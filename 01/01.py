@@ -3,6 +3,8 @@ import torchvision
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
+from torch.optim.lr_scheduler import StepLR
+
 from torchvision import datasets, transforms
 from torchsummary import summary
 import os
@@ -108,7 +110,7 @@ def main():
                 shuffle=False)
 
     # 梯度下降方法 随机梯度下降
-    optimizer = optim.SGD(net.parameters(), lr=0.01, momentum=0.9)
+    optimizer = optim.SGD(net.parameters(), lr=0.1, momentum=0.9)
     # 损失函数定义 交叉熵损失
     ceriation = nn.CrossEntropyLoss()
 
@@ -117,9 +119,12 @@ def main():
         net.load_state_dict(torch.load(savefile))  #读取网络参数
 
     # 训练
+    # 动态调整学习率
+    scheduler = StepLR(optimizer, step_size=1, gamma=0.9)
     for epoch in range(1):
         train(train_loader, net, optimizer, ceriation, use_cuda, epoch)
         test(test_loader, net, ceriation, use_cuda, epoch)
+        scheduler.step()
 
     torch.save(net.state_dict(), savefile)
 
