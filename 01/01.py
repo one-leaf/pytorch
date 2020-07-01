@@ -5,6 +5,7 @@ import torch.nn.functional as F
 import torch.optim as optim
 from torchvision import datasets, transforms
 from torchsummary import summary
+import os
 
 # 定义模型
 class Net(nn.Module):
@@ -21,7 +22,7 @@ class Net(nn.Module):
         self.dropout1 = nn.Dropout2d(0.5)
         self.dropout2 = nn.Dropout(0.5)
         # Linear (输入维度， 输出维度)
-        self.fc1 = nn.Linear(576, 128)
+        self.fc1 = nn.Linear(400, 128)
         self.fc2 = nn.Linear(128, 64)
         self.fc3 = nn.Linear(64, 10)
 
@@ -45,27 +46,43 @@ class Net(nn.Module):
         output = F.log_softmax(x, dim=1)
         return output
 
+# 训练
 def train(train_loader, net, optimizer, ceriation, use_cuda, epoch):
-    # trainning
     ave_loss = 0
     for batch_idx, (x, target) in enumerate(train_loader):
         optimizer.zero_grad()
         if use_cuda:
             x, target = x.cuda(), target.cuda()
-        x, target = Variable(x), Variable(target)
         out = net(x)
         loss = ceriation(out, target)
-        ave_loss = ave_loss * 0.9 + loss.data[0] * 0.1
+        ave_loss = ave_loss * 0.9 + loss.item() * 0.1
         loss.backward()
         optimizer.step()
         if (batch_idx+1) % 100 == 0 or (batch_idx+1) == len(train_loader):
             print('==>>> epoch: {}, batch index: {}, train loss: {:.6f}'.format(
                 epoch, batch_idx+1, ave_loss))
 
+def test(test_loader, net, ceriation, use_cuda, epoch):
+    correct_cnt, ave_loss = 0, 0
+    for batch_idx, (x, target) in enumerate(test_loader):
+        if use_cuda:
+            x, targe = x.cuda(), target.cuda()
+        out = net(x)
+        loss = ceriation(out, target)
+        pred = out.argmax(dim=1, keepdim=True)
+        
+        correct_cnt += pred.eq(target.view_as(pred)).sum().item()
+        # smooth average
+        ave_loss = ave_loss * 0.9 + loss.item() * 0.1
+        
+        if(batch_idx+1) % 100 == 0 or (batch_idx+1) == len(test_loader):
+            print('==>>> epoch: {}, batch index: {}, test loss: {:.6f}, acc: {:.3f}'.format(
+                epoch, batch_idx+1, ave_loss, correct_cnt))
+
 def main():
     net = Net()
     print(net)
-    print(summary(net,(1,32,32)))
+    print(summary(net,(1,28,28)))
 
     # 是否采用GPU
     use_cuda = torch.cuda.is_available()
@@ -93,15 +110,16 @@ def main():
     # 损失函数定义 交叉熵损失
     ceriation = nn.CrossEntropyLoss()
 
+    savefile="mnist_cnn.pt"
+    if os.path.exists(savefile):
+        net.load_state_dict(torch.load(savefile))  #读取网络参数
+
     # 训练
-    for epoch in range(10):
+    for epoch in range(1):
         train(train_loader, net, optimizer, ceriation, use_cuda, epoch)
+        test(test_loader, net, ceriation, use_cuda, epoch)
 
-    # input = torch.randn(1, 1, 32, 32)
-    # out = net(input)
-    # print(out)
-
-
+    torch.save(net.state_dict(), savefile)
 
 if __name__ == "__main__":
     main()
