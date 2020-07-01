@@ -48,6 +48,7 @@ class Net(nn.Module):
 
 # 训练
 def train(train_loader, net, optimizer, ceriation, use_cuda, epoch):
+    net.train()
     ave_loss = 0
     for batch_idx, (x, target) in enumerate(train_loader):
         optimizer.zero_grad()
@@ -63,6 +64,7 @@ def train(train_loader, net, optimizer, ceriation, use_cuda, epoch):
                 epoch, batch_idx+1, ave_loss))
 
 def test(test_loader, net, ceriation, use_cuda, epoch):
+    net.eval()
     correct_cnt, ave_loss = 0, 0
     for batch_idx, (x, target) in enumerate(test_loader):
         if use_cuda:
@@ -89,9 +91,9 @@ def main():
     if use_cuda:
         model = model.cuda()
 
+    # 下载的数据进行归一化处理
     root = "./data"
     download=True
-    # 下载的数据进行归一化处理
     trans = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5,), (1.0,))])
     train_set = datasets.MNIST(root=root, train=True, transform=trans, download=download)
     test_set = datasets.MNIST(root=root, train=False, transform=trans)
