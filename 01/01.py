@@ -102,7 +102,7 @@ def main():
     # 下载MNIST数据并进行归一化处理
     root = "./data"
 
-    # transforms.ToTensor() 将Image [0,255] 转为 FloatTensor [0.0, 1.0]
+    # transforms.ToTensor() 将 Image [0,255] 转为 FloatTensor [0.0, 1.0] 注意数据轴会发生变化 [H W C] ==> [C H W]
     # transforms.Normalize((0.5,), (1.0,)) 将 [0.0, 1.0] 转为 [-0.5, 0.5] 区间
     # Normalize公式： output = (input - mean) / std 即： (0-0.5)/1.0 = -0.5  1-0.5/1.0 = 0.5 
     # mean 和 std 就是数据的均值和方差，需要统计求出来。
