@@ -50,22 +50,27 @@ class Net(nn.Module):
 
 # 训练
 def train(train_loader, net, optimizer, ceriation, use_cuda, epoch):
+    # 启用 BN 和 Dropout
     net.train()
     ave_loss = 0
     for batch_idx, (x, target) in enumerate(train_loader):
+        # 梯度先清零
         optimizer.zero_grad()
         if use_cuda:
             x, target = x.cuda(), target.cuda()
         out = net(x)
         loss = ceriation(out, target)
         ave_loss = ave_loss * 0.9 + loss.item() * 0.1
+        # 计算梯度
         loss.backward()
+        # 更新参数
         optimizer.step()
         if (batch_idx+1) % 100 == 0 or (batch_idx+1) == len(train_loader):
             print('==>>> epoch: {}, batch index: {}, train loss: {:.6f}'.format(
                 epoch, batch_idx+1, ave_loss))
 
 def test(test_loader, net, ceriation, use_cuda, epoch):
+    # 固定住 BN 和 Dropout
     net.eval()
     correct_cnt, ave_loss = 0, 0
     for batch_idx, (x, target) in enumerate(test_loader):
@@ -75,6 +80,7 @@ def test(test_loader, net, ceriation, use_cuda, epoch):
         loss = ceriation(out, target)
         pred = out.argmax(dim=1, keepdim=True)
         
+        # 计算正确率
         correct_cnt += pred.eq(target.view_as(pred)).sum().item()
         # smooth average
         ave_loss = ave_loss * 0.9 + loss.item() * 0.1
@@ -93,23 +99,27 @@ def main():
     if use_cuda:
         model = model.cuda()
 
-    # 下载的数据进行归一化处理
+    # 下载MNIST数据并进行归一化处理
     root = "./data"
-    download=True
-    trans = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5,), (1.0,))])
-    train_set = datasets.MNIST(root=root, train=True, transform=trans, download=download)
+
+    # transforms.ToTensor() 将Image [0,255] 转为 FloatTensor [0.0, 1.0]
+    # transforms.Normalize((0.5,), (1.0,)) 将 [0.0, 1.0] 转为 [-0.5, 0.5] 区间
+    # Normalize公式： output = (input - mean) / std 即： (0-0.5)/1.0 = -0.5  1-0.5/1.0 = 0.5 
+    # mean 和 std 就是数据的均值和方差，需要统计求出来。
+    # 针对MNIST数据集黑白图像，则采用 (0.1307,), (0.3081,) 这样可以数据更好的分布  
+    # 如果是imagenet数据集（RGB），则 transforms.Normalize((0.485, 0.456, 0.406),(0.229, 0.224, 0.225)))
+    transform = transforms.Normalize((0.1307,), (0.3081,))
+    # transforms.Compose() 将多个处理方法集成一起
+    trans = transforms.Compose([transforms.ToTensor(), transform])
+    train_set = datasets.MNIST(root=root, train=True, transform=trans, download=True)
     test_set = datasets.MNIST(root=root, train=False, transform=trans)
     batch_size = 128
-    train_loader = torch.utils.data.DataLoader(
-                 dataset=train_set,
-                 batch_size=batch_size,
-                 shuffle=True)
-    test_loader = torch.utils.data.DataLoader(
-                dataset=test_set,
-                batch_size=batch_size,
-                shuffle=False)
 
-    # 梯度下降方法 随机梯度下降
+    # 加载训练集和测试集
+    train_loader = torch.utils.data.DataLoader(dataset=train_set, batch_size=batch_size, shuffle=True)
+    test_loader = torch.utils.data.DataLoader(dataset=test_set,  batch_size=batch_size, shuffle=False)
+
+    # 小批量梯度下降方法
     optimizer = optim.SGD(net.parameters(), lr=0.1, momentum=0.9)
     # 损失函数定义 交叉熵损失
     ceriation = nn.CrossEntropyLoss()
