@@ -27,10 +27,10 @@ y = torch.randn(D_h, D_y)
 model = TwoLayerNet(D_x, D_h, D_y)
 
 # 构造损失函数和优化器。
-# SGD构造函数中对model.parameters()的调用，
+# SGD构造函数中对model.parameters()的调用，这里加了 momentum
 # 将包含模型的一部分，即两个nn.Linear模块的可学习参数。
 loss_fn = torch.nn.MSELoss(reduction='sum')
-optimizer = torch.optim.SGD(model.parameters(), lr=1e-4)
+optimizer = torch.optim.SGD(model.parameters(), lr=1e-4, momentum=0.9)
 for t in range(500):
     # 前向传播：通过向模型传递x计算预测值y
     y_pred = model(x)

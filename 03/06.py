@@ -15,10 +15,10 @@ model = torch.nn.Sequential(
 loss_fn = torch.nn.MSELoss(reduction='sum')
 
 # 使用optim包定义优化器（Optimizer）。Optimizer将会为我们更新模型的权重。
-# 这里我们使用Adam优化方法；optim包还包含了许多别的优化算法。
-# Adam构造函数的第一个参数告诉优化器应该更新哪些张量。
+# 这里我们使用SGD优化方法；optim包还包含了许多别的优化算法。
+# SGD构造函数的第一个参数告诉优化器应该更新哪些张量。
 learning_rate = 1e-4
-optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+optimizer = torch.optim.SGD(model.parameters(), lr=1e-4)
 
 for t in range(500):
 
