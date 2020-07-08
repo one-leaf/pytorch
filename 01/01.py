@@ -115,6 +115,8 @@ def main():
     test_set = datasets.MNIST(root=root, train=False, transform=trans)
     batch_size = 128
 
+    print(train_set, train_set.__getitem__(0))
+
     # 加载训练集和测试集
     train_loader = torch.utils.data.DataLoader(dataset=train_set, batch_size=batch_size, shuffle=True)
     test_loader = torch.utils.data.DataLoader(dataset=test_set,  batch_size=batch_size, shuffle=False)
