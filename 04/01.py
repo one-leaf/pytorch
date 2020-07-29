@@ -30,11 +30,9 @@ data_transforms = {
 }
 
 data_dir = 'data/hymenoptera_data'
-image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x),
-                                          data_transforms[x])
-                  for x in ['train', 'val']}
-dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=4,
-                                             shuffle=True, num_workers=4)
+image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x), data_transforms[x])
+                 for x in ['train', 'val']}
+dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=4, shuffle=True, num_workers=4)
               for x in ['train', 'val']}
 dataset_sizes = {x: len(image_datasets[x]) for x in ['train', 'val']}
 class_names = image_datasets['train'].classes
@@ -152,6 +150,8 @@ def visualize_model(model, num_images=6):
                     return
         model.train(mode=was_training)
 
+#加载resnet18预训练模型，整个模型都参与训练
+
 model_ft = models.resnet18(pretrained=True)
 num_ftrs = model_ft.fc.in_features
 model_ft.fc = nn.Linear(num_ftrs, 2)
@@ -169,7 +169,10 @@ model_ft = train_model(model_ft, criterion, optimizer_ft, exp_lr_scheduler,
 
 visualize_model(model_ft)
 
-model_conv = torchvision.models.resnet18(pretrained=True)
+
+#加载resnet18预训练模型，但只训练最后一层，训练速度会快很多
+
+model_conv = models.resnet18(pretrained=True)
 for param in model_conv.parameters():
     param.requires_grad = False
 
