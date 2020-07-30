@@ -690,17 +690,23 @@ class EncoderRNN(nn.Module):
                           dropout=(0 if n_layers == 1 else dropout), bidirectional=True)
 
     def forward(self, input_seq, input_lengths, hidden=None):
-        # 获得词向量 （B, L，H）
+        # input_seq [L, B] input_lengths [B]
+        # embedded [10, 64, 500]    [L, B, H]
         embedded = self.embedding(input_seq)
-        # 将这一批句子按照输入的长度进行打包，主要是稀疏网络太占用内存
+        # 将这一批句子按照输入的长度进行打包为 PackedSequence，主要是稀疏网络太占用内存
         packed = nn.utils.rnn.pack_padded_sequence(embedded, input_lengths)
         # 前向GRU
+        # outputs 也是 PackedSequence
+        # hidden [4, 64, 500] 由于是双向rnn，所以0维的大小是层*2=2*2=4 [n_layers*2, B, H]
         outputs, hidden = self.gru(packed, hidden)
         # 将返回的打包数据重新展开为标准矩阵，第一个是矩阵，第二个返回参数是长度，数据和input_lengths一样
+        # outputs [10, 64, 1000] 由于是双向RNN，最后一维需要*2=H*2=1000    [L, B, H*2]
+        # _ 为序列的长度 [64] [B]
         outputs, _ = nn.utils.rnn.pad_packed_sequence(outputs)
         # 由于是双向GRU，最后一个维度增加了一倍，所以直接对折数据求和
+        # outputs [10, 64, 1000]    [L, B, H]
         outputs = outputs[:, :, :self.hidden_size] + outputs[:, : ,self.hidden_size:]
-        # 返回输出和隐藏层 (B, L, H)
+        # 返回输出和隐藏层 (L, B, H)
         return outputs, hidden
 
 
@@ -797,18 +803,22 @@ class Attn(nn.Module):
         return torch.sum(self.v * energy, dim=2)
 
     def forward(self, hidden, encoder_outputs):
+        # hidden            [1, 64, 500]    [1, B, H]
+        # encoder_outputs   [10, 64, 500]   [L, B, H]        
         # 计算注意力权重能量
+        # attn_energies [10, 64]    [L, B]
         if self.method == 'general':
             attn_energies = self.general_score(hidden, encoder_outputs)
         elif self.method == 'concat':
             attn_energies = self.concat_score(hidden, encoder_outputs)
         elif self.method == 'dot':
             attn_energies = self.dot_score(hidden, encoder_outputs)
-
         # 交换最大长度 max_length 和 batch_size 的维度
+        # attn_energies [64, 10]    [B, L]
         attn_energies = attn_energies.t()
 
         # 返回softmax归一化概率分数（增加维度）
+        # [64, 1, 10]     [B, 1, L]
         return F.softmax(attn_energies, dim=1).unsqueeze(1)
 
 
@@ -868,25 +878,39 @@ class LuongAttnDecoderRNN(nn.Module):
         self.attn = Attn(attn_model, hidden_size)
 
     def forward(self, input_step, last_hidden, encoder_outputs):
-        # Note: we run this one step (word) at a time
-        # Get embedding of current input word
+        # 每次只输入一个单词
+        # 获得输出词向量
+        # embedded  [1, 64, 500]     [1, B, H]
         embedded = self.embedding(input_step)
         embedded = self.embedding_dropout(embedded)
-        # Forward through unidirectional GRU
+        # 由于只有一个单词，就不是稀疏网络，所以也不打包，并且不再标记长度和启用双向rnn
+        # rnn_output    [1, 64, 500]     [1, B, H]
+        # hidden [2, 64, 500]   [n_layers, B, H]
         rnn_output, hidden = self.gru(embedded, last_hidden)
-        # Calculate attention weights from the current GRU output
+        # 从 encode 的输出 和 rnn 的 输出 合并计算注意力权重
+        # rnn_output        [1, 64, 500]    [1, B, H]
+        # encoder_outputs   [10, 64, 500]   [L, B, H]
+        # attn_weights      [64, 1, 10]     [B, 1, L]
         attn_weights = self.attn(rnn_output, encoder_outputs)
-        # Multiply attention weights to encoder outputs to get new "weighted sum" context vector
+        # 矩阵乘法 [b h1 l] * [b l h2] = [b h1 h2]
+        # [64, 1, 10] [64, 10, 500]
+        # context  [64, 1, 500]
         context = attn_weights.bmm(encoder_outputs.transpose(0, 1))
-        # Concatenate weighted context vector and GRU output using Luong eq. 5
+        # 使用 Luong公式5 连接加权上下文向量和GRU输出
+        # rnn_output [64, 500]
         rnn_output = rnn_output.squeeze(0)
+        # context [64, 500]
         context = context.squeeze(1)
+        # concat_input [64, 1000]
         concat_input = torch.cat((rnn_output, context), 1)
+        # concat_output [64, 500]
         concat_output = torch.tanh(self.concat(concat_input))
-        # Predict next word using Luong eq. 6
+        # 使用 Luong公式6 预测下一个单词
+        # output [64, 7826]
         output = self.out(concat_output)
+        # output [64, 7826]
         output = F.softmax(output, dim=1)
-        # Return output and final hidden state
+        # 返回单词的概率和最终隐藏层
         return output, hidden
 
 
@@ -979,40 +1003,51 @@ def maskNLLLoss(inp, target, mask):
 def train(input_variable, lengths, target_variable, mask, max_target_len, encoder, decoder, embedding,
           encoder_optimizer, decoder_optimizer, batch_size, clip, max_length=MAX_LENGTH):
 
-    # Zero gradients
+    # 清空梯度
     encoder_optimizer.zero_grad()
     decoder_optimizer.zero_grad()
 
-    # Set device options
+    # 是否采用CPU或GPU训练
     input_variable = input_variable.to(device)
     lengths = lengths.to(device)
     target_variable = target_variable.to(device)
     mask = mask.to(device)
 
-    # Initialize variables
+    # 损失
     loss = 0
     print_losses = []
     n_totals = 0
 
-    # Forward pass through encoder
+    # 编码器前向传播
+    # input_variable：  [10, 64]        [L, B] 
+    # lengths:          [64]            [B]
+    # encoder_outputs   [10, 64, 500]   [L, B, H]
+    # encoder_hidden    [4, 64, 500]    [l*2, B, H]
     encoder_outputs, encoder_hidden = encoder(input_variable, lengths)
 
-    # Create initial decoder input (start with SOS tokens for each sentence)
+    # 建立 decoder_input 每个句子用SOS开头
+    # decoder_input [1, 64]
     decoder_input = torch.LongTensor([[SOS_token for _ in range(batch_size)]])
     decoder_input = decoder_input.to(device)
 
-    # Set initial decoder hidden state to the encoder's final hidden state
+    # 将编码器的最后输出隐藏层状态作为解码隐藏层状态初始
+    # decoder_hidden [2, 64, 500]
     decoder_hidden = encoder_hidden[:decoder.n_layers]
 
-    # Determine if we are using teacher forcing this iteration
+    # 是否采用教师强制迭代
+    # 采用教师强制迭代有助于收敛，但不利于泛化， 所以最好是一个比例值
     use_teacher_forcing = True if random.random() < teacher_forcing_ratio else False
 
-    # Forward batch of sequences through decoder one time step at a time
+    # 通过解码器逐一前向
     if use_teacher_forcing:
         for t in range(max_target_len):
+            # decoder_output [64, 7826]
+            # decoder_hidden [2, 64, 500]
             decoder_output, decoder_hidden = decoder(
                 decoder_input, decoder_hidden, encoder_outputs
             )
+            return
+
             # Teacher forcing: next input is current target
             decoder_input = target_variable[t].view(1, -1)
             # Calculate and accumulate loss
@@ -1069,28 +1104,34 @@ def train(input_variable, lengths, target_variable, mask, max_target_len, encode
 
 def trainIters(model_name, voc, pairs, encoder, decoder, encoder_optimizer, decoder_optimizer, embedding, encoder_n_layers, decoder_n_layers, save_dir, n_iteration, batch_size, print_every, save_every, clip, corpus_name, loadFilename):
 
-    # Load batches for each iteration
+    # 按循环次数随机加载训练样本
     training_batches = [batch2TrainData(voc, [random.choice(pairs) for _ in range(batch_size)])
                       for _ in range(n_iteration)]
 
-    # Initializations
+    # 初始化
     print('Initializing ...')
     start_iteration = 1
     print_loss = 0
     if loadFilename:
         start_iteration = checkpoint['iteration'] + 1
 
-    # Training loop
+    # 循环训练
     print("Training...")
     for iteration in range(start_iteration, n_iteration + 1):
         training_batch = training_batches[iteration - 1]
-        # Extract fields from batch
+        # 从一批数据组解开栏位
+        # input_variable.shape  [10, 64]  [L, B]
+        # lengths.shape         [64]      [B]
+        # target_variable.shape [10, 64]  [L, B]
+        # mask.shape            [10, 64]  [L, B]  
+        # max_target_len int 
         input_variable, lengths, target_variable, mask, max_target_len = training_batch
 
-        # Run a training iteration with batch
+        # 训练这一批数据
         loss = train(input_variable, lengths, target_variable, mask, max_target_len, encoder,
                      decoder, embedding, encoder_optimizer, decoder_optimizer, batch_size, clip)
         print_loss += loss
+        return
 
         # Print progress
         if iteration % print_every == 0:
@@ -1332,7 +1373,7 @@ clip = 50.0
 teacher_forcing_ratio = 1.0
 learning_rate = 0.0001
 decoder_learning_ratio = 5.0
-n_iteration = 4000
+n_iteration = 5000
 print_every = 1
 save_every = 500
 
@@ -1352,12 +1393,12 @@ if loadFilename:
 for state in encoder_optimizer.state.values():
     for k, v in state.items():
         if isinstance(v, torch.Tensor):
-            state[k] = v.cuda()
+            state[k] = v.to(device)
 
 for state in decoder_optimizer.state.values():
     for k, v in state.items():
         if isinstance(v, torch.Tensor):
-            state[k] = v.cuda()
+            state[k] = v.to(device)
     
 # Run training iterations
 print("Starting Training!")
