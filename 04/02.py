@@ -930,9 +930,17 @@ class LuongAttnDecoderRNN(nn.Module):
 # mask tensor.
 #
 
+# 支持mask的损失，只针对正确项的概率
 def maskNLLLoss(inp, target, mask):
+    # inp [64, 7826]
+    # target [64]
+    # mask [64]
     nTotal = mask.sum()
+    # torch.gather(inp, 1, target.view(-1, 1)) 取正确值的概率
+    # -torch.log 对概率取负对数
+    # crossEntropy [64]
     crossEntropy = -torch.log(torch.gather(inp, 1, target.view(-1, 1)).squeeze(1))
+    # 按mask取有效的值
     loss = crossEntropy.masked_select(mask).mean()
     loss = loss.to(device)
     return loss, nTotal.item()
@@ -1046,21 +1054,23 @@ def train(input_variable, lengths, target_variable, mask, max_target_len, encode
             decoder_output, decoder_hidden = decoder(
                 decoder_input, decoder_hidden, encoder_outputs
             )
-            return
 
-            # Teacher forcing: next input is current target
+            # Teacher forcing: 直接将正确的输出作为下一个输入
+            # decoder_input [1, 64]
             decoder_input = target_variable[t].view(1, -1)
             # Calculate and accumulate loss
             mask_loss, nTotal = maskNLLLoss(decoder_output, target_variable[t], mask[t])
             loss += mask_loss
             print_losses.append(mask_loss.item() * nTotal)
             n_totals += nTotal
+            return
     else:
         for t in range(max_target_len):
             decoder_output, decoder_hidden = decoder(
                 decoder_input, decoder_hidden, encoder_outputs
             )
-            # No teacher forcing: next input is decoder's own current output
+            # 按照预测的输出第1维度获得当前最大概率的单词作为下一个的输入
+            # decoder_input [1, 64]
             _, topi = decoder_output.topk(1)
             decoder_input = torch.LongTensor([[topi[i][0] for i in range(batch_size)]])
             decoder_input = decoder_input.to(device)
