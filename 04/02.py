@@ -1063,7 +1063,6 @@ def train(input_variable, lengths, target_variable, mask, max_target_len, encode
             loss += mask_loss
             print_losses.append(mask_loss.item() * nTotal)
             n_totals += nTotal
-            return
     else:
         for t in range(max_target_len):
             decoder_output, decoder_hidden = decoder(
@@ -1080,14 +1079,14 @@ def train(input_variable, lengths, target_variable, mask, max_target_len, encode
             print_losses.append(mask_loss.item() * nTotal)
             n_totals += nTotal
 
-    # Perform backpropatation
+    # 反向传播
     loss.backward()
 
-    # Clip gradients: gradients are modified in place
+    # 梯度截断
     _ = nn.utils.clip_grad_norm_(encoder.parameters(), clip)
     _ = nn.utils.clip_grad_norm_(decoder.parameters(), clip)
 
-    # Adjust model weights
+    # 计算参数权重
     encoder_optimizer.step()
     decoder_optimizer.step()
 
@@ -1203,6 +1202,7 @@ def trainIters(model_name, voc, pairs, encoder, decoder, encoder_optimizer, deco
 #    6) Return collections of word tokens and scores.
 #
 
+# 实际预测
 class GreedySearchDecoder(nn.Module):
     def __init__(self, encoder, decoder):
         super(GreedySearchDecoder, self).__init__()
