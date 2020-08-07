@@ -35,34 +35,46 @@ class PennFudanDataset(object):
         # 0是背景
         mask = Image.open(mask_path)
         # 将PIL图像转换为numpy数组
+        # mask [h, w]
+        # 注意这个图片的高和宽不是固定的
         mask = np.array(mask)
+
         # 实例被编码为不同的颜色
+        # 去重得到序列，并按从小到大排列
         obj_ids = np.unique(mask)
         # 第一个id是背景，所以删除它
+        # obj_ids [obj_ids_len]
         obj_ids = obj_ids[1:]
 
         # 将颜色编码的mask分成一组
         # 二进制格式
+        # masks [obj_ids_len, h, w]
         masks = mask == obj_ids[:, None, None]
-
+        
         # 获取每个mask的边界框坐标
+        # num_objs 目标的个数
         num_objs = len(obj_ids)
         boxes = []
         for i in range(num_objs):
-            pos = np.where(masks[i])
+            # pos 输出符合条件的所有坐标
+            # ([1,2,3],[4,5,6])
+            pos = np.where(masks[i])        
             xmin = np.min(pos[1])
             xmax = np.max(pos[1])
             ymin = np.min(pos[0])
             ymax = np.max(pos[0])
             boxes.append([xmin, ymin, xmax, ymax])
-
         # 将所有转换为torch.Tensor
+        # boxes [obj_ids_len, 4]
         boxes = torch.as_tensor(boxes, dtype=torch.float32)
+
         # 这里仅有一个类
         labels = torch.ones((num_objs,), dtype=torch.int64)
         masks = torch.as_tensor(masks, dtype=torch.uint8)
 
         image_id = torch.tensor([idx])
+        
+        # 计算所有box面积 area [obj_ids_len]
         area = (boxes[:, 3] - boxes[:, 1]) * (boxes[:, 2] - boxes[:, 0])
         # 假设所有实例都不是人群
         iscrowd = torch.zeros((num_objs,), dtype=torch.int64)
