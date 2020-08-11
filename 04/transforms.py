@@ -3,7 +3,7 @@ import torch
 
 from torchvision.transforms import functional as F
 
-
+# 翻转box
 def _flip_coco_person_keypoints(kps, width):
     flip_inds = [0, 2, 1, 4, 3, 6, 5, 8, 7, 10, 9, 12, 11, 14, 13, 16, 15]
     flipped_data = kps[:, flip_inds]
@@ -13,7 +13,7 @@ def _flip_coco_person_keypoints(kps, width):
     flipped_data[inds] = 0
     return flipped_data
 
-
+# 定义聚合
 class Compose(object):
     def __init__(self, transforms):
         self.transforms = transforms
@@ -23,7 +23,7 @@ class Compose(object):
             image, target = t(image, target)
         return image, target
 
-
+# 按概率随机翻转图片
 class RandomHorizontalFlip(object):
     def __init__(self, prob):
         self.prob = prob

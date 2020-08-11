@@ -10,17 +10,18 @@ from coco_eval import CocoEvaluator
 import utils
 
 
+# 训练数据
 def train_one_epoch(model, optimizer, data_loader, device, epoch, print_freq):
     model.train()
     metric_logger = utils.MetricLogger(delimiter="  ")
     metric_logger.add_meter('lr', utils.SmoothedValue(window_size=1, fmt='{value:.6f}'))
     header = 'Epoch: [{}]'.format(epoch)
 
+    # 这个学习率其实外部有定义，不清楚为什么还要重新定义一遍
     lr_scheduler = None
     if epoch == 0:
         warmup_factor = 1. / 1000
         warmup_iters = min(1000, len(data_loader) - 1)
-
         lr_scheduler = utils.warmup_lr_scheduler(optimizer, warmup_iters, warmup_factor)
 
     for images, targets in metric_logger.log_every(data_loader, print_freq, header):
@@ -31,12 +32,13 @@ def train_one_epoch(model, optimizer, data_loader, device, epoch, print_freq):
 
         losses = sum(loss for loss in loss_dict.values())
 
-        # reduce losses over all GPUs for logging purposes
+        # 用于多GPU分布式计算综合的loss
         loss_dict_reduced = utils.reduce_dict(loss_dict)
         losses_reduced = sum(loss for loss in loss_dict_reduced.values())
 
         loss_value = losses_reduced.item()
 
+        # 检查值是否超过最大浮点数或低于最小浮点数（inf -inf nan）
         if not math.isfinite(loss_value):
             print("Loss is {}, stopping training".format(loss_value))
             print(loss_dict_reduced)
@@ -84,7 +86,9 @@ def evaluate(model, data_loader, device):
     for images, targets in metric_logger.log_every(data_loader, 100, header):
         images = list(img.to(device) for img in images)
 
-        # torch.cuda.synchronize()
+        if device == torch.device('cuda'):
+            torch.cuda.synchronize()
+
         model_time = time.time()
         outputs = model(images)
 

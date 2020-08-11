@@ -115,7 +115,7 @@ def get_model_instance_segmentation(num_classes):
 
     return model
 
-
+# 定义图片预处理
 def get_transform(train):
     transforms = []
     transforms.append(T.ToTensor())
