@@ -129,7 +129,7 @@ def test():
 
 def convert_image_np(inp):
     """Convert a Tensor to numpy image."""  
-    # [c,w,h] => [w,h,c]
+    # [c,h,w] => [h,w,c]
     inp = inp.numpy().transpose((1, 2, 0))
     mean = np.array([0.485, 0.456, 0.406])
     std = np.array([0.229, 0.224, 0.225])

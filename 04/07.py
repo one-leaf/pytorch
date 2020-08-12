@@ -63,24 +63,29 @@ class ContentLoss(nn.Module):
         # 我们从用于动态计算梯度的树中“分离”目标内容：
         # 这是一个声明的值，而不是变量。 
         # 否则标准的正向方法将引发错误。
+        # 这个目标切断了反向传播，也就是不在这个变量和其后的层都不在计算梯度
         self.target = target.detach()
 
     def forward(self, input):
         self.loss = F.mse_loss(input, self.target)
         return input
 
+# 特征增强，Gram矩阵是没有减去均值的协方差矩阵
+# 协方差矩阵是一种相关性度量的矩阵，通过协方差来度量相关性
 def gram_matrix(input):
-    a, b, c, d = input.size()  # a=batch size(=1)
+    a, b, c, d = input.size()  # a=batch size(=1) [-1, c, h, w]
     # 特征映射 b=number
     # (c,d)=dimensions of a f. map (N=c*d)
 
     features = input.view(a * b, c * d)  # resise F_XL into \hat F_XL
 
+    # 获得图片的特征后做一次内积运算，起到将特征增强的目的
     G = torch.mm(features, features.t())  # compute the gram product
 
     # 我们通过除以每个特征映射中的元素数来“标准化”gram矩阵的值.
     return G.div(a * b * c * d)
 
+# 采用gram矩阵对比前后图片的的特征
 class StyleLoss(nn.Module):
 
     def __init__(self, target_feature):
@@ -131,6 +136,7 @@ def get_style_model_and_losses(cnn, normalization_mean, normalization_std,
 
     # 假设cnn是一个`nn.Sequential`，
     # 所以我们创建一个新的`nn.Sequential`来放入应该按顺序激活的模块
+    # 重新开个model，将CNN的层全部加入到model，同时引入损失层
     model = nn.Sequential(normalization)
 
     i = 0  # increment every time we see a conv
@@ -166,7 +172,7 @@ def get_style_model_and_losses(cnn, normalization_mean, normalization_std,
             model.add_module("style_loss_{}".format(i), style_loss)
             style_losses.append(style_loss)
 
-    # 现在我们在最后的内容和风格损失之后剪掉了图层
+    # 现在我们在最后的内容和风格损失之后剪掉了后面的图层
     for i in range(len(model) - 1, -1, -1):
         if isinstance(model[i], ContentLoss) or isinstance(model[i], StyleLoss):
             break
@@ -185,7 +191,8 @@ plt.figure()
 imshow(input_img, title='Input Image')
 
 def get_input_optimizer(input_img):
-    # 此行显示输入是需要渐变的参数
+    # 此行显示输入是需要渐变的参数 LBFGS：拟牛顿法
+    # requires_grad_()函数会改变Tensor的requires_grad属性并返回Tensor
     optimizer = optim.LBFGS([input_img.requires_grad_()])
     return optimizer
 
@@ -204,6 +211,7 @@ def run_style_transfer(cnn, normalization_mean, normalization_std,
 
         def closure():
             # 更正更新的输入图像的值
+            # 将图片的值全部约束到0~1之间
             input_img.data.clamp_(0, 1)
 
             optimizer.zero_grad()
@@ -216,6 +224,7 @@ def run_style_transfer(cnn, normalization_mean, normalization_std,
             for cl in content_losses:
                 content_score += cl.loss
 
+            # 对风格的提取远大于对原特征的提取
             style_score *= style_weight
             content_score *= content_weight
 
@@ -233,7 +242,7 @@ def run_style_transfer(cnn, normalization_mean, normalization_std,
 
         optimizer.step(closure)
 
-    # 最后的修正......
+    # 训练完成后，在将图片的数字限制到 [0, 1] ，而不是采用正则的方式进行
     input_img.data.clamp_(0, 1)
 
     return input_img
