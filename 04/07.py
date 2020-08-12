@@ -1,4 +1,5 @@
 # Neural-Transfer
+# 输入和输出图的内容一致，同时保证输出图的风格和原风格图片的gram矩阵一致，做到风格提取
 
 from __future__ import print_function
 
