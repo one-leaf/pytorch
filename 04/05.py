@@ -259,6 +259,7 @@ model_ft, hist = train_model(model_ft, dataloaders_dict, criterion, optimizer_ft
 
 
 # 初始化用于此运行的模型的非预训练版本
+# 这里如果打开使用预训练模型，进行全部参数更新，最终的效果反而不如只训练最后一层的参数，可能是样本不足的原因
 scratch_model,_ = initialize_model(model_name, num_classes, feature_extract=False, use_pretrained=True)
 scratch_model = scratch_model.to(device)
 scratch_optimizer = optim.SGD(scratch_model.parameters(), lr=0.001, momentum=0.9)
