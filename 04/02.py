@@ -941,7 +941,7 @@ def maskNLLLoss(inp, target, mask):
     # crossEntropy [64]
     crossEntropy = -torch.log(torch.gather(inp, 1, target.view(-1, 1)).squeeze(1))
     # 按mask取有效的值
-    loss = crossEntropy.masked_select(mask).mean()
+    loss = crossEntropy.masked_select(mask.bool()).mean()
     loss = loss.to(device)
     return loss, nTotal.item()
 
@@ -1328,7 +1328,7 @@ dropout = 0.1
 batch_size = 64
 
 # Set checkpoint to load from; set to None if starting from scratch
-# loadFilename = None
+loadFilename = None
 checkpoint_iter = 4000
 loadFilename = os.path.join(save_dir, model_name, corpus_name,
                            '{}-{}_{}'.format(encoder_n_layers, decoder_n_layers, hidden_size),

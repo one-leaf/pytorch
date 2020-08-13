@@ -7,46 +7,29 @@ from torch.optim.lr_scheduler import StepLR
 
 from torchvision import datasets, transforms
 from torchsummary import summary
+import matplotlib.pyplot as plt
+
 import os
 
 # 定义模型
 class Net(nn.Module):
-    # 定义层
+    """ConvNet -> Max_Pool -> RELU -> ConvNet -> Max_Pool -> RELU -> FC -> RELU -> FC -> SOFTMAX"""
     def __init__(self):
         super(Net, self).__init__()
-        # Conv2d (输入 维度，输出维度， 窗口尺寸)
-        self.conv1 = nn.Conv2d(1, 8, 3)
-        self.conv2 = nn.Conv2d(8, 16, 3)
-        # BatchNorm
-        self.bn1 = nn.BatchNorm2d(8)
-        self.bn2 = nn.BatchNorm2d(16)
-        # Dropout (比例)
-        self.dropout1 = nn.Dropout2d(0.5)
-        self.dropout2 = nn.Dropout(0.5)
-        # Linear (输入维度， 输出维度)
-        self.fc1 = nn.Linear(400, 128)
-        self.fc2 = nn.Linear(128, 64)
-        self.fc3 = nn.Linear(64, 10)
+        self.conv1 = nn.Conv2d(1, 10, 5, 1)
+        self.conv2 = nn.Conv2d(10, 20, 5, 1)
+        self.fc1 = nn.Linear(4*4*20, 50)
+        self.fc2 = nn.Linear(50, 10)
 
-    # 前向网络
     def forward(self, x):
-        # CNN 先 relu 然后再 池化 2*2
-        x=F.relu(self.bn1(self.conv1(x)))
-        x = F.max_pool2d(x,2)
-        x=F.relu(self.bn2(self.conv2(x)))
-        x = F.max_pool2d(x,2)
-        x = self.dropout1(x)
-        # 扁平化
-        x = torch.flatten(x, 1)
-        # 全连接
+        x = F.relu(self.conv1(x))
+        x = F.max_pool2d(x, 2, 2)
+        x = F.relu(self.conv2(x))
+        x = F.max_pool2d(x, 2, 2)
+        x = x.view(-1, 4*4*20)
         x = F.relu(self.fc1(x))
-        x = F.relu(self.fc2(x))
-        x = self.dropout2(x)
-        # 最后一层不做激活函数，避免最终输出不完整
-        x = self.fc3(x)
-        # 将结果转为概率
-        output = F.log_softmax(x, dim=1)
-        return output
+        x = self.fc2(x)
+        return F.log_softmax(x, dim=1)
 
 # 训练
 def train(train_loader, net, optimizer, ceriation, use_cuda, epoch):
@@ -89,6 +72,22 @@ def test(test_loader, net, ceriation, use_cuda, epoch):
             print('==>>> epoch: {}, batch index: {}, test loss: {:.6f}, acc: {:.3f}'.format(
                 epoch, batch_idx+1, ave_loss, correct_cnt))
 
+def show(train_loader):
+    images, label = next(iter(train_loader))
+    images_example = torchvision.utils.make_grid(images)
+    images_example = images_example.numpy().transpose(1,2,0) # 将图像的通道值置换到最后的维度，符合图像的格式
+    mean = [0.1307,]
+    std =  [0.3081,]
+    images_example = images_example * std + mean
+    plt.imshow(images_example, cmap="gray")
+    plt.show()
+
+    images_example = images[0]#把一个批数的训练数据的第一个取出
+    print(images_example.shape)
+    images_example = images_example.reshape(28,28) #转换成28*28的矩阵
+    plt.imshow(images_example, cmap="gray")
+    plt.show()
+
 def main():
     net = Net()
     print(net)
@@ -114,12 +113,12 @@ def main():
     train_set = datasets.MNIST(root=root, train=True, transform=trans, download=True)
     test_set = datasets.MNIST(root=root, train=False, transform=trans)
     batch_size = 128
-
-    print(train_set, train_set.__getitem__(0))
-
+    
     # 加载训练集和测试集
     train_loader = torch.utils.data.DataLoader(dataset=train_set, batch_size=batch_size, shuffle=True)
     test_loader = torch.utils.data.DataLoader(dataset=test_set,  batch_size=batch_size, shuffle=False)
+
+    show(train_loader)
 
     # 小批量梯度下降方法
     optimizer = optim.SGD(net.parameters(), lr=0.1, momentum=0.9)
