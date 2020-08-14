@@ -8,6 +8,7 @@ from torch.optim.lr_scheduler import StepLR
 from torchvision import datasets, transforms
 from torchsummary import summary
 import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
 
 import os
 
@@ -55,6 +56,10 @@ def train(train_loader, net, optimizer, ceriation, use_cuda, epoch):
 def test(test_loader, net, ceriation, use_cuda, epoch):
     # 固定住 BN 和 Dropout
     net.eval()
+
+    # 创建混淆矩阵
+    confusion = torch.zeros(10, 10)
+
     correct_cnt, ave_loss = 0, 0
     for batch_idx, (x, target) in enumerate(test_loader):
         if use_cuda:
@@ -62,7 +67,7 @@ def test(test_loader, net, ceriation, use_cuda, epoch):
         out = net(x)
         loss = ceriation(out, target)
         pred = out.argmax(dim=1, keepdim=True)
-        
+
         # 计算正确率
         correct_cnt += pred.eq(target.view_as(pred)).sum().item()
         # smooth average
@@ -71,6 +76,32 @@ def test(test_loader, net, ceriation, use_cuda, epoch):
         if(batch_idx+1) % 100 == 0 or (batch_idx+1) == len(test_loader):
             print('==>>> epoch: {}, batch index: {}, test loss: {:.6f}, acc: {:.3f}'.format(
                 epoch, batch_idx+1, ave_loss, correct_cnt))
+
+        # 显示混淆矩阵，但只显示错误相关性
+        for idx in range(len(target)):
+            if target[idx]!=pred[idx]:
+                confusion[target[idx]][pred[idx]] += 1
+
+    # 混淆矩阵数据归一化
+    for i in range(10):
+        confusion[i] = confusion[i] / confusion[i].sum()
+
+    # 设置绘图
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    cax = ax.matshow(confusion.numpy())
+    fig.colorbar(cax)
+
+    # 设置轴
+    ax.set_xticklabels([''] + list(range(10)), rotation=90)
+    ax.set_yticklabels([''] + list(range(10)))
+
+    # 每个刻度线强制标签
+    ax.xaxis.set_major_locator(ticker.MultipleLocator(1))
+    ax.yaxis.set_major_locator(ticker.MultipleLocator(1))
+
+    # sphinx_gallery_thumbnail_number = 2
+    plt.show()
 
 def show(train_loader):
     images, label = next(iter(train_loader))

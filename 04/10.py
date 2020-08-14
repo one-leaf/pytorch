@@ -230,7 +230,7 @@ def evaluate(line_tensor):
 
     return output
 
-# 查看一堆正确猜到的例子和记录
+# 查看 n_confusion 个正确猜到的例子和记录
 for i in range(n_confusion):
     category, line, category_tensor, line_tensor = randomTrainingExample()
     output = evaluate(line_tensor)
