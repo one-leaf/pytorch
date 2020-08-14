@@ -785,11 +785,13 @@ dropout = 0.1
 batch_size = 64
 
 # 设置检查点以加载; 如果从头开始，则设置为None
-loadFilename = None
 checkpoint_iter = 5000
-# loadFilename = os.path.join(save_dir, model_name, corpus_name,
-#                            '{}-{}_{}'.format(encoder_n_layers, decoder_n_layers, hidden_size),
-#                            '{}_checkpoint.tar'.format(checkpoint_iter))
+loadFilename = os.path.join(save_dir, model_name, corpus_name,
+                           '{}-{}_{}'.format(encoder_n_layers, decoder_n_layers, hidden_size),
+                           '{}_checkpoint.tar'.format(checkpoint_iter))
+
+if not os.path.exists(loadFilename):
+    loadFilename = None
 
 # 如果提供了loadFilename，则加载模型
 if loadFilename:
