@@ -14,23 +14,30 @@ import torch.optim as optim
 import torch.nn.functional as F
 import torchvision.transforms as T
 
-
+# 游戏有设置最大步数 200/env._max_episode_steps 步
+# unwarpped类是解除这个限制，玩多少步都可以
 env = gym.make('CartPole-v0').unwrapped
 
-# set up matplotlib
-is_ipython = 'inline' in matplotlib.get_backend()
-if is_ipython:
-    from IPython import display
+# 随机玩一局
+# env.step(0): 小车向左， env.step(1): 小车向右
+for t in count(): 
+    env.render()
+    leftOrRight = random.randrange(env.action_space.n)
+    _, reward, done, _ = env.step(leftOrRight)
 
-plt.ion()
+    if done:
+        break
+
+env.reset()
+
+
+# plt.ion()
 
 # if gpu is to be used
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-
-Transition = namedtuple('Transition',
-                        ('state', 'action', 'next_state', 'reward'))
-
+# 状态、动作、下一个状态、打分
+Transition = namedtuple('Transition', ('state', 'action', 'next_state', 'reward'))
 
 class ReplayMemory(object):
 
@@ -83,19 +90,29 @@ resize = T.Compose([T.ToPILImage(),
                     T.ToTensor()])
 
 
+# 获得当前小车的位置，转为正整数
+# env.x_threshold x最大边距 [-2.4 ---- 0 ---- 2.4]
+# env.state 当前状态 (位置x，x加速度, 偏移角度theta, 角加速度) 位置x可以为负数
 def get_cart_location(screen_width):
+    # 世界的总长度
     world_width = env.x_threshold * 2
+    # 世界转屏幕像素系数
     scale = screen_width / world_width
+    # 世界的中心点在屏幕中央，所以位置需要左偏移屏幕宽度的一半
     return int(env.state[0] * scale + screen_width / 2.0)  # MIDDLE OF CART
 
 def get_screen():
     # gym要求的返回屏幕是400x600x3，但有时更大，如800x1200x3。 将其转换为torch order（CHW）。
     screen = env.render(mode='rgb_array').transpose((2, 0, 1))
-    # cart位于下半部分，因此不包括屏幕的顶部和底部
+    # cart位于下半部分，因此不包括屏幕的顶部和底部 [3, 400, 600]
     _, screen_height, screen_width = screen.shape
+    # [3, 160, 600]
     screen = screen[:, int(screen_height*0.4):int(screen_height * 0.8)]
     view_width = int(screen_width * 0.6)
+
+    # 获得当前小车的位置
     cart_location = get_cart_location(screen_width)
+
     if cart_location < view_width // 2:
         slice_range = slice(view_width)
     elif cart_location > (screen_width - view_width // 2):
@@ -182,9 +199,6 @@ def plot_durations():
         plt.plot(means.numpy())
 
     plt.pause(0.001)  # 暂停一下，以便更新图表
-    if is_ipython:
-        display.clear_output(wait=True)
-        display.display(plt.gcf())
 
 
 def optimize_model():
@@ -217,6 +231,8 @@ def optimize_model():
     expected_state_action_values = (next_state_values * GAMMA) + reward_batch
 
     # 计算Huber损失
+    # 为了最大限度地降低此错误，我们将使用Huber损失。当误差很小时，Huber损失就像均方误差一样，
+    # 但是当误差很大时，就像平均绝对误差一样 - 当的估计噪声很多时，这使得它对异常值更加鲁棒。
     loss = F.smooth_l1_loss(state_action_values, expected_state_action_values.unsqueeze(1))
 
     # 优化模型
