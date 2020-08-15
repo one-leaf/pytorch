@@ -325,7 +325,7 @@ def trainIters(encoder, decoder, n_iters, print_every=1000, plot_every=100, lear
     showPlot(plot_losses)
 
 import matplotlib.pyplot as plt
-plt.switch_backend('agg')
+# plt.switch_backend('agg')
 import matplotlib.ticker as ticker
 import numpy as np
 
@@ -390,14 +390,16 @@ attn_decoder1 = AttnDecoderRNN(hidden_size, output_lang.n_words, dropout_p=0.1).
 
 loadFilename = "data/save/12_checkpoint.tar"
 if os.path.exists(loadFilename):
-    # 如果在同一台机器上加载，则对模型进行训练
     checkpoint = torch.load(loadFilename)
     # If loading a model trained on GPU to CPU
     #checkpoint = torch.load(loadFilename, map_location=torch.device('cpu'))
-    encoder1 = checkpoint['en']
-    attn_decoder1 = checkpoint['de']
+    en_sd = checkpoint['en']
+    de_sd = checkpoint['de']
     input_lang =  checkpoint['input_lang']
     output_lang = checkpoint['output_lang']
+
+    encoder1.load_state_dict(en_sd)
+    attn_decoder1.load_state_dict(de_sd)
 else:    
     trainIters(encoder1, attn_decoder1, 75000, print_every=5000)
 
