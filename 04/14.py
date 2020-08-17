@@ -20,13 +20,13 @@ env = gym.make('CartPole-v0').unwrapped
 
 # 随机玩一局
 # env.step(0): 小车向左， env.step(1): 小车向右
-for t in count(): 
-    env.render()
-    leftOrRight = random.randrange(env.action_space.n)
-    _, reward, done, _ = env.step(leftOrRight)
-
-    if done:
-        break
+# env.reset()
+# for t in count(): 
+#     env.render()
+#     leftOrRight = random.randrange(env.action_space.n)
+#     _, reward, done, _ = env.step(leftOrRight)
+#     if done:
+#         break
 
 env.reset()
 
@@ -39,6 +39,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # 状态、动作、下一个状态、打分
 Transition = namedtuple('Transition', ('state', 'action', 'next_state', 'reward'))
 
+# 定长的数组，自动按self.position循环更新数据
 class ReplayMemory(object):
 
     def __init__(self, capacity):
@@ -80,10 +81,10 @@ class DQN(nn.Module):
 
     # 使用一个元素调用以确定下一个操作，或在优化期间调用batch。返回tensor([[left0exp,right0exp]...]).
     def forward(self, x):
-        x = F.relu(self.bn1(self.conv1(x)))
-        x = F.relu(self.bn2(self.conv2(x)))
-        x = F.relu(self.bn3(self.conv3(x)))
-        return self.head(x.view(x.size(0), -1))
+        x = F.relu(self.bn1(self.conv1(x)))         #[B, 3, 40, 90] => [B, 16, 18, 43]
+        x = F.relu(self.bn2(self.conv2(x)))         #[B, 16, 18, 43] => [B, 32, 7, 20]
+        x = F.relu(self.bn3(self.conv3(x)))         #[B, 32, 7, 20] => [B, 32, 2, 8]
+        return self.head(x.view(x.size(0), -1))     #[B, 512] => [B, 2]
 
 resize = T.Compose([T.ToPILImage(),
                     T.Resize(40, interpolation=Image.CUBIC),
@@ -106,24 +107,27 @@ def get_screen():
     screen = env.render(mode='rgb_array').transpose((2, 0, 1))
     # cart位于下半部分，因此不包括屏幕的顶部和底部 [3, 400, 600]
     _, screen_height, screen_width = screen.shape
-    # [3, 160, 600]
+    # 把高度按160 - 320截断为160，[3, 160, 600]
     screen = screen[:, int(screen_height*0.4):int(screen_height * 0.8)]
+    # 宽度只截取 60% ，左右各截取 30%
     view_width = int(screen_width * 0.6)
 
     # 获得当前小车的位置
     cart_location = get_cart_location(screen_width)
 
     if cart_location < view_width // 2:
+        # 如果小车右边还有 30% 空间，则切片范围左边 60%【None, view_width, None】
         slice_range = slice(view_width)
     elif cart_location > (screen_width - view_width // 2):
+        # 如果小车左边有 30% 的空间，则切片范围最右边 60% [-view_width, None, None]
         slice_range = slice(-view_width, None)
     else:
+        # 否则按小车的当前位置两端分别截取 30% 
         slice_range = slice(cart_location - view_width // 2,
                             cart_location + view_width // 2)
     # 去掉边缘，使得我们有一个以cart为中心的方形图像
     screen = screen[:, :, slice_range]
     # 转换为float类型，重新缩放，转换为torch张量
-    # (this doesn't require a copy)
     screen = np.ascontiguousarray(screen, dtype=np.float32) / 255
     screen = torch.from_numpy(screen)
     # 调整大小并添加batch维度（BCHW）
@@ -149,12 +153,15 @@ TARGET_UPDATE = 10
 # 此时的典型尺寸接近3x40x90
 # 这是get_screen（）中的限幅和缩小渲染缓冲区的结果
 init_screen = get_screen()
-_, _, screen_height, screen_width = init_screen.shape
+_, _, screen_height, screen_width = init_screen.shape #【B，C，H，W】
 
-# 从gym行动空间中获取行动数量
+# 从gym行动空间中获取行动数量 ， 就两种，左或右
 n_actions = env.action_space.n
 
+# 训练网络
 policy_net = DQN(screen_height, screen_width, n_actions).to(device)
+
+# 预测网络,相对于 policy_net 是上一次的训练参数
 target_net = DQN(screen_height, screen_width, n_actions).to(device)
 target_net.load_state_dict(policy_net.state_dict())
 target_net.eval()
@@ -162,10 +169,9 @@ target_net.eval()
 optimizer = optim.RMSprop(policy_net.parameters())
 memory = ReplayMemory(10000)
 
-
 steps_done = 0
 
-
+# 开始随机动作，后期逐渐采用预测动作 【0.05 --> 0.9】返回动作shape: [B, 1]
 def select_action(state):
     global steps_done
     sample = random.random()
@@ -180,9 +186,7 @@ def select_action(state):
     else:
         return torch.tensor([[random.randrange(n_actions)]], device=device, dtype=torch.long)
 
-
 episode_durations = []
-
 
 def plot_durations():
     plt.figure(2)
@@ -204,35 +208,45 @@ def plot_durations():
 def optimize_model():
     if len(memory) < BATCH_SIZE:
         return
+    # 获得 [(state, action, next_state, reward), ...]
     transitions = memory.sample(BATCH_SIZE)
     # 转置batch（有关详细说明，请参阅https://stackoverflow.com/a/19343/3343043）。
     # 这会将过渡的batch数组转换为batch数组的过渡。
+    # [T(a=1,b=2),T(a=1,b=2),T(a=1,b=2)] ==> T(a=(1,1,1),b=(2,2,2))  
     batch = Transition(*zip(*transitions))
 
     # 计算非最终状态的掩码并连接batch元素（最终状态将是模拟结束后的状态）
+    # [True,True,...] Shape[128]
     non_final_mask = torch.tensor(tuple(map(lambda s: s is not None,
                                           batch.next_state)), device=device, dtype=torch.bool)
-    non_final_next_states = torch.cat([s for s in batch.next_state
-                                                if s is not None])
+    # [121, 3, 40, 90]
+    non_final_next_states = torch.cat([s for s in batch.next_state if s is not None])
+    # [128, 3, 40, 90]
     state_batch = torch.cat(batch.state)
+    # [128, 1]
     action_batch = torch.cat(batch.action)
+    # [128]
     reward_batch = torch.cat(batch.reward)
-
+    
     # 计算Q(s_t，a) - 模型计算Q(s_t)，然后我们选择所采取的动作列。
     # 这些是根据policy_net对每个batch状态采取的操作
+    # 根据当前的动作获得当前动作的概率 shape [128,1]
     state_action_values = policy_net(state_batch).gather(1, action_batch)
 
     # 计算所有下一个状态的V(s_{t+1})
-    # non_final_next_states的操作的预期值是基于“较旧的”target_net计算的; 
+    # non_final_next_states的操作的预期值是基于“较旧的”target_net计算的; 为什么要这样干？
     # 用max(1)[0]选择最佳奖励。这是基于掩码合并的，这样我们就可以得到预期的状态值，或者在状态是最终的情况下为0。
+    # 预测下一个状态的最大概率，如果没有下一步，则下一步的概率为0 ,shape : 121
     next_state_values = torch.zeros(BATCH_SIZE, device=device)
     next_state_values[non_final_mask] = target_net(non_final_next_states).max(1)[0].detach()
-    # 计算预期的Q值
+    # 计算预期的Q值，当处于下一个状态，获得预测的不管什么步骤，越明确越好，即概率越大越好，在加上本次的奖励获得总奖励
+    # shape [128]
     expected_state_action_values = (next_state_values * GAMMA) + reward_batch
 
     # 计算Huber损失
     # 为了最大限度地降低此错误，我们将使用Huber损失。当误差很小时，Huber损失就像均方误差一样，
-    # 但是当误差很大时，就像平均绝对误差一样 - 当的估计噪声很多时，这使得它对异常值更加鲁棒。
+    # 但是当误差很大时，就像平均绝对误差一样 - 当估计噪声很多时，这使得它对异常值更加鲁棒。
+    # 这样当奖励越大是，推动当前的概率也越大, 这里并不对错误动作概率做惩罚
     loss = F.smooth_l1_loss(state_action_values, expected_state_action_values.unsqueeze(1))
 
     # 优化模型
@@ -246,16 +260,16 @@ num_episodes = 50
 for i_episode in range(num_episodes):
     # 初始化环境和状态
     env.reset()
-    last_screen = get_screen()
-    current_screen = get_screen()
-    state = current_screen - last_screen
+    last_screen = get_screen()                  # [1, 3, 40, 90]
+    current_screen = get_screen()               # [1, 3, 40, 90]
+    state = current_screen - last_screen        # [1, 3, 40, 90]    
     for t in count():
         # 选择动作并执行
         action = select_action(state)
         _, reward, done, _ = env.step(action.item())
         reward = torch.tensor([reward], device=device)
 
-        # 观察新的状态
+        # 观察新的状态,下一个状态 等于当前屏幕 - 上一个屏幕 ？ 这样抗干扰高？所有的状态预测都是像素差
         last_screen = current_screen
         current_screen = get_screen()
         if not done:
