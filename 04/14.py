@@ -141,7 +141,7 @@ plt.figure()
 plt.imshow(get_screen().cpu().squeeze(0).permute(1, 2, 0).numpy(),
            interpolation='none')
 plt.title('Example extracted screen')
-plt.show()
+# plt.show()
 
 
 BATCH_SIZE = 128
