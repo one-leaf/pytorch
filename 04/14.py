@@ -14,6 +14,7 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
 import torchvision.transforms as T
+from IPython import display
 
 # 游戏有设置最大步数 200/env._max_episode_steps 步
 # unwarpped类是解除这个限制，玩多少步都可以
@@ -303,7 +304,7 @@ for i_episode in range(num_episodes):
     # 更新目标网络，复制DQN中的所有权重和偏差
     if i_episode % TARGET_UPDATE == 0:
         target_net.load_state_dict(policy_net.state_dict())
-
+    print("save ", steps_done, i_episode*1.0/num_episodes)
     torch.save({    'policy_net': policy_net.state_dict(),
                     'steps_done': steps_done,
                 }, MODEL_File)
