@@ -271,7 +271,7 @@ def optimize_model():
 
 num_episodes = 5000
 max_step = 1
-avg_step = 0
+avg_step = 100
 for i_episode in range(num_episodes):
     # 初始化环境和状态
     env.reset()
