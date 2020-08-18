@@ -281,9 +281,17 @@ for i_episode in range(num_episodes):
     for t in count():
         # 选择动作并执行
         action = select_action(state)
-        _, reward, done, _ = env.step(action.item())
-        # 这个奖励每次都是1，除非游戏结束，应该加上步数的奖励
-        reward = reward * 1.0 * t / avg_step
+        observation_, reward, done, _ = env.step(action.item())
+
+        # 不采用系统默认的reward，太难学习了
+        x, x_dot, theta, theta_dot = observation_   
+        # r1代表车的 x水平位移 与 x最大边距 的距离差的得分
+        r1 = math.exp((env.x_threshold - abs(x))/env.x_threshold) - math.exp(1)/2
+        # r2代表棒子的 theta离垂直的角度 与 theta最大角度 的差的得分
+        r2 = math.exp((env.theta_threshold_radians - abs(theta))/env.theta_threshold_radians) - math.exp(1)/2
+        # 总 reward 是 r1 和 r2 的结合, 既考虑位置, 也考虑角度。
+        reward = r1 + r2   
+
         reward = torch.tensor([reward], device=device)
 
         # 观察新的状态,下一个状态 等于当前屏幕 - 上一个屏幕 ？ 这样抗干扰高？所有的状态预测都是像素差
