@@ -283,7 +283,7 @@ for i_episode in range(num_episodes):
         action = select_action(state)
         _, reward, done, _ = env.step(action.item())
         # 这个奖励每次都是1，除非游戏结束，应该加上步数的奖励
-        reward = reward * 1.0 * t / max_step
+        reward = reward * 1.0 * t / avg_step
         reward = torch.tensor([reward], device=device)
 
         # 观察新的状态,下一个状态 等于当前屏幕 - 上一个屏幕 ？ 这样抗干扰高？所有的状态预测都是像素差
