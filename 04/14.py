@@ -320,9 +320,9 @@ for i_episode in range(num_episodes):
         target_net.load_state_dict(policy_net.state_dict())
 
     avg_step = avg_step*0.999 + t*0.001 
-    print("save", steps_done, i_episode*1.0/num_episodes, t, '/' , avg_step, action, reward)
-
-    torch.save({    'policy_net': policy_net.state_dict(),
+    print(steps_done, t, '/' , avg_step, action, reward)
+    if i_episode%10==0:
+        torch.save({    'policy_net': policy_net.state_dict(),
                     'steps_done': steps_done,
                 }, MODEL_File)
 
