@@ -269,7 +269,7 @@ def optimize_model():
         param.grad.data.clamp_(-1, 1)
     optimizer.step()
 
-num_episodes = 5000
+num_episodes = 5000000
 max_step = 1
 avg_step = 50
 for i_episode in range(num_episodes):
