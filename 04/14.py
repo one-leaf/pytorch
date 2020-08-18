@@ -176,6 +176,7 @@ optimizer = optim.RMSprop(policy_net.parameters())
 memory = ReplayMemory(10000)
 
 steps_done = 0
+last_steps_done = 0
 
 if os.path.exists(MODEL_File):
     checkpoint = torch.load(MODEL_File)
@@ -305,7 +306,10 @@ for i_episode in range(num_episodes):
     # 更新目标网络，复制DQN中的所有权重和偏差
     if i_episode % TARGET_UPDATE == 0:
         target_net.load_state_dict(policy_net.state_dict())
-    print("save ", steps_done, i_episode*1.0/num_episodes)
+
+    print("save", steps_done, i_episode*1.0/num_episodes, steps_done-last_steps_done, action, reward)
+    last_steps_done = steps_done
+
     torch.save({    'policy_net': policy_net.state_dict(),
                     'steps_done': steps_done,
                 }, MODEL_File)
