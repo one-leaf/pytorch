@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 from collections import namedtuple
 from itertools import count
 from PIL import Image
+import os
 
 import torch
 import torch.nn as nn
@@ -27,6 +28,7 @@ env = gym.make('CartPole-v0').unwrapped
 #     _, reward, done, _ = env.step(leftOrRight)
 #     if done:
 #         break
+
 
 env.reset()
 
@@ -148,6 +150,8 @@ EPS_START = 0.9
 EPS_END = 0.05
 EPS_DECAY = 200
 TARGET_UPDATE = 10
+MODEL_File = 'data/save/14_checkpoint.tar'
+
 
 # 获取屏幕大小，以便我们可以根据AI gym返回的形状正确初始化图层。 
 # 此时的典型尺寸接近3x40x90
@@ -171,7 +175,14 @@ memory = ReplayMemory(10000)
 
 steps_done = 0
 
-# 开始随机动作，后期逐渐采用预测动作 【0.05 --> 0.9】返回动作shape: [B, 1]
+if os.path.exists(MODEL_File):
+    checkpoint = torch.load(MODEL_File)
+    policy_net_sd = checkpoint['policy_net']
+    steps_done =  checkpoint['steps_done']
+    policy_net.load_state_dict(policy_net_sd)
+    target_net.load_state_dict(policy_net_sd)
+
+# 开始随机动作，后期逐渐采用预测动作 【0.9 --> 0.05】返回动作shape: [B, 1]
 def select_action(state):
     global steps_done
     sample = random.random()
@@ -256,7 +267,7 @@ def optimize_model():
         param.grad.data.clamp_(-1, 1)
     optimizer.step()
 
-num_episodes = 50
+num_episodes = 5000
 for i_episode in range(num_episodes):
     # 初始化环境和状态
     env.reset()
@@ -292,6 +303,10 @@ for i_episode in range(num_episodes):
     # 更新目标网络，复制DQN中的所有权重和偏差
     if i_episode % TARGET_UPDATE == 0:
         target_net.load_state_dict(policy_net.state_dict())
+
+    torch.save({    'policy_net': policy_net.state_dict(),
+                    'steps_done': steps_done,
+                }, MODEL_File)
 
 print('Complete')
 env.render()

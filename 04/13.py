@@ -4,6 +4,7 @@ from __future__ import print_function
 #%matplotlib inline
 import argparse
 import os
+from os import curdir
 import random
 import torch
 import torch.nn as nn
@@ -26,7 +27,8 @@ print("Random Seed: ", manualSeed)
 random.seed(manualSeed)
 torch.manual_seed(manualSeed)
 
-dataroot = "data/celeba"
+curr_dir = os.path.dirname(__file__)
+dataroot = os.path.join(curr_dir, "../data/celeba")
 workers = 2
 batch_size = 128
 image_size = 64
