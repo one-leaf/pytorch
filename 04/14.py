@@ -38,6 +38,7 @@ env.reset()
 
 # if gpu is to be used
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print("device:", device)
 
 # 状态、动作、下一个状态、打分
 Transition = namedtuple('Transition', ('state', 'action', 'next_state', 'reward'))
