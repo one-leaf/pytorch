@@ -271,6 +271,7 @@ def optimize_model():
     optimizer.step()
 
 num_episodes = 5000
+max_step = 1
 for i_episode in range(num_episodes):
     # 初始化环境和状态
     env.reset()
@@ -281,6 +282,8 @@ for i_episode in range(num_episodes):
         # 选择动作并执行
         action = select_action(state)
         _, reward, done, _ = env.step(action.item())
+        # 这个奖励每次都是1，除非游戏结束，应该加上步数的奖励
+        reward = reward * 1.0 * t / max_step
         reward = torch.tensor([reward], device=device)
 
         # 观察新的状态,下一个状态 等于当前屏幕 - 上一个屏幕 ？ 这样抗干扰高？所有的状态预测都是像素差
@@ -302,6 +305,7 @@ for i_episode in range(num_episodes):
         if done:
             episode_durations.append(t + 1)
             plot_durations()
+            if t>max_step: max_step=t
             break
     # 更新目标网络，复制DQN中的所有权重和偏差
     if i_episode % TARGET_UPDATE == 0:
