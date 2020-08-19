@@ -274,7 +274,7 @@ def optimize_model():
 
 num_episodes = 5000000
 max_step = 1
-avg_step = 50
+avg_step = 10
 for i_episode in range(num_episodes):
     # 初始化环境和状态
     env.reset()
@@ -322,7 +322,7 @@ for i_episode in range(num_episodes):
     if i_episode % TARGET_UPDATE == 0:
         target_net.load_state_dict(policy_net.state_dict())
 
-    avg_step = avg_step*i_episode/num_episodes + t*(1-i_episode/num_episodes) 
+    avg_step = avg_step*0.9999 + t*0.0001 
     print(i_episode, steps_done, t, '/' , avg_step, action, reward)
     if i_episode%10==0:
         torch.save({    'policy_net': policy_net.state_dict(),
