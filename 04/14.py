@@ -322,7 +322,7 @@ for i_episode in range(num_episodes):
     if i_episode % TARGET_UPDATE == 0:
         target_net.load_state_dict(policy_net.state_dict())
 
-    avg_step = avg_step*0.999 + t*0.001 
+    avg_step = avg_step*i_episode/num_episodes + t*(1-i_episode/num_episodes) 
     print(i_episode, steps_done, t, '/' , avg_step, action, reward)
     if i_episode%10==0:
         torch.save({    'policy_net': policy_net.state_dict(),
