@@ -174,7 +174,7 @@ target_net.load_state_dict(policy_net.state_dict())
 target_net.eval()
 
 # 将学习率调到很小
-optimizer = optim.RMSprop(policy_net.parameters(),lr=1e-4)
+optimizer = optim.RMSprop(policy_net.parameters(),lr=1e-5)
 memory = ReplayMemory(10000)
 
 # 总共训练步数
