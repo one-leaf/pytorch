@@ -316,7 +316,7 @@ for i_episode in range(num_episodes):
             next_state = None
 
         # 在记忆中存储过渡,但减少为1的奖励
-        if random.random()<reward_proportion*2:
+        if random.random()<reward_proportion*2 and not done :
             if len(memory.memory)==memory.capacity: 
                 while memory.memory[memory.position].next_state==None:
                     memory.position = (memory.position + 1) % memory.capacity
