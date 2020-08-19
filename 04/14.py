@@ -147,6 +147,7 @@ plt.title('Example extracted screen')
 
 
 BATCH_SIZE = 128
+# 得分的权重
 GAMMA = 0.999
 EPS_START = 0.9
 EPS_END = 0.05
@@ -172,7 +173,8 @@ target_net = DQN(screen_height, screen_width, n_actions).to(device)
 target_net.load_state_dict(policy_net.state_dict())
 target_net.eval()
 
-optimizer = optim.RMSprop(policy_net.parameters())
+# 将学习率调到很小
+optimizer = optim.RMSprop(policy_net.parameters(),lr=1e-6)
 memory = ReplayMemory(10000)
 
 steps_done = 0
@@ -283,14 +285,14 @@ for i_episode in range(num_episodes):
         action = select_action(state)
         observation_, reward, done, _ = env.step(action.item())
 
-        # 不采用系统默认的reward，太难学习了
-        x, x_dot, theta, theta_dot = observation_   
-        # r1代表车的 x水平位移 与 x最大边距 的距离差的得分
-        r1 = math.exp((env.x_threshold - abs(x))/env.x_threshold) - math.exp(1)/2
-        # r2代表棒子的 theta离垂直的角度 与 theta最大角度 的差的得分
-        r2 = math.exp((env.theta_threshold_radians - abs(theta))/env.theta_threshold_radians) - math.exp(1)/2
-        # 总 reward 是 r1 和 r2 的结合, 既考虑位置, 也考虑角度。
-        reward = r1 + r2   
+        # # 不采用系统默认的reward，太难学习了
+        # x, x_dot, theta, theta_dot = observation_   
+        # # r1代表车的 x水平位移 与 x最大边距 的距离差的得分
+        # r1 = math.exp((env.x_threshold - abs(x))/env.x_threshold) - math.exp(1)/2
+        # # r2代表棒子的 theta离垂直的角度 与 theta最大角度 的差的得分
+        # r2 = math.exp((env.theta_threshold_radians - abs(theta))/env.theta_threshold_radians) - math.exp(1)/2
+        # # 总 reward 是 r1 和 r2 的结合, 既考虑位置, 也考虑角度。
+        # reward = r1 + r2   
 
         reward = torch.tensor([reward], device=device)
 
