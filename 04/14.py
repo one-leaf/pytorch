@@ -177,12 +177,15 @@ target_net.eval()
 optimizer = optim.RMSprop(policy_net.parameters(),lr=1e-6)
 memory = ReplayMemory(10000)
 
+# 总共训练步数
 steps_done = 0
-
+# 平均一局步数
+avg_step = 10
 if os.path.exists(MODEL_File):
     checkpoint = torch.load(MODEL_File)
     policy_net_sd = checkpoint['policy_net']
     steps_done =  checkpoint['steps_done']
+    avg_step = checkpoint['avg_step']
     policy_net.load_state_dict(policy_net_sd)
     target_net.load_state_dict(policy_net_sd)
 
@@ -273,8 +276,6 @@ def optimize_model():
     optimizer.step()
 
 num_episodes = 5000000
-max_step = 1
-avg_step = 10
 for i_episode in range(num_episodes):
     # 初始化环境和状态
     env.reset()
@@ -316,7 +317,6 @@ for i_episode in range(num_episodes):
         if done:
             episode_durations.append(t + 1)
             plot_durations()
-            if t>max_step: max_step=t
             break
     # 更新目标网络，复制DQN中的所有权重和偏差
     if i_episode % TARGET_UPDATE == 0:
@@ -327,6 +327,7 @@ for i_episode in range(num_episodes):
     if i_episode%10==0:
         torch.save({    'policy_net': policy_net.state_dict(),
                     'steps_done': steps_done,
+                    'avg_step': avg_step,
                 }, MODEL_File)
 
 print('Complete')
