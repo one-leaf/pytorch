@@ -1,4 +1,3 @@
-from 04.13 import batch_size
 import gym
 import math
 import random
@@ -320,9 +319,11 @@ for i_episode in range(num_episodes):
             next_state = None
 
         # 在记忆中存储过渡,但减少为1的奖励
-        if random.random()<reward_proportion*2 and not done and steps_done>memory.capacity :
-            while memory.memory[memory.position].next_state==None:
-                memory.position = (memory.position + 1) % memory.capacity
+        if random.random()<reward_proportion*2 and not done and steps_done>memory.capacity:
+            print(memory.position, len(memory.memory), memory.capacity)
+            if len(memory.memory)==memory.capacity: 
+                while memory.memory[memory.position].next_state==None:
+                    memory.position = (memory.position + 1) % memory.capacity
         memory.push(state, action, next_state, reward)
 
         # 移动到下一个状态
@@ -338,7 +339,7 @@ for i_episode in range(num_episodes):
     avg_step = avg_step*0.999 + t*0.001 
 
     # 更新目标网络，复制DQN中的所有权重和偏差
-    if i_episode % TARGET_UPDATE == 0 and loss!=None:
+    if i_episode % TARGET_UPDATE == 0 and loss!=None :
         target_net.load_state_dict(policy_net.state_dict())
         print(i_episode, steps_done, t, '/' , avg_step, "loss:", loss.item(), "reward_proportion", \
             reward_proportion, "position:",memory.position,"eps_threshold:",EPS_END + (EPS_START - EPS_END) * \
