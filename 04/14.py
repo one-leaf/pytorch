@@ -196,7 +196,7 @@ if os.path.exists(MODEL_File):
     policy_net.load_state_dict(policy_net_sd)
     target_net.load_state_dict(policy_net_sd)
 
-# 开始随机动作，后期逐渐采用预测动作 【0.9 --> 0.05】返回动作shape: [B, 1]
+# 开始随机动作，后期逐渐采用预测动作 【0.05 --> 0.9】返回动作shape: [B, 1]
 def select_action(state):
     global steps_done
     sample = random.random()
