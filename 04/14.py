@@ -61,6 +61,12 @@ class ReplayMemory(object):
     def sample(self, batch_size):
         return random.sample(self.memory, batch_size)
 
+    def calc(self):
+        reward = 0.0 
+        for transition in self.memory:
+            reward += transition['reward']
+        return reward/self.capacity
+
     def __len__(self):
         return len(self.memory)
 
@@ -281,7 +287,8 @@ for i_episode in range(num_episodes):
     env.reset()
     last_screen = get_screen()                  # [1, 3, 40, 90]
     current_screen = get_screen()               # [1, 3, 40, 90]
-    state = current_screen - last_screen        # [1, 3, 40, 90]    
+    state = current_screen - last_screen        # [1, 3, 40, 90]   
+    reward_proportion = memory.calc() 
     for t in count():
         # 选择动作并执行
         action = select_action(state)
@@ -306,8 +313,9 @@ for i_episode in range(num_episodes):
         else:
             next_state = None
 
-        # 在记忆中存储过渡
-        memory.push(state, action, next_state, reward)
+        # 在记忆中存储过渡,但减少为1的奖励
+        if random.random()>reward_proportion or reward==0:
+            memory.push(state, action, next_state, reward)
 
         # 移动到下一个状态
         state = next_state
