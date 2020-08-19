@@ -181,7 +181,7 @@ target_net.load_state_dict(policy_net.state_dict())
 target_net.eval()
 
 # 将学习率调到很小
-optimizer = optim.RMSprop(policy_net.parameters(),lr=1e-5)
+optimizer = optim.RMSprop(policy_net.parameters(),lr=1e-6)
 memory = ReplayMemory(10000)
 
 # 总共训练步数
@@ -319,7 +319,7 @@ for i_episode in range(num_episodes):
             next_state = None
 
         # 在记忆中存储过渡,但减少为1的奖励
-        if random.random()<reward_proportion*2 and not done and steps_done>memory.capacity:
+        if random.random()<reward_proportion and not done and steps_done>memory.capacity:
             if len(memory.memory)==memory.capacity: 
                 while memory.memory[memory.position].next_state==None:
                     memory.position = (memory.position + 1) % memory.capacity
