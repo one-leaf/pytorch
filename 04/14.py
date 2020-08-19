@@ -343,7 +343,7 @@ for i_episode in range(num_episodes):
         target_net.load_state_dict(policy_net.state_dict())
         print(i_episode, steps_done, t, '/' , avg_step, "loss:", loss.item(), "reward_proportion", \
             reward_proportion, "position:",memory.position,"eps_threshold:",EPS_END + (EPS_START - EPS_END) * \
-            math.exp(-1. * steps_done / EPS_DECAY)
+            math.exp(-1. * steps_done / EPS_DECAY))
         torch.save({    'policy_net': policy_net.state_dict(),
                     'steps_done': steps_done,
                     'avg_step': avg_step,
