@@ -204,6 +204,7 @@ def select_action(state):
 episode_durations = []
 
 def plot_durations():
+    return
     plt.figure(2)
     plt.clf()
     durations_t = torch.tensor(episode_durations, dtype=torch.float)
