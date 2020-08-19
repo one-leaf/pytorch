@@ -293,7 +293,7 @@ for i_episode in range(num_episodes):
         # 选择动作并执行
         action = select_action(state)
         observation_, _reward, done, _ = env.step(action.item())
-        if done: _reward=0
+        if done: _reward = 0.0
 
         # # 不采用系统默认的reward，太难学习了
         # x, x_dot, theta, theta_dot = observation_   
