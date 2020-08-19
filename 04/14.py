@@ -318,13 +318,12 @@ for i_episode in range(num_episodes):
             episode_durations.append(t + 1)
             plot_durations()
             break
+
+    avg_step = avg_step*0.9999 + t*0.0001 
     # 更新目标网络，复制DQN中的所有权重和偏差
     if i_episode % TARGET_UPDATE == 0:
         target_net.load_state_dict(policy_net.state_dict())
-
-    avg_step = avg_step*0.9999 + t*0.0001 
-    print(i_episode, steps_done, t, '/' , avg_step, action, reward)
-    if i_episode%10==0:
+        print(i_episode, steps_done, t, '/' , avg_step, action, reward)
         torch.save({    'policy_net': policy_net.state_dict(),
                     'steps_done': steps_done,
                     'avg_step': avg_step,
