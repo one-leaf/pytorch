@@ -320,6 +320,7 @@ for i_episode in range(num_episodes):
             break
 
     avg_step = avg_step*0.9999 + t*0.0001 
+
     # 更新目标网络，复制DQN中的所有权重和偏差
     if i_episode % TARGET_UPDATE == 0:
         target_net.load_state_dict(policy_net.state_dict())
