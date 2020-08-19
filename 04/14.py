@@ -292,7 +292,7 @@ for i_episode in range(num_episodes):
     for t in count():
         # 选择动作并执行
         action = select_action(state)
-        observation_, reward, done, _ = env.step(action.item())
+        observation_, _reward, done, _ = env.step(action.item())
 
         # # 不采用系统默认的reward，太难学习了
         # x, x_dot, theta, theta_dot = observation_   
@@ -303,7 +303,7 @@ for i_episode in range(num_episodes):
         # # 总 reward 是 r1 和 r2 的结合, 既考虑位置, 也考虑角度。
         # reward = r1 + r2   
 
-        reward = torch.tensor([reward], device=device)
+        reward = torch.tensor([_reward], device=device)
 
         # 观察新的状态,下一个状态 等于当前屏幕 - 上一个屏幕 ？ 这样抗干扰高？所有的状态预测都是像素差
         last_screen = current_screen
@@ -314,7 +314,7 @@ for i_episode in range(num_episodes):
             next_state = None
 
         # 在记忆中存储过渡,但减少为1的奖励
-        if random.random()>reward_proportion or reward==0:
+        if random.random()>reward_proportion or _reward==0:
             memory.push(state, action, next_state, reward)
 
         # 移动到下一个状态
