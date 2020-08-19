@@ -315,7 +315,7 @@ for i_episode in range(num_episodes):
             next_state = None
 
         # 在记忆中存储过渡,但减少为1的奖励
-        if random.random()>reward_proportion*2 or _reward==0:
+        if random.random()>reward_proportion*2 or done:
             memory.push(state, action, next_state, reward)
 
         # 移动到下一个状态
