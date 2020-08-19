@@ -181,7 +181,7 @@ target_net.load_state_dict(policy_net.state_dict())
 target_net.eval()
 
 # 将学习率调到很小
-optimizer = optim.RMSprop(policy_net.parameters())
+optimizer = optim.RMSprop(policy_net.parameters(),lr=1e-5)
 memory = ReplayMemory(10000)
 
 # 总共训练步数
@@ -281,7 +281,7 @@ def optimize_model():
     optimizer.zero_grad()
     loss.backward()
     for param in policy_net.parameters():
-        param.grad.data.clamp_(-1, 1)
+        param.grad.data.clamp_(-5, 5)
     optimizer.step()
     return loss
 
