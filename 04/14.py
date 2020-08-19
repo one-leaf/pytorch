@@ -185,7 +185,7 @@ if os.path.exists(MODEL_File):
     checkpoint = torch.load(MODEL_File)
     policy_net_sd = checkpoint['policy_net']
     steps_done =  checkpoint['steps_done']
-    avg_step = checkpoint['avg_step']
+    # avg_step = checkpoint['avg_step']
     policy_net.load_state_dict(policy_net_sd)
     target_net.load_state_dict(policy_net_sd)
 
