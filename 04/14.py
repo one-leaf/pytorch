@@ -153,9 +153,9 @@ plt.title('Example extracted screen')
 # plt.show()
 
 
-BATCH_SIZE = 128
+BATCH_SIZE = 2
 # 得分的权重
-GAMMA = 0.999
+GAMMA = 0.9
 EPS_START = 0.9
 EPS_END = 0.05
 EPS_DECAY = 200
@@ -240,33 +240,33 @@ def optimize_model():
     # 这会将过渡的batch数组转换为batch数组的过渡。
     # [T(a=1,b=2),T(a=1,b=2),T(a=1,b=2)] ==> T(a=(1,1,1),b=(2,2,2))  
     batch = Transition(*zip(*transitions))
-
     # 计算非最终状态的掩码并连接batch元素（最终状态将是模拟结束后的状态）
-    # [True,True,...] Shape[128]
+    # [True,True] Shape [128]
     non_final_mask = torch.tensor(tuple(map(lambda s: s is not None,
-                                          batch.next_state)), device=device, dtype=torch.bool)
+                                      batch.next_state)), device=device, dtype=torch.bool)
     # [121, 3, 40, 90]
     non_final_next_states = torch.cat([s for s in batch.next_state if s is not None])
     # [128, 3, 40, 90]
     state_batch = torch.cat(batch.state)
-    # [128, 1]
+    # [[1],[1]] Shape [128, 1]
     action_batch = torch.cat(batch.action)
-    # [128]
+    # [1, 1] Shape [128]
     reward_batch = torch.cat(batch.reward)
     
     # 计算Q(s_t，a) - 模型计算Q(s_t)，然后我们选择所采取的动作列。
     # 这些是根据policy_net对每个batch状态采取的操作
-    # 根据当前的动作获得当前动作的概率 shape [128,1]
+    # 根据当前的动作获得当前动作的奖励 
+    # [[6.2464],[3.2442]] shape [128,1]
     state_action_values = policy_net(state_batch).gather(1, action_batch)
-
     # 计算所有下一个状态的V(s_{t+1})
-    # non_final_next_states的操作的预期值是基于“较旧的”target_net计算的; 为什么要这样干？
-    # 用max(1)[0]选择最佳奖励。这是基于掩码合并的，这样我们就可以得到预期的状态值，或者在状态是最终的情况下为0。
+    # non_final_next_states的操作的预期值是基于“较旧的”target_net计算的; 
+    # 用 max(1)[0] 选择最佳奖励。这是基于掩码合并的，这样我们就可以得到预期的状态值，或者在状态是最终的情况下为0。
     # 预测下一个状态的最大概率，如果没有下一步，则下一步的概率为0 ,shape : 121
     next_state_values = torch.zeros(BATCH_SIZE, device=device)
+    # [6.4941, 0.0000] Shape [128]
     next_state_values[non_final_mask] = target_net(non_final_next_states).max(1)[0].detach()
     # 计算预期的Q值，当处于下一个状态，获得预测的不管什么步骤，越明确越好，即概率越大越好，在加上本次的奖励获得总奖励
-    # shape [128]
+    # [6.8447, -1] Shape [128]
     expected_state_action_values = (next_state_values * GAMMA) + reward_batch
 
     # 计算Huber损失
@@ -279,7 +279,7 @@ def optimize_model():
     optimizer.zero_grad()
     loss.backward()
     for param in policy_net.parameters():
-        param.grad.data.clamp_(-1, 1)
+        param.grad.data.clamp_(-5, 5)
     optimizer.step()
 
 num_episodes = 5000000
