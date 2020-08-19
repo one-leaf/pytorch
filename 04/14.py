@@ -260,16 +260,18 @@ def optimize_model():
     state_action_values = policy_net(state_batch).gather(1, action_batch)
     # 计算所有下一个状态的V(s_{t+1})
     # non_final_next_states的操作的预期值是基于“较旧的”target_net计算的; 
+    # 因为涉及到模型BatchNorm2d的参数，需要采用eval()，而当前模型 policy_net 又处理train()状态，所以只能另外开一个 target_net 来计算
     # 用 max(1)[0] 选择最佳奖励。这是基于掩码合并的，这样我们就可以得到预期的状态值，或者在状态是最终的情况下为0。
-    # 预测下一个状态的最大概率，如果没有下一步，则下一步的概率为0 ,shape : 121
+    # 预测下一个状态的最大值，如果没有下一步，则下一步的概率为0 ,shape : 121
     next_state_values = torch.zeros(BATCH_SIZE, device=device)
     # [6.4941, 0.0000] Shape [128]
     next_state_values[non_final_mask] = target_net(non_final_next_states).max(1)[0].detach()
-    # 计算预期的Q值，当处于下一个状态，获得预测的不管什么步骤，越明确越好，即概率越大越好，在加上本次的奖励获得总奖励
+    # 计算预期的Q值，最大值，在加上本次的奖励获得总奖励
     # [6.8447, -1] Shape [128]
     expected_state_action_values = (next_state_values * GAMMA) + reward_batch
 
     # 计算Huber损失
+    # 期望当前状态得分和下一次状态得分一样，这样，如果下一次状态得分高，则鼓励当前动作，否则压制当前动作
     # 为了最大限度地降低此错误，我们将使用Huber损失。当误差很小时，Huber损失就像均方误差一样，
     # 但是当误差很大时，就像平均绝对误差一样 - 当估计噪声很多时，这使得它对异常值更加鲁棒。
     # 这样当奖励越大是，推动当前的概率也越大, 这里并不对错误动作概率做惩罚
