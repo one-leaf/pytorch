@@ -64,7 +64,7 @@ class ReplayMemory(object):
     def calc(self):
         reward = 0.0 
         for transition in self.memory:
-            reward += transition['reward']
+            reward += transition.reward
         return reward/self.capacity
 
     def __len__(self):
