@@ -276,8 +276,7 @@ def optimize_model():
     # 为了最大限度地降低此错误，我们将使用Huber损失。当误差很小时，Huber损失就像均方误差一样，
     # 但是当误差很大时，就像平均绝对误差一样 - 当估计噪声很多时，这使得它对异常值更加鲁棒。
     # 在 [-1, 1] 区间，直接采用MSE: 1/2*(y-f(x))^2，其余采用L1Loss: |y-f(x)| 
-    # loss = F.smooth_l1_loss(state_action_values, expected_state_action_values.unsqueeze(1))
-    loss = F.mse_loss(state_action_values, expected_state_action_values.unsqueeze(1))
+    loss = F.smooth_l1_loss(state_action_values, expected_state_action_values.unsqueeze(1))
     
     # 优化模型
     optimizer.zero_grad()
