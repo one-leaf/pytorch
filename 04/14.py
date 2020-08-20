@@ -157,7 +157,7 @@ BATCH_SIZE = 128
 # 得分的权重
 GAMMA = 0.99
 EPS_START = 0.9
-EPS_END = 0.9
+EPS_END = 0.1
 EPS_DECAY = 1000000
 TARGET_UPDATE = 10
 MODEL_File = 'data/save/14_checkpoint.tar'
