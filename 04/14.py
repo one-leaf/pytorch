@@ -305,7 +305,7 @@ for i_episode in range(num_episodes):
         # # r2代表棒子的 theta离垂直的角度 与 theta最大角度 的差的得分
         # r2 = math.exp((env.theta_threshold_radians - abs(theta))/env.theta_threshold_radians) - math.exp(1)/2
         # # 总 reward 是 r1 和 r2 的结合, 既考虑位置, 也考虑角度。
-        # reward = r1 + r2   
+        # _reward = r1 + r2   
 
         reward = torch.tensor([_reward], device=device)
 
