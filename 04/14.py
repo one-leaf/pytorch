@@ -274,7 +274,6 @@ def optimize_model():
     # 期望当前状态得分和下一次状态得分一样，这样，如果下一次状态得分高，则鼓励当前动作，否则压制当前动作
     # 为了最大限度地降低此错误，我们将使用Huber损失。当误差很小时，Huber损失就像均方误差一样，
     # 但是当误差很大时，就像平均绝对误差一样 - 当估计噪声很多时，这使得它对异常值更加鲁棒。
-    # 这样当奖励越大是，推动当前的概率也越大, 这里并不对错误动作概率做惩罚
     loss = F.smooth_l1_loss(state_action_values, expected_state_action_values.unsqueeze(1))
 
     # 优化模型
