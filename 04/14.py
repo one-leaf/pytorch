@@ -287,6 +287,7 @@ def optimize_model():
     return loss
 
 num_episodes = 5000000
+step_episode_update = 0.
 for i_episode in range(num_episodes):
     # 初始化环境和状态
     env.reset()
@@ -335,15 +336,16 @@ for i_episode in range(num_episodes):
             # episode_durations.append(t + 1)
             # plot_durations()
             break
-
-    avg_step = avg_step*0.9999 + t*0.0001 
+    step_episode_update += t
     target_net.load_state_dict(policy_net.state_dict())
 
     # 更新目标网络，复制DQN中的所有权重和偏差
     if i_episode % TARGET_UPDATE == 0 and loss!=None :
-        print(i_episode, steps_done, t, '/' , avg_step, "loss:", loss.item(), "reward_proportion", \
+        avg_step = avg_step*0.999 + step_episode_update/TARGET_UPDATE*0.001 
+        print(i_episode, steps_done, step_episode_update/TARGET_UPDATE, '/' , avg_step, "loss:", loss.item(), "reward_proportion", \
             reward_proportion, "position:",memory.position,"eps_threshold:",EPS_END + (EPS_START - EPS_END) * \
             math.exp(-1. * steps_done / EPS_DECAY))
+        step_episode_update = 0.
         torch.save({    'policy_net': policy_net.state_dict(),
                     'steps_done': steps_done,
                     'avg_step': avg_step,
