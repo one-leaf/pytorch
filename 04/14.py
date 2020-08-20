@@ -155,7 +155,7 @@ plt.title('Example extracted screen')
 
 BATCH_SIZE = 512
 # 得分的权重
-GAMMA = 0.99
+GAMMA = 0.5
 EPS_START = 0.9
 EPS_END = 0.1
 EPS_DECAY = 1000000
@@ -255,19 +255,19 @@ def optimize_model():
     
     # 计算Q(s_t，a) - 模型计算Q(s_t)，然后我们选择所采取的动作列。
     # 这些是根据policy_net对每个batch状态采取的操作
-    # 根据当前的动作获得当前动作的奖励 
+    # 根据当前的动作获得当前动作对应的得分 
     # [[6.2464],[3.2442]] shape [128,1]
     state_action_values = policy_net(state_batch).gather(1, action_batch)
     # 计算所有下一个状态的V(s_{t+1})
     # non_final_next_states的操作的预期值是基于“较旧的”target_net计算的; 
     # 因为涉及到模型BatchNorm2d的参数，需要采用eval()，而当前模型 policy_net 又处理train()状态，所以只能另外开一个 target_net 来计算
-    # 用 max(1)[0] 选择最佳奖励。这是基于掩码合并的，这样我们就可以得到预期的状态值，或者在状态是最终的情况下为0。
-    # 预测下一个状态的最大值，如果没有下一步，则下一步的概率为0 ,shape : 121
+    # 用 max(1)[0] 选择一下个状态最佳得分。这是基于掩码合并的，这样我们就可以得到预期的得分，或者在状态是最终的情况下为0。
+    # 预测下一个状态的最佳得分，如果没有下一步，则下一步的概率为0 ,shape : 121
     next_state_values = torch.zeros(BATCH_SIZE, device=device)
     # [6.4941, 0.0000] Shape [128]
     next_state_values[non_final_mask] = target_net(non_final_next_states).max(1)[0].detach()
-    # 计算预期的Q值，最大值，在加上本次的奖励获得总奖励
-    # [6.8447, -1] Shape [128]
+    # 用预期的下一步的最佳得分*衰减，再加上本次的奖励获得总得分
+    # [6.8447, 0] Shape [128]
     expected_state_action_values = (next_state_values * GAMMA) + reward_batch
 
     # 计算Huber损失
