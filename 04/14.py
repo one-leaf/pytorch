@@ -355,13 +355,13 @@ for i_episode in range(num_episodes):
         step_episode_update = 0.
         action_episode_update = 0.
 
-        if _loss<10:
+        if _loss<1:
             torch.save({    'policy_net': policy_net.state_dict(),
                     'steps_done': steps_done,
                     'avg_step': avg_step,
                 }, MODEL_File)
 
-        if _loss>100:
+        if _loss>10:
             break
 
 print('Complete')
