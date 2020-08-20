@@ -188,8 +188,8 @@ memory = ReplayMemory(10000)
 
 # 总共训练步数
 steps_done = 0
-# 平均一局步数
-avg_step = 10
+# 全随机大概平均一局步数
+avg_step = 20
 if os.path.exists(MODEL_File):
     checkpoint = torch.load(MODEL_File)
     policy_net_sd = checkpoint['policy_net']
