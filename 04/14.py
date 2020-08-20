@@ -156,7 +156,7 @@ plt.title('Example extracted screen')
 BATCH_SIZE = 512
 # 得分的权重，这个值越小，越容易快速将得分压制到【0 ~ 1】之间，但同时最长远步骤的影响力也就越小，不能压制的太小
 # 得分压制的太小会导致 Loss 过小，MSE的梯度会变得很小，不容易学习
-GAMMA = 0.9
+GAMMA = 0.85
 EPS_START = 0.9
 EPS_END = 0.1
 EPS_DECAY = 1000000
