@@ -155,7 +155,7 @@ plt.title('Example extracted screen')
 
 BATCH_SIZE = 512
 # 得分的权重，这个值越小，越容易快速将得分压制到【0 ~ 1】之间，但同时最长远步骤的影响力也就越小
-GAMMA = 0.6
+GAMMA = 0.8
 EPS_START = 0.9
 EPS_END = 0.1
 EPS_DECAY = 1000000
