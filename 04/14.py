@@ -146,10 +146,10 @@ def get_screen():
 
 
 env.reset()
-plt.figure()
-plt.imshow(get_screen().cpu().squeeze(0).permute(1, 2, 0).numpy(),
-           interpolation='none')
-plt.title('Example extracted screen')
+# plt.figure()
+# plt.imshow(get_screen().cpu().squeeze(0).permute(1, 2, 0).numpy(),
+#            interpolation='none')
+# plt.title('Example extracted screen')
 # plt.show()
 
 
@@ -216,7 +216,6 @@ def select_action(state):
 episode_durations = []
 
 def plot_durations():
-    return
     plt.figure(2)
     plt.clf()
     durations_t = torch.tensor(episode_durations, dtype=torch.float)
@@ -333,15 +332,15 @@ for i_episode in range(num_episodes):
         # 执行优化的一个步骤（在目标网络上）
         loss = optimize_model()
         if done:
-            episode_durations.append(t + 1)
-            plot_durations()
+            # episode_durations.append(t + 1)
+            # plot_durations()
             break
 
     avg_step = avg_step*0.9999 + t*0.0001 
+    target_net.load_state_dict(policy_net.state_dict())
 
     # 更新目标网络，复制DQN中的所有权重和偏差
     if i_episode % TARGET_UPDATE == 0 and loss!=None :
-        target_net.load_state_dict(policy_net.state_dict())
         print(i_episode, steps_done, t, '/' , avg_step, "loss:", loss.item(), "reward_proportion", \
             reward_proportion, "position:",memory.position,"eps_threshold:",EPS_END + (EPS_START - EPS_END) * \
             math.exp(-1. * steps_done / EPS_DECAY))
