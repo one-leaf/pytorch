@@ -156,7 +156,7 @@ env.reset()
 BATCH_SIZE = 512
 # 得分的权重，这个值越小，越容易快速将得分压制到【0 ~ 1】之间，但同时最长远步骤的影响力也就越小，不能压制的太小
 # 得分压制的太小会导致 Loss 过小，MSE的梯度会变得很小，不容易学习
-GAMMA = 0.9
+GAMMA = 0.99
 EPS_START = 0.9
 EPS_END = 0.1
 EPS_DECAY = 100000
@@ -326,10 +326,10 @@ for i_episode in range(num_episodes):
             next_state = None
 
         # 在记忆中存储过渡,但减少为1的奖励
-        # if random.random()<reward_proportion and not done and steps_done>memory.capacity:
-        #     if len(memory.memory)==memory.capacity: 
-        #         while memory.memory[memory.position].next_state==None:
-        #             memory.position = (memory.position + 1) % memory.capacity
+        if random.random()<reward_proportion*1.5 and not done and steps_done>memory.capacity:
+            if len(memory.memory)==memory.capacity: 
+                while memory.memory[memory.position].next_state==None:
+                    memory.position = (memory.position + 1) % memory.capacity
         memory.push(state, action, next_state, reward)
 
         # 移动到下一个状态
