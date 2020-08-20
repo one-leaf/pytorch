@@ -353,7 +353,8 @@ for i_episode in range(num_episodes):
             "action: %.2f"%(action_episode_update/step_episode_update) )
         step_episode_update = 0.
         action_episode_update = 0.
-        torch.save({    'policy_net': policy_net.state_dict(),
+        if loss.item()<0:
+            torch.save({    'policy_net': policy_net.state_dict(),
                     'steps_done': steps_done,
                     'avg_step': avg_step,
                 }, MODEL_File)
