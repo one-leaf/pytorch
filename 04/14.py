@@ -155,7 +155,7 @@ plt.title('Example extracted screen')
 
 BATCH_SIZE = 512
 # 得分的权重
-GAMMA = 0.9
+GAMMA = 0.99
 EPS_START = 0.9
 EPS_END = 0.1
 EPS_DECAY = 1000000
