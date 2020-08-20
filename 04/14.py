@@ -346,9 +346,10 @@ for i_episode in range(num_episodes):
     # 更新目标网络，复制DQN中的所有权重和偏差
     if i_episode % TARGET_UPDATE == 0 and loss!=None :
         avg_step = avg_step*0.999 + step_episode_update/TARGET_UPDATE*0.001 
-        print(i_episode, steps_done, step_episode_update/TARGET_UPDATE, '/' , avg_step, "action:", action_episode_update/step_episode_update ,"loss:", loss.item(), "reward_proportion", \
-            reward_proportion, "position:",memory.position,"eps_threshold:",EPS_END + (EPS_START - EPS_END) * \
-            math.exp(-1. * steps_done / EPS_DECAY))
+        print(i_episode, steps_done, "%.2f/%.2f"%(step_episode_update/TARGET_UPDATE, avg_step), \
+            "loss:", loss.item(), "reward_proportion",  reward_proportion, \
+            "action_random: %.2f" % EPS_END + (EPS_START - EPS_END) * math.exp(-1. * steps_done / EPS_DECAY), \
+            "action: %.2f" % action_episode_update/step_episode_update )
         step_episode_update = 0.
         action_episode_update = 0.
         torch.save({    'policy_net': policy_net.state_dict(),
