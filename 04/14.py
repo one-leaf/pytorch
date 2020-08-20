@@ -181,8 +181,9 @@ target_net = DQN(screen_height, screen_width, n_actions).to(device)
 target_net.load_state_dict(policy_net.state_dict())
 target_net.eval()
 
-# 将学习率调到很小
-optimizer = optim.RMSprop(policy_net.parameters(),lr=0.01)
+# 将学习率调到很小 RMSprop 貌似学不出来
+optimizer = optim.Adam(policy_net.parameters(),lr=0.001)
+# optimizer = optim.RMSprop(policy_net.parameters(),lr=0.01)
 memory = ReplayMemory(10000)
 
 # 总共训练步数
