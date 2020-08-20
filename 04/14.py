@@ -155,7 +155,7 @@ plt.title('Example extracted screen')
 
 BATCH_SIZE = 512
 # 得分的权重
-GAMMA = 0.99
+GAMMA = 0.9
 EPS_START = 0.9
 EPS_END = 0.1
 EPS_DECAY = 1000000
@@ -181,7 +181,7 @@ target_net.load_state_dict(policy_net.state_dict())
 target_net.eval()
 
 # 将学习率调到很小
-optimizer = optim.RMSprop(policy_net.parameters(),lr=1e-6)
+optimizer = optim.RMSprop(policy_net.parameters(),lr=0.01)
 memory = ReplayMemory(10000)
 
 # 总共训练步数
