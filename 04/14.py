@@ -153,7 +153,7 @@ plt.title('Example extracted screen')
 # plt.show()
 
 
-BATCH_SIZE = 128
+BATCH_SIZE = 256
 # 得分的权重
 GAMMA = 0.99
 EPS_START = 0.9
