@@ -311,7 +311,7 @@ for i_episode in range(num_episodes):
 
         if done:
             # 奖励为当前步数，越大越好 
-            _reward = math.exp(-1. * avg_step/ (t+1))
+            _reward = math.exp(-1. * avg_step/ (t+1))-math.exp(-1)
         else:
             _reward = 0.
 
