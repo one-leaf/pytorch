@@ -279,8 +279,8 @@ def optimize_model():
     # 优化模型
     optimizer.zero_grad()
     loss.backward()
-    # for param in policy_net.parameters():
-    #     param.grad.data.clamp_(-1, 1)
+    for param in policy_net.parameters():
+        param.grad.data.clamp_(-1, 1)
     optimizer.step()
     return loss
 
