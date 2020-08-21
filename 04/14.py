@@ -348,10 +348,10 @@ for i_episode in range(num_episodes):
         
         avg_loss += loss.item() 
 
-        # if done:
-        #     # episode_durations.append(t + 1)
-        #     # plot_durations()
-        #     break
+        if done:
+             # episode_durations.append(t + 1)
+             # plot_durations()
+            break
     step_episode_update += t
     target_net.load_state_dict(policy_net.state_dict())
  
