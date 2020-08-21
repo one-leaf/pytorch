@@ -298,6 +298,7 @@ for i_episode in range(num_episodes):
     current_screen = get_screen()               # [1, 3, 40, 90]
     state = current_screen - last_screen        # [1, 3, 40, 90]   
     reward_proportion = memory.calc() 
+    avg_loss = 0.
     for t in count():
         # 选择动作并执行
         action = select_action(state)
@@ -342,21 +343,25 @@ for i_episode in range(num_episodes):
 
         # 执行优化的一个步骤（在目标网络上）
         loss = optimize_model()
+        avg_loss += loss.item() 
         if done:
             # episode_durations.append(t + 1)
             # plot_durations()
             break
     step_episode_update += t
     target_net.load_state_dict(policy_net.state_dict())
+ 
+    # 根据 loss 动态调整GAMMA，加快数据收敛
+    avg_loss = avg_loss / t * 0.1
+    GAMMA =  math.exp(-1.* avg_loss/3)
 
     # 更新目标网络，复制DQN中的所有权重和偏差
     if i_episode % TARGET_UPDATE == 0 and loss!=None :
-        _loss = loss.item()
         avg_step = avg_step*0.99 + step_episode_update/TARGET_UPDATE*0.01 
         print(i_episode, steps_done, "%.2f/%.2f"%(step_episode_update/TARGET_UPDATE, avg_step), \
-            "loss:", _loss, "reward_1:",  reward_proportion, \
+            "loss:", avg_loss, "reward_1:",  reward_proportion, \
             "action_random: %.2f"%(EPS_END + (EPS_START - EPS_END) * math.exp(-1. * steps_done / EPS_DECAY)), \
-            "action: %.2f"%(action_episode_update/step_episode_update) )
+            "action: %.2f"%(action_episode_update/step_episode_update), "GAMMA:", GAMMA )
         step_episode_update = 0.
         action_episode_update = 0.
 
