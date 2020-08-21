@@ -356,7 +356,7 @@ for i_episode in range(num_episodes):
         action_episode_update = 0.
 
         if _loss<1:
-            if i_episode % 100000 == 0:
+            if i_episode % 1000 == 0:
                 torch.save({    'policy_net': policy_net.state_dict(),
                         'steps_done': steps_done,
                         'avg_step': avg_step,
