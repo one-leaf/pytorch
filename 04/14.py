@@ -348,7 +348,7 @@ for i_episode in range(num_episodes):
     step_episode_update += t
     target_net.load_state_dict(policy_net.state_dict())
 
-    GAMMA = GAMMA_START + (GAMMA_END - GAMMA_END) * math.exp(-1. * GAMMA_DECAY / steps_done)
+    GAMMA = GAMMA_START + (GAMMA_END - GAMMA_START) * math.exp(-1. * GAMMA_DECAY / steps_done)
 
     # 更新目标网络，复制DQN中的所有权重和偏差
     if i_episode % TARGET_UPDATE == 0 and loss!=None :
