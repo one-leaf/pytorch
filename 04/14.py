@@ -308,7 +308,10 @@ for i_episode in range(num_episodes):
         action_episode_update += action_value
 
         observation_, _reward, done, _ = env.step(action_value)
-        if done: _reward = - 1.0
+        if done: 
+            _reward = 1.0*t
+        else:
+            _reward = 0.
 
         # # 不采用系统默认的reward，太难学习了
         # x, x_dot, theta, theta_dot = observation_   
