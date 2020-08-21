@@ -160,7 +160,7 @@ GAMMA = 0.999
 
 EPS_START = 0.9
 EPS_END = 0.05
-EPS_DECAY = 10000.
+EPS_DECAY = 1000.
 TARGET_UPDATE = 10
 MODEL_File = 'data/save/14_checkpoint.tar'
 
