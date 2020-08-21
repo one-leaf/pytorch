@@ -343,10 +343,8 @@ for i_episode in range(num_episodes):
 
         # 执行优化的一个步骤（在目标网络上）
         loss = optimize_model()
-        if loss==None:
-            continue
-        
-        avg_loss += loss.item() 
+        if loss!=None:       
+            avg_loss += loss.item() 
 
         if done:
              # episode_durations.append(t + 1)
