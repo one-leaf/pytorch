@@ -356,11 +356,16 @@ for i_episode in range(num_episodes):
         action_episode_update = 0.
 
         if _loss<1:
-            torch.save({    'policy_net': policy_net.state_dict(),
-                    'steps_done': steps_done,
-                    'avg_step': avg_step,
-                }, MODEL_File)
-
+            if i_episode % 100000 == 0:
+                torch.save({    'policy_net': policy_net.state_dict(),
+                        'steps_done': steps_done,
+                        'avg_step': avg_step,
+                    }, MODEL_File+"_"+str(i_episode))
+            else:
+                torch.save({    'policy_net': policy_net.state_dict(),
+                        'steps_done': steps_done,
+                        'avg_step': avg_step,
+                    }, MODEL_File)
         if _loss>10:
             break
 
