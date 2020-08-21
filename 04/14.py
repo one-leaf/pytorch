@@ -279,8 +279,8 @@ def optimize_model():
     # 优化模型
     optimizer.zero_grad()
     loss.backward()
-    for param in policy_net.parameters():
-        param.grad.data.clamp_(-1, 1)
+    # for param in policy_net.parameters():
+    #     param.grad.data.clamp_(-1, 1)
     optimizer.step()
     return loss
 
@@ -362,19 +362,19 @@ for i_episode in range(num_episodes):
         step_episode_update = 0.
         action_episode_update = 0.
 
-        if _loss<1:
-            if i_episode % 1000 == 0:
-                torch.save({    'policy_net': policy_net.state_dict(),
-                        'steps_done': steps_done,
-                        'avg_step': avg_step,
-                    }, MODEL_File+"_"+str(i_episode))
-            else:
-                torch.save({    'policy_net': policy_net.state_dict(),
-                        'steps_done': steps_done,
-                        'avg_step': avg_step,
-                    }, MODEL_File)
-        if _loss>10:
-            break
+        # if _loss<1:
+        if i_episode % 1000 == 0:
+            torch.save({    'policy_net': policy_net.state_dict(),
+                    'steps_done': steps_done,
+                    'avg_step': avg_step,
+                }, MODEL_File+"_"+str(i_episode))
+        else:
+            torch.save({    'policy_net': policy_net.state_dict(),
+                    'steps_done': steps_done,
+                    'avg_step': avg_step,
+                }, MODEL_File)
+        # if _loss>10:
+        #     break
 
 print('Complete')
 env.render()
