@@ -343,11 +343,15 @@ for i_episode in range(num_episodes):
 
         # 执行优化的一个步骤（在目标网络上）
         loss = optimize_model()
+        if loss==None:
+            continue
+        
         avg_loss += loss.item() 
-        if done:
-            # episode_durations.append(t + 1)
-            # plot_durations()
-            break
+
+        # if done:
+        #     # episode_durations.append(t + 1)
+        #     # plot_durations()
+        #     break
     step_episode_update += t
     target_net.load_state_dict(policy_net.state_dict())
  
