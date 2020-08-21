@@ -354,7 +354,7 @@ for i_episode in range(num_episodes):
     # 更新目标网络，复制DQN中的所有权重和偏差
     if i_episode % TARGET_UPDATE == 0 and loss!=None :
         _loss = loss.item()
-        avg_step = avg_step*0.99 + step_episode_update/TARGET_UPDATE*0.01 
+        avg_step = avg_step*0.9 + step_episode_update/TARGET_UPDATE*0.1 
         print(i_episode, steps_done, "%.2f/%.2f"%(step_episode_update/TARGET_UPDATE, avg_step), \
             "loss:", _loss, "reward_1:",  reward_proportion, \
             "action_random: %.2f"%(EPS_END + (EPS_START - EPS_END) * math.exp(-1. * steps_done / EPS_DECAY)), \
