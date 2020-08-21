@@ -156,10 +156,7 @@ env.reset()
 BATCH_SIZE = 512
 # 得分的权重，这个值越小，越容易快速将得分压制到【0 ~ 1】之间，但同时最长远步骤的影响力也就越小，不能压制的太小
 # 得分压制的太小会导致 Loss 过小，MSE的梯度会变得很小，不容易学习
-GAMMA = 0.5
-GAMMA_START = 0.5
-GAMMA_END = 0.999
-GAMMA_DECAY = 100000.
+GAMMA = 0.999
 
 EPS_START = 0.9
 EPS_END = 0.1
@@ -313,8 +310,8 @@ for i_episode in range(num_episodes):
             # 奖励为当前步数，越大越好 
             if t > avg_step:
                 _reward = math.exp(-1. / (t-avg_step) )
-            elif t < avg_step:
-                _reward = -1. * math.exp(-1. / (avg_step-t) )
+            # elif t < avg_step:
+            #     _reward = -1. * math.exp(-1. / (avg_step-t) )
             else:
                 _reward = 0.
         else:
@@ -354,8 +351,6 @@ for i_episode in range(num_episodes):
     step_episode_update += t
     target_net.load_state_dict(policy_net.state_dict())
 
-    GAMMA = GAMMA_START + (GAMMA_END - GAMMA_START) * math.exp(-1. * GAMMA_DECAY / steps_done)
-
     # 更新目标网络，复制DQN中的所有权重和偏差
     if i_episode % TARGET_UPDATE == 0 and loss!=None :
         _loss = loss.item()
@@ -363,8 +358,7 @@ for i_episode in range(num_episodes):
         print(i_episode, steps_done, "%.2f/%.2f"%(step_episode_update/TARGET_UPDATE, avg_step), \
             "loss:", _loss, "reward_1:",  reward_proportion, \
             "action_random: %.2f"%(EPS_END + (EPS_START - EPS_END) * math.exp(-1. * steps_done / EPS_DECAY)), \
-            "action: %.2f"%(action_episode_update/step_episode_update), \
-            "gamma:", GAMMA )
+            "action: %.2f"%(action_episode_update/step_episode_update) )
         step_episode_update = 0.
         action_episode_update = 0.
 
