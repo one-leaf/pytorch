@@ -159,7 +159,7 @@ BATCH_SIZE = 512
 GAMMA = 0.999
 
 EPS_START = 0.9
-EPS_END = 0.1
+EPS_END = 0.05
 EPS_DECAY = 10000.
 TARGET_UPDATE = 10
 MODEL_File = 'data/save/14_checkpoint.tar'
