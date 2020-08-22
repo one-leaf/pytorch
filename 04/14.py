@@ -307,10 +307,10 @@ for i_episode in range(num_episodes):
 
         observation_, _reward, done, _ = env.step(action_value)
 
+        # 只能对步骤给予奖励，对结果进行惩罚 
         if done:
             _reward = -1.0
         else:
-            # 奖励为当前步数，越大越好 
             _reward = math.exp(-1. * avg_step / (t+1))            
 
         # # 不采用系统默认的reward，太难学习了
