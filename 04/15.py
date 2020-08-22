@@ -120,7 +120,7 @@ if __name__ == '__main__':
             if done:
                 if loss!=None:
                     if loss.item()>1:
-                        _reward *= 1.01
+                        _reward *= 1.1
                     else:
                         _reward *= 0.99
                 r1 = _reward 
@@ -142,6 +142,6 @@ if __name__ == '__main__':
 
         if episode % 10==0:
             if loss!=None:
-                print(episode, t,"/", avg_reward, "loss:", loss.item()) 
+                print(episode, t,"/", avg_reward, "loss:", loss.item(),"_reward:", _reward) 
             torch.save({    'eval_net': agent.eval_net.state_dict(),
                 }, modle_file)
