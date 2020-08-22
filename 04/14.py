@@ -352,8 +352,12 @@ for i_episode in range(num_episodes):
     target_net.load_state_dict(policy_net.state_dict())
  
     # 根据 loss 动态调整GAMMA，加快数据收敛
-    avg_loss = avg_loss / t 
-    GAMMA =  math.exp(-1.* avg_loss/10)
+    avg_loss = avg_loss / t
+    if avg_loss>1: 
+        GAMMA = GAMMA * 0.95
+    else:
+        GAMMA = GAMMA * 1.001  
+
     # GAMMA =  math.exp(-2. * avg_loss) + 0.7
 
     # 更新目标网络，复制DQN中的所有权重和偏差
