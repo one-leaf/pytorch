@@ -139,9 +139,9 @@ if __name__ == '__main__':
         # plot(score, mean)
 
         if avg_loss>100:
-            agent.gamma = agent.gamma * 0.99
+            agent.gamma = agent.gamma * 0.9999
         elif avg_loss<1:
-            agent.gamma = agent.gamma * 1.001
+            agent.gamma = agent.gamma * 1.0001
 
         if episode % 10==0:
             print(episode, t,"/", avg_reward, "avg_loss:", avg_loss,"gamma:", agent.gamma) 
