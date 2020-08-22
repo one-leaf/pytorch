@@ -97,7 +97,7 @@ if __name__ == '__main__':
     score = []
     mean = []
 
-    for episode in range(1000):
+    for episode in range(100000):
         s0 = env.reset()
         total_reward = 0
         while True:
@@ -117,7 +117,7 @@ if __name__ == '__main__':
             s0 = s1
             agent.learn()
             
-        score.append(total_reward)
-        mean.append( sum(score[-100:])/100)
-        
-        plot(score, mean)
+        # score.append(total_reward)
+        # mean.append( sum(score[-100:])/100)
+        print(episode, total_reward) 
+        # plot(score, mean)
