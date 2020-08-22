@@ -182,7 +182,7 @@ target_net = DQN(screen_height, screen_width, n_actions).to(device)
 target_net.load_state_dict(policy_net.state_dict())
 target_net.eval()
 
-memory = ReplayMemory(10000)
+memory = ReplayMemory(100000)
 
 # 总共训练步数
 steps_done = 0
