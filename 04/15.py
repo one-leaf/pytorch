@@ -129,9 +129,10 @@ if __name__ == '__main__':
         # score.append(total_reward)
         # mean.append( sum(score[-100:])/100)
         avg_reward = avg_reward*0.99 + total_reward*0.01
-        print(episode, total_reward,"/", avg_reward, "loss:", loss.item()) 
         # plot(score, mean)
 
         if episode % 10==0:
+            if loss!=None:
+                print(episode, total_reward,"/", avg_reward, "loss:", loss.item()) 
             torch.save({    'eval_net': agent.eval_net.state_dict(),
                 }, modle_file)
