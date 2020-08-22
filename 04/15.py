@@ -16,10 +16,11 @@ class Net(nn.Module):
         super().__init__()
         self.linear1 = nn.Linear(input_size, hidden_size)
         self.linear2 = nn.Linear(hidden_size, output_size)
+        self.softmax = nn.LogSoftmax(dim=1)
     def forward(self, x):
         x = F.relu(self.linear1(x))
         x = self.linear2(x)
-        x = nn.LogSoftmax(x, dim=1)
+        x = self.softmax(x)
         return x
 
 class Agent(object):
