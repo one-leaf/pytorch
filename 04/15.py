@@ -61,7 +61,8 @@ class Agent(object):
         y_true = r1 + self.gamma * torch.max( self.eval_net(s1).detach(), dim=1)[0].view(self.batch_size, -1)
         y_pred = self.eval_net(s0).gather(1, a0)
         
-        loss_fn = nn.MSELoss()
+        #loss_fn = nn.MSELoss()
+        loss_fn = nn.CrossEntropyLoss()
         loss = loss_fn(y_pred, y_true)
         
         self.optimizer.zero_grad()
