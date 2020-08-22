@@ -344,7 +344,7 @@ for i_episode in range(num_episodes):
         if loss!=None:       
             avg_loss += loss.item() 
 
-        if done:
+        if done or t>=1000:
              # episode_durations.append(t + 1)
              # plot_durations()
             break

@@ -127,7 +127,7 @@ if __name__ == '__main__':
 
             agent.put(s0, a0, r1, s1)
             
-            if done or t > 1000:
+            if done or t >= 1000:
                 break
 
             s0 = s1
