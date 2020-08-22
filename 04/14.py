@@ -356,7 +356,7 @@ for i_episode in range(num_episodes):
     if avg_loss>1: 
         GAMMA = GAMMA * 0.95
     else:
-        GAMMA = GAMMA * 1.001  
+        GAMMA = GAMMA * 1.01  
 
     # GAMMA =  math.exp(-2. * avg_loss) + 0.7
 
