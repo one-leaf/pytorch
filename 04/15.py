@@ -144,8 +144,8 @@ if __name__ == '__main__':
             torch.save({    'eval_net': agent.eval_net.state_dict(),
                 }, modle_file)
 
-            if avg_loss>100:
+            if avg_loss>1:
                 agent.gamma = agent.gamma * 0.9999
-            elif avg_loss<1:
+            elif avg_loss<0.1:
                 agent.gamma = agent.gamma * 1.0001        
                      
