@@ -117,7 +117,7 @@ if __name__ == '__main__':
             if done:
                 r1 = t #math.exp(-1. * avg_reward / (t+1))
             else:
-                r1 = 0
+                r1 = 0.1
 
             agent.put(s0, a0, r1, s1)
             
