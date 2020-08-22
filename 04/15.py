@@ -29,7 +29,7 @@ class Agent(object):
             setattr(self, key, value)
         self.eval_net = Net(self.state_space_dim, 256, self.action_space_dim)
         self.optimizer = optim.Adam(self.eval_net.parameters(), lr=self.lr)
-        self.scheduler = optim.lr_scheduler.StepLR(self.optimizer, step_size=100, gamma=0.999)
+        self.scheduler = optim.lr_scheduler.StepLR(self.optimizer, step_size=1000, gamma=0.999)
         self.buffer = []
         self.steps = 0
         
