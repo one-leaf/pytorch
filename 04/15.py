@@ -29,6 +29,7 @@ class Agent(object):
             setattr(self, key, value)
         self.eval_net = Net(self.state_space_dim, 256, self.action_space_dim)
         self.optimizer = optim.Adam(self.eval_net.parameters(), lr=self.lr)
+        self.scheduler = optim.lr_scheduler.StepLR(self.optimizer, step_size=100, gamma=0.99)
         self.buffer = []
         self.steps = 0
         
@@ -67,6 +68,7 @@ class Agent(object):
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
+        self.scheduler.step()
         return loss
 
 def plot(score, mean):
