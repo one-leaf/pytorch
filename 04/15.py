@@ -132,20 +132,20 @@ if __name__ == '__main__':
             loss = agent.learn()
             if loss!=None:
                 sum_loss += loss.item()
+
         # score.append(t)
         # mean.append( sum(score[-100:])/100)
         avg_reward = avg_reward*0.99 + t*0.01
         avg_loss = avg_loss*0.99 + sum_loss*0.01/t
         # plot(score, mean)
 
-        if avg_loss>100:
-            agent.gamma = agent.gamma * 0.9999
-        elif avg_loss<1:
-            agent.gamma = agent.gamma * 1.0001
-
         if episode % 10==0:
             print(episode, t,"/", avg_reward, "avg_loss:", avg_loss,"gamma:", agent.gamma) 
             torch.save({    'eval_net': agent.eval_net.state_dict(),
                 }, modle_file)
-        
+
+            if avg_loss>100:
+                agent.gamma = agent.gamma * 0.9999
+            elif avg_loss<1:
+                agent.gamma = agent.gamma * 1.0001        
                      
