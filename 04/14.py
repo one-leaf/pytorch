@@ -314,7 +314,7 @@ for i_episode in range(num_episodes):
             # 前面的动作对后续的影响更大，所以前面的奖励变大
             _reward = math.exp(-1. * t / avg_step)            
 
-        # # 不采用系统默认的reward，太难学习了
+        # 这种奖励就明显的引入了规则，看作作弊了
         # x, x_dot, theta, theta_dot = observation_   
         # # r1代表车的 x水平位移 与 x最大边距 的距离差的得分
         # r1 = math.exp((env.x_threshold - abs(x))/env.x_threshold) - math.exp(1)/2
