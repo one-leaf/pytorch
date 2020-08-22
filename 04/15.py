@@ -87,7 +87,7 @@ if __name__ == '__main__':
     env = gym.make('CartPole-v0').unwrapped
 
     params = {
-        'gamma': 0.999,
+        'gamma': 0.99,
         'epsi_high': 0.9,
         'epsi_low': 0.05,
         'decay': 200, 
