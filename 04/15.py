@@ -97,6 +97,7 @@ if __name__ == '__main__':
     score = []
     mean = []
 
+    avg_reward = 0
     for episode in range(100000):
         s0 = env.reset()
         total_reward = 0
@@ -119,5 +120,6 @@ if __name__ == '__main__':
             
         # score.append(total_reward)
         # mean.append( sum(score[-100:])/100)
-        print(episode, total_reward) 
+        avg_reward = avg_reward*0.99 + total_reward*0.01
+        print(episode, total_reward,"/", avg_reward) 
         # plot(score, mean)
