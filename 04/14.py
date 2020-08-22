@@ -311,7 +311,8 @@ for i_episode in range(num_episodes):
         if done:
             _reward = -1.0
         else:
-            _reward = math.exp(-1. * avg_step / (t+1))            
+            # 前面的动作对后续的影响更大，所以前面的奖励变大
+            _reward = math.exp(-1. * t / avg_step)            
 
         # # 不采用系统默认的reward，太难学习了
         # x, x_dot, theta, theta_dot = observation_   
