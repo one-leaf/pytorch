@@ -90,7 +90,7 @@ if __name__ == '__main__':
     env = gym.make('CartPole-v0').unwrapped
 
     params = {
-        'gamma': 0.999, 
+        'gamma': 0.8, 
         'epsi_high': 0.9,
         'epsi_low': 0.05,
         'decay': 200,
@@ -109,21 +109,17 @@ if __name__ == '__main__':
     mean = []
 
     avg_reward = 0.1
-    _reward = -10.        
+    avg_loss = 0
     for episode in range(100000):
         s0 = env.reset()
+        sum_loss = 0
         for t in count():
             # env.render()
             a0 = agent.act(s0)
             s1, r1, done, _ = env.step(a0)
             
             if done:
-                if loss!=None:
-                    if loss.item()>1:
-                        _reward *= 1.1
-                    else:
-                        _reward *= 0.99
-                r1 = _reward 
+                r1 = -1. 
             else:
                 r1 = math.exp(-1. * (t+1) / avg_reward )
 
@@ -134,14 +130,22 @@ if __name__ == '__main__':
 
             s0 = s1
             loss = agent.learn()
-            
+            if loss!=None:
+                sum_loss += loss.item()
         # score.append(t)
         # mean.append( sum(score[-100:])/100)
         avg_reward = avg_reward*0.99 + t*0.01
+        avg_loss = avg_loss*0.99 + sum_loss*0.01/t
         # plot(score, mean)
 
+        if avg_loss>100:
+            agent.gamma = agent.gamma * 0.99
+        elif avg_loss<1:
+            agent.gamma = agent.gamma * 1.00001
+
         if episode % 10==0:
-            if loss!=None:
-                print(episode, t,"/", avg_reward, "loss:", loss.item(),"_reward:", _reward) 
+            print(episode, t,"/", avg_reward, "avg_loss:", avg_loss,"gamma:", agent.gamma) 
             torch.save({    'eval_net': agent.eval_net.state_dict(),
                 }, modle_file)
+        
+                     
