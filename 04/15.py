@@ -111,13 +111,14 @@ if __name__ == '__main__':
     avg_reward = 0.1
     for episode in range(100000):
         s0 = env.reset()
+        loss = 0        
         for t in count():
             # env.render()
             a0 = agent.act(s0)
             s1, r1, done, _ = env.step(a0)
             
             if done:
-                r1 = -100
+                r1 = -1. * loss 
             else:
                 r1 = math.exp(-1. * (t+1) / avg_reward )
 
