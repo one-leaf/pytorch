@@ -8,6 +8,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 
+from itertools import count
 import os
 
 class Net(nn.Module):
@@ -109,8 +110,8 @@ if __name__ == '__main__':
     for episode in range(100000):
         s0 = env.reset()
         total_reward = 0
-        while True:
-            env.render()
+        for t in count():
+            # env.render()
             a0 = agent.act(s0)
             s1, r1, done, _ = env.step(a0)
             
