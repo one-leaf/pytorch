@@ -140,7 +140,7 @@ if __name__ == '__main__':
         # plot(score, mean)
 
         if episode % 10==0:
-            print(episode, t,"/", avg_reward, "avg_loss:", avg_loss,"gamma:", agent.gamma) 
+            print(episode, t,"/", avg_reward, "avg_loss:", avg_loss, "gamma:", agent.gamma, "lr:", agent.lr) 
             torch.save({    'eval_net': agent.eval_net.state_dict(),
                 }, modle_file)
 
@@ -149,3 +149,4 @@ if __name__ == '__main__':
             elif avg_loss<0.1:
                 agent.gamma = agent.gamma * 1.0001        
                      
+            agent.lr = agent.lr * 0.999
