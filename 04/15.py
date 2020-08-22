@@ -109,7 +109,7 @@ if __name__ == '__main__':
     mean = []
 
     avg_reward = 0.1
-    _reward = -1000.        
+    _reward = -10.        
     for episode in range(100000):
         s0 = env.reset()
         for t in count():
