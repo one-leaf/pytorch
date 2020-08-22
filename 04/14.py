@@ -354,7 +354,7 @@ for i_episode in range(num_episodes):
     # 根据 loss 动态调整GAMMA，加快数据收敛
     avg_loss = avg_loss / t
     if avg_loss>1: 
-        GAMMA = GAMMA * 0.95
+        GAMMA = GAMMA * 0.999
     elif avg_loss<0.01:
         GAMMA = min(GAMMA * 1.001, 0.999)  
 
