@@ -116,8 +116,10 @@ if __name__ == '__main__':
             s1, r1, done, _ = env.step(a0)
             
             if done:
-                r1 = -1
-                
+                r1 = t
+            else:
+                r1 = 0
+
             agent.put(s0, a0, r1, s1)
             
             if done:
