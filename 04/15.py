@@ -19,6 +19,7 @@ class Net(nn.Module):
     def forward(self, x):
         x = F.relu(self.linear1(x))
         x = self.linear2(x)
+        x = nn.LogSoftmax(x, dim=1)
         return x
 
 class Agent(object):
@@ -115,7 +116,7 @@ if __name__ == '__main__':
             s1, r1, done, _ = env.step(a0)
             
             if not done:
-                r1 = -1
+                r1 = 0
             else:
                 r1 = t # math.exp(-1. * (t+1) / avg_reward )
 
