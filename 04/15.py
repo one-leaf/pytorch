@@ -109,7 +109,6 @@ if __name__ == '__main__':
     avg_reward = 0
     for episode in range(100000):
         s0 = env.reset()
-        total_reward = 0
         for t in count():
             # env.render()
             a0 = agent.act(s0)
@@ -125,17 +124,16 @@ if __name__ == '__main__':
             if done:
                 break
 
-            total_reward += 1
             s0 = s1
-            loss = agent.learn()
+            loss = agent.learn()t
             
-        # score.append(total_reward)
+        # score.append(t)
         # mean.append( sum(score[-100:])/100)
-        avg_reward = avg_reward*0.99 + total_reward*0.01
+        avg_reward = avg_reward*0.99 + t*0.01
         # plot(score, mean)
 
         if episode % 10==0:
             if loss!=None:
-                print(episode, total_reward,"/", avg_reward, "loss:", loss.item()) 
+                print(episode, t,"/", avg_reward, "loss:", loss.item()) 
             torch.save({    'eval_net': agent.eval_net.state_dict(),
                 }, modle_file)
