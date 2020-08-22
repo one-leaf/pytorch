@@ -62,7 +62,7 @@ class Agent(object):
         y_pred = self.eval_net(s0).gather(1, a0)
         
         #loss_fn = nn.MSELoss()
-        loss_fn = nn.KLDivLoss()
+        loss_fn = nn.SoftMarginLoss()
         loss = loss_fn(y_pred, y_true)
         
         self.optimizer.zero_grad()
