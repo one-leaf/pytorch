@@ -116,7 +116,7 @@ if __name__ == '__main__':
             s1, r1, done, _ = env.step(a0)
             
             if done:
-                r1 = t
+                r1 = math.exp(-1. * avg_reward / (t+1))
             else:
                 r1 = 0
 
@@ -125,7 +125,7 @@ if __name__ == '__main__':
             if done:
                 break
 
-            total_reward += r1
+            total_reward += 1
             s0 = s1
             loss = agent.learn()
             
