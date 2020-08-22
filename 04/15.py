@@ -64,6 +64,7 @@ class Agent(object):
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
+        return loss
 
 def plot(score, mean):
     
@@ -123,12 +124,12 @@ if __name__ == '__main__':
 
             total_reward += r1
             s0 = s1
-            agent.learn()
+            loss = agent.learn()
             
         # score.append(total_reward)
         # mean.append( sum(score[-100:])/100)
         avg_reward = avg_reward*0.99 + total_reward*0.01
-        print(episode, total_reward,"/", avg_reward) 
+        print(episode, total_reward,"/", avg_reward, "loss:", loss.item()) 
         # plot(score, mean)
 
         if episode % 10==0:
