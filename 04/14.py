@@ -311,7 +311,7 @@ for i_episode in range(num_episodes):
             _reward = -1.0
         else:
             # 奖励为当前步数，越大越好 
-            _reward = math.exp(-1. * avg_step / t)            
+            _reward = math.exp(-1. * avg_step / (t+1))            
 
         # # 不采用系统默认的reward，太难学习了
         # x, x_dot, theta, theta_dot = observation_   
