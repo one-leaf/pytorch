@@ -353,7 +353,7 @@ for i_episode in range(num_episodes):
     # 根据 loss 动态调整GAMMA，加快数据收敛
     avg_loss = avg_loss / t 
     # GAMMA =  math.exp(-1.* avg_loss/3)
-    GAMMA =  math.exp(-1.* avg_step * avg_loss) + 1
+    GAMMA =  math.exp(-1.* avg_step * avg_loss) + 0.7
 
     # 更新目标网络，复制DQN中的所有权重和偏差
     if i_episode % TARGET_UPDATE == 0 and loss!=None :
