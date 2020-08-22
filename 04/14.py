@@ -156,10 +156,10 @@ env.reset()
 BATCH_SIZE = 512
 # 得分的权重，这个值越小，越容易快速将得分压制到【0 ~ 1】之间，但同时最长远步骤的影响力也就越小，不能压制的太小
 # 得分压制的太小会导致 Loss 过小，MSE的梯度会变得很小，不容易学习
-GAMMA = 0.7
+GAMMA = 0.9
 
 EPS_START = 0.9
-EPS_END = 0.5
+EPS_END = 0.1
 EPS_DECAY = 10000.
 TARGET_UPDATE = 10
 MODEL_File = 'data/save/14_checkpoint.tar'
@@ -368,7 +368,7 @@ for i_episode in range(num_episodes):
             torch.save({    'policy_net': policy_net.state_dict(),
                     'steps_done': steps_done,
                     'avg_step': avg_step,
-                }, MODEL_File+"_"+str(i_episode))
+                }, MODEL_File+"_"+str(steps_done))
         else:
             torch.save({    'policy_net': policy_net.state_dict(),
                     'steps_done': steps_done,
