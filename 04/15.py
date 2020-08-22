@@ -125,7 +125,7 @@ if __name__ == '__main__':
                 break
 
             s0 = s1
-            loss = agent.learn()t
+            loss = agent.learn()
             
         # score.append(t)
         # mean.append( sum(score[-100:])/100)
