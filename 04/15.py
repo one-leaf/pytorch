@@ -94,7 +94,7 @@ if __name__ == '__main__':
         'epsi_high': 0.9,
         'epsi_low': 0.05,
         'decay': 2000000,
-        'lr': 1e-5,
+        'lr': 1e-4,
         'capacity': 100000,
         'batch_size': 256,
         'state_space_dim': env.observation_space.shape[0],
