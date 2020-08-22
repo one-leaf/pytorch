@@ -62,7 +62,7 @@ class Agent(object):
         y_pred = self.eval_net(s0).gather(1, a0)
         
         #loss_fn = nn.MSELoss()
-        loss_fn = nn.BCEWithLogitsLoss()
+        loss_fn = nn.NLLLoss()
         loss = loss_fn(y_pred, y_true)
         
         self.optimizer.zero_grad()
@@ -117,7 +117,7 @@ if __name__ == '__main__':
             a0 = agent.act(s0)
             s1, r1, done, _ = env.step(a0)
             
-            if not done:
+            if done:
                 r1 = 0
             else:
                 r1 = math.exp(-1. * (t+1) / avg_reward )
