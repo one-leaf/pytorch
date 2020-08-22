@@ -109,7 +109,7 @@ if __name__ == '__main__':
     mean = []
 
     avg_reward = 0.1
-    _reward = -1.        
+    _reward = -1000.        
     for episode in range(100000):
         s0 = env.reset()
         for t in count():
@@ -118,8 +118,11 @@ if __name__ == '__main__':
             s1, r1, done, _ = env.step(a0)
             
             if done:
-                if loss!=None and loss.item()>1:
-                    _reward *= 1.01
+                if loss!=None:
+                    if loss.item()>1:
+                        _reward *= 1.01
+                    else:
+                        _reward *= 0.99
                 r1 = _reward 
             else:
                 r1 = math.exp(-1. * (t+1) / avg_reward )
