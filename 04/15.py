@@ -117,7 +117,7 @@ if __name__ == '__main__':
             s1, r1, done, _ = env.step(a0)
             
             if not done:
-                r1 = 0
+                r1 = -1
             else:
                 r1 = t # math.exp(-1. * (t+1) / avg_reward )
 
