@@ -93,7 +93,7 @@ if __name__ == '__main__':
         'gamma': 0.9, 
         'epsi_high': 0.9,
         'epsi_low': 0.05,
-        'decay': 2000000,
+        'decay': 20000,
         'lr': 1e-4,
         'capacity': 100000,
         'batch_size': 256,
