@@ -8,6 +8,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 
+import os
+
 class Net(nn.Module):
     def __init__(self, input_size, hidden_size, output_size):
         super().__init__()
@@ -79,6 +81,8 @@ def plot(score, mean):
 
 if __name__ == '__main__':
 
+    modle_file = "data/save/15_checkpoint.tar"
+
     env = gym.make('CartPole-v0').unwrapped
 
     params = {
@@ -93,6 +97,9 @@ if __name__ == '__main__':
         'action_space_dim': env.action_space.n   
     }
     agent = Agent(**params)
+
+    if os.path.exists(modle_file):
+        agent.eval_net.load_state_dict(torch.load(modle_file)["eval_net"])
 
     score = []
     mean = []
@@ -123,3 +130,7 @@ if __name__ == '__main__':
         avg_reward = avg_reward*0.99 + total_reward*0.01
         print(episode, total_reward,"/", avg_reward) 
         # plot(score, mean)
+
+        if episode % 10==0:
+            torch.save({    'eval_net': agent.eval_net.state_dict(),
+                }, modle_file)
