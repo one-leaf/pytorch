@@ -142,7 +142,7 @@ if __name__ == '__main__':
         # plot(score, mean)
 
         if episode % 10==0:
-            print(episode, t,"/", avg_reward, "avg_loss:", avg_loss, "gamma:", agent.gamma, "lr:", agent.scheduler.get_lr()) 
+            print(episode, t,"/", avg_reward, "avg_loss:", avg_loss, "gamma:", agent.gamma, "lr:", agent.scheduler.get_last_lr()) 
             torch.save({    'eval_net': agent.eval_net.state_dict(),
                 }, modle_file)
 
