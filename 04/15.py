@@ -90,7 +90,7 @@ if __name__ == '__main__':
     env = gym.make('CartPole-v0').unwrapped
 
     params = {
-        'gamma': 0.8, 
+        'gamma': 0.999, 
         'epsi_high': 0.9,
         'epsi_low': 0.05,
         'decay': 200,
@@ -117,7 +117,7 @@ if __name__ == '__main__':
             s1, r1, done, _ = env.step(a0)
             
             if done:
-                r1 = -1
+                r1 = -100
             else:
                 r1 = math.exp(-1. * (t+1) / avg_reward )
 
