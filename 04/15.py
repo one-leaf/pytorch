@@ -92,7 +92,7 @@ if __name__ == '__main__':
         'epsi_low': 0.05,
         'decay': 200, 
         'lr': 0.001,
-        'capacity': 10000,
+        'capacity': 100000,
         'batch_size': 1024,
         'state_space_dim': env.observation_space.shape[0],
         'action_space_dim': env.action_space.n   
