@@ -108,7 +108,7 @@ if __name__ == '__main__':
         checkfile = torch.load(modle_file)
         agent.eval_net.load_state_dict(checkfile["eval_net"])
         agent.steps = checkfile["steps"]
-        lr = 1e-6# checkfile["lr"]
+        lr = checkfile["lr"]
         for param_group in agent.optimizer.param_groups:
             param_group['lr'] = lr
 
