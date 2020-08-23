@@ -142,9 +142,9 @@ if __name__ == '__main__':
 
         avg_reward = avg_reward*0.9 + t*0.1
         avg_loss = avg_loss*0.99 + sum_loss*0.01/t
-        # score.append(t)
-        # mean.append( sum(score[-100:])/100)
-        # plot(score, mean)
+        score.append(t)
+        mean.append( sum(score[-100:])/100)
+        plot(score, mean)
 
         if episode % 10==0:
             print(episode, t,"/", avg_reward, "avg_loss:", avg_loss, "gamma:", agent.gamma, "lr:", agent.scheduler.get_last_lr()) 
