@@ -105,7 +105,12 @@ if __name__ == '__main__':
     agent = Agent(**params)
 
     if os.path.exists(modle_file):
-        agent.eval_net.load_state_dict(torch.load(modle_file)["eval_net"])
+        checkfile = torch.load(modle_file)
+        agent.eval_net.load_state_dict(checkfile["eval_net"])
+        agent.steps = checkfile["steps"]
+        lr = checkfile["lr"]
+        for param_group in agent.optimizer.param_groups:
+            param_group['lr'] = lr
 
     score = []
     mean = []
@@ -116,12 +121,12 @@ if __name__ == '__main__':
         s0 = env.reset()
         sum_loss = 0
         for t in count():
-            # env.render()
+            env.render()
             a0 = agent.act(s0)
             s1, r1, done, _ = env.step(a0)
             
             if done:
-                r1 = -1. 
+                r1 = -1
             else:
                 r1 = math.exp(-1. * (t+1) / avg_reward )
 
@@ -135,15 +140,15 @@ if __name__ == '__main__':
             if loss!=None:
                 sum_loss += loss.item()
 
-        # score.append(t)
-        # mean.append( sum(score[-100:])/100)
         avg_reward = avg_reward*0.9 + t*0.1
         avg_loss = avg_loss*0.99 + sum_loss*0.01/t
+        # score.append(t)
+        # mean.append( sum(score[-100:])/100)
         # plot(score, mean)
 
         if episode % 10==0:
             print(episode, t,"/", avg_reward, "avg_loss:", avg_loss, "gamma:", agent.gamma, "lr:", agent.scheduler.get_last_lr()) 
-            torch.save({    'eval_net': agent.eval_net.state_dict(),
+            torch.save({'eval_net': agent.eval_net.state_dict(), "steps":agent.steps, "lr":  agent.scheduler.get_last_lr()[0]
                 }, modle_file)
 
             if avg_loss>1:
