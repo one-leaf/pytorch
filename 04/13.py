@@ -21,8 +21,8 @@ import matplotlib.animation as animation
 # from IPython.display import HTML
 
 # 为再现性设置随机seem
-manualSeed = 999
-#manualSeed = random.randint(1, 10000) # 如果你想要新的结果就是要这段代码
+# manualSeed = 999
+manualSeed = random.randint(1, 10000) # 如果你想要新的结果就是要这段代码
 print("Random Seed: ", manualSeed)
 random.seed(manualSeed)
 torch.manual_seed(manualSeed)
@@ -56,6 +56,8 @@ dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size,
 
 # 选择我们运行在上面的设备
 device = torch.device("cuda:0" if (torch.cuda.is_available() and ngpu > 0) else "cpu")
+
+print("runing on", device)
 
 # 绘制部分我们的输入图像
 real_batch = next(iter(dataloader))
