@@ -268,7 +268,7 @@ for epoch in range(num_epochs):
             errG = criterion(output, label)
             # 计算 G 的梯度
             errG.backward()
-            # 输出假图片到真标签的距离 0 --> 0.5
+            # 输出假图片到真标签的距离 0 --> 1
             D_G_z2 = output.mean().item()
             # 用假数据却赋予正确标签，同时计算 D 和 G，通过D推动G的学习，但只更新 G 的参数
             optimizerG.step()
