@@ -35,7 +35,7 @@ nc = 3              # 图像颜色通道
 nz = 100            # 潜在的向量长度
 ngf = 64            # 生成器的特征深度
 ndf = 64            # 判别器的特征深度
-num_epochs = 5
+num_epochs = 500
 lr = 0.00001        # 学习率为 0.0002 * beta1
 beta1 = 0.5         # 应该为 0.5 * GPU个数
 ngpu = 1            # GPU 个数
@@ -65,7 +65,7 @@ plt.axis("off")
 plt.title("Training Images")
 plt.imshow(np.transpose(vutils.make_grid(real_batch[0].to(device)[:64], padding=2, normalize=True).cpu(),(1,2,0)))
 
-# custom weights initialization called on netG and netD
+# netG 和 netD 所有模型权重应从正态分布中随机初始化，mean = 0，stdev = 0.02。
 def weights_init(m):
     classname = m.__class__.__name__
     if classname.find('Conv') != -1:
@@ -74,7 +74,10 @@ def weights_init(m):
         nn.init.normal_(m.weight.data, 1.0, 0.02)
         nn.init.constant_(m.bias.data, 0)
 
-# 生成器代码
+# 生成器
+# 生成器用于将潜在空间矢量映射到数据空间。输入和输出是一致的
+# 跨步的二维卷积转置层
+# 生成器的输出通过tanh函数输入，使其返回到[-1,1]范围的输入数据。
 class Generator(nn.Module):
     def __init__(self, ngpu):
         super(Generator, self).__init__()
@@ -113,6 +116,10 @@ netG.apply(weights_init)
 
 print(netG)
 
+# 判别器
+# 判别器是二进制分类网络，它将图像作为输入并输出输入图像是真实的标量概率（与假的相反）。
+# 通过Sigmoid激活函数输出 最终概率
+# DCGAN论文提到使用跨步卷积而不是池化到降低采样是一种很好的做法，因为它可以让网络学习自己的池化功能。
 class Discriminator(nn.Module):
     def __init__(self, ngpu):
         super(Discriminator, self).__init__()
@@ -135,6 +142,7 @@ class Discriminator(nn.Module):
             nn.LeakyReLU(0.2, inplace=True),
             # state size. (ndf*8) x 4 x 4
             nn.Conv2d(ndf * 8, 1, 4, 1, 0, bias=False),
+            # state size. 1
             nn.Sigmoid()
         )
 
@@ -154,6 +162,7 @@ netD.apply(weights_init)
 # 打印模型
 print(netD)
 
+# 加载模型
 modle_file = "data/save/13_checkpoint.tar"
 if os.path.exists(modle_file):
     checkpoint = torch.load(modle_file)
@@ -162,10 +171,11 @@ if os.path.exists(modle_file):
     netG.load_state_dict(netG_sd)
     netD.load_state_dict(netD_sd)
 
-# 初始化BCELoss函数
+# 初始化BCELoss函数 二进制交叉熵损失
 criterion = nn.BCELoss()
 
 # 创建一批潜在的向量，我们将用它来可视化生成器的进程
+# 混合噪声，按高斯分布采样 (64, 100, 1, 1)
 fixed_noise = torch.randn(64, nz, 1, 1, device=device)
 
 # 在训练期间建立真假标签的惯例
@@ -195,11 +205,11 @@ for epoch in range(num_epochs):
         ###########################
         ## Train with all-real batch
         netD.zero_grad()
-        # Format batch
+        # Format batch [128, 3, 64, 64]
         real_cpu = data[0].to(device)
         b_size = real_cpu.size(0)
         label = torch.full((b_size,), real_label, device=device)
-        # Forward pass real batch through D
+        # Forward pass real batch through D [128]
         output = netD(real_cpu).view(-1)
         # Calculate loss on all-real batch
         errD_real = criterion(output, label)
@@ -209,10 +219,13 @@ for epoch in range(num_epochs):
 
         ## Train with all-fake batch
         # Generate batch of latent vectors
+        # 输入一组随机高斯分布噪声 [128, 100, 1, 1] 产生一个假图片
         noise = torch.randn(b_size, nz, 1, 1, device=device)
         # Generate fake image batch with G
         fake = netG(noise)
         label.fill_(fake_label)
+
+        # 对假图片进行判别
         # Classify all fake batch with D
         output = netD(fake.detach()).view(-1)
         # Calculate D's loss on the all-fake batch
@@ -220,9 +233,13 @@ for epoch in range(num_epochs):
         # Calculate the gradients for this batch
         errD_fake.backward()
         D_G_z1 = output.mean().item()
-        # Add the gradients from the all-real and all-fake batches
+
+        # 将真的和假的损失梯度混合再一起
+        # errD_real 最初这应该从接近1开始，随着G提升然后理论上收敛到0.5。
+        # errD_fake 最初这应该从接近0开始，随着G提升然后理论上收敛到0.5。
         errD = errD_real + errD_fake
-        # Update D
+        # 判别器损失计算为所有实际批次和所有假批次的损失总和，但禁止向下传播假图片G的梯度
+        # 也就是只会计算 真实图片的 D 的梯度 和 假图片的 D 的梯度，让D的判别真图能力增强
         optimizerD.step()
 
         ############################
@@ -237,7 +254,7 @@ for epoch in range(num_epochs):
         # Calculate gradients for G
         errG.backward()
         D_G_z2 = output.mean().item()
-        # Update G
+        # 用假数据却赋予正确标签，同时计算 D 和 G，通过D推动G的学习，同时会降低D的预判能力
         optimizerG.step()
 
         # Output training stats
