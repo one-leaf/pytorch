@@ -181,12 +181,12 @@ criterion = nn.BCELoss()
 # 混合噪声，按高斯分布采样 (64, 100, 1, 1)
 fixed_noise = torch.randn(64, nz, 1, 1, device=device)
 
-with torch.no_grad():
-    fake = netG(fixed_noise).detach().cpu()
-    img = vutils.make_grid(fake, padding=2, normalize=True)
-    plt.imshow(np.transpose(img,(1,2,0)))
-    plt.show()
-    raise "only test"
+# with torch.no_grad():
+#     fake = netG(fixed_noise).detach().cpu()
+#     img = vutils.make_grid(fake, padding=2, normalize=True)
+#     plt.imshow(np.transpose(img,(1,2,0)))
+#     plt.show()
+#     raise "only test"
 
 # 在训练期间建立真假标签的惯例
 real_label = 1
