@@ -214,64 +214,61 @@ for epoch in range(num_epochs):
         # (1) Update D network: maximize log(D(x)) + log(1 - D(G(z)))
         ###########################
         ## 用真实样本进行训练
-        netD.zero_grad()
-        # [128, 3, 64, 64]
-        real_cpu = data[0].to(device)
-        b_size = real_cpu.size(0)
-        label = torch.full((b_size,), real_label, device=device)
-        # 输出真实图片的概率 D [128]
-        output = netD(real_cpu).view(-1)
-        # 计算真实图片和真实标签的的损失
-        errD_real = criterion(output, label)
-        # 计算真实样本下D的梯度
-        errD_real.backward()
-        # 真样本的概率 1 --> 0.5
-        D_x = output.mean().item()
+        for i in range(5):
+            netD.zero_grad()
+            # [128, 3, 64, 64]
+            real_cpu = data[0].to(device)
+            b_size = real_cpu.size(0)
+            label = torch.full((b_size,), real_label, device=device)
+            # 输出真实图片的概率 D [128]
+            output = netD(real_cpu).view(-1)
+            # 计算真实图片和真实标签的的损失
+            errD_real = criterion(output, label)
+            # 计算真实样本下D的梯度
+            errD_real.backward()
+            # 真样本的概率 1 --> 0.5
+            D_x = output.mean().item()
 
-        ## 用假样本进行训练
-        # 输入一组随机高斯分布噪声 [128, 100, 1, 1] 产生一个假图片
-        noise = torch.randn(b_size, nz, 1, 1, device=device)
-        # 根据随机噪声通过 G 产生假的图片
-        fake = netG(noise)
-        label.fill_(fake_label)
+            ## 用假样本进行训练
+            # 输入一组随机高斯分布噪声 [128, 100, 1, 1] 产生一个假图片
+            noise = torch.randn(b_size, nz, 1, 1, device=device)
+            # 根据随机噪声通过 G 产生假的图片
+            fake = netG(noise)
+            label.fill_(fake_label)
 
-        # 对假图片进行判别
-        output = netD(fake.detach()).view(-1)
-        # 计算所有假图片和假标签的损失
-        errD_fake = criterion(output, label)
-        # 计算假样本下D的梯度
-        errD_fake.backward()
-        # 假样本的概率 0 --> 0.5
-        D_G_z1 = output.mean().item()
+            # 对假图片进行判别
+            output = netD(fake.detach()).view(-1)
+            # 计算所有假图片和假标签的损失
+            errD_fake = criterion(output, label)
+            # 计算假样本下D的梯度
+            errD_fake.backward()
+            # 假样本的概率 0 --> 0.5
+            D_G_z1 = output.mean().item()
 
-        # 将真的和假的损失梯度混合再一起
-        # errD_real 最初这应该从接近1开始，随着G提升然后理论上收敛到0.5。
-        # errD_fake 最初这应该从接近0开始，随着G提升然后理论上收敛到0.5。
-        errD = errD_real + errD_fake
-        # 判别器损失计算为所有实际批次和所有假批次的损失总和，同时禁止向下传播假图片G的梯度，只更新 D 的参数
-        # 也就是只会计算 真实图片的 D 的梯度 和 假图片的 D 的梯度，让D的判别真图能力增强，不更新 G
-        optimizerD.step()
+            # 将真的和假的损失梯度混合再一起
+            # errD_real 最初这应该从接近1开始，随着G提升然后理论上收敛到0.5。
+            # errD_fake 最初这应该从接近0开始，随着G提升然后理论上收敛到0.5。
+            errD = errD_real + errD_fake
+            # 判别器损失计算为所有实际批次和所有假批次的损失总和，同时禁止向下传播假图片G的梯度，只更新 D 的参数
+            # 也就是只会计算 真实图片的 D 的梯度 和 假图片的 D 的梯度，让D的判别真图能力增强，不更新 G
+            optimizerD.step()
 
         ############################
         # (2) Update G network: maximize log(D(G(z)))
         ###########################
-        # 多训练几次G
-        for _ in range(5):
-            netG.zero_grad()
-            label.fill_(real_label)  # 假图片却采用真的标签
-            # 所有假图片重新计算概率，但允许更新G的梯度
-            output = netD(fake).view(-1)
-            # 计算假图片和真样本之间的损失
-            errG = criterion(output, label)
-            # 计算 G 的梯度
-            errG.backward()
-            # 输出假图片到真标签的距离 0 --> 0.5
-            D_G_z2 = output.mean().item()
-            # 用假数据却赋予正确标签，同时计算 D 和 G，通过D推动G的学习，但只更新 G 的参数
-            optimizerG.step()
-            noise = torch.randn(b_size, nz, 1, 1, device=device)
-            # 根据随机噪声通过 G 产生假的图片
-            fake = netG(noise)
+        # 训练G
+        netG.zero_grad()
+        label.fill_(real_label)  # 假图片却采用真的标签
+        # 所有假图片重新计算概率，但允许更新G的梯度
+        output = netD(fake).view(-1)
+        # 计算假图片和真样本之间的损失
+        errG = criterion(output, label)
+        # 计算 G 的梯度
+        errG.backward()
+        # 输出假图片到真标签的距离 0 --> 0.5
+        D_G_z2 = output.mean().item()
+        # 用假数据却赋予正确标签，同时计算 D 和 G，通过D推动G的学习，但只更新 G 的参数
+        optimizerG.step()
 
         # 输出训练状态
         if i % 50 == 0:
