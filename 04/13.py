@@ -255,18 +255,23 @@ for epoch in range(num_epochs):
         ############################
         # (2) Update G network: maximize log(D(G(z)))
         ###########################
-        netG.zero_grad()
-        label.fill_(real_label)  # 假图片却采用真的标签
-        # 所有假图片重新计算概率，但允许更新G的梯度
-        output = netD(fake).view(-1)
-        # 计算假图片和真样本之间的损失
-        errG = criterion(output, label)
-        # 计算 G 的梯度
-        errG.backward()
-        # 输出假图片到真标签的距离 0 --> 0.5
-        D_G_z2 = output.mean().item()
-        # 用假数据却赋予正确标签，同时计算 D 和 G，通过D推动G的学习，但只更新 G 的参数
-        optimizerG.step()
+        # 多训练几次G
+        for _ in range(5):
+            netG.zero_grad()
+            label.fill_(real_label)  # 假图片却采用真的标签
+            # 所有假图片重新计算概率，但允许更新G的梯度
+            output = netD(fake).view(-1)
+            # 计算假图片和真样本之间的损失
+            errG = criterion(output, label)
+            # 计算 G 的梯度
+            errG.backward()
+            # 输出假图片到真标签的距离 0 --> 0.5
+            D_G_z2 = output.mean().item()
+            # 用假数据却赋予正确标签，同时计算 D 和 G，通过D推动G的学习，但只更新 G 的参数
+            optimizerG.step()
+            noise = torch.randn(b_size, nz, 1, 1, device=device)
+            # 根据随机噪声通过 G 产生假的图片
+            fake = netG(noise)
 
         # 输出训练状态
         if i % 50 == 0:
