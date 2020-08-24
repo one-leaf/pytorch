@@ -20,8 +20,8 @@ import matplotlib.animation as animation
 from IPython.display import HTML
 
 # 为再现性设置随机seem
-manualSeed = 999
-# manualSeed = random.randint(1, 10000) # 如果你想要新的结果就是要这段代码
+# manualSeed = 999
+manualSeed = random.randint(1, 10000) # 如果你想要新的结果就是要这段代码
 print("Random Seed: ", manualSeed)
 random.seed(manualSeed)
 torch.manual_seed(manualSeed)
