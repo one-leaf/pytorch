@@ -1,5 +1,6 @@
 # 生成对抗网络
 
+from 04.15 import modle_file
 from __future__ import print_function
 #%matplotlib inline
 import argparse
@@ -155,6 +156,13 @@ netD.apply(weights_init)
 # 打印模型
 print(netD)
 
+modle_file = "data/save/13_checkpoint.tar"
+if os.path.exists(modle_file):
+    checkpoint = torch.load(modle_file)
+    netG_sd = checkpoint["netG"] 
+    netD_sd = checkpoint["netD"] 
+    netG.load_state_dict(netG_sd)
+    netD.load_state_dict(netD_sd)
 
 # 初始化BCELoss函数
 criterion = nn.BCELoss()
@@ -251,6 +259,10 @@ for epoch in range(num_epochs):
             img_list.append(vutils.make_grid(fake, padding=2, normalize=True))
 
         iters += 1
+
+    torch.save({    'netG': netG.state_dict(),
+                    'netD': netD.state_dict(),
+                }, modle_file)
 
 
 plt.figure(figsize=(10,5))
