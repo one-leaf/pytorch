@@ -8,14 +8,19 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 
+from itertools import count
+import os
+
 class Net(nn.Module):
     def __init__(self, input_size, hidden_size, output_size):
         super().__init__()
         self.linear1 = nn.Linear(input_size, hidden_size)
         self.linear2 = nn.Linear(hidden_size, output_size)
+        # self.softmax = nn.LogSoftmax(dim=1)
     def forward(self, x):
         x = F.relu(self.linear1(x))
         x = self.linear2(x)
+        # x = self.softmax(x)
         return x
 
 class Agent(object):
@@ -24,6 +29,7 @@ class Agent(object):
             setattr(self, key, value)
         self.eval_net = Net(self.state_space_dim, 256, self.action_space_dim)
         self.optimizer = optim.Adam(self.eval_net.parameters(), lr=self.lr)
+        self.scheduler = optim.lr_scheduler.StepLR(self.optimizer, step_size=1000, gamma=0.999)
         self.buffer = []
         self.steps = 0
         
@@ -62,6 +68,8 @@ class Agent(object):
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
+        self.scheduler.step()
+        return loss
 
 def plot(score, mean):
     
@@ -79,45 +87,72 @@ def plot(score, mean):
 
 if __name__ == '__main__':
 
+    modle_file = "data/save/15_checkpoint.tar"
+
     env = gym.make('CartPole-v0').unwrapped
 
     params = {
-        'gamma': 0.8,
+        'gamma': 0.9, 
         'epsi_high': 0.9,
         'epsi_low': 0.05,
-        'decay': 200, 
-        'lr': 0.001,
-        'capacity': 10000,
-        'batch_size': 64,
+        'decay': 20000,
+        'lr': 1e-5,
+        'capacity': 100000,
+        'batch_size': 256,
         'state_space_dim': env.observation_space.shape[0],
         'action_space_dim': env.action_space.n   
     }
     agent = Agent(**params)
 
+    if os.path.exists(modle_file):
+        checkfile = torch.load(modle_file)
+        agent.eval_net.load_state_dict(checkfile["eval_net"])
+        agent.steps = checkfile["steps"]
+        lr = checkfile["lr"]
+        for param_group in agent.optimizer.param_groups:
+            param_group['lr'] = lr
+
     score = []
     mean = []
 
-    for episode in range(1000):
+    avg_reward = 0.1
+    avg_loss = 0
+    for episode in range(100000):
         s0 = env.reset()
-        total_reward = 0
-        while True:
+        sum_loss = 0
+        for t in count():
             env.render()
             a0 = agent.act(s0)
             s1, r1, done, _ = env.step(a0)
             
             if done:
                 r1 = -1
-                
+            else:
+                r1 = math.exp(-1. * (t+1) / avg_reward )
+
             agent.put(s0, a0, r1, s1)
             
-            if done:
+            if done or t >= 1000:
                 break
 
-            total_reward += r1
             s0 = s1
-            agent.learn()
-            
-        score.append(total_reward)
+            loss = agent.learn()
+            if loss!=None:
+                sum_loss += loss.item()
+
+        avg_reward = avg_reward*0.9 + t*0.1
+        avg_loss = avg_loss*0.99 + sum_loss*0.01/t
+        score.append(t)
         mean.append( sum(score[-100:])/100)
-        
         plot(score, mean)
+
+        if episode % 10==0:
+            print(episode, t,"/", avg_reward, "avg_loss:", avg_loss, "gamma:", agent.gamma, "lr:", agent.scheduler.get_last_lr()) 
+            torch.save({'eval_net': agent.eval_net.state_dict(), "steps":agent.steps, "lr":  agent.scheduler.get_last_lr()[0]
+                }, modle_file)
+
+            if avg_loss>1:
+                agent.gamma = agent.gamma * 0.9999
+            elif avg_loss<0.1:
+                agent.gamma = agent.gamma * 1.0001        
+                     

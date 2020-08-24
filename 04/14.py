@@ -156,11 +156,11 @@ env.reset()
 BATCH_SIZE = 512
 # 得分的权重，这个值越小，越容易快速将得分压制到【0 ~ 1】之间，但同时最长远步骤的影响力也就越小，不能压制的太小
 # 得分压制的太小会导致 Loss 过小，MSE的梯度会变得很小，不容易学习
-GAMMA = 0.99
+GAMMA = 0.9
 
 EPS_START = 0.9
-EPS_END = 0.05
-EPS_DECAY = 1000.
+EPS_END = 0.1
+EPS_DECAY = 10000.
 TARGET_UPDATE = 10
 MODEL_File = 'data/save/14_checkpoint.tar'
 
@@ -182,7 +182,7 @@ target_net = DQN(screen_height, screen_width, n_actions).to(device)
 target_net.load_state_dict(policy_net.state_dict())
 target_net.eval()
 
-memory = ReplayMemory(10000)
+memory = ReplayMemory(100000)
 
 # 总共训练步数
 steps_done = 0
@@ -285,8 +285,8 @@ def optimize_model():
     return loss
 
 # 将学习率调到很小 RMSprop 貌似学不出来
-# optimizer = optim.Adam(policy_net.parameters(),lr=0.001)
-optimizer = optim.RMSprop(policy_net.parameters(),lr=0.01)
+optimizer = optim.Adam(policy_net.parameters(),lr=1e-4)
+# optimizer = optim.RMSprop(policy_net.parameters(),lr=1e-3)
 
 num_episodes = 5000000
 step_episode_update = 0.
@@ -298,6 +298,7 @@ for i_episode in range(num_episodes):
     current_screen = get_screen()               # [1, 3, 40, 90]
     state = current_screen - last_screen        # [1, 3, 40, 90]   
     reward_proportion = memory.calc() 
+    avg_loss = 0.
     for t in count():
         # 选择动作并执行
         action = select_action(state)
@@ -306,16 +307,14 @@ for i_episode in range(num_episodes):
 
         observation_, _reward, done, _ = env.step(action_value)
 
+        # 只能对步骤给予奖励，对结果进行惩罚 
         if done:
-            # 奖励为当前步数，越大越好 
-            if t > avg_step:
-                _reward = math.exp(-1. * avg_step / t)
-            else:
-                _reward = 0.
+            _reward = -1.0
         else:
-            _reward = 0.
+            # 前面的动作对后续的影响更大，所以前面的奖励变大
+            _reward = math.exp(-1. * t / avg_step)            
 
-        # # 不采用系统默认的reward，太难学习了
+        # 这种奖励就明显的引入了规则，看作作弊了
         # x, x_dot, theta, theta_dot = observation_   
         # # r1代表车的 x水平位移 与 x最大边距 的距离差的得分
         # r1 = math.exp((env.x_threshold - abs(x))/env.x_threshold) - math.exp(1)/2
@@ -342,21 +341,32 @@ for i_episode in range(num_episodes):
 
         # 执行优化的一个步骤（在目标网络上）
         loss = optimize_model()
-        if done:
-            # episode_durations.append(t + 1)
-            # plot_durations()
+        if loss!=None:       
+            avg_loss += loss.item() 
+
+        if done or t>=1000:
+             # episode_durations.append(t + 1)
+             # plot_durations()
             break
     step_episode_update += t
     target_net.load_state_dict(policy_net.state_dict())
+ 
+    # 根据 loss 动态调整GAMMA，加快数据收敛
+    avg_loss = avg_loss / t
+    if avg_loss>1: 
+        GAMMA = GAMMA * 0.999
+    elif avg_loss<0.01:
+        GAMMA = min(GAMMA * 1.001, 0.999)  
+
+    # GAMMA =  math.exp(-2. * avg_loss) + 0.7
 
     # 更新目标网络，复制DQN中的所有权重和偏差
     if i_episode % TARGET_UPDATE == 0 and loss!=None :
-        _loss = loss.item()
         avg_step = avg_step*0.99 + step_episode_update/TARGET_UPDATE*0.01 
         print(i_episode, steps_done, "%.2f/%.2f"%(step_episode_update/TARGET_UPDATE, avg_step), \
-            "loss:", _loss, "reward_1:",  reward_proportion, \
+            "loss:", avg_loss, "reward_1:",  reward_proportion, \
             "action_random: %.2f"%(EPS_END + (EPS_START - EPS_END) * math.exp(-1. * steps_done / EPS_DECAY)), \
-            "action: %.2f"%(action_episode_update/step_episode_update) )
+            "action: %.2f"%(action_episode_update/step_episode_update), "GAMMA:", GAMMA )
         step_episode_update = 0.
         action_episode_update = 0.
 
@@ -364,7 +374,7 @@ for i_episode in range(num_episodes):
             torch.save({    'policy_net': policy_net.state_dict(),
                     'steps_done': steps_done,
                     'avg_step': avg_step,
-                }, MODEL_File+"_"+str(i_episode))
+                }, MODEL_File+"_"+str(steps_done))
         else:
             torch.save({    'policy_net': policy_net.state_dict(),
                     'steps_done': steps_done,
