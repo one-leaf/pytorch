@@ -238,8 +238,8 @@ for epoch in range(num_epochs):
         # errD_real 最初这应该从接近1开始，随着G提升然后理论上收敛到0.5。
         # errD_fake 最初这应该从接近0开始，随着G提升然后理论上收敛到0.5。
         errD = errD_real + errD_fake
-        # 判别器损失计算为所有实际批次和所有假批次的损失总和，但禁止向下传播假图片G的梯度
-        # 也就是只会计算 真实图片的 D 的梯度 和 假图片的 D 的梯度，让D的判别真图能力增强
+        # 判别器损失计算为所有实际批次和所有假批次的损失总和，同时禁止向下传播假图片G的梯度，只更新 D 的参数
+        # 也就是只会计算 真实图片的 D 的梯度 和 假图片的 D 的梯度，让D的判别真图能力增强，不更新 G
         optimizerD.step()
 
         ############################
@@ -254,7 +254,7 @@ for epoch in range(num_epochs):
         # Calculate gradients for G
         errG.backward()
         D_G_z2 = output.mean().item()
-        # 用假数据却赋予正确标签，同时计算 D 和 G，通过D推动G的学习，同时会降低D的预判能力
+        # 用假数据却赋予正确标签，同时计算 D 和 G，通过D推动G的学习，但只更新 G 的参数
         optimizerG.step()
 
         # Output training stats
