@@ -258,10 +258,6 @@ for epoch in range(num_epochs):
         # 训练G
         label.fill_(real_label)  # 假图片却采用真的标签
         for _ in range(10):
-            if _ > 0:
-                noise = torch.randn(b_size, nz, 1, 1, device=device)
-                fake = netG(noise)            
-
             netG.zero_grad()
             # 所有假图片重新计算概率，但允许更新G的梯度
             output = netD(fake).view(-1)
@@ -273,6 +269,10 @@ for epoch in range(num_epochs):
             D_G_z2 = output.mean().item()
             # 用假数据却赋予正确标签，同时计算 D 和 G，通过D推动G的学习，但只更新 G 的参数
             optimizerG.step()
+            if D_G_z2>0.5: break
+            noise = torch.randn(b_size, nz, 1, 1, device=device)
+            fake = netG(noise)            
+
 
         # 输出训练状态
         if i % 50 == 0:
