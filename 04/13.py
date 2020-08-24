@@ -20,8 +20,8 @@ import matplotlib.animation as animation
 from IPython.display import HTML
 
 # 为再现性设置随机seem
-# manualSeed = 999
-manualSeed = random.randint(1, 10000) # 如果你想要新的结果就是要这段代码
+manualSeed = 999
+# manualSeed = random.randint(1, 10000) # 如果你想要新的结果就是要这段代码
 print("Random Seed: ", manualSeed)
 random.seed(manualSeed)
 torch.manual_seed(manualSeed)
@@ -181,12 +181,15 @@ criterion = nn.BCELoss()
 # 混合噪声，按高斯分布采样 (64, 100, 1, 1)
 fixed_noise = torch.randn(64, nz, 1, 1, device=device)
 
-# with torch.no_grad():
-#     fake = netG(fixed_noise).detach().cpu()
-#     img = vutils.make_grid(fake, padding=2, normalize=True)
-#     plt.imshow(np.transpose(img,(1,2,0)))
-#     plt.show()
-#     raise "only test"
+with torch.no_grad():
+    fake = netG(fixed_noise).detach().cpu()
+    img = vutils.make_grid(fake, padding=2, normalize=True)
+    plt.figure(figsize=(8,8))
+    plt.axis("off")
+    plt.title("Fake Images")
+    plt.imshow(np.transpose(img,(1,2,0)))
+    plt.show()
+    raise "only test"
 
 # 在训练期间建立真假标签的惯例
 real_label = 1
