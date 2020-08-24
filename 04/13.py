@@ -1,6 +1,4 @@
 # 生成对抗网络
-
-from 04.15 import modle_file
 from __future__ import print_function
 #%matplotlib inline
 import argparse
