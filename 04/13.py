@@ -17,7 +17,7 @@ import torchvision.utils as vutils
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
-# from IPython.display import HTML
+from IPython.display import HTML
 
 # 为再现性设置随机seem
 # manualSeed = 999
@@ -32,11 +32,11 @@ workers = 2
 batch_size = 128
 image_size = 64
 nc = 3              # 图像颜色通道 
-nz = 100            # 潜在的向量长度
+nz = 100            # 随机参数的向量长度
 ngf = 64            # 生成器的特征深度
 ndf = 64            # 判别器的特征深度
-num_epochs = 500
-lr = 0.00001        # 学习率为 0.0002 * beta1
+num_epochs = 1000
+lr = 0.0002         # 学习率为 0.0002 * beta1
 beta1 = 0.5         # 应该为 0.5 * GPU个数
 ngpu = 1            # GPU 个数
 
@@ -83,26 +83,27 @@ class Generator(nn.Module):
         super(Generator, self).__init__()
         self.ngpu = ngpu
         self.main = nn.Sequential(
-            # 输入是Z，进入卷积
+            # 输入是 (b, nz, 1, 1)，进入反向卷积
             nn.ConvTranspose2d( nz, ngf * 8, 4, 1, 0, bias=False),
             nn.BatchNorm2d(ngf * 8),
             nn.ReLU(True),
-            # state size. (ngf*8) x 4 x 4
+            # (b, (ngf*8), 4, 4)
             nn.ConvTranspose2d(ngf * 8, ngf * 4, 4, 2, 1, bias=False),
             nn.BatchNorm2d(ngf * 4),
             nn.ReLU(True),
-            # state size. (ngf*4) x 8 x 8
+            # (b, (ngf*4), 8, 8)
             nn.ConvTranspose2d( ngf * 4, ngf * 2, 4, 2, 1, bias=False),
             nn.BatchNorm2d(ngf * 2),
             nn.ReLU(True),
-            # state size. (ngf*2) x 16 x 16
+            # (b, (ngf*2), 16, 16)
             nn.ConvTranspose2d( ngf * 2, ngf, 4, 2, 1, bias=False),
             nn.BatchNorm2d(ngf),
             nn.ReLU(True),
-            # state size. (ngf) x 32 x 32
+            # (b, ngf, 32, 32)
             nn.ConvTranspose2d( ngf, nc, 4, 2, 1, bias=False),
+            # (b, nc, 64, 64)
             nn.Tanh()
-            # state size. (nc) x 64 x 64
+            # 输出是图片，数据压缩到 [0，1]区间 (b, nc, 64, 64)
         )
 
     def forward(self, input):
@@ -125,25 +126,26 @@ class Discriminator(nn.Module):
         super(Discriminator, self).__init__()
         self.ngpu = ngpu
         self.main = nn.Sequential(
-            # input is (nc) x 64 x 64
+            # 输入是图片 (b, nc, 64, 64)
             nn.Conv2d(nc, ndf, 4, 2, 1, bias=False),
             nn.LeakyReLU(0.2, inplace=True),
-            # state size. (ndf) x 32 x 32
+            # (b, ndf, 32, 32)
             nn.Conv2d(ndf, ndf * 2, 4, 2, 1, bias=False),
             nn.BatchNorm2d(ndf * 2),
             nn.LeakyReLU(0.2, inplace=True),
-            # state size. (ndf*2) x 16 x 16
+            # (b, (ndf*2), 16, 16)
             nn.Conv2d(ndf * 2, ndf * 4, 4, 2, 1, bias=False),
             nn.BatchNorm2d(ndf * 4),
             nn.LeakyReLU(0.2, inplace=True),
-            # state size. (ndf*4) x 8 x 8
+            # (b, (ndf*4), 8, 8)
             nn.Conv2d(ndf * 4, ndf * 8, 4, 2, 1, bias=False),
             nn.BatchNorm2d(ndf * 8),
             nn.LeakyReLU(0.2, inplace=True),
-            # state size. (ndf*8) x 4 x 4
+            # (b, (ndf*8), 4, 4)
             nn.Conv2d(ndf * 8, 1, 4, 1, 0, bias=False),
-            # state size. 1
+            # (b, 1, 1, 1)
             nn.Sigmoid()
+            # 输出是正常还是虚假图片的概率，数据范围【0~1】 (b, 1) 
         )
 
     def forward(self, input):
@@ -165,7 +167,7 @@ print(netD)
 # 加载模型
 modle_file = "data/save/13_checkpoint.tar"
 if os.path.exists(modle_file):
-    checkpoint = torch.load(modle_file)
+    checkpoint = torch.load(modle_file, map_location=device)
     netG_sd = checkpoint["netG"] 
     netD_sd = checkpoint["netD"] 
     netG.load_state_dict(netG_sd)
@@ -186,16 +188,16 @@ fake_label = 0
 optimizerD = optim.Adam(netD.parameters(), lr=lr, betas=(beta1, 0.999))
 optimizerG = optim.Adam(netG.parameters(), lr=lr, betas=(beta1, 0.999))
 
-# Training Loop
+# 训练
 
-# Lists to keep track of progress
+# 训练中间状态
 img_list = []
 G_losses = []
 D_losses = []
 iters = 0
 
 print("Starting Training Loop...")
-# For each epoch
+# 每一轮训练
 for epoch in range(num_epochs):
     # 对于数据加载器中的每个batch
     for i, data in enumerate(dataloader, 0):
@@ -203,35 +205,35 @@ for epoch in range(num_epochs):
         ############################
         # (1) Update D network: maximize log(D(x)) + log(1 - D(G(z)))
         ###########################
-        ## Train with all-real batch
+        ## 用真实样本进行训练
         netD.zero_grad()
-        # Format batch [128, 3, 64, 64]
+        # [128, 3, 64, 64]
         real_cpu = data[0].to(device)
         b_size = real_cpu.size(0)
         label = torch.full((b_size,), real_label, device=device)
-        # Forward pass real batch through D [128]
+        # 输出真实图片的概率 D [128]
         output = netD(real_cpu).view(-1)
-        # Calculate loss on all-real batch
+        # 计算真实图片和真实标签的的损失
         errD_real = criterion(output, label)
-        # Calculate gradients for D in backward pass
+        # 计算真实样本下D的梯度
         errD_real.backward()
+        # 真样本的概率 1 --> 0.5
         D_x = output.mean().item()
 
-        ## Train with all-fake batch
-        # Generate batch of latent vectors
+        ## 用假样本进行训练
         # 输入一组随机高斯分布噪声 [128, 100, 1, 1] 产生一个假图片
         noise = torch.randn(b_size, nz, 1, 1, device=device)
-        # Generate fake image batch with G
+        # 根据随机噪声通过 G 产生假的图片
         fake = netG(noise)
         label.fill_(fake_label)
 
         # 对假图片进行判别
-        # Classify all fake batch with D
         output = netD(fake.detach()).view(-1)
-        # Calculate D's loss on the all-fake batch
+        # 计算所有假图片和假标签的损失
         errD_fake = criterion(output, label)
-        # Calculate the gradients for this batch
+        # 计算假样本下D的梯度
         errD_fake.backward()
+        # 假样本的概率 0 --> 0.5
         D_G_z1 = output.mean().item()
 
         # 将真的和假的损失梯度混合再一起
@@ -246,28 +248,29 @@ for epoch in range(num_epochs):
         # (2) Update G network: maximize log(D(G(z)))
         ###########################
         netG.zero_grad()
-        label.fill_(real_label)  # fake labels are real for generator cost
-        # Since we just updated D, perform another forward pass of all-fake batch through D
+        label.fill_(real_label)  # 假图片却采用真的标签
+        # 所有假图片重新计算概率，但允许更新G的梯度
         output = netD(fake).view(-1)
-        # Calculate G's loss based on this output
+        # 计算假图片和真样本之间的损失
         errG = criterion(output, label)
-        # Calculate gradients for G
+        # 计算 G 的梯度
         errG.backward()
+        # 输出假图片到真标签的距离 0 --> 0.5
         D_G_z2 = output.mean().item()
         # 用假数据却赋予正确标签，同时计算 D 和 G，通过D推动G的学习，但只更新 G 的参数
         optimizerG.step()
 
-        # Output training stats
+        # 输出训练状态
         if i % 50 == 0:
             print('[%d/%d][%d/%d]\tLoss_D: %.4f\tLoss_G: %.4f\tD(x): %.4f\tD(G(z)): %.4f / %.4f'
                   % (epoch, num_epochs, i, len(dataloader),
                      errD.item(), errG.item(), D_x, D_G_z1, D_G_z2))
 
-        # Save Losses for plotting later
+        # 保存损失后续绘制
         G_losses.append(errG.item())
         D_losses.append(errD.item())
 
-        # Check how the generator is doing by saving G's output on fixed_noise
+        # 用固定的噪声产生同样的图片输出，看G的训练过程
         if (iters % 500 == 0) or ((epoch == num_epochs-1) and (i == len(dataloader)-1)):
             with torch.no_grad():
                 fake = netG(fixed_noise).detach().cpu()
