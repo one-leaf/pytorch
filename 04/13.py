@@ -35,7 +35,7 @@ nc = 3              # 图像颜色通道
 nz = 100            # 随机参数的向量长度
 ngf = 64            # 生成器的特征深度
 ndf = 64            # 判别器的特征深度
-num_epochs = 1000
+num_epochs = 10000
 lr = 0.0002         # 学习率为 0.0002 * beta1
 beta1 = 0.5         # 应该为 0.5 * GPU个数
 ngpu = 1            # GPU 个数
@@ -181,12 +181,12 @@ criterion = nn.BCELoss()
 # 混合噪声，按高斯分布采样 (64, 100, 1, 1)
 fixed_noise = torch.randn(64, nz, 1, 1, device=device)
 
-with torch.no_grad():
-    fake = netG(fixed_noise).detach().cpu()
-    img = vutils.make_grid(fake, padding=2, normalize=True)
-    plt.imshow(np.transpose(img,(1,2,0)))
-    plt.show()
-    raise "only test"
+# with torch.no_grad():
+#     fake = netG(fixed_noise).detach().cpu()
+#     img = vutils.make_grid(fake, padding=2, normalize=True)
+#     plt.imshow(np.transpose(img,(1,2,0)))
+#     plt.show()
+#     raise "only test"
 
 # 在训练期间建立真假标签的惯例
 real_label = 1
