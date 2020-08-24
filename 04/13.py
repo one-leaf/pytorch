@@ -46,6 +46,7 @@ dataset = dset.ImageFolder(root=dataroot,
                            transform=transforms.Compose([
                                transforms.Resize(image_size),
                                transforms.CenterCrop(image_size),
+                               transforms.RandomHorizontalFlip(p=0.5),
                                transforms.ToTensor(),
                                transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
                            ]))
@@ -179,6 +180,13 @@ criterion = nn.BCELoss()
 # 创建一批潜在的向量，我们将用它来可视化生成器的进程
 # 混合噪声，按高斯分布采样 (64, 100, 1, 1)
 fixed_noise = torch.randn(64, nz, 1, 1, device=device)
+
+with torch.no_grad():
+    fake = netG(fixed_noise).detach().cpu()
+    img = vutils.make_grid(fake, padding=2, normalize=True)
+    plt.imshow(np.transpose(img,(1,2,0)))
+    plt.show()
+    raise "only test"
 
 # 在训练期间建立真假标签的惯例
 real_label = 1
