@@ -32,14 +32,14 @@ dataroot = os.path.join(curr_dir, "../data/celeba")
 workers = 2
 batch_size = 128
 image_size = 64
-nc = 3
-nz = 100
-ngf = 64
-ndf = 64
+nc = 3              # 图像颜色通道 
+nz = 100            # 潜在的向量长度
+ngf = 64            # 生成器的特征深度
+ndf = 64            # 判别器的特征深度
 num_epochs = 5
-lr = 0.0002
-beta1 = 0.5
-ngpu = 0
+lr = 0.00001        # 学习率为 0.0002 * beta1
+beta1 = 0.5         # 应该为 0.5 * GPU个数
+ngpu = 1            # GPU 个数
 
 # 我们可以按照设置的方式使用图像文件夹数据集。
 # 创建数据集
