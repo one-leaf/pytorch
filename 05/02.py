@@ -225,7 +225,8 @@ def train(agent):
                 _reward = -1.
                 next_state = None
             else:
-                _reward = math.exp(-1. * (t+1) / avg_step )    
+                # 这里如果有消除整行的奖励就直接加上
+                _reward += math.exp(-1. * (t+1) / avg_step )    
                 next_state = agent.getBoard().to(device)
             
             reward = torch.tensor([_reward], device=device)
