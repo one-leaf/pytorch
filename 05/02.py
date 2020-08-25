@@ -128,7 +128,7 @@ class Net(nn.Module):
         return x
 
 BATCH_SIZE = 128
-GAMMA = 0.7
+GAMMA = 0.99
 EPS_START = 0.9
 EPS_END = 0.1
 EPS_DECAY = 100000.
