@@ -124,7 +124,7 @@ class Net(nn.Module):
         return x
 
 BATCH_SIZE = 512
-GAMMA = 0.9
+GAMMA = 0.7
 EPS_START = 0.9
 EPS_END = 0.1
 EPS_DECAY = 1000000.
@@ -138,7 +138,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 steps_done = 0
 # 200 是面板数据 10*20 ，512 是隐藏层大小
 net = Net(200, 512, n_actions).to(device)
-optimizer = optim.Adam(net.parameters(), lr=1e-4)
+optimizer = optim.Adam(net.parameters(), lr=1e-3)
 
 def select_action(state, norandom=False):
     global steps_done
