@@ -204,7 +204,7 @@ def train(agent):
             is_terminal, _reward = agent.step(action_value, need_draw)
 
             curr_board_height = agent.getBoardCurrHeight()
-            if t<15-curr_board_height: continue
+            if t<15-curr_board_height and not is_terminal: continue
             if curr_board_height > 4 + steps_done//1000000:
                 is_terminal = True
 
