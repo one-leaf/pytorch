@@ -1,3 +1,4 @@
+from numpy.lib.stride_tricks import broadcast_arrays
 from game import Tetromino, pieces, templatenum, blank, black
 import copy
 import pygame
@@ -97,7 +98,8 @@ class Agent(object):
                 for y in range(templatenum):
                     if shapedraw[y][x]!=blank:
                         board[x][y]=1
-        return torch.tensor(board, dtype=torch.float).view(1,-1)
+        board = torch.tensor(board, dtype=torch.float)
+        return board.view(1,-1)
 
 class Net(nn.Module):
     def __init__(self, input_size, hidden_size, output_size):
@@ -171,7 +173,7 @@ def train(agent):
     
     # 加载模型
     if os.path.exists(modle_file):
-        checkpoint = torch.load(modle_file)
+        checkpoint = torch.load(modle_file, map_location=device)
         net_sd = checkpoint['net']
         steps_done = checkpoint['steps_done']
         avg_step = checkpoint['avg_step']
