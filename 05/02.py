@@ -125,7 +125,7 @@ modle_file = 'data/save/05_02_checkpoint.tar'
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 steps_done = 0
 # 200 是面板数据 10*20 ，512 是隐藏层大小
-net = Net(200, 512, n_actions)
+net = Net(200, 512, n_actions).to(device)
 optimizer = optim.Adam(net.parameters(), lr=1e-5)
 
 def select_action(state):
@@ -136,7 +136,6 @@ def select_action(state):
         with torch.no_grad():
             # t.max(1)将返回每行的最大列值。 
             # 最大结果的第二列是找到最大元素的索引，因此我们选择具有较大预期奖励的行动。
-            print(state)
             return net(state).max(1)[1].view(1, 1)
     else:
         return torch.tensor([[random.randrange(n_actions)]], device=device, dtype=torch.long)
