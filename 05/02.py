@@ -34,7 +34,6 @@ class Agent(object):
         self.score = 0
         self.level = 0
         self.board = self.tetromino.getblankboard()
-        self.calc_reward = 0.0 
     
     def step(self, action, needdraw=True):
         # 状态 0 下落过程中 1 更换方块 2 结束一局
