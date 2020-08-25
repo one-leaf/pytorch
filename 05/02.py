@@ -131,7 +131,7 @@ BATCH_SIZE = 512
 GAMMA = 0.7
 EPS_START = 0.9
 EPS_END = 0.1
-EPS_DECAY = 1000000.
+EPS_DECAY = 100000.
 TARGET_UPDATE = 10
 Transition = namedtuple('Transition', ('state', 'action', 'next_state', 'reward'))
 
