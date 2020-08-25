@@ -136,6 +136,7 @@ def select_action(state):
         with torch.no_grad():
             # t.max(1)将返回每行的最大列值。 
             # 最大结果的第二列是找到最大元素的索引，因此我们选择具有较大预期奖励的行动。
+            print(state)
             return net(state).max(1)[1].view(1, 1)
     else:
         return torch.tensor([[random.randrange(n_actions)]], device=device, dtype=torch.long)
