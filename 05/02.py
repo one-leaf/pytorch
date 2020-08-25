@@ -37,6 +37,7 @@ class Agent(object):
     
     def step(self, action, needdraw=True):
         is_terminal = False
+        reward = 0
         self.level, self.fallfreq = self.tetromino.calculate(self.score)
 
         if action == KEY_LEFT and self.tetromino.validposition(self.board,self.fallpiece,ax = -1):
@@ -55,7 +56,8 @@ class Agent(object):
 
         if not self.tetromino.validposition(self.board,self.fallpiece,ay = 1):
             self.tetromino.addtoboard(self.board,self.fallpiece)
-            self.score += self.tetromino.removecompleteline(self.board)            
+            reward = self.tetromino.removecompleteline(self.board) 
+            self.score += reward          
             self.level, self.fallfreq = self.tetromino.calculate(self.score)   
 
             self.fallpiece = None
@@ -77,8 +79,8 @@ class Agent(object):
             if not self.tetromino.validposition(self.board,self.fallpiece):   
                 is_terminal = True       
                 self.reset()     
-                return is_terminal
-        return is_terminal
+                return is_terminal, reward
+        return is_terminal, reward
 
     def getBoard(self):
         board=[]
@@ -168,7 +170,7 @@ def train(agent):
     global GAMMA, steps_done
     num_episodes = 5000000
     avg_step = 100.
-    need_draw = False
+    need_draw = (device.type == "cpu")
     step_episode_update = 0.
     
     # 加载模型
@@ -191,13 +193,13 @@ def train(agent):
 
             action = select_action(state)
             action_value = action.item()
-            is_terminal = agent.step(action_value, need_draw)
+            is_terminal, _reward = agent.step(action_value, need_draw)
 
             if is_terminal:
                 _reward = -1.0
                 next_state = None
             else:
-                _reward = math.exp(-1. * t / avg_step)    
+                _reward += math.exp(-1. * t / avg_step)    
                 next_state = agent.getBoard().to(device)
             
             reward = torch.tensor([_reward], device=device)
