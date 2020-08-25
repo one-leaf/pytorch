@@ -210,7 +210,6 @@ def train(agent):
             agent_state, _reward = agent.step(action_value, need_draw)
             is_terminal = (agent_state == 2)
             if agent_state==1: 
-                avg_step = avg_step*0.99 + piece_step*0.01
                 piece_step = 0
 
             curr_board_height = agent.getBoardCurrHeight()
@@ -224,7 +223,7 @@ def train(agent):
                 _reward = -1.
                 next_state = None
             else:
-                _reward = 1.    
+                _reward = math.exp(-1. * (t+1) / avg_step )    
                 next_state = agent.getBoard().to(device)
             
             reward = torch.tensor([_reward], device=device)
@@ -240,6 +239,7 @@ def train(agent):
                 break
         
         step_episode_update += t
+        avg_step = avg_step*0.999 + t*0.001
         avg_loss = avg_loss / t
         if avg_loss>1: 
             GAMMA = GAMMA * 0.999
