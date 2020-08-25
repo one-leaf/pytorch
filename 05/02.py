@@ -130,7 +130,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 steps_done = 0
 # 200 是面板数据 10*20 ，512 是隐藏层大小
 net = Net(200, 512, n_actions).to(device)
-optimizer = optim.Adam(net.parameters(), lr=1e-5)
+optimizer = optim.Adam(net.parameters(), lr=1e-3)
 
 def select_action(state):
     global steps_done
@@ -236,7 +236,7 @@ def train(agent):
                         'steps_done': steps_done,
                         'avg_step': avg_step,
                         }, modle_file+"_%s"%steps_done)  
-                        
+
 if __name__ == "__main__":
     tetromino = Tetromino()
     agent = Agent(tetromino)
