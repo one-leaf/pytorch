@@ -137,7 +137,7 @@ TARGET_UPDATE = 10
 Transition = namedtuple('Transition', ('state', 'action', 'next_state', 'reward'))
 
 n_actions = 4 
-buffer = deque(maxlen=10000)
+buffer = deque(maxlen=1000000)
 modle_file = 'data/save/05_02_checkpoint.tar'
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 steps_done = 0
