@@ -1,10 +1,10 @@
+from time import time
 from numpy.lib.stride_tricks import broadcast_arrays
 from game import Tetromino, pieces, templatenum, blank, black
 import copy
 import pygame
 from pygame.locals import *
-import sys
-
+import sys, time
 
 import torch
 import torch.nn as nn
@@ -78,7 +78,6 @@ class Agent(object):
             self.nextpiece = self.tetromino.getnewpiece()
             if not self.tetromino.validposition(self.board,self.fallpiece):   
                 is_terminal = True       
-                self.reset()     
                 return is_terminal, reward
         return is_terminal, reward
 
@@ -102,6 +101,15 @@ class Agent(object):
                         board[x][y]=1
         board = torch.tensor(board, dtype=torch.float)
         return board.view(1,-1)
+
+    def getBoardCurrHeight(self):
+        height=len(self.board[0])
+        for line in self.board:
+            for h, value in enumerate(line): 
+                if value!=blank:
+                    if h<height:
+                        height = h
+        return height
 
 class Net(nn.Module):
     def __init__(self, input_size, hidden_size, output_size):
@@ -195,6 +203,9 @@ def train(agent):
             action_value = action.item()
             is_terminal, _reward = agent.step(action_value, need_draw)
 
+            if agent.getBoardCurrHeight()< 4 + steps_done//1000000:
+                is_terminal = True
+
             if is_terminal:
                 _reward = -1.0
                 next_state = None
@@ -211,6 +222,7 @@ def train(agent):
                 avg_loss += loss.item() 
 
             if is_terminal or t>=10000:
+                agent.reset()
                 break
         
         step_episode_update += t
