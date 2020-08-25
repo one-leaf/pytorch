@@ -197,7 +197,7 @@ def train(agent):
     for i_episode in range(num_episodes):
         avg_loss = 0.
         state = agent.getBoard().to(device)
-        piece_step = 0  # 方块步数
+        # piece_step = 0  # 方块步数
         for t in count():
             if need_draw:
                 for event in pygame.event.get():  # 需要事件循环，否则白屏
@@ -209,12 +209,14 @@ def train(agent):
             action_value = action.item()
             agent_state, _reward = agent.step(action_value, need_draw)
             is_terminal = (agent_state == 2)
-            if agent_state==1: 
-                piece_step = 0
+            # if agent_state==1: 
+            #     piece_step = 0
 
             curr_board_height = agent.getBoardCurrHeight()
-            piece_step += 1
-            if piece_step<15-curr_board_height and not is_terminal: continue
+
+            # # 有一半的几率不学习前几步，但这样会不会修改采样的分布？
+            # piece_step += 1
+            # if piece_step<15-curr_board_height and not is_terminal and random.random>0.5: continue
 
             if curr_board_height > 4 + steps_done//1000000:
                 is_terminal = True
