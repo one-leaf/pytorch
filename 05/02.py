@@ -1,3 +1,4 @@
+from os import stat
 from time import time
 from numpy.lib.stride_tricks import broadcast_arrays
 from game import Tetromino, pieces, templatenum, blank, black
@@ -36,7 +37,8 @@ class Agent(object):
         self.calc_reward = 0.0 
     
     def step(self, action, needdraw=True):
-        is_terminal = False
+        # 状态 0 下落过程中 1 更换方块 2 结束一局
+        state = 0
         reward = 0
         self.level, self.fallfreq = self.tetromino.calculate(self.score)
 
@@ -59,7 +61,6 @@ class Agent(object):
             reward = self.tetromino.removecompleteline(self.board) 
             self.score += reward          
             self.level, self.fallfreq = self.tetromino.calculate(self.score)   
-
             self.fallpiece = None
         else:
             self.fallpiece['y'] +=1
@@ -77,9 +78,13 @@ class Agent(object):
             self.fallpiece = self.nextpiece
             self.nextpiece = self.tetromino.getnewpiece()
             if not self.tetromino.validposition(self.board,self.fallpiece):   
-                is_terminal = True       
-                return is_terminal, reward
-        return is_terminal, reward
+                state = 2       
+                return state, reward
+            else: 
+                state =1
+        else:
+            state = 0
+        return state, reward
 
     def getBoard(self):
         board=[]
@@ -192,6 +197,7 @@ def train(agent):
     for i_episode in range(num_episodes):
         avg_loss = 0.
         state = agent.getBoard().to(device)
+        piece_step = 0  # 方块步数
         for t in count():
             if need_draw:
                 for event in pygame.event.get():  # 需要事件循环，否则白屏
@@ -201,18 +207,24 @@ def train(agent):
 
             action = select_action(state, need_draw)
             action_value = action.item()
-            is_terminal, _reward = agent.step(action_value, need_draw)
+            agent_state, _reward = agent.step(action_value, need_draw)
+            is_terminal = (agent_state == 2)
+            if agent_state==1: 
+                avg_step = avg_step*0.99 + piece_step*0.01
+                piece_step = 0
 
             curr_board_height = agent.getBoardCurrHeight()
-            if t<15-curr_board_height and not is_terminal: continue
+            piece_step += 1
+            if piece_step<15-curr_board_height and not is_terminal: continue
+
             if curr_board_height > 4 + steps_done//1000000:
                 is_terminal = True
 
             if is_terminal:
-                _reward = -1.0
+                _reward = -1.
                 next_state = None
             else:
-                _reward += math.exp(-1. * t / avg_step)    
+                _reward = 1.    
                 next_state = agent.getBoard().to(device)
             
             reward = torch.tensor([_reward], device=device)
@@ -235,7 +247,6 @@ def train(agent):
             GAMMA = min(GAMMA * 1.001, 0.999)  
 
         if i_episode % TARGET_UPDATE == 0:
-            avg_step = avg_step*0.99 + step_episode_update/TARGET_UPDATE*0.01 
             print(i_episode, steps_done, "%.2f/%.2f"%(step_episode_update/TARGET_UPDATE, avg_step), \
                 "loss:", avg_loss, \
                 "action_random: %.2f"%(EPS_END + (EPS_START - EPS_END) * math.exp(-1. * steps_done / EPS_DECAY)), \
