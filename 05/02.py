@@ -127,7 +127,7 @@ class Net(nn.Module):
         x = self.linear3(x)
         return x
 
-BATCH_SIZE = 512
+BATCH_SIZE = 128
 GAMMA = 0.7
 EPS_START = 0.9
 EPS_END = 0.1
@@ -136,7 +136,7 @@ TARGET_UPDATE = 10
 Transition = namedtuple('Transition', ('state', 'action', 'next_state', 'reward'))
 
 n_actions = 4 
-buffer = deque(maxlen=1000)
+buffer = deque(maxlen=10000)
 modle_file = 'data/save/05_02_checkpoint.tar'
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 steps_done = 0
