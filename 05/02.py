@@ -132,11 +132,11 @@ steps_done = 0
 net = Net(200, 512, n_actions).to(device)
 optimizer = optim.Adam(net.parameters(), lr=1e-4)
 
-def select_action(state):
+def select_action(state, norandom=False):
     global steps_done
     eps_threshold = EPS_END + (EPS_START - EPS_END) * math.exp(-1. * steps_done / EPS_DECAY)
     steps_done += 1
-    if random.random() > eps_threshold:
+    if norandom or random.random() > eps_threshold:
         with torch.no_grad():
             # t.max(1)将返回每行的最大列值。 
             # 最大结果的第二列是找到最大元素的索引，因此我们选择具有较大预期奖励的行动。
@@ -191,7 +191,7 @@ def train(agent):
                         pygame.quit()
                         sys.exit()  
 
-            action = select_action(state)
+            action = select_action(state, need_draw)
             action_value = action.item()
             is_terminal, _reward = agent.step(action_value, need_draw)
 
