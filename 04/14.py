@@ -189,7 +189,7 @@ steps_done = 0
 # 全随机大概平均一局步数
 avg_step = 20
 if os.path.exists(MODEL_File):
-    checkpoint = torch.load(MODEL_File)
+    checkpoint = torch.load(MODEL_File, map_location=device)
     policy_net_sd = checkpoint['policy_net']
     steps_done =  checkpoint['steps_done']
     avg_step = checkpoint['avg_step']
