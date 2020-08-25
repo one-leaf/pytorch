@@ -179,7 +179,7 @@ def train(agent):
             
     for i_episode in range(num_episodes):
         avg_loss = 0.
-        state = agent.getBoard()
+        state = agent.getBoard().to(device)
         for t in count():
             if need_draw:
                 for event in pygame.event.get():  # 需要事件循环，否则白屏
@@ -196,7 +196,7 @@ def train(agent):
                 next_state = None
             else:
                 _reward = math.exp(-1. * t / avg_step)    
-                next_state = agent.getBoard()
+                next_state = agent.getBoard().to(device)
             
             reward = torch.tensor([_reward], device=device)
             buffer.append(Transition(state, action, next_state, reward))
