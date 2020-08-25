@@ -203,7 +203,7 @@ def train(agent):
             action_value = action.item()
             is_terminal, _reward = agent.step(action_value, need_draw)
 
-            if agent.getBoardCurrHeight()< 4 + steps_done//1000000:
+            if agent.getBoardCurrHeight() < 20 - (4 + steps_done//1000000):
                 is_terminal = True
 
             if is_terminal:
