@@ -185,19 +185,15 @@ class Agent(object):
     
     def step(self, action):
         reward  = 0
-        moveleft = False
-        moveright = False
         is_terminal = False
         shape  = self.fallpiece['shape']
-        self.level = self.tetromino.calculate(self.score)
+        self.level, self.fallfreq = self.tetromino.calculate(self.score)
 
         if action == KEY_LEFT and self.tetromino.validposition(self.board,self.fallpiece,ax = -1):
             self.fallpiece['x']-=1
-            moveleft = True
 
         if action == KEY_RIGHT and self.tetromino.validposition(self.board,self.fallpiece,ax = 1):
             self.fallpiece['x']+=1  
-            moveright = True 
 
         if action == KEY_ROTATION:
             self.fallpiece['rotation'] =  (self.fallpiece['rotation'] + 1) % len(pieces[self.fallpiece['shape']])
@@ -208,7 +204,7 @@ class Agent(object):
             self.tetromino.addtoboard(self.board,self.fallpiece)
             reward = calcReward(self.tetromino, self.board, self.fallpiece)
             self.score += self.tetromino.removecompleteline(self.board)            
-            self.level = self.tetromino.calculate(self.score)   
+            self.level, self.fallfreq = self.tetromino.calculate(self.score)   
 
             self.fallpiece = None
         else:
@@ -216,7 +212,7 @@ class Agent(object):
 
         self.tetromino.disp.fill(black)
         self.tetromino.drawboard(self.board)
-        self.tetromino.drawstatus(self.score, str(self.level))
+        self.tetromino.drawstatus(self.score, self.level)
         self.tetromino.drawnextpiece(self.nextpiece)
         if self.fallpiece !=None:
             self.tetromino.drawpiece(self.fallpiece)

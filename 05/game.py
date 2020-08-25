@@ -302,7 +302,7 @@ class Tetromino(object):
     def getblankboard(self):
         board = []
         for x in range(boardwidth):
-                board.append([blank]*boardheight)
+            board.append([blank]*boardheight)
         return board
     
     def addtoboard(self,board,piece):
