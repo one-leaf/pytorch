@@ -165,7 +165,7 @@ def optimize_model():
 def train(agent):
     global GAMMA, steps_done
     num_episodes = 5000000
-    avg_step = 10.
+    avg_step = 100.
     need_draw = False
     step_episode_update = 0.
     
