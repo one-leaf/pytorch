@@ -138,7 +138,7 @@ class Net(nn.Module):
         x = self.fc2(x)
         return x
 
-BATCH_SIZE = 128
+BATCH_SIZE = 512
 GAMMA = 0.99
 EPS_START = 0.9
 EPS_END = 0.1
