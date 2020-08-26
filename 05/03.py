@@ -209,7 +209,7 @@ def train(agent):
         state[1] = state[2]
         state[2] = board
 
-        # piece_step = 0  # 方块步数
+        piece_step = 0  # 方块步数
         for t in count():
             if need_draw:
                 for event in pygame.event.get():  # 需要事件循环，否则白屏
