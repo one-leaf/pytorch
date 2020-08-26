@@ -291,7 +291,7 @@ def train(agent):
 
 def test(agent):
     # 加载模型
-    num_episodes = 5
+    num_episodes = 10
     checkpoint = torch.load(modle_file, map_location=device)
     net_sd = checkpoint['net']
     net.load_state_dict(net_sd)
@@ -319,6 +319,8 @@ def test(agent):
             if agent_state==2: 
                 agent.reset()
                 break
+
+            time.sleep(0.1)
 
 if __name__ == "__main__":
     tetromino = Tetromino()
