@@ -96,13 +96,16 @@ class Agent(object):
                 else:
                     board[-1].append(1)
         # 需要加上当前下落方块的值
-        if self.fallpiece == None:
+        if self.fallpiece != None:
             piece = self.fallpiece
             shapedraw = pieces[piece['shape']][piece['rotation']]
             for x in range(templatenum):
                 for y in range(templatenum):
                     if shapedraw[y][x]!=blank:
-                        board[x][y]=1
+                        px, py = x+piece['x'], y+piece['y']
+                        if px>=0 and py>=0:
+                            board[x+piece['x']][y+piece['y']]=1
+                            
         board = torch.tensor(board, dtype=torch.float)
         return board.view(1,-1)
 

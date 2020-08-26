@@ -17,6 +17,9 @@ from collections import deque
 from collections import namedtuple
 import os, math, random
 
+import torchvision.utils as vutils
+import numpy as np
+import matplotlib.pyplot as plt
 
 KEY_ROTATION  = 0
 KEY_LEFT      = 1
@@ -98,13 +101,16 @@ class Agent(object):
                 else:
                     board[-1].append(1)
         # 需要加上当前下落方块的值
-        if self.fallpiece == None:
+        if self.fallpiece != None:
             piece = self.fallpiece
             shapedraw = pieces[piece['shape']][piece['rotation']]
             for x in range(templatenum):
                 for y in range(templatenum):
                     if shapedraw[y][x]!=blank:
-                        board[x][y]=1
+                        px, py = x+piece['x'], y+piece['y']
+                        if px>=0 and py>=0:
+                            board[x+piece['x']][y+piece['y']]=1
+
         board = torch.tensor(board, dtype=torch.float)
         return board
 
@@ -209,10 +215,8 @@ def train(agent):
         state[0] = state[1]
         state[1] = state[2]
         state[2] = board
-
         piece_step = 0  # 方块步数
         for t in count():
-
             # 前10步都是随机乱走的
             piece_step += 1
             if piece_step<10-steps_done//1000000:
@@ -293,6 +297,7 @@ def test(agent):
     net.load_state_dict(net_sd)
     net.eval()
     for i_episode in range(num_episodes):
+        if i_episode >0 : break
         state = torch.zeros((3, 10, 20)).to(device)   
         for t in count():
             for event in pygame.event.get():  # 需要事件循环，否则白屏
@@ -305,6 +310,9 @@ def test(agent):
             state[1] = state[2]
             state[2] = board
 
+            # plt.imshow(np.transpose(state,(1,2,0)))
+            # plt.show()
+
             action = select_action(state.unsqueeze(0), True)
             action_value = action.item()
             agent_state, _reward = agent.step(action_value, True)
@@ -316,6 +324,7 @@ def test(agent):
 if __name__ == "__main__":
     tetromino = Tetromino()
     agent = Agent(tetromino)
+    # train(agent)
     if device.type == "cpu":
         test(agent)
     else:
