@@ -283,7 +283,7 @@ def train(agent):
                         'steps_done': steps_done,
                         'avg_step': avg_step,
                         }, modle_file)
-            if i_episode % 1000 == 0:
+            if i_episode>0 and i_episode % 1000 == 0:
                 torch.save({'net': net.state_dict(),
                         'steps_done': steps_done,
                         'avg_step': avg_step,

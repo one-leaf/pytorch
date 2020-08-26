@@ -105,7 +105,7 @@ class Agent(object):
                         px, py = x+piece['x'], y+piece['y']
                         if px>=0 and py>=0:
                             board[x+piece['x']][y+piece['y']]=1
-                            
+
         board = torch.tensor(board, dtype=torch.float)
         return board.view(1,-1)
 
@@ -261,7 +261,7 @@ def train(agent):
                         'steps_done': steps_done,
                         'avg_step': avg_step,
                         }, modle_file)
-            if i_episode % 1000 == 0:
+            if i_episode>0 and i_episode % 1000 == 0:
                 torch.save({'net': net.state_dict(),
                         'steps_done': steps_done,
                         'avg_step': avg_step,
