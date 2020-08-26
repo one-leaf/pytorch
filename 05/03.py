@@ -269,11 +269,12 @@ def train(agent):
             GAMMA = min(GAMMA * 1.001, 0.999)  
 
         if i_episode % TARGET_UPDATE == 0:
+            net_actions_count_value = net_actions_count.numpy()
             print(i_episode, steps_done, "%.2f/%.2f"%(step_episode_update/TARGET_UPDATE, avg_step), \
                 "loss:", avg_loss, \
                 "action_random: %.2f"%(EPS_END + (EPS_START - EPS_END) * math.exp(-1. * steps_done / EPS_DECAY)), \
                 "GAMMA:", GAMMA, \
-                "action net counts",net_actions_count )
+                "action_counts:",net_actions_count_value/sum(net_actions_count_value) )
             step_episode_update = 0.
             torch.save({'net': net.state_dict(),
                         'steps_done': steps_done,
