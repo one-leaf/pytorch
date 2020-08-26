@@ -239,7 +239,6 @@ def train(agent):
             if is_terminal:
                 _reward = -1.
                 next_state = None
-                  
             else:
                 # 这里如果有消除整行的奖励就直接加上
                 _reward += math.exp(-1. * (t+1) / avg_step )    
