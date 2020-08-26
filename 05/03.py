@@ -189,7 +189,7 @@ def train(agent):
     global GAMMA, steps_done
     num_episodes = 5000000
     avg_step = 100.
-    need_draw = False# (device.type == "cpu")
+    need_draw = (device.type == "cpu")
     step_episode_update = 0.
     
     # 加载模型
@@ -234,7 +234,7 @@ def train(agent):
                 piece_step = 0
 
             curr_board_height = agent.getBoardCurrHeight()
-            if curr_board_height > 5 + steps_done//1000000:
+            if curr_board_height > 2 + steps_done//1000000:
                 is_terminal = True
 
             if is_terminal:
