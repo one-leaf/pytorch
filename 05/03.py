@@ -54,6 +54,8 @@ class Agent(object):
             self.fallpiece['rotation'] =  (self.fallpiece['rotation'] + 1) % len(pieces[self.fallpiece['shape']])
             if not self.tetromino.validposition(self.board,self.fallpiece):
                 self.fallpiece['rotation'] = (self.fallpiece['rotation'] - 1) % len(pieces[self.fallpiece['shape']])
+            if self.tetromino.validposition(self.board,self.fallpiece,ay = 1):
+                self.fallpiece['y']+=1
 
         if not self.tetromino.validposition(self.board,self.fallpiece,ay = 1):
             self.tetromino.addtoboard(self.board,self.fallpiece)
