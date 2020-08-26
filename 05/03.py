@@ -219,7 +219,6 @@ def train(agent):
 
             action = select_action(state.unsqueeze(0), need_draw)
             action_value = action.item()
-            print(action_value, type(action_value))
             agent_state, _reward = agent.step(action_value, need_draw)
             is_terminal = (agent_state == 2)
            
