@@ -244,9 +244,9 @@ def train(agent):
                 # 这里如果有消除整行的奖励就直接加上
                 _reward += math.exp(-1. * (t+1) / avg_step )    
                 next_board = agent.getBoard().to(device)
-                next_state = state.clone().detach()
-                next_state[0] = next_state[1]
-                next_state[1] = next_state[2]
+                next_state = torch.zeros((3, 10, 20)).to(device) 
+                next_state[0] = state[1]
+                next_state[1] = state[2]
                 next_state[2] = next_board   
             
             reward = torch.tensor([_reward], device=device)
@@ -268,7 +268,7 @@ def train(agent):
         avg_loss = avg_loss / t
         if avg_loss>1: 
             GAMMA = GAMMA * 0.999
-        elif avg_loss<0.01:
+        elif avg_loss<0.1:
             GAMMA = min(GAMMA * 1.001, 0.999)  
 
         if i_episode % TARGET_UPDATE == 0:
