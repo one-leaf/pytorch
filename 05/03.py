@@ -291,13 +291,12 @@ def train(agent):
 
 def test(agent):
     # 加载模型
-    num_episodes = 5000000
+    num_episodes = 5
     checkpoint = torch.load(modle_file, map_location=device)
     net_sd = checkpoint['net']
     net.load_state_dict(net_sd)
     net.eval()
     for i_episode in range(num_episodes):
-        if i_episode >0 : break
         state = torch.zeros((3, 10, 20)).to(device)   
         for t in count():
             for event in pygame.event.get():  # 需要事件循环，否则白屏
