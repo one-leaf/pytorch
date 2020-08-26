@@ -147,6 +147,8 @@ steps_done = 0
 net = Net(512, n_actions).to(device)
 optimizer = optim.Adam(net.parameters(), lr=1e-3)
 
+net_actions_count=torch.tensor([0,0,0,0], device=device, dtype=torch.long)
+
 def select_action(state, norandom=False):
     global steps_done
     eps_threshold = EPS_END + (EPS_START - EPS_END) * math.exp(-1. * steps_done / EPS_DECAY)
@@ -155,7 +157,9 @@ def select_action(state, norandom=False):
         with torch.no_grad():
             # t.max(1)将返回每行的最大列值。 
             # 最大结果的第二列是找到最大元素的索引，因此我们选择具有较大预期奖励的行动。
-            return net(state).max(1)[1].view(1, 1)
+            action = net(state).max(1)[1].view(1, 1)
+            net_actions_count[action]+=1
+            return action
     else:
         return torch.tensor([[random.randrange(n_actions)]], device=device, dtype=torch.long)
 
@@ -268,7 +272,8 @@ def train(agent):
             print(i_episode, steps_done, "%.2f/%.2f"%(step_episode_update/TARGET_UPDATE, avg_step), \
                 "loss:", avg_loss, \
                 "action_random: %.2f"%(EPS_END + (EPS_START - EPS_END) * math.exp(-1. * steps_done / EPS_DECAY)), \
-                "GAMMA:", GAMMA )
+                "GAMMA:", GAMMA, \
+                "action net counts",net_actions_count )
             step_episode_update = 0.
             torch.save({'net': net.state_dict(),
                         'steps_done': steps_done,
