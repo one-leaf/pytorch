@@ -219,15 +219,17 @@ def train(agent):
 
             # 前10步都是直接往下的
             piece_step += 1
-            if piece_step<10-steps_done//1000000:
-                action = torch.tensor([[random.randrange(3)]], device=device, dtype=torch.long)
+            if piece_step<6-steps_done//1000000:
+                action = torch.tensor([[3]], device=device, dtype=torch.long)
             else:
                 action = select_action(state.unsqueeze(0), need_draw)
 
             action_value = action.item()
             agent_state, _reward = agent.step(action_value, need_draw)
             is_terminal = (agent_state == 2)
-           
+
+            time.sleep(1)
+
             # 如果是一个新方块落下，设置当前方块的步数为0
             if agent_state==1: 
                 piece_step = 0
