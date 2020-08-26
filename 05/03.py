@@ -217,7 +217,13 @@ def train(agent):
                         pygame.quit()
                         sys.exit()  
 
-            action = select_action(state.unsqueeze(0), need_draw)
+            # 前10步都是直接往下的
+            piece_step += 1
+            if piece_step<10-steps_done//1000000:
+                action = torch.tensor([[random.randrange(3)]], device=device, dtype=torch.long)
+            else:
+                action = select_action(state.unsqueeze(0), need_draw)
+
             action_value = action.item()
             agent_state, _reward = agent.step(action_value, need_draw)
             is_terminal = (agent_state == 2)
@@ -227,11 +233,6 @@ def train(agent):
                 piece_step = 0
 
             curr_board_height = agent.getBoardCurrHeight()
-
-            # 最初的下落前10步不学习，但这样会不会修改采样的分布？
-            piece_step += 1
-            if piece_step<15-curr_board_height and not is_terminal: continue
-
             if curr_board_height > 5 + steps_done//1000000:
                 is_terminal = True
 
