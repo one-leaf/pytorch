@@ -232,7 +232,7 @@ def train(agent):
             piece_step += 1
             if piece_step<15-curr_board_height and not is_terminal: continue
 
-            if curr_board_height > 4 + steps_done//1000000:
+            if curr_board_height > 5 + steps_done//1000000:
                 is_terminal = True
 
             if is_terminal:
