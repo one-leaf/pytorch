@@ -221,7 +221,7 @@ def train(agent):
             piece_step += 1
             if piece_step<10-steps_done//1000000 and not need_draw:
                 # action = torch.tensor([[3]], device=device, dtype=torch.long)
-                torch.tensor([[random.randrange(3)]], device=device, dtype=torch.long)
+                action = torch.tensor([[random.randrange(3)]], device=device, dtype=torch.long)
             else:
                 action = select_action(state.unsqueeze(0), need_draw)
 
