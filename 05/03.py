@@ -153,7 +153,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 steps_done = 0
 # 200 是面板数据 10*20 ，512 是隐藏层大小
 net = Net(512, n_actions).to(device)
-optimizer = optim.Adam(net.parameters(), lr=1e-3)
+optimizer = optim.Adam(net.parameters(), lr=1e-6)
 
 net_actions_count=torch.tensor([0,0,0,0], device=device, dtype=torch.long)
 

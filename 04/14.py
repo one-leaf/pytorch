@@ -285,7 +285,7 @@ def optimize_model():
     return loss
 
 # 将学习率调到很小 RMSprop 貌似学不出来
-optimizer = optim.Adam(policy_net.parameters(),lr=1e-5)
+optimizer = optim.Adam(policy_net.parameters(),lr=1e-6)
 # optimizer = optim.RMSprop(policy_net.parameters(),lr=1e-5)
 
 num_episodes = 5000000
@@ -357,8 +357,6 @@ for i_episode in range(num_episodes):
         GAMMA = GAMMA * 0.999
     elif avg_loss<0.01:
         GAMMA = min(GAMMA * 1.001, 0.999)  
-
-    # GAMMA =  math.exp(-2. * avg_loss) + 0.7
 
     # 更新目标网络，复制DQN中的所有权重和偏差
     if i_episode % TARGET_UPDATE == 0 and loss!=None :
