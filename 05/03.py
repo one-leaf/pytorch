@@ -219,16 +219,19 @@ def train(agent):
 
             action = select_action(state.unsqueeze(0), need_draw)
             action_value = action.item()
+            print(action_value, type(action_value))
             agent_state, _reward = agent.step(action_value, need_draw)
             is_terminal = (agent_state == 2)
-            # if agent_state==1: 
-            #     piece_step = 0
+           
+            # 如果是一个新方块落下，设置当前方块的步数为0
+            if agent_state==1: 
+                piece_step = 0
 
             curr_board_height = agent.getBoardCurrHeight()
 
-            # # 有一半的几率不学习前几步，但这样会不会修改采样的分布？
-            # piece_step += 1
-            # if piece_step<15-curr_board_height and not is_terminal and random.random>0.5: continue
+            # 最初的下落前10步不学习，但这样会不会修改采样的分布？
+            piece_step += 1
+            if piece_step<15-curr_board_height and not is_terminal: continue
 
             if curr_board_height > 4 + steps_done//1000000:
                 is_terminal = True
