@@ -185,7 +185,7 @@ def train(agent):
     global GAMMA, steps_done
     num_episodes = 5000000
     avg_step = 100.
-    need_draw = (device.type == "cpu")
+    need_draw = False# (device.type == "cpu")
     step_episode_update = 0.
     
     # 加载模型
