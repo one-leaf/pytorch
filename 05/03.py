@@ -35,7 +35,7 @@ class Agent(object):
         self.level = 0
         self.board = self.tetromino.getblankboard()
     
-    def step(self, action, needdraw=True):
+    def step(self, action, need_draw=True):
         # 状态 0 下落过程中 1 更换方块 2 结束一局
         state = 0
         reward = 0
@@ -64,7 +64,7 @@ class Agent(object):
         else:
             self.fallpiece['y'] +=1
 
-        if needdraw:
+        if need_draw:
             self.tetromino.disp.fill(black)
             self.tetromino.drawboard(self.board)
             self.tetromino.drawstatus(self.score, self.level)
@@ -189,7 +189,6 @@ def train(agent):
     global GAMMA, steps_done
     num_episodes = 5000000
     avg_step = 100.
-    need_draw = (device.type == "cpu")
     step_episode_update = 0.
     
     # 加载模型
@@ -211,22 +210,17 @@ def train(agent):
 
         piece_step = 0  # 方块步数
         for t in count():
-            if need_draw:
-                for event in pygame.event.get():  # 需要事件循环，否则白屏
-                    if event.type == QUIT:
-                        pygame.quit()
-                        sys.exit()  
 
             # 前10步都是随机乱走的
             piece_step += 1
-            if piece_step<10-steps_done//1000000 and not need_draw:
+            if piece_step<10-steps_done//1000000:
                 # action = torch.tensor([[3]], device=device, dtype=torch.long)
                 action = torch.tensor([[random.randrange(3)]], device=device, dtype=torch.long)
             else:
-                action = select_action(state.unsqueeze(0), need_draw)
+                action = select_action(state.unsqueeze(0), False)
 
             action_value = action.item()
-            agent_state, _reward = agent.step(action_value, need_draw)
+            agent_state, _reward = agent.step(action_value, False)
             is_terminal = (agent_state == 2)
 
             # 如果是一个新方块落下，设置当前方块的步数为0
@@ -289,7 +283,38 @@ def train(agent):
                         'avg_step': avg_step,
                         }, modle_file+"_%s"%steps_done)  
 
+def test(agent):
+    # 加载模型
+    num_episodes = 5000000
+    checkpoint = torch.load(modle_file, map_location=device)
+    net_sd = checkpoint['net']
+    net.load_state_dict(net_sd)
+    net.eval()
+    for i_episode in range(num_episodes):
+        state = torch.zeros((3, 10, 20)).to(device)   
+        for t in count():
+            for event in pygame.event.get():  # 需要事件循环，否则白屏
+                if event.type == QUIT:
+                    pygame.quit()
+                    sys.exit()    
+
+            board = agent.getBoard().to(device)
+            state[0] = state[1]
+            state[1] = state[2]
+            state[2] = board
+
+            action = select_action(state.unsqueeze(0), True)
+            action_value = action.item()
+            agent_state, _reward = agent.step(action_value, True)
+
+            if agent_state==2: 
+                agent.reset()
+                break
+
 if __name__ == "__main__":
     tetromino = Tetromino()
     agent = Agent(tetromino)
-    train(agent)
+    if device.type == "cpu":
+        test(agent)
+    else:
+        train(agent)
