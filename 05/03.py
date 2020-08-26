@@ -219,7 +219,7 @@ def train(agent):
 
             # 前10步都是随机乱走的
             piece_step += 1
-            if piece_step<6-steps_done//1000000 and not need_draw:
+            if piece_step<10-steps_done//1000000 and not need_draw:
                 # action = torch.tensor([[3]], device=device, dtype=torch.long)
                 torch.tensor([[random.randrange(3)]], device=device, dtype=torch.long)
             else:
