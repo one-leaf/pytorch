@@ -590,8 +590,8 @@ def trainIters(model_name, voc, pairs, encoder, decoder, encoder_optimizer, deco
     print('Initializing ...')
     start_iteration = 1
     print_loss = 0
-    # if loadFilename:
-    #     start_iteration = checkpoint['iteration'] + 1
+    if loadFilename:
+        start_iteration = checkpoint['iteration'] + 1
 
     # 循环训练
     print("Training...")
