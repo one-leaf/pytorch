@@ -237,9 +237,14 @@ def train(agent):
             if curr_board_height > 2 + steps_done//1000000:
                 is_terminal = True
 
-            if is_terminal or agent_state==1:
+            if is_terminal :
                 _reward = -1.
                 next_state = None
+            elif agent_state==1:
+                if _reward==0:
+                    _reward = -1.
+                else:
+                    _reward += 1.
             else:
                 # 这里如果有消除整行的奖励就直接加上
                 _reward += 1. #;math.exp(-1. * (t+1) / avg_step )    
