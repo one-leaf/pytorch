@@ -1,10 +1,7 @@
 import gym
 import random
 from gym.envs.classic_control import rendering
-
 import time
-
-from pyglet import gl
  
 class FiveChessEnv(gym.Env):
     metadata = {
