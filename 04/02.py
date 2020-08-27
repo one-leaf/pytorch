@@ -720,7 +720,7 @@ loadFilename = os.path.join(save_dir, model_name, corpus_name,
                            'checkpoint.tar')
 
 # 加载模型
-if loadFilename:
+if os.path.exists(loadFilename):
     # If loading on same machine the model was trained on
     checkpoint = torch.load(loadFilename, map_location=device)
     # If loading a model trained on GPU to CPU
