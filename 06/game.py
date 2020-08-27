@@ -3,8 +3,10 @@ import random
 from gym.envs.classic_control import rendering
 
 import time
+
+from pyglet import gl
  
-class FiveChess(gym.Env):
+class FiveChessEnv(gym.Env):
     metadata = {
         'render.modes': ['human', 'rgb_array'],
         'video.frames_per_second': 2
@@ -101,7 +103,6 @@ class FiveChess(gym.Env):
             bg = rendering.FilledPolygon([(0,0),(screen_width,0),(screen_width,screen_height),(0,screen_height),(0,0)])
             bg.set_color(0.2,0.2,0.2)
             self.viewer.add_geom(bg)
-            
             #棋盘网格
             for i in range(self.SIZE):
                 line = rendering.Line((space,space+i*width),(screen_width-space,space+i*width))
@@ -134,26 +135,64 @@ class FiveChess(gym.Env):
                         self.chess[x][y][0].set_color(0,0,0)
                 else:
                     self.chess[x][y][1].set_translation(-10,-10)
- 
+
         return self.viewer.render(return_rgb_array=mode == 'rgb_array')
 
+    def point_to_action(self, point):
+        x, y = point
+        x = x - 50
+        y = y - 50
+        ax = ay = 0
+        w = 700./(self.SIZE-1)
+        for i in range(0, self.SIZE):
+            if x > (i-0.5) * w  and x < (i+0.5)*w:
+                ax = i 
+                break
+        for i in range(0, self.SIZE):
+            if y > (i-0.5) * w and y < (i+0.5)*w:
+                ay = i 
+                break
+        return (ax, ay)
+
+user_point = None
+def on_mouse_press(x, y, button, modifiers):
+    global user_point
+    user_point = (x, y)
+
 if __name__ == "__main__":
-    env = FiveChess(size=10,n_in_row=3)
+    env = FiveChessEnv(size=15, n_in_row=5)
     while True:
         env.reset()
+        env.render()
+        env.viewer.window.on_mouse_press = on_mouse_press
         done = False
+
+        is_human = True        
         while not done:
-            available_locations = env.get_available_locations()
+            if is_human:
+                while True:
+                    if user_point!=None:
+                        action = env.point_to_action(user_point)
+                        if env.is_valid_set_coord(*action):
+                            user_point = None
+                            break
+                    env.render()
+                    time.sleep(0.1)
+                _, reward, done, info = env.step(action)
+                env.render(mode="human",close=False)
+            else:
+                available_locations = env.get_available_locations()
+                action = random.choice(available_locations)
+                _, reward, done, info = env.step(action)
+                env.render(mode="human",close=False)
             
-            action = random.choice(available_locations)
-
-            _, reward, done, info = env.step(action)
-            env.render(True)
-
+            is_human = not is_human
+            
             if done:
                 curr_user = env.get_current_player()
                 step_count = env.step_count
                 print(f'win_user: {info["user"]}, curr_user: {curr_user} reward: {reward} step_count: {step_count}')
-                time.sleep(5)
+                for i in range(50):
+                    time.sleep(0.1)
                 break
 
