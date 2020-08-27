@@ -312,7 +312,7 @@ for i_episode in range(num_episodes):
             _reward = -1.0
         else:
             # 前面的动作对后续的影响更大，所以前面的奖励变大
-            _reward = math.exp(-1. * t / avg_step)            
+            _reward = 1# math.exp(-1. * t / avg_step)            
 
         # 这种奖励就明显的引入了规则，看作作弊了
         # x, x_dot, theta, theta_dot = observation_   
