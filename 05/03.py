@@ -232,7 +232,7 @@ def train(agent):
             # 如果是一个新方块落下，设置当前方块的步数为0
             if agent_state==1: 
                 piece_step = 0
-
+                               
             curr_board_height = agent.getBoardCurrHeight()
             if curr_board_height > 2 + steps_done//1000000:
                 is_terminal = True
@@ -327,7 +327,7 @@ def test(agent):
 if __name__ == "__main__":
     tetromino = Tetromino()
     agent = Agent(tetromino)
-    # train(agent)
+    train(agent)
     if device.type == "cpu":
         test(agent)
     else:
