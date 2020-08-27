@@ -156,7 +156,7 @@ env.reset()
 BATCH_SIZE = 256
 # 得分的权重，这个值越小，越容易快速将得分压制到【0 ~ 1】之间，但同时最长远步骤的影响力也就越小，不能压制的太小
 # 得分压制的太小会导致 Loss 过小，MSE的梯度会变得很小，不容易学习
-GAMMA = 0.99
+GAMMA = 0.5
 
 EPS_START = 0.9
 EPS_END = 0.1
@@ -353,10 +353,10 @@ for i_episode in range(num_episodes):
  
     # 根据 loss 动态调整GAMMA，加快数据收敛
     avg_loss = avg_loss / t
-    if avg_loss>1: 
-        GAMMA = GAMMA * 0.999
-    elif avg_loss<0.01:
-        GAMMA = min(GAMMA * 1.001, 0.999)  
+    # if avg_loss>1: 
+    #     GAMMA = GAMMA * 0.999
+    # elif avg_loss<0.01:
+    #     GAMMA = min(GAMMA * 1.001, 0.999)  
 
     # 更新目标网络，复制DQN中的所有权重和偏差
     if i_episode % TARGET_UPDATE == 0 and loss!=None :
