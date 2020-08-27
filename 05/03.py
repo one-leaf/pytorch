@@ -265,7 +265,6 @@ def train(agent):
                 agent.reset()
                 break
 
-
         step_episode_update += t
         avg_step = avg_step*0.999 + t*0.001
         avg_loss = avg_loss / t
