@@ -1,96 +1,5 @@
 # -*- coding: utf-8 -*-
 
-"""
-Chatbot Tutorial
-================
-**Author:** `Matthew Inkawhich <https://github.com/MatthewInkawhich>`_
-"""
-
-
-######################################################################
-# In this tutorial, we explore a fun and interesting use-case of recurrent
-# sequence-to-sequence models. We will train a simple chatbot using movie
-# scripts from the `Cornell Movie-Dialogs
-# Corpus <https://www.cs.cornell.edu/~cristian/Cornell_Movie-Dialogs_Corpus.html>`__.
-#
-# Conversational models are a hot topic in artificial intelligence
-# research. Chatbots can be found in a variety of settings, including
-# customer service applications and online helpdesks. These bots are often
-# powered by retrieval-based models, which output predefined responses to
-# questions of certain forms. In a highly restricted domain like a
-# company’s IT helpdesk, these models may be sufficient, however, they are
-# not robust enough for more general use-cases. Teaching a machine to
-# carry out a meaningful conversation with a human in multiple domains is
-# a research question that is far from solved. Recently, the deep learning
-# boom has allowed for powerful generative models like Google’s `Neural
-# Conversational Model <https://arxiv.org/abs/1506.05869>`__, which marks
-# a large step towards multi-domain generative conversational models. In
-# this tutorial, we will implement this kind of model in PyTorch.
-#
-# .. figure:: /_static/img/chatbot/bot.png
-#    :align: center
-#    :alt: bot
-#
-# .. code:: python
-#
-#   > hello?
-#   Bot: hello .
-#   > where am I?
-#   Bot: you re in a hospital .
-#   > who are you?
-#   Bot: i m a lawyer .
-#   > how are you doing?
-#   Bot: i m fine .
-#   > are you my friend?
-#   Bot: no .
-#   > you're under arrest
-#   Bot: i m trying to help you !
-#   > i'm just kidding
-#   Bot: i m sorry .
-#   > where are you from?
-#   Bot: san francisco .
-#   > it's time for me to leave
-#   Bot: i know .
-#   > goodbye
-#   Bot: goodbye .
-#
-# **Tutorial Highlights**
-#
-# -  Handle loading and preprocessing of `Cornell Movie-Dialogs
-#    Corpus <https://www.cs.cornell.edu/~cristian/Cornell_Movie-Dialogs_Corpus.html>`__
-#    dataset
-# -  Implement a sequence-to-sequence model with `Luong attention
-#    mechanism(s) <https://arxiv.org/abs/1508.04025>`__
-# -  Jointly train encoder and decoder models using mini-batches
-# -  Implement greedy-search decoding module
-# -  Interact with trained chatbot
-#
-# **Acknowledgements**
-#
-# This tutorial borrows code from the following sources:
-#
-# 1) Yuan-Kuei Wu’s pytorch-chatbot implementation:
-#    https://github.com/ywk991112/pytorch-chatbot
-#
-# 2) Sean Robertson’s practical-pytorch seq2seq-translation example:
-#    https://github.com/spro/practical-pytorch/tree/master/seq2seq-translation
-#
-# 3) FloydHub’s Cornell Movie Corpus preprocessing code:
-#    https://github.com/floydhub/textutil-preprocess-cornell-movie-corpus
-#
-
-
-######################################################################
-# Preparations
-# ------------
-#
-# To start, Download the data ZIP file
-# `here <https://www.cs.cornell.edu/~cristian/Cornell_Movie-Dialogs_Corpus.html>`__
-# and put in a ``data/`` directory under the current directory.
-#
-# After that, let’s import some necessities.
-#
-
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -115,31 +24,6 @@ import math
 USE_CUDA = torch.cuda.is_available()
 device = torch.device("cuda" if USE_CUDA else "cpu")
 
-
-######################################################################
-# Load & Preprocess Data
-# ----------------------
-#
-# The next step is to reformat our data file and load the data into
-# structures that we can work with.
-#
-# The `Cornell Movie-Dialogs
-# Corpus <https://www.cs.cornell.edu/~cristian/Cornell_Movie-Dialogs_Corpus.html>`__
-# is a rich dataset of movie character dialog:
-#
-# -  220,579 conversational exchanges between 10,292 pairs of movie
-#    characters
-# -  9,035 characters from 617 movies
-# -  304,713 total utterances
-#
-# This dataset is large and diverse, and there is a great variation of
-# language formality, time periods, sentiment, etc. Our hope is that this
-# diversity makes our model robust to many forms of inputs and queries.
-#
-# First, we’ll take a look at some lines of our datafile to see the
-# original format.
-#
-
 corpus_name = "cornell movie-dialogs corpus"
 corpus = os.path.join("data", corpus_name)
 
@@ -150,25 +34,6 @@ def printLines(file, n=10):
         print(line)
 
 printLines(os.path.join(corpus, "movie_lines.txt"))
-
-
-######################################################################
-# Create formatted data file
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~
-#
-# For convenience, we'll create a nicely formatted data file in which each line
-# contains a tab-separated *query sentence* and a *response sentence* pair.
-#
-# The following functions facilitate the parsing of the raw
-# *movie_lines.txt* data file.
-#
-# -  ``loadLines`` splits each line of the file into a dictionary of
-#    fields (lineID, characterID, movieID, character, text)
-# -  ``loadConversations`` groups fields of lines from ``loadLines`` into
-#    conversations based on *movie_conversations.txt*
-# -  ``extractSentencePairs`` extracts pairs of sentences from
-#    conversations
-#
 
 # 从文件中读取句子进行分割，并按给定的fields转为Dict
 def loadLines(fileName, fields):
@@ -250,27 +115,6 @@ with open(datafile, 'w', encoding='utf-8') as outputfile:
 print("\nSample lines from file:")
 printLines(datafile)
 
-
-######################################################################
-# Load and trim data
-# ~~~~~~~~~~~~~~~~~~
-#
-# Our next order of business is to create a vocabulary and load
-# query/response sentence pairs into memory.
-#
-# Note that we are dealing with sequences of **words**, which do not have
-# an implicit mapping to a discrete numerical space. Thus, we must create
-# one by mapping each unique word that we encounter in our dataset to an
-# index value.
-#
-# For this we define a ``Voc`` class, which keeps a mapping from words to
-# indexes, a reverse mapping of indexes to words, a count of each word and
-# a total word count. The class provides methods for adding a word to the
-# vocabulary (``addWord``), adding all words in a sentence
-# (``addSentence``) and trimming infrequently seen words (``trim``). More
-# on trimming later.
-#
-
 # 定义词语控制符，包括补0，句子开始和句子结束
 PAD_token = 0  # Used for padding short sentences
 SOS_token = 1  # Start-of-sentence token
@@ -324,20 +168,6 @@ class Voc:
 
         for word in keep_words:
             self.addWord(word)
-
-
-######################################################################
-# Now we can assemble our vocabulary and query/response sentence pairs.
-# Before we are ready to use this data, we must perform some
-# preprocessing.
-#
-# First, we must convert the Unicode strings to ASCII using
-# ``unicodeToAscii``. Next, we should convert all letters to lowercase and
-# trim all non-letter characters except for basic punctuation
-# (``normalizeString``). Finally, to aid in training convergence, we will
-# filter out sentences with length greater than the ``MAX_LENGTH``
-# threshold (``filterPairs``).
-#
 
 MAX_LENGTH = 10  # 句子的最大长度
 
@@ -400,20 +230,6 @@ print("\npairs:")
 for pair in pairs[:10]:
     print(pair)
 
-
-######################################################################
-# Another tactic that is beneficial to achieving faster convergence during
-# training is trimming rarely used words out of our vocabulary. Decreasing
-# the feature space will also soften the difficulty of the function that
-# the model must learn to approximate. We will do this as a two-step
-# process:
-#
-# 1) Trim words used under ``MIN_COUNT`` threshold using the ``voc.trim``
-#    function.
-#
-# 2) Filter out pairs with trimmed words.
-#
-
 # 最少3次被引用
 MIN_COUNT = 3    # Minimum word count threshold for trimming
 
@@ -449,60 +265,6 @@ def trimRareWords(voc, pairs, MIN_COUNT):
 
 # 删除少量词汇并删除涉及到这些少量词汇的句子
 pairs = trimRareWords(voc, pairs, MIN_COUNT)
-
-
-######################################################################
-# Prepare Data for Models
-# -----------------------
-#
-# Although we have put a great deal of effort into preparing and massaging our
-# data into a nice vocabulary object and list of sentence pairs, our models
-# will ultimately expect numerical torch tensors as inputs. One way to
-# prepare the processed data for the models can be found in the `seq2seq
-# translation
-# tutorial <https://pytorch.org/tutorials/intermediate/seq2seq_translation_tutorial.html>`__.
-# In that tutorial, we use a batch size of 1, meaning that all we have to
-# do is convert the words in our sentence pairs to their corresponding
-# indexes from the vocabulary and feed this to the models.
-#
-# However, if you’re interested in speeding up training and/or would like
-# to leverage GPU parallelization capabilities, you will need to train
-# with mini-batches.
-#
-# Using mini-batches also means that we must be mindful of the variation
-# of sentence length in our batches. To accomodate sentences of different
-# sizes in the same batch, we will make our batched input tensor of shape
-# *(max_length, batch_size)*, where sentences shorter than the
-# *max_length* are zero padded after an *EOS_token*.
-#
-# If we simply convert our English sentences to tensors by converting
-# words to their indexes(\ ``indexesFromSentence``) and zero-pad, our
-# tensor would have shape *(batch_size, max_length)* and indexing the
-# first dimension would return a full sequence across all time-steps.
-# However, we need to be able to index our batch along time, and across
-# all sequences in the batch. Therefore, we transpose our input batch
-# shape to *(max_length, batch_size)*, so that indexing across the first
-# dimension returns a time step across all sentences in the batch. We
-# handle this transpose implicitly in the ``zeroPadding`` function.
-#
-# .. figure:: /_static/img/chatbot/seq2seq_batches.png
-#    :align: center
-#    :alt: batches
-#
-# The ``inputVar`` function handles the process of converting sentences to
-# tensor, ultimately creating a correctly shaped zero-padded tensor. It
-# also returns a tensor of ``lengths`` for each of the sequences in the
-# batch which will be passed to our decoder later.
-#
-# The ``outputVar`` function performs a similar function to ``inputVar``,
-# but instead of returning a ``lengths`` tensor, it returns a binary mask
-# tensor and a maximum target sentence length. The binary mask tensor has
-# the same shape as the output target tensor, but every element that is a
-# *PAD_token* is 0 and all others are 1.
-#
-# ``batch2TrainData`` simply takes a bunch of pairs and returns the input
-# and target tensors using the aforementioned functions.
-#
 
 # 句子转ID
 def indexesFromSentence(voc, sentence):
@@ -576,106 +338,6 @@ print("target_variable:", target_variable)
 print("mask:", mask)
 print("max_target_len:", max_target_len)
 
-
-######################################################################
-# Define Models
-# -------------
-#
-# Seq2Seq Model
-# ~~~~~~~~~~~~~
-#
-# The brains of our chatbot is a sequence-to-sequence (seq2seq) model. The
-# goal of a seq2seq model is to take a variable-length sequence as an
-# input, and return a variable-length sequence as an output using a
-# fixed-sized model.
-#
-# `Sutskever et al. <https://arxiv.org/abs/1409.3215>`__ discovered that
-# by using two separate recurrent neural nets together, we can accomplish
-# this task. One RNN acts as an **encoder**, which encodes a variable
-# length input sequence to a fixed-length context vector. In theory, this
-# context vector (the final hidden layer of the RNN) will contain semantic
-# information about the query sentence that is input to the bot. The
-# second RNN is a **decoder**, which takes an input word and the context
-# vector, and returns a guess for the next word in the sequence and a
-# hidden state to use in the next iteration.
-#
-# .. figure:: /_static/img/chatbot/seq2seq_ts.png
-#    :align: center
-#    :alt: model
-#
-# Image source:
-# https://jeddy92.github.io/JEddy92.github.io/ts_seq2seq_intro/
-#
-
-
-######################################################################
-# Encoder
-# ~~~~~~~
-#
-# The encoder RNN iterates through the input sentence one token
-# (e.g. word) at a time, at each time step outputting an “output” vector
-# and a “hidden state” vector. The hidden state vector is then passed to
-# the next time step, while the output vector is recorded. The encoder
-# transforms the context it saw at each point in the sequence into a set
-# of points in a high-dimensional space, which the decoder will use to
-# generate a meaningful output for the given task.
-#
-# At the heart of our encoder is a multi-layered Gated Recurrent Unit,
-# invented by `Cho et al. <https://arxiv.org/pdf/1406.1078v3.pdf>`__ in
-# 2014. We will use a bidirectional variant of the GRU, meaning that there
-# are essentially two independent RNNs: one that is fed the input sequence
-# in normal sequential order, and one that is fed the input sequence in
-# reverse order. The outputs of each network are summed at each time step.
-# Using a bidirectional GRU will give us the advantage of encoding both
-# past and future context.
-#
-# Bidirectional RNN:
-#
-# .. figure:: /_static/img/chatbot/RNN-bidirectional.png
-#    :width: 70%
-#    :align: center
-#    :alt: rnn_bidir
-#
-# Image source: https://colah.github.io/posts/2015-09-NN-Types-FP/
-#
-# Note that an ``embedding`` layer is used to encode our word indices in
-# an arbitrarily sized feature space. For our models, this layer will map
-# each word to a feature space of size *hidden_size*. When trained, these
-# values should encode semantic similarity between similar meaning words.
-#
-# Finally, if passing a padded batch of sequences to an RNN module, we
-# must pack and unpack padding around the RNN pass using
-# ``nn.utils.rnn.pack_padded_sequence`` and
-# ``nn.utils.rnn.pad_packed_sequence`` respectively.
-#
-# **Computation Graph:**
-#
-#    1) Convert word indexes to embeddings.
-#    2) Pack padded batch of sequences for RNN module.
-#    3) Forward pass through GRU.
-#    4) Unpack padding.
-#    5) Sum bidirectional GRU outputs.
-#    6) Return output and final hidden state.
-#
-# **Inputs:**
-#
-# -  ``input_seq``: batch of input sentences; shape=\ *(max_length,
-#    batch_size)*
-# -  ``input_lengths``: list of sentence lengths corresponding to each
-#    sentence in the batch; shape=\ *(batch_size)*
-# -  ``hidden``: hidden state; shape=\ *(n_layers x num_directions,
-#    batch_size, hidden_size)*
-#
-# **Outputs:**
-#
-# -  ``outputs``: output features from the last hidden layer of the GRU
-#    (sum of bidirectional outputs); shape=\ *(max_length, batch_size,
-#    hidden_size)*
-# -  ``hidden``: updated hidden state from GRU; shape=\ *(n_layers x
-#    num_directions, batch_size, hidden_size)*
-#
-#
-
 # 编码器模型
 class EncoderRNN(nn.Module):
     def __init__(self, hidden_size, embedding, n_layers=1, dropout=0):
@@ -709,70 +371,6 @@ class EncoderRNN(nn.Module):
         # 返回输出和隐藏层 (L, B, H)
         return outputs, hidden
 
-
-######################################################################
-# Decoder
-# ~~~~~~~
-#
-# The decoder RNN generates the response sentence in a token-by-token
-# fashion. It uses the encoder’s context vectors, and internal hidden
-# states to generate the next word in the sequence. It continues
-# generating words until it outputs an *EOS_token*, representing the end
-# of the sentence. A common problem with a vanilla seq2seq decoder is that
-# if we rely soley on the context vector to encode the entire input
-# sequence’s meaning, it is likely that we will have information loss.
-# This is especially the case when dealing with long input sequences,
-# greatly limiting the capability of our decoder.
-#
-# To combat this, `Bahdanau et al. <https://arxiv.org/abs/1409.0473>`__
-# created an “attention mechanism” that allows the decoder to pay
-# attention to certain parts of the input sequence, rather than using the
-# entire fixed context at every step.
-#
-# At a high level, attention is calculated using the decoder’s current
-# hidden state and the encoder’s outputs. The output attention weights
-# have the same shape as the input sequence, allowing us to multiply them
-# by the encoder outputs, giving us a weighted sum which indicates the
-# parts of encoder output to pay attention to. `Sean
-# Robertson’s <https://github.com/spro>`__ figure describes this very
-# well:
-#
-# .. figure:: /_static/img/chatbot/attn2.png
-#    :align: center
-#    :alt: attn2
-#
-# `Luong et al. <https://arxiv.org/abs/1508.04025>`__ improved upon
-# Bahdanau et al.’s groundwork by creating “Global attention”. The key
-# difference is that with “Global attention”, we consider all of the
-# encoder’s hidden states, as opposed to Bahdanau et al.’s “Local
-# attention”, which only considers the encoder’s hidden state from the
-# current time step. Another difference is that with “Global attention”,
-# we calculate attention weights, or energies, using the hidden state of
-# the decoder from the current time step only. Bahdanau et al.’s attention
-# calculation requires knowledge of the decoder’s state from the previous
-# time step. Also, Luong et al. provides various methods to calculate the
-# attention energies between the encoder output and decoder output which
-# are called “score functions”:
-#
-# .. figure:: /_static/img/chatbot/scores.png
-#    :width: 60%
-#    :align: center
-#    :alt: scores
-#
-# where :math:`h_t` = current target decoder state and :math:`\bar{h}_s` =
-# all encoder states.
-#
-# Overall, the Global attention mechanism can be summarized by the
-# following figure. Note that we will implement the “Attention Layer” as a
-# separate ``nn.Module`` called ``Attn``. The output of this module is a
-# softmax normalized weights tensor of shape *(batch_size, 1,
-# max_length)*.
-#
-# .. figure:: /_static/img/chatbot/global_attn.png
-#    :align: center
-#    :width: 60%
-#    :alt: global_attn
-#
 
 # Luong 注意力层
 class Attn(nn.Module):
@@ -821,40 +419,6 @@ class Attn(nn.Module):
         # [64, 1, 10]     [B, 1, L]
         return F.softmax(attn_energies, dim=1).unsqueeze(1)
 
-
-######################################################################
-# Now that we have defined our attention submodule, we can implement the
-# actual decoder model. For the decoder, we will manually feed our batch
-# one time step at a time. This means that our embedded word tensor and
-# GRU output will both have shape *(1, batch_size, hidden_size)*.
-#
-# **Computation Graph:**
-#
-#    1) Get embedding of current input word.
-#    2) Forward through unidirectional GRU.
-#    3) Calculate attention weights from the current GRU output from (2).
-#    4) Multiply attention weights to encoder outputs to get new "weighted sum" context vector.
-#    5) Concatenate weighted context vector and GRU output using Luong eq. 5.
-#    6) Predict next word using Luong eq. 6 (without softmax).
-#    7) Return output and final hidden state.
-#
-# **Inputs:**
-#
-# -  ``input_step``: one time step (one word) of input sequence batch;
-#    shape=\ *(1, batch_size)*
-# -  ``last_hidden``: final hidden layer of GRU; shape=\ *(n_layers x
-#    num_directions, batch_size, hidden_size)*
-# -  ``encoder_outputs``: encoder model’s output; shape=\ *(max_length,
-#    batch_size, hidden_size)*
-#
-# **Outputs:**
-#
-# -  ``output``: softmax normalized tensor giving probabilities of each
-#    word being the correct next word in the decoded sequence;
-#    shape=\ *(batch_size, voc.num_words)*
-# -  ``hidden``: final hidden state of GRU; shape=\ *(n_layers x
-#    num_directions, batch_size, hidden_size)*
-#
 
 # 加了注意力机制的RNN
 class LuongAttnDecoderRNN(nn.Module):
@@ -914,22 +478,6 @@ class LuongAttnDecoderRNN(nn.Module):
         return output, hidden
 
 
-######################################################################
-# Define Training Procedure
-# -------------------------
-#
-# Masked loss
-# ~~~~~~~~~~~
-#
-# Since we are dealing with batches of padded sequences, we cannot simply
-# consider all elements of the tensor when calculating loss. We define
-# ``maskNLLLoss`` to calculate our loss based on our decoder’s output
-# tensor, the target tensor, and a binary mask tensor describing the
-# padding of the target tensor. This loss function calculates the average
-# negative log likelihood of the elements that correspond to a *1* in the
-# mask tensor.
-#
-
 # 支持mask的损失，只针对正确项的概率
 def maskNLLLoss(inp, target, mask):
     # inp [64, 7826]
@@ -945,67 +493,6 @@ def maskNLLLoss(inp, target, mask):
     loss = loss.to(device)
     return loss, nTotal.item()
 
-
-######################################################################
-# Single training iteration
-# ~~~~~~~~~~~~~~~~~~~~~~~~~
-#
-# The ``train`` function contains the algorithm for a single training
-# iteration (a single batch of inputs).
-#
-# We will use a couple of clever tricks to aid in convergence:
-#
-# -  The first trick is using **teacher forcing**. This means that at some
-#    probability, set by ``teacher_forcing_ratio``, we use the current
-#    target word as the decoder’s next input rather than using the
-#    decoder’s current guess. This technique acts as training wheels for
-#    the decoder, aiding in more efficient training. However, teacher
-#    forcing can lead to model instability during inference, as the
-#    decoder may not have a sufficient chance to truly craft its own
-#    output sequences during training. Thus, we must be mindful of how we
-#    are setting the ``teacher_forcing_ratio``, and not be fooled by fast
-#    convergence.
-#
-# -  The second trick that we implement is **gradient clipping**. This is
-#    a commonly used technique for countering the “exploding gradient”
-#    problem. In essence, by clipping or thresholding gradients to a
-#    maximum value, we prevent the gradients from growing exponentially
-#    and either overflow (NaN), or overshoot steep cliffs in the cost
-#    function.
-#
-# .. figure:: /_static/img/chatbot/grad_clip.png
-#    :align: center
-#    :width: 60%
-#    :alt: grad_clip
-#
-# Image source: Goodfellow et al. *Deep Learning*. 2016. https://www.deeplearningbook.org/
-#
-# **Sequence of Operations:**
-#
-#    1) Forward pass entire input batch through encoder.
-#    2) Initialize decoder inputs as SOS_token, and hidden state as the encoder's final hidden state.
-#    3) Forward input batch sequence through decoder one time step at a time.
-#    4) If teacher forcing: set next decoder input as the current target; else: set next decoder input as current decoder output.
-#    5) Calculate and accumulate loss.
-#    6) Perform backpropagation.
-#    7) Clip gradients.
-#    8) Update encoder and decoder model parameters.
-#
-#
-# .. Note ::
-#
-#   PyTorch’s RNN modules (``RNN``, ``LSTM``, ``GRU``) can be used like any
-#   other non-recurrent layers by simply passing them the entire input
-#   sequence (or batch of sequences). We use the ``GRU`` layer like this in
-#   the ``encoder``. The reality is that under the hood, there is an
-#   iterative process looping over each time step calculating hidden states.
-#   Alternatively, you ran run these modules one time-step at a time. In
-#   this case, we manually loop over the sequences during the training
-#   process like we must do for the ``decoder`` model. As long as you
-#   maintain the correct conceptual model of these modules, implementing
-#   sequential models can be very straightforward.
-#
-#
 
 
 def train(input_variable, lengths, target_variable, mask, max_target_len, encoder, decoder, embedding,
@@ -1093,24 +580,6 @@ def train(input_variable, lengths, target_variable, mask, max_target_len, encode
     return sum(print_losses) / n_totals
 
 
-######################################################################
-# Training iterations
-# ~~~~~~~~~~~~~~~~~~~
-#
-# It is finally time to tie the full training procedure together with the
-# data. The ``trainIters`` function is responsible for running
-# ``n_iterations`` of training given the passed models, optimizers, data,
-# etc. This function is quite self explanatory, as we have done the heavy
-# lifting with the ``train`` function.
-#
-# One thing to note is that when we save our model, we save a tarball
-# containing the encoder and decoder state_dicts (parameters), the
-# optimizers’ state_dicts, the loss, the iteration, etc. Saving the model
-# in this way will give us the ultimate flexibility with the checkpoint.
-# After loading a checkpoint, we will be able to use the model parameters
-# to run inference, or we can continue training right where we left off.
-#
-
 def trainIters(model_name, voc, pairs, encoder, decoder, encoder_optimizer, decoder_optimizer, embedding, encoder_n_layers, decoder_n_layers, save_dir, n_iteration, batch_size, print_every, save_every, clip, corpus_name, loadFilename):
 
     # 按循环次数随机加载训练样本
@@ -1140,7 +609,6 @@ def trainIters(model_name, voc, pairs, encoder, decoder, encoder_optimizer, deco
         loss = train(input_variable, lengths, target_variable, mask, max_target_len, encoder,
                      decoder, embedding, encoder_optimizer, decoder_optimizer, batch_size, clip)
         print_loss += loss
-        return
 
         # Print progress
         if iteration % print_every == 0:
@@ -1162,45 +630,7 @@ def trainIters(model_name, voc, pairs, encoder, decoder, encoder_optimizer, deco
                 'loss': loss,
                 'voc_dict': voc.__dict__,
                 'embedding': embedding.state_dict()
-            }, os.path.join(directory, '{}_{}.tar'.format(iteration, 'checkpoint')))
-
-
-######################################################################
-# Define Evaluation
-# -----------------
-#
-# After training a model, we want to be able to talk to the bot ourselves.
-# First, we must define how we want the model to decode the encoded input.
-#
-# Greedy decoding
-# ~~~~~~~~~~~~~~~
-#
-# Greedy decoding is the decoding method that we use during training when
-# we are **NOT** using teacher forcing. In other words, for each time
-# step, we simply choose the word from ``decoder_output`` with the highest
-# softmax value. This decoding method is optimal on a single time-step
-# level.
-#
-# To facilite the greedy decoding operation, we define a
-# ``GreedySearchDecoder`` class. When run, an object of this class takes
-# an input sequence (``input_seq``) of shape *(input_seq length, 1)*, a
-# scalar input length (``input_length``) tensor, and a ``max_length`` to
-# bound the response sentence length. The input sentence is evaluated
-# using the following computational graph:
-#
-# **Computation Graph:**
-#
-#    1) Forward input through encoder model.
-#    2) Prepare encoder's final hidden layer to be first hidden input to the decoder.
-#    3) Initialize decoder's first input as SOS_token.
-#    4) Initialize tensors to append decoded words to.
-#    5) Iteratively decode one word token at a time:
-#        a) Forward pass through decoder.
-#        b) Obtain most likely word token and its softmax score.
-#        c) Record token and score.
-#        d) Prepare current token to be next decoder input.
-#    6) Return collections of word tokens and scores.
-#
+            }, os.path.join(directory, 'checkpoint.tar'))
 
 # 实际预测
 class GreedySearchDecoder(nn.Module):
@@ -1232,37 +662,6 @@ class GreedySearchDecoder(nn.Module):
             decoder_input = torch.unsqueeze(decoder_input, 0)
         # Return collections of word tokens and scores
         return all_tokens, all_scores
-
-
-######################################################################
-# Evaluate my text
-# ~~~~~~~~~~~~~~~~
-#
-# Now that we have our decoding method defined, we can write functions for
-# evaluating a string input sentence. The ``evaluate`` function manages
-# the low-level process of handling the input sentence. We first format
-# the sentence as an input batch of word indexes with *batch_size==1*. We
-# do this by converting the words of the sentence to their corresponding
-# indexes, and transposing the dimensions to prepare the tensor for our
-# models. We also create a ``lengths`` tensor which contains the length of
-# our input sentence. In this case, ``lengths`` is scalar because we are
-# only evaluating one sentence at a time (batch_size==1). Next, we obtain
-# the decoded response sentence tensor using our ``GreedySearchDecoder``
-# object (``searcher``). Finally, we convert the response’s indexes to
-# words and return the list of decoded words.
-#
-# ``evaluateInput`` acts as the user interface for our chatbot. When
-# called, an input text field will spawn in which we can enter our query
-# sentence. After typing our input sentence and pressing *Enter*, our text
-# is normalized in the same way as our training data, and is ultimately
-# fed to the ``evaluate`` function to obtain a decoded output sentence. We
-# loop this process, so we can keep chatting with our bot until we enter
-# either “q” or “quit”.
-#
-# Finally, if a sentence is entered that contains a word that is not in
-# the vocabulary, we handle this gracefully by printing an error message
-# and prompting the user to enter another sentence.
-#
 
 def evaluate(encoder, decoder, searcher, voc, sentence, max_length=MAX_LENGTH):
     ### Format input sentence as a batch
@@ -1302,20 +701,6 @@ def evaluateInput(encoder, decoder, searcher, voc):
             print("Error: Encountered unknown word.")
 
 
-######################################################################
-# Run Model
-# ---------
-#
-# Finally, it is time to run our model!
-#
-# Regardless of whether we want to train or test the chatbot model, we
-# must initialize the individual encoder and decoder models. In the
-# following block, we set our desired configurations, choose to start from
-# scratch or set a checkpoint to load from, and build and initialize the
-# models. Feel free to play with different model configurations to
-# optimize performance.
-#
-
 # Configure models
 model_name = 'cb_model'
 attn_model = 'dot'
@@ -1332,8 +717,7 @@ loadFilename = None
 checkpoint_iter = 4000
 loadFilename = os.path.join(save_dir, model_name, corpus_name,
                            '{}-{}_{}'.format(encoder_n_layers, decoder_n_layers, hidden_size),
-                           '{}_checkpoint.tar'.format(checkpoint_iter))
-
+                           'checkpoint.tar')
 
 # 加载模型
 if loadFilename:
@@ -1367,23 +751,12 @@ decoder = decoder.to(device)
 print('Models built and ready to go!')
 
 
-######################################################################
-# Run Training
-# ~~~~~~~~~~~~
-#
-# Run the following block if you want to train the model.
-#
-# First we set training parameters, then we initialize our optimizers, and
-# finally we call the ``trainIters`` function to run our training
-# iterations.
-#
-
 # Configure training/optimization
 clip = 50.0
 teacher_forcing_ratio = 1.0
 learning_rate = 0.0001
 decoder_learning_ratio = 5.0
-n_iteration = 5000
+n_iteration = 50000
 print_every = 1
 save_every = 500
 
@@ -1417,14 +790,7 @@ trainIters(model_name, voc, pairs, encoder, decoder, encoder_optimizer, decoder_
            print_every, save_every, clip, corpus_name, loadFilename)
 
 
-######################################################################
-# Run Evaluation
-# ~~~~~~~~~~~~~~
-#
-# To chat with your model, run the following block.
-#
 
-# Set dropout layers to eval mode
 encoder.eval()
 decoder.eval()
 
@@ -1434,17 +800,3 @@ searcher = GreedySearchDecoder(encoder, decoder)
 # Begin chatting (uncomment and run the following line to begin)
 evaluateInput(encoder, decoder, searcher, voc)
 
-
-######################################################################
-# Conclusion
-# ----------
-#
-# That’s all for this one, folks. Congratulations, you now know the
-# fundamentals to building a generative chatbot model! If you’re
-# interested, you can try tailoring the chatbot’s behavior by tweaking the
-# model and training parameters and customizing the data that you train
-# the model on.
-#
-# Check out the other tutorials for more cool deep learning applications
-# in PyTorch!
-#
