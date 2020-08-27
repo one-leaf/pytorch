@@ -195,7 +195,7 @@ def optimize_model():
 
 def train(agent):
     global GAMMA, steps_done
-    num_episodes = 5000000
+    num_episodes = 100000
     avg_step = 100.
     step_episode_update = 0.
     
@@ -245,6 +245,7 @@ def train(agent):
                     _reward = -1.
                 else:
                     _reward += 1.
+                next_state = None                    
             else:
                 # 这里如果有消除整行的奖励就直接加上
                 _reward += 1. #;math.exp(-1. * (t+1) / avg_step )    
@@ -256,6 +257,14 @@ def train(agent):
             
             reward = torch.tensor([_reward], device=device)
             buffer.append(Transition(state, action, next_state, reward))
+
+            # print(t, action, reward)
+            # plt.figure()
+            # plt.imshow(np.transpose(state,(1,2,0)))
+            # if next_state!=None:
+            #     plt.figure()            
+            #     plt.imshow(np.transpose(next_state,(1,2,0)))
+            # plt.show()
 
             loss = optimize_model()
             if loss!=None:       
@@ -269,7 +278,6 @@ def train(agent):
             if is_terminal or t>=10000:
                 agent.reset()
                 break
-
         step_episode_update += t
         avg_step = avg_step*0.999 + t*0.001
         avg_loss = avg_loss / t
@@ -332,7 +340,7 @@ def test(agent):
 if __name__ == "__main__":
     tetromino = Tetromino()
     agent = Agent(tetromino)
-    train(agent)
+    # train(agent)
     if device.type == "cpu":
         test(agent)
     else:
