@@ -590,8 +590,8 @@ def trainIters(model_name, voc, pairs, encoder, decoder, encoder_optimizer, deco
     print('Initializing ...')
     start_iteration = 1
     print_loss = 0
-    if loadFilename:
-        start_iteration = checkpoint['iteration'] + 1
+    # if loadFilename:
+    #     start_iteration = checkpoint['iteration'] + 1
 
     # 循环训练
     print("Training...")
@@ -722,9 +722,9 @@ loadFilename = os.path.join(save_dir, model_name, corpus_name,
 # 加载模型
 if loadFilename:
     # If loading on same machine the model was trained on
-    checkpoint = torch.load(loadFilename)
+    checkpoint = torch.load(loadFilename, map_location=device)
     # If loading a model trained on GPU to CPU
-    #checkpoint = torch.load(loadFilename, map_location=torch.device('cpu'))
+    # checkpoint = torch.load(loadFilename, map_location=torch.device('cpu'))
     encoder_sd = checkpoint['en']
     decoder_sd = checkpoint['de']
     encoder_optimizer_sd = checkpoint['en_opt']
