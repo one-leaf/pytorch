@@ -57,8 +57,8 @@ class Agent(object):
             self.fallpiece['rotation'] =  (self.fallpiece['rotation'] + 1) % len(pieces[self.fallpiece['shape']])
             if not self.tetromino.validposition(self.board,self.fallpiece):
                 self.fallpiece['rotation'] = (self.fallpiece['rotation'] - 1) % len(pieces[self.fallpiece['shape']])
-            if self.tetromino.validposition(self.board,self.fallpiece,ay = 1):
-                self.fallpiece['y']+=1
+            # if self.tetromino.validposition(self.board,self.fallpiece,ay = 1):
+            #     self.fallpiece['y']+=1
 
         if not self.tetromino.validposition(self.board,self.fallpiece,ay = 1):
             self.tetromino.addtoboard(self.board,self.fallpiece)
@@ -237,7 +237,7 @@ def train(agent):
             if curr_board_height > 2 + steps_done//1000000:
                 is_terminal = True
 
-            if is_terminal:
+            if is_terminal or agent_state==1:
                 _reward = -1.
                 next_state = None
             else:
