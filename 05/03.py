@@ -184,10 +184,10 @@ def optimize_model():
     reward_batch = torch.cat(batch.reward)
     state_action_values = net(state_batch).gather(1, action_batch)
     next_state_values = torch.zeros(BATCH_SIZE, device=device)
-    next_state_values[non_final_mask] = net(non_final_next_states).max(1)[0].detach()
+    with torch.no_grad():
+        next_state_values[non_final_mask] = net(non_final_next_states).max(1)[0]
     expected_state_action_values = (next_state_values * GAMMA) + reward_batch
     loss = F.smooth_l1_loss(state_action_values, expected_state_action_values.unsqueeze(1))
-
     optimizer.zero_grad()
     loss.backward()
     optimizer.step()
