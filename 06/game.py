@@ -24,10 +24,11 @@ class FiveChessEnv(gym.Env):
     def is_valid_coord(self,x,y):
         return x>=0 and x<self.SIZE and y>=0 and y<self.SIZE
  
+    # 检查当前action是否有效
     def is_valid_set_coord(self,x,y):
         return self.is_valid_coord(x,y) and self.chessboard[x][y]==0
  
-    #返回有效的下棋位置
+    # 返回所有有效的下棋位置
     def get_available_locations(self):
         results = []
         for x in range(self.SIZE):
@@ -135,6 +136,7 @@ class FiveChessEnv(gym.Env):
 
         return self.viewer.render(return_rgb_array=mode == 'rgb_array')
 
+    # 鼠标点击坐标转为动作坐标
     def point_to_action(self, point):
         x, y = point
         x = x - 50
