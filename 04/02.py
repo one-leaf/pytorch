@@ -590,7 +590,7 @@ def trainIters(model_name, voc, pairs, encoder, decoder, encoder_optimizer, deco
     print('Initializing ...')
     start_iteration = 1
     print_loss = 0
-    if loadFilename:
+    if os.path.exists(loadFilename):
         start_iteration = checkpoint['iteration'] + 1
 
     # 循环训练
@@ -736,13 +736,13 @@ if os.path.exists(loadFilename):
 print('Building encoder and decoder ...')
 # 定义词向量（L，H）
 embedding = nn.Embedding(voc.num_words, hidden_size)
-if loadFilename:
+if os.path.exists(loadFilename):
     embedding.load_state_dict(embedding_sd)
 # 定义编码器
 encoder = EncoderRNN(hidden_size, embedding, encoder_n_layers, dropout)
 # 定义解码器
 decoder = LuongAttnDecoderRNN(attn_model, embedding, hidden_size, voc.num_words, decoder_n_layers, dropout)
-if loadFilename:
+if os.path.exists(loadFilename):
     encoder.load_state_dict(encoder_sd)
     decoder.load_state_dict(decoder_sd)
 # Use appropriate device
@@ -768,7 +768,7 @@ decoder.train()
 print('Building optimizers ...')
 encoder_optimizer = optim.Adam(encoder.parameters(), lr=learning_rate)
 decoder_optimizer = optim.Adam(decoder.parameters(), lr=learning_rate * decoder_learning_ratio)
-if loadFilename:
+if os.path.exists(loadFilename):
     encoder_optimizer.load_state_dict(encoder_optimizer_sd)
     decoder_optimizer.load_state_dict(decoder_optimizer_sd)
 
