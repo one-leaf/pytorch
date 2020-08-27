@@ -255,14 +255,17 @@ def train(agent):
             loss = optimize_model()
             if loss!=None:       
                 avg_loss += loss.item() 
+            
+            if next_state == None:
+                state = torch.zeros((3, 10, 20)).to(device)
+            else:
+                state = next_state
 
             if is_terminal or t>=10000:
                 agent.reset()
-                state = torch.zeros((3, 10, 20)).to(device) 
                 break
-            else:
-                state = next_state
-        
+
+
         step_episode_update += t
         avg_step = avg_step*0.999 + t*0.001
         avg_loss = avg_loss / t
