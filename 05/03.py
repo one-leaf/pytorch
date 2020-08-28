@@ -335,7 +335,9 @@ def test(agent):
                 agent.reset()
                 break
 
-            time.sleep(0.1)
+            # time.sleep(0.1)
+        net_actions_count_value = net_actions_count.cpu().numpy()
+        print("action_counts:",net_actions_count_value/sum(net_actions_count_value))
 
 if __name__ == "__main__":
     tetromino = Tetromino()

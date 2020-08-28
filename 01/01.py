@@ -164,7 +164,7 @@ def main():
     # 动态调整学习率
     scheduler = StepLR(optimizer, step_size=1, gamma=0.9)
     for epoch in range(1):
-        train(train_loader, net, optimizer, ceriation, use_cuda, epoch)
+        # train(train_loader, net, optimizer, ceriation, use_cuda, epoch)
         test(test_loader, net, ceriation, use_cuda, epoch)
         scheduler.step()
 
