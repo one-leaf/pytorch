@@ -141,7 +141,7 @@ class Net(nn.Module):
 BATCH_SIZE = 256
 GAMMA = 0.5
 EPS_START = 0.9
-EPS_END = 0.1
+EPS_END = 0.05
 EPS_DECAY = 1000000.
 TARGET_UPDATE = 10
 Transition = namedtuple('Transition', ('state', 'action', 'next_state', 'reward'))
