@@ -75,12 +75,9 @@ class DQN(nn.Module):
 
     def __init__(self, h, w, outputs):
         super(DQN, self).__init__()
-        self.conv1 = nn.Conv2d(3, 16, kernel_size=5, stride=2)
-        self.bn1 = nn.BatchNorm2d(16)
-        self.conv2 = nn.Conv2d(16, 32, kernel_size=5, stride=2)
-        self.bn2 = nn.BatchNorm2d(32)
-        self.conv3 = nn.Conv2d(32, 32, kernel_size=5, stride=2)
-        self.bn3 = nn.BatchNorm2d(32)
+        self.conv1 = nn.Conv2d(3, 16, kernel_size=3, stride=2)
+        self.conv2 = nn.Conv2d(16, 32, kernel_size=3, stride=2)
+        self.conv3 = nn.Conv2d(32, 64, kernel_size=3, stride=2)
 
         # 线性输入连接的数量取决于conv2d层的输出，因此取决于输入图像的大小，因此请对其进行计算。
         def conv2d_size_out(size, kernel_size = 5, stride = 2):
@@ -88,14 +85,19 @@ class DQN(nn.Module):
         convw = conv2d_size_out(conv2d_size_out(conv2d_size_out(w)))
         convh = conv2d_size_out(conv2d_size_out(conv2d_size_out(h)))
         linear_input_size = convw * convh * 32
-        self.head = nn.Linear(linear_input_size, outputs)
+        self.fc1 = nn.Linear(linear_input_size, 256)
+        self.fc2 = nn.Linear(256, 64)
+        self.head = nn.Linear(64, outputs)
 
     # 使用一个元素调用以确定下一个操作，或在优化期间调用batch。返回tensor([[left0exp,right0exp]...]).
     def forward(self, x):
-        x = F.relu(self.bn1(self.conv1(x)))         #[B, 3, 40, 90] => [B, 16, 18, 43]
-        x = F.relu(self.bn2(self.conv2(x)))         #[B, 16, 18, 43] => [B, 32, 7, 20]
-        x = F.relu(self.bn3(self.conv3(x)))         #[B, 32, 7, 20] => [B, 32, 2, 8]
-        return self.head(x.view(x.size(0), -1))     #[B, 512] => [B, 2]
+        x = F.relu(self.conv1(x))         #[B, 3, 40, 90] => [B, 16, 18, 43]
+        x = F.relu(self.conv2(x))         #[B, 16, 18, 43] => [B, 32, 7, 20]
+        x = F.relu(self.conv3(x))         #[B, 32, 7, 20] => [B, 32, 2, 8]
+        x = x.view(x.size(0), -1)
+        x = F.relu(self.fc1(x))            #[B, 512] => [B, 128]
+        x = F.relu(self.fc2(x))            #[B, 512] => [B, 128]
+        return self.head(x)               #[B, 128] => [B, 2]
 
 resize = T.Compose([T.ToPILImage(),
                     T.Resize(40, interpolation=Image.CUBIC),
@@ -153,13 +155,13 @@ env.reset()
 # plt.show()
 
 
-BATCH_SIZE = 256
+BATCH_SIZE = 64
 # 得分的权重，这个值越小，越容易快速将得分压制到【0 ~ 1】之间，但同时最长远步骤的影响力也就越小，不能压制的太小
 # 得分压制的太小会导致 Loss 过小，MSE的梯度会变得很小，不容易学习
-GAMMA = 0.5
+GAMMA = 0.999
 
 EPS_START = 0.9
-EPS_END = 0.1
+EPS_END = 0.05
 EPS_DECAY = 1000000.
 TARGET_UPDATE = 10
 MODEL_File = 'data/save/14_checkpoint.tar'
@@ -178,9 +180,6 @@ n_actions = env.action_space.n
 policy_net = DQN(screen_height, screen_width, n_actions).to(device)
 
 # 预测网络,相对于 policy_net 是上一次的训练参数
-target_net = DQN(screen_height, screen_width, n_actions).to(device)
-target_net.load_state_dict(policy_net.state_dict())
-target_net.eval()
 
 memory = ReplayMemory(100000)
 
@@ -194,7 +193,6 @@ if os.path.exists(MODEL_File):
     steps_done =  checkpoint['steps_done']
     avg_step = checkpoint['avg_step']
     policy_net.load_state_dict(policy_net_sd)
-    target_net.load_state_dict(policy_net_sd)
 
 # 开始随机动作，后期逐渐采用预测动作 【0.05 --> 0.9】返回动作shape: [B, 1]
 def select_action(state):
@@ -264,7 +262,8 @@ def optimize_model():
     # 预测下一个状态的最佳得分，如果没有下一步，则下一步的概率为0 ,shape : 121
     next_state_values = torch.zeros(BATCH_SIZE, device=device)
     # [6.4941, 0.0000] Shape [128]
-    next_state_values[non_final_mask] = target_net(non_final_next_states).max(1)[0].detach()
+    with torch.no_grad():
+        next_state_values[non_final_mask] = policy_net(non_final_next_states).max(1)[0]
     # 用预期的下一步的最佳得分*衰减，再加上本次的奖励获得总得分
     # [6.8447, 0] Shape [128]
     expected_state_action_values = (next_state_values * GAMMA) + reward_batch
@@ -312,7 +311,7 @@ for i_episode in range(num_episodes):
             _reward = -1.0
         else:
             # 前面的动作对后续的影响更大，所以前面的奖励变大
-            _reward = 1.# math.exp(-1. * t / avg_step)            
+            _reward = math.exp(-1. * t / avg_step)            
 
         # 这种奖励就明显的引入了规则，看作作弊了
         # x, x_dot, theta, theta_dot = observation_   
@@ -336,11 +335,9 @@ for i_episode in range(num_episodes):
         # 强化学习的采样直接按正常采样
         memory.push(state, action, next_state, reward)
 
-        # 移动到下一个状态
-        state = next_state
-
         # 执行优化的一个步骤（在目标网络上）
         loss = optimize_model()
+
         if loss!=None:       
             avg_loss += loss.item() 
 
@@ -348,8 +345,10 @@ for i_episode in range(num_episodes):
              # episode_durations.append(t + 1)
              # plot_durations()
             break
+        else:
+            state = next_state
+
     step_episode_update += t
-    target_net.load_state_dict(policy_net.state_dict())
  
     # 根据 loss 动态调整GAMMA，加快数据收敛
     avg_loss = avg_loss / t
