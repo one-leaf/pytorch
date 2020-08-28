@@ -77,7 +77,7 @@ class DQN(nn.Module):
         super(DQN, self).__init__()
         self.conv1 = nn.Conv2d(3, 16, kernel_size=3, stride=2)
         self.conv2 = nn.Conv2d(16, 32, kernel_size=3, stride=2)
-        self.conv3 = nn.Conv2d(32, 64, kernel_size=3, stride=2)
+        self.conv3 = nn.Conv2d(32, 32, kernel_size=3, stride=2)
 
         # 线性输入连接的数量取决于conv2d层的输出，因此取决于输入图像的大小，因此请对其进行计算。
         def conv2d_size_out(size, kernel_size = 3, stride = 2):
