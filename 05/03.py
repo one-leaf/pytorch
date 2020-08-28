@@ -139,7 +139,7 @@ class Net(nn.Module):
         return x
 
 BATCH_SIZE = 256
-GAMMA = 0.99
+GAMMA = 0.5
 EPS_START = 0.9
 EPS_END = 0.1
 EPS_DECAY = 1000000.
@@ -281,10 +281,10 @@ def train(agent):
         step_episode_update += t
         avg_step = avg_step*0.999 + t*0.001
         avg_loss = avg_loss / t
-        if avg_loss>1: 
-            GAMMA = GAMMA * 0.999
-        elif avg_loss<0.1:
-            GAMMA = min(GAMMA * 1.001, 0.999)  
+        # if avg_loss>1: 
+        #     GAMMA = GAMMA * 0.999
+        # elif avg_loss<0.1:
+        #     GAMMA = min(GAMMA * 1.001, 0.999)  
 
         if i_episode % TARGET_UPDATE == 0:
             net_actions_count_value = net_actions_count.cpu().numpy()
