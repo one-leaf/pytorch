@@ -143,8 +143,8 @@ def get_screen():
     # 转换为float类型，重新缩放，转换为torch张量
     screen = np.ascontiguousarray(screen, dtype=np.float32) / 255
     screen = torch.from_numpy(screen)
-    # 调整大小并添加batch维度（BCHW）
-    return resize(screen).unsqueeze(0).to(device)
+    # 调整大小（CHW）
+    return resize(screen).to(device)
 
 
 env.reset()
@@ -171,7 +171,7 @@ MODEL_File = 'data/save/14_checkpoint.tar'
 # 此时的典型尺寸接近3x40x90
 # 这是get_screen（）中的限幅和缩小渲染缓冲区的结果
 init_screen = get_screen()
-_, _, screen_height, screen_width = init_screen.shape #【B，C，H，W】
+_, screen_height, screen_width = init_screen.shape #【C，H，W】
 
 # 从gym行动空间中获取行动数量 ， 就两种，左或右
 n_actions = env.action_space.n
@@ -290,12 +290,14 @@ optimizer = optim.Adam(policy_net.parameters(),lr=1e-6)
 num_episodes = 5000000
 step_episode_update = 0.
 action_episode_update = 0.
+state = torch.zeros((3, 40, 90)).to(device) 
 for i_episode in range(num_episodes):
     # 初始化环境和状态
     env.reset()
-    last_screen = get_screen()                  # [1, 3, 40, 90]
-    current_screen = get_screen()               # [1, 3, 40, 90]
-    state = current_screen - last_screen        # [1, 3, 40, 90]   
+    state[-1] = get_screen()
+    # last_screen = get_screen()                  # [1, 3, 40, 90]
+    # current_screen = get_screen()               # [1, 3, 40, 90]
+    # state = current_screen - last_screen        # [1, 3, 40, 90]   
     reward_proportion = memory.calc() 
     avg_loss = 0.
     for t in count():
@@ -325,10 +327,12 @@ for i_episode in range(num_episodes):
         reward = torch.tensor([_reward], device=device)
 
         # 观察新的状态,下一个状态 等于当前屏幕 - 上一个屏幕 ？ 这样抗干扰高？所有的状态预测都是像素差
-        last_screen = current_screen
         current_screen = get_screen()
         if not done:
-            next_state = current_screen - last_screen
+            next_state = torch.zeros((3, 10, 20)).to(device) 
+            next_state[0] = state[1]
+            next_state[1] = state[2]
+            next_state[2] = current_screen  
         else:
             next_state = None
 
@@ -341,12 +345,15 @@ for i_episode in range(num_episodes):
         if loss!=None:       
             avg_loss += loss.item() 
 
+        if next_state == None:
+            state = torch.zeros((3, 10, 20)).to(device)
+        else:
+            state = next_state
+
         if done or t>=1000:
              # episode_durations.append(t + 1)
              # plot_durations()
             break
-        else:
-            state = next_state
 
     step_episode_update += t
  

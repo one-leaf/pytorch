@@ -210,11 +210,8 @@ def train(agent):
     state = torch.zeros((3, 10, 20)).to(device)   
     for i_episode in range(num_episodes):
         avg_loss = 0.
-
         board = agent.getBoard().to(device)
-        state[0] = state[1]
-        state[1] = state[2]
-        state[2] = board
+        state[-1] = board
         piece_step = 0  # 方块步数
         for t in count():
             # 前10步都是随机乱走的
@@ -335,7 +332,7 @@ def test(agent):
                 agent.reset()
                 break
 
-            # time.sleep(0.1)
+            time.sleep(0.1)
         net_actions_count_value = net_actions_count.cpu().numpy()
         print("action_counts:",net_actions_count_value/sum(net_actions_count_value))
 
