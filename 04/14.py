@@ -101,6 +101,7 @@ class DQN(nn.Module):
 
 resize = T.Compose([T.ToPILImage(),
                     T.Resize(40, interpolation=Image.CUBIC),
+                    T.Grayscale(num_output_channels=1),
                     T.ToTensor()])
 
 
@@ -242,9 +243,9 @@ def optimize_model():
     non_final_mask = torch.tensor(tuple(map(lambda s: s is not None,
                                       batch.next_state)), device=device, dtype=torch.bool)
     # [121, 3, 40, 90]
-    non_final_next_states = torch.cat([s for s in batch.next_state if s is not None])
+    non_final_next_states = torch.stack([s for s in batch.next_state if s is not None])
     # [128, 3, 40, 90]
-    state_batch = torch.cat(batch.state)
+    state_batch = torch.stack(batch.state)
     # [[1],[1]] Shape [128, 1]
     action_batch = torch.cat(batch.action)
     # [1, 1] Shape [128]
@@ -294,7 +295,7 @@ state = torch.zeros((3, 40, 90)).to(device)
 for i_episode in range(num_episodes):
     # 初始化环境和状态
     env.reset()
-    state[-1] = get_screen()
+    state[2] = get_screen()
     # last_screen = get_screen()                  # [1, 3, 40, 90]
     # current_screen = get_screen()               # [1, 3, 40, 90]
     # state = current_screen - last_screen        # [1, 3, 40, 90]   
@@ -302,7 +303,7 @@ for i_episode in range(num_episodes):
     avg_loss = 0.
     for t in count():
         # 选择动作并执行
-        action = select_action(state)
+        action = select_action(state.unsqueeze(0))
         action_value = action.item()
         action_episode_update += action_value
 
@@ -329,7 +330,7 @@ for i_episode in range(num_episodes):
         # 观察新的状态,下一个状态 等于当前屏幕 - 上一个屏幕 ？ 这样抗干扰高？所有的状态预测都是像素差
         current_screen = get_screen()
         if not done:
-            next_state = torch.zeros((3, 10, 20)).to(device) 
+            next_state = torch.zeros((3, 40, 90)).to(device) 
             next_state[0] = state[1]
             next_state[1] = state[2]
             next_state[2] = current_screen  
@@ -346,7 +347,7 @@ for i_episode in range(num_episodes):
             avg_loss += loss.item() 
 
         if next_state == None:
-            state = torch.zeros((3, 10, 20)).to(device)
+            state = torch.zeros((3, 40, 90)).to(device)
         else:
             state = next_state
 
