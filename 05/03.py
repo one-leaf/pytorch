@@ -239,7 +239,7 @@ def train(agent):
                 next_state = None
             elif agent_state==1:
                 if _reward==0:
-                    _reward = -1.
+                    _reward = 0.
                 else:
                     _reward += 1.
                 next_state = None                    
