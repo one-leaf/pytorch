@@ -365,7 +365,7 @@ for i_episode in range(num_episodes):
         print(i_episode, steps_done, "%.2f/%.2f"%(step_episode_update/TARGET_UPDATE, avg_step), \
             "loss:", avg_loss, "reward_1:",  reward_proportion, \
             "action_random: %.2f"%(EPS_END + (EPS_START - EPS_END) * math.exp(-1. * steps_done / EPS_DECAY)), \
-            "action: %.2f"%(net_actions_count_value/sum(net_actions_count_value)), "GAMMA:", GAMMA )
+            "action:", net_actions_count_value/sum(net_actions_count_value), "GAMMA:", GAMMA )
         step_episode_update = 0.
 
         if i_episode % 1000 == 0:
