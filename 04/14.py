@@ -91,54 +91,6 @@ class DQN(nn.Module):
         x = x.view(x.size(0), -1)
         return self.head(x)               #[B, 128] => [B, 2]
 
-resize2 = T.Compose([T.ToPILImage(),
-                    T.Resize(40, interpolation=Image.CUBIC),
-                    T.Grayscale(num_output_channels=1),
-                    T.ToTensor()])
-
-
-# 获得当前小车的位置，转为正整数
-# env.x_threshold x最大边距 [-2.4 ---- 0 ---- 2.4]
-# env.state 当前状态 (位置x，x加速度, 偏移角度theta, 角加速度) 位置x可以为负数
-def get_cart_location(screen_width):
-    # 世界的总长度
-    world_width = env.x_threshold * 2
-    # 世界转屏幕像素系数
-    scale = screen_width / world_width
-    # 世界的中心点在屏幕中央，所以位置需要左偏移屏幕宽度的一半
-    return int(env.state[0] * scale + screen_width / 2.0)  # MIDDLE OF CART
-
-def get_screen2():
-    # gym要求的返回屏幕是400x600x3，但有时更大，如800x1200x3。 将其转换为torch order（CHW）。
-    screen = env.render(mode='rgb_array').transpose((2, 0, 1))
-    # cart位于下半部分，因此不包括屏幕的顶部和底部 [3, 400, 600]
-    _, screen_height, screen_width = screen.shape
-    # 把高度按160 - 320截断为160，[3, 160, 600]
-    screen = screen[:, int(screen_height*0.4):int(screen_height * 0.8)]
-    # 宽度只截取 60% ，左右各截取 30%
-    view_width = int(screen_width * 0.6)
-
-    # 获得当前小车的位置
-    cart_location = get_cart_location(screen_width)
-
-    if cart_location < view_width // 2:
-        # 如果小车右边还有 30% 空间，则切片范围左边 60%【None, view_width, None】
-        slice_range = slice(view_width)
-    elif cart_location > (screen_width - view_width // 2):
-        # 如果小车左边有 30% 的空间，则切片范围最右边 60% [-view_width, None, None]
-        slice_range = slice(-view_width, None)
-    else:
-        # 否则按小车的当前位置两端分别截取 30% 
-        slice_range = slice(cart_location - view_width // 2,
-                            cart_location + view_width // 2)
-    # 去掉边缘，使得我们有一个以cart为中心的方形图像
-    screen = screen[:, :, slice_range]
-    # 转换为float类型，重新缩放，转换为torch张量
-    screen = np.ascontiguousarray(screen, dtype=np.float32) / 255
-    screen = torch.from_numpy(screen)
-    # 调整大小（CHW）
-    return resize2(screen).to(device)
-
 resize = T.Compose([T.ToPILImage(),
                     T.Resize(40, interpolation=Image.CUBIC),
                     T.Grayscale(num_output_channels=1),
