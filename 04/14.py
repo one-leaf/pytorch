@@ -10,6 +10,7 @@ from PIL import Image
 import os
 
 import torch
+from torch import mode
 import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
@@ -75,28 +76,19 @@ class DQN(nn.Module):
 
     def __init__(self, h, w, outputs):
         super(DQN, self).__init__()
-        self.conv1 = nn.Conv2d(3, 8, kernel_size=3, stride=2)
-        self.conv2 = nn.Conv2d(8, 16, kernel_size=3, stride=2)
-        self.conv3 = nn.Conv2d(16, 32, kernel_size=3, stride=2)
-
-        # 线性输入连接的数量取决于conv2d层的输出，因此取决于输入图像的大小，因此请对其进行计算。
-        def conv2d_size_out(size, kernel_size = 3, stride = 2):
-            return (size - (kernel_size - 1) - 1) // stride  + 1
-        convw = conv2d_size_out(conv2d_size_out(conv2d_size_out(w)))
-        convh = conv2d_size_out(conv2d_size_out(conv2d_size_out(h)))
-        linear_input_size = convw * convh * 32
-        self.fc1 = nn.Linear(linear_input_size, 128)
-        self.fc2 = nn.Linear(128, 64)
-        self.head = nn.Linear(64, outputs)
+        self.conv1 = nn.Conv2d(3, 16, kernel_size=5, stride=2)
+        self.conv2 = nn.Conv2d(16, 32, kernel_size=5, stride=2)
+        self.conv3 = nn.Conv2d(32, 64, kernel_size=3, stride=2)
+        self.conv4 = nn.Conv2d(64, 128, kernel_size=(3,9), stride=1)
+        self.head = nn.Linear(128, outputs)
 
     # 使用一个元素调用以确定下一个操作，或在优化期间调用batch。返回tensor([[left0exp,right0exp]...]).
     def forward(self, x):
         x = F.relu(self.conv1(x))         #[B, 3, 40, 90] => [B, 16, 18, 43]
         x = F.relu(self.conv2(x))         #[B, 16, 18, 43] => [B, 32, 7, 20]
-        x = F.relu(self.conv3(x))         #[B, 32, 7, 20] => [B, 32, 2, 8]
+        x = F.relu(self.conv3(x))         #[B, 32, 7, 20] => [B, 64, 3, 9]
+        x = F.relu(self.conv4(x))         #[B, 64, 3, 9] => [B, 128, 1, 1]
         x = x.view(x.size(0), -1)
-        x = F.relu(self.fc1(x))            #[B, 512] => [B, 128]
-        x = F.relu(self.fc2(x))            #[B, 512] => [B, 128]
         return self.head(x)               #[B, 128] => [B, 2]
 
 resize = T.Compose([T.ToPILImage(),
@@ -150,16 +142,14 @@ def get_screen():
 
 env.reset()
 # plt.figure()
-# plt.imshow(get_screen().cpu().squeeze(0).permute(1, 2, 0).numpy(),
-#            interpolation='none')
+# plt.imshow(get_screen().cpu().squeeze().numpy())
 # plt.title('Example extracted screen')
 # plt.show()
-
 
 BATCH_SIZE = 256
 # 得分的权重，这个值越小，越容易快速将得分压制到 1/(1-GAMMA) ，但同时最长远步骤的影响力也就越小，不能压制的太小
 # 得分压制的太小会导致 Loss 过小，MSE的梯度会变得很小，不容易学习
-GAMMA = 0.5
+GAMMA = 0.7
 
 EPS_START = 0.9
 EPS_END = 0.05
@@ -179,6 +169,8 @@ n_actions = env.action_space.n
 
 # 训练网络
 policy_net = DQN(screen_height, screen_width, n_actions).to(device)
+
+print(policy_net)
 
 # 预测网络,相对于 policy_net 是上一次的训练参数
 
