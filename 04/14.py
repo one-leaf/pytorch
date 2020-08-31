@@ -79,7 +79,7 @@ class DQN(nn.Module):
         self.conv1 = nn.Conv2d(3, 16, kernel_size=5, stride=2)
         self.conv2 = nn.Conv2d(16, 32, kernel_size=5, stride=2)
         self.conv3 = nn.Conv2d(32, 64, kernel_size=3, stride=2)
-        self.conv4 = nn.Conv2d(64, 128, kernel_size=(3,9), stride=1)
+        self.conv4 = nn.Conv2d(64, 128, kernel_size=(3,5), stride=1)
         self.head = nn.Linear(128, outputs)
 
     # 使用一个元素调用以确定下一个操作，或在优化期间调用batch。返回tensor([[left0exp,right0exp]...]).
@@ -91,7 +91,7 @@ class DQN(nn.Module):
         x = x.view(x.size(0), -1)
         return self.head(x)               #[B, 128] => [B, 2]
 
-resize = T.Compose([T.ToPILImage(),
+resize2 = T.Compose([T.ToPILImage(),
                     T.Resize(40, interpolation=Image.CUBIC),
                     T.Grayscale(num_output_channels=1),
                     T.ToTensor()])
@@ -108,7 +108,7 @@ def get_cart_location(screen_width):
     # 世界的中心点在屏幕中央，所以位置需要左偏移屏幕宽度的一半
     return int(env.state[0] * scale + screen_width / 2.0)  # MIDDLE OF CART
 
-def get_screen():
+def get_screen2():
     # gym要求的返回屏幕是400x600x3，但有时更大，如800x1200x3。 将其转换为torch order（CHW）。
     screen = env.render(mode='rgb_array').transpose((2, 0, 1))
     # cart位于下半部分，因此不包括屏幕的顶部和底部 [3, 400, 600]
@@ -137,8 +137,16 @@ def get_screen():
     screen = np.ascontiguousarray(screen, dtype=np.float32) / 255
     screen = torch.from_numpy(screen)
     # 调整大小（CHW）
-    return resize(screen).to(device)
+    return resize2(screen).to(device)
 
+resize = T.Compose([T.ToPILImage(),
+                    T.Resize(40, interpolation=Image.CUBIC),
+                    T.Grayscale(num_output_channels=1),
+                    T.ToTensor(),
+                    T.Normalize(mean=(0.5,),std=(0.5,))])
+def get_screen():
+    screen = env.render(mode='rgb_array')
+    return resize(screen).to(device)
 
 env.reset()
 # plt.figure()
@@ -285,14 +293,14 @@ optimizer = optim.Adam(policy_net.parameters(),lr=1e-6)
 
 num_episodes = 5000000
 step_episode_update = 0.
-state = torch.zeros((3, 40, 90)).to(device) 
+state = torch.zeros((3, 40, 60)).to(device) 
 for i_episode in range(num_episodes):
     # 初始化环境和状态
     env.reset()
     state[2] = get_screen()
-    # last_screen = get_screen()                  # [1, 3, 40, 90]
-    # current_screen = get_screen()               # [1, 3, 40, 90]
-    # state = current_screen - last_screen        # [1, 3, 40, 90]   
+    # last_screen = get_screen()                  # [1, 3, 40, 60]
+    # current_screen = get_screen()               # [1, 3, 40, 60]
+    # state = current_screen - last_screen        # [1, 3, 40, 60]   
     # reward_proportion = memory.calc() 
     avg_loss = 0.
     for t in count():
@@ -323,7 +331,7 @@ for i_episode in range(num_episodes):
         # 观察新的状态,下一个状态 等于当前屏幕 - 上一个屏幕 ？ 这样抗干扰高？所有的状态预测都是像素差
         current_screen = get_screen()
         if not done:
-            next_state = torch.zeros((3, 40, 90)).to(device) 
+            next_state = torch.zeros((3, 40, 60)).to(device) 
             next_state[0] = state[1]
             next_state[1] = state[2]
             next_state[2] = current_screen  
@@ -340,7 +348,7 @@ for i_episode in range(num_episodes):
             avg_loss += loss.item() 
 
         if next_state == None:
-            state = torch.zeros((3, 40, 90)).to(device)
+            state = torch.zeros((3, 40, 60)).to(device)
         else:
             state = next_state
 
