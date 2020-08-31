@@ -216,11 +216,11 @@ def train(agent):
         for t in count():
             # 前10步都是随机乱走的
             piece_step += 1
-            if piece_step<10-steps_done//1000000:
-                # action = torch.tensor([[3]], device=device, dtype=torch.long)
-                action = torch.tensor([[random.randrange(3)]], device=device, dtype=torch.long)
-            else:
-                action = select_action(state.unsqueeze(0), False)
+            # if piece_step<10-steps_done//1000000:
+            #     # action = torch.tensor([[3]], device=device, dtype=torch.long)
+            #     action = torch.tensor([[random.randrange(3)]], device=device, dtype=torch.long)
+            # else:
+            action = select_action(state.unsqueeze(0), False)
 
             action_value = action.item()
             agent_state, _reward = agent.step(action_value, False)
