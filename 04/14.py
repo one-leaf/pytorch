@@ -293,7 +293,7 @@ for i_episode in range(num_episodes):
     # last_screen = get_screen()                  # [1, 3, 40, 90]
     # current_screen = get_screen()               # [1, 3, 40, 90]
     # state = current_screen - last_screen        # [1, 3, 40, 90]   
-    reward_proportion = memory.calc() 
+    # reward_proportion = memory.calc() 
     avg_loss = 0.
     for t in count():
         # 选择动作并执行
@@ -363,7 +363,7 @@ for i_episode in range(num_episodes):
         net_actions_count_value = net_actions_count.cpu().numpy()
         avg_step = avg_step*0.99 + step_episode_update/TARGET_UPDATE*0.01 
         print(i_episode, steps_done, "%.2f/%.2f"%(step_episode_update/TARGET_UPDATE, avg_step), \
-            "loss:", avg_loss, "reward_1:",  reward_proportion, \
+            "loss:", avg_loss, \
             "action_random: %.2f"%(EPS_END + (EPS_START - EPS_END) * math.exp(-1. * steps_done / EPS_DECAY)), \
             "action:", net_actions_count_value/sum(net_actions_count_value), "GAMMA:", GAMMA )
         step_episode_update = 0.
