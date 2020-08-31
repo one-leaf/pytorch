@@ -76,11 +76,11 @@ class DQN(nn.Module):
 
     def __init__(self, h, w, outputs):
         super(DQN, self).__init__()
-        self.conv1 = nn.Conv2d(3, 32, kernel_size=3, stride=2)
-        self.conv2 = nn.Conv2d(32, 32, kernel_size=3, stride=2)
+        self.conv1 = nn.Conv2d(3, 32, kernel_size=5, stride=2)
+        self.conv2 = nn.Conv2d(32, 32, kernel_size=3, stride=1)
         self.conv3 = nn.Conv2d(32, 32, kernel_size=3, stride=1)
         self.conv4 = nn.Conv2d(32, 1, kernel_size=1, stride=1)
-        self.head = nn.Linear(84, outputs)
+        self.head = nn.Linear(336, outputs)
 
     # 使用一个元素调用以确定下一个操作，或在优化期间调用batch。返回tensor([[left0exp,right0exp]...]).
     def forward(self, x):
