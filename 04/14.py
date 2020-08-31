@@ -188,6 +188,7 @@ if os.path.exists(MODEL_File):
     policy_net.load_state_dict(policy_net_sd)
 
 # 开始随机动作，后期逐渐采用预测动作 【0.05 --> 0.9】返回动作shape: [B, 1]
+net_actions_count=torch.tensor([0,0], device=device, dtype=torch.long)
 def select_action(state):
     global steps_done
     sample = random.random()
@@ -198,7 +199,9 @@ def select_action(state):
         with torch.no_grad():
             # t.max(1)将返回每行的最大列值。 
             # 最大结果的第二列是找到最大元素的索引，因此我们选择具有较大预期奖励的行动。
-            return policy_net(state).max(1)[1].view(1, 1)
+            action = policy_net(state).max(1)[1].view(1, 1)
+            net_actions_count[action]+=1
+            return action
     else:
         return torch.tensor([[random.randrange(n_actions)]], device=device, dtype=torch.long)
 
@@ -282,7 +285,6 @@ optimizer = optim.Adam(policy_net.parameters(),lr=1e-6)
 
 num_episodes = 5000000
 step_episode_update = 0.
-action_episode_update = 0.
 state = torch.zeros((3, 40, 90)).to(device) 
 for i_episode in range(num_episodes):
     # 初始化环境和状态
@@ -297,7 +299,6 @@ for i_episode in range(num_episodes):
         # 选择动作并执行
         action = select_action(state.unsqueeze(0))
         action_value = action.item()
-        action_episode_update += action_value
 
         observation_, _reward, done, _ = env.step(action_value)
 
@@ -359,13 +360,13 @@ for i_episode in range(num_episodes):
 
     # 更新目标网络，复制DQN中的所有权重和偏差
     if i_episode % TARGET_UPDATE == 0 and loss!=None :
+        net_actions_count_value = net_actions_count.cpu().numpy()
         avg_step = avg_step*0.99 + step_episode_update/TARGET_UPDATE*0.01 
         print(i_episode, steps_done, "%.2f/%.2f"%(step_episode_update/TARGET_UPDATE, avg_step), \
             "loss:", avg_loss, "reward_1:",  reward_proportion, \
             "action_random: %.2f"%(EPS_END + (EPS_START - EPS_END) * math.exp(-1. * steps_done / EPS_DECAY)), \
-            "action: %.2f"%(action_episode_update/step_episode_update), "GAMMA:", GAMMA )
+            "action: %.2f"%(net_actions_count_value/sum(net_actions_count_value)), "GAMMA:", GAMMA )
         step_episode_update = 0.
-        action_episode_update = 0.
 
         if i_episode % 1000 == 0:
             torch.save({    'policy_net': policy_net.state_dict(),
