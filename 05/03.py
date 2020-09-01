@@ -245,7 +245,7 @@ def train(agent):
                 next_state = None                    
             else:
                 # 这里如果有消除整行的奖励就直接加上
-                _reward += 0.5. #;math.exp(-1. * (t+1) / avg_step )    
+                _reward += 0.5 #;math.exp(-1. * (t+1) / avg_step )    
                 next_board = agent.getBoard().to(device)
                 next_state = torch.zeros((3, 10, 20)).to(device) 
                 next_state[0] = state[1]
