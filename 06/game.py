@@ -2,7 +2,7 @@ import gym
 import random
 from gym.envs.classic_control import rendering
 import time
- 
+
 class FiveChessEnv(gym.Env):
     metadata = {
         'render.modes': ['human', 'rgb_array'],
@@ -19,14 +19,19 @@ class FiveChessEnv(gym.Env):
         self.viewer = None
         self.step_count = 0
         self.players = [1, -1]
+        # 可用步骤
         self.reset()
-        
-    def is_valid_coord(self,x,y):
-        return x>=0 and x<self.SIZE and y>=0 and y<self.SIZE
+
+    def reset(self):
+        self.chessboard = [ [  0 for v in range(self.SIZE)  ] for v in range(self.SIZE) ]
+        self.step_count = 0
+        self.current_player = self.players[0]
+        self.availables = [(x,y) for x in range(self.SIZE) for y in range(self.SIZE)]
+        return self.chessboard
  
     # 检查当前action是否有效
-    def is_valid_set_coord(self,x,y):
-        return self.is_valid_coord(x,y) and self.chessboard[x][y]==0
+    def is_valid_set_coord(self, action):
+        return action in self.availables
  
     # 返回所有有效的下棋位置
     def get_available_locations(self):
@@ -69,6 +74,8 @@ class FiveChessEnv(gym.Env):
     #action 包括坐标和  例如：[1,3] 表示： 坐标（1,3）
     #输出 下一个状态，动作价值，是否结束，赢的用户
     def step(self, action):
+        if action not in self.availables: raise "action error"        
+        self.availables.remove(action)
         self.step_count +=1
         #胜负判定
         color = self.players[self.get_current_player()]
@@ -76,13 +83,7 @@ class FiveChessEnv(gym.Env):
         self.chessboard[action[0]][action[1]] = color
         terminal, user = self.check_terminal()
         reward = 0 if user==-1 else 1 
-        return self.chessboard,reward,terminal,{"user":user}
-
-    def reset(self):
-        self.chessboard = [ [  0 for v in range(self.SIZE)  ] for v in range(self.SIZE) ]
-        self.step_count = 0
-        self.current_player = self.players[0]
-        return self.chessboard
+        return self.chessboard, reward, terminal, {"user":user}
  
     def render(self, mode = 'human', close=False):
         if close:
@@ -153,12 +154,19 @@ class FiveChessEnv(gym.Env):
                 break
         return (ax, ay)
 
-user_point = None
-def on_mouse_press(x, y, button, modifiers):
-    global user_point
-    user_point = (x, y)
+    # 以下是AI接口
+    def do_move(self, action):
+        self.step(action)
+
+    def game_end(self):
+        return self.check_terminal()
 
 if __name__ == "__main__":
+    user_point = None
+    def on_mouse_press(x, y, button, modifiers):
+        global user_point
+        user_point = (x, y)
+
     env = FiveChessEnv(size=15, n_in_row=5)
     while True:
         env.reset()
@@ -172,7 +180,7 @@ if __name__ == "__main__":
                 while True:
                     if user_point!=None:
                         action = env.point_to_action(user_point)
-                        if env.is_valid_set_coord(*action):
+                        if env.is_valid_set_coord(action):
                             user_point = None
                             break
                     env.render()
@@ -180,7 +188,7 @@ if __name__ == "__main__":
                 _, reward, done, info = env.step(action)
                 env.render(mode="human",close=False)
             else:
-                available_locations = env.get_available_locations()
+                available_locations = env.availables
                 action = random.choice(available_locations)
                 _, reward, done, info = env.step(action)
                 env.render(mode="human",close=False)

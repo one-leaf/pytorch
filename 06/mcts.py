@@ -14,49 +14,54 @@ class TreeNode(object):
 
     def __init__(self, parent, prior_p):
         self._parent = parent
-        self._children = {}  # a map from action to TreeNode
+        self._children = {}  # 子节点 TreeNode
         self._Q = 0  # 节点分数，用于mcts树初始构建时的充分打散（每次叶子节点被最优选中时，节点隔级-leaf_value逻辑，以避免构建树时某分支被反复选中）
         self._n_visits = 0  # 节点被最优选中的次数，用于树构建完毕后的走子选择
-        self._u = 0
         self._P = prior_p  # action概率
 
+    # 扩展新的子节点
     def expand(self, action_priors):
-        """把策略函数返回的[(action,概率)]列表追加到child节点上
-            Params：action_priors=走子策略函数返回的走子概率列表[(action,概率)]
+        """把策略函数返回的 [(action,概率)] 列表追加到 child 节点上
+            Params：action_priors = 走子策略函数返回的走子概率列表 [(action,概率)]
         """
         for action, prob in action_priors:
             if action not in self._children:
                 self._children[action] = TreeNode(self, prob)
 
+    # 从子节点中选择最佳子节点
     def select(self, c_puct):
-        """从child中选择最大action Q+奖励u(P) 的动作
-            Params：c_puct=child搜索深度
-            Return: (action, next_node)
+        """从child中选择最大 action Q+奖励u(P) 的动作
+            Params：c_puct = child 搜索深度
+            Return: tuple (action, next_node)
         """
         return max(self._children.items(), key=lambda act_node: act_node[1].get_value(c_puct))
 
-    # 这个公式有点奇怪
-    # UCT = self._Q/self_n + 2*self._P*sqrt(log(root._n)/(1+self._n))
+    # 计算和返回这个节点的值
+    # 这个公式有点奇怪：
+    # 正常应该是 UCT = self._Q/self_n + 2*sqrt(log(root._n)/(1+self._n))
+    # 这个是    UCT = self._Q        + 5*self_P*sqrt(_parent._n)/(1+self_n) 
     def get_value(self, c_puct):
         """计算并返回当前节点的值
-            c_puct:     child搜索深度
+            c_puct:     一个数值，取值范围为（0， inf），调整先验概率和当前路径的权重
             self._P:    action概率
             self._parent._n_visits  父节点的最优选次数
             self._n_visits          当前节点的最优选次数
             self._Q                 当前节点的分数，用于mcts树初始构建时的充分打散
         """
-        self._u = (c_puct * self._P * np.sqrt(self._parent._n_visits) / (1 + self._n_visits))
-        return self._Q + self._u
+        _u = (c_puct * self._P * np.sqrt(self._parent._n_visits) / (1 + self._n_visits))
+        return self._Q + _u
 
+    # 反向更新当前节点
     def update(self, leaf_value):
         """更新当前节点的访问次数和叶子节点评估结果
             leaf_value: 从当前玩家的角度看子树的评估值.
         """
         # 访问计数
         self._n_visits += 1
-        # Update Q, a running average of values for all visits.
+        # 更新 Q, 加上叶子值和当前值的差异的平均数，如果叶子值比本节点价值高，本节点会增高，否则减少.
         self._Q += 1.0 * (leaf_value - self._Q) / self._n_visits
 
+    # 递归更新当前和其所有的父节点
     def update_recursive(self, leaf_value):
         """同update(), 但是对所有祖先进行递归应用
             注意：这里递归-leaf_value用于输赢交替player的分数交错+-
@@ -66,10 +71,12 @@ class TreeNode(object):
             self._parent.update_recursive(-leaf_value)
         self.update(leaf_value)
 
+    # 检查当前是否已经扩展了
     def is_leaf(self):
         """检查当前是否叶子节点"""
         return self._children == {}
 
+    # 检查当前是否是根节点
     def is_root(self):
         """检查当前是否root节点"""
         return self._parent is None
@@ -79,25 +86,24 @@ class MCTS(object):
     """蒙特卡罗树搜索的实现"""
 
     def __init__(self, policy_value_fn, c_puct=5, n_playout=10000):
-        """初始化参数"""
-        self._root = TreeNode(None, 1.0)  # root
+        """
+        初始化参数
+        policy_value_fn 一个接收board 状态并输出下一步可用动作和概率的函数，
+            输出（动作，概率）元组的列表以及[0，1]中的分数，所有分数的合计为1(softmax)
+        c_puct 控制搜索速度收敛到最大值的一个权重，取值从 (0, inf) ，这个值越大前面的父节点就会被反向更新的幅度也就越大，
+            也就是意味着较高的值会造成更多的依赖之前的步骤
+        """
+        self._root = TreeNode(None, 1.0)  # 根节点，默认概率值为1
         self._policy = policy_value_fn  # 可走子action及对应概率，这里采用平均概率
-        self._c_puct = c_puct  # MCTS child搜索深度
+        self._c_puct = c_puct  # MCTS child搜索收敛权重
         self._n_playout = n_playout  # 构建MCTS初始树的随机走子步数
 
-    def get_move(self, board):
-        """
-        构建纯MCTS初始树(节点分布充分)，并返回child中访问量最大的action
-            board: 当前游戏盘面
-            Return: 构建的树中访问量最大的action
-        """
-        for n in range(self._n_playout):
-            state_copy = copy.deepcopy(board)
-            self._playout(state_copy)
-        return max(self._root._children.items(), key=lambda act_node: act_node[1]._n_visits)[0]
-
-    # 探索和反向传播
-    def _playout(self, board):
+    # 从根节点 root 到子节点执行一次探索过程
+    # 1 如果不是叶子，就按子节点的规划执行动作，直到找到叶子
+    # 2 获取这一步的所有可能的走法，同时检查游戏有没有结束，如果没有结束，添加到当前节点的父节点
+    # 3 继续按随机策略走棋，最终得到当前这一步最后的输赢，如果赢了+1 ，否则-1，没有走完或平局为0
+    # 4 按上面得到的价值更新这条线上的所有Q值和选择次数
+    def _playout(self, state):
         """
         执行一步随机走子，对应一次MCTS树持续构建过程（选择最优叶子节点->根据走子策略概率扩充mcts树->评估并更新树的最优选次数）
             Params：state盘面 构建过程中会模拟走子，必须传入盘面的copy.deepcopy副本
@@ -111,49 +117,57 @@ class MCTS(object):
             # 从child中选择最优action
             action, node = node.select(self._c_puct)
             # 执行action走子
-            board.do_move(action)
+            state.do_move(action)
 
         # 2.Expansion（就是在前面选中的子节点中走一步创建一个新的子节点。一般策略是随机自行一个操作并且这个操作不能与前面的子节点重复）
         # 走子策略返回的[(action,概率)]list
-        action_probs, _ = self._policy(board)
+        action_probs, leaf_value = self._policy(state)
         # 检查游戏是否有赢家
-        end, winner = board.game_end()
+        end, winner = state.game_end()
         if not end:  # 没有结束时，把走子策略返回的[(action,概率)]list加载到mcts树child中
             node.expand(action_probs)
 
+        # 注意，下面这个是标准走法，但中间产生了大量的平局，所以造成网络很大，因此直接第3步的快速随机走子来达到裁剪网络的效果
+        # else:
+        #     if winner == -1:  # tie平局
+        #         leaf_value = 0.
+        #     else:
+        #         leaf_value = 1. if winner == state.get_current_player() else -1.
+
         # 3.Simulation（在前面新Expansion出来的节点开始模拟游戏，直到到达游戏结束状态，这样可以收到到这个expansion出来的节点的得分是多少）
         # 使用快速随机走子评估此叶子节点继续往后走的胜负（state执行快速走子）
-        leaf_value = self._evaluate_rollout(board)
+        leaf_value = self._evaluate_rollout(state)
         # 4.Backpropagation（把前面expansion出来的节点得分反馈到前面所有父节点中，更新这些节点的quality value和visit times，方便后面计算UCB值）
         # 递归更新当前节点及所有父节点的最优选中次数和Q分数（最优选中次数是累加的，Q分数递归-1的目的在于输赢对于交替的player来说是正负交错的）
         node.update_recursive(-leaf_value)
 
-    def update_with_move(self, last_move):
+    def update_root_with_action(self, action):
         """根据action更新根节点"""
-        if last_move in self._root._children:
-            self._root = self._root._children[last_move]
+        if action in self._root._children:
+            self._root = self._root._children[action]
             self._root._parent = None
         else:
             self._root = TreeNode(None, 1.0)
 
-    def _evaluate_rollout(self, board, limit=1000):
+    def _evaluate_rollout(self, state, limit=1000):
         """使用随机快速走子策略评估叶子节点
             Params：
-                board 当前盘面
+                state 当前盘面
                 limit 随机走子次数
             Return：如果当前玩家获胜返回+1
                     如果对手获胜返回-1
                     如果平局返回0
         """
-        player = board.get_current_player()
+        player = state.get_current_player()
+        winner = -1
         for i in range(limit):  # 随机快速走limit次，用于快速评估当前叶子节点的优略
-            end, winner = board.game_end()
+            end, winner = state.game_end()
             if end:
                 break
             # 给棋盘所有可落子位置随机分配概率，并取其中最大概率的action移动
-            action_probs = MCTS.rollout_policy_fn(board)
+            action_probs = MCTS.rollout_policy_fn(state)
             max_action = max(action_probs, key=itemgetter(1))[0]
-            board.do_move(max_action)
+            state.do_move(max_action)
         else:
             # If no break from the loop, issue a warning.
             print("WARNING: rollout reached move limit")
@@ -163,33 +177,34 @@ class MCTS(object):
             return 1 if winner == player else -1
 
     @staticmethod
-    def rollout_policy_fn(board):
+    def rollout_policy_fn(state):
         """给棋盘所有可落子位置随机分配概率"""
-        action_probs = np.random.rand(len(board.availables))
-        return zip(board.availables, action_probs)
+        action_probs = np.random.rand(len(state.availables))
+        return zip(state.availables, action_probs)
 
     @staticmethod
-    def policy_value_fn(board):
+    def policy_value_fn(state):
         """给棋盘所有可落子位置分配默认平均概率 [(0, 0.015625), (action, probability), ...], 0"""
-        action_probs = np.ones(len(board.availables)) / len(board.availables)
-        return zip(board.availables, action_probs), 0
+        action_probs = np.ones(len(state.availables)) / len(state.availables)
+        return zip(state.availables, action_probs), 0
 
-    def get_move_probs(self, board, temp=1e-3):
+    # 按照当前状态构建所有的树，默认10000局
+    def get_move_probs(self, state, temp=1e-3):
         """
         构建模型网络MCTS初始树，并返回所有action及对应模型概率
             Params：
-                board: 当前游戏盘面
+                state: 当前游戏盘面
                 temp：温度参数  控制探测水平，范围(0,1]
             Return: 所有action及对应概率
         """
         for n in range(self._n_playout):
-            state_copy = copy.deepcopy(board)
+            state_copy = copy.deepcopy(state)
             self._playout_network(state_copy)
 
         # 分解出child中的action和最优选访问次数
         act_visits = [(act, node._n_visits) for act, node in self._root._children.items()]
         acts, visits = zip(*act_visits)
-        # softmax概率
+        # softmax概率，先用log(visites)，拉平差异，再乘以一个权重，这样给了一个可以调节的参数，
         act_probs = MCTS.softmax(1.0 / temp * np.log(np.array(visits) + 1e-10))
         return acts, act_probs
 
@@ -200,7 +215,18 @@ class MCTS(object):
         probs /= np.sum(probs)
         return probs
 
-    def _playout_network(self, board):
+    def get_move(self, state):
+        """
+        构建纯MCTS初始树(节点分布充分)，并返回child中访问量最大的action
+            state: 当前游戏盘面
+            Return: 构建的树中访问量最大的action
+        """
+        for n in range(self._n_playout):
+            state_copy = copy.deepcopy(state)
+            self._playout(state_copy)
+        return max(self._root._children.items(), key=lambda act_node: act_node[1]._n_visits)[0]
+
+    def _playout_network(self, state):
         """
         执行一步走子，对应一次MCTS树持续构建过程（选择最优叶子节点->根据模型走子策略概率扩充mcts树->评估并更新树的最优选次数）
             Params：state盘面 构建过程中会模拟走子，必须传入盘面的copy.deepcopy副本
@@ -213,12 +239,12 @@ class MCTS(object):
             # 从child中选择最优action
             action, node = node.select(self._c_puct)
             # 执行action走子
-            board.do_move(action)
+            state.do_move(action)
 
         # 使用训练好的模型策略评估此叶子节点，返回[(action,概率)]list 以及当前玩家的后续走子胜负
-        action_probs, leaf_value = self._policy(board)
+        action_probs, leaf_value = self._policy(state)
         # 检查游戏是否有赢家
-        end, winner = board.game_end()
+        end, winner = state.game_end()
         if not end:  # 没有结束时，把走子策略返回的[(action,概率)]list加载到mcts树child中
             node.expand(action_probs)
         else:
@@ -226,7 +252,7 @@ class MCTS(object):
             if winner == -1:  # tie平局
                 leaf_value = 0.0
             else:
-                leaf_value = (1.0 if winner == board.get_current_player() else -1.0)
+                leaf_value = (1.0 if winner == state.get_current_player() else -1.0)
 
         # 递归更新当前节点及所有父节点的最优选中次数和Q分数
         node.update_recursive(-leaf_value)
@@ -248,18 +274,18 @@ class MCTSPurePlayer(object):
 
     def reset_player(self):
         """更新根节点:根据最后action向前探索树"""
-        self.mcts.update_with_move(-1)
+        self.mcts.update_root_with_action(None)
 
-    def get_action(self, board):
+    def get_action(self, state):
         """计算下一步走子action"""
-        if len(board.availables) > 0:  # 盘面可落子位置>0
+        if len(state.availables) > 0:  # 盘面可落子位置>0
             # 构建纯MCTS初始树(节点分布充分)，并返回child中访问量最大的action
-            move = self.mcts.get_move(board)
+            move = self.mcts.get_move(state)
             # 更新根节点:根据最后action向前探索树
-            self.mcts.update_with_move(-1)
+            self.mcts.update_root_with_action(None)
             return move
         else:
-            print("WARNING: the board is full")
+            print("WARNING: the state is full")
 
     def __str__(self):
         return "MCTS {}".format(self.player)
@@ -279,14 +305,14 @@ class MCTSPlayer(object):
 
     def reset_player(self):
         """根据最后action向前探索树（通过_root保存当前探索位置）"""
-        self.mcts.update_with_move(-1)
+        self.mcts.update_root_with_action(None)
 
-    def get_action(self, board, temp=1e-3, return_prob=0):
+    def get_action(self, state, temp=1e-3, return_prob=0):
         """计算下一步走子action"""
         # the pi vector returned by MCTS as in the alphaGo Zero paper
-        move_probs = np.zeros(board.width * board.height)
-        if len(board.availables) > 0:  # 盘面可落子位置>0
-            acts, probs = self.mcts.get_move_probs(board, temp)
+        move_probs = np.zeros(state.size * state.size)
+        if len(state.availables) > 0:  # 盘面可落子位置>0
+            acts, probs = self.mcts.get_move_probs(state, temp)
             move_probs[list(acts)] = probs
             if self._is_selfplay:  # 自我对抗
                 # 添加Dirichlet Noise进行探索（自我训练所需）
@@ -298,21 +324,21 @@ class MCTSPlayer(object):
                 logging.info(dirichlet)
                 logging.info("p:")
                 logging.info(0.75 * probs + 0.25 * dirichlet)
-                move = np.random.choice(acts, p=0.75 * probs + 0.25 * dirichlet)
+                action = np.random.choice(acts, p=0.75 * probs + 0.25 * dirichlet)
                 # 更新根节点并重用搜索树
-                self.mcts.update_with_move(move)
+                self.mcts.update_root_with_action(action)
             else:  # 和人类对战
                 # 使用默认的temp = 1e-3，它几乎相当于选择具有最高概率的移动
-                move = np.random.choice(acts, p=probs)
+                action = np.random.choice(acts, p=probs)
                 # 更新根节点:根据最后action向前探索树
-                self.mcts.update_with_move(-1)
+                self.mcts.update_root_with_action(None)
                 # 打印AI走子信息
-                location = board.move_to_location(move)
+                location = state.update_root_with_action(action)
                 print("AI move: %d,%d\n" % (location[0], location[1]))
             if return_prob:
-                return move, move_probs
+                return action, move_probs
             else:
-                return move
+                return action
         else:
             print("WARNING: the board is full")
 
