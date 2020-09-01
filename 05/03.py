@@ -139,7 +139,7 @@ class Net(nn.Module):
         return x
 
 BATCH_SIZE = 256
-GAMMA = 0.5
+GAMMA = 0.6
 EPS_START = 0.9
 EPS_END = 0.05
 EPS_DECAY = 1000000.
@@ -239,13 +239,13 @@ def train(agent):
                 next_state = None
             elif agent_state==1:
                 if _reward==0:
-                    _reward = 0.
+                    _reward = -0.5
                 else:
                     _reward += 1.
                 next_state = None                    
             else:
                 # 这里如果有消除整行的奖励就直接加上
-                _reward += 1. #;math.exp(-1. * (t+1) / avg_step )    
+                _reward += 0.5. #;math.exp(-1. * (t+1) / avg_step )    
                 next_board = agent.getBoard().to(device)
                 next_state = torch.zeros((3, 10, 20)).to(device) 
                 next_state[0] = state[1]

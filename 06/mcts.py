@@ -35,6 +35,8 @@ class TreeNode(object):
         """
         return max(self._children.items(), key=lambda act_node: act_node[1].get_value(c_puct))
 
+    # 这个公式有点奇怪
+    # UCT = self._Q/self_n + 2*self._P*sqrt(log(root._n)/(1+self._n))
     def get_value(self, c_puct):
         """计算并返回当前节点的值
             c_puct:     child搜索深度
@@ -79,7 +81,7 @@ class MCTS(object):
     def __init__(self, policy_value_fn, c_puct=5, n_playout=10000):
         """初始化参数"""
         self._root = TreeNode(None, 1.0)  # root
-        self._policy = policy_value_fn  # 可走子action及对应概率
+        self._policy = policy_value_fn  # 可走子action及对应概率，这里采用平均概率
         self._c_puct = c_puct  # MCTS child搜索深度
         self._n_playout = n_playout  # 构建MCTS初始树的随机走子步数
 
@@ -94,6 +96,7 @@ class MCTS(object):
             self._playout(state_copy)
         return max(self._root._children.items(), key=lambda act_node: act_node[1]._n_visits)[0]
 
+    # 探索和反向传播
     def _playout(self, board):
         """
         执行一步随机走子，对应一次MCTS树持续构建过程（选择最优叶子节点->根据走子策略概率扩充mcts树->评估并更新树的最优选次数）
@@ -117,6 +120,7 @@ class MCTS(object):
         end, winner = board.game_end()
         if not end:  # 没有结束时，把走子策略返回的[(action,概率)]list加载到mcts树child中
             node.expand(action_probs)
+
         # 3.Simulation（在前面新Expansion出来的节点开始模拟游戏，直到到达游戏结束状态，这样可以收到到这个expansion出来的节点的得分是多少）
         # 使用快速随机走子评估此叶子节点继续往后走的胜负（state执行快速走子）
         leaf_value = self._evaluate_rollout(board)
