@@ -2,6 +2,8 @@ import gym
 import random
 from gym.envs.classic_control import rendering
 import time
+import numpy as np
+from numpy.lib.stride_tricks import broadcast_arrays
 
 class FiveChessEnv(gym.Env):
     metadata = {
@@ -25,6 +27,7 @@ class FiveChessEnv(gym.Env):
     def reset(self):
         self.chessboard = [ [  0 for v in range(self.SIZE)  ] for v in range(self.SIZE) ]
         self.step_count = 0
+        self.last_action = None
         self.current_player = self.players[0]
         self.availables = [(x,y) for x in range(self.SIZE) for y in range(self.SIZE)]
         return self.chessboard
@@ -74,7 +77,8 @@ class FiveChessEnv(gym.Env):
     #action 包括坐标和  例如：[1,3] 表示： 坐标（1,3）
     #输出 下一个状态，动作价值，是否结束，赢的用户
     def step(self, action):
-        if action not in self.availables: raise "action error"        
+        if action not in self.availables: raise "action error"  
+        self.last_action = action     
         self.availables.remove(action)
         self.step_count +=1
         #胜负判定
@@ -154,12 +158,41 @@ class FiveChessEnv(gym.Env):
                 break
         return (ax, ay)
 
-    # 以下是AI接口
+class Agent(object):
+    def __init__(self, fivechess):
+        self.env = fivechess
+        self.env.reset()
+
     def do_move(self, action):
-        self.step(action)
+        self.env.step(action)
 
     def game_end(self):
-        return self.check_terminal()
+        return self.env.check_terminal()
+
+    def get_availables(self):
+        return self.env.availables
+
+    # 返回 [1, 4, size, size]
+    def current_state(self):
+        square_state = np.zeros((4, self.size, self.size))
+        board = self.env.chessboard
+        curr_player_id = self.env.get_current_player()
+        # 前面2层是自己和对手的棋
+        for x in range(self.size):
+            for y in range(self.size):
+                if board[x][y]!=0:
+                    idx = 0 if board[x][y]==self.env.players[curr_player_id] else 1
+                    square_state[idx][x][y] = 1.0
+        # 第三层为最后一步
+        x,y = self.env.last_action
+        square_state[2][x][y] = 1.0
+        # 第四层为如果当前用户是先手则为1
+        if curr_player_id == 0:
+            square_state[3][:,:] = 1.0
+        return square_state
+
+    def start_self_play(self):
+        pass
 
 if __name__ == "__main__":
     user_point = None
