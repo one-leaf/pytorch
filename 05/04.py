@@ -141,24 +141,30 @@ class Agent(object):
         return len(self.board[0]) - height
 
 class Net(nn.Module):
-    def __init__(self, hidden_size, output_size):
+    def __init__(self, output_size):
         super().__init__()
         self.conv1 = nn.Conv2d(3, 32, 3, 1, padding=1)
         self.conv2 = nn.Conv2d(32, 32, 3, 1, padding=1)
         self.conv3 = nn.Conv2d(32, 32, 3, 1, padding=1)
         self.conv4 = nn.Conv2d(32, 32, 3, 1, padding=1)
         self.conv5 = nn.Conv2d(32, 32, 3, 1, padding=1)
-        self.fc1 = nn.Linear(32*10*20, hidden_size)
-        self.fc2 = nn.Linear(hidden_size, output_size)
+        self.conv6 = nn.Conv2d(32, 32, 3, 1, padding=1)
+        self.conv7 = nn.Conv2d(32, 32, 3, 1, padding=1)
+        self.conv8 = nn.Conv2d(32, 32, 3, 1, padding=1)
+        self.conv9 = nn.Conv2d(32, 1, 1, 1)
+        self.fc1 = nn.Linear(10*20, output_size)
     def forward(self, x):
         x = F.relu(self.conv1(x))
         x = F.relu(self.conv2(x))
         x = F.relu(self.conv3(x))
         x = F.relu(self.conv4(x))
         x = F.relu(self.conv5(x))
-        x = x.view(-1, 32*10*20)
-        x = F.relu(self.fc1(x))
-        x = self.fc2(x)
+        x = F.relu(self.conv6(x))
+        x = F.relu(self.conv7(x))
+        x = F.relu(self.conv8(x))
+        x = F.relu(self.conv9(x))
+        x = x.view(x.size(0),-1)
+        x = self.fc1(x)
         return x
 
 BATCH_SIZE = 256
@@ -174,8 +180,8 @@ buffer = deque(maxlen=100000)
 modle_file = 'data/save/05_04_checkpoint.tar'
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 steps_done = 0
-# 200 是面板数据 10*20 ，512 是隐藏层大小
-net = Net(512, n_actions).to(device)
+# 200 是面板数据 10*20
+net = Net(n_actions).to(device)
 optimizer = optim.Adam(net.parameters(), lr=1e-6)
 
 net_actions_count=torch.tensor([0,0,0,0], device=device, dtype=torch.long)
