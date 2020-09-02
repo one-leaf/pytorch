@@ -100,6 +100,11 @@ class Agent(object):
                     board[-1].append(0)
                 else:
                     board[-1].append(1)
+        board = torch.tensor(board, dtype=torch.float)
+        return board
+
+    def get_fallpiece_board(self):                    
+        board=[[0]*20 for _ in range(10)]
         # 需要加上当前下落方块的值
         if self.fallpiece != None:
             piece = self.fallpiece
@@ -110,7 +115,19 @@ class Agent(object):
                         px, py = x+piece['x'], y+piece['y']
                         if px>=0 and py>=0:
                             board[x+piece['x']][y+piece['y']]=1
+        board = torch.tensor(board, dtype=torch.float)
+        return board
 
+    # 反向显示
+    def get_nextpiece_borad(self):
+        board=[[1]*20 for _ in range(10)]
+        if self.nextpiece != None:
+            piece = self.nextpiece  
+            shapedraw = pieces[piece['shape']][piece['rotation']]
+            for x in range(templatenum):
+                for y in range(templatenum):
+                    if shapedraw[y][x]!=blank:
+                        board[x][y]=0
         board = torch.tensor(board, dtype=torch.float)
         return board
 
@@ -126,20 +143,26 @@ class Agent(object):
 class Net(nn.Module):
     def __init__(self, hidden_size, output_size):
         super().__init__()
-        self.conv1 = nn.Conv2d(3, 16, 3, 2)
-        self.conv2 = nn.Conv2d(16, 32, 3, 2)
-        self.fc1 = nn.Linear(128, hidden_size)
+        self.conv1 = nn.Conv2d(3, 32, 3, 1, padding=1)
+        self.conv2 = nn.Conv2d(32, 32, 3, 1, padding=1)
+        self.conv3 = nn.Conv2d(32, 32, 3, 1, padding=1)
+        self.conv4 = nn.Conv2d(32, 32, 3, 1, padding=1)
+        self.conv5 = nn.Conv2d(32, 32, 3, 1, padding=1)
+        self.fc1 = nn.Linear(32*10*20, hidden_size)
         self.fc2 = nn.Linear(hidden_size, output_size)
     def forward(self, x):
         x = F.relu(self.conv1(x))
         x = F.relu(self.conv2(x))
-        x = x.view(-1, 128)
+        x = F.relu(self.conv3(x))
+        x = F.relu(self.conv4(x))
+        x = F.relu(self.conv5(x))
+        x = x.view(-1, 32*10*20)
         x = F.relu(self.fc1(x))
         x = self.fc2(x)
         return x
 
 BATCH_SIZE = 256
-GAMMA = 0.7
+GAMMA = 0.5
 EPS_START = 0.9
 EPS_END = 0.05
 EPS_DECAY = 1000000.
@@ -148,7 +171,7 @@ Transition = namedtuple('Transition', ('state', 'action', 'next_state', 'reward'
 
 n_actions = 4 
 buffer = deque(maxlen=100000)
-modle_file = 'data/save/05_03_checkpoint.tar'
+modle_file = 'data/save/05_04_checkpoint.tar'
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 steps_done = 0
 # 200 是面板数据 10*20 ，512 是隐藏层大小
@@ -207,13 +230,15 @@ def train(agent):
         avg_step = checkpoint['avg_step']
         net.load_state_dict(net_sd)
 
-    state = torch.zeros((3, 10, 20)).to(device)   
     for i_episode in range(num_episodes):
         avg_loss = 0.
         board = agent.getBoard().to(device)
-        state[-1] = board
+        board_1 = agent.get_fallpiece_board().to(device)
+        board_2 = agent.get_nextpiece_borad().to(device)
+        state = torch.stack([board,board_1,board_2])
         piece_step = 0  # 方块步数
         for t in count():
+
             # 前10步都是随机乱走的
             piece_step += 1
             curr_board_height = agent.getBoardCurrHeight()
@@ -237,44 +262,43 @@ def train(agent):
             if is_terminal :
                 _reward = -1.
                 next_state = None
-            elif agent_state==1:
-                if _reward==0:
-                    _reward = -0.5
-                else:
-                    _reward += 1.
-                next_state = None                    
             else:
-                # 这里如果有消除整行的奖励就直接加上
-                _reward += 0.5 #;math.exp(-1. * (t+1) / avg_step )    
-                next_board = agent.getBoard().to(device)
-                next_state = torch.zeros((3, 10, 20)).to(device) 
-                next_state[0] = state[1]
-                next_state[1] = state[2]
-                next_state[2] = next_board   
+                if agent_state==1:
+                    if _reward==0:
+                        _reward = -0.5
+                    else:
+                        _reward += 1.
+                else:
+                    _reward += 0.5
+                board = agent.getBoard().to(device)
+                board_1 = agent.get_fallpiece_board().to(device)
+                board_2 = agent.get_nextpiece_borad().to(device)
+                next_state = torch.stack([board,board_1,board_2])
             
             reward = torch.tensor([_reward], device=device)
             buffer.append(Transition(state, action, next_state, reward))
 
             # print(t, action, reward)
+            # print(t, action, reward,  state)
             # plt.figure()
             # plt.imshow(np.transpose(state,(1,2,0)))
             # if next_state!=None:
             #     plt.figure()            
             #     plt.imshow(np.transpose(next_state,(1,2,0)))
             # plt.show()
+            # if  t>3:
+            #     raise "ddd"
 
             loss = optimize_model()
             if loss!=None:       
                 avg_loss += loss.item() 
-            
-            if next_state == None:
-                state = torch.zeros((3, 10, 20)).to(device)
-            else:
-                state = next_state
 
-            if is_terminal or t>=10000:
+            if is_terminal:
                 agent.reset()
                 break
+
+            state = next_state
+
         step_episode_update += t
         avg_step = avg_step*0.999 + t*0.001
         avg_loss = avg_loss / t
@@ -338,7 +362,7 @@ def test(agent):
 if __name__ == "__main__":
     tetromino = Tetromino()
     agent = Agent(tetromino)
-    # train(agent)
+    train(agent)
     if device.type == "cpu":
         test(agent)
     else:
