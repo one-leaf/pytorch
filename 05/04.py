@@ -338,7 +338,6 @@ def test(agent):
     net.load_state_dict(net_sd)
     net.eval()
     for i_episode in range(num_episodes):
-        state = torch.zeros((3, 10, 20)).to(device)   
         for t in count():
             for event in pygame.event.get():  # 需要事件循环，否则白屏
                 if event.type == QUIT:
@@ -346,9 +345,9 @@ def test(agent):
                     sys.exit()    
 
             board = agent.getBoard().to(device)
-            state[0] = state[1]
-            state[1] = state[2]
-            state[2] = board
+            board_1 = agent.get_fallpiece_board().to(device)
+            board_2 = agent.get_nextpiece_borad().to(device)
+            state = torch.stack([board,board_1,board_2])
 
             # plt.imshow(np.transpose(state,(1,2,0)))
             # plt.show()
@@ -361,14 +360,12 @@ def test(agent):
                 agent.reset()
                 break
 
-            time.sleep(0.1)
-        net_actions_count_value = net_actions_count.cpu().numpy()
-        print("action_counts:",net_actions_count_value/sum(net_actions_count_value))
+            time.sleep(0.01)
 
 if __name__ == "__main__":
     tetromino = Tetromino()
     agent = Agent(tetromino)
-    train(agent)
+    # train(agent)
     if device.type == "cpu":
         test(agent)
     else:
