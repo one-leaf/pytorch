@@ -141,8 +141,8 @@ class Agent(object):
                         height = h
         return len(self.board[0]) - height
 
-    # 判断是否存在空洞, minHoles 能够允许的最低空洞个数阈值
-    def isExitesEmptyHoles(self, minHoles=0):
+    # 空洞个数 
+    def getEmptyHolesCount(self):
         boardwidth = len(self.board)
         boardheight = len(self.board[0])
         holesCount = 0
@@ -152,10 +152,8 @@ class Agent(object):
                 if self.board[x][y]!=blank:
                     find_block = True
                 elif find_block:
-                    holesCount += 1
-                    if holesCount>minHoles:
-                        return True            
-        return False
+                    holesCount += 1          
+        return holesCount
 
 class Net(nn.Module):
     def __init__(self, output_size):
@@ -260,8 +258,8 @@ def train(agent):
         board_2 = agent.get_nextpiece_borad().to(device)
         state = torch.stack([board,board_1,board_2])
         piece_step = 0  # 方块步数
+        holesCount = 0
         for t in count():
-
             # 前10步都是随机乱走的
             piece_step += 1
             curr_board_height = agent.getBoardCurrHeight()
@@ -280,7 +278,7 @@ def train(agent):
             # 如果是一个新方块落下，设置当前方块的步数为0
             if agent_state==1: 
                 piece_step = 0
-                               
+                            
             # if curr_board_height > 2 + steps_done//1000000:
             #     is_terminal = True
 
@@ -290,11 +288,13 @@ def train(agent):
             else:
                 if agent_state==1:
                     if _reward==0:
-                        # 如果出现空洞就惩罚
-                        if agent.isExitesEmptyHoles():
+                        # 如果没有奖励且又出现空洞就惩罚
+                        curr_holesCount = agent.getEmptyHolesCount()
+                        if curr_holesCount>holesCount:
                             _reward = -1.
                         else:
-                            _reward = -0.5
+                            _reward = -0.
+                        holesCount = curr_holesCount
                     else:
                         _reward += 1.
                 else:

@@ -116,7 +116,7 @@ class PolicyValueNet():
         entropy = -torch.mean(
                 torch.sum(torch.exp(log_act_probs) * log_act_probs, 1)
                 )
-        return loss.data[0], entropy.data[0]
+        return loss.items(), entropy.item()
 
     def get_policy_param(self):
         net_params = self.policy_value_net.state_dict()
