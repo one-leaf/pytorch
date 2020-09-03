@@ -143,9 +143,9 @@ class Agent(object):
 
     # 判断是否存在空洞
     def isExitesEmptyHoles(self):
-        for x in range(self.boardwidth):
+        for x in range(self.tetromino.boardwidth):
             find_block = False
-            for y in range(self.boardheight):
+            for y in range(self.tetromino.boardheight):
                 if self.board[x][y]!=blank:
                     find_block = True
                 elif find_block:
