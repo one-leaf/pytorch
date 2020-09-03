@@ -1,6 +1,6 @@
 from policy_value_net import PolicyValueNet  
 from mcts import MCTSPurePlayer, MCTSPlayer
-from game import FiveChessEnv, Agent
+from agent import Agent
 import os
 import sys
 import random
@@ -8,23 +8,18 @@ import logging
 import numpy as np
 from collections import defaultdict, deque
 
-CUR_PATH = os.path.dirname(os.path.abspath(__file__))
-
-# from net.policy_value_net import PolicyValueNet  # Theano and Lasagne
-# from net.policy_value_net_pytorch import PolicyValueNet  # Pytorch
-# from net.policy_value_net_tensorflow import PolicyValueNet # Tensorflow
-
+curr_dir = os.path.dirname(os.path.abspath(__file__))
+size = 15  # 棋盘大小
+n_in_row = 5  # 几子连线
+model_file =  os.path.join(curr_dir, '../data/model/06_policy_{}x{}.model'.format(size, size))
 
 class GomokuTrainPipeline():
-    def __init__(self, init_model=None, size=8, n_in_row=5):
-        # 棋盘大小 8*8, 5个子连起来
-        self.size = size
-        self.n_in_row = n_in_row  # n子相连
+    def __init__(self):
         self.policy_evaluate_size = 10  # 策略评估胜率时的模拟对局次数
         self.game_batch_num = 10000  # selfplay对战次数
         self.batch_size = 512  # data_buffer中对战次数超过n次后开始启动模型训练
         self.check_freq = 50  # 每对战n次检查一次当前模型vs旧模型胜率
-        self.game = Agent(FiveChessEnv(size=self.size, n_in_row=self.n_in_row))
+        self.game = Agent(size, n_in_row)
 
         # training params
         self.learn_rate = 2e-3
@@ -41,12 +36,12 @@ class GomokuTrainPipeline():
         # 纯MCTS的模拟数，用于评估策略模型
         self.pure_mcts_playout_num = 1000 # 用户纯MCTS构建初始树时的随机走子步数
         self.c_puct = 5  # MCTS child权重
-        if init_model:
+        if os.path.exists(model_file):
             # 使用一个训练好的策略价值网络
-            self.policy_value_net = PolicyValueNet(self.size, model_file=init_model)
+            self.policy_value_net = PolicyValueNet(size, model_file=model_file)
         else:
             # 使用一个新的的策略价值网络
-            self.policy_value_net = PolicyValueNet(self.size)
+            self.policy_value_net = PolicyValueNet(size)
         # 创建使用策略价值网络来指导树搜索和评估叶节点的MCTS玩家
         self.mcts_player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout, is_selfplay=1)
 
@@ -140,12 +135,12 @@ class GomokuTrainPipeline():
                     logging.info("TRAIN Current self-play batch: {}".format(i + 1))
                     # 策略胜率评估：模型与纯MCTS玩家对战n局看胜率
                     win_ratio = self.policy_evaluate(self.policy_evaluate_size)
-                    self.policy_value_net.save_model(CUR_PATH + '/model/current_policy_{}x{}.model'.format(self.board_width, self.board_height))
+                    self.policy_value_net.save_model(model_file)
                     if win_ratio > self.best_win_ratio:  # 胜率超过历史最优模型
                         logging.info("TRAIN New best policy!!!!!!!!batch:{} win_ratio:{}->{} pure_mcts_playout_num:{}".format(i + 1, self.best_win_ratio, win_ratio, self.pure_mcts_playout_num))
                         self.best_win_ratio = win_ratio
                         # 保存当前模型为最优模型best_policy
-                        self.policy_value_net.save_model(CUR_PATH + '/model/best_policy_{}x{}.model'.format(self.board_width, self.board_height))
+                        self.policy_value_net.save_model(model_file)
                         # 如果胜率=100%，则增加纯MCT的模拟数 (<6000的限制视mem情况)
                         if self.best_win_ratio == 1.0: # and self.pure_mcts_playout_num < 6000:
                             self.pure_mcts_playout_num += 1000
@@ -156,10 +151,5 @@ class GomokuTrainPipeline():
 
 if __name__ == '__main__':
     # train
-    size = 15  # 棋盘大小
-    model_file = '{}/model/current_policy_{}x{}.model'.format(CUR_PATH, size, size)
-    print("model file exists: {}".format(os.path.exists(model_file)))
-    model_file = '' if os.path.exists(model_file) is False else model_file
-    #training_pipeline = GomokuTrainPipeline(size=size)
-    training_pipeline = GomokuTrainPipeline(init_model=model_file, size=size)
+    training_pipeline = GomokuTrainPipeline()
     training_pipeline.run()

@@ -36,13 +36,13 @@ class Net(nn.Module):
         # 动作
         x_act = F.relu(self.act_conv1(x))
         x_act = x_act.view(x.size(0), -1)
-        x_act = F.log_softmax(self.act_fc1(x_act))
+        x_act = F.log_softmax(self.act_fc1(x_act),dim=1)
 
         # 胜率 输出为 -1 ~ 1 之间的数字
         x_val = F.relu(self.val_conv1(x))
         x_val = x_val.view(x.size(0), -1)
         x_val = F.relu(self.val_fc1(x_val))
-        x_val = F.tanh(self.val_fc2(x_val))
+        x_val = torch.tanh(self.val_fc2(x_val))
         return x_act, x_val
 
 
@@ -54,7 +54,7 @@ class PolicyValueNet():
         self.policy_value_net = Net(size).to(device)
         self.optimizer = optim.Adam(self.policy_value_net.parameters(), weight_decay=self.l2_const)
 
-        if os.path.exists(model_file):
+        if model_file and os.path.exists(model_file):
             net_sd = torch.load(model_file, map_location=self.device)
             self.policy_value_net.load_state_dict(net_sd)
 
@@ -71,18 +71,21 @@ class PolicyValueNet():
         return act_probs, value.data.cpu().numpy()
 
     # 从当前棋局获得 ((action, act_probs),...) 的可用动作概率和当前棋盘胜率
-    def policy_value_fn(self, board):
+    def policy_value_fn(self, game):
         """
-        input: board
+        input: game
         output: a list of (action, probability) tuples for each available
-        action and the score of the board state
+        action and the score of the game state
         """
-        legal_positions =[x+y*self.size for x,y in board.availables]
-        current_state = board.current_state().reshape(1, 4, self.size, self.size)
+        legal_positions = game.actions_to_positions(game.get_availables())
+        current_state = game.current_state().reshape(1, 4, self.size, self.size)
         act_probs, value = self.policy_value(current_state)
         act_probs = act_probs.flatten()
-        act_probs = zip(legal_positions, act_probs[legal_positions])
-        value = value.data[0][0]
+
+        actions = game.positions_to_actions(legal_positions)
+        
+        act_probs = zip(actions, act_probs[legal_positions])
+        value = value[0][0]
         return act_probs, value
 
     def train_step(self, state_batch, mcts_probs, winner_batch, lr):

@@ -2,8 +2,6 @@ import gym
 import random
 from gym.envs.classic_control import rendering
 import time
-import numpy as np
-from numpy.lib.stride_tricks import broadcast_arrays
 
 class FiveChessEnv(gym.Env):
     metadata = {
@@ -20,7 +18,8 @@ class FiveChessEnv(gym.Env):
         self.chessboard = [ [  0 for v in range(self.SIZE)  ] for v in range(self.SIZE) ]
         self.viewer = None
         self.step_count = 0
-        self.players = [1, -1]
+        self.players = [0, 1]
+        self.colors = [1, -1]
         # 可用步骤
         self.reset()
 
@@ -45,10 +44,6 @@ class FiveChessEnv(gym.Env):
                     results.append([x,y])
         return results
  
-    # 获取当前用户
-    def get_current_player(self):
-        return self.step_count%2
-
     # 检查是否游戏结束,返回赢的用户0 或 1，如果平局返回-1
     def check_terminal(self):
         # 如果都没有下子的位置了，则返回平局
@@ -62,27 +57,31 @@ class FiveChessEnv(gym.Env):
                 color = self.chessboard[x][y]
                 if color == 0: continue
                 if self.SIZE-x>=n and abs(sum([self.chessboard[x+i][y] for i in range(n)]))==n:  
-                    return True, self.players.index(color)
+                    return True, self.colors.index(color)
 
                 if self.SIZE-y>=n and abs(sum([self.chessboard[x][y+i] for i in range(n)]))==n:  
-                    return True, self.players.index(color)
+                    return True, self.colors.index(color)
 
                 if self.SIZE-x>=n and self.SIZE-y>=n and abs(sum([self.chessboard[x+i][y+i] for i in range(n)]))==n:  
-                    return True, self.players.index(color)
+                    return True, self.colors.index(color)
 
                 if self.SIZE-x>=n and y>=n and abs(sum([self.chessboard[x+i][y-i] for i in range(n)]))==n:  
-                    return True, self.players.index(color)
+                    return True, self.colors.index(color)
         return False, -1        
 
     #action 包括坐标和  例如：[1,3] 表示： 坐标（1,3）
     #输出 下一个状态，动作价值，是否结束，赢的用户
     def step(self, action):
-        if action not in self.availables: raise "action error"  
+        if action not in self.availables:
+            print(action)
+            raise "action error"  
         self.last_action = action     
         self.availables.remove(action)
         self.step_count +=1
+        self.current_player = self.step_count % 2
+
         #胜负判定
-        color = self.players[self.get_current_player()]
+        color = self.colors[self.current_player]
         #棋子
         self.chessboard[action[0]][action[1]] = color
         terminal, user = self.check_terminal()
@@ -158,41 +157,6 @@ class FiveChessEnv(gym.Env):
                 break
         return (ax, ay)
 
-class Agent(object):
-    def __init__(self, fivechess):
-        self.env = fivechess
-        self.env.reset()
-
-    def do_move(self, action):
-        self.env.step(action)
-
-    def game_end(self):
-        return self.env.check_terminal()
-
-    def get_availables(self):
-        return self.env.availables
-
-    # 返回 [1, 4, size, size]
-    def current_state(self):
-        square_state = np.zeros((4, self.size, self.size))
-        board = self.env.chessboard
-        curr_player_id = self.env.get_current_player()
-        # 前面2层是自己和对手的棋
-        for x in range(self.size):
-            for y in range(self.size):
-                if board[x][y]!=0:
-                    idx = 0 if board[x][y]==self.env.players[curr_player_id] else 1
-                    square_state[idx][x][y] = 1.0
-        # 第三层为最后一步
-        x,y = self.env.last_action
-        square_state[2][x][y] = 1.0
-        # 第四层为如果当前用户是先手则为1
-        if curr_player_id == 0:
-            square_state[3][:,:] = 1.0
-        return square_state
-
-    def start_self_play(self):
-        pass
 
 if __name__ == "__main__":
     user_point = None
@@ -201,38 +165,36 @@ if __name__ == "__main__":
         user_point = (x, y)
 
     env = FiveChessEnv(size=15, n_in_row=5)
-    while True:
-        env.reset()
-        env.render()
-        env.viewer.window.on_mouse_press = on_mouse_press
-        done = False
 
-        is_human = True        
-        while not done:
-            if is_human:
-                while True:
-                    if user_point!=None:
-                        action = env.point_to_action(user_point)
-                        if env.is_valid_set_coord(action):
-                            user_point = None
-                            break
-                    env.render()
-                    time.sleep(0.1)
-                _, reward, done, info = env.step(action)
-                env.render(mode="human",close=False)
-            else:
-                available_locations = env.availables
-                action = random.choice(available_locations)
-                _, reward, done, info = env.step(action)
-                env.render(mode="human",close=False)
-            
-            is_human = not is_human
-            
-            if done:
-                curr_user = env.get_current_player()
-                step_count = env.step_count
-                print(f'win_user: {info["user"]}, curr_user: {curr_user} reward: {reward} step_count: {step_count}')
-                for i in range(50):
-                    time.sleep(0.1)
-                break
+    env.reset()
+    env.render()
+    env.viewer.window.on_mouse_press = on_mouse_press
+    done = False
 
+    is_human = True        
+    while not done:
+        if is_human:
+            while True:
+                if user_point!=None:
+                    action = env.point_to_action(user_point)
+                    if env.is_valid_set_coord(action):
+                        user_point = None
+                        break
+                env.render()
+                time.sleep(0.1)
+            _, reward, done, info = env.step(action)
+            env.render(mode="human",close=False)
+        else:
+            available_locations = env.availables
+            action = random.choice(available_locations)
+            _, reward, done, info = env.step(action)
+            env.render(mode="human",close=False)
+        
+        is_human = not is_human
+        
+        if done:
+            curr_user = env.current_player
+            step_count = env.step_count
+            print(f'win_user: {info["user"]}, curr_user: {curr_user} reward: {reward} step_count: {step_count}')
+
+    env.close()            

@@ -117,7 +117,7 @@ class MCTS(object):
             # 从child中选择最优action
             action, node = node.select(self._c_puct)
             # 执行action走子
-            state.do_move(action)
+            state.step(action)
 
         # 2.Expansion（就是在前面选中的子节点中走一步创建一个新的子节点。一般策略是随机自行一个操作并且这个操作不能与前面的子节点重复）
         # 走子策略返回的[(action,概率)]list
@@ -151,7 +151,7 @@ class MCTS(object):
             # 从child中选择最优action
             action, node = node.select(self._c_puct)
             # 执行action走子
-            state.do_move(action)
+            state.step(action)
 
         # 使用训练好的模型策略评估此叶子节点，返回[(action,概率)]list 以及当前玩家的后续走子胜负
         action_probs, leaf_value = self._policy(state)
@@ -186,7 +186,7 @@ class MCTS(object):
                     如果对手获胜返回-1
                     如果平局返回0
         """
-        player = state.get_current_player()
+        player = state.current_player
         winner = -1
         for i in range(limit):  # 随机快速走limit次，用于快速评估当前叶子节点的优略
             end, winner = state.game_end()
@@ -195,7 +195,7 @@ class MCTS(object):
             # 给棋盘所有可落子位置随机分配概率，并取其中最大概率的action移动
             action_probs = MCTS.rollout_policy_fn(state)
             max_action = max(action_probs, key=itemgetter(1))[0]
-            state.do_move(max_action)
+            state.step(max_action)
         else:
             # If no break from the loop, issue a warning.
             print("WARNING: rollout reached move limit")
@@ -207,14 +207,16 @@ class MCTS(object):
     @staticmethod
     def rollout_policy_fn(state):
         """给棋盘所有可落子位置随机分配概率"""
-        action_probs = np.random.rand(len(state.availables))
-        return zip(state.availables, action_probs)
+        availables = state.get_availables()
+        action_probs = np.random.rand(len(availables))
+        return zip(availables, action_probs)
 
     @staticmethod
     def policy_value_fn(state):
         """给棋盘所有可落子位置分配默认平均概率 [(0, 0.015625), (action, probability), ...], 0"""
-        action_probs = np.ones(len(state.availables)) / len(state.availables)
-        return zip(state.availables, action_probs), 0
+        availables = state.get_availables()
+        action_probs = np.ones(len(availables)) / len(availables)
+        return zip(availables, action_probs), 0
 
     @staticmethod
     def softmax(x):
@@ -278,7 +280,7 @@ class MCTSPurePlayer(object):
 
     def get_action(self, state):
         """计算下一步走子action"""
-        if len(state.availables) > 0:  # 盘面可落子位置>0
+        if len(state.get_availables()) > 0:  # 盘面可落子位置>0
             # 构建纯MCTS初始树(节点分布充分)，并返回child中访问量最大的action
             move = self.mcts.get_action(state)
             # 更新根节点:根据最后action向前探索树
@@ -311,9 +313,10 @@ class MCTSPlayer(object):
         """计算下一步走子action"""
         # the pi vector returned by MCTS as in the alphaGo Zero paper
         move_probs = np.zeros(state.size * state.size)
-        if len(state.availables) > 0:  # 盘面可落子位置>0
+        if len(state.get_availables()) > 0:  # 盘面可落子位置>0
             acts, probs = self.mcts.get_action_probs(state, temp)
-            move_probs[list(acts)] = probs
+            positions = state.actions_to_positions(acts)
+            move_probs[positions] = probs
             if self._is_selfplay:  # 自我对抗
                 # 添加Dirichlet Noise进行探索（自我训练所需）
                 # dirichlet噪声参数中的0.3：一般按照反比于每一步的可行move数量设置，所以棋盘扩大或改围棋之后这个参数需要减小（此值设置过大容易出现在自我对弈的训练中陷入到两方都只进攻不防守的困境中无法提高）
@@ -324,12 +327,14 @@ class MCTSPlayer(object):
                 logging.info(dirichlet)
                 logging.info("p:")
                 logging.info(0.75 * probs + 0.25 * dirichlet)
-                action = np.random.choice(acts, p=0.75 * probs + 0.25 * dirichlet)
+                position = np.random.choice(positions, p=0.75 * probs + 0.25 * dirichlet)
+                action = state.positions_to_actions([position])[0]
                 # 更新根节点并重用搜索树
                 self.mcts.update_root_with_action(action)
             else:  # 和人类对战
                 # 使用默认的temp = 1e-3，它几乎相当于选择具有最高概率的移动
-                action = np.random.choice(acts, p=probs)
+                position = np.random.choice(positions, p=probs)
+                action = state.positions_to_actions([position])[0]
                 # 更新根节点:根据最后action向前探索树
                 self.mcts.update_root_with_action(None)
                 # 打印AI走子信息
