@@ -142,7 +142,7 @@ class Agent(object):
         return len(self.board[0]) - height
 
     # 判断是否存在空洞, minHoles 能够允许的最低空洞个数阈值
-    def isExitesEmptyHoles(self, minHoles=1):
+    def isExitesEmptyHoles(self, minHoles=0):
         boardwidth = len(self.board)
         boardheight = len(self.board[0])
         holesCount = 0
@@ -274,7 +274,8 @@ def train(agent):
             action_value = action.item()
             agent_state, _reward = agent.step(action_value, False)
 
-            is_terminal = (agent_state == 2) or (agent_state==1 and agent.isExitesEmptyHoles())
+            # 如果出现大于5个空洞就结束
+            is_terminal = (agent_state == 2) or (agent_state==1 and agent.isExitesEmptyHoles(5))
 
             # 如果是一个新方块落下，设置当前方块的步数为0
             if agent_state==1: 
@@ -289,6 +290,7 @@ def train(agent):
             else:
                 if agent_state==1:
                     if _reward==0:
+                        # 如果出现空洞就惩罚
                         if agent.isExitesEmptyHoles():
                             _reward = -1.
                         else:
