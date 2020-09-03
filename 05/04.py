@@ -141,17 +141,20 @@ class Agent(object):
                         height = h
         return len(self.board[0]) - height
 
-    # 判断是否存在空洞
-    def isExitesEmptyHoles(self):
+    # 判断是否存在空洞, minHoles 能够允许的最低空洞个数阈值
+    def isExitesEmptyHoles(self, minHoles=1):
         boardwidth = len(self.board)
         boardheight = len(self.board[0])
+        holesCount = 0
         for x in range(boardwidth):
             find_block = False
             for y in range(boardheight):
                 if self.board[x][y]!=blank:
                     find_block = True
                 elif find_block:
-                    return True            
+                    holesCount += 1
+                    if holesCount>minHoles:
+                        return True            
         return False
 
 class Net(nn.Module):
