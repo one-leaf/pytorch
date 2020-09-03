@@ -30,7 +30,7 @@ class Agent(object):
         return self.env.availables
 
     def get_current_player(self):
-        return self.current_player
+        return self.env.current_player
 
     # 返回 [1, 4, size, size]
     def current_state(self):
