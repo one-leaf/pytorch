@@ -108,7 +108,7 @@ env.reset()
 # plt.title('Example extracted screen')
 # plt.show()
 
-BATCH_SIZE = 128
+BATCH_SIZE = 64
 # 得分的权重，这个值越小，越容易快速将得分压制到 1/(1-GAMMA) ，但同时最长远步骤的影响力也就越小，不能压制的太小
 # 得分压制的太小会导致 Loss 过小，MSE的梯度会变得很小，不容易学习
 GAMMA = 0.5
