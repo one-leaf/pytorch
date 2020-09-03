@@ -131,6 +131,7 @@ class Agent(object):
         board = torch.tensor(board, dtype=torch.float)
         return board
 
+    # 计算当前的最高点
     def getBoardCurrHeight(self):
         height=len(self.board[0])
         for line in self.board:
@@ -139,6 +140,17 @@ class Agent(object):
                     if h<height:
                         height = h
         return len(self.board[0]) - height
+
+    # 判断是否存在空洞
+    def isExitesEmptyHoles(self):
+        for x in range(self.boardwidth):
+            find_block = False
+            for y in range(self.boardheight):
+                if self.board[x][y]!=blank:
+                    find_block = True
+                elif find_block:
+                    return True            
+        return False
 
 class Net(nn.Module):
     def __init__(self, output_size):
@@ -256,7 +268,8 @@ def train(agent):
 
             action_value = action.item()
             agent_state, _reward = agent.step(action_value, False)
-            is_terminal = (agent_state == 2)
+
+            is_terminal = (agent_state == 2) 
 
             # 如果是一个新方块落下，设置当前方块的步数为0
             if agent_state==1: 
@@ -271,7 +284,10 @@ def train(agent):
             else:
                 if agent_state==1:
                     if _reward==0:
-                        _reward = -0.5
+                        if agent.isExitesEmptyHoles():
+                            _reward = -1.
+                        else:
+                            _reward = -0.5
                     else:
                         _reward += 1.
                 else:
