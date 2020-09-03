@@ -143,7 +143,7 @@ class Agent(object):
 
     # 判断是否存在空洞
     def isExitesEmptyHoles(self):
-        boardwidth = len(self.borad)
+        boardwidth = len(self.board)
         boardheight = len(self.board[0])
         for x in range(boardwidth):
             find_block = False
