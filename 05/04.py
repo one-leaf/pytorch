@@ -293,8 +293,10 @@ def train(agent):
                         curr_holesCount = agent.getEmptyHolesCount()
                         if curr_holesCount>holesCount:
                             _reward = -1.
+                        elif curr_holesCount==holesCount:
+                            _reward = 0.5
                         else:
-                            _reward = -0.
+                            _reward = 1.
                         holesCount = curr_holesCount
                     else:
                         _reward += 1.
