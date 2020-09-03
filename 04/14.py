@@ -76,16 +76,12 @@ class DQN(nn.Module):
 
     def __init__(self, h, w, outputs):
         super(DQN, self).__init__()
-        self.conv1 = nn.Conv2d(3, 32, kernel_size=3, stride=1)
-        self.conv2 = nn.Conv2d(32, 32, kernel_size=3, stride=1)
-        self.conv3 = nn.Conv2d(32, 32, kernel_size=3, stride=1)
-        self.conv4 = nn.Conv2d(32, 32, kernel_size=3, stride=1)
-        self.conv5 = nn.Conv2d(32, 32, kernel_size=3, stride=1)
-        self.conv6 = nn.Conv2d(32, 32, kernel_size=3, stride=1)
-        self.conv7 = nn.Conv2d(32, 32, kernel_size=3, stride=1)
-        self.conv8 = nn.Conv2d(32, 32, kernel_size=3, stride=1)
-        self.conv9 = nn.Conv2d(32, 1, kernel_size=1, stride=1)
-        self.head = nn.Linear(1056, outputs)
+        self.conv1 = nn.Conv2d(3, 32, kernel_size=3, stride=2)
+        self.conv2 = nn.Conv2d(32, 32, kernel_size=3, stride=2)
+        self.conv3 = nn.Conv2d(32, 32, kernel_size=3, stride=2)
+        self.conv4 = nn.Conv2d(32, 32, kernel_size=3, stride=2)
+        self.conv5 = nn.Conv2d(32, 1, kernel_size=1, stride=1)
+        self.head = nn.Linear(864, outputs)
 
     # 使用一个元素调用以确定下一个操作，或在优化期间调用batch。返回tensor([[left0exp,right0exp]...]).
     def forward(self, x):
@@ -94,16 +90,12 @@ class DQN(nn.Module):
         x = F.relu(self.conv3(x))         #[B, 32, 7, 20] => [B, 64, 3, 9]
         x = F.relu(self.conv4(x))         #[B, 64, 3, 9] => [B, 128, 1, 1]
         x = F.relu(self.conv5(x))         
-        x = F.relu(self.conv6(x))         
-        x = F.relu(self.conv7(x))         
-        x = F.relu(self.conv8(x))         
-        x = F.relu(self.conv9(x))         
         x = x.view(x.size(0), -1)
         return self.head(x)               #[B, 128] => [B, 2]
 
 resize = T.Compose([T.ToPILImage(),
-                    T.Resize(40, interpolation=Image.CUBIC),
                     T.Grayscale(num_output_channels=1),
+                    # T.Resize(40, interpolation=Image.CUBIC),
                     T.ToTensor(),
                     T.Normalize(mean=(0.5,),std=(0.5,))])
 def get_screen():
@@ -116,7 +108,7 @@ env.reset()
 # plt.title('Example extracted screen')
 # plt.show()
 
-BATCH_SIZE = 256
+BATCH_SIZE = 128
 # 得分的权重，这个值越小，越容易快速将得分压制到 1/(1-GAMMA) ，但同时最长远步骤的影响力也就越小，不能压制的太小
 # 得分压制的太小会导致 Loss 过小，MSE的梯度会变得很小，不容易学习
 GAMMA = 0.5
@@ -255,7 +247,7 @@ optimizer = optim.Adam(policy_net.parameters(),lr=1e-6)
 
 num_episodes = 5000000
 step_episode_update = 0.
-state = torch.zeros((3, 40, 60)).to(device) 
+state = torch.zeros((3, 400, 600)).to(device) 
 for i_episode in range(num_episodes):
     # 初始化环境和状态
     env.reset()
@@ -293,7 +285,7 @@ for i_episode in range(num_episodes):
         # 观察新的状态,下一个状态 等于当前屏幕 - 上一个屏幕 ？ 这样抗干扰高？所有的状态预测都是像素差
         current_screen = get_screen()
         if not done:
-            next_state = torch.zeros((3, 40, 60)).to(device) 
+            next_state = torch.zeros((3, 400, 600)).to(device) 
             next_state[0] = state[1]
             next_state[1] = state[2]
             next_state[2] = current_screen  
@@ -310,7 +302,7 @@ for i_episode in range(num_episodes):
             avg_loss += loss.item() 
 
         if next_state == None:
-            state = torch.zeros((3, 40, 60)).to(device)
+            state = torch.zeros((3, 400, 600)).to(device)
         else:
             state = next_state
 

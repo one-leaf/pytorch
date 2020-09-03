@@ -55,7 +55,7 @@ class GomokuTrainPipeline():
             for i in [1, 2, 3, 4]:
                 # 逆时针旋转
                 equi_state = np.array([np.rot90(s, i) for s in state])
-                equi_mcts_prob = np.rot90(np.flipud(mcts_porb.reshape(self.board_height, self.board_width)), i)
+                equi_mcts_prob = np.rot90(np.flipud(mcts_porb.reshape(size, size)), i)
                 extend_data.append((equi_state, np.flipud(equi_mcts_prob).flatten(), winner))
                 # 水平翻转
                 equi_state = np.array([np.fliplr(s) for s in equi_state])
