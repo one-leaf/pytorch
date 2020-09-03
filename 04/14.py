@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from collections import namedtuple
 from itertools import count
 from PIL import Image
-import os
+import os,time
 
 import torch
 from torch import mode
@@ -322,7 +322,8 @@ for i_episode in range(num_episodes):
     if i_episode % TARGET_UPDATE == 0 and loss!=None :
         net_actions_count_value = net_actions_count.cpu().numpy()
         avg_step = avg_step*0.99 + step_episode_update/TARGET_UPDATE*0.01 
-        print(i_episode, steps_done, "%.2f/%.2f"%(step_episode_update/TARGET_UPDATE, avg_step), \
+        print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),\
+            i_episode, steps_done, "%.2f/%.2f"%(step_episode_update/TARGET_UPDATE, avg_step), \
             "loss:", avg_loss, \
             "action_random: %.2f"%(EPS_END + (EPS_START - EPS_END) * math.exp(-1. * steps_done / EPS_DECAY)), \
             "action:", net_actions_count_value/sum(net_actions_count_value), "GAMMA:", GAMMA )
