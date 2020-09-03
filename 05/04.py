@@ -241,6 +241,7 @@ def train(agent):
     global GAMMA, steps_done
     num_episodes = 100000
     avg_step = 100.
+    avg_holesCount = 20.
     step_episode_update = 0.
     
     # 加载模型
@@ -330,6 +331,7 @@ def train(agent):
 
         step_episode_update += t
         avg_step = avg_step*0.999 + t*0.001
+        avg_holesCount = avg_holesCount*0.999 + holesCount*0.001
         avg_loss = avg_loss / t
         # if avg_loss>1: 
         #     GAMMA = GAMMA * 0.999
@@ -341,7 +343,8 @@ def train(agent):
             print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), \
                 i_episode, steps_done, "%.2f/%.2f"%(step_episode_update/TARGET_UPDATE, avg_step), \
                 "loss:", avg_loss, "GAMMA:", GAMMA, \
-                "action_counts:",net_actions_count_value/sum(net_actions_count_value) )
+                "action_counts:",net_actions_count_value/sum(net_actions_count_value), \
+                "holesCount:", avg_holesCount )
             step_episode_update = 0.
             torch.save({'net': net.state_dict(),
                         'steps_done': steps_done,

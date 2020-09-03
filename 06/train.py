@@ -13,7 +13,7 @@ size = 15  # 棋盘大小
 n_in_row = 5  # 几子连线
 model_file =  os.path.join(curr_dir, '../data/model/06_policy_{}x{}.model'.format(size, size))
 
-class GomokuTrainPipeline():
+class FiveChessTrain():
     def __init__(self):
         self.policy_evaluate_size = 10  # 策略评估胜率时的模拟对局次数
         self.game_batch_num = 10000  # selfplay对战次数
@@ -151,5 +151,5 @@ class GomokuTrainPipeline():
 
 if __name__ == '__main__':
     # train
-    training_pipeline = GomokuTrainPipeline()
-    training_pipeline.run()
+    training = FiveChessTrain()
+    training.run()
