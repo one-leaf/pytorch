@@ -29,6 +29,9 @@ class Agent(object):
     def get_availables(self):
         return self.env.availables
 
+    def get_current_player(self):
+        return self.current_player
+
     # 返回 [1, 4, size, size]
     def current_state(self):
         square_state = np.zeros((4, self.size, self.size))

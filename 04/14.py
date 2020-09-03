@@ -79,8 +79,13 @@ class DQN(nn.Module):
         self.conv1 = nn.Conv2d(3, 32, kernel_size=3, stride=1)
         self.conv2 = nn.Conv2d(32, 32, kernel_size=3, stride=1)
         self.conv3 = nn.Conv2d(32, 32, kernel_size=3, stride=1)
-        self.conv4 = nn.Conv2d(32, 1, kernel_size=1, stride=1)
-        self.head = nn.Linear(1836, outputs)
+        self.conv4 = nn.Conv2d(32, 32, kernel_size=3, stride=1)
+        self.conv5 = nn.Conv2d(32, 32, kernel_size=3, stride=1)
+        self.conv6 = nn.Conv2d(32, 32, kernel_size=3, stride=1)
+        self.conv7 = nn.Conv2d(32, 32, kernel_size=3, stride=1)
+        self.conv8 = nn.Conv2d(32, 32, kernel_size=3, stride=1)
+        self.conv9 = nn.Conv2d(32, 1, kernel_size=1, stride=1)
+        self.head = nn.Linear(1056, outputs)
 
     # 使用一个元素调用以确定下一个操作，或在优化期间调用batch。返回tensor([[left0exp,right0exp]...]).
     def forward(self, x):
@@ -88,6 +93,11 @@ class DQN(nn.Module):
         x = F.relu(self.conv2(x))         #[B, 16, 18, 43] => [B, 32, 7, 20]
         x = F.relu(self.conv3(x))         #[B, 32, 7, 20] => [B, 64, 3, 9]
         x = F.relu(self.conv4(x))         #[B, 64, 3, 9] => [B, 128, 1, 1]
+        x = F.relu(self.conv5(x))         
+        x = F.relu(self.conv6(x))         
+        x = F.relu(self.conv7(x))         
+        x = F.relu(self.conv8(x))         
+        x = F.relu(self.conv9(x))         
         x = x.view(x.size(0), -1)
         return self.head(x)               #[B, 128] => [B, 2]
 
