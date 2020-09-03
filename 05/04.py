@@ -271,7 +271,7 @@ def train(agent):
             action_value = action.item()
             agent_state, _reward = agent.step(action_value, False)
 
-            is_terminal = (agent_state == 2) 
+            is_terminal = (agent_state == 2) or (agent_state==1 and agent.isExitesEmptyHoles())
 
             # 如果是一个新方块落下，设置当前方块的步数为0
             if agent_state==1: 
