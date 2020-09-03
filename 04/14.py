@@ -242,7 +242,7 @@ def optimize_model():
     return loss
 
 # 将学习率调到很小 RMSprop 貌似学不出来
-optimizer = optim.Adam(policy_net.parameters(),lr=1e-6)
+optimizer = optim.Adam(policy_net.parameters(),lr=1e-4)
 # optimizer = optim.RMSprop(policy_net.parameters(),lr=1e-5)
 
 num_episodes = 5000000
