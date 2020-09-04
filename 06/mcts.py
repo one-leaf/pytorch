@@ -207,14 +207,14 @@ class MCTS(object):
     @staticmethod
     def rollout_policy_fn(state):
         """给棋盘所有可落子位置随机分配概率"""
-        availables = state.get_availables()
+        availables = state.availables
         action_probs = np.random.rand(len(availables))
         return zip(availables, action_probs)
 
     @staticmethod
     def policy_value_fn(state):
         """给棋盘所有可落子位置分配默认平均概率 [(0, 0.015625), (action, probability), ...], 0"""
-        availables = state.get_availables()
+        availables = state.availables
         action_probs = np.ones(len(availables)) / len(availables)
         return zip(availables, action_probs), 0
 
@@ -280,7 +280,7 @@ class MCTSPurePlayer(object):
 
     def get_action(self, state):
         """计算下一步走子action"""
-        if len(state.get_availables()) > 0:  # 盘面可落子位置>0
+        if len(state.availables) > 0:  # 盘面可落子位置>0
             # 构建纯MCTS初始树(节点分布充分)，并返回child中访问量最大的action
             move = self.mcts.get_action(state)
             # 更新根节点:根据最后action向前探索树
@@ -313,7 +313,7 @@ class MCTSPlayer(object):
         """计算下一步走子action"""
         # the pi vector returned by MCTS as in the alphaGo Zero paper
         move_probs = np.zeros(state.size * state.size)
-        if len(state.get_availables()) > 0:  # 盘面可落子位置>0
+        if len(state.availables) > 0:  # 盘面可落子位置>0
             acts, probs = self.mcts.get_action_probs(state, temp)
             positions = state.actions_to_positions(acts)
             move_probs[positions] = probs

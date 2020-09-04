@@ -2,6 +2,7 @@ import gym
 import random
 from gym.envs.classic_control import rendering
 import time
+import numpy as np
 
 class FiveChess(object):
     def __init__(self, size=15, n_in_row=5):
@@ -23,6 +24,8 @@ class FiveChess(object):
         self.last_action = None
         self.current_player = self.players[0]
         self.availables = [(x,y) for x in range(self.size) for y in range(self.size)]
+        self.terminal = False
+        self.win_user = -1
         return self.chessboard
  
     # 检查当前action是否有效
@@ -78,9 +81,38 @@ class FiveChess(object):
         color = self.colors[self.current_player]
         #棋子
         self.chessboard[action[0]][action[1]] = color
-        terminal, user = self.check_terminal()
-        reward = 0 if user==-1 else 1 
-        return self.chessboard, reward, terminal, {"user":user}
+        self.terminal, self.win_user = self.check_terminal()
+        reward = 0 if self.win_user==-1 else 1 
+        return self.chessboard, reward, self.terminal, self.win_user
+
+    # 位置转action
+    def positions_to_actions(self, positions):
+        return [(i//self.size, i%self.size) for i in positions]
+
+    # action转位置
+    def actions_to_positions(self, actions):
+        return [x*self.size+y for x,y in actions]
+
+    # 返回 [1, 4, size, size]
+    def current_state(self):
+        square_state = np.zeros((4, self.size, self.size))
+        # 前面2层是自己和对手的棋
+        for x in range(self.size):
+            for y in range(self.size):
+                if self.chessboard[x][y]!=0:
+                    idx = 0 if self.chessboard[x][y]==self.colors[self.current_player] else 1
+                    square_state[idx][x][y] = 1.0
+        # 第三层为最后一步
+        if self.last_action!=None:
+            x,y = self.last_action
+            square_state[2][x][y] = 1.0
+        # 第四层为如果当前用户是先手则为1
+        if self.current_player == 0:
+            square_state[3][:,:] = 1.0
+        return square_state
+
+    def game_end(self):
+        return self.terminal, self.win_user
 
 class FiveChessEnv(gym.Env):
     metadata = {
@@ -191,12 +223,12 @@ if __name__ == "__main__":
                         break
                 env.render()
                 time.sleep(0.1)
-            _, reward, done, info = env.step(action)
+            _, reward, done, win_user = env.step(action)
             env.render(mode="human",close=False)
         else:
             available_locations = env.fiveChess.availables
             action = random.choice(available_locations)
-            _, reward, done, info = env.step(action)
+            _, reward, done, win_user = env.step(action)
             env.render(mode="human",close=False)
         
         is_human = not is_human
@@ -204,6 +236,6 @@ if __name__ == "__main__":
         if done:
             curr_user = env.current_player
             step_count = env.step_count
-            print(f'win_user: {info["user"]}, curr_user: {curr_user} reward: {reward} step_count: {step_count}')
+            print(f'win_user: {win_user}, curr_user: {curr_user} reward: {reward} step_count: {step_count}')
 
     env.close()            

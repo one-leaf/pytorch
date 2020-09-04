@@ -77,7 +77,7 @@ class PolicyValueNet():
         output: a list of (action, probability) tuples for each available
         action and the score of the game state
         """
-        legal_positions = game.actions_to_positions(game.get_availables())
+        legal_positions = game.actions_to_positions(game.availables)
         current_state = game.current_state().reshape(1, 4, self.size, self.size)
         act_probs, value = self.policy_value(current_state)
         act_probs = act_probs.flatten()

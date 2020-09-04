@@ -1,83 +1,35 @@
 import numpy as np
-from game import FiveChess
+from game import FiveChess, FiveChessEnv
 
 # 游戏的AI封装
 class Agent(object):
     def __init__(self, size, n_in_row):
         self.size = size
         self.n_in_row = n_in_row
-        self.env = FiveChess(size=self.size, n_in_row=self.n_in_row)
-        self.reset()
-
-    def reset(self):
-        self.env.reset()
-        self.board = self.env.chessboard
-        self.terminal = False
-        self.win_user = -1
-
-    # 走棋
-    def step(self, action):
-        _, _, terminal, info = self.env.step(action)
-        self.terminal = terminal
-        self.win_user = info["user"]
-
-    # 位置转action
-    def positions_to_actions(self, positions):
-        return [(i//self.size, i%self.size) for i in positions]
-
-    # action转位置
-    def actions_to_positions(self, actions):
-        return [x*self.size+y for x,y in actions]
-
-    # 返回 （是否胜利， 胜利玩家） ，如果没有胜利者，胜利玩家 = -1
-    def game_end(self):
-        return self.terminal, self.win_user
-
-    def get_availables(self):
-        return self.env.availables
-
-    def get_current_player(self):
-        return self.env.current_player
-
-    # 返回 [1, 4, size, size]
-    def current_state(self):
-        square_state = np.zeros((4, self.size, self.size))
-        curr_player_id = self.env.current_player
-        # 前面2层是自己和对手的棋
-        for x in range(self.size):
-            for y in range(self.size):
-                if self.board[x][y]!=0:
-                    idx = 0 if self.board[x][y]==self.env.colors[curr_player_id] else 1
-                    square_state[idx][x][y] = 1.0
-        # 第三层为最后一步
-        if self.env.last_action!=None:
-            x,y = self.env.last_action
-            square_state[2][x][y] = 1.0
-        # 第四层为如果当前用户是先手则为1
-        if curr_player_id == 0:
-            square_state[3][:,:] = 1.0
-        return square_state
+        self.game = FiveChess(size=self.size, n_in_row=self.n_in_row)
+        self.env = FiveChessEnv(self.game)
+        self.game.reset()
 
     # 使用 mcts 训练，重用搜索树，并保存数据
     def start_self_play(self, player, is_shown=0, temp=1e-3):
         """ start a self-play game using a MCTS player, reuse the search tree,
         and store the self-play data: (state, mcts_probs, z) for training
         """
-        self.reset()
-        p1, p2 = self.env.players
+        self.game.reset()
+        p1, p2 = self.game.players
         states, mcts_probs, current_players = [], [], []
         while True:
             # temp 权重 ，return_prob 是否返回概率数据
-            action, move_probs = player.get_action(self, temp=temp, return_prob=1)
+            action, move_probs = player.get_action(self.game, temp=temp, return_prob=1)
             # store the data
-            states.append(self.current_state())
+            states.append(self.game.current_state())
             mcts_probs.append(move_probs)
-            current_players.append(self.env.current_player)
+            current_players.append(self.game.current_player)
             # perform a move
-            self.step(action)
+            self.game.step(action)
             if is_shown:
                 self.env.render()
-            end, winner = self.game_end()
+            end, winner = self.game.game_end()
             if end:
                 # winner from the perspective of the current player of each state
                 winners_z = np.zeros(len(current_players))
@@ -96,14 +48,14 @@ class Agent(object):
     # AI和蒙特卡罗对战
     def start_play(self, player1, player2, start_player=0, is_shown=1):
         """start a game between two players"""
-        self.reset()
+        self.game.reset()
         if start_player not in (0, 1):
             raise Exception('start_player should be either 0 (player1 first) '
                             'or 1 (player2 first)')
         if start_player==0:
-            p1, p2 = self.env.players
+            p1, p2 = self.game.players
         else:
-            p2, p1 = self.env.players
+            p2, p1 = self.game.players
         player1.set_player_ind(p1)
         player2.set_player_ind(p2)
         players = {p1: player1, p2: player2}
@@ -112,11 +64,11 @@ class Agent(object):
         while True:
             current_player = self.get_current_player()
             player_in_turn = players[current_player]
-            move = player_in_turn.get_action(self)
-            self.step(move)
+            action = player_in_turn.get_action(self)
+            self.game.step(action)
             if is_shown:
                 self.env.render()
-            end, winner = self.game_end()
+            end, winner = self.game.game_end()
             if end:
                 if is_shown:
                     if winner != -1:

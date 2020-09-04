@@ -20,7 +20,7 @@ class FiveChessTrain():
         self.game_batch_num = 10000  # selfplay对战次数
         self.batch_size = 512  # data_buffer中对战次数超过n次后开始启动模型训练
         self.check_freq = 50  # 每对战n次检查一次当前模型vs旧模型胜率
-        self.game = Agent(size, n_in_row)
+        self.agent = Agent(size, n_in_row)
 
         # training params
         self.learn_rate = 2e-3
@@ -68,7 +68,7 @@ class FiveChessTrain():
         """收集自我对抗数据用于训练"""
         for i in range(n_games):
             # 使用MCTS蒙特卡罗树搜索进行自我对抗
-            winner, play_data = self.game.start_self_play(self.mcts_player, temp=self.temp)
+            winner, play_data = self.agent.start_self_play(self.mcts_player, temp=self.temp)
             play_data = list(play_data)[:]
             self.episode_len = len(play_data)
             # 把翻转棋盘数据加到数据集里
@@ -113,7 +113,7 @@ class FiveChessTrain():
         pure_mcts_player = MCTSPurePlayer(c_puct=5, n_playout=self.pure_mcts_playout_num)
         win_cnt = defaultdict(int)
         for i in range(n_games):  # 对战
-            winner = self.game.start_play(current_mcts_player, pure_mcts_player, start_player=i % 2, is_shown=0)
+            winner = self.agent.start_play(current_mcts_player, pure_mcts_player, start_player=i % 2, is_shown=0)
             win_cnt[winner] += 1
         # 胜率
         win_ratio = 1.0 * (win_cnt[1] + 0.5 * win_cnt[-1]) / n_games
