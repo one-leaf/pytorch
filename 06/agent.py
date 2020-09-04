@@ -62,9 +62,8 @@ class Agent(object):
         if is_shown:
             self.env.render()
         while True:
-            current_player = self.get_current_player()
-            player_in_turn = players[current_player]
-            action = player_in_turn.get_action(self)
+            player_in_turn = players[self.game.current_player]
+            action = player_in_turn.get_action(self.game)
             self.game.step(action)
             if is_shown:
                 self.env.render()

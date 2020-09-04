@@ -14,21 +14,25 @@ class Human(object):
     """
     human player
     """
-    def __init__(self, agent):
+    def __init__(self, agent, is_show=1):
         self.player = None        
         self.agent = agent      
+        self.user_click_point=None
+        def on_mouse_press(x, y, button, modifiers):
+            self.user_click_point = (x, y)
+        if is_show:
+            self.agent.env.render()
+            self.agent.env.viewer.window.on_mouse_press = on_mouse_press
 
     def set_player_ind(self, p):
         self.player = p
 
-    def get_action(self, state):
-        # if state.env.viewer.window!=None:
-        #     self.agent.env.viewer.window.on_mouse_press = on_mouse_press        
+    def get_action(self, state):   
         while True:
-            if mouse_click_point!=None:
-                action = self.agent.env.point_to_action(Human.user_point)
-                if self.agent.env.is_valid_set_coord(action):
-                    Human.user_point = None
+            if self.user_click_point!=None:
+                action = self.agent.env.point_to_action(self.user_click_point)
+                if self.agent.game.is_valid_set_coord(action):
+                    self.user_click_point = None
                     break
             self.agent.env.render()
             time.sleep(0.1)
@@ -53,13 +57,13 @@ class Human(object):
         if is_shown:
             self.env.render()
         while True:
-            current_player = self.get_current_player()
+            current_player = self.agent.game.current_player
             player_in_turn = players[current_player]
             move = player_in_turn.get_action(self)
             self.step(move)
             if is_shown:
                 self.env.render()
-            end, winner = self.game_end()
+            end, winner = self.agent.game.game_end()
             if end:
                 if is_shown:
                     if winner != -1:
@@ -76,7 +80,7 @@ def run():
     best_model_file =  os.path.join(curr_dir, '../data/save/06_best_model_%s.pth'%size)
 
     try:
-        game = Agent(size=size, n_in_row=n_in_row)
+        agent = Agent(size=size, n_in_row=n_in_row)
         # ############### human VS AI ###################
         # load the trained policy_value_net in either Theano/Lasagne, PyTorch or TensorFlow
 
@@ -87,10 +91,10 @@ def run():
         mcts_player = MCTSPurePlayer(c_puct=5, n_playout=1000)
 
         # human player
-        human = Human(game)
+        human = Human(agent,is_show=1)
 
         # set start_player=0 for human first
-        game.start_play(human, mcts_player, start_player=1, is_shown=0)
+        agent.start_play(human, mcts_player, start_player=1, is_shown=1)
     except KeyboardInterrupt:
         print('quit')
 
