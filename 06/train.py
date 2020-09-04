@@ -147,7 +147,7 @@ class FiveChessTrain():
                             self.pure_mcts_playout_num += 100
                             self.best_win_ratio = 0.0
         except KeyboardInterrupt:
-            logging.info('\n\rquit')
+            logging.info('quit')
 
 
 if __name__ == '__main__':
