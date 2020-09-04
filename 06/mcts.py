@@ -164,7 +164,7 @@ class MCTS(object):
             if winner == -1:  # tie平局
                 leaf_value = 0.0
             else:
-                leaf_value = (1.0 if winner == state.get_current_player() else -1.0)
+                leaf_value = (1.0 if winner == state.current_player else -1.0)
 
         # 递归更新当前节点及所有父节点的最优选中次数和Q分数
         node.update_recursive(-leaf_value)
@@ -186,7 +186,7 @@ class MCTS(object):
                     如果对手获胜返回-1
                     如果平局返回0
         """
-        player = state.get_current_player()
+        player = state.current_player
         winner = -1
         for i in range(limit):  # 随机快速走limit次，用于快速评估当前叶子节点的优略
             end, winner = state.game_end()
