@@ -132,8 +132,8 @@ class FiveChessTrain():
                 if len(self.data_buffer) > self.batch_size:
                     loss, entropy = self.policy_update()
                 # 每n个batch检查一下当前模型胜率
+                self.policy_value_net.save_model(model_file)
                 if (i + 1) % self.check_freq == 0:
-                    self.policy_value_net.save_model(model_file)
                     logging.info("TRAIN Current self-play batch: {}".format(i + 1))
                     # 策略胜率评估：模型与纯MCTS玩家对战n局看胜率
                     win_ratio = self.policy_evaluate(self.policy_evaluate_size)
