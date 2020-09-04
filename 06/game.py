@@ -6,12 +6,11 @@ import time
 class FiveChess(object):
     def __init__(self, size=15, n_in_row=5):
         # 棋盘大小
-        self.SIZE = size
+        self.size = size
         # 最少多少子连线才算赢
         self.n_in_row = n_in_row
         # 初始棋盘是0    -1表示黑棋子   1表示白棋子
-        self.chessboard = [ [  0 for v in range(self.SIZE)  ] for v in range(self.SIZE) ]
-        self.viewer = None
+        self.chessboard = [ [  0 for v in range(self.size)  ] for v in range(self.size) ]
         self.step_count = 0
         self.players = [0, 1]
         self.colors = [1, -1]
@@ -19,11 +18,11 @@ class FiveChess(object):
         self.reset()
 
     def reset(self):
-        self.chessboard = [ [  0 for v in range(self.SIZE)  ] for v in range(self.SIZE) ]
+        self.chessboard = [ [  0 for v in range(self.size)  ] for v in range(self.size) ]
         self.step_count = 0
         self.last_action = None
         self.current_player = self.players[0]
-        self.availables = [(x,y) for x in range(self.SIZE) for y in range(self.SIZE)]
+        self.availables = [(x,y) for x in range(self.size) for y in range(self.size)]
         return self.chessboard
  
     # 检查当前action是否有效
@@ -33,8 +32,8 @@ class FiveChess(object):
     # 返回所有有效的下棋位置
     def get_available_locations(self):
         results = []
-        for x in range(self.SIZE):
-            for y in range(self.SIZE):
+        for x in range(self.size):
+            for y in range(self.size):
                 if self.chessboard[x][y]==0:
                     results.append([x,y])
         return results
@@ -47,20 +46,20 @@ class FiveChess(object):
 
         # 遍历落子位置，检查是否出现横/竖/斜线上n子相连的情况
         n = self.n_in_row
-        for x in range(self.SIZE):
-            for y in range(self.SIZE):
+        for x in range(self.size):
+            for y in range(self.size):
                 color = self.chessboard[x][y]
                 if color == 0: continue
-                if self.SIZE-x>=n and abs(sum([self.chessboard[x+i][y] for i in range(n)]))==n:  
+                if self.size-x>=n and abs(sum([self.chessboard[x+i][y] for i in range(n)]))==n:  
                     return True, self.colors.index(color)
 
-                if self.SIZE-y>=n and abs(sum([self.chessboard[x][y+i] for i in range(n)]))==n:  
+                if self.size-y>=n and abs(sum([self.chessboard[x][y+i] for i in range(n)]))==n:  
                     return True, self.colors.index(color)
 
-                if self.SIZE-x>=n and self.SIZE-y>=n and abs(sum([self.chessboard[x+i][y+i] for i in range(n)]))==n:  
+                if self.size-x>=n and self.size-y>=n and abs(sum([self.chessboard[x+i][y+i] for i in range(n)]))==n:  
                     return True, self.colors.index(color)
 
-                if self.SIZE-x>=n and y>=n and abs(sum([self.chessboard[x+i][y-i] for i in range(n)]))==n:  
+                if self.size-x>=n and y>=n and abs(sum([self.chessboard[x+i][y-i] for i in range(n)]))==n:  
                     return True, self.colors.index(color)
         return False, -1        
 
@@ -83,12 +82,22 @@ class FiveChess(object):
         reward = 0 if user==-1 else 1 
         return self.chessboard, reward, terminal, {"user":user}
 
-class FiveChessEnv(FiveChess, gym.Env):
+class FiveChessEnv(gym.Env):
     metadata = {
         'render.modes': ['human', 'rgb_array'],
         'video.frames_per_second': 2
     }
- 
+
+    def __init__(self, fiveChess):
+        self.fiveChess = fiveChess
+        self.viewer = None
+
+    def reset(self):
+        self.fiveChess.reset()
+
+    def step(self, action):
+        return self.fiveChess.step(action)
+
     def render(self, mode = 'human', close=False):
         if close:
             if self.viewer is not None:
@@ -99,7 +108,7 @@ class FiveChessEnv(FiveChess, gym.Env):
         screen_width = 800
         screen_height = 800
         space = 50
-        width = (screen_width - space*2)/(self.SIZE-1)
+        width = (screen_width - space*2)/(self.fiveChess.size-1)
  
         if self.viewer is None:
             self.viewer = rendering.Viewer(screen_width, screen_height)
@@ -107,20 +116,20 @@ class FiveChessEnv(FiveChess, gym.Env):
             bg.set_color(0.2,0.2,0.2)
             self.viewer.add_geom(bg)
             #棋盘网格
-            for i in range(self.SIZE):
+            for i in range(self.fiveChess.size):
                 line = rendering.Line((space,space+i*width),(screen_width-space,space+i*width))
                 line.set_color(1, 1, 1)
                 self.viewer.add_geom(line)
-            for i in range(self.SIZE):
+            for i in range(self.fiveChess.size):
                 line = rendering.Line((space+i*width,space),(space+i*width,screen_height - space))
                 line.set_color(1, 1, 1)
                 self.viewer.add_geom(line)
                 
             #棋子
             self.chess = []
-            for x in range(self.SIZE):
+            for x in range(self.fiveChess.size):
                 self.chess.append([])
-                for y in range(self.SIZE):
+                for y in range(self.fiveChess.size):
                     c = rendering.make_circle(width/3)
                     ct = rendering.Transform(translation=(0,0))
                     c.add_attr(ct)
@@ -128,11 +137,11 @@ class FiveChessEnv(FiveChess, gym.Env):
                     self.chess[x].append([c,ct])
                     self.viewer.add_geom(c)
 
-        for x in range(self.SIZE):
-            for y in range(self.SIZE):	
-                if self.chessboard[x][y]!=0:
+        for x in range(self.fiveChess.size):
+            for y in range(self.fiveChess.size):	
+                if self.fiveChess.chessboard[x][y]!=0:
                     self.chess[x][y][1].set_translation(space+x*width,space+y*width)
-                    if self.chessboard[x][y]==1:
+                    if self.fiveChess.chessboard[x][y]==1:
                         self.chess[x][y][0].set_color(255,255,255)
                     else:
                         self.chess[x][y][0].set_color(0,0,0)
@@ -147,12 +156,12 @@ class FiveChessEnv(FiveChess, gym.Env):
         x = x - 50
         y = y - 50
         ax = ay = 0
-        w = 700./(self.SIZE-1)
-        for i in range(0, self.SIZE):
+        w = 700./(self.fiveChess.size-1)
+        for i in range(0, self.fiveChess.size):
             if x > (i-0.5) * w  and x < (i+0.5)*w:
                 ax = i 
                 break
-        for i in range(0, self.SIZE):
+        for i in range(0, self.fiveChess.size):
             if y > (i-0.5) * w and y < (i+0.5)*w:
                 ay = i 
                 break
@@ -163,8 +172,8 @@ if __name__ == "__main__":
     def on_mouse_press(x, y, button, modifiers):
         global user_point
         user_point = (x, y)
-
-    env = FiveChessEnv(size=15, n_in_row=5)
+    fiveChess = FiveChess(size=15, n_in_row=5)
+    env = FiveChessEnv(fiveChess)
 
     env.reset()
     env.render()
@@ -177,7 +186,7 @@ if __name__ == "__main__":
             while True:
                 if user_point!=None:
                     action = env.point_to_action(user_point)
-                    if env.is_valid_set_coord(action):
+                    if env.fiveChess.is_valid_set_coord(action):
                         user_point = None
                         break
                 env.render()
@@ -185,7 +194,7 @@ if __name__ == "__main__":
             _, reward, done, info = env.step(action)
             env.render(mode="human",close=False)
         else:
-            available_locations = env.availables
+            available_locations = env.fiveChess.availables
             action = random.choice(available_locations)
             _, reward, done, info = env.step(action)
             env.render(mode="human",close=False)

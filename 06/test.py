@@ -16,12 +16,7 @@ class Human(object):
     """
     def __init__(self, agent):
         self.player = None        
-        self.agent = agent
-
-        # self.agent.env.render()
-        
-        
-        
+        self.agent = agent      
 
     def set_player_ind(self, p):
         self.player = p
@@ -41,6 +36,37 @@ class Human(object):
 
     def __str__(self):
         return "Human {}".format(self.player)
+
+    def start_play(self, player1, player2, start_player=0, is_shown=1):
+        """start a game between two players"""
+        self.reset()
+        if start_player not in (0, 1):
+            raise Exception('start_player should be either 0 (player1 first) '
+                            'or 1 (player2 first)')
+        if start_player==0:
+            p1, p2 = self.env.players
+        else:
+            p2, p1 = self.env.players
+        player1.set_player_ind(p1)
+        player2.set_player_ind(p2)
+        players = {p1: player1, p2: player2}
+        if is_shown:
+            self.env.render()
+        while True:
+            current_player = self.get_current_player()
+            player_in_turn = players[current_player]
+            move = player_in_turn.get_action(self)
+            self.step(move)
+            if is_shown:
+                self.env.render()
+            end, winner = self.game_end()
+            if end:
+                if is_shown:
+                    if winner != -1:
+                        print("Game end. Winner is", players[winner])
+                    else:
+                        print("Game end. Tie")
+                return winner
 
 
 def run():
