@@ -7,24 +7,31 @@ class Agent(object):
         self.size = size
         self.n_in_row = n_in_row
         self.env = FiveChessEnv(size=self.size, n_in_row=self.n_in_row)
+        self.reset()
+
+    def reset(self):
         self.env.reset()
         self.board = self.env.chessboard
+        self.terminal = False
+        self.win_user = -1
 
     # 走棋
     def step(self, action):
-        self.env.step(action)
+        _, _, terminal, info = self.env.step(action)
+        self.terminal = terminal
+        self.win_user = info["user"]
 
     # 位置转action
     def positions_to_actions(self, positions):
-        return [(i%self.size, i//self.size) for i in positions]
+        return [(i//self.size, i%self.size) for i in positions]
 
     # action转位置
     def actions_to_positions(self, actions):
-        return [x+y*self.size for x,y in actions]
+        return [x*self.size+y for x,y in actions]
 
     # 返回 （是否胜利， 胜利玩家） ，如果没有胜利者，胜利玩家 = -1
     def game_end(self):
-        return self.env.check_terminal()
+        return self.terminal, self.win_user
 
     def get_availables(self):
         return self.env.availables
@@ -56,7 +63,7 @@ class Agent(object):
         """ start a self-play game using a MCTS player, reuse the search tree,
         and store the self-play data: (state, mcts_probs, z) for training
         """
-        self.env.reset()
+        self.reset()
         p1, p2 = self.env.players
         states, mcts_probs, current_players = [], [], []
         while True:
@@ -85,3 +92,35 @@ class Agent(object):
                     else:
                         print("Game end. Tie")
                 return winner, zip(states, mcts_probs, winners_z)
+
+    # AI和蒙特卡罗对战
+    def start_play(self, player1, player2, start_player=0, is_shown=1):
+        """start a game between two players"""
+        self.reset()
+        if start_player not in (0, 1):
+            raise Exception('start_player should be either 0 (player1 first) '
+                            'or 1 (player2 first)')
+        if start_player==0:
+            p1, p2 = self.env.players
+        else:
+            p2, p1 = self.env.players
+        player1.set_player_ind(p1)
+        player2.set_player_ind(p2)
+        players = {p1: player1, p2: player2}
+        if is_shown:
+            self.env.render()
+        while True:
+            current_player = self.get_current_player()
+            player_in_turn = players[current_player]
+            move = player_in_turn.get_action(self)
+            self.step(move)
+            if is_shown:
+                self.env.render()
+            end, winner = self.game_end()
+            if end:
+                if is_shown:
+                    if winner != -1:
+                        print("Game end. Winner is", players[winner])
+                    else:
+                        print("Game end. Tie")
+                return winner

@@ -186,7 +186,7 @@ class MCTS(object):
                     如果对手获胜返回-1
                     如果平局返回0
         """
-        player = state.current_player
+        player = state.get_current_player()
         winner = -1
         for i in range(limit):  # 随机快速走limit次，用于快速评估当前叶子节点的优略
             end, winner = state.game_end()
@@ -321,13 +321,13 @@ class MCTSPlayer(object):
                 # 添加Dirichlet Noise进行探索（自我训练所需）
                 # dirichlet噪声参数中的0.3：一般按照反比于每一步的可行move数量设置，所以棋盘扩大或改围棋之后这个参数需要减小（此值设置过大容易出现在自我对弈的训练中陷入到两方都只进攻不防守的困境中无法提高）
                 dirichlet = np.random.dirichlet(0.3 * np.ones(len(probs)))
-                logging.info("probs:")
-                logging.info(probs)
-                logging.info("dirichlet:")
-                logging.info(dirichlet)
-                logging.info("p:")
-                logging.info(0.75 * probs + 0.25 * dirichlet)
-                position = np.random.choice(positions, p=0.75 * probs + 0.25 * dirichlet)
+                # logging.info("probs:")
+                # logging.info(probs)
+                # logging.info("dirichlet:")
+                # logging.info(dirichlet)
+                # logging.info("p:")
+                # logging.info(0.75 * probs + 0.25 * dirichlet)
+                position = np.random.choice(positions, p=0.75 * probs + 0.25 * dirichlet) 
                 action = state.positions_to_actions([position])[0]
                 # 更新根节点并重用搜索树
                 self.mcts.update_root_with_action(action)
@@ -338,8 +338,7 @@ class MCTSPlayer(object):
                 # 更新根节点:根据最后action向前探索树
                 self.mcts.update_root_with_action(None)
                 # 打印AI走子信息
-                location = state.update_root_with_action(action)
-                print("AI move: %d,%d\n" % (location[0], location[1]))
+                # print("AI move: %d,%d\n" % (action[0], action[1]))
             if return_prob:
                 return action, move_probs
             else:

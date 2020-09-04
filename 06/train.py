@@ -9,16 +9,16 @@ import numpy as np
 from collections import defaultdict, deque
 
 curr_dir = os.path.dirname(os.path.abspath(__file__))
-size = 15  # 棋盘大小
+size = 8  # 棋盘大小
 n_in_row = 5  # 几子连线
-model_file =  os.path.join(curr_dir, '../data/model/06_policy_{}x{}.model'.format(size, size))
+model_file =  os.path.join(curr_dir, '../data/save/06_model_%s.pth'%size)
 
 class FiveChessTrain():
     def __init__(self):
         self.policy_evaluate_size = 10  # 策略评估胜率时的模拟对局次数
         self.game_batch_num = 10000  # selfplay对战次数
         self.batch_size = 512  # data_buffer中对战次数超过n次后开始启动模型训练
-        self.check_freq = 50  # 每对战n次检查一次当前模型vs旧模型胜率
+        self.check_freq = 10  # 每对战n次检查一次当前模型vs旧模型胜率
         self.game = Agent(size, n_in_row)
 
         # training params
@@ -151,5 +151,6 @@ class FiveChessTrain():
 
 if __name__ == '__main__':
     # train
+    logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
     training = FiveChessTrain()
     training.run()

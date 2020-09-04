@@ -241,7 +241,7 @@ def train(agent):
     global GAMMA, steps_done
     num_episodes = 100000
     avg_step = 100.
-    avg_holesCount = 20.
+    avg_holesCount = 50.
     step_episode_update = 0.
     
     # 加载模型
