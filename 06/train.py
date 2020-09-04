@@ -135,6 +135,7 @@ class FiveChessTrain():
                     logging.info("TRAIN Current self-play batch: {}".format(i + 1))
                     # 策略胜率评估：模型与纯MCTS玩家对战n局看胜率
                     win_ratio = self.policy_evaluate(self.policy_evaluate_size)
+                    logging.info("TRAIN win_ratio: {}".format(win_ratio))
                     self.policy_value_net.save_model(model_file)
                     if win_ratio > self.best_win_ratio:  # 胜率超过历史最优模型
                         logging.info("TRAIN New best policy!!!!!!!!batch:{} win_ratio:{}->{} pure_mcts_playout_num:{}".format(i + 1, self.best_win_ratio, win_ratio, self.pure_mcts_playout_num))
