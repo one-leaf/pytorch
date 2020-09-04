@@ -152,6 +152,6 @@ class FiveChessTrain():
 
 if __name__ == '__main__':
     # train
-    logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
+    logging.basicConfig(format='%(asctime)s %(message)s', level=logging.DEBUG)
     training = FiveChessTrain()
     training.run()
