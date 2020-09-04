@@ -1,12 +1,12 @@
 import numpy as np
-from game import FiveChessEnv
+from game import FiveChess
 
 # 游戏的AI封装
 class Agent(object):
     def __init__(self, size, n_in_row):
         self.size = size
         self.n_in_row = n_in_row
-        self.env = FiveChessEnv(size=self.size, n_in_row=self.n_in_row)
+        self.env = FiveChess(size=self.size, n_in_row=self.n_in_row)
         self.reset()
 
     def reset(self):

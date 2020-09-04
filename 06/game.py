@@ -3,12 +3,7 @@ import random
 from gym.envs.classic_control import rendering
 import time
 
-class FiveChessEnv(gym.Env):
-    metadata = {
-        'render.modes': ['human', 'rgb_array'],
-        'video.frames_per_second': 2
-    }
- 
+class FiveChess(object):
     def __init__(self, size=15, n_in_row=5):
         # 棋盘大小
         self.SIZE = size
@@ -87,6 +82,12 @@ class FiveChessEnv(gym.Env):
         terminal, user = self.check_terminal()
         reward = 0 if user==-1 else 1 
         return self.chessboard, reward, terminal, {"user":user}
+
+class FiveChessEnv(FiveChess, gym.Env):
+    metadata = {
+        'render.modes': ['human', 'rgb_array'],
+        'video.frames_per_second': 2
+    }
  
     def render(self, mode = 'human', close=False):
         if close:
@@ -156,7 +157,6 @@ class FiveChessEnv(gym.Env):
                 ay = i 
                 break
         return (ax, ay)
-
 
 if __name__ == "__main__":
     user_point = None

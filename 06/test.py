@@ -1,0 +1,73 @@
+from agent import Agent
+from mcts import MCTSPlayer, MCTSPurePlayer
+from policy_value_net import PolicyValueNet
+import time
+import os
+
+mouse_click_point = None
+
+def on_mouse_press(x, y, button, modifiers):
+    global mouse_click_point
+    mouse_click_point = (x, y)       
+
+class Human(object):
+    """
+    human player
+    """
+    def __init__(self, agent):
+        self.player = None        
+        self.agent = agent
+
+        # self.agent.env.render()
+        
+        
+        
+
+    def set_player_ind(self, p):
+        self.player = p
+
+    def get_action(self, state):
+        # if state.env.viewer.window!=None:
+        #     self.agent.env.viewer.window.on_mouse_press = on_mouse_press        
+        while True:
+            if mouse_click_point!=None:
+                action = self.agent.env.point_to_action(Human.user_point)
+                if self.agent.env.is_valid_set_coord(action):
+                    Human.user_point = None
+                    break
+            self.agent.env.render()
+            time.sleep(0.1)
+        return action
+
+    def __str__(self):
+        return "Human {}".format(self.player)
+
+
+def run():
+    curr_dir = os.path.dirname(os.path.abspath(__file__))
+    size = 8  # 棋盘大小
+    n_in_row = 5  # 几子连线
+    best_model_file =  os.path.join(curr_dir, '../data/save/06_best_model_%s.pth'%size)
+
+    try:
+        game = Agent(size=size, n_in_row=n_in_row)
+        # ############### human VS AI ###################
+        # load the trained policy_value_net in either Theano/Lasagne, PyTorch or TensorFlow
+
+        # best_policy = PolicyValueNet(size, model_file = best_model_file)
+        # mcts_player = MCTSPlayer(best_policy.policy_value_fn, c_puct=5, n_playout=400)
+
+        # uncomment the following line to play with pure MCTS (it's much weaker even with a larger n_playout)
+        mcts_player = MCTSPurePlayer(c_puct=5, n_playout=1000)
+
+        # human player
+        human = Human(game)
+
+        # set start_player=0 for human first
+        game.start_play(human, mcts_player, start_player=1, is_shown=0)
+    except KeyboardInterrupt:
+        print('quit')
+
+
+if __name__ == '__main__':
+    run()
