@@ -12,6 +12,7 @@ curr_dir = os.path.dirname(os.path.abspath(__file__))
 size = 8  # 棋盘大小
 n_in_row = 5  # 几子连线
 model_file =  os.path.join(curr_dir, '../data/save/06_model_%s.pth'%size)
+best_model_file =  os.path.join(curr_dir, '../data/save/06_best_model_%s.pth'%size)
 
 class FiveChessTrain():
     def __init__(self):
@@ -34,7 +35,7 @@ class FiveChessTrain():
         self.best_win_ratio = 0.0
 
         # 纯MCTS的模拟数，用于评估策略模型
-        self.pure_mcts_playout_num = 1000 # 用户纯MCTS构建初始树时的随机走子步数
+        self.pure_mcts_playout_num = self.n_playout # 用户纯MCTS构建初始树时的随机走子步数
         self.c_puct = 5  # MCTS child权重
         if os.path.exists(model_file):
             # 使用一个训练好的策略价值网络
@@ -132,18 +133,18 @@ class FiveChessTrain():
                     loss, entropy = self.policy_update()
                 # 每n个batch检查一下当前模型胜率
                 if (i + 1) % self.check_freq == 0:
+                    self.policy_value_net.save_model(model_file)
                     logging.info("TRAIN Current self-play batch: {}".format(i + 1))
                     # 策略胜率评估：模型与纯MCTS玩家对战n局看胜率
                     win_ratio = self.policy_evaluate(self.policy_evaluate_size)
-                    self.policy_value_net.save_model(model_file)
                     if win_ratio > self.best_win_ratio:  # 胜率超过历史最优模型
                         logging.info("TRAIN New best policy!!!!!!!!batch:{} win_ratio:{}->{} pure_mcts_playout_num:{}".format(i + 1, self.best_win_ratio, win_ratio, self.pure_mcts_playout_num))
                         self.best_win_ratio = win_ratio
                         # 保存当前模型为最优模型best_policy
-                        self.policy_value_net.save_model(model_file)
+                        self.policy_value_net.save_model(best_model_file)
                         # 如果胜率=100%，则增加纯MCT的模拟数 (<6000的限制视mem情况)
                         if self.best_win_ratio == 1.0: # and self.pure_mcts_playout_num < 6000:
-                            self.pure_mcts_playout_num += 1000
+                            self.pure_mcts_playout_num += 100
                             self.best_win_ratio = 0.0
         except KeyboardInterrupt:
             logging.info('\n\rquit')
