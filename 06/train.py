@@ -35,7 +35,7 @@ class FiveChessTrain():
         self.best_win_ratio = 0.0
 
         # 纯MCTS的模拟数，用于评估策略模型
-        self.pure_mcts_playout_num = self.n_playout # 用户纯MCTS构建初始树时的随机走子步数
+        self.pure_mcts_playout_num = 1000 # 用户纯MCTS构建初始树时的随机走子步数
         self.c_puct = 5  # MCTS child权重
         if os.path.exists(model_file):
             # 使用一个训练好的策略价值网络
@@ -144,7 +144,7 @@ class FiveChessTrain():
                         self.policy_value_net.save_model(best_model_file)
                         # 如果胜率=100%，则增加纯MCT的模拟数 (<6000的限制视mem情况)
                         if self.best_win_ratio == 1.0: # and self.pure_mcts_playout_num < 6000:
-                            self.pure_mcts_playout_num += 100
+                            self.pure_mcts_playout_num += 1000
                             self.best_win_ratio = 0.0
         except KeyboardInterrupt:
             logging.info('quit')

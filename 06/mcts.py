@@ -133,8 +133,8 @@ class MCTS(object):
         # 使用快速随机走子评估此叶子节点继续往后走的胜负（state执行快速走子）
         leaf_value = self._evaluate_rollout(state)
         # 4.Backpropagation（把前面expansion出来的节点得分反馈到前面所有父节点中，更新这些节点的quality value和visit times，方便后面计算UCB值）
-        # 递归更新当前节点及所有父节点的最优选中次数和Q分数（最优选中次数是累加的，Q分数递归-1的目的在于输赢对于交替的player来说是正负交错的）
-        node.update_recursive(-leaf_value)
+        # 递归更新当前节点及所有父节点的最优选中次数和Q分数（最优选中次数是累加的）
+        node.update_recursive(leaf_value)
 
     # 从根节点 root 到子节点执行一次探索过程
     # 这个不同于上面，上面的更有效，但很慢
@@ -164,10 +164,10 @@ class MCTS(object):
             if winner == -1:  # tie平局
                 leaf_value = 0.0
             else:
-                leaf_value = (1.0 if winner == state.current_player else -1.0)
+                leaf_value = (1.0 if winner == state.current_player  else -1.0)
 
         # 递归更新当前节点及所有父节点的最优选中次数和Q分数
-        node.update_recursive(-leaf_value)
+        node.update_recursive(leaf_value)
 
     def update_root_with_action(self, action):
         """根据action更新根节点"""
@@ -186,7 +186,7 @@ class MCTS(object):
                     如果对手获胜返回-1
                     如果平局返回0
         """
-        player = state.current_player
+        curr_player = state.current_player
         winner = -1
         for i in range(limit):  # 随机快速走limit次，用于快速评估当前叶子节点的优略
             end, winner = state.game_end()
@@ -202,7 +202,7 @@ class MCTS(object):
         if winner == -1:  # tie平局
             return 0
         else:
-            return 1 if winner == player else -1
+            return 1 if winner == curr_player else -1
 
     @staticmethod
     def rollout_policy_fn(state):
@@ -257,6 +257,7 @@ class MCTS(object):
         for n in range(self._n_playout):
             state_copy = copy.deepcopy(state)
             self._playout(state_copy)
+
         return max(self._root._children.items(), key=lambda act_node: act_node[1]._n_visits)[0]
 
     def __str__(self):
@@ -282,10 +283,10 @@ class MCTSPurePlayer(object):
         """计算下一步走子action"""
         if len(state.availables) > 0:  # 盘面可落子位置>0
             # 构建纯MCTS初始树(节点分布充分)，并返回child中访问量最大的action
-            move = self.mcts.get_action(state)
+            action = self.mcts.get_action(state)
             # 更新根节点:根据最后action向前探索树
             self.mcts.update_root_with_action(None)
-            return move
+            return action
         else:
             print("WARNING: the state is full")
 
