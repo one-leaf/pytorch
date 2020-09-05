@@ -10,11 +10,11 @@ class FiveChess(object):
         self.size = size
         # 最少多少子连线才算赢
         self.n_in_row = n_in_row
-        # 初始棋盘是0    -1表示黑棋子   1表示白棋子
         self.chessboard = [ [  0 for v in range(self.size)  ] for v in range(self.size) ]
         self.step_count = 0
         self.players = [0, 1]
-        self.colors = [1, -1]
+        # 初始棋盘是0    -1表示黑棋子   1表示白棋子
+        self.colors = [-1, 1]
         # 可用步骤
         self.reset()
 
@@ -74,8 +74,6 @@ class FiveChess(object):
             raise "action error"  
         self.last_action = action     
         self.availables.remove(action)
-        self.step_count +=1
-        self.current_player = self.step_count % 2
 
         #胜负判定
         color = self.colors[self.current_player]
@@ -83,6 +81,10 @@ class FiveChess(object):
         self.chessboard[action[0]][action[1]] = color
         self.terminal, self.win_user = self.check_terminal()
         reward = 0 if self.win_user==-1 else 1 
+
+        #这一步完成
+        self.step_count +=1
+        self.current_player = self.step_count % 2
         return self.chessboard, reward, self.terminal, self.win_user
 
     # 位置转action

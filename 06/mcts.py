@@ -134,7 +134,7 @@ class MCTS(object):
         leaf_value = self._evaluate_rollout(state)
         # 4.Backpropagation（把前面expansion出来的节点得分反馈到前面所有父节点中，更新这些节点的quality value和visit times，方便后面计算UCB值）
         # 递归更新当前节点及所有父节点的最优选中次数和Q分数（最优选中次数是累加的）
-        node.update_recursive(leaf_value)
+        node.update_recursive(-leaf_value)
 
     # 从根节点 root 到子节点执行一次探索过程
     # 这个不同于上面，上面的更有效，但很慢
@@ -167,7 +167,7 @@ class MCTS(object):
                 leaf_value = (1.0 if winner == state.current_player  else -1.0)
 
         # 递归更新当前节点及所有父节点的最优选中次数和Q分数
-        node.update_recursive(leaf_value)
+        node.update_recursive(-leaf_value)
 
     def update_root_with_action(self, action):
         """根据action更新根节点"""
@@ -286,6 +286,7 @@ class MCTSPurePlayer(object):
             action = self.mcts.get_action(state)
             # 更新根节点:根据最后action向前探索树
             self.mcts.update_root_with_action(None)
+            # print("MCTS:", action)
             return action
         else:
             print("WARNING: the state is full")
@@ -340,6 +341,7 @@ class MCTSPlayer(object):
                 self.mcts.update_root_with_action(None)
                 # 打印AI走子信息
                 # print("AI move: %d,%d\n" % (action[0], action[1]))
+            # print("AI:", action)
             if return_prob:
                 return action, move_probs
             else:
