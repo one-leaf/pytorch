@@ -114,9 +114,12 @@ class FiveChessTrain():
         win_cnt = defaultdict(int)
         for i in range(n_games):  # 对战
             winner = self.agent.start_play(current_mcts_player, pure_mcts_player, start_player=i % 2, is_shown=0)
-            win_cnt[winner] += 1
-        # 胜率
-        win_ratio = 1.0 * (win_cnt[1] + 0.5 * win_cnt[-1]) / n_games
+            if winner == current_mcts_player.player:
+                win_cnt[0] += 1
+            elif winner == -1:  # 平局
+                win_cnt[-1] += 1
+        # MCTS的胜率 winner = 0, 1, -1 ; -1 表示平局
+        win_ratio = 1.0 * (win_cnt[0] + 0.5 * win_cnt[-1]) / n_games
         logging.info("TRAIN Num_playouts:{}, win: {}, lose: {}, tie:{}, win_ratio:{}".format(self.pure_mcts_playout_num,
                                                                                win_cnt[1], win_cnt[2], win_cnt[-1], win_ratio))
         return win_ratio
