@@ -118,10 +118,12 @@ class FiveChessTrain():
                 win_cnt[0] += 1
             elif winner == -1:  # 平局
                 win_cnt[-1] += 1
+            else:
+                win_cnt[1] += 1
         # MCTS的胜率 winner = 0, 1, -1 ; -1 表示平局
         win_ratio = 1.0 * (win_cnt[0] + 0.5 * win_cnt[-1]) / n_games
         logging.info("TRAIN Num_playouts:{}, win: {}, lose: {}, tie:{}, win_ratio:{}".format(self.pure_mcts_playout_num,
-                                                                               win_cnt[1], win_cnt[2], win_cnt[-1], win_ratio))
+                                                                               win_cnt[0], win_cnt[1], win_cnt[-1], win_ratio))
         return win_ratio
 
     def run(self):
