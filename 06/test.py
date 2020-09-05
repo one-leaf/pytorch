@@ -94,7 +94,7 @@ def run():
         human = Human(agent,is_show=1)
 
         # set start_player=0 for human first
-        agent.start_play(mcts_ai_player, human, start_player=0, is_shown=1)
+        agent.start_play(mcts_player, human, start_player=0, is_shown=1)
     except KeyboardInterrupt:
         print('quit')
 
