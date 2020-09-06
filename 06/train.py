@@ -30,7 +30,7 @@ class FiveChessTrain():
         self.buffer_size = 10000  # cache对战记录个数
         self.data_buffer = deque(maxlen=self.buffer_size)  # 完整对战历史记录，用于训练
         self.play_batch_size = 1
-        self.epochs = 10  # 每次更新策略价值网络的训练步骤数
+        self.epochs = 100  # 每次更新策略价值网络的训练步骤数
         self.kl_targ = 0.02  # 策略价值网络KL值目标
         self.best_win_ratio = 0.0
 
@@ -78,14 +78,16 @@ class FiveChessTrain():
 
     def policy_update(self):
         """更新策略价值网络policy-value"""
-        # 随机抽取data_buffer中的对抗数据
-        mini_batch = random.sample(self.data_buffer, self.batch_size)
-        state_batch = [data[0] for data in mini_batch]
-        mcts_probs_batch = [data[1] for data in mini_batch]
-        winner_batch = [data[2] for data in mini_batch]
-        old_probs, old_v = self.policy_value_net.policy_value(state_batch)
         # 训练策略价值网络
         for i in range(self.epochs):
+            # 随机抽取data_buffer中的对抗数据
+            mini_batch = random.sample(self.data_buffer, self.batch_size)
+            state_batch = [data[0] for data in mini_batch]
+            mcts_probs_batch = [data[1] for data in mini_batch]
+            winner_batch = [data[2] for data in mini_batch]
+            old_probs, old_v = self.policy_value_net.policy_value(state_batch)
+
+        # for i in range(self.epochs):
             loss, entropy = self.policy_value_net.train_step(state_batch, mcts_probs_batch, winner_batch, self.learn_rate * self.lr_multiplier)
             new_probs, new_v = self.policy_value_net.policy_value(state_batch)
             kl = np.mean(np.sum(old_probs * (np.log(old_probs + 1e-10) - np.log(new_probs + 1e-10)), axis=1))
