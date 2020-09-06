@@ -226,7 +226,7 @@ class MCTS(object):
         return probs
 
     # 按概率返回当前状态下的动作及其概率，构建所有的树，默认10000局
-    # 这个不同于 get_action ，这个是 mtcs 的特殊走法 
+    # 这个不同于 get_action ，这个是 mtcs + AI 的特殊走法 
     def get_action_probs(self, state, temp=1e-3):
         """
         构建模型网络MCTS初始树，并返回所有action及对应模型概率
@@ -243,6 +243,7 @@ class MCTS(object):
         act_visits = [(act, node._n_visits) for act, node in self._root._children.items()]
         acts, visits = zip(*act_visits)
         # softmax概率，先用log(visites)，拉平差异，再乘以一个权重，这样给了一个可以调节的参数，
+        # temp 越小，导致softmax的越肯定，也就是当temp=1e-3时，基本上返回只有一个1,其余概率都是0; 训练的时候 temp=1
         act_probs = MCTS.softmax(1.0 / temp * np.log(np.array(visits) + 1e-10))
         return acts, act_probs
 
@@ -265,7 +266,7 @@ class MCTS(object):
 
 
 class MCTSPurePlayer(object):
-    """基于纯MCTS的AI player"""
+    """基于纯MCTS的player"""
 
     def __init__(self, c_puct=5, n_playout=2000):
         """初始化参数"""
@@ -296,7 +297,7 @@ class MCTSPurePlayer(object):
 
 
 class MCTSPlayer(object):
-    """基于模型指导概率的MCTS AI player"""
+    """基于模型指导概率的MCTS + AI player"""
 
     def __init__(self, policy_value_function, c_puct=5, n_playout=2000, is_selfplay=0):
         """初始化参数"""
@@ -316,6 +317,7 @@ class MCTSPlayer(object):
         # the pi vector returned by MCTS as in the alphaGo Zero paper
         move_probs = np.zeros(state.size * state.size)
         if len(state.availables) > 0:  # 盘面可落子位置>0
+            # 使用默认的temp = 1e-3，它几乎相当于选择具有最高概率的移动 ，训练的时候 temp = 1
             acts, probs = self.mcts.get_action_probs(state, temp)
             positions = state.actions_to_positions(acts)
             move_probs[positions] = probs
@@ -334,7 +336,6 @@ class MCTSPlayer(object):
                 # 更新根节点并重用搜索树
                 self.mcts.update_root_with_action(action)
             else:  # 和人类对战
-                # 使用默认的temp = 1e-3，它几乎相当于选择具有最高概率的移动
                 position = np.random.choice(positions, p=probs)
                 action = state.positions_to_actions([position])[0]
                 # 更新根节点:根据最后action向前探索树
