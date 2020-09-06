@@ -18,7 +18,7 @@ class FiveChessTrain():
     def __init__(self):
         self.policy_evaluate_size = 10  # 策略评估胜率时的模拟对局次数
         self.game_batch_num = 10000  # selfplay对战次数
-        self.batch_size = 64  # data_buffer中对战次数超过n次后开始启动模型训练
+        self.batch_size = 512  # data_buffer中对战次数超过n次后开始启动模型训练
         self.check_freq = 100  # 每对战n次检查一次当前模型vs旧模型胜率
         self.agent = Agent(size, n_in_row)
 
@@ -30,7 +30,7 @@ class FiveChessTrain():
         self.buffer_size = 10000  # cache对战记录个数
         self.data_buffer = deque(maxlen=self.buffer_size)  # 完整对战历史记录，用于训练
         self.play_batch_size = 1
-        self.epochs = 5  # 每次更新策略价值网络的训练步骤数
+        self.epochs = 10  # 每次更新策略价值网络的训练步骤数
         self.kl_targ = 0.02  # 策略价值网络KL值目标
         self.best_win_ratio = 0.0
 
@@ -96,13 +96,16 @@ class FiveChessTrain():
             self.lr_multiplier /= 1.5
         elif kl < self.kl_targ / 2 and self.lr_multiplier < 10:
             self.lr_multiplier *= 1.5
-        print(winner_batch)
-        print(old_v)
-        print(new_v)
         explained_var_old = (1 - np.var(np.array(winner_batch) - old_v.flatten()) / np.var(np.array(winner_batch)))
         explained_var_new = (1 - np.var(np.array(winner_batch) - new_v.flatten()) / np.var(np.array(winner_batch)))
         logging.info(("TRAIN kl:{:.5f},lr_multiplier:{:.3f},loss:{},entropy:{},explained_var_old:{:.3f},explained_var_new:{:.3f}"
                       ).format(kl, self.lr_multiplier, loss, entropy, explained_var_old, explained_var_new))
+        print("\twinner_batch",winner_batch[0])
+        print("\told_v",old_v[0])
+        print("\tnew_v",new_v[0])
+        print("\tmcts_probs_batch",mcts_probs_batch[0])
+        print("\told_probs",old_probs[0])
+        print("\tnew_probs",new_probs[0])
         return loss, entropy
 
     def policy_evaluate(self, n_games=10):
