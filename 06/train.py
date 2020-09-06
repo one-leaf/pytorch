@@ -30,7 +30,7 @@ class FiveChessTrain():
         self.buffer_size = 10000  # cache对战记录个数
         self.data_buffer = deque(maxlen=self.buffer_size)  # 完整对战历史记录，用于训练
         self.play_batch_size = 1
-        self.epochs = 100  # 每次更新策略价值网络的训练步骤数, 推荐是5，不过5收敛太慢了
+        self.epochs = 1000  # 每次更新策略价值网络的训练步骤数, 推荐是5，不过5收敛太慢了
         self.kl_targ = 0.02  # 策略价值网络KL值目标
         self.best_win_ratio = 0.0
 
