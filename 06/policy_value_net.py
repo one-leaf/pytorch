@@ -48,7 +48,7 @@ class Net(nn.Module):
 
 class PolicyValueNet():
     def print_netwark(self):
-        x=torch.Tensor(4,4,size,size).to(self.device)
+        x=torch.Tensor(4,4,self.size,self.size).to(self.device)
         print(self.policy_value_net)
         v,p=self.policy_value_net(x)
         print("value:",v.size())
