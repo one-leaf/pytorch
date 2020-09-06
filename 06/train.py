@@ -79,20 +79,23 @@ class FiveChessTrain():
     def policy_update(self):
         """更新策略价值网络policy-value"""
         # 训练策略价值网络
-        for i in range(self.epochs):
-            # 随机抽取data_buffer中的对抗数据
-            mini_batch = random.sample(self.data_buffer, self.batch_size)
-            state_batch = [data[0] for data in mini_batch]
-            mcts_probs_batch = [data[1] for data in mini_batch]
-            winner_batch = [data[2] for data in mini_batch]
-            old_probs, old_v = self.policy_value_net.policy_value(state_batch)
+        # 随机抽取data_buffer中的对抗数据
+        mini_batch = random.sample(self.data_buffer, self.batch_size)
+        state_batch = [data[0] for data in mini_batch]
+        mcts_probs_batch = [data[1] for data in mini_batch]
+        winner_batch = [data[2] for data in mini_batch]
+        old_probs, old_v = self.policy_value_net.policy_value(state_batch)
 
-        # for i in range(self.epochs):
+        for i in range(self.epochs):
             loss, entropy = self.policy_value_net.train_step(state_batch, mcts_probs_batch, winner_batch, self.learn_rate * self.lr_multiplier)
             new_probs, new_v = self.policy_value_net.policy_value(state_batch)
+
+            # 散度计算：
+            # D(P||Q) = sum( pi * log( pi / qi) ) = sum( pi * (log(pi) - log(qi)) )
             kl = np.mean(np.sum(old_probs * (np.log(old_probs + 1e-10) - np.log(new_probs + 1e-10)), axis=1))
             if kl > self.kl_targ * 4:  # 如果D_KL跑偏则尽早停止
                 break
+            
         # 自动调整学习率
         if kl > self.kl_targ * 2 and self.lr_multiplier > 0.1:
             self.lr_multiplier /= 1.5
