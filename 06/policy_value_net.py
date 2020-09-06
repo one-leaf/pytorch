@@ -47,11 +47,21 @@ class Net(nn.Module):
 
 
 class PolicyValueNet():
+    def print_netwark(self):
+        x=torch.Tensor(4,4,size,size).to(self.device)
+        print(self.policy_value_net)
+        v,p=self.policy_value_net(x)
+        print("value:",v.size())
+        print("policy:",p.size())
+
     def __init__(self, size, model_file=None, device=None, l2_const=10-4):
         self.size = size
         self.device=device
         self.l2_const = l2_const  
         self.policy_value_net = Net(size).to(device)
+
+        self.print_netwark()
+
         self.optimizer = optim.Adam(self.policy_value_net.parameters(), weight_decay=self.l2_const)
 
         if model_file and os.path.exists(model_file):
@@ -107,23 +117,18 @@ class PolicyValueNet():
         # Note: the L2 penalty is incorporated in optimizer
         # 胜率
         value_loss = F.mse_loss(value.view(-1), winner_batch)
-        policy_loss = -torch.mean(torch.sum(mcts_probs*log_act_probs, 1))
+        policy_loss = -torch.mean(torch.sum(mcts_probs * log_act_probs, 1))
         loss = value_loss + policy_loss
         # backward and optimize
         loss.backward()
         self.optimizer.step()
-        # calc policy entropy, for monitoring only
-        # 计算信息熵，越小越好
+        # 计算信息熵，越小越好, 只用于监控
         entropy = -torch.mean(
                 torch.sum(torch.exp(log_act_probs) * log_act_probs, 1)
                 )
         return loss.item(), entropy.item()
 
-    def get_policy_param(self):
-        net_params = self.policy_value_net.state_dict()
-        return net_params
-
+    # 保存模型
     def save_model(self, model_file):
         """ save model params to file """
-        net_params = self.get_policy_param()  # get model params
-        torch.save(net_params, model_file)
+        torch.save(self.policy_value_net.state_dict(), model_file)

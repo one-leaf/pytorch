@@ -18,8 +18,8 @@ class FiveChessTrain():
     def __init__(self):
         self.policy_evaluate_size = 10  # 策略评估胜率时的模拟对局次数
         self.game_batch_num = 10000  # selfplay对战次数
-        self.batch_size = 512  # data_buffer中对战次数超过n次后开始启动模型训练
-        self.check_freq = 50  # 每对战n次检查一次当前模型vs旧模型胜率
+        self.batch_size = 64  # data_buffer中对战次数超过n次后开始启动模型训练
+        self.check_freq = 100  # 每对战n次检查一次当前模型vs旧模型胜率
         self.agent = Agent(size, n_in_row)
 
         # training params
@@ -96,7 +96,9 @@ class FiveChessTrain():
             self.lr_multiplier /= 1.5
         elif kl < self.kl_targ / 2 and self.lr_multiplier < 10:
             self.lr_multiplier *= 1.5
-
+        print(winner_batch)
+        print(old_v)
+        print(new_v)
         explained_var_old = (1 - np.var(np.array(winner_batch) - old_v.flatten()) / np.var(np.array(winner_batch)))
         explained_var_new = (1 - np.var(np.array(winner_batch) - new_v.flatten()) / np.var(np.array(winner_batch)))
         logging.info(("TRAIN kl:{:.5f},lr_multiplier:{:.3f},loss:{},entropy:{},explained_var_old:{:.3f},explained_var_new:{:.3f}"
