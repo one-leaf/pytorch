@@ -172,7 +172,7 @@ class Agent(object):
                         c +=1
                     if self.board[x][y]!=blank or  self.board[x-1][y]==blank or  self.board[x+1][y]==blank:
                         c = 0
-            if c>2: holesCount += 1
+            if c>2: holesCount += c
 
         return holesCount
 
