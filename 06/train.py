@@ -30,7 +30,7 @@ class FiveChessTrain():
         self.buffer_size = 10000  # cache对战记录个数
         self.data_buffer = deque(maxlen=self.buffer_size)  # 完整对战历史记录，用于训练
         self.play_batch_size = 1
-        self.epochs = 100  # 每次更新策略价值网络的训练步骤数
+        self.epochs = 100  # 每次更新策略价值网络的训练步骤数, 推荐是5，不过5收敛太慢了
         self.kl_targ = 0.02  # 策略价值网络KL值目标
         self.best_win_ratio = 0.0
 
@@ -95,7 +95,7 @@ class FiveChessTrain():
             kl = np.mean(np.sum(old_probs * (np.log(old_probs + 1e-10) - np.log(new_probs + 1e-10)), axis=1))
             if kl > self.kl_targ * 4:  # 如果D_KL跑偏则尽早停止
                 break
-            
+
         # 自动调整学习率
         if kl > self.kl_targ * 2 and self.lr_multiplier > 0.1:
             self.lr_multiplier /= 1.5
