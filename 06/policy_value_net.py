@@ -19,8 +19,14 @@ class Net(nn.Module):
 
         # 由于每个棋盘大小对最终对应一个动作，所以补齐的效果比较好
         self.conv1 = nn.Conv2d(4, 32, 3, padding=1)
-        self.conv2 = nn.Conv2d(32, 64, 3, padding=1)
-        self.conv3 = nn.Conv2d(64, 128, 3, padding=1)
+        self.conv2 = nn.Conv2d(32, 32, 3, padding=1)
+        self.conv3 = nn.Conv2d(32, 32, 3, padding=1)
+        self.conv4 = nn.Conv2d(32, 32, 3, padding=1)
+        self.conv5 = nn.Conv2d(32, 32, 3, padding=1)
+        self.conv6 = nn.Conv2d(32, 32, 3, padding=1)
+        self.conv7 = nn.Conv2d(32, 32, 3, padding=1)
+        self.conv8 = nn.Conv2d(32, 64, 3, padding=1)
+        self.conv9 = nn.Conv2d(64, 128, 3, padding=1)
         # 动作预测
         self.act_conv1 = nn.Conv2d(128, 4, 1)
         self.act_fc1 = nn.Linear(4*size*size, size*size)
@@ -33,6 +39,12 @@ class Net(nn.Module):
         x = F.relu(self.conv1(x))
         x = F.relu(self.conv2(x))
         x = F.relu(self.conv3(x))
+        x = F.relu(self.conv4(x))
+        x = F.relu(self.conv5(x))
+        x = F.relu(self.conv6(x))
+        x = F.relu(self.conv7(x))
+        x = F.relu(self.conv8(x))
+        x = F.relu(self.conv9(x))
         # 动作
         x_act = F.relu(self.act_conv1(x))
         x_act = x_act.view(x.size(0), -1)
