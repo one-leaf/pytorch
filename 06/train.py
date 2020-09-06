@@ -101,7 +101,7 @@ class FiveChessTrain():
             self.lr_multiplier /= 1.5
         elif kl < self.kl_targ / 2 and self.lr_multiplier < 10:
             self.lr_multiplier *= 1.5
-        # 如果学习到了，explained_var 应该趋近于1，如果没有学习到则为 0
+        # 如果学习到了，explained_var 应该趋近于 1，如果没有学习到也就是胜率都为很小值时，则为 0
         explained_var_old = (1 - np.var(np.array(winner_batch) - old_v.flatten()) / np.var(np.array(winner_batch)))
         explained_var_new = (1 - np.var(np.array(winner_batch) - new_v.flatten()) / np.var(np.array(winner_batch)))
         logging.info(("TRAIN kl:{},lr_multiplier:{:.3f},loss:{},entropy:{},var_old:{},var_new:{}"
