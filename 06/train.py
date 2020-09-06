@@ -101,11 +101,10 @@ class FiveChessTrain():
             self.lr_multiplier /= 1.5
         elif kl < self.kl_targ / 2 and self.lr_multiplier < 10:
             self.lr_multiplier *= 1.5
-        explained_var_old = np.var(np.array(winner_batch) - old_v.flatten())#(1 - np.var(np.array(winner_batch) - old_v.flatten()) / np.var(np.array(winner_batch)))
-        explained_var_new = np.var(np.array(winner_batch) - new_v.flatten())#(1 - np.var(np.array(winner_batch) - new_v.flatten()) / np.var(np.array(winner_batch)))
+        explained_var_old = (1 - np.var(np.array(winner_batch) - old_v.flatten()) / np.var(np.array(winner_batch)))
+        explained_var_new = (1 - np.var(np.array(winner_batch) - new_v.flatten()) / np.var(np.array(winner_batch)))
         logging.info(("TRAIN kl:{},lr_multiplier:{:.3f},loss:{},entropy:{},var_old:{},var_new:{}"
                       ).format(kl, self.lr_multiplier, loss, entropy, explained_var_old, explained_var_new))
-        print("\twinner_batch:",winner_batch[0],"old_v:",old_v[0][0],"new_v:",new_v[0][0])
         return loss, entropy
 
     def policy_evaluate(self, n_games=10):
