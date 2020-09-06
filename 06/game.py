@@ -102,7 +102,7 @@ class FiveChess(object):
         for x in range(self.size):
             for y in range(self.size):
                 if self.chessboard[x][y]!=0:
-                    idx = 0 if self.chessboard[x][y]==self.colors[self.current_player] else 1
+                    idx = 1 if self.chessboard[x][y]!=self.colors[self.current_player] else 0
                     square_state[idx][x][y] = 1.0
         # 第三层为最后一步
         if self.last_action!=None:
