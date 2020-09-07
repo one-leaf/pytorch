@@ -41,8 +41,6 @@ class Human(object):
     def __str__(self):
         return "Human {}".format(self.player)
 
-   
-
 def run():
     curr_dir = os.path.dirname(os.path.abspath(__file__))
     size = 8  # 棋盘大小
