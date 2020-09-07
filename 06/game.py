@@ -90,11 +90,11 @@ class FiveChess(object):
 
     # 位置转action
     def positions_to_actions(self, positions):
-        return [(i//self.size, i%self.size) for i in positions]
+        return [(i%self.size, self.size-(i//self.size)-1) for i in positions]
 
     # action转位置
     def actions_to_positions(self, actions):
-        return [x*self.size+y for x,y in actions]
+        return [x+(self.size-y-1)*self.size for x,y in actions]
 
     # 返回 [1, 4, size, size]
     def current_state(self):
@@ -104,11 +104,11 @@ class FiveChess(object):
             for y in range(self.size):
                 if self.chessboard[x][y]!=0:
                     idx = 1 if self.chessboard[x][y]!=self.colors[self.current_player] else 0
-                    square_state[idx][x][y] = 1.0
+                    square_state[idx][self.size-y-1][x] = 1.0
         # 第三层为最后一步
         if self.last_action!=None:
             x,y = self.last_action
-            square_state[2][x][y] = 1.0
+            square_state[2][self.size-y-1][x] = 1.0
         # 第四层为如果当前用户是先手则为1
         if self.step_count % 2 == 0:
             square_state[3][:,:] = 1.0
@@ -212,6 +212,13 @@ if __name__ == "__main__":
     env = FiveChessEnv(fiveChess)
 
     env.reset()
+    # fiveChess.step((2,3))
+    # print(fiveChess.chessboard)
+    # print(fiveChess.current_state())
+    # # env.render()
+    # # time.sleep(5)
+    # raise "x"
+
     env.render()
     env.viewer.window.on_mouse_press = on_mouse_press
     done = False

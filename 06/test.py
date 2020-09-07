@@ -36,6 +36,7 @@ class Human(object):
                     break
             self.agent.env.render()
             time.sleep(0.1)
+        print(action)
         return action
 
     def __str__(self):

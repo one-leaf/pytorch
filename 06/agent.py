@@ -23,6 +23,9 @@ class Agent(object):
             action, move_probs = player.get_action(self.game, temp=temp, return_prob=1)
             # store the data
             states.append(self.game.current_state())
+            # print(action)
+            # print(move_probs.reshape(self.size,self.size))
+            # print(states[-1])
             mcts_probs.append(move_probs)
             current_players.append(self.game.current_player)
             # perform a move
