@@ -18,11 +18,11 @@ class FiveChess(object):
         # 可用步骤
         self.reset()
 
-    def reset(self):
+    def reset(self, start_player=0):
         self.chessboard = [ [  0 for v in range(self.size)  ] for v in range(self.size) ]
         self.step_count = 0
         self.last_action = None
-        self.current_player = self.players[0]
+        self.current_player = self.players[start_player]
         self.availables = [(x,y) for x in range(self.size) for y in range(self.size)]
         self.terminal = False
         self.win_user = -1
@@ -84,7 +84,7 @@ class FiveChess(object):
 
         #这一步完成
         self.step_count +=1
-        self.current_player = self.step_count % 2
+        self.current_player = self.players[0] if self.current_player==self.players[1] else self.players[1]
         return self.chessboard, reward, self.terminal, self.win_user
 
     # 位置转action
@@ -109,7 +109,7 @@ class FiveChess(object):
             x,y = self.last_action
             square_state[2][x][y] = 1.0
         # 第四层为如果当前用户是先手则为1
-        if self.current_player == 0:
+        if self.step_count % 2 == 0:
             square_state[3][:,:] = 1.0
         return square_state
 
