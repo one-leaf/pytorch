@@ -48,14 +48,11 @@ class Agent(object):
     # AI和蒙特卡罗对战
     def start_play(self, player1, player2, start_player=0, is_shown=1):
         """start a game between two players"""
-        self.game.reset()
         if start_player not in (0, 1):
             raise Exception('start_player should be either 0 (player1 first) '
                             'or 1 (player2 first)')
-        if start_player==0:
-            p1, p2 = self.game.players
-        else:
-            p2, p1 = self.game.players
+        p1, p2 = self.game.players
+        self.game.reset(start_player)
         player1.set_player_ind(p1)
         player2.set_player_ind(p2)
         players = {p1: player1, p2: player2}
