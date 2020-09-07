@@ -68,7 +68,7 @@ class FiveChessTrain():
         """收集自我对抗数据用于训练"""
         for i in range(n_games):
             # 使用MCTS蒙特卡罗树搜索进行自我对抗
-            winner, play_data = self.agent.start_self_play(self.mcts_player, temp=self.temp)
+            winner, play_data = self.agent.start_self_play(self.mcts_player, is_shown=0, temp=self.temp)
             play_data = list(play_data)[:]
             self.episode_len = len(play_data)
             # 把翻转棋盘数据加到数据集里

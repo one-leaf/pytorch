@@ -75,10 +75,11 @@ class FiveChess(object):
         self.last_action = action     
         self.availables.remove(action)
 
-        #胜负判定
-        color = self.colors[self.current_player]
         #棋子
+        color = self.colors[self.current_player]
         self.chessboard[action[0]][action[1]] = color
+
+        #胜负判定
         self.terminal, self.win_user = self.check_terminal()
         reward = 0 if self.win_user==-1 else 1 
 
@@ -168,7 +169,7 @@ class FiveChessEnv(gym.Env):
                     c = rendering.make_circle(width/3)
                     ct = rendering.Transform(translation=(0,0))
                     c.add_attr(ct)
-                    c.set_color(0,0,0)
+                    c.set_color(0, 0, 0)
                     self.chess[x].append([c,ct])
                     self.viewer.add_geom(c)
 
@@ -181,7 +182,7 @@ class FiveChessEnv(gym.Env):
                     else:
                         self.chess[x][y][0].set_color(0,0,0)
                 else:
-                    self.chess[x][y][1].set_translation(-10,-10)
+                    self.chess[x][y][1].set_translation(-1*width,-1*width)
 
         return self.viewer.render(return_rgb_array=mode == 'rgb_array')
 
