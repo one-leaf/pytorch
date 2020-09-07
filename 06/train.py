@@ -53,15 +53,19 @@ class FiveChessTrain():
         """
         extend_data = []
         for state, mcts_porb, winner in play_data:
+            mcts_porb = mcts_porb.reshape(size, size)
             for i in [1, 2, 3, 4]:
                 # 逆时针旋转
                 equi_state = np.array([np.rot90(s, i) for s in state])
-                equi_mcts_prob = np.rot90(np.flipud(mcts_porb.reshape(size, size)), i)
-                extend_data.append((equi_state, np.flipud(equi_mcts_prob).flatten(), winner))
+                # equi_mcts_prob = np.rot90(np.flipud(mcts_porb.reshape(size, size)), i)
+                equi_mcts_prob = np.rot90(mcts_porb, i)
+                # extend_data.append((equi_state, np.flipud(equi_mcts_prob).flatten(), winner))
+                extend_data.append((equi_state, equi_mcts_prob.flatten(), winner))
                 # 水平翻转
                 equi_state = np.array([np.fliplr(s) for s in equi_state])
                 equi_mcts_prob = np.fliplr(equi_mcts_prob)
-                extend_data.append((equi_state, np.flipud(equi_mcts_prob).flatten(), winner))
+                # extend_data.append((equi_state, np.flipud(equi_mcts_prob).flatten(), winner))
+                extend_data.append((equi_state, equi_mcts_prob.flatten(), winner))
         return extend_data
 
     def collect_selfplay_data(self, n_games=1):
@@ -69,10 +73,10 @@ class FiveChessTrain():
         for i in range(n_games):
             # 使用MCTS蒙特卡罗树搜索进行自我对抗
             winner, play_data = self.agent.start_self_play(self.mcts_player, is_shown=0, temp=self.temp)
-            play_data = list(play_data)# list(play_data)[:]
+            play_data = list(play_data)[:]
             self.episode_len = len(play_data)
             # 把翻转棋盘数据加到数据集里
-            # play_data = self.get_equi_data(play_data)
+            play_data = self.get_equi_data(play_data)
             # 保存对抗数据到data_buffer
             self.data_buffer.extend(play_data)
 

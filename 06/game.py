@@ -112,7 +112,7 @@ class FiveChess(object):
         # 第四层为如果当前用户是先手则为1
         if self.step_count % 2 == 0:
             square_state[3][:,:] = 1.0
-        square_state = square_state[:, ::-1, :]
+        # square_state = square_state[:, ::-1, :]
         return square_state
 
     def game_end(self):
