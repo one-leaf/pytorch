@@ -159,19 +159,19 @@ class Agent(object):
             for y in range(boardheight):
                 if self.board[x][y]!=blank: break
                 if x == 0:
-                    if self.board[x][y]==blank and self.board[x+1][y]!=blank:
+                    if self.board[x+1][y]!=blank:
                         c += 1
-                    elif c > 0 and self.board[x][y]==blank:
+                    elif c > 0:
                         c += 1
                 elif x == boardwidth-1:
-                    if self.board[x][y]==blank and self.board[x-1][y]!=blank:
+                    if self.board[x-1][y]!=blank:
                         c +=1
-                    elif c > 0 and self.board[x][y]==blank:
+                    elif c > 0:
                         c += 1
                 else:
-                    if self.board[x][y]==blank and self.board[x-1][y]!=blank and self.board[x+1][y]!=blank:
+                    if self.board[x-1][y]!=blank and self.board[x+1][y]!=blank:
                         c +=1
-                    elif c > 0 and self.board[x][y]==blank:
+                    elif c > 0:
                         c += 1
             if c>2: holesCount += c
 
