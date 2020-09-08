@@ -113,9 +113,12 @@ class PolicyValueNet():
         state_batch = torch.FloatTensor(state_batch).to(self.device) 
         self.policy_value_net.eval()
         log_act_probs, value = self.policy_value_net(state_batch)
+
         # 还原成标准的概率
         act_probs = np.exp(log_act_probs.data.cpu().numpy())
-        return act_probs, value.data.cpu().numpy()
+        value = value.data.cpu().numpy()
+        print(np.max(act_probs),np.argmax(act_probs), value)
+        return act_probs, value
 
     # 从当前棋局获得 ((action, act_probs),...) 的可用动作+概率和当前棋盘胜率
     def policy_value_fn(self, game):
