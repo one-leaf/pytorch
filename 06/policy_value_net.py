@@ -6,11 +6,6 @@ from torch.autograd import Variable
 import numpy as np
 import os
 
-# 设置学习率
-def set_learning_rate(optimizer, lr):
-    for param_group in optimizer.param_groups:
-        param_group['lr'] = lr
-
 # 网络模型
 class Net(nn.Module):
 
@@ -59,6 +54,11 @@ class Net(nn.Module):
 
 
 class PolicyValueNet():
+    # 设置学习率
+    def set_learning_rate(self, lr):
+        for param_group in self.optimizer.param_groups:
+            param_group['lr'] = lr
+
     def print_netwark(self):
         x=torch.Tensor(1,4,self.size,self.size).to(self.device)
         print(self.policy_value_net)
@@ -81,7 +81,7 @@ class PolicyValueNet():
             net_sd = torch.load(model_file, map_location=self.device)
             self.policy_value_net.load_state_dict(net_sd)
 
-    # 根据当前状态得到，action的概率和价值
+    # 根据当前状态得到，action的概率和概率
     def policy_value(self, state_batch):
         """
         input: a batch of states
@@ -94,7 +94,7 @@ class PolicyValueNet():
         act_probs = np.exp(log_act_probs.data.cpu().numpy())
         return act_probs, value.data.cpu().numpy()
 
-    # 从当前棋局获得 ((action, act_probs),...) 的可用动作概率和当前棋盘胜率
+    # 从当前棋局获得 ((action, act_probs),...) 的可用动作+概率和当前棋盘胜率
     def policy_value_fn(self, game):
         """
         input: game
@@ -109,7 +109,7 @@ class PolicyValueNet():
         actions = game.positions_to_actions(legal_positions)
         
         act_probs = zip(actions, act_probs[legal_positions])
-        value = value[0][0]
+        value = value[0,0]
         return act_probs, value
 
     def train_step(self, state_batch, mcts_probs, winner_batch, lr):
@@ -129,7 +129,7 @@ class PolicyValueNet():
         # zero the parameter gradients
         self.optimizer.zero_grad()
         # set learning rate
-        set_learning_rate(self.optimizer, lr)
+        self.set_learning_rate(lr)
 
         # forward
         log_act_probs, value = self.policy_value_net(state_batch)
@@ -139,8 +139,20 @@ class PolicyValueNet():
         value_loss = F.mse_loss(value.view(-1), winner_batch)
         policy_loss = -torch.mean(torch.sum(mcts_probs * log_act_probs, 1))
         loss = value_loss + policy_loss
+
         # backward and optimize
         loss.backward()
+
+        print(lr)
+        print(value.view(-1)[:self.size*2])
+        print(winner_batch[:self.size*2])
+        print(mcts_probs[0][:self.size*2])
+        print(log_act_probs[0][:self.size*2])
+        print(loss, value_loss, policy_loss)
+        for name, parms in self.policy_value_net.named_parameters():
+            print('name:', name, 'grad_requirs:', parms.requires_grad,' grad_value:',torch.max(parms.grad))
+        # raise "ss"
+
         self.optimizer.step()
         # 计算信息熵，越小越好, 只用于监控
         entropy = -torch.mean(
