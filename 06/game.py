@@ -113,6 +113,7 @@ class FiveChess(object):
         if self.step_count % 2 == 0:
             square_state[3][:,:] = 1.0
         # square_state = square_state[:, ::-1, :]
+        # 归一化数据
         norm = np.linalg.norm(square_state)
         if norm != 0:
             square_state =  square_state / norm
