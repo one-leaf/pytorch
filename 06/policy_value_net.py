@@ -119,8 +119,10 @@ class PolicyValueNet():
         act_probs = np.exp(log_act_probs.data.cpu().numpy())
         value = value.data.cpu().numpy()
 
-        if random.random()<0.001:
-            print(np.max(act_probs),np.argmax(act_probs), value)
+        if random.random()<0.0001:
+            idx = np.argmax(act_probs)
+            print("max:", np.max(act_probs), "min:", np.min(act_probs), "idx:", idx, \
+                "act:", (idx%self.size, self.size-(idx//self.size)-1), "value:", value)
 
         return act_probs, value
 
