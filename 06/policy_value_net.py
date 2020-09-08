@@ -111,7 +111,7 @@ class PolicyValueNet():
         output: a batch of action probabilities and state values
         """
         state_batch = torch.FloatTensor(state_batch).to(self.device) 
-        self.policy_value_net.eval()
+        # self.policy_value_net.eval()
         log_act_probs, value = self.policy_value_net(state_batch)
 
         # 还原成标准的概率
