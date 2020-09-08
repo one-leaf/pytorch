@@ -87,7 +87,7 @@ class PolicyValueNet():
         input: a batch of states
         output: a batch of action probabilities and state values
         """
-        state_batch = torch.tensor(state_batch, dtype=torch.float, device=self.device,  requires_grad=True)
+        state_batch = torch.tensor(state_batch, dtype=torch.float, device=self.device)
         log_act_probs, value = self.policy_value_net(state_batch)
         # 还原成标准的概率
         act_probs = np.exp(log_act_probs.data.cpu().numpy())
@@ -101,7 +101,7 @@ class PolicyValueNet():
         action and the score of the game state
         """
         legal_positions = game.actions_to_positions(game.availables)
-        current_state = np.ascontiguousarray(game.current_state().reshape(-1, 4, self.size, self.size))
+        current_state = game.current_state().reshape(1, 4, self.size, self.size)
         act_probs, value = self.policy_value(current_state)
         act_probs = act_probs.flatten()
 
@@ -114,12 +114,12 @@ class PolicyValueNet():
     def train_step(self, state_batch, mcts_probs, winner_batch, lr):
         """perform a training step"""
         # wrap in Variable
-        state_batch = torch.tensor(state_batch, dtype=torch.float, device=self.device,  requires_grad=True)
-        mcts_probs = torch.tensor(mcts_probs, dtype=torch.float, device=self.device,  requires_grad=True)
-        winner_batch = torch.tensor(winner_batch, dtype=torch.float, device=self.device,  requires_grad=True)
-        # state_batch = torch.FloatTensor(state_batch, requires_grad=True).to(self.device)
-        # mcts_probs = torch.FloatTensor(mcts_probs, requires_grad=True).to(self.device)
-        # winner_batch = torch.FloatTensor(winner_batch, requires_grad=True).to(self.device)
+        # state_batch = torch.tensor(state_batch, dtype=torch.float, device=self.device,  requires_grad=True)
+        # mcts_probs = torch.tensor(mcts_probs, dtype=torch.float, device=self.device,  requires_grad=True)
+        # winner_batch = torch.tensor(winner_batch, dtype=torch.float, device=self.device,  requires_grad=True)
+        state_batch = torch.FloatTensor(state_batch).to(self.device)
+        mcts_probs = torch.FloatTensor(mcts_probs).to(self.device)
+        winner_batch = torch.FloatTensor(winner_batch).to(self.device)
 
         # zero the parameter gradients
         self.optimizer.zero_grad()
