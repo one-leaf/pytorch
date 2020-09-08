@@ -9,8 +9,8 @@ import numpy as np
 from collections import defaultdict, deque
 
 curr_dir = os.path.dirname(os.path.abspath(__file__))
-size = 6  # 棋盘大小
-n_in_row = 4  # 几子连线
+size = 8  # 棋盘大小
+n_in_row = 5  # 几子连线
 model_file =  os.path.join(curr_dir, '../data/save/06_model_%s_%s.pth'%(size,n_in_row))
 best_model_file =  os.path.join(curr_dir, '../data/save/06_best_model_%s_%s.pth'%(size,n_in_row))
 
@@ -77,7 +77,13 @@ class FiveChessTrain():
             self.episode_len = len(play_data)
             # 把翻转棋盘数据加到数据集里
             play_data = self.get_equi_data(play_data)
-
+            # print("===",winner,"===")
+            # for state, mcts_porb, winner in play_data:
+            #     print(winner)
+            # state, mcts_porb, winner =  play_data[-1]
+            # print(state)
+            # print(mcts_porb)               
+            # raise "xx"
             # 保存对抗数据到data_buffer
             self.data_buffer.extend(play_data)
 
