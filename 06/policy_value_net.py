@@ -169,9 +169,9 @@ class PolicyValueNet():
         loss.backward()
 
         print(loss, value_loss, policy_loss)
-        for name, parms in self.policy_value_net.named_parameters():
-            grad_value = torch.max(parms.grad)
-            print('name:', name, 'grad_requirs:', parms.requires_grad,' grad_value:',grad_value)
+        # for name, parms in self.policy_value_net.named_parameters():
+        #     grad_value = torch.max(parms.grad)
+        #     print('name:', name, 'grad_requirs:', parms.requires_grad,' grad_value:',grad_value)
         # raise "ss"
 
         self.optimizer.step()
