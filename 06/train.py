@@ -77,6 +77,7 @@ class FiveChessTrain():
             self.episode_len = len(play_data)
             # 把翻转棋盘数据加到数据集里
             play_data = self.get_equi_data(play_data)
+
             # 保存对抗数据到data_buffer
             self.data_buffer.extend(play_data)
 

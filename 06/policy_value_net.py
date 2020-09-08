@@ -87,7 +87,7 @@ class PolicyValueNet():
         input: a batch of states
         output: a batch of action probabilities and state values
         """
-        state_batch = torch.tensor(state_batch, dtype=torch.float, device=self.device)
+        state_batch = torch.tensor(state_batch, dtype=torch.float, device=self.device,  requires_grad=True)
         log_act_probs, value = self.policy_value_net(state_batch)
         # 还原成标准的概率
         act_probs = np.exp(log_act_probs.data.cpu().numpy())
