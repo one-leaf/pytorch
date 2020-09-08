@@ -80,7 +80,7 @@ class FiveChessTrain():
             # print("===",winner,"===")
             # for state, mcts_porb, winner in play_data:
             #     print(winner)
-            # state, mcts_porb, winner =  play_data[-1]
+            # state, mcts_porb, winner =  play_data[16]
             # print(state)
             # print(mcts_porb)               
             # raise "xx"
