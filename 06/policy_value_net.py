@@ -15,8 +15,8 @@ class Net(nn.Module):
         # 由于每个棋盘大小对最终对应一个动作，所以补齐的效果比较好
         self.conv1 = nn.Conv2d(4, 32, 3, padding=1)
         self.conv2 = nn.Conv2d(32, 32, 3, padding=1)
-        # self.conv3 = nn.Conv2d(32, 32, 3, padding=1)
-        # self.conv4 = nn.Conv2d(32, 32, 3, padding=1)
+        self.conv3 = nn.Conv2d(32, 32, 3, padding=1)
+        self.conv4 = nn.Conv2d(32, 32, 3, padding=1)
         # self.conv5 = nn.Conv2d(32, 32, 3, padding=1)
         # self.conv6 = nn.Conv2d(32, 32, 3, padding=1)
         # self.conv7 = nn.Conv2d(32, 32, 3, padding=1)
@@ -33,8 +33,8 @@ class Net(nn.Module):
     def forward(self, x):
         x = F.relu(self.conv1(x))
         x = F.relu(self.conv2(x))
-        # x = F.relu(self.conv3(x))
-        # x = F.relu(self.conv4(x))
+        x = F.relu(self.conv3(x))
+        x = F.relu(self.conv4(x))
         # x = F.relu(self.conv5(x))
         # x = F.relu(self.conv6(x))
         # x = F.relu(self.conv7(x))
@@ -88,8 +88,6 @@ class PolicyValueNet():
         output: a batch of action probabilities and state values
         """
         state_batch = torch.FloatTensor(state_batch).to(self.device) 
-        # state_batch = torch.tensor(state_batch, dtype=torch.float, device=self.device)
-        # state_batch = Variable(torch.FloatTensor(state_batch).to(self.device)) 
         log_act_probs, value = self.policy_value_net(state_batch)
         # 还原成标准的概率
         act_probs = np.exp(log_act_probs.data.cpu().numpy())
@@ -115,17 +113,10 @@ class PolicyValueNet():
 
     def train_step(self, state_batch, mcts_probs, winner_batch, lr):
         """perform a training step"""
-        # wrap in Variable
-        # state_batch = torch.tensor(state_batch, dtype=torch.float, device=self.device,  requires_grad=True)
-        # mcts_probs = torch.tensor(mcts_probs, dtype=torch.float, device=self.device,  requires_grad=True)
-        # winner_batch = torch.tensor(winner_batch, dtype=torch.float, device=self.device,  requires_grad=True)
-        
+        # wrap in Variable       
         state_batch = torch.FloatTensor(state_batch).to(self.device)
         mcts_probs = torch.FloatTensor(mcts_probs).to(self.device)
         winner_batch = torch.FloatTensor(winner_batch).to(self.device)
-        # state_batch = Variable(torch.FloatTensor(state_batch).to(self.device)) 
-        # mcts_probs = Variable(torch.FloatTensor(mcts_probs).to(self.device)) 
-        # winner_batch = Variable(torch.FloatTensor(winner_batch).to(self.device)) 
 
         # zero the parameter gradients
         self.optimizer.zero_grad()
