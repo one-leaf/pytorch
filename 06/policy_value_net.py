@@ -15,10 +15,10 @@ class ResidualBlock(nn.Module):
         super(ResidualBlock,self).__init__()
         self.left=nn.Sequential(
             nn.Conv2d(inchannel,outchannel,3,stride,1,bias=False),
-            nn.BatchNorm2d(outchannel),
+            # nn.BatchNorm2d(outchannel),
             nn.ReLU(inplace=True),
             nn.Conv2d(outchannel,outchannel,3,1,1,bias=False),
-            nn.BatchNorm2d(outchannel)
+            # nn.BatchNorm2d(outchannel)
         )
         self.right=shortcut
         
@@ -50,7 +50,7 @@ class Net(nn.Module):
         #构建layer,包含多个residual block
         shortcut=nn.Sequential(
             nn.Conv2d(inchannel,outchannel,1,stride,bias=False),
-            nn.BatchNorm2d(outchannel)
+            # nn.BatchNorm2d(outchannel)
         )
  
         layers=[ ]
