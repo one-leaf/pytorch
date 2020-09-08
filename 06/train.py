@@ -23,7 +23,7 @@ class FiveChessTrain():
         self.agent = Agent(size, n_in_row)
 
         # training params
-        self.learn_rate = 1e-4
+        self.learn_rate = 2e-3
         self.lr_multiplier = 1.0  # 基于KL的自适应学习率
         self.temp = 1.0  # the temperature param
         self.n_playout = 400  # 每个动作的模拟次数
