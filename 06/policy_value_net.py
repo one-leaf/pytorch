@@ -15,10 +15,10 @@ class ResidualBlock(nn.Module):
         super(ResidualBlock,self).__init__()
         self.left=nn.Sequential(
             nn.Conv2d(inchannel,outchannel,3,stride,1,bias=False),
-            # nn.BatchNorm2d(outchannel),
+            nn.BatchNorm2d(outchannel),
             nn.ReLU(inplace=True),
             nn.Conv2d(outchannel,outchannel,3,1,1,bias=False),
-            # nn.BatchNorm2d(outchannel)
+            nn.BatchNorm2d(outchannel)
         )
         self.right=shortcut
         
@@ -50,7 +50,7 @@ class Net(nn.Module):
         #构建layer,包含多个residual block
         shortcut=nn.Sequential(
             nn.Conv2d(inchannel,outchannel,1,stride,bias=False),
-            # nn.BatchNorm2d(outchannel)
+            nn.BatchNorm2d(outchannel)
         )
  
         layers=[ ]
@@ -110,8 +110,10 @@ class PolicyValueNet():
         input: a batch of states
         output: a batch of action probabilities and state values
         """
-        state_batch = torch.FloatTensor(state_batch).to(self.device) 
-        log_act_probs, value = self.policy_value_net(state_batch)
+        state_batch = torch.FloatTensor(state_batch).to(self.device)
+        self.policy_value_net.eval()
+        with torch.no_grad(): 
+            log_act_probs, value = self.policy_value_net(state_batch)
 
         # 还原成标准的概率
         act_probs = np.exp(log_act_probs.data.cpu().numpy())
@@ -143,8 +145,6 @@ class PolicyValueNet():
         state_batch = torch.FloatTensor(state_batch).to(self.device)
         mcts_probs = torch.FloatTensor(mcts_probs).to(self.device)
         winner_batch = torch.FloatTensor(winner_batch).to(self.device)
-        
-        self.policy_value_net.train()
 
         # zero the parameter gradients
         self.optimizer.zero_grad()
@@ -152,7 +152,9 @@ class PolicyValueNet():
         self.set_learning_rate(lr)
 
         # forward
+        self.policy_value_net.train()
         log_act_probs, value = self.policy_value_net(state_batch)
+
         # define the loss = (z - v)^2 - pi^T * log(p) + c||theta||^2
         # Note: the L2 penalty is incorporated in optimizer
         # 胜率
@@ -164,10 +166,9 @@ class PolicyValueNet():
         loss.backward()
 
         print(loss, value_loss, policy_loss)
-        # for name, parms in self.policy_value_net.named_parameters():
-        #     grad_value = torch.max(parms.grad)
-        #     if grad_value == 0:
-        #         print('name:', name, 'grad_requirs:', parms.requires_grad,' grad_value:',grad_value)
+        for name, parms in self.policy_value_net.named_parameters():
+            grad_value = torch.max(parms.grad)
+            print('name:', name, 'grad_requirs:', parms.requires_grad,' grad_value:',grad_value)
         # raise "ss"
 
         self.optimizer.step()
