@@ -11,6 +11,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
+from torchvision import transforms
 
 from itertools import count
 from collections import deque
@@ -177,35 +178,59 @@ class Agent(object):
 
         return holesCount
 
+# 定义残差块
+class ResidualBlock(nn.Module):
+    #实现子module: Residual    Block
+    def __init__(self,inchannel,outchannel,stride=1,shortcut=None):
+        super(ResidualBlock,self).__init__()
+        self.left=nn.Sequential(
+            nn.Conv2d(inchannel,outchannel,3,stride,1,bias=False),
+            nn.BatchNorm2d(outchannel),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(outchannel,outchannel,3,1,1,bias=False),
+            nn.BatchNorm2d(outchannel)
+        )
+        self.right=shortcut
+        
+    def forward(self,x):
+        out=self.left(x)
+        residual=x if self.right is None else self.right(x)
+        out+=residual
+        return F.relu(out)
+
 class Net(nn.Module):
     def __init__(self, output_size):
         super().__init__()
-        self.conv1 = nn.Conv2d(3, 32, 3, 1, padding=1)
-        self.conv2 = nn.Conv2d(32, 32, 3, 1, padding=1)
-        self.conv3 = nn.Conv2d(32, 32, 3, 1, padding=1)
-        self.conv4 = nn.Conv2d(32, 32, 3, 1, padding=1)
-        self.conv5 = nn.Conv2d(32, 32, 3, 1, padding=1)
-        self.conv6 = nn.Conv2d(32, 32, 3, 1, padding=1)
-        self.conv7 = nn.Conv2d(32, 32, 3, 1, padding=1)
-        self.conv8 = nn.Conv2d(32, 32, 3, 1, padding=1)
-        self.conv9 = nn.Conv2d(32, 1, 1, 1)
-        self.fc1 = nn.Linear(10*20, output_size)
+        self.conv1=self._make_layer(3, 64, 3)
+        self.conv2=self._make_layer(64, 128, 3)
+        self.conv3 = nn.Conv2d(128, 4, 1, 1)
+        self.fc1 = nn.Linear(10*20*4, 128)
+        self.fc2 = nn.Linear(128, output_size)
     def forward(self, x):
-        x = F.relu(self.conv1(x))
-        x = F.relu(self.conv2(x))
-        x = F.relu(self.conv3(x))
-        x = F.relu(self.conv4(x))
-        x = F.relu(self.conv5(x))
-        x = F.relu(self.conv6(x))
-        x = F.relu(self.conv7(x))
-        x = F.relu(self.conv8(x))
-        x = F.relu(self.conv9(x))
+        x = self.conv1(x)
+        x = self.conv2(x)
+        x = self.conv3(x)
         x = x.view(x.size(0),-1)
-        x = self.fc1(x)
+        x = F.relu(self.fc1(x))
+        x = self.fc2(x)
         return x
 
+    def _make_layer(self,inchannel,outchannel,block_num,stride=1):
+        #构建layer,包含多个residual block
+        shortcut=nn.Sequential(
+            nn.Conv2d(inchannel,outchannel,1,stride,bias=False),
+            nn.BatchNorm2d(outchannel)
+        )
+ 
+        layers=[ ]
+        layers.append(ResidualBlock(inchannel,outchannel,stride,shortcut))
+        
+        for i in range(1,block_num):
+            layers.append(ResidualBlock(outchannel,outchannel))
+        return nn.Sequential(*layers)
+
 BATCH_SIZE = 256
-GAMMA = 0.5
+GAMMA = 0.9
 EPS_START = 0.9
 EPS_END = 0.05
 EPS_DECAY = 1000000.
@@ -265,7 +290,13 @@ def train(agent):
     avg_step = 100.
     avg_holesCount = 40.
     step_episode_update = 0.
-    
+
+    transform = transforms.Compose([
+        transforms.Normalize(mean = (0.5, 0.5, 0.5), std = (0.5, 0.5, 0.5))
+        ]
+    )
+
+
     # 加载模型
     if os.path.exists(modle_file):
         checkpoint = torch.load(modle_file, map_location=device)
@@ -279,7 +310,7 @@ def train(agent):
         board = agent.getBoard().to(device)
         board_1 = agent.get_fallpiece_board().to(device)
         board_2 = agent.get_nextpiece_borad().to(device)
-        state = torch.stack([board,board_1,board_2])
+        state = transform(torch.stack([board,board_1,board_2]))
         piece_step = 0  # 方块步数
         holesCount = 0
         for t in count():
@@ -327,7 +358,7 @@ def train(agent):
                 board = agent.getBoard().to(device)
                 board_1 = agent.get_fallpiece_board().to(device)
                 board_2 = agent.get_nextpiece_borad().to(device)
-                next_state = torch.stack([board,board_1,board_2])
+                next_state = transform(torch.stack([board,board_1,board_2]))
             
             reward = torch.tensor([_reward], device=device)
             buffer.append(Transition(state, action, next_state, reward))
@@ -415,7 +446,7 @@ def test(agent):
 if __name__ == "__main__":
     tetromino = Tetromino()
     agent = Agent(tetromino)
-    # train(agent)
+    train(agent)
     if device.type == "cpu":
         test(agent)
     else:
