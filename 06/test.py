@@ -44,16 +44,16 @@ class Human(object):
 
 def run():
     curr_dir = os.path.dirname(os.path.abspath(__file__))
-    size = 8  # 棋盘大小
-    n_in_row = 5  # 几子连线
-    best_model_file =  os.path.join(curr_dir, '../data/save/06_model_%s.pth'%size)
+    size = 6  # 棋盘大小
+    n_in_row = 4  # 几子连线
+    model_file =  os.path.join(curr_dir, '../data/save/06_model_%s_%s.pth'%(size,n_in_row))
 
     try:
         agent = Agent(size=size, n_in_row=n_in_row)
         # ############### human VS AI ###################
         # load the trained policy_value_net in either Theano/Lasagne, PyTorch or TensorFlow
 
-        best_policy = PolicyValueNet(size, model_file = best_model_file)
+        best_policy = PolicyValueNet(size, model_file = model_file)
         mcts_ai_player = MCTSPlayer(best_policy.policy_value_fn, c_puct=5, n_playout=400)
 
         # uncomment the following line to play with pure MCTS (it's much weaker even with a larger n_playout)
@@ -63,7 +63,7 @@ def run():
         human = Human(agent,is_show=1)
 
         # set start_player=0 for human first
-        agent.start_play(human, human, start_player=0, is_shown=1)
+        agent.start_play(human, mcts_ai_player, start_player=0, is_shown=1)
     except KeyboardInterrupt:
         print('quit')
 
