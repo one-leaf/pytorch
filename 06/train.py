@@ -9,8 +9,8 @@ import numpy as np
 from collections import defaultdict, deque
 
 curr_dir = os.path.dirname(os.path.abspath(__file__))
-size = 8  # 棋盘大小
-n_in_row = 5  # 几子连线
+size = 6  # 棋盘大小
+n_in_row = 4  # 几子连线
 model_file =  os.path.join(curr_dir, '../data/save/06_model_%s_%s.pth'%(size,n_in_row))
 best_model_file =  os.path.join(curr_dir, '../data/save/06_best_model_%s_%s.pth'%(size,n_in_row))
 
