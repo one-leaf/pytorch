@@ -7,31 +7,62 @@ import numpy as np
 import os
 
 # 网络模型
+
+# 定义残差块，删除了BN
+class ResidualBlock(nn.Module):
+    #实现子module: Residual    Block
+    def __init__(self,inchannel,outchannel,stride=1,shortcut=None):
+        super(ResidualBlock,self).__init__()
+        self.left=nn.Sequential(
+            nn.Conv2d(inchannel,outchannel,3,stride,1,bias=False),
+            nn.BatchNorm2d(outchannel),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(outchannel,outchannel,3,1,1,bias=False),
+            nn.BatchNorm2d(outchannel)
+        )
+        self.right=shortcut
+        
+    def forward(self,x):
+        out=self.left(x)
+        residual=x if self.right is None else self.right(x)
+        out+=residual
+        return F.relu(out)
+
 class Net(nn.Module):
 
     def __init__(self, size):
         super(Net, self).__init__()
 
         # 由于每个棋盘大小对最终对应一个动作，所以补齐的效果比较好
-        self.conv1 = nn.Conv2d(4, 32, 3, padding=1)
-        self.conv2 = nn.Conv2d(32, 32, 3, padding=1)
-        self.conv3 = nn.Conv2d(32, 64, 3, padding=1)
-        self.conv4 = nn.Conv2d(64, 128, 3, padding=1)
-        self.conv5 = nn.Conv2d(128, 256, 3, padding=1)
+        # 直接来2个残差网络
+        self.conv1=self._make_layer(4, 64, 3)
+        self.conv2=self._make_layer(64, 128, 3)
+
         # 动作预测
-        self.act_conv1 = nn.Conv2d(256, 4, 1)
+        self.act_conv1 = nn.Conv2d(128, 4, 1)
         self.act_fc1 = nn.Linear(4*size*size, size*size)
         # 动作价值
-        self.val_conv1 = nn.Conv2d(256, 2, 1)
+        self.val_conv1 = nn.Conv2d(128, 2, 1)
         self.val_fc1 = nn.Linear(2*size*size, 64)
         self.val_fc2 = nn.Linear(64, 1)
 
+    def _make_layer(self,inchannel,outchannel,block_num,stride=1):
+        #构建layer,包含多个residual block
+        shortcut=nn.Sequential(
+            nn.Conv2d(inchannel,outchannel,1,stride,bias=False),
+            nn.BatchNorm2d(outchannel)
+        )
+ 
+        layers=[ ]
+        layers.append(ResidualBlock(inchannel,outchannel,stride,shortcut))
+        
+        for i in range(1,block_num):
+            layers.append(ResidualBlock(outchannel,outchannel))
+        return nn.Sequential(*layers)
+
     def forward(self, x):
-        x = F.relu(self.conv1(x))
-        x = F.relu(self.conv2(x))
-        x = F.relu(self.conv3(x))
-        x = F.relu(self.conv4(x))
-        x = F.relu(self.conv5(x))
+        x = self.conv1(x)
+        x = self.conv2(x)
         # 动作
         x_act = F.relu(self.act_conv1(x))
         x_act = x_act.view(x.size(0), -1)
