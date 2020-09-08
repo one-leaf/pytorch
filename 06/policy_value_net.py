@@ -87,7 +87,8 @@ class PolicyValueNet():
         input: a batch of states
         output: a batch of action probabilities and state values
         """
-        state_batch = torch.tensor(state_batch, dtype=torch.float, device=self.device)
+        # state_batch = torch.tensor(state_batch, dtype=torch.float, device=self.device)
+        state_batch = Variable(torch.FloatTensor(state_batch).to(self.device)) 
         log_act_probs, value = self.policy_value_net(state_batch)
         # 还原成标准的概率
         act_probs = np.exp(log_act_probs.data.cpu().numpy())
@@ -117,9 +118,13 @@ class PolicyValueNet():
         # state_batch = torch.tensor(state_batch, dtype=torch.float, device=self.device,  requires_grad=True)
         # mcts_probs = torch.tensor(mcts_probs, dtype=torch.float, device=self.device,  requires_grad=True)
         # winner_batch = torch.tensor(winner_batch, dtype=torch.float, device=self.device,  requires_grad=True)
-        state_batch = torch.FloatTensor(state_batch).to(self.device)
-        mcts_probs = torch.FloatTensor(mcts_probs).to(self.device)
-        winner_batch = torch.FloatTensor(winner_batch).to(self.device)
+        
+        # state_batch = torch.FloatTensor(state_batch).to(self.device)
+        # mcts_probs = torch.FloatTensor(mcts_probs).to(self.device)
+        # winner_batch = torch.FloatTensor(winner_batch).to(self.device)
+        state_batch = Variable(torch.FloatTensor(state_batch).to(self.device)) 
+        mcts_probs = Variable(torch.FloatTensor(mcts_probs).to(self.device)) 
+        winner_batch = Variable(torch.FloatTensor(winner_batch).to(self.device)) 
 
         # zero the parameter gradients
         self.optimizer.zero_grad()
