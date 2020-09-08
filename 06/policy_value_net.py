@@ -60,13 +60,13 @@ class Net(nn.Module):
 
 class PolicyValueNet():
     def print_netwark(self):
-        x=torch.Tensor(4,4,self.size,self.size).to(self.device)
+        x=torch.Tensor(1,4,self.size,self.size).to(self.device)
         print(self.policy_value_net)
         v,p=self.policy_value_net(x)
         print("value:",v.size())
         print("policy:",p.size())
 
-    def __init__(self, size, model_file=None, device=None, l2_const=10-4):
+    def __init__(self, size, model_file=None, device=None, l2_const=1e-4):
         self.size = size
         self.device=device
         self.l2_const = l2_const  
