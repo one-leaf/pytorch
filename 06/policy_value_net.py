@@ -5,7 +5,7 @@ import torch.nn.functional as F
 from torch.autograd import Variable
 import numpy as np
 import os
-
+import random
 # 网络模型
 
 # 定义残差块，删除了BN
@@ -118,7 +118,10 @@ class PolicyValueNet():
         # 还原成标准的概率
         act_probs = np.exp(log_act_probs.data.cpu().numpy())
         value = value.data.cpu().numpy()
-        # print(np.max(act_probs),np.argmax(act_probs), value)
+
+        if random.random()<0.001:
+            print(np.max(act_probs),np.argmax(act_probs), value)
+
         return act_probs, value
 
     # 从当前棋局获得 ((action, act_probs),...) 的可用动作+概率和当前棋盘胜率
