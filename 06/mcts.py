@@ -323,7 +323,7 @@ class MCTSPlayer(object):
             if self._is_selfplay:  # 自我对抗
                 # 添加Dirichlet Noise进行探索（自我训练所需）
                 # dirichlet噪声参数中的0.3：一般按照反比于每一步的可行move数量设置，所以棋盘扩大或改围棋之后这个参数需要减小（此值设置过大容易出现在自我对弈的训练中陷入到两方都只进攻不防守的困境中无法提高）
-                dirichlet = np.random.dirichlet(0.3 * np.ones(len(act_probs)))
+                dirichlet = np.random.dirichlet(0.2 * np.ones(len(act_probs)))
                 # logging.info("probs:")
                 # logging.info(probs)
                 # logging.info("dirichlet:")
@@ -337,8 +337,8 @@ class MCTSPlayer(object):
             else:  # 和人类对战
                 position = np.random.choice(positions, p=act_probs)
                 action = state.positions_to_actions([position])[0]
-                # print(move_probs.reshape(6,6))
-                # print(action, act_probs[acts.index(action)]) 
+                print(move_probs.reshape(8,8))
+                print(action, act_probs[acts.index(action)]) 
                 # 更新根节点:根据最后action向前探索树
                 self.mcts.update_root_with_action(None)
                 # 打印AI走子信息
