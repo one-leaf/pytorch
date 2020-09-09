@@ -77,24 +77,6 @@ class Net(nn.Module):
 
 
 class PolicyValueNet():
-    def __init__(self):
-        self.transform = transforms.Compose([
-            transforms.Normalize(mean = (0.5, 0.5, 0.5, 0.5), std = (0.5, 0.5, 0.5, 0.5))
-            ]
-        )
-
-    # 设置学习率
-    def set_learning_rate(self, lr):
-        for param_group in self.optimizer.param_groups:
-            param_group['lr'] = lr
-
-    def print_netwark(self):
-        x=torch.Tensor(1,4,self.size,self.size).to(self.device)
-        print(self.policy_value_net)
-        v,p=self.policy_value_net(x)
-        print("value:",v.size())
-        print("policy:",p.size())
-
     def __init__(self, size, model_file=None, device=None, l2_const=1e-4):
         self.size = size
         self.device=device
@@ -104,11 +86,29 @@ class PolicyValueNet():
         self.print_netwark()
 
         self.optimizer = optim.Adam(self.policy_value_net.parameters(), weight_decay=self.l2_const)
+        
+        self.transform = transforms.Compose([
+            transforms.Normalize(mean = (0.5, 0.5, 0.5, 0.5), std = (0.5, 0.5, 0.5, 0.5))
+            ]
+        )
 
         if model_file and os.path.exists(model_file):
             print("Loading model", model_file)
             net_sd = torch.load(model_file, map_location=self.device)
             self.policy_value_net.load_state_dict(net_sd)
+
+    # 设置学习率
+    def set_learning_rate(self, lr):
+        for param_group in self.optimizer.param_groups:
+            param_group['lr'] = lr
+            
+    # 打印当前网络
+    def print_netwark(self):
+        x=torch.Tensor(1,4,self.size,self.size).to(self.device)
+        print(self.policy_value_net)
+        v,p=self.policy_value_net(x)
+        print("value:",v.size())
+        print("policy:",p.size())
 
     # 根据当前状态得到，action的概率和概率
     def policy_value(self, state_batch):
