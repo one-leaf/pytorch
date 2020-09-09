@@ -127,8 +127,6 @@ class MCTS(object):
         if not end:  # 没有结束时，把走子策略返回的[(action,概率)]list加载到mcts树child中
             node.expand(action_probs)
 
-        # 注意，参考下面的 _playout_network 函数， 那个才是标准走法，但效果没有这个好，这个可以直接评估当前节点的价值，而不是对局中间状态0
-
         # 3.Simulation（在前面新Expansion出来的节点开始模拟游戏，直到到达游戏结束状态，这样可以收到到这个expansion出来的节点的得分是多少）
         # 使用快速随机走子评估此叶子节点继续往后走的胜负（state执行快速走子）
         leaf_value = self._evaluate_rollout(state)
@@ -137,7 +135,7 @@ class MCTS(object):
         node.update_recursive(-leaf_value)
 
     # 从根节点 root 到子节点执行一次探索过程
-    # 这个不同于上面，上面的是纯mcts, 这个直接用网络来估测当前可以步数的价值
+    # 这个不同于上面，上面的是纯mcts,后面多一步对当前动作进行评估的过程，这个是直接用网络来估测当前可以步数的价值
     def _playout_network(self, state):
         """
         执行一步走子，对应一次MCTS树持续构建过程（选择最优叶子节点->根据模型走子策略概率扩充mcts树->评估并更新树的最优选次数）
