@@ -88,6 +88,7 @@ class PolicyValueNet():
         self.optimizer = optim.Adam(self.policy_value_net.parameters(), weight_decay=self.l2_const)
         
         self.transform = transforms.Compose([
+            transforms.ToTensor(),
             transforms.Normalize(mean = (0.5, 0.5, 0.5, 0.5), std = (0.5, 0.5, 0.5, 0.5))
             ]
         )
@@ -101,7 +102,7 @@ class PolicyValueNet():
     def set_learning_rate(self, lr):
         for param_group in self.optimizer.param_groups:
             param_group['lr'] = lr
-            
+
     # 打印当前网络
     def print_netwark(self):
         x=torch.Tensor(1,4,self.size,self.size).to(self.device)
