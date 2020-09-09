@@ -117,7 +117,8 @@ class FiveChessTrain():
         # 如果学习到了，explained_var 应该趋近于 1，如果没有学习到也就是胜率都为很小值时，则为 0
         explained_var_old = (1 - np.var(np.array(winner_batch) - old_v.flatten()) / np.var(np.array(winner_batch)))
         explained_var_new = (1 - np.var(np.array(winner_batch) - new_v.flatten()) / np.var(np.array(winner_batch)))
-        logging.info(("TRAIN kl:{},lr_multiplier:{:.3f},loss:{},entropy:{},var_old:{},var_new:{}"
+        # entropy 信息熵，越小越好
+        logging.info(("TRAIN kl:{:.5f},lr_multiplier:{:.3f},loss:{},entropy:{:.5f},var_old:{:.5f},var_new:{:.5f}"
                       ).format(kl, self.lr_multiplier, loss, entropy, explained_var_old, explained_var_new))
         return loss, entropy
 

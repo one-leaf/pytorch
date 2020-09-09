@@ -414,7 +414,11 @@ def train(agent):
 def test(agent):
     # 加载模型
     num_episodes = 10
-    checkpoint = torch.load(modle_file, map_location=device)
+    if os.path.exists(modle_file):
+        print("load",modle_file)
+        checkpoint = torch.load(modle_file, map_location=device)
+    else:
+        raise "not find modle file %s"%modle_file
     net_sd = checkpoint['net']
     net.load_state_dict(net_sd)
     net.eval()
@@ -446,7 +450,7 @@ def test(agent):
 if __name__ == "__main__":
     tetromino = Tetromino()
     agent = Agent(tetromino)
-    train(agent)
+    # train(agent)
     if device.type == "cpu":
         test(agent)
     else:
