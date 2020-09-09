@@ -230,7 +230,7 @@ class Net(nn.Module):
         return nn.Sequential(*layers)
 
 BATCH_SIZE = 256
-GAMMA = 0.9
+GAMMA = 0.95
 EPS_START = 0.9
 EPS_END = 0.05
 EPS_DECAY = 1000000.
@@ -262,6 +262,11 @@ def select_action(state, norandom=False):
     else:
         return torch.tensor([[random.randrange(n_actions)]], device=device, dtype=torch.long)
 
+transform = transforms.Compose([
+    transforms.Normalize(mean = (0.5, 0.5, 0.5), std = (0.5, 0.5, 0.5))
+    ]
+)
+
 def optimize_model():
     if len(buffer) < BATCH_SIZE:
         return
@@ -290,12 +295,6 @@ def train(agent):
     avg_step = 100.
     avg_holesCount = 40.
     step_episode_update = 0.
-
-    transform = transforms.Compose([
-        transforms.Normalize(mean = (0.5, 0.5, 0.5), std = (0.5, 0.5, 0.5))
-        ]
-    )
-
 
     # 加载模型
     if os.path.exists(modle_file):
@@ -432,7 +431,7 @@ def test(agent):
             board = agent.getBoard().to(device)
             board_1 = agent.get_fallpiece_board().to(device)
             board_2 = agent.get_nextpiece_borad().to(device)
-            state = torch.stack([board,board_1,board_2])
+            state = transform(torch.stack([board,board_1,board_2]))
 
             # plt.imshow(np.transpose(state,(1,2,0)))
             # plt.show()
