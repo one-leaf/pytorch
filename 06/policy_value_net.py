@@ -87,12 +87,6 @@ class PolicyValueNet():
 
         self.optimizer = optim.Adam(self.policy_value_net.parameters(), weight_decay=self.l2_const)
         
-        self.transform = transforms.Compose([
-            transforms.ToTensor(),
-            transforms.Normalize(mean = (0.5, 0.5, 0.5, 0.5), std = (0.5, 0.5, 0.5, 0.5))
-            ]
-        )
-
         if model_file and os.path.exists(model_file):
             print("Loading model", model_file)
             net_sd = torch.load(model_file, map_location=self.device)
@@ -141,7 +135,7 @@ class PolicyValueNet():
         action and the score of the game state
         """
         legal_positions = game.actions_to_positions(game.availables)
-        current_state = game.current_state(self.transform).reshape(1, 4, self.size, self.size)
+        current_state = game.current_state().reshape(1, 4, self.size, self.size)
         act_probs, value = self.policy_value(current_state)
         act_probs = act_probs.flatten()
 

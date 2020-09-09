@@ -97,7 +97,7 @@ class FiveChess(object):
         return [x+(self.size-y-1)*self.size for x,y in actions]
 
     # 返回 [1, 4, size, size]
-    def current_state(self, transform=None):
+    def current_state(self):
         square_state = np.zeros((4, self.size, self.size))
         # 前面2层是自己和对手的棋
         for x in range(self.size):
@@ -112,10 +112,11 @@ class FiveChess(object):
         # 第四层为如果当前用户是先手则为1
         if self.step_count % 2 == 0:
             square_state[3][:,:] = 1.0
-        # square_state = square_state[:, ::-1, :]
-        # 由于模型中用到了bn单元，所以需要归一化数据           
-        if transform!=None:
-            square_state = transform(square_state)
+        # 由于模型中用到了bn单元，所以需要归一化数据
+        #square_state = (square_state - square_state.mean(axis=(0,1,2), keepdims=True)) \
+        #    / square_state.std(axis=(0,1,2), keepdims=True)
+        meam=std=0.5     
+        square_state = (square_state-meam)/std  
         return square_state
 
     def game_end(self):

@@ -1,6 +1,5 @@
 import numpy as np
 from game import FiveChess, FiveChessEnv
-from torchvision import transforms
 
 # 游戏的AI封装
 class Agent(object):
@@ -10,12 +9,6 @@ class Agent(object):
         self.game = FiveChess(size=self.size, n_in_row=self.n_in_row)
         self.env = FiveChessEnv(self.game)
         self.game.reset()
-
-        self.transform = transforms.Compose([
-            transforms.ToTensor(),
-            transforms.Normalize(mean = (0.5, 0.5, 0.5, 0.5), std = (0.5, 0.5, 0.5, 0.5))
-            ]
-        )
 
     # 使用 mcts 训练，重用搜索树，并保存数据
     def start_self_play(self, player, is_shown=0, temp=1e-3):
@@ -29,7 +22,7 @@ class Agent(object):
             # temp 权重 ，return_prob 是否返回概率数据
             action, move_probs = player.get_action(self.game, temp=temp, return_prob=1)
             # store the data
-            states.append(self.game.current_state(self.transform))
+            states.append(self.game.current_state())
             # print(action)
             # print(move_probs.reshape(self.size,self.size))
             # print(states[-1])
