@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
-from torch.autograd import Variable
+from torchvision import transforms
 import numpy as np
 import os
 import random
@@ -77,6 +77,12 @@ class Net(nn.Module):
 
 
 class PolicyValueNet():
+    def __init__(self):
+        self.transform = transforms.Compose([
+            transforms.Normalize(mean = (0.5, 0.5, 0.5, 0.5), std = (0.5, 0.5, 0.5, 0.5))
+            ]
+        )
+
     # 设置学习率
     def set_learning_rate(self, lr):
         for param_group in self.optimizer.param_groups:
@@ -134,7 +140,7 @@ class PolicyValueNet():
         action and the score of the game state
         """
         legal_positions = game.actions_to_positions(game.availables)
-        current_state = game.current_state().reshape(1, 4, self.size, self.size)
+        current_state = game.current_state(self.transform).reshape(1, 4, self.size, self.size)
         act_probs, value = self.policy_value(current_state)
         act_probs = act_probs.flatten()
 

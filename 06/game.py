@@ -88,16 +88,16 @@ class FiveChess(object):
         self.current_player = self.players[0] if self.current_player==self.players[1] else self.players[1]
         return self.chessboard, reward, self.terminal, self.win_user
 
-    # 位置转action
+    # 概率的索引位置转action
     def positions_to_actions(self, positions):
         return [(i%self.size, self.size-(i//self.size)-1) for i in positions]
 
-    # action转位置
+    # action转概率的索引位置
     def actions_to_positions(self, actions):
         return [x+(self.size-y-1)*self.size for x,y in actions]
 
     # 返回 [1, 4, size, size]
-    def current_state(self):
+    def current_state(self, transform=None):
         square_state = np.zeros((4, self.size, self.size))
         # 前面2层是自己和对手的棋
         for x in range(self.size):
@@ -113,10 +113,9 @@ class FiveChess(object):
         if self.step_count % 2 == 0:
             square_state[3][:,:] = 1.0
         # square_state = square_state[:, ::-1, :]
-        # 归一化数据
-        norm = np.linalg.norm(square_state)
-        if norm != 0:
-            square_state =  square_state / norm
+        # 由于模型中用到了bn单元，所以需要归一化数据           
+        if transform!=None:
+            square_state = transform(square_state)
         return square_state
 
     def game_end(self):
