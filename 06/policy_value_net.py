@@ -112,7 +112,7 @@ class PolicyValueNet():
         output: a batch of action probabilities and state values
         """
         state_batch_tensor = torch.FloatTensor(state_batch).to(self.device)
-        self.policy_value_net.eval()
+        # self.policy_value_net.eval()
         with torch.no_grad(): 
             log_act_probs, value = self.policy_value_net(state_batch_tensor)
 
