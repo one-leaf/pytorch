@@ -337,7 +337,6 @@ class MCTSPlayer(object):
             else:  # 和人类对战
                 position = np.random.choice(positions, p=act_probs)
                 action = state.positions_to_actions([position])[0]
-                print(move_probs.reshape(8,8))
                 print(action, act_probs[acts.index(action)]) 
                 # 更新根节点:根据最后action向前探索树
                 self.mcts.update_root_with_action(None)
