@@ -331,7 +331,7 @@ class MCTSPlayer(object):
                 # logging.info("dirichlet:")
                 # logging.info(dirichlet)
                 # logging.info("p:")
-                logging.info(0.75 * act_probs + 0.25 * dirichlet)
+                # logging.info(0.75 * act_probs + 0.25 * dirichlet)
                 position = np.random.choice(positions, p=0.75 * act_probs + 0.25 * dirichlet) 
                 action = state.positions_to_actions([position])[0]
                 # 更新根节点并重用搜索树
