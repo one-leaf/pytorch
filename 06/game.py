@@ -3,7 +3,6 @@ import random
 from gym.envs.classic_control import rendering
 import time
 import numpy as np
-
 class FiveChess(object):
     def __init__(self, size=15, n_in_row=5):
         # 棋盘大小
@@ -15,17 +14,16 @@ class FiveChess(object):
         self.players = [0, 1]
         # 初始棋盘是0    -1表示黑棋子   1表示白棋子
         self.colors = [-1, 1]
-        # 可用步骤
         self.reset()
 
     def reset(self, start_player=0):
         self.chessboard = [ [  0 for v in range(self.size)  ] for v in range(self.size) ]
         self.step_count = 0
-        self.last_action = None
         self.current_player = self.players[start_player]
         self.availables = [(x,y) for x in range(self.size) for y in range(self.size)]
         self.terminal = False
         self.win_user = -1
+        self.players_actions=[[],[]]
         return self.chessboard
  
     # 检查当前action是否有效
@@ -72,12 +70,12 @@ class FiveChess(object):
         if action not in self.availables:
             print(action)
             raise "action error"  
-        self.last_action = action     
         self.availables.remove(action)
 
         #棋子
         color = self.colors[self.current_player]
         self.chessboard[action[0]][action[1]] = color
+        self.players_actions[self.current_player].append(action)
 
         #胜负判定
         self.terminal, self.win_user = self.check_terminal()
@@ -98,23 +96,27 @@ class FiveChess(object):
 
     # 返回 [1, 4, size, size]
     def current_state(self):
-        square_state = np.zeros((4, self.size, self.size))
-        # 前面2层是自己和对手的棋
+        square_state = np.zeros((7, self.size, self.size))
+        # 前面4层是自己和对手的棋包括最后三步的棋
         for x in range(self.size):
             for y in range(self.size):
                 if self.chessboard[x][y]!=0:
-                    idx = 1 if self.chessboard[x][y]!=self.colors[self.current_player] else 0
-                    square_state[idx][self.size-y-1][x] = 1.0
-        # 第三层为最后一步
-        if self.last_action!=None:
-            x,y = self.last_action
-            square_state[2][self.size-y-1][x] = 1.0
+                    # 检测这个棋是否在最后三步
+                    player = self.players[self.colors.index(self.chessboard[x][y])]
+                    action = (x,y)
+                    last_actions = self.players_actions[player][-3:]
+                    if player == self.current_player:
+                        idx = 0 
+                    else:
+                        idx = 3    
+                    if action in last_actions:
+                        idx +=  last_actions.index(action)
+                    square_state[idx,self.size-y-1,x] = 1.0     
+
         # 第四层为如果当前用户是先手则为1
         if self.step_count % 2 == 0:
-            square_state[3][:,:] = 1.0
+            square_state[6][:,:] = 1.0
         # 由于模型中用到了bn单元，所以需要归一化数据
-        #square_state = (square_state - square_state.mean(axis=(0,1,2), keepdims=True)) \
-        #    / square_state.std(axis=(0,1,2), keepdims=True)
         meam=std=0.5     
         square_state = (square_state-meam)/std  
         return square_state
@@ -212,7 +214,7 @@ if __name__ == "__main__":
     def on_mouse_press(x, y, button, modifiers):
         global user_point
         user_point = (x, y)
-    fiveChess = FiveChess(size=15, n_in_row=5)
+    fiveChess = FiveChess(size=8, n_in_row=5)
     env = FiveChessEnv(fiveChess)
 
     env.reset()
@@ -246,6 +248,9 @@ if __name__ == "__main__":
             _, reward, done, win_user = env.step(action)
             env.render(mode="human",close=False)
         
+        print(fiveChess.current_state())
+        print("-----------------")
+
         is_human = not is_human
         
         if done:
