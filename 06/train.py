@@ -77,15 +77,6 @@ class FiveChessTrain():
             self.episode_len = len(play_data)
             # 把翻转棋盘数据加到数据集里
             play_data = self.get_equi_data(play_data)
-
-            # print("===",winner,"===")
-            # for state, mcts_porb, winner in play_data:
-            #     print(winner)
-            # state, mcts_porb, winner =  play_data[16]
-            # print(state)
-            # print(mcts_porb.reshape(size,size))               
-            # raise "xx"
-
             # 保存对抗数据到data_buffer
             self.data_buffer.extend(play_data)
 
@@ -98,7 +89,8 @@ class FiveChessTrain():
             state_batch = [data[0] for data in mini_batch]
             mcts_probs_batch = [data[1] for data in mini_batch]
             winner_batch = [data[2] for data in mini_batch]
-            old_probs, old_v = self.policy_value_net.policy_value(state_batch)
+            if i==0:
+                old_probs, old_v = self.policy_value_net.policy_value(state_batch)  
 
             loss, entropy = self.policy_value_net.train_step(state_batch, mcts_probs_batch, winner_batch, self.learn_rate * self.lr_multiplier)
             new_probs, new_v = self.policy_value_net.policy_value(state_batch)
