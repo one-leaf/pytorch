@@ -94,10 +94,10 @@ class FiveChess(object):
     def actions_to_positions(self, actions):
         return [x+(self.size-y-1)*self.size for x,y in actions]
 
-    # 返回 [1, 4, size, size]
+    # 返回 [1, 7, size, size]
     def current_state(self):
         square_state = np.zeros((7, self.size, self.size))
-        # 前面4层是自己和对手的棋包括最后三步的棋
+        # 前面6层是自己和对手的棋包括最后三步的棋
         for x in range(self.size):
             for y in range(self.size):
                 if self.chessboard[x][y]!=0:
