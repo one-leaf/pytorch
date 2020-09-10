@@ -21,9 +21,11 @@ EOS_token = 1
 class Lang:
     def __init__(self, name):
         self.name = name
-        self.word2index = {}
-        self.word2count = {}
+        # 词索引
+        self.word2index = {}        
         self.index2word = {0: "SOS", 1: "EOS"}
+        # 词语频率
+        self.word2count = {}
         self.n_words = 2  # Count SOS and EOS
 
     def addSentence(self, sentence):
@@ -40,6 +42,7 @@ class Lang:
             self.word2count[word] += 1
 
 # 将Unicode字符串转换为纯ASCII, 感谢https://stackoverflow.com/a/518232/2809427
+# 除去字符上的音标
 def unicodeToAscii(s):
     return ''.join(
         c for c in unicodedata.normalize('NFD', s)

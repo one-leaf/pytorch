@@ -117,10 +117,8 @@ class FiveChess(object):
         if self.step_count % 2 == 0:
             square_state[6][:,:] = 1.0
 
-        # 由于模型中用到了bn单元，所以需要标准化数据，锁定均值为0，方差为1
-        std = np.std(square_state)
-        if std != 0:
-            square_state = (square_state - np.mean(square_state)) / std
+        # 归一化数据
+        square_state = (square_state - 0.5) / 0.5
 
         return square_state
 
