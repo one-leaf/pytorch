@@ -155,8 +155,8 @@ class FiveChessTrain():
                 # 使用对抗数据重新训练策略价值网络模型
                 if len(self.data_buffer) > self.batch_size*10:
                     loss, entropy = self.policy_update()
-                # 每n个batch检查一下当前模型胜率
-                self.policy_value_net.save_model(model_file)
+                    # 每n个batch检查一下当前模型胜率
+                    self.policy_value_net.save_model(model_file)
                 if (i + 1) % self.check_freq == 0:
                     logging.info("TRAIN Current self-play batch: {}".format(i + 1))
                     # 策略胜率评估：模型与纯MCTS玩家对战n局看胜率
