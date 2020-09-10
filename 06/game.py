@@ -116,9 +116,12 @@ class FiveChess(object):
         # 第四层为如果当前用户是先手则为1
         if self.step_count % 2 == 0:
             square_state[6][:,:] = 1.0
-        # 由于模型中用到了bn单元，所以需要归一化数据
-        meam=std=0.5     
-        square_state = (square_state-meam)/std  
+
+        # 由于模型中用到了bn单元，所以需要标准化数据
+        std = np.std(square_state)
+        if std != 0:
+            square_state = (square_state - np.mean(square_state)) / std
+
         return square_state
 
     def game_end(self):
