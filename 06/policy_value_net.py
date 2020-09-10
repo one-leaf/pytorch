@@ -122,7 +122,7 @@ class PolicyValueNet():
 
         if random.random()<0.0001:
             idx = np.argmax(act_probs)
-            print("sate var",state_batch.var(),"max:", np.max(act_probs), "min:", np.min(act_probs), "idx:", idx, \
+            print("state var:",state_batch.var(),"max:", np.max(act_probs), "min:", np.min(act_probs), "idx:", idx, \
                 "act:", (idx%self.size, self.size-(idx//self.size)-1), "value:", value)
 
         return act_probs, value
