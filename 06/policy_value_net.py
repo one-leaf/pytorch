@@ -113,7 +113,7 @@ class PolicyValueNet():
         """
         state_batch_tensor = torch.FloatTensor(state_batch).to(self.device)
         # self.policy_value_net.eval()
-        # 如果加了eval会导致数据都出来是同一个，原因待查
+        # 如果加了eval会导致数据都出来异常，原因待查
         with torch.no_grad(): 
             log_act_probs, value = self.policy_value_net(state_batch_tensor)
 
