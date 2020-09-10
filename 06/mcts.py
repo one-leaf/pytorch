@@ -326,11 +326,11 @@ class MCTSPlayer(object):
                 # dirichlet噪声是分布的分布，sum为1，参数越大，分布越均匀，参数越小越集中
                 # 给定的是一个均匀分布，则参数越小，方差越大，扰动就越大
                 dirichlet = np.random.dirichlet(0.1 * np.ones(len(act_probs)))
-                logging.info("probs:")
-                logging.info(act_probs)
-                logging.info("dirichlet:")
-                logging.info(dirichlet)
-                logging.info("p:")
+                # logging.info("probs:")
+                # logging.info(act_probs)
+                # logging.info("dirichlet:")
+                # logging.info(dirichlet)
+                # logging.info("p:")
                 logging.info(0.75 * act_probs + 0.25 * dirichlet)
                 position = np.random.choice(positions, p=0.75 * act_probs + 0.25 * dirichlet) 
                 action = state.positions_to_actions([position])[0]
