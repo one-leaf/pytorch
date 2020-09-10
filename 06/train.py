@@ -153,7 +153,7 @@ class FiveChessTrain():
                 self.collect_selfplay_data(self.play_batch_size)
                 logging.info("TRAIN Size:{}, n_in_row:{}, Batch:{}, steps:{}".format(size, n_in_row ,i + 1, self.episode_len))
                 # 使用对抗数据重新训练策略价值网络模型
-                if len(self.data_buffer) > self.batch_size:
+                if len(self.data_buffer) > self.batch_size*10:
                     loss, entropy = self.policy_update()
                 # 每n个batch检查一下当前模型胜率
                 self.policy_value_net.save_model(model_file)
