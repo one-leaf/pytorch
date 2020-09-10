@@ -111,10 +111,10 @@ class PolicyValueNet():
         input: a batch of states
         output: a batch of action probabilities and state values
         """
-        state_batch = torch.FloatTensor(state_batch).to(self.device)
+        state_batch_tensor = torch.FloatTensor(state_batch).to(self.device)
         self.policy_value_net.eval()
         with torch.no_grad(): 
-            log_act_probs, value = self.policy_value_net(state_batch)
+            log_act_probs, value = self.policy_value_net(state_batch_tensor)
 
         # 还原成标准的概率
         act_probs = np.exp(log_act_probs.data.cpu().numpy())
@@ -122,7 +122,7 @@ class PolicyValueNet():
 
         if random.random()<0.0001:
             idx = np.argmax(act_probs)
-            print("max:", np.max(act_probs), "min:", np.min(act_probs), "idx:", idx, \
+            print("sate var",state_batch.var(),"max:", np.max(act_probs), "min:", np.min(act_probs), "idx:", idx, \
                 "act:", (idx%self.size, self.size-(idx//self.size)-1), "value:", value)
 
         return act_probs, value
