@@ -1,3 +1,4 @@
+from 05.02 import buffer
 from policy_value_net import PolicyValueNet  
 from mcts import MCTSPurePlayer, MCTSPlayer
 from agent import Agent
@@ -80,11 +81,11 @@ class FiveChessTrain():
             # 保存对抗数据到data_buffer
             self.data_buffer.extend(play_data)
 
-    def policy_update(self):
+    def policy_update(self, epochs=1):
         """更新策略价值网络policy-value"""
         # 训练策略价值网络
         # 随机抽取data_buffer中的对抗数据
-        for i in range(self.epochs):
+        for i in range(epochs):
             mini_batch = random.sample(self.data_buffer, self.batch_size)
             state_batch = [data[0] for data in mini_batch]
             mcts_probs_batch = [data[1] for data in mini_batch]
@@ -144,8 +145,9 @@ class FiveChessTrain():
                 self.collect_selfplay_data(self.play_batch_size)
                 logging.info("TRAIN Size:{}, n_in_row:{}, Batch:{}, steps:{}".format(size, n_in_row ,i + 1, self.episode_len))
                 # 使用对抗数据重新训练策略价值网络模型
-                if len(self.data_buffer) > self.batch_size:
-                    loss, entropy = self.policy_update()
+                data_buffer_len = len(self.data_buffer)
+                if data_buffer_len > self.batch_size:
+                    loss, entropy = self.policy_update(min(self.epochs, data_buffer_len//(self.batch_size*self.epochs)))
                     # 每n个batch检查一下当前模型胜率
                     self.policy_value_net.save_model(model_file)
                 if (i + 1) % self.check_freq == 0:
