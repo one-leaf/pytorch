@@ -8,17 +8,17 @@ import os
 import random
 # 网络模型
 
-# 定义残差块，删除了BN
+# 定义残差块，固定住BN的方差和均值
 class ResidualBlock(nn.Module):
     #实现子module: Residual    Block
     def __init__(self,inchannel,outchannel,stride=1,shortcut=None):
         super(ResidualBlock,self).__init__()
         self.left=nn.Sequential(
             nn.Conv2d(inchannel,outchannel,3,stride,1,bias=False),
-            nn.BatchNorm2d(outchannel),
+            nn.BatchNorm2d(outchannel, track_running_stats=False),
             nn.ReLU(inplace=True),
             nn.Conv2d(outchannel,outchannel,3,1,1,bias=False),
-            nn.BatchNorm2d(outchannel)
+            nn.BatchNorm2d(outchannel, track_running_stats=False)
         )
         self.right=shortcut
         
@@ -50,7 +50,7 @@ class Net(nn.Module):
         #构建layer,包含多个residual block
         shortcut=nn.Sequential(
             nn.Conv2d(inchannel,outchannel,1,stride,bias=False),
-            nn.BatchNorm2d(outchannel)
+            nn.BatchNorm2d(outchannel, track_running_stats=False)
         )
  
         layers=[ ]
@@ -112,7 +112,7 @@ class PolicyValueNet():
         output: a batch of action probabilities and state values
         """
         state_batch_tensor = torch.FloatTensor(state_batch).to(self.device)
-        # self.policy_value_net.eval()
+        self.policy_value_net.eval()
         # 由于样本不足，导致单张局面做预测时的分布与平均分布相差很大，会出现无法预测的情况，所以不加 eval() 锁定bn为平均方差
         with torch.no_grad(): 
             log_act_probs, value = self.policy_value_net(state_batch_tensor)
