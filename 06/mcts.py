@@ -286,7 +286,7 @@ class MCTSPurePlayer(object):
             action = self.mcts.get_action(state)
             # 更新根节点:根据最后action向前探索树
             self.mcts.update_root_with_action(None)
-            # print("MCTS:", action)
+            print("MCTS:", action)
             return action
         else:
             print("WARNING: the state is full")
@@ -339,7 +339,7 @@ class MCTSPlayer(object):
             else:  # 和人类对战
                 position = np.random.choice(positions, p=act_probs)
                 action = state.positions_to_actions([position])[0]
-                print(action, act_probs[acts.index(action)]) 
+                print("AI", action, act_probs[acts.index(action)]) 
                 # 更新根节点:根据最后action向前探索树
                 self.mcts.update_root_with_action(None)
                 # 打印AI走子信息
