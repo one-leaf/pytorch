@@ -34,6 +34,11 @@ class TreeNode(object):
             Params：c_puct = child 搜索深度
             Return: tuple (action, next_node)
         """
+        # 最少将根节点的子节点全部探测一遍，不然很容易出很大偏差
+        if self._parent==None:
+            for action in self._children:
+                if self._children[action]._n_visits==0:
+                    return (action, self._children[action])
         return max(self._children.items(), key=lambda act_node: act_node[1].get_value(c_puct))
 
     # 计算和返回这个节点的值
@@ -239,8 +244,9 @@ class MCTS(object):
             self._playout_network(state_copy)
 
         # 分解出child中的action和最优选访问次数
-        act_visits = [(act, node._n_visits) for act, node in self._root._children.items()]
+        act_visits = [(act, node._n_visits) for act, node in self._root._children.items() if node._n_visits!=0]
         acts, visits = zip(*act_visits)
+        # print(act_visits)
         # softmax概率，先用log(visites)，拉平差异，再乘以一个权重，这样给了一个可以调节的参数，
         # temp 越小，导致softmax的越肯定，也就是当temp=1e-3时，基本上返回只有一个1,其余概率都是0; 训练的时候 temp=1
         act_probs = MCTS.softmax(1.0 / temp * np.log(np.array(visits) + 1e-10))
