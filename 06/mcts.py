@@ -45,6 +45,7 @@ class TreeNode(object):
     # 这个公式有点奇怪：
     # 正常应该是 UCT = self._Q/self_n + 2*sqrt(log(root._n)/(1+self._n))
     # 这个是    UCT = self._Q        + 5*self_P*sqrt(_parent._n)/(1+self_n) 
+    # 在 leela-zero 中 cfg_puct 中设置的为 0.5 ，这个值如果小就多考虑mcts探索，否则加强概率的影响
     def get_value(self, c_puct):
         """计算并返回当前节点的值
             c_puct:     一个数值，取值范围为（0， inf），调整先验概率和当前路径的权重
@@ -86,6 +87,12 @@ class TreeNode(object):
         """检查当前是否root节点"""
         return self._parent is None
 
+    def __str__(self):
+        if self._parent is None:
+            value= 0
+        else:
+            value = self.get_value(5)
+        return "Node - Q: %s, P: %s, N: %s, Value: %s"%(self._Q, self._P, self._n_visits, value) 
 
 class MCTS(object):
     """蒙特卡罗树搜索的实现"""
@@ -345,8 +352,14 @@ class MCTSPlayer(object):
             else:  # 和人类对战
                 position = np.random.choice(positions, p=act_probs)
                 action = state.positions_to_actions([position])[0]
-                print("AI", action, act_probs[acts.index(action)]) 
                 # 更新根节点:根据最后action向前探索树
+                root = self.mcts._root
+                for act in root._children:
+                    node = root._children[act]   
+                    if node._n_visits==0: continue                 
+                    print(act,node)
+                print("AI", action, act_probs[acts.index(action)]) 
+
                 self.mcts.update_root_with_action(None)
                 # 打印AI走子信息
                 # print("AI move: %d,%d\n" % (action[0], action[1]))
