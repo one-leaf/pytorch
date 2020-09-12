@@ -356,7 +356,7 @@ class MCTSPlayer(object):
                 root = self.mcts._root
                 for act in root._children:
                     node = root._children[act]   
-                    if node._n_visits==0: continue                 
+                    if node._n_visits<2: continue                 
                     print(act,node)
                 print("AI", action, act_probs[acts.index(action)]) 
 
