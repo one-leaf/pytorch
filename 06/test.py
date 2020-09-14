@@ -54,7 +54,7 @@ def run():
         # load the trained policy_value_net in either Theano/Lasagne, PyTorch or TensorFlow
 
         best_policy = PolicyValueNet(size, model_file = model_file)
-        mcts_ai_player = MCTSPlayer(best_policy.policy_value_fn, c_puct=1, n_playout=1000)
+        mcts_ai_player = MCTSPlayer(best_policy.policy_value_fn, c_puct=3, n_playout=1000)
 
         # uncomment the following line to play with pure MCTS (it's much weaker even with a larger n_playout)
         mcts_player = MCTSPurePlayer(c_puct=5, n_playout=2000)
