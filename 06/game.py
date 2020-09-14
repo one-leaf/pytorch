@@ -40,7 +40,7 @@ class FiveChess(object):
         return results
  
     # 检查是否游戏结束,返回赢的用户0 或 1，如果平局返回-1
-    def check_terminal(self):
+    def check_terminal2(self):
         # 如果都没有下子的位置了，则返回平局
         if len(self.get_available_locations())==0:
             return True, -1
@@ -64,6 +64,63 @@ class FiveChess(object):
                     return True, self.colors.index(color)
         return False, -1        
 
+    # 检查是否游戏结束,返回赢的用户0 或 1，如果平局返回-1
+    def check_terminal(self):
+        # 如果都没有足够的棋
+        if self.step_count<self.n_in_row*2-1:
+            return False, -1
+        # 如果都没有下子的位置了，或，则返回平局
+        if len(self.get_available_locations())==0:
+            return True, -1
+
+        # 找到最后一个子
+        lastplayer = self.players[0] if self.current_player==self.players[1] else self.players[1]
+        last_x, last_y = self.players_actions[lastplayer][-1]
+        n = self.n_in_row
+        c = self.chessboard[last_x][last_y]
+
+        hassame=1
+        for l in range(1, n):
+            if last_x+l==self.size or self.chessboard[last_x+l][last_y]!=c: break
+            hassame += 1
+        if hassame>=n: return True, lastplayer
+        for l in range(1, n):
+            if last_x-l<0 or self.chessboard[last_x-l][last_y]!=c: break
+            hassame += 1
+        if hassame>=n: return True, lastplayer
+        
+        hassame=1
+        for l in range(1, n):
+            if last_y+l==self.size or self.chessboard[last_x][last_y+l]!=c: break
+            hassame += 1
+        if hassame>=n: return True, lastplayer
+        for l in range(1, n):
+            if last_y-l<0 or self.chessboard[last_x][last_y-l]!=c: break
+            hassame += 1
+        if hassame>=n: return True, lastplayer
+
+        hassame=1
+        for l in range(1, n):
+            if last_x+l==self.size or last_y+l==self.size or self.chessboard[last_x+l][last_y+l]!=c: break
+            hassame += 1
+        if hassame>=n: return True, lastplayer
+        for l in range(1, n):
+            if last_x-l<0 or last_y-l<0 or self.chessboard[last_x-l][last_y-l]!=c: break
+            hassame += 1
+        if hassame>=n: return True, lastplayer
+
+        hassame=1
+        for l in range(1, n):
+            if last_x-l<0 or last_y+l==self.size or self.chessboard[last_x-l][last_y+l]!=c: break
+            hassame += 1
+        if hassame>=n: return True, lastplayer
+        for l in range(1, n):
+            if last_x+l==self.size or last_y-l<0 or self.chessboard[last_x+l][last_y-l]!=c: break
+            hassame += 1
+        if hassame>=n: return True, lastplayer
+
+        return False, -1   
+
     #action 包括坐标和  例如：[1,3] 表示： 坐标（1,3）
     #输出 下一个状态，动作价值，是否结束，赢的用户
     def step(self, action):
@@ -77,13 +134,14 @@ class FiveChess(object):
         self.chessboard[action[0]][action[1]] = color
         self.players_actions[self.current_player].append(action)
 
+        #这一步完成
+        self.step_count +=1
+        self.current_player = self.players[0] if self.current_player==self.players[1] else self.players[1]
+
         #胜负判定
         self.terminal, self.win_user = self.check_terminal()
         reward = 0 if self.win_user==-1 else 1 
 
-        #这一步完成
-        self.step_count +=1
-        self.current_player = self.players[0] if self.current_player==self.players[1] else self.players[1]
         return self.chessboard, reward, self.terminal, self.win_user
 
     # 概率的索引位置转action
@@ -249,14 +307,14 @@ if __name__ == "__main__":
             _, reward, done, win_user = env.step(action)
             env.render(mode="human",close=False)
         
-        print(fiveChess.current_state())
-        print("-----------------")
+        # print(fiveChess.current_state())
+        # print("-----------------")
 
         is_human = not is_human
         
         if done:
-            curr_user = env.current_player
-            step_count = env.step_count
+            curr_user = fiveChess.current_player
+            step_count = fiveChess.step_count
             print(f'win_user: {win_user}, curr_user: {curr_user} reward: {reward} step_count: {step_count}')
 
     env.close()            
