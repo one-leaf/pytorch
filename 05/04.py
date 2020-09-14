@@ -154,26 +154,26 @@ class Agent(object):
                     find_block = True
                 elif find_block:
                     holesCount += 1   
-        # 别出现#
+        # 别出现#,但权重改为 0.1
         for x in range(boardwidth):
             c = 0
             for y in range(boardheight):
                 if self.board[x][y]!=blank: break
                 if x == 0:
                     if self.board[x+1][y]!=blank:
-                        c += 1
+                        c += 0.1
                     elif c > 0:
-                        c += 1
+                        c += 0.1
                 elif x == boardwidth-1:
                     if self.board[x-1][y]!=blank:
-                        c +=1
+                        c += 0.1
                     elif c > 0:
-                        c += 1
+                        c += 0.1
                 else:
                     if self.board[x-1][y]!=blank and self.board[x+1][y]!=blank:
-                        c +=1
+                        c += 0.1
                     elif c > 0:
-                        c += 1
+                        c += 0.1
             if c>2: holesCount += c
 
         return holesCount
