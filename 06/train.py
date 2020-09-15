@@ -39,7 +39,7 @@ class Dataset(torch.utils.data.Dataset):
 
     def __getitem__(self, index):
         filename = random.choice(self.file_list)
-        return filename
+        return pickle.load(open(filename, "rb"))
 
     def loadData(self, filenames):
         objlist=[]
@@ -66,13 +66,11 @@ class Dataset(torch.utils.data.Dataset):
     def curr_size(self):
         return len(self.file_list)
 
-
-
 class FiveChessTrain():
     def __init__(self):
         self.policy_evaluate_size = 10  # 策略评估胜率时的模拟对局次数
         self.game_batch_num = 10000  # selfplay对战次数
-        self.batch_size = 512  # data_buffer中对战次数超过n次后开始启动模型训练
+        self.batch_size = 2  # data_buffer中对战次数超过n次后开始启动模型训练
         self.check_freq = 100  # 每对战n次检查一次当前模型vs旧模型胜率
         self.agent = Agent(size, n_in_row)
 
@@ -140,7 +138,8 @@ class FiveChessTrain():
         """更新策略价值网络policy-value"""
         # 训练策略价值网络
         # 随机抽取data_buffer中的对抗数据
-        mini_batch = self.dataset.loadData(sample_datas)
+        # mini_batch = self.dataset.loadData(sample_datas)
+        mini_batch = sample_datas
         state_batch = [data[0] for data in mini_batch]
         mcts_probs_batch = [data[1] for data in mini_batch]
         winner_batch = [data[2] for data in mini_batch]
@@ -201,7 +200,9 @@ class FiveChessTrain():
     def run(self):
         """启动训练"""
         try:
+            print("start data loader")
             training_loader = torch.utils.data.DataLoader(self.dataset, batch_size=self.batch_size, shuffle=False, num_workers=4,)
+            print("end data loader")
 
             step = 0
             while self.dataset.curr_size() < self.batch_size*self.epochs:
