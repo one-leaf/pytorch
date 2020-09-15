@@ -150,7 +150,7 @@ class FiveChessTrain():
                 # 收集自我对抗数据
                 self.collect_selfplay_data(self.play_batch_size)
                 logging.info("TRAIN Batch:{}, steps:{}, Size:{}, n_in_row:{}".format(i + 1, self.episode_len, size, n_in_row))
-                logging.info("TRAIN save data_buffer to {}".format(buffer_file))
+                logging.info("TRAIN Save data_buffer to {}".format(buffer_file))
                 pickle.dump(self.data_buffer, open(buffer_file, 'wb')) 
                 # 使用对抗数据重新训练策略价值网络模型
                 data_buffer_len = len(self.data_buffer)
