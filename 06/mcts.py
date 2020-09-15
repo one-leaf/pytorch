@@ -250,7 +250,7 @@ class MCTS(object):
             state_copy = copy.deepcopy(state)
             self._playout_network(state_copy)
 
-            # 为了提高学习效率如果有走子的次数大于100，直接放弃再尝试返回。
+            # 为了提高学习效率如果有走子的次数大于100，直接放弃探索,返回。
             if n >= len(state.availables):
                 _n_visits = [node._n_visits for node in self._root._children.values()]
                 if max(_n_visits)>100:
