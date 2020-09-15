@@ -31,29 +31,30 @@ class Dataset(torch.utils.data.Dataset):
         self.buffer_size = buffer_size
         self.curr_game_batch_num = 0
         self.data_index_file = os.path.join(data_dir, 'index.txt')
-        self.file_list = glob.glob(os.path.join(self.data_dir,"*.pkl"))
+        self.file_list = glob.glob(os.path.join(self.data_dir, "*.pkl"))
 
     def __len__(self):
         return self.game_batch_num
 
     def __getitem__(self, index):
         filename = random.choice(self.file_list)
-        return pickle.load(open(os.path.join(self.data_dir,filename),"rb"))
+        return pickle.load(open(filename, "rb"))
 
     def save_game_batch_num(self):
-        with open(self.data_index_file,"w") as f:
+        with open(self.data_index_file, "w") as f:
             f.write(str(self.curr_game_batch_num))
 
     def load_game_batch_num(self):
         if os.path.exists(self.data_index_file):
-            self.curr_game_batch_num = int(open(self.data_index_file,'r').read().strip())
+            self.curr_game_batch_num = int(open(self.data_index_file, 'r').read().strip())
 
     def save(self, obj):
         filename = "%s.pkl" % (self.curr_game_batch_num % self.buffer_size)
-        pickle.dump(obj, open(os.path.join(self.data_dir,filename),"wb"))
+        savefile = os.path.join(self.data_dir, filename)
+        pickle.dump(obj, open(savefile, "wb"))
         self.curr_game_batch_num += 1
         self.save_game_batch_num()
-        self.file_list.append(filename)
+        self.file_list.append(savefile)
 
     def curr_size(self):
         return len(self.file_list)
