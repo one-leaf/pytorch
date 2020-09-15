@@ -139,15 +139,15 @@ class FiveChessTrain():
         # 训练策略价值网络
         # 随机抽取data_buffer中的对抗数据
         # mini_batch = self.dataset.loadData(sample_datas)
-        mini_batch = sample_datas
-        for x in mini_batch:
-            print("-----------------")
-            print(x)
-        state_batch = [data[0] for data in mini_batch]
-        mcts_probs_batch = [data[1] for data in mini_batch]
-        winner_batch = [data[2] for data in mini_batch]
+        state_batch, mcts_probs_batch, winner_batch = sample_datas
+        # # for x in mini_batch:
+        # #     print("-----------------")
+        # #     print(x)
+        # # state_batch = [data[0] for data in mini_batch]
+        # # mcts_probs_batch = [data[1] for data in mini_batch]
+        # # winner_batch = [data[2] for data in mini_batch]
 
-        print(state_batch)
+        # print(state_batch)
 
         for i in range(epochs):
             old_probs, old_v = self.policy_value_net.policy_value(state_batch)  
