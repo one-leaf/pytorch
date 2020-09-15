@@ -137,6 +137,9 @@ class FiveChessTrain():
         mcts_probs_batch = [data[1] for data in mini_batch]
         winner_batch = [data[2] for data in mini_batch]
 
+        print(mini_batch)
+        print(state_batch)
+
         for i in range(epochs):
             old_probs, old_v = self.policy_value_net.policy_value(state_batch)  
             loss, entropy = self.policy_value_net.train_step(state_batch, mcts_probs_batch, winner_batch, self.learn_rate * self.lr_multiplier)
