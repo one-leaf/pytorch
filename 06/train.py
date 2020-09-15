@@ -148,8 +148,9 @@ class FiveChessTrain():
         try:
             for i in range(self.game_batch_num):  # 计划训练批次
                 # 收集自我对抗数据
+                logging.info("TRAIN Batch:{} starting, Size:{}, n_in_row:{}".format(i + 1, size, n_in_row))
                 self.collect_selfplay_data(self.play_batch_size)
-                logging.info("TRAIN Batch:{}, steps:{}, Size:{}, n_in_row:{}".format(i + 1, self.episode_len, size, n_in_row))
+                logging.info("TRAIN Batch:{} end, steps:{}".format(i + 1, self.episode_len))
                 logging.info("TRAIN Save data_buffer to {}".format(buffer_file))
                 pickle.dump(self.data_buffer, open(buffer_file, 'wb')) 
                 # 使用对抗数据重新训练策略价值网络模型
