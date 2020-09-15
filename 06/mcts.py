@@ -7,7 +7,7 @@ import numpy as np
 import copy
 import logging
 from operator import itemgetter
-
+import heapq
 
 class TreeNode(object):
     """MCTS树中的节点类。 每个节点跟踪其自身的值Q，先验概率P及其访问次数调整的先前得分u。"""
@@ -250,10 +250,10 @@ class MCTS(object):
             state_copy = copy.deepcopy(state)
             self._playout_network(state_copy)
 
-            # 为了提高学习效率如果有走子的此次超过目前探索次数的20%了，直接放弃再尝试返回。
+            # 为了提高学习效率如果有走子的次数前三名占了全部探索次数的50%了，直接放弃再尝试返回。
             if n >= len(state.availables)*2:
                 _n_visits = [node._n_visits for node in self._root._children.values()]
-                if max(_n_visits)/sum(_n_visits)>0.2:
+                if sum(heapq.nlargest(3,_n_visits))/sum(_n_visits)>0.5:
                     break
 
         # 分解出child中的action和最优选访问次数
