@@ -215,9 +215,8 @@ class FiveChessTrain():
 
                 # 使用对抗数据重新训练策略价值网络模型
                 data_buffer_len =  self.dataset.curr_size()
-                loss, entropy = self.policy_update(data, min(self.epochs//2, data_buffer_len//(self.batch_size*self.epochs)))
+                loss, entropy = self.policy_update(data, min(self.epochs, data_buffer_len//(self.batch_size*self.epochs)))
                 # 每n个batch检查一下当前模型胜率
-                self.policy_value_net.save_model(model_file)
 
                 if (step + 1) % self.check_freq == 0:
                     # 保存buffer数据
@@ -235,6 +234,7 @@ class FiveChessTrain():
                             self.best_win_ratio = 0.0
 
                 if step % self.epochs == 0:
+                    self.policy_value_net.save_model(model_file)
                     # 收集自我对抗数据
                     logging.info("TRAIN Batch:{} starting, Size:{}, n_in_row:{}".format(step + 1, size, n_in_row))
                     self.collect_selfplay_data(self.play_batch_size)
