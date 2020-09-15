@@ -7,13 +7,14 @@ import random
 import logging
 import numpy as np
 from collections import defaultdict, deque
+import pickle
 
 curr_dir = os.path.dirname(os.path.abspath(__file__))
 size = 15  # 棋盘大小
 n_in_row = 5  # 几子连线
 model_file =  os.path.join(curr_dir, '../data/save/06_model_%s_%s.pth'%(size,n_in_row))
 best_model_file =  os.path.join(curr_dir, '../data/save/06_best_model_%s_%s.pth'%(size,n_in_row))
-
+buffer_file = os.path.join(curr_dir, '../data/save/06_buffer_%s_%s.pth'%(size,n_in_row))
 class FiveChessTrain():
     def __init__(self):
         self.policy_evaluate_size = 10  # 策略评估胜率时的模拟对局次数
@@ -33,6 +34,9 @@ class FiveChessTrain():
         self.epochs = 10  # 每次更新策略价值网络的训练步骤数, 推荐是5
         self.kl_targ = 0.02  # 策略价值网络KL值目标
         self.best_win_ratio = 0.0
+        if os.path.exists(buffer_file):
+            print("load buffer data from", buffer_file)
+            self.data_buffer = pickle.load(open(buffer_file,"rb"))
 
         # 纯MCTS的模拟数，用于评估策略模型
         self.pure_mcts_playout_num = 1000 # 用户纯MCTS构建初始树时的随机走子步数
@@ -153,6 +157,9 @@ class FiveChessTrain():
                     # 每n个batch检查一下当前模型胜率
                     self.policy_value_net.save_model(model_file)
                 if (i + 1) % self.check_freq == 0:
+                    # 保存buffer数据
+                    logging.info("TRAIN save data_buffer to {}".format(buffer_file))
+                    pickle.dump(self.data_buffer, open(buffer_file, 'wb')) 
                     logging.info("TRAIN Current self-play batch: {}".format(i + 1))
                     # 策略胜率评估：模型与纯MCTS玩家对战n局看胜率
                     win_ratio = self.policy_evaluate(self.policy_evaluate_size)
