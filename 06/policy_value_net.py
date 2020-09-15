@@ -111,7 +111,10 @@ class PolicyValueNet():
         input: a batch of states
         output: a batch of action probabilities and state values
         """
-        state_batch_tensor = torch.FloatTensor(state_batch).to(self.device)
+        if torch.is_tensor(state_batch):
+            state_batch_tensor = state_batch.to(self.device)
+        else:
+            state_batch_tensor = torch.FloatTensor(state_batch).to(self.device)
         self.policy_value_net.eval()
         # 由于样本不足，导致单张局面做预测时的分布与平均分布相差很大，会出现无法预测的情况，所以不加 eval() 锁定bn为平均方差
         # 或者 设置 BN 的 track_running_stats=False ，不使用全局的方差，直接用每批的方差来标准化。
