@@ -83,6 +83,7 @@ class FiveChessTrain():
             play_data = self.get_equi_data(play_data)
             # 保存对抗数据到data_buffer
             self.data_buffer.extend(play_data)
+        pickle.dump(self.data_buffer, open(buffer_file, 'wb')) 
 
     def policy_update(self, epochs=1):
         """更新策略价值网络policy-value"""
