@@ -254,6 +254,7 @@ class MCTS(object):
             if n >= len(state.availables)*2:
                 _n_visits = [node._n_visits for node in self._root._children.values()]
                 if sum(heapq.nlargest(3,_n_visits))/sum(_n_visits)>0.5:
+                    print(_n_visits)
                     break
 
         # 分解出child中的action和最优选访问次数
