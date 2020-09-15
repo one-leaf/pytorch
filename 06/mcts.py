@@ -251,9 +251,10 @@ class MCTS(object):
             self._playout_network(state_copy)
 
             # 为了提高学习效率如果有走子的此次超过目前探索次数的一半了，直接放弃再尝试返回。
-            _n_visits = [node._n_visits for node in self._root._children.values()]
-            if max(_n_visits)/sum(_n_visits)>0.5:
-                break
+            if n > 100:
+                _n_visits = [node._n_visits for node in self._root._children.values()]
+                if max(_n_visits)/sum(_n_visits)>0.5:
+                    break
 
         # 分解出child中的action和最优选访问次数
         act_visits = [(act, node._n_visits) for act, node in self._root._children.items() if node._n_visits!=0]
