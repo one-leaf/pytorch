@@ -1,20 +1,64 @@
 from policy_value_net import PolicyValueNet  
 from mcts import MCTSPurePlayer, MCTSPlayer
 from agent import Agent
-import os
+import os, glob, pickle
 import sys
 import random
 import logging
 import numpy as np
 from collections import defaultdict, deque
-import pickle
+import torch
 
 curr_dir = os.path.dirname(os.path.abspath(__file__))
 size = 15  # 棋盘大小
 n_in_row = 5  # 几子连线
-model_file =  os.path.join(curr_dir, '../data/save/06_model_%s_%s.pth'%(size,n_in_row))
-best_model_file =  os.path.join(curr_dir, '../data/save/06_best_model_%s_%s.pth'%(size,n_in_row))
-buffer_file = os.path.join(curr_dir, '../data/save/06_buffer_%s_%s.pkl'%(size,n_in_row))
+
+data_dir = os.path.join(curr_dir, './data/%s_%s/'%(size,n_in_row))
+if not os.path.exists(data_dir):
+    os.makedirs(data_dir)
+
+model_dir = os.path.join(curr_dir, './model/')
+if not os.path.exists(model_dir):
+    os.makedirs(model_dir)
+
+model_file =  os.path.join(model_dir, 'model_%s_%s.pth'%(size,n_in_row))
+best_model_file =  os.path.join(model_dir, 'best_model_%s_%s.pth'%(size,n_in_row))
+
+class Dataset(torch.utils.data.Dataset):
+    def __init__(self, data_dir, game_batch_num, buffer_size):
+        self.data_dir = data_dir
+        self.game_batch_num = game_batch_num
+        self.buffer_size = buffer_size
+        self.curr_game_batch_num = 0
+        self.data_index_file = os.path.join(data_dir, 'index.txt')
+        self.file_list = glob.glob(os.path.join(self.data_dir,"*.pkl"))
+
+    def __len__(self):
+        return self.game_batch_num
+
+    def __getitem__(self, index):
+        if self.file_list==[]: return None
+        filename = random.choice(self.file_list)
+        return pickle.load(open(filename,"rb"))
+
+    def save_game_batch_num(self):
+        with open(self.data_index_file,"w") as f:
+            f.write(str(self.curr_game_batch_num))
+
+    def load_game_batch_num(self):
+        if os.path.exists(self.data_index_file):
+            self.curr_game_batch_num = int(open(self.data_index_file,'r').read().strip())
+
+    def save(self, obj):
+        filename = "%s.pkl" % (self.curr_game_batch_num % self.buffer_size)
+        pickle.dump(obj, open(os.path.join(self.data_dir,filename),"wb"))
+        self.curr_game_batch_num += 1
+        self.save_game_batch_num()
+        self.file_list.append(filename)
+
+    def curr_size(self):
+        return len(self.file_list)
+
 class FiveChessTrain():
     def __init__(self):
         self.policy_evaluate_size = 10  # 策略评估胜率时的模拟对局次数
@@ -29,14 +73,11 @@ class FiveChessTrain():
         self.temp = 1.0  # the temperature param
         self.n_playout = 600  # 每个动作的模拟次数
         self.buffer_size = 500000  # cache对战记录个数
-        self.data_buffer = deque(maxlen=self.buffer_size)  # 完整对战历史记录，用于训练
         self.play_batch_size = 1
         self.epochs = 10  # 每次更新策略价值网络的训练步骤数, 推荐是5
         self.kl_targ = 0.02  # 策略价值网络KL值目标
         self.best_win_ratio = 0.0
-        if os.path.exists(buffer_file):
-            print("load buffer data from", buffer_file)
-            self.data_buffer = pickle.load(open(buffer_file,"rb"))
+        self.dataset = Dataset(data_dir, self.game_batch_num, self.buffer_size)
 
         # 纯MCTS的模拟数，用于评估策略模型
         self.pure_mcts_playout_num = 1000 # 用户纯MCTS构建初始树时的随机走子步数
@@ -81,19 +122,21 @@ class FiveChessTrain():
             self.episode_len = len(play_data)
             # 把翻转棋盘数据加到数据集里
             play_data = self.get_equi_data(play_data)
-            # 保存对抗数据到data_buffer
-            self.data_buffer.extend(play_data)
 
-    def policy_update(self, epochs=1):
+            # 保存对抗数据到data_buffer
+            for obj in play_data:
+                self.dataset.save(obj)
+
+    def policy_update(self, sample_datas, epochs=1):
         """更新策略价值网络policy-value"""
         # 训练策略价值网络
         # 随机抽取data_buffer中的对抗数据
-        for i in range(epochs):
-            mini_batch = random.sample(self.data_buffer, self.batch_size)
-            state_batch = [data[0] for data in mini_batch]
-            mcts_probs_batch = [data[1] for data in mini_batch]
-            winner_batch = [data[2] for data in mini_batch]
+        mini_batch = sample_datas
+        state_batch = [data[0] for data in mini_batch]
+        mcts_probs_batch = [data[1] for data in mini_batch]
+        winner_batch = [data[2] for data in mini_batch]
 
+        for i in range(epochs):
             old_probs, old_v = self.policy_value_net.policy_value(state_batch)  
             loss, entropy = self.policy_value_net.train_step(state_batch, mcts_probs_batch, winner_batch, self.learn_rate * self.lr_multiplier)
             new_probs, new_v = self.policy_value_net.policy_value(state_batch)
@@ -146,26 +189,35 @@ class FiveChessTrain():
     def run(self):
         """启动训练"""
         try:
-            for i in range(self.game_batch_num):  # 计划训练批次
-                # 收集自我对抗数据
-                logging.info("TRAIN Batch:{} starting, Size:{}, n_in_row:{}".format(i + 1, size, n_in_row))
+            training_loader = torch.utils.data.DataLoader(self.dataset, batch_size=self.batch_size, shuffle=False, num_workers=4,)
+
+            step = 0
+            while self.dataset.curr_size() < self.batch_size*self.epochs:
+                logging.info("TRAIN Batch:{} starting, Size:{}, n_in_row:{}".format(step + 1, size, n_in_row))
                 self.collect_selfplay_data(self.play_batch_size)
-                logging.info("TRAIN Batch:{} end, steps:{}".format(i + 1, self.episode_len))
-                logging.info("TRAIN Save data_buffer to {}".format(buffer_file))
-                pickle.dump(self.data_buffer, open(buffer_file, 'wb')) 
+                logging.info("TRAIN Batch:{} end, steps:{}".format(step + 1, self.episode_len))
+                step += 1
+
+            for data in training_loader:  # 计划训练批次
+                # 收集自我对抗数据
+                logging.info("TRAIN Batch:{} starting, Size:{}, n_in_row:{}".format(step + 1, size, n_in_row))
+                self.collect_selfplay_data(self.play_batch_size)
+                logging.info("TRAIN Batch:{} end, steps:{}".format(step + 1, self.episode_len))
+                step += 1
+
                 # 使用对抗数据重新训练策略价值网络模型
-                data_buffer_len = len(self.data_buffer)
-                if data_buffer_len > self.batch_size*self.epochs:
-                    loss, entropy = self.policy_update(min(self.epochs, data_buffer_len//(self.batch_size*self.epochs)))
-                    # 每n个batch检查一下当前模型胜率
-                    self.policy_value_net.save_model(model_file)
-                if (i + 1) % self.check_freq == 0:
+                data_buffer_len =  self.dataset.curr_size()
+                loss, entropy = self.policy_update(data, min(self.epochs, data_buffer_len//(self.batch_size*self.epochs)))
+                # 每n个batch检查一下当前模型胜率
+                self.policy_value_net.save_model(model_file)
+
+                if (step + 1) % self.check_freq == 0:
                     # 保存buffer数据
                     logging.info("TRAIN Current self-play batch: {}".format(i + 1))
                     # 策略胜率评估：模型与纯MCTS玩家对战n局看胜率
                     win_ratio = self.policy_evaluate(self.policy_evaluate_size)
                     if win_ratio > self.best_win_ratio:  # 胜率超过历史最优模型
-                        logging.info("TRAIN New best policy!!!!!!!!batch:{} win_ratio:{}->{} pure_mcts_playout_num:{}".format(i + 1, self.best_win_ratio, win_ratio, self.pure_mcts_playout_num))
+                        logging.info("TRAIN New best policy!!!!!!!!batch:{} win_ratio:{}->{} pure_mcts_playout_num:{}".format(step + 1, self.best_win_ratio, win_ratio, self.pure_mcts_playout_num))
                         self.best_win_ratio = win_ratio
                         # 保存当前模型为最优模型best_policy
                         self.policy_value_net.save_model(best_model_file)
