@@ -39,13 +39,11 @@ class Dataset(torch.utils.data.Dataset):
 
     def __getitem__(self, index):
         filename = random.choice(self.file_list)
-        return pickle.load(open(filename, "rb"))
-
-    def loadData(self, filenames):
-        objlist=[]
-        for fiename in filenames:
-            objlist.append(pickle.load(open(filename, "rb")))
-        return objlist
+        state, mcts_prob, winner = pickle.load(open(filename, "rb"))
+        state = torch.from_numpy(state).double()
+        mcts_prob = torch.from_numpy(mcts_prob).double()
+        winner = torch.from_numpy(winner).double()
+        return state, mcts_prob, winner
 
     def save_game_batch_num(self):
         with open(self.data_index_file, "w") as f:
