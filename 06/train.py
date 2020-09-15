@@ -39,7 +39,7 @@ class Dataset(torch.utils.data.Dataset):
     def __getitem__(self, index):
         if self.file_list==[]: return None
         filename = random.choice(self.file_list)
-        return pickle.load(open(filename,"rb"))
+        return pickle.load(open(os.path.join(self.data_dir,filename),"rb"))
 
     def save_game_batch_num(self):
         with open(self.data_index_file,"w") as f:
