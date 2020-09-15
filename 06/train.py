@@ -149,7 +149,9 @@ class FiveChessTrain():
             for i in range(self.game_batch_num):  # 计划训练批次
                 # 收集自我对抗数据
                 self.collect_selfplay_data(self.play_batch_size)
-                logging.info("TRAIN Size:{}, n_in_row:{}, Batch:{}, steps:{}".format(size, n_in_row ,i + 1, self.episode_len))
+                logging.info("TRAIN Batch:{}, steps:{}, Size:{}, n_in_row:{}".format(i + 1, self.episode_len, size, n_in_row))
+                logging.info("TRAIN save data_buffer to {}".format(buffer_file))
+                pickle.dump(self.data_buffer, open(buffer_file, 'wb')) 
                 # 使用对抗数据重新训练策略价值网络模型
                 data_buffer_len = len(self.data_buffer)
                 if data_buffer_len > self.batch_size*self.epochs:
@@ -158,8 +160,6 @@ class FiveChessTrain():
                     self.policy_value_net.save_model(model_file)
                 if (i + 1) % self.check_freq == 0:
                     # 保存buffer数据
-                    logging.info("TRAIN save data_buffer to {}".format(buffer_file))
-                    pickle.dump(self.data_buffer, open(buffer_file, 'wb')) 
                     logging.info("TRAIN Current self-play batch: {}".format(i + 1))
                     # 策略胜率评估：模型与纯MCTS玩家对战n局看胜率
                     win_ratio = self.policy_evaluate(self.policy_evaluate_size)
