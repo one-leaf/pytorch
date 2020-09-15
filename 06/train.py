@@ -213,11 +213,6 @@ class FiveChessTrain():
                 step += 1
 
             for data in training_loader:  # 计划训练批次
-                # 收集自我对抗数据
-                logging.info("TRAIN Batch:{} starting, Size:{}, n_in_row:{}".format(step + 1, size, n_in_row))
-                self.collect_selfplay_data(self.play_batch_size)
-                logging.info("TRAIN Batch:{} end, steps:{}".format(step + 1, self.episode_len))
-                step += 1
 
                 # 使用对抗数据重新训练策略价值网络模型
                 data_buffer_len =  self.dataset.curr_size()
@@ -239,6 +234,14 @@ class FiveChessTrain():
                         if self.best_win_ratio == 1.0: # and self.pure_mcts_playout_num < 6000:
                             self.pure_mcts_playout_num += 1000
                             self.best_win_ratio = 0.0
+
+
+                # 收集自我对抗数据
+                logging.info("TRAIN Batch:{} starting, Size:{}, n_in_row:{}".format(step + 1, size, n_in_row))
+                self.collect_selfplay_data(self.play_batch_size)
+                logging.info("TRAIN Batch:{} end, steps:{}".format(step + 1, self.episode_len))
+                step += 1
+
         except KeyboardInterrupt:
             logging.info('quit')
 
