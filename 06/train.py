@@ -39,7 +39,13 @@ class Dataset(torch.utils.data.Dataset):
 
     def __getitem__(self, index):
         filename = random.choice(self.file_list)
-        return pickle.load(open(filename, "rb"))
+        return filename
+
+    def loadData(self, filenames):
+        objlist=[]
+        for fiename in filenames:
+            objlist.append(pickle.load(open(filename, "rb")))
+        return objlist
 
     def save_game_batch_num(self):
         with open(self.data_index_file, "w") as f:
@@ -59,6 +65,8 @@ class Dataset(torch.utils.data.Dataset):
 
     def curr_size(self):
         return len(self.file_list)
+
+
 
 class FiveChessTrain():
     def __init__(self):
@@ -132,7 +140,7 @@ class FiveChessTrain():
         """更新策略价值网络policy-value"""
         # 训练策略价值网络
         # 随机抽取data_buffer中的对抗数据
-        mini_batch = sample_datas
+        mini_batch = self.dataset.loadData(sample_datas)
         state_batch = [data[0] for data in mini_batch]
         mcts_probs_batch = [data[1] for data in mini_batch]
         winner_batch = [data[2] for data in mini_batch]
