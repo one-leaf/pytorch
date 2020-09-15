@@ -33,7 +33,7 @@ class Dataset(torch.utils.data.Dataset):
         self.data_index_file = os.path.join(data_dir, 'index.txt')
         self.file_list = glob.glob(os.path.join(self.data_dir, "*.pkl"))
         self.load_game_batch_num()
-        
+
     def __len__(self):
         return self.game_batch_num
 
@@ -50,10 +50,10 @@ class Dataset(torch.utils.data.Dataset):
             self.curr_game_batch_num = int(open(self.data_index_file, 'r').read().strip())
 
     def save(self, obj):
+        self.curr_game_batch_num += 1
         filename = "%s.pkl" % (self.curr_game_batch_num % self.buffer_size)
         savefile = os.path.join(self.data_dir, filename)
         pickle.dump(obj, open(savefile, "wb"))
-        self.curr_game_batch_num += 1
         self.save_game_batch_num()
         self.file_list.append(savefile)
 
