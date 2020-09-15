@@ -68,7 +68,7 @@ class FiveChessTrain():
     def __init__(self):
         self.policy_evaluate_size = 10  # 策略评估胜率时的模拟对局次数
         self.game_batch_num = 10000  # selfplay对战次数
-        self.batch_size = 2  # data_buffer中对战次数超过n次后开始启动模型训练
+        self.batch_size = 512  # data_buffer中对战次数超过n次后开始启动模型训练
         self.check_freq = 100  # 每对战n次检查一次当前模型vs旧模型胜率
         self.agent = Agent(size, n_in_row)
 
@@ -138,9 +138,6 @@ class FiveChessTrain():
         # 随机抽取data_buffer中的对抗数据
         # mini_batch = self.dataset.loadData(sample_datas)
         state_batch, mcts_probs_batch, winner_batch = sample_datas
-        print(state_batch)
-        print(mcts_probs_batch)
-        print(winner_batch)
         # # for x in mini_batch:
         # #     print("-----------------")
         # #     print(x)
