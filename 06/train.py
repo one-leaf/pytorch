@@ -26,7 +26,7 @@ class FiveChessTrain():
         self.learn_rate = 1e-4
         self.lr_multiplier = 1.0  # 基于KL的自适应学习率
         self.temp = 1.0  # the temperature param
-        self.n_playout = 500  # 每个动作的模拟次数
+        self.n_playout = 600  # 每个动作的模拟次数
         self.buffer_size = 500000  # cache对战记录个数
         self.data_buffer = deque(maxlen=self.buffer_size)  # 完整对战历史记录，用于训练
         self.play_batch_size = 1
