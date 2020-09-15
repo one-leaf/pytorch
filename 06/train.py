@@ -147,8 +147,8 @@ class FiveChessTrain():
 
         # print(state_batch)
 
+        old_probs, old_v = self.policy_value_net.policy_value(state_batch)  
         for i in range(epochs):
-            old_probs, old_v = self.policy_value_net.policy_value(state_batch)  
             loss, entropy = self.policy_value_net.train_step(state_batch, mcts_probs_batch, winner_batch, self.learn_rate * self.lr_multiplier)
             new_probs, new_v = self.policy_value_net.policy_value(state_batch)
 
@@ -215,7 +215,7 @@ class FiveChessTrain():
 
                 # 使用对抗数据重新训练策略价值网络模型
                 data_buffer_len =  self.dataset.curr_size()
-                loss, entropy = self.policy_update(data, min(self.epochs, data_buffer_len//(self.batch_size*self.epochs)))
+                loss, entropy = self.policy_update(data, min(self.epochs//2, data_buffer_len//(self.batch_size*self.epochs)))
                 # 每n个batch检查一下当前模型胜率
                 self.policy_value_net.save_model(model_file)
 
@@ -234,12 +234,12 @@ class FiveChessTrain():
                             self.pure_mcts_playout_num += 1000
                             self.best_win_ratio = 0.0
 
-
-                # 收集自我对抗数据
-                logging.info("TRAIN Batch:{} starting, Size:{}, n_in_row:{}".format(step + 1, size, n_in_row))
-                self.collect_selfplay_data(self.play_batch_size)
-                logging.info("TRAIN Batch:{} end, steps:{}".format(step + 1, self.episode_len))
-                step += 1
+                if step % self.epochs == 0:
+                    # 收集自我对抗数据
+                    logging.info("TRAIN Batch:{} starting, Size:{}, n_in_row:{}".format(step + 1, size, n_in_row))
+                    self.collect_selfplay_data(self.play_batch_size)
+                    logging.info("TRAIN Batch:{} end, steps:{}".format(step + 1, self.episode_len))
+                    step += 1
 
         except KeyboardInterrupt:
             logging.info('quit')
