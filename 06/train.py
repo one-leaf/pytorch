@@ -201,9 +201,7 @@ class FiveChessTrain():
     def run(self):
         """启动训练"""
         try:
-            print("start dataloader")
             training_loader = torch.utils.data.DataLoader(self.dataset, batch_size=self.batch_size, shuffle=False, num_workers=4,)
-            print("end  dataloader")
 
             step = 0
             while self.dataset.curr_size() < self.batch_size*self.epochs:
