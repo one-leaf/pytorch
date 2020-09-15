@@ -250,7 +250,7 @@ class MCTS(object):
             state_copy = copy.deepcopy(state)
             self._playout_network(state_copy)
 
-            # 为了提高学习效率如果有走子的次数前三名占了全部探索次数的50%了，直接放弃再尝试返回。
+            # 为了提高学习效率如果有走子的次数方差大于50，直接放弃再尝试返回。
             if n >= len(state.availables):
                 _n_visits = [node._n_visits for node in self._root._children.values()]
                 var = np.var(np.array(_n_visits))
