@@ -251,10 +251,10 @@ class MCTS(object):
             self._playout_network(state_copy)
 
             # 为了提高学习效率如果有走子的次数前三名占了全部探索次数的50%了，直接放弃再尝试返回。
-            if n >= len(state.availables)*2:
+            if n >= len(state.availables):
                 _n_visits = [node._n_visits for node in self._root._children.values()]
                 var = np.var(np.array(_n_visits))
-                if var>10:
+                if var > 50:
                     print(var, _n_visits)
                     break
 
