@@ -40,9 +40,9 @@ class Dataset(torch.utils.data.Dataset):
     def __getitem__(self, index):
         filename = random.choice(self.file_list)
         state, mcts_prob, winner = pickle.load(open(filename, "rb"))
-        state = torch.from_numpy(state).double()
-        mcts_prob = torch.from_numpy(mcts_prob).double()
-        winner = torch.as_tensor(winner).double()
+        state = torch.from_numpy(state).float()
+        mcts_prob = torch.from_numpy(mcts_prob).float()
+        winner = torch.as_tensor(winner).float()
         return state, mcts_prob, winner
 
     def save_game_batch_num(self):
