@@ -140,6 +140,9 @@ class FiveChessTrain():
         # 随机抽取data_buffer中的对抗数据
         # mini_batch = self.dataset.loadData(sample_datas)
         state_batch, mcts_probs_batch, winner_batch = sample_datas
+        print(state_batch)
+        print(mcts_probs_batch)
+        print(winner_batch)
         # # for x in mini_batch:
         # #     print("-----------------")
         # #     print(x)
