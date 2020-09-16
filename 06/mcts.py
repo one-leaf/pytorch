@@ -18,6 +18,7 @@ class TreeNode(object):
         self._Q = 0  # 节点分数，用于mcts树初始构建时的充分打散（每次叶子节点被最优选中时，节点隔级-leaf_value逻辑，以避免构建树时某分支被反复选中）
         self._n_visits = 0  # 节点被最优选中的次数，用于树构建完毕后的走子选择
         self._P = prior_p  # action概率
+        self._cache = {}
 
     # 扩展新的子节点
     def expand(self, action_priors):
@@ -36,23 +37,30 @@ class TreeNode(object):
         """
 
         # 最少将当前有关联的棋子全部探测一遍，这个代码有点脏
-        if self._parent==None or self._parent._parent==None:
+        if self._parent==None:
             # 获得已经下的步数
-            action_x = [action[0] for action in self._children]
-            action_y = [action[1] for action in self._children]
-            # 找出需要下的步骤
-            need_selects=set()
-            for x in range(max(action_x)):
-                for y in range(max(action_y)):
-                    if x not in action_x and y not in action_y:
-                        need_selects.add((x-1,y-1))
-                        need_selects.add((x+1,y+1))
-                        need_selects.add((x-1,y+1))
-                        need_selects.add((x+1,y-1))
-                        need_selects.add((x,y-1))
-                        need_selects.add((x,y+1))
-                        need_selects.add((x-1,y))
-                        need_selects.add((x+1,y))
+            max_x=max_y=0
+            actions=[]
+            key=0
+            for i, action in enumerate(self._children):
+                if action[0]>max_x: max_x=action[0]
+                if action[1]>max_y: max_y=action[1]
+                actions.append(action)
+                key += (action[0]*32 + action[1]) * (i+1)
+
+            if key in self._cache:
+                need_selects = self._cache[key]
+            else:
+                # 找出需要下的步骤
+                need_selects=set()
+                for x in range(max_x):
+                    for y in range(max_y):
+                        if (x,y) not in actions:
+                            for ac in [(x,y-1),(x,y+1),(x-1,y),(x+1,y),(x+1,y+1),(x+1,y-1),(x-1,y+1),(x-1,y-1)]:
+                                if ac in actions:
+                                    need_selects.add(ac)
+                self._cache[key]=need_selects
+
             for action in self._children:
                 if self._children[action]._n_visits==0 and action in need_selects:
                     return (action, self._children[action])
@@ -383,7 +391,7 @@ class MCTSPlayer(object):
                 root = self.mcts._root
                 for act in root._children:
                     node = root._children[act]   
-                    if node._n_visits<2: continue                 
+                    if node._n_visits==0: continue                 
                     print(act,node)
                 print("AI", action, act_probs[acts.index(action)]) 
 
