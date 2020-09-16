@@ -43,10 +43,12 @@ class Human(object):
         return "Human {}".format(self.player)
 
 def run():
-    curr_dir = os.path.dirname(os.path.abspath(__file__))
     size = 15  # 棋盘大小
     n_in_row = 5  # 几子连线
-    model_file =  os.path.join(curr_dir, '../data/save/06_model_%s_%s.pth'%(size,n_in_row))
+
+    curr_dir = os.path.dirname(os.path.abspath(__file__))
+    model_dir = os.path.join(curr_dir, './model/')
+    model_file =  os.path.join(model_dir, 'model_%s_%s.pth'%(size,n_in_row))
 
     try:
         agent = Agent(size=size, n_in_row=n_in_row)

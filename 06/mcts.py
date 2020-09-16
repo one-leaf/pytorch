@@ -34,11 +34,29 @@ class TreeNode(object):
             Params：c_puct = child 搜索深度
             Return: tuple (action, next_node)
         """
-        # 最少将根节点的子节点全部探测一遍，不然很容易出很大偏差
-        if self._parent==None:
+
+        # 最少将当前有关联的棋子全部探测一遍，这个代码有点脏
+        if self._parent==None or self._parent._parent==None:
+            # 获得已经下的步数
+            action_x = [action[0] for action in self._children]
+            action_y = [action[1] for action in self._children]
+            # 找出需要下的步骤
+            need_selects=set()
+            for x in range(max(action_x)):
+                for y in range(max(action_y)):
+                    if x not in action_x and y not in action_y:
+                        need_selects.add((x-1,y-1))
+                        need_selects.add((x+1,y+1))
+                        need_selects.add((x-1,y+1))
+                        need_selects.add((x+1,y-1))
+                        need_selects.add((x,y-1))
+                        need_selects.add((x,y+1))
+                        need_selects.add((x-1,y))
+                        need_selects.add((x+1,y))
             for action in self._children:
-                if self._children[action]._n_visits==0:
+                if self._children[action]._n_visits==0 and action in need_selects:
                     return (action, self._children[action])
+
         return max(self._children.items(), key=lambda act_node: act_node[1].get_value(c_puct))
 
     # 计算和返回这个节点的值
