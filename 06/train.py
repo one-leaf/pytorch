@@ -132,17 +132,19 @@ class FiveChessTrain():
                 self.dataset.save(obj)
 
             state = play_data[-1][0]
-            one_state = state[0:6].sum(0)
-            one_state = one_state*0.5+0.5
-            for x in range(len(one_state)):
+            state1 = state[0:3].sum(0)
+            state2 = state[3:3].sum(0)
+            state1 = state1*0.5+0.5
+            state2 = state2*0.5+0.5
+            for x in range(len(state1)):
                 line=""
-                for y in range(len(one_state[0])):
-                    if one_state[x][y]==0:
-                        line+=" "
-                    elif one_state[x][y]==1:
-                        line+="X"
-                    elif one_state[x][y]==-1:
-                        line+="O"
+                for y in range(len(state1[0])):
+                    char = " "
+                    if state1[x][y]==1:
+                        char = "X"
+                    elif state2[x][y]==1:
+                        char = "O"
+                    line += char
                 print(line)
                     
 
