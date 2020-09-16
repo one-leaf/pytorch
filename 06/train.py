@@ -134,9 +134,9 @@ class FiveChessTrain():
             state = play_data[-1][0]
             one_state = state[0:6].sum(0)
             one_state = one_state*0.5+0.5
-            for x in one_state:
+            for x in range(len(one_state)):
                 line=""
-                for y in one_state[0]:
+                for y in range(len(one_state[0])):
                     if one_state[x][y]==0:
                         line+=" "
                     elif one_state[x][y]==1:
