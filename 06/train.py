@@ -133,14 +133,14 @@ class FiveChessTrain():
 
             state = play_data[-1][0]*0.5+0.5
             state1 = state[0:3].sum(0)
-            state2 = state[3:3].sum(0)
+            state2 = state[3:6].sum(0)
             for x in range(len(state1)):
                 line=""
                 for y in range(len(state1[0])):
                     char = " "
                     if state1[x][y]==1:
                         char = "X"
-                    elif state2[x][y]==1:
+                    if state2[x][y]==1:
                         char = "O"
                     line += char
                 print(line)
