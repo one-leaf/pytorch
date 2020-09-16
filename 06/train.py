@@ -133,7 +133,18 @@ class FiveChessTrain():
 
             state = play_data[-1][0]
             one_state = state[0:6].sum(0)
-            print(one_state*0.5+0.5)
+            one_state = one_state*0.5+0.5
+            for x in one_state:
+                line=""
+                for y in one_state[0]:
+                    if one_state[x][y]==0:
+                        line+=" "
+                    elif one_state[x][y]==1:
+                        line+="X"
+                    elif one_state[x][y]==-1:
+                        line+="O"
+                print(line)
+                    
 
     def policy_update(self, sample_datas, epochs=1):
         """更新策略价值网络policy-value"""
