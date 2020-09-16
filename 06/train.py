@@ -131,6 +131,10 @@ class FiveChessTrain():
             for obj in play_data:
                 self.dataset.save(obj)
 
+            state = play_data[-1][0]
+            one_state = state[0:6].sum(0)
+            print(one_state*0.5+0.5)
+
     def policy_update(self, sample_datas, epochs=1):
         """更新策略价值网络policy-value"""
         # 训练策略价值网络
