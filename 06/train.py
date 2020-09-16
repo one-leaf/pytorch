@@ -79,11 +79,10 @@ class FiveChessTrain():
         self.n_playout = 600  # 每个动作的模拟次数
         self.buffer_size = 500000  # cache对战记录个数
         self.play_batch_size = 1
-        self.epochs = 10  # 每次更新策略价值网络的训练步骤数, 推荐是5
+        self.epochs = 5  # 每次更新策略价值网络的训练步骤数, 推荐是5
         self.kl_targ = 0.02  # 策略价值网络KL值目标
         self.best_win_ratio = 0.0
-        self.dataset = Dataset(data_dir, self.game_batch_num, self.buffer_size)
-
+        
         # 纯MCTS的模拟数，用于评估策略模型
         self.pure_mcts_playout_num = 1000 # 用户纯MCTS构建初始树时的随机走子步数
         self.c_puct = 3  # MCTS child权重， 用来调节MCTS中 探索/乐观 的程度
@@ -201,6 +200,7 @@ class FiveChessTrain():
         """启动训练"""
         try:
             print("start data loader")
+            self.dataset = Dataset(data_dir, self.game_batch_num*self.batch_size, self.buffer_size)
             training_loader = torch.utils.data.DataLoader(self.dataset, batch_size=self.batch_size, shuffle=False, num_workers=4,)
             print("end data loader")
 
@@ -212,15 +212,13 @@ class FiveChessTrain():
                 step += 1
 
             for data in training_loader:  # 计划训练批次
-
                 # 使用对抗数据重新训练策略价值网络模型
-                data_buffer_len =  self.dataset.curr_size()
-                loss, entropy = self.policy_update(data, min(self.epochs, data_buffer_len//(self.batch_size*self.epochs)))
+                loss, entropy = self.policy_update(data, self.epochs)
                 # 每n个batch检查一下当前模型胜率
 
                 if (step + 1) % self.check_freq == 0:
                     # 保存buffer数据
-                    logging.info("TRAIN Current self-play batch: {}".format(i + 1))
+                    logging.info("TRAIN Current self-play batch: {}".format(step + 1))
                     # 策略胜率评估：模型与纯MCTS玩家对战n局看胜率
                     win_ratio = self.policy_evaluate(self.policy_evaluate_size)
                     if win_ratio > self.best_win_ratio:  # 胜率超过历史最优模型
@@ -233,7 +231,7 @@ class FiveChessTrain():
                             self.pure_mcts_playout_num += 1000
                             self.best_win_ratio = 0.0
 
-                if step % self.epochs == 0:
+                if (step+1) % self.epochs == 0:
                     self.policy_value_net.save_model(model_file)
                     # 收集自我对抗数据
                     logging.info("TRAIN Batch:{} starting, Size:{}, n_in_row:{}".format(step + 1, size, n_in_row))
