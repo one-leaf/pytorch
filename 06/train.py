@@ -35,13 +35,7 @@ class Dataset(torch.utils.data.Dataset):
         self.data_index_file = os.path.join(data_dir, 'index.txt')
         self.file_list = deque(maxlen=buffer_size)        
         self.load_game_batch_num()
-        self.loadFiles()
-
-    def loadFiles(self):
-        files = glob.glob(os.path.join(self.data_dir, "*.pkl"))
-        files = sorted(files, key=lambda x: os.path.getmtime(x))
-        for filename in files:
-            self.file_list.append(filename)
+        self.load_game_files()
 
     def __len__(self):
         return self.game_batch_num
@@ -53,6 +47,12 @@ class Dataset(torch.utils.data.Dataset):
         mcts_prob = torch.from_numpy(mcts_prob).float()
         winner = torch.as_tensor(winner).float()
         return state, mcts_prob, winner
+
+    def load_game_files(self):
+        files = glob.glob(os.path.join(self.data_dir, "*.pkl"))
+        files = sorted(files, key=lambda x: os.path.getmtime(x))
+        for filename in files:
+            self.file_list.append(filename)
 
     def save_game_batch_num(self):
         with open(self.data_index_file, "w") as f:
