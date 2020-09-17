@@ -26,7 +26,7 @@ class ResidualBlock(nn.Module):
         out=self.left(x)
         residual=x if self.right is None else self.right(x)
         out+=residual
-        return F.LeakyReLU(out)
+        return F.leaky_relu(out)
 
 class Net(nn.Module):
 
@@ -64,14 +64,14 @@ class Net(nn.Module):
         x = self.conv1(x)
         x = self.conv2(x)
         # 动作
-        x_act = F.LeakyReLU(self.act_conv1(x))
+        x_act = F.leaky_relu(self.act_conv1(x))
         x_act = x_act.view(x.size(0), -1)
         x_act = F.log_softmax(self.act_fc1(x_act),dim=1)
 
         # 胜率 输出为 -1 ~ 1 之间的数字
-        x_val = F.LeakyReLU(self.val_conv1(x))
+        x_val = F.leaky_relu(self.val_conv1(x))
         x_val = x_val.view(x.size(0), -1)
-        x_val = F.LeakyReLU(self.val_fc1(x_val))
+        x_val = F.leaky_relu(self.val_fc1(x_val))
         x_val = torch.tanh(self.val_fc2(x_val))
         return x_act, x_val
 
