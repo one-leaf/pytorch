@@ -132,27 +132,14 @@ class FiveChessTrain():
             for obj in play_data:
                 self.dataset.save(obj)
 
-            state = play_data[-1][0]*0.5+0.5
-            state1 = state[0:3].sum(0)
-            state2 = state[3:6].sum(0)
-            for x in range(len(state1)):
-                line=""
-                for y in range(len(state1[0])):
-                    char = " "
-                    if state1[x][y]==1:
-                        char = "X"
-                    if state2[x][y]==1:
-                        char = "O"
-                    line += char
-                print(line)
-                    
+            self.agent.game.print(play_data[-1])                   
 
-    def policy_update(self, sample_datas, epochs=1):
+    def policy_update(self, sample_data, epochs=1):
         """更新策略价值网络policy-value"""
         # 训练策略价值网络
         # 随机抽取data_buffer中的对抗数据
-        # mini_batch = self.dataset.loadData(sample_datas)
-        state_batch, mcts_probs_batch, winner_batch = sample_datas
+        # mini_batch = self.dataset.loadData(sample_data)
+        state_batch, mcts_probs_batch, winner_batch = sample_data
         # # for x in mini_batch:
         # #     print("-----------------")
         # #     print(x)
@@ -206,6 +193,8 @@ class FiveChessTrain():
             else:
                 win_cnt[1] += 1
                 print("AI Lost!","win:", win_cnt[0],"lost",win_cnt[1],"tie",win_cnt[-1])
+            
+            self.agent.game.print()
         # MCTS的胜率 winner = 0, 1, -1 ; -1 表示平局
         win_ratio = 1.0 * (win_cnt[0] + 0.5 * win_cnt[-1]) / n_games
         logging.info("TRAIN Num_playouts: {}, win: {}, lose: {}, tie: {}, win_ratio: {}".format(self.pure_mcts_playout_num,
