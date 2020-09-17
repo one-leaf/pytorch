@@ -1,5 +1,3 @@
-from tarfile import filemode
-from 04.10 import filename
 from policy_value_net import PolicyValueNet  
 from mcts import MCTSPurePlayer, MCTSPlayer
 from agent import Agent
