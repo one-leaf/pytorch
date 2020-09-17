@@ -52,8 +52,8 @@ class TreeNode(object):
         else:
             # 找出需要下的步骤
             need_selects=set()
-            for x in range(max_x):
-                for y in range(max_y):
+            for x in range(max_x+1):
+                for y in range(max_y+1):
                     if (x,y) not in actions:
                         for ac in [(x,y-1),(x,y+1),(x-1,y),(x+1,y),(x+1,y+1),(x+1,y-1),(x-1,y+1),(x-1,y-1)]:
                             if ac in actions:
@@ -64,8 +64,6 @@ class TreeNode(object):
                 return (action, self._children[action])
         
         if not self._parent is None:
-            if len(need_selects)==0:
-                print(self._children)
             items = [(act, self._children[act]) for act in need_selects]
             return max(items, key=lambda act_node: act_node[1].get_value(c_puct))
 
