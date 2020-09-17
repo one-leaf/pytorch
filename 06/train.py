@@ -78,7 +78,7 @@ class FiveChessTrain():
         self.lr_multiplier = 1.0  # 基于KL的自适应学习率
         self.temp = 1.0  # the temperature param
         self.n_playout = 600  # 每个动作的模拟次数
-        self.buffer_size = 500000  # cache对战记录个数
+        self.buffer_size = 200000  # cache对战记录个数
         self.play_batch_size = 1
         self.epochs = 5  # 每次更新策略价值网络的训练步骤数, 推荐是5
         self.kl_targ = 0.02  # 策略价值网络KL值目标
