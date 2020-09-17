@@ -391,8 +391,8 @@ class MCTSPlayer(object):
                 root = self.mcts._root
                 for act in root._children:
                     node = root._children[act]   
-                    if node._n_visits==0: continue                 
-                    print(act,node)
+                    if node._n_visits>1:                  
+                        print(act,node)
                 print("AI", action, act_probs[acts.index(action)]) 
 
                 self.mcts.update_root_with_action(None)
