@@ -183,7 +183,7 @@ class FiveChess(object):
     # 打印状态
     def print(self, state=None):
         if state!= None:
-            state = state[0]*0.5+0.5
+            state = state*0.5+0.5
             state1 = state[0:3].sum(0)
             state2 = state[3:6].sum(0)
             for x in range(self.size):
