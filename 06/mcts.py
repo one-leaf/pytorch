@@ -36,34 +36,32 @@ class TreeNode(object):
             Return: tuple (action, next_node)
         """
 
-        # 最少将当前有关联的棋子全部探测一遍，这个代码有点脏
-        if self._parent==None:
-            # 获得已经下的步数
-            max_x=max_y=0
-            actions=[]
-            key=0
-            for i, action in enumerate(self._children):
-                if action[0]>max_x: max_x=action[0]
-                if action[1]>max_y: max_y=action[1]
-                actions.append(action)
-                key += (action[0]*32 + action[1]) * (i+1)
+        # 当探索时，附近的棋子优先，这个代码有点脏
+        # 获得已经下的步数
+        max_x=max_y=0
+        actions=[]
+        key=0
+        for i, action in enumerate(self._children):
+            if action[0]>max_x: max_x=action[0]
+            if action[1]>max_y: max_y=action[1]
+            actions.append(action)
+            key += (action[0]*32 + action[1]) * (i+1)
 
-            if key in self._cache:
-                need_selects = self._cache[key]
-            else:
-                # 找出需要下的步骤
-                need_selects=set()
-                for x in range(max_x):
-                    for y in range(max_y):
-                        if (x,y) not in actions:
-                            for ac in [(x,y-1),(x,y+1),(x-1,y),(x+1,y),(x+1,y+1),(x+1,y-1),(x-1,y+1),(x-1,y-1)]:
-                                if ac in actions:
-                                    need_selects.add(ac)
-                self._cache[key]=need_selects
-
-            for action in self._children:
-                if self._children[action]._n_visits==0 and action in need_selects:
-                    return (action, self._children[action])
+        if key in self._cache:
+            need_selects = self._cache[key]
+        else:
+            # 找出需要下的步骤
+            need_selects=set()
+            for x in range(max_x):
+                for y in range(max_y):
+                    if (x,y) not in actions:
+                        for ac in [(x,y-1),(x,y+1),(x-1,y),(x+1,y),(x+1,y+1),(x+1,y-1),(x-1,y+1),(x-1,y-1)]:
+                            if ac in actions:
+                                need_selects.add(ac)
+            self._cache[key]=need_selects
+        for action in self._children:
+            if self._children[action]._n_visits==0 and action in need_selects:                    
+                return (action, self._children[action])
 
         return max(self._children.items(), key=lambda act_node: act_node[1].get_value(c_puct))
 
@@ -188,21 +186,19 @@ class MCTS(object):
             action, node = node.select(self._c_puct)
             # 执行action走子
             state.step(action)
-
         # 使用训练好的模型策略评估此叶子节点，返回[(action,概率)]list 以及当前玩家的后续走子胜负
         action_probs, leaf_value = self._policy(state)
 
         # 检查游戏是否有赢家
         end, winner = state.game_end()
-        if not end:  # 没有结束时，把走子策略返回的[(action,概率)]list加载到mcts树child中
+        if not end:  # 没有结束时，把走子策略返回的[(action,概率)]list加载到mcts树child中 ，同时降低了 leaf_value 的权重
             node.expand(action_probs)
         else:
             # 游戏结束时返回真实的叶子胜负
             if winner == -1:  # tie平局
                 leaf_value = 0.0
             else:
-                leaf_value = (1.0 if winner == state.current_player  else -1.0)
-
+                leaf_value = (10.0 if winner == state.current_player  else -10.0)
         # 递归更新当前节点及所有父节点的最优选中次数和Q分数,因为得到的是本次的价值，但需要更新上一次的节点，所以取反
         node.update_recursive(-leaf_value)
 
@@ -280,7 +276,7 @@ class MCTS(object):
             if n >= len(state.availables):
                 _need_end = False
                 for node in self._root._children.values():
-                    if node._n_visits > 100:
+                    if node._n_visits > 200:
                         _need_end = True
                         break
                 if _need_end: break
@@ -391,8 +387,7 @@ class MCTSPlayer(object):
                 root = self.mcts._root
                 for act in root._children:
                     node = root._children[act]   
-                    if node._n_visits>1:                  
-                        print(act,node)
+                    print(act, node)
                 print("AI", action, act_probs[acts.index(action)]) 
 
                 self.mcts.update_root_with_action(None)
