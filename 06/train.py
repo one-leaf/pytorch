@@ -1,3 +1,5 @@
+from tarfile import filemode
+from 04.10 import filename
 from policy_value_net import PolicyValueNet  
 from mcts import MCTSPurePlayer, MCTSPlayer
 from agent import Agent
@@ -31,8 +33,15 @@ class Dataset(torch.utils.data.Dataset):
         self.buffer_size = buffer_size
         self.curr_game_batch_num = 0
         self.data_index_file = os.path.join(data_dir, 'index.txt')
-        self.file_list = glob.glob(os.path.join(self.data_dir, "*.pkl"))
+        self.file_list = deque(maxlen=buffer_size)        
         self.load_game_batch_num()
+        self.loadFiles()
+
+    def loadFiles(self):
+        files = glob.glob(os.path.join(self.data_dir, "*.pkl"))
+        files = sorted(files, key=lambda x: os.path.getmtime(x))
+        for filename in files:
+            self.file_list.append(filename)
 
     def __len__(self):
         return self.game_batch_num
@@ -54,13 +63,12 @@ class Dataset(torch.utils.data.Dataset):
             self.curr_game_batch_num = int(open(self.data_index_file, 'r').read().strip())
 
     def save(self, obj):
-        filename = "%s.pkl" % (self.curr_game_batch_num % self.buffer_size)
+        filename = "%s.pkl" % self.curr_game_batch_num
         savefile = os.path.join(self.data_dir, filename)
         pickle.dump(obj, open(savefile, "wb"))
         self.curr_game_batch_num += 1
         self.save_game_batch_num()
-        if savefile not in self.file_list:
-            self.file_list.append(savefile)
+        self.file_list.append(savefile)
 
     def curr_size(self):
         return len(self.file_list)
