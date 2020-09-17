@@ -207,7 +207,7 @@ class FiveChess(object):
                         char = "O"
                     line += char
                 print(line)
-        print("currr_player:", self.current_player)
+        print("currr_player:", self.current_player, "is_first:", self.step_count % 2 == 0)
 
     def game_end(self):
         return self.terminal, self.win_user
