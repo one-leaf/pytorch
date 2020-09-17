@@ -80,7 +80,7 @@ class FiveChessTrain():
         self.n_playout = 600  # 每个动作的模拟次数
         self.buffer_size = 200000  # cache对战记录个数
         self.play_batch_size = 1
-        self.epochs = 5  # 每次更新策略价值网络的训练步骤数, 推荐是5
+        self.epochs = 2  # 每次更新策略价值网络的训练步骤数, 推荐是5
         self.kl_targ = 0.02  # 策略价值网络KL值目标
         self.best_win_ratio = 0.0
         
@@ -236,7 +236,7 @@ class FiveChessTrain():
                             self.pure_mcts_playout_num += 1000
                             self.best_win_ratio = 0.0
 
-                if (i+1) % self.epochs == 0:
+                if (i+1) % (20//self.epochs) == 0:
                     self.policy_value_net.save_model(model_file)
                     # 收集自我对抗数据
                     logging.info("TRAIN Batch:{} starting, Size:{}, n_in_row:{}".format(step + 1, size, n_in_row))
