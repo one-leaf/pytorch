@@ -36,7 +36,7 @@ class TreeNode(object):
             Return: tuple (action, next_node)
         """
 
-        # 当探索时，附近的棋子优先，这个代码有点脏
+        # 当探索时，附近的棋子优先，加了一个先验概率，这个可能会导致后期不完美
         # 获得已经下的步数
         max_x=max_y=0
         actions=[]
