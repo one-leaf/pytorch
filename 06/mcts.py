@@ -62,6 +62,10 @@ class TreeNode(object):
         for action in self._children:
             if self._children[action]._n_visits==0 and action in need_selects:                    
                 return (action, self._children[action])
+        
+        if not self._parent is None:
+            items = [(act, self._children[act]) for act in need_selects]
+            return max(items, key=lambda act_node: act_node[1].get_value(c_puct))
 
         return max(self._children.items(), key=lambda act_node: act_node[1].get_value(c_puct))
 
