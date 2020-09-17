@@ -64,6 +64,8 @@ class TreeNode(object):
                 return (action, self._children[action])
         
         if not self._parent is None:
+            if len(need_selects)==0:
+                print(self._children)
             items = [(act, self._children[act]) for act in need_selects]
             return max(items, key=lambda act_node: act_node[1].get_value(c_puct))
 
