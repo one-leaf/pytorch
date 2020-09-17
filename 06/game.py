@@ -181,32 +181,32 @@ class FiveChess(object):
         return square_state
 
     # 打印状态
-    def print(self, state):
-        state = state[0]*0.5+0.5
-        state1 = state[0:3].sum(0)
-        state2 = state[3:6].sum(0)
-        for x in range(self.size):
-            line=""
-            for y in range(self.size):
-                char = " "
-                if state1[x][y]==1:
-                    char = "X"
-                if state2[x][y]==1:
-                    char = "O"
-                line += char
-            print(line)
-
-    def print(self):
-       for x in range(self.size):
-            line=""
-            for y in range(self.size):
-                char = " "
-                if self.chessboard[x][y]==1:
-                    char = "X"
-                if self.chessboard[x][y]==-1:
-                    char = "O"
-                line += char
-            print(line)
+    def print(self, state=None):
+        if state!= None:
+            state = state[0]*0.5+0.5
+            state1 = state[0:3].sum(0)
+            state2 = state[3:6].sum(0)
+            for x in range(self.size):
+                line=""
+                for y in range(self.size):
+                    char = " "
+                    if state1[x][y]==1:
+                        char = "X"
+                    if state2[x][y]==1:
+                        char = "O"
+                    line += char
+                print(line)
+        else:
+            for x in range(self.size):
+                line=""
+                for y in range(self.size):
+                    char = " "
+                    if self.chessboard[x][y]==1:
+                        char = "X"
+                    if self.chessboard[x][y]==-1:
+                        char = "O"
+                    line += char
+                print(line)
 
     def game_end(self):
         return self.terminal, self.win_user
