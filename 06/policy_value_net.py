@@ -37,7 +37,7 @@ class Net(nn.Module):
 
         # 由于每个棋盘大小对最终对应一个动作，所以补齐的效果比较好
         # 直接来2个残差网络
-        self.conv1=self._make_layer(7, 128, 3)
+        self.conv1=self._make_layer(7, 64, 3)
         self.conv2=self._make_layer(64, 128, 3)
         self.conv3=self._make_layer(128, 128, 3)
 
