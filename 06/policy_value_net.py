@@ -6,7 +6,7 @@ from torchvision import transforms
 import numpy as np
 import os
 import random
-from multiprocessing import Lock
+from threading import Lock
 
 # 网络模型
 

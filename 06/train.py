@@ -9,7 +9,7 @@ import logging
 import numpy as np
 from collections import defaultdict, deque
 import torch
-from multiprocessing import Process, Lock
+from threading import Thread, Lock
 
 curr_dir = os.path.dirname(os.path.abspath(__file__))
 size = 15  # 棋盘大小
@@ -139,10 +139,9 @@ class FiveChessTrain():
         logging.info("TRAIN Self Play end. length:%s saving ..." % episode_len)
 
         # 保存对抗数据到data_buffer
-        for obj in play_data:
-            lock.acquire()
-            self.dataset.save(obj)
-            lock.release()
+        with lock:
+            for obj in play_data:
+                self.dataset.save(obj)
         agent.game.print(play_data[-1][0])                   
 
     def policy_update(self, sample_data, epochs=1):
@@ -253,10 +252,10 @@ class FiveChessTrain():
                     self.policy_value_net.save_model(model_file)
                     # 收集自我对抗数据
 
-                    lock = Lock()
                     p_list=[]
+                    lock = Lock()
                     for _ in range(self.play_batch_size):
-                        p = Process(target=self.collect_selfplay_data, args=(lock,))
+                        p = Thread(target=self.collect_selfplay_data, args=(lock,))
                         p_list.append(p)
                         p.start()   
 
