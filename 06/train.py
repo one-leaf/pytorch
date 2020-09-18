@@ -131,7 +131,7 @@ class FiveChessTrain():
         # 创建使用策略价值网络来指导树搜索和评估叶节点的MCTS玩家
         mcts_player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout, is_selfplay=1)
         # 开始下棋
-        winner, play_data = agent.start_self_play(mcts_player, is_shown=0, temp=self.temp)
+        winner, play_data = agent.start_self_play(mcts_player, temp=self.temp)
         play_data = list(play_data)[:]
         episode_len = len(play_data)
         # 把翻转棋盘数据加到数据集里
@@ -194,7 +194,8 @@ class FiveChessTrain():
         pure_mcts_player = MCTSPurePlayer(c_puct=5, n_playout=self.pure_mcts_playout_num)
         win_cnt = defaultdict(int)
         for i in range(n_games):  # 对战
-            winner = self.agent.start_play(current_mcts_player, pure_mcts_player, start_player=i % 2, is_shown=0)
+            agent = Agent(size, n_in_row, is_shown=0)
+            winner = agent.start_play(current_mcts_player, pure_mcts_player, start_player=i % 2)
             if winner == current_mcts_player.player:
                 win_cnt[0] += 1
                 print("AI Win!","win:", win_cnt[0],"lost",win_cnt[1],"tie",win_cnt[-1])
@@ -205,7 +206,7 @@ class FiveChessTrain():
                 win_cnt[1] += 1
                 print("AI Lost!","win:", win_cnt[0],"lost",win_cnt[1],"tie",win_cnt[-1])
             
-            self.agent.game.print()
+            agent.game.print()
         # MCTS的胜率 winner = 0, 1, -1 ; -1 表示平局
         win_ratio = 1.0 * (win_cnt[0] + 0.5 * win_cnt[-1]) / n_games
         logging.info("TRAIN Num_playouts: {}, win: {}, lose: {}, tie: {}, win_ratio: {}".format(self.pure_mcts_playout_num,
