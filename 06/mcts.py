@@ -18,7 +18,7 @@ class TreeNode(object):
         self._Q = 0  # 节点分数，用于mcts树初始构建时的充分打散（每次叶子节点被最优选中时，节点隔级-leaf_value逻辑，以避免构建树时某分支被反复选中）
         self._n_visits = 0  # 节点被最优选中的次数，用于树构建完毕后的走子选择
         self._P = prior_p  # action概率
-        self._cache = {}
+        self._cache = []
 
     # 扩展新的子节点
     def expand(self, action_priors):
@@ -28,6 +28,7 @@ class TreeNode(object):
         for action, prob in action_priors:
             if action not in self._children:
                 self._children[action] = TreeNode(self, prob)
+                self._cache.append(action)
 
     # 从子节点中选择最佳子节点
     def select(self, c_puct):
@@ -36,36 +37,13 @@ class TreeNode(object):
             Return: tuple (action, next_node)
         """
 
-        # 当探索时，附近的棋子优先，加了一个先验概率，这个可能会导致后期不完美
-        # 获得已经下的步数
-        # max_x=max_y=0
-        # actions=[]
-        # key=0
-        # for i, action in enumerate(self._children):
-        #     if action[0]>max_x: max_x=action[0]
-        #     if action[1]>max_y: max_y=action[1]
-        #     actions.append(action)
-        #     key += (action[0]*32 + action[1]) * (i+1)
-
-        # if key in self._cache:
-        #     need_selects = self._cache[key]
-        # else:
-        #     # 找出需要下的步骤
-        #     need_selects=set()
-        #     for x in range(max_x+1):
-        #         for y in range(max_y+1):
-        #             if (x,y) not in actions:
-        #                 for ac in [(x,y-1),(x,y+1),(x-1,y),(x+1,y),(x+1,y+1),(x+1,y-1),(x-1,y+1),(x-1,y-1)]:
-        #                     if ac in actions:
-        #                         need_selects.add(ac)
-        #     self._cache[key]=need_selects
-        # for action in self._children:
-        #     if self._children[action]._n_visits==0 and action in need_selects:                    
-        #         return (action, self._children[action])
-        
-        # if not self._parent is None:
-        #     items = [(act, self._children[act]) for act in need_selects]
-        #     return max(items, key=lambda act_node: act_node[1].get_value(c_puct))
+        # 当探索第二步以上时，直接选择靠前的30%棋子，增加探索深度，加了一个先验概率，这个可能会导致后期不完美
+        if not self._parent is None:
+            # 获得已经下的步数
+            if len(self._cache)>50:
+                size =  int(len(self._cache)*0.3)           
+                items = [(act, self._children[act]) for act in self._cache[:size]]
+                return max(items, key=lambda act_node: act_node[1].get_value(c_puct))
 
         return max(self._children.items(), key=lambda act_node: act_node[1].get_value(c_puct))
 
@@ -198,11 +176,11 @@ class MCTS(object):
         if not end:  # 没有结束时，把走子策略返回的[(action,概率)]list加载到mcts树child中 ，同时降低了 leaf_value 的权重
             node.expand(action_probs)
         else:
-            # 游戏结束时返回真实的叶子胜负
+            # 游戏结束时返回真实的叶子胜负, 注意这里提升了一倍导致游戏失败或成功的分值
             if winner == -1:  # tie平局
                 leaf_value = 0.0
             else:
-                leaf_value = (10.0 if winner == state.current_player  else -10.0)
+                leaf_value = (2.0 if winner == state.current_player  else -2.0)
         # 递归更新当前节点及所有父节点的最优选中次数和Q分数,因为得到的是本次的价值，但需要更新上一次的节点，所以取反
         node.update_recursive(-leaf_value)
 
