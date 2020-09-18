@@ -22,9 +22,7 @@ class Agent(object):
         states, mcts_probs, current_players = [], [], []
         while True:
             # temp 权重 ，return_prob 是否返回概率数据
-            print("thinking")
             action, move_probs = player.get_action(self.game, temp=temp, return_prob=1)
-            print(action)
             # store the data
             states.append(self.game.current_state())
             # print(action)
