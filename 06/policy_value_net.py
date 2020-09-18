@@ -37,14 +37,17 @@ class Net(nn.Module):
         # 直接来2个残差网络
         self.conv1=self._make_layer(7, 64, 3)
         self.conv2=self._make_layer(64, 128, 3)
+        self.conv3=self._make_layer(128, 128, 3)
 
         # 动作预测
         self.act_conv1 = nn.Conv2d(128, 4, 1)
         self.act_fc1 = nn.Linear(4*size*size, size*size)
+        self.act_fc2 = nn.Linear(size*size, size*size)
         # 动作价值
         self.val_conv1 = nn.Conv2d(128, 2, 1)
-        self.val_fc1 = nn.Linear(2*size*size, 64)
-        self.val_fc2 = nn.Linear(64, 1)
+        self.val_fc1 = nn.Linear(2*size*size, size*size)
+        self.val_fc2 = nn.Linear(size*size, 64)
+        self.val_fc3 = nn.Linear(64, 1)
 
     def _make_layer(self,inchannel,outchannel,block_num,stride=1):
         #构建layer,包含多个residual block
@@ -63,16 +66,19 @@ class Net(nn.Module):
     def forward(self, x):
         x = self.conv1(x)
         x = self.conv2(x)
+        x = self.conv3(x)
         # 动作
         x_act = F.leaky_relu(self.act_conv1(x))
         x_act = x_act.view(x.size(0), -1)
-        x_act = F.log_softmax(self.act_fc1(x_act),dim=1)
+        x_act = F.leaky_relu(self.act_fc1(x_act))
+        x_act = F.log_softmax(self.act_fc2(x_act),dim=1)
 
         # 胜率 输出为 -1 ~ 1 之间的数字
         x_val = F.leaky_relu(self.val_conv1(x))
         x_val = x_val.view(x.size(0), -1)
         x_val = F.leaky_relu(self.val_fc1(x_val))
-        x_val = torch.tanh(self.val_fc2(x_val))
+        x_val = F.leaky_relu(self.val_fc2(x_val))
+        x_val = torch.tanh(self.val_fc3(x_val))
         return x_act, x_val
 
 
