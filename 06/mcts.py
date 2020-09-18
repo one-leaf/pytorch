@@ -251,7 +251,7 @@ class MCTS(object):
             Return: 所有action及对应概率
         """
         for n in range(self._n_playout):
-            print(".",end='')
+            print("\r_n_playout： {:.2f}%".format(n / self._n_playout), end='')
             state_copy = copy.deepcopy(state)
             self._playout_network(state_copy)
 
@@ -263,7 +263,6 @@ class MCTS(object):
                         _need_end = True
                         break
                 if _need_end: break
-        print("")
         # 分解出child中的action和最优选访问次数
         act_visits = [(act, node._n_visits) for act, node in self._root._children.items() if node._n_visits!=0]
         acts, visits = zip(*act_visits)
