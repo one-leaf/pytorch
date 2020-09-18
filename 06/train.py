@@ -9,7 +9,7 @@ import logging
 import numpy as np
 from collections import defaultdict, deque
 import torch
-from multiprocessing import Pool
+from multiprocessing import Process, Lock
 
 curr_dir = os.path.dirname(os.path.abspath(__file__))
 size = 15  # 棋盘大小
@@ -87,7 +87,7 @@ class FiveChessTrain():
         self.temp = 1.0  # the temperature param
         self.n_playout = 800  # 每个动作的模拟次数
         self.buffer_size = 100000  # cache对战记录个数
-        self.play_batch_size = 1
+        self.play_batch_size = 5 # 每次自学习次数
         self.epochs = 2  # 每次更新策略价值网络的训练步骤数, 推荐是5
         self.kl_targ = 0.02  # 策略价值网络KL值目标
         self.best_win_ratio = 0.0
@@ -126,21 +126,22 @@ class FiveChessTrain():
                 extend_data.append((equi_state, equi_mcts_prob.flatten(), winner))
         return extend_data
 
-    def collect_selfplay_data(self, n_games=1):
-        """收集自我对抗数据用于训练"""
-        for i in range(n_games):
-            # 使用MCTS蒙特卡罗树搜索进行自我对抗
-            winner, play_data = self.agent.start_self_play(self.mcts_player, is_shown=0, temp=self.temp)
-            play_data = list(play_data)[:]
-            self.episode_len = len(play_data)
-            # 把翻转棋盘数据加到数据集里
-            play_data = self.get_equi_data(play_data)
+    def collect_selfplay_data(self, lock):
+        """收集自我对抗数据用于训练"""       
+        # 使用MCTS蒙特卡罗树搜索进行自我对抗
+        winner, play_data = self.agent.start_self_play(self.mcts_player, is_shown=0, temp=self.temp)
+        play_data = list(play_data)[:]
+        self.episode_len = len(play_data)
+        # 把翻转棋盘数据加到数据集里
+        play_data = self.get_equi_data(play_data)
 
-            # 保存对抗数据到data_buffer
-            for obj in play_data:
-                self.dataset.save(obj)
+        # 保存对抗数据到data_buffer
+        for obj in play_data:
+            lock.acquire()
+            self.dataset.save(obj)
+            lock.release()
 
-            self.agent.game.print(play_data[-1][0])                   
+        self.agent.game.print(play_data[-1][0])                   
 
     def policy_update(self, sample_data, epochs=1):
         """更新策略价值网络policy-value"""
@@ -248,10 +249,17 @@ class FiveChessTrain():
                     self.policy_value_net.save_model(model_file)
                     # 收集自我对抗数据
                     logging.info("TRAIN Batch:{} starting, Size:{}, n_in_row:{}".format(step + 1, size, n_in_row))
-                    pool = Pool(4)
-                    pool.map(self.collect_selfplay_data, [self.play_batch_size for _ in range(4)])
-                    pool.close()
-                    pool.join()
+                    
+                    lock = Lock()
+                    p_list=[]
+                    for _ in self.play_batch_size:
+                        p = Process(target=self.collect_selfplay_data, args=(lock,))
+                        p_list.append(p)
+                        p.start()
+
+                    for p in p_list:
+                        p.join()   
+
                     # self.collect_selfplay_data(self.play_batch_size)
                     logging.info("TRAIN Batch:{} end, steps:{}".format(step + 1, self.episode_len))
                     step += 1
