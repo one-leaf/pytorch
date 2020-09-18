@@ -248,7 +248,6 @@ class FiveChessTrain():
                 if (i+1) % (int(self.dataset.curr_size() ** 0.1)) == 0:
                     self.policy_value_net.save_model(model_file)
                     # 收集自我对抗数据
-                    logging.info("TRAIN Batch:{} starting, Size:{}, n_in_row:{}".format(step + 1, size, n_in_row))
 
                     lock = Lock()
                     p_list=[]
@@ -256,14 +255,16 @@ class FiveChessTrain():
                         p = Process(target=self.collect_selfplay_data, args=(lock,))
                         p_list.append(p)
                         p.start()
+                        logging.info("TRAIN Batch:{} starting, Size:{}, n_in_row:{}".format(step + 1, size, n_in_row))
 
                     for p in p_list:
                         p.join()   
+                        logging.info("TRAIN Batch:{} end, steps:{}".format(step + 1, self.episode_len))
 
-                    # self.collect_selfplay_data(self.play_batch_size)
-                    logging.info("TRAIN Batch:{} end, steps:{}".format(step + 1, self.episode_len))
                     step += 1
 
+                    # self.collect_selfplay_data(self.play_batch_size)
+    
         except KeyboardInterrupt:
             logging.info('quit')
 
