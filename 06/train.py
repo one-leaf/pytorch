@@ -252,15 +252,16 @@ class FiveChessTrain():
                 if (i+1) % (int(self.dataset.curr_size() ** 0.1)) == 0:
                     self.policy_value_net.save_model(model_file)
                     # 收集自我对抗数据
-
-                    p_list=[]
                     for _ in range(self.play_batch_size):
-                        p = Thread(target=self.collect_selfplay_data, args=())
-                        p_list.append(p)
-                        p.start()   
+                        self.collect_selfplay_data()
+                    #p_list=[]
+                    #for _ in range(self.play_batch_size):
+                    #    p = Thread(target=self.collect_selfplay_data, args=())
+                    #    p_list.append(p)
+                    #     p.start()   
 
-                    for p in p_list:
-                        p.join()   
+                    #for p in p_list:
+                    #    p.join()   
                     step += 1
 
                     # self.collect_selfplay_data(self.play_batch_size)
