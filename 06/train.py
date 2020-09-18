@@ -56,9 +56,8 @@ class Dataset(torch.utils.data.Dataset):
             self.file_list.append(filename)
 
     def save_game_batch_num(self):
-        with self._save_lock:
-            with open(self.data_index_file, "w") as f:
-                f.write(str(self.curr_game_batch_num))
+        with open(self.data_index_file, "w") as f:
+            f.write(str(self.curr_game_batch_num))
 
     def load_game_batch_num(self):
         if os.path.exists(self.data_index_file):
@@ -252,16 +251,16 @@ class FiveChessTrain():
                 if (i+1) % (int(self.dataset.curr_size() ** 0.1)) == 0:
                     self.policy_value_net.save_model(model_file)
                     # 收集自我对抗数据
-                    for _ in range(self.play_batch_size):
-                        self.collect_selfplay_data()
-                    #p_list=[]
                     #for _ in range(self.play_batch_size):
-                    #    p = Thread(target=self.collect_selfplay_data, args=())
-                    #    p_list.append(p)
-                    #     p.start()   
+                    #    self.collect_selfplay_data()
+                    p_list=[]
+                    for _ in range(self.play_batch_size):
+                        p = Thread(target=self.collect_selfplay_data, args=())
+                        p_list.append(p)
+                        p.start()   
 
-                    #for p in p_list:
-                    #    p.join()   
+                    for p in p_list:
+                        p.join()   
                     step += 1
 
                     # self.collect_selfplay_data(self.play_batch_size)
