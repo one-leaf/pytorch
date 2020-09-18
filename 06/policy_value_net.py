@@ -37,16 +37,16 @@ class Net(nn.Module):
 
         # 由于每个棋盘大小对最终对应一个动作，所以补齐的效果比较好
         # 直接来2个残差网络
-        self.conv1=self._make_layer(7, 64, 3)
-        self.conv2=self._make_layer(64, 128, 3)
-        self.conv3=self._make_layer(128, 128, 3)
+        self.conv1=self._make_layer(7, 64, 4)
+        # self.conv2=self._make_layer(64, 128, 3)
+        # self.conv3=self._make_layer(128, 128, 3)
 
         # 动作预测
-        self.act_conv1 = nn.Conv2d(128, 4, 1)
-        self.act_fc1 = nn.Linear(4*size*size, size*size)
-        # self.act_fc2 = nn.Linear(size*size, size*size)
+        self.act_conv1 = nn.Conv2d(64, 4, 1)
+        self.act_fc1 = nn.Linear(4*size*size, 2*size*size)
+        self.act_fc2 = nn.Linear(2*size*size, size*size)
         # 动作价值
-        self.val_conv1 = nn.Conv2d(128, 2, 1)
+        self.val_conv1 = nn.Conv2d(64, 2, 1)
         self.val_fc1 = nn.Linear(2*size*size, size*size)
         self.val_fc2 = nn.Linear(size*size, 1)
         # self.val_fc3 = nn.Linear(64, 1)
@@ -67,12 +67,14 @@ class Net(nn.Module):
 
     def forward(self, x):
         x = self.conv1(x)
-        x = self.conv2(x)
-        x = self.conv3(x)
+        # x = self.conv2(x)
+        # x = self.conv3(x)
+
         # 动作
         x_act = F.leaky_relu(self.act_conv1(x))
         x_act = x_act.view(x.size(0), -1)
-        x_act = F.log_softmax(self.act_fc1(x_act),dim=1)
+        x_act = F.leaky_relu(self.act_fc1(x_act))
+        x_act = F.log_softmax(self.act_fc2(x_act),dim=1)
 
         # 胜率 输出为 -1 ~ 1 之间的数字
         x_val = F.leaky_relu(self.val_conv1(x))
