@@ -61,9 +61,8 @@ class Dataset(torch.utils.data.Dataset):
                 f.write(str(self.curr_game_batch_num))
 
     def load_game_batch_num(self):
-        with self._save_lock:
-            if os.path.exists(self.data_index_file):
-                self.curr_game_batch_num = int(open(self.data_index_file, 'r').read().strip())
+        if os.path.exists(self.data_index_file):
+            self.curr_game_batch_num = int(open(self.data_index_file, 'r').read().strip())
 
     def save(self, obj):
         with self._save_lock:
