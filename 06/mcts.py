@@ -38,34 +38,34 @@ class TreeNode(object):
 
         # 当探索时，附近的棋子优先，加了一个先验概率，这个可能会导致后期不完美
         # 获得已经下的步数
-        max_x=max_y=0
-        actions=[]
-        key=0
-        for i, action in enumerate(self._children):
-            if action[0]>max_x: max_x=action[0]
-            if action[1]>max_y: max_y=action[1]
-            actions.append(action)
-            key += (action[0]*32 + action[1]) * (i+1)
+        # max_x=max_y=0
+        # actions=[]
+        # key=0
+        # for i, action in enumerate(self._children):
+        #     if action[0]>max_x: max_x=action[0]
+        #     if action[1]>max_y: max_y=action[1]
+        #     actions.append(action)
+        #     key += (action[0]*32 + action[1]) * (i+1)
 
-        if key in self._cache:
-            need_selects = self._cache[key]
-        else:
-            # 找出需要下的步骤
-            need_selects=set()
-            for x in range(max_x+1):
-                for y in range(max_y+1):
-                    if (x,y) not in actions:
-                        for ac in [(x,y-1),(x,y+1),(x-1,y),(x+1,y),(x+1,y+1),(x+1,y-1),(x-1,y+1),(x-1,y-1)]:
-                            if ac in actions:
-                                need_selects.add(ac)
-            self._cache[key]=need_selects
-        for action in self._children:
-            if self._children[action]._n_visits==0 and action in need_selects:                    
-                return (action, self._children[action])
+        # if key in self._cache:
+        #     need_selects = self._cache[key]
+        # else:
+        #     # 找出需要下的步骤
+        #     need_selects=set()
+        #     for x in range(max_x+1):
+        #         for y in range(max_y+1):
+        #             if (x,y) not in actions:
+        #                 for ac in [(x,y-1),(x,y+1),(x-1,y),(x+1,y),(x+1,y+1),(x+1,y-1),(x-1,y+1),(x-1,y-1)]:
+        #                     if ac in actions:
+        #                         need_selects.add(ac)
+        #     self._cache[key]=need_selects
+        # for action in self._children:
+        #     if self._children[action]._n_visits==0 and action in need_selects:                    
+        #         return (action, self._children[action])
         
-        if not self._parent is None:
-            items = [(act, self._children[act]) for act in need_selects]
-            return max(items, key=lambda act_node: act_node[1].get_value(c_puct))
+        # if not self._parent is None:
+        #     items = [(act, self._children[act]) for act in need_selects]
+        #     return max(items, key=lambda act_node: act_node[1].get_value(c_puct))
 
         return max(self._children.items(), key=lambda act_node: act_node[1].get_value(c_puct))
 

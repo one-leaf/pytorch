@@ -20,7 +20,9 @@ class FiveChess(object):
         self.chessboard = [ [  0 for v in range(self.size)  ] for v in range(self.size) ]
         self.step_count = 0
         self.current_player = self.players[start_player]
-        self.availables = [(x,y) for x in range(self.size) for y in range(self.size)]
+        availables = [(x,y) for x in range(self.size) for y in range(self.size)]
+        # 按照先中间后两边的排序
+        self.availables = sorted(availables, key=lambda x : (x[0]-self.size//2)**2+(x[1]-self.size//2)**2)
         self.terminal = False
         self.win_user = -1
         self.players_actions=[[],[]]
