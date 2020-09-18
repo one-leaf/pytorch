@@ -125,19 +125,18 @@ class PolicyValueNet():
         else:
             state_batch_tensor = torch.FloatTensor(state_batch).to(self.device)
 
+        print("eval start1")
         self.policy_value_net.eval()
         # 由于样本不足，导致单张局面做预测时的分布与平均分布相差很大，会出现无法预测的情况，所以不加 eval() 锁定bn为平均方差
         # 或者 设置 BN 的 track_running_stats=False ，不使用全局的方差，直接用每批的方差来标准化。
-        print("eval start")
-        with self._net_eval_lock:
-            print("eval start2")
-            with torch.no_grad(): 
-                log_act_probs, value = self.policy_value_net(state_batch_tensor)
-            # 还原成标准的概率
-            print("eval start3")
-            act_probs = np.exp(log_act_probs.data.cpu().numpy())
-            print("eval start4")
-            value = value.data.cpu().numpy()
+        print("eval start2")
+        with torch.no_grad(): 
+            log_act_probs, value = self.policy_value_net(state_batch_tensor)
+        # 还原成标准的概率
+        print("eval start3")
+        act_probs = np.exp(log_act_probs.data.cpu().numpy())
+        print("eval start4")
+        value = value.data.cpu().numpy()
         print("eval end")
 
         # if random.random()<0.0001:
@@ -156,7 +155,8 @@ class PolicyValueNet():
         """
         legal_positions = game.actions_to_positions(game.availables)
         current_state = game.current_state().reshape(1, -1, self.size, self.size)
-        act_probs, value = self.policy_value(current_state)
+        with self._net_eval_lock:
+            act_probs, value = self.policy_value(current_state)
         act_probs = act_probs.flatten()
 
         actions = game.positions_to_actions(legal_positions)
