@@ -127,7 +127,7 @@ class FiveChessTrain():
         """收集自我对抗数据用于训练"""       
         # 使用MCTS蒙特卡罗树搜索进行自我对抗
         logging.info("TRAIN Self Play starting ...")
-        agent = Agent(size, n_in_row)
+        agent = Agent(size, n_in_row, is_shown=0)
         # 创建使用策略价值网络来指导树搜索和评估叶节点的MCTS玩家
         mcts_player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout, is_selfplay=1)
         # 开始下棋

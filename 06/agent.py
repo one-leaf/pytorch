@@ -3,11 +3,12 @@ from game import FiveChess, FiveChessEnv
 
 # 游戏的AI封装
 class Agent(object):
-    def __init__(self, size, n_in_row):
+    def __init__(self, size, n_in_row, is_shown=1):
         self.size = size
         self.n_in_row = n_in_row
         self.game = FiveChess(size=self.size, n_in_row=self.n_in_row)
-        self.env = FiveChessEnv(self.game)
+        if is_shown:
+            self.env = FiveChessEnv(self.game)
         self.game.reset()
 
     # 使用 mcts 训练，重用搜索树，并保存数据
