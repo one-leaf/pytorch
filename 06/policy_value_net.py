@@ -130,10 +130,13 @@ class PolicyValueNet():
         # 或者 设置 BN 的 track_running_stats=False ，不使用全局的方差，直接用每批的方差来标准化。
         print("eval start")
         self._net_eval_lock.acquire()
+        print("eval start2")
         with torch.no_grad(): 
             log_act_probs, value = self.policy_value_net(state_batch_tensor)
         # 还原成标准的概率
+        print("eval start3")
         act_probs = np.exp(log_act_probs.data.cpu().numpy())
+        print("eval start4")
         value = value.data.cpu().numpy()
         self._net_eval_lock.release()
         print("eval end")
