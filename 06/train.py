@@ -9,6 +9,7 @@ import logging
 import numpy as np
 from collections import defaultdict, deque
 import torch
+from multiprocessing import Pool
 
 curr_dir = os.path.dirname(os.path.abspath(__file__))
 size = 15  # 棋盘大小
@@ -247,7 +248,11 @@ class FiveChessTrain():
                     self.policy_value_net.save_model(model_file)
                     # 收集自我对抗数据
                     logging.info("TRAIN Batch:{} starting, Size:{}, n_in_row:{}".format(step + 1, size, n_in_row))
-                    self.collect_selfplay_data(self.play_batch_size)
+                    pool = Pool(4)
+                    pool.map(self.collect_selfplay_data, [self.play_batch_size for _ in range(4)])
+                    pool.close()
+                    pool.join()
+                    # self.collect_selfplay_data(self.play_batch_size)
                     logging.info("TRAIN Batch:{} end, steps:{}".format(step + 1, self.episode_len))
                     step += 1
 
