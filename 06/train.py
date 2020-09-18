@@ -129,11 +129,13 @@ class FiveChessTrain():
     def collect_selfplay_data(self, lock):
         """收集自我对抗数据用于训练"""       
         # 使用MCTS蒙特卡罗树搜索进行自我对抗
+        logging.info("TRAIN Self Play starting ...")
         winner, play_data = self.agent.start_self_play(self.mcts_player, is_shown=0, temp=self.temp)
         play_data = list(play_data)[:]
         self.episode_len = len(play_data)
         # 把翻转棋盘数据加到数据集里
         play_data = self.get_equi_data(play_data)
+        logging.info("TRAIN Self Play end. length:%s saving ..." % self.episode_len)
 
         # 保存对抗数据到data_buffer
         for obj in play_data:
@@ -255,12 +257,10 @@ class FiveChessTrain():
                         p = Process(target=self.collect_selfplay_data, args=(lock,))
                         p_list.append(p)
                         p.start()
-                        logging.info("TRAIN Batch:{} starting, Size:{}, n_in_row:{}".format(step + 1, size, n_in_row))
+                        
 
                     for p in p_list:
                         p.join()   
-                        logging.info("TRAIN Batch:{} end, steps:{}".format(step + 1, self.episode_len))
-
                     step += 1
 
                     # self.collect_selfplay_data(self.play_batch_size)
