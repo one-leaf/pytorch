@@ -36,6 +36,7 @@ class Dataset(torch.utils.data.Dataset):
         self.file_list = deque(maxlen=buffer_size)        
         self.load_game_batch_num()
         self.load_game_files()
+        self._save_lock = Lock()
 
     def __len__(self):
         return self.game_batch_num
@@ -55,20 +56,23 @@ class Dataset(torch.utils.data.Dataset):
             self.file_list.append(filename)
 
     def save_game_batch_num(self):
-        with open(self.data_index_file, "w") as f:
-            f.write(str(self.curr_game_batch_num))
+        with self._save_lock:
+            with open(self.data_index_file, "w") as f:
+                f.write(str(self.curr_game_batch_num))
 
     def load_game_batch_num(self):
-        if os.path.exists(self.data_index_file):
-            self.curr_game_batch_num = int(open(self.data_index_file, 'r').read().strip())
+        with self._save_lock:
+            if os.path.exists(self.data_index_file):
+                self.curr_game_batch_num = int(open(self.data_index_file, 'r').read().strip())
 
     def save(self, obj):
-        filename = "%s.pkl" % self.curr_game_batch_num
-        savefile = os.path.join(self.data_dir, filename)
-        pickle.dump(obj, open(savefile, "wb"))
-        self.curr_game_batch_num += 1
-        self.save_game_batch_num()
-        self.file_list.append(savefile)
+        with self._save_lock:
+            filename = "%s.pkl" % self.curr_game_batch_num
+            savefile = os.path.join(self.data_dir, filename)
+            pickle.dump(obj, open(savefile, "wb"))
+            self.curr_game_batch_num += 1
+            self.save_game_batch_num()
+            self.file_list.append(savefile)
 
     def curr_size(self):
         return len(self.file_list)
@@ -123,7 +127,7 @@ class FiveChessTrain():
                 extend_data.append((equi_state, equi_mcts_prob.flatten(), winner))
         return extend_data
 
-    def collect_selfplay_data(self, lock):
+    def collect_selfplay_data(self):
         """收集自我对抗数据用于训练"""       
         # 使用MCTS蒙特卡罗树搜索进行自我对抗
         logging.info("TRAIN Self Play starting ...")
@@ -139,9 +143,8 @@ class FiveChessTrain():
         logging.info("TRAIN Self Play end. length:%s saving ..." % episode_len)
 
         # 保存对抗数据到data_buffer
-        with lock:
-            for obj in play_data:
-                self.dataset.save(obj)
+        for obj in play_data:
+            self.dataset.save(obj)
         agent.game.print(play_data[-1][0])                   
 
     def policy_update(self, sample_data, epochs=1):
@@ -223,8 +226,7 @@ class FiveChessTrain():
             step = 0
             while self.dataset.curr_size() < self.batch_size*self.epochs:
                 logging.info("TRAIN Batch:{} starting, Size:{}, n_in_row:{}".format(step + 1, size, n_in_row))
-                lock = Lock()
-                self.collect_selfplay_data(lock)
+                self.collect_selfplay_data()
                 logging.info("TRAIN Batch:{} end".format(step + 1,))
                 step += 1
 
@@ -253,9 +255,8 @@ class FiveChessTrain():
                     # 收集自我对抗数据
 
                     p_list=[]
-                    lock = Lock()
                     for _ in range(self.play_batch_size):
-                        p = Thread(target=self.collect_selfplay_data, args=(lock,))
+                        p = Thread(target=self.collect_selfplay_data, args=())
                         p_list.append(p)
                         p.start()   
 
