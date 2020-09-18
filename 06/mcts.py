@@ -168,8 +168,11 @@ class MCTS(object):
             action, node = node.select(self._c_puct)
             # 执行action走子
             state.step(action)
+            print(action)
         # 使用训练好的模型策略评估此叶子节点，返回[(action,概率)]list 以及当前玩家的后续走子胜负
+        print("_policy")
         action_probs, leaf_value = self._policy(state)
+        print("leaf_value",leaf_value)
 
         # 检查游戏是否有赢家
         end, winner = state.game_end()
