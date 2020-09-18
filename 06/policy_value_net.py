@@ -6,6 +6,8 @@ from torchvision import transforms
 import numpy as np
 import os
 import random
+import threading
+
 # 网络模型
 
 # 定义残差块，固定住BN的方差和均值
@@ -88,6 +90,7 @@ class PolicyValueNet():
         self.device=device
         self.l2_const = l2_const  
         self.policy_value_net = Net(size).to(device)
+        self._net_eval_lock = threading.Lock()
 
         self.print_netwark()
 
@@ -117,24 +120,23 @@ class PolicyValueNet():
         input: a batch of states
         output: a batch of action probabilities and state values
         """
-        print("1")
         if torch.is_tensor(state_batch):
             state_batch_tensor = state_batch.to(self.device)
         else:
             state_batch_tensor = torch.FloatTensor(state_batch).to(self.device)
-        print("2")
+            
         self.policy_value_net.eval()
         # 由于样本不足，导致单张局面做预测时的分布与平均分布相差很大，会出现无法预测的情况，所以不加 eval() 锁定bn为平均方差
         # 或者 设置 BN 的 track_running_stats=False ，不使用全局的方差，直接用每批的方差来标准化。
-        print("3")
+
+        self._net_eval_lock.acquire()
         with torch.no_grad(): 
             log_act_probs, value = self.policy_value_net(state_batch_tensor)
-        print("4")
+        self._net_eval_lock.release()
 
         # 还原成标准的概率
         act_probs = np.exp(log_act_probs.data.cpu().numpy())
         value = value.data.cpu().numpy()
-        print("5")
 
         # if random.random()<0.0001:
         #     idx = np.argmax(act_probs)
