@@ -34,9 +34,9 @@ class Dataset(torch.utils.data.Dataset):
         self.curr_game_batch_num = 0
         self.data_index_file = os.path.join(data_dir, 'index.txt')
         self.file_list = deque(maxlen=buffer_size)        
+        self._save_lock = Lock()
         self.load_game_batch_num()
         self.load_game_files()
-        self._save_lock = Lock()
 
     def __len__(self):
         return self.game_batch_num
