@@ -251,7 +251,6 @@ class MCTS(object):
             Return: 所有action及对应概率
         """
         for n in range(self._n_playout):
-            print(n)
             state_copy = copy.deepcopy(state)
             self._playout_network(state_copy)
 
