@@ -78,8 +78,7 @@ class FiveChessTrain():
         self.policy_evaluate_size = 10  # 策略评估胜率时的模拟对局次数
         self.game_batch_num = 10000  # selfplay对战次数
         self.batch_size = 512  # data_buffer中对战次数超过n次后开始启动模型训练
-        self.check_freq = 100  # 每对战n次检查一次当前模型vs旧模型胜率
-        self.agent = Agent(size, n_in_row)
+        self.check_freq = 100  # 每对战n次检查一次当前模型vs旧模型胜率        
 
         # training params
         self.learn_rate = 1e-5
@@ -101,8 +100,6 @@ class FiveChessTrain():
         else:
             # 使用一个新的的策略价值网络
             self.policy_value_net = PolicyValueNet(size)
-        # 创建使用策略价值网络来指导树搜索和评估叶节点的MCTS玩家
-        self.mcts_player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout, is_selfplay=1)
 
     def get_equi_data(self, play_data):
         """
@@ -130,20 +127,23 @@ class FiveChessTrain():
         """收集自我对抗数据用于训练"""       
         # 使用MCTS蒙特卡罗树搜索进行自我对抗
         logging.info("TRAIN Self Play starting ...")
-        winner, play_data = self.agent.start_self_play(self.mcts_player, is_shown=0, temp=self.temp)
+        agent = Agent(size, n_in_row)
+        # 创建使用策略价值网络来指导树搜索和评估叶节点的MCTS玩家
+        mcts_player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout, is_selfplay=1)
+        # 开始下棋
+        winner, play_data = agent.start_self_play(mcts_player, is_shown=0, temp=self.temp)
         play_data = list(play_data)[:]
-        self.episode_len = len(play_data)
+        episode_len = len(play_data)
         # 把翻转棋盘数据加到数据集里
         play_data = self.get_equi_data(play_data)
-        logging.info("TRAIN Self Play end. length:%s saving ..." % self.episode_len)
+        logging.info("TRAIN Self Play end. length:%s saving ..." % episode_len)
 
         # 保存对抗数据到data_buffer
         for obj in play_data:
             lock.acquire()
             self.dataset.save(obj)
             lock.release()
-
-        self.agent.game.print(play_data[-1][0])                   
+        agent.game.print(play_data[-1][0])                   
 
     def policy_update(self, sample_data, epochs=1):
         """更新策略价值网络policy-value"""
@@ -223,8 +223,9 @@ class FiveChessTrain():
             step = 0
             while self.dataset.curr_size() < self.batch_size*self.epochs:
                 logging.info("TRAIN Batch:{} starting, Size:{}, n_in_row:{}".format(step + 1, size, n_in_row))
-                self.collect_selfplay_data(self.play_batch_size)
-                logging.info("TRAIN Batch:{} end, steps:{}".format(step + 1, self.episode_len))
+                lock = Lock()
+                self.collect_selfplay_data(lock)
+                logging.info("TRAIN Batch:{} end".format(step + 1,))
                 step += 1
 
             for i, data in enumerate(training_loader):  # 计划训练批次
@@ -256,8 +257,7 @@ class FiveChessTrain():
                     for _ in range(self.play_batch_size):
                         p = Process(target=self.collect_selfplay_data, args=(lock,))
                         p_list.append(p)
-                        p.start()
-                        
+                        p.start()   
 
                     for p in p_list:
                         p.join()   
