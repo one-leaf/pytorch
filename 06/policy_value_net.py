@@ -150,8 +150,8 @@ class PolicyValueNet():
         """
         legal_positions = game.actions_to_positions(game.availables)
         current_state = game.current_state().reshape(1, -1, self.size, self.size)
-        with self._net_eval_lock:
-            act_probs, value = self.policy_value(current_state)
+        # with self._net_eval_lock:
+        act_probs, value = self.policy_value(current_state)
         act_probs = act_probs.flatten()
 
         actions = game.positions_to_actions(legal_positions)
