@@ -6,7 +6,7 @@ from torchvision import transforms
 import numpy as np
 import os
 import random
-import threading
+from multiprocessing import Lock
 
 # 网络模型
 
@@ -90,7 +90,7 @@ class PolicyValueNet():
         self.device=device
         self.l2_const = l2_const  
         self.policy_value_net = Net(size).to(device)
-        self._net_eval_lock = threading.Lock()
+        self._net_eval_lock = Lock()
 
         self.print_netwark()
 
@@ -129,16 +129,15 @@ class PolicyValueNet():
         # 由于样本不足，导致单张局面做预测时的分布与平均分布相差很大，会出现无法预测的情况，所以不加 eval() 锁定bn为平均方差
         # 或者 设置 BN 的 track_running_stats=False ，不使用全局的方差，直接用每批的方差来标准化。
         print("eval start")
-        self._net_eval_lock.acquire()
-        print("eval start2")
-        with torch.no_grad(): 
-            log_act_probs, value = self.policy_value_net(state_batch_tensor)
-        # 还原成标准的概率
-        print("eval start3")
-        act_probs = np.exp(log_act_probs.data.cpu().numpy())
-        print("eval start4")
-        value = value.data.cpu().numpy()
-        self._net_eval_lock.release()
+        with self._net_eval_lock:
+            print("eval start2")
+            with torch.no_grad(): 
+                log_act_probs, value = self.policy_value_net(state_batch_tensor)
+            # 还原成标准的概率
+            print("eval start3")
+            act_probs = np.exp(log_act_probs.data.cpu().numpy())
+            print("eval start4")
+            value = value.data.cpu().numpy()
         print("eval end")
 
         # if random.random()<0.0001:
