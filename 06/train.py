@@ -1,3 +1,4 @@
+from torch import sqrt
 from policy_value_net import PolicyValueNet  
 from mcts import MCTSPurePlayer, MCTSPlayer
 from agent import Agent
@@ -242,7 +243,7 @@ class FiveChessTrain():
                             self.pure_mcts_playout_num += 1000
                             self.best_win_ratio = 0.0
 
-                if (i+1) % (4//self.epochs) == 0:
+                if (i+1) % (int(self.dataset.curr_size() ** 0.1)) == 0:
                     self.policy_value_net.save_model(model_file)
                     # 收集自我对抗数据
                     logging.info("TRAIN Batch:{} starting, Size:{}, n_in_row:{}".format(step + 1, size, n_in_row))
