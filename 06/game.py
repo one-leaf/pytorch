@@ -188,27 +188,29 @@ class FiveChess(object):
             state = state*0.5+0.5
             state1 = state[0:3].sum(0)
             state2 = state[3:6].sum(0)
-            for x in range(self.size):
-                line=""
-                for y in range(self.size):
+            for y in range(self.size-1, -1, -1):
+                line="%s "%(y%10)
+                for x in range(self.size):
                     char = " "
                     if state1[x][y]==1:
                         char = "X"
                     if state2[x][y]==1:
                         char = "O"
-                    line += char
+                    line += char+" "
                 print(line)
+            print("  "+str.join(" ",[str(i%10) for i in range(self.size)]))
         else:
-            for x in range(self.size):
-                line=""
-                for y in range(self.size):
+            for y in range(self.size-1, -1, -1):
+                line="%s "%(y%10)
+                for x in range(self.size):
                     char = " "
                     if self.chessboard[x][y]==1:
                         char = "X"
                     if self.chessboard[x][y]==-1:
                         char = "O"
-                    line += char
+                    line += char+" "
                 print(line)
+            print("  "+str.join(" ",[str(i%10) for i in range(self.size)]))
         print("currr_player:", self.current_player, "is_first:", self.step_count % 2 == 0, "last_action:",self.players_actions[0][-1],self.players_actions[1][-1])
 
     def game_end(self):
@@ -348,4 +350,6 @@ if __name__ == "__main__":
             step_count = fiveChess.step_count
             print(f'win_user: {win_user}, curr_user: {curr_user} reward: {reward} step_count: {step_count}')
 
+        if env.fiveChess.step_count>2:
+            env.fiveChess.print()
     env.close()            

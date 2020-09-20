@@ -143,7 +143,7 @@ class FiveChessTrain():
         # 保存对抗数据到data_buffer
         for obj in play_data:
             self.dataset.save(obj)
-        agent.game.print(play_data[-1][0])                   
+        agent.game.print()                   
 
     def policy_update(self, sample_data, epochs=1):
         """更新策略价值网络policy-value"""
