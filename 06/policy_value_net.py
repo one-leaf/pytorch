@@ -7,9 +7,29 @@ import numpy as np
 import os
 import random
 from threading import Lock
+from collections import OrderedDict
+
+class Cache(OrderedDict):
+    'Limit size, evicting the least recently looked-up key when full'
+
+    def __init__(self, maxsize=128, *args, **kwds):
+        self.maxsize = maxsize
+        super().__init__(*args, **kwds)
+
+    def __getitem__(self, key):
+        value = super().__getitem__(key)
+        self.move_to_end(key)
+        return value
+
+    def __setitem__(self, key, value):
+        if key in self:
+            self.move_to_end(key)
+        super().__setitem__(key, value)
+        if len(self) > self.maxsize:
+            oldest = next(iter(self))
+            del self[oldest]
 
 # 网络模型
-
 # 定义残差块，固定住BN的方差和均值
 class ResidualBlock(nn.Module):
     #实现子module: Residual    Block
@@ -90,12 +110,12 @@ class PolicyValueNet():
         self.device=device
         self.l2_const = l2_const  
         self.policy_value_net = Net(size).to(device)
-        self._net_eval_lock = Lock()
 
+        self.cache = Cache(maxsize=1000)
         self.print_netwark()
 
-        self.optimizer = optim.Adam(self.policy_value_net.parameters(), weight_decay=self.l2_const)
-        
+        self.optimizer = optim.Adam(self.policy_value_net.parameters(), weight_decay=self.l2_const)       
+
         if model_file and os.path.exists(model_file):
             print("Loading model", model_file)
             net_sd = torch.load(model_file, map_location=self.device)
@@ -149,16 +169,37 @@ class PolicyValueNet():
         action and the score of the game state
         """
         legal_positions = game.actions_to_positions(game.availables)
-        current_state = game.current_state().reshape(1, -1, self.size, self.size)
-        # with self._net_eval_lock:
-        act_probs, value = self.policy_value(current_state)
-        act_probs = act_probs.flatten()
+        key = "".join([str(p) for p in legal_positions])
+        if key in self.cache:
+            print("find key")
+            return self.cache[key]
+        print("current_and_next_state start")
+        square_state, availables = game.current_and_next_state()
+        print("current_and_next_state end")
+        act_probs_list, value_list = self.policy_value(square_state)
+        print("current_and_next_state network end")
+        for i, av in enumerate(availables):
+            _legal_positions = game.actions_to_positions(av)
+            _key = "".join([str(p) for p in _legal_positions])
+            act_probs = act_probs_list[i]
+            value = value_list[i]
+            actions = game.positions_to_actions(_legal_positions)
+            act_probs = zip(actions, act_probs[_legal_positions])
+            value = value[0]
+            self.cache[_key] = (act_probs, value)
+        print("current_and_next_state add cache end", i)
 
-        actions = game.positions_to_actions(legal_positions)
+        return self.cache[key]
+
+        # current_state = game.current_state().reshape(1, -1, self.size, self.size)
+        # act_probs, value = self.policy_value(current_state)
+        # act_probs = act_probs.flatten()
+
+        # actions = game.positions_to_actions(legal_positions)
         
-        act_probs = zip(actions, act_probs[legal_positions])
-        value = value[0,0]
-        return act_probs, value
+        # act_probs = zip(actions, act_probs[legal_positions])
+        # value = value[0,0]
+        # return act_probs, value
 
     def train_step(self, state_batch, mcts_probs, winner_batch, lr):
         """perform a training step"""

@@ -3,6 +3,8 @@ import random
 from gym.envs.classic_control import rendering
 import time
 import numpy as np
+import copy
+
 class FiveChess(object):
     def __init__(self, size=15, n_in_row=5):
         # 棋盘大小
@@ -179,8 +181,21 @@ class FiveChess(object):
 
         # 归一化数据
         square_state = (square_state - 0.5) / 0.5
-
         return square_state
+
+    # 获得当前棋和下一次的尝试的模拟走法截图
+    def current_and_next_state(self):
+        availables = []
+        batchsize = len(self.availables)+1
+        square_state = np.zeros((batchsize, 7, self.size, self.size))
+        square_state[0] = self.current_state()
+        availables.append(self.availables)
+        for i, ac in enumerate(self.availables):
+            game = copy.deepcopy(self)
+            game.step(ac)
+            square_state[i+1] = game.current_state()
+            availables.append(game.availables)
+        return square_state, availables
 
     # 打印状态
     def print(self, state=None):
