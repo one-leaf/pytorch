@@ -182,36 +182,20 @@ class FiveChess(object):
         return square_state
 
     # 打印状态
-    def print(self, state=None):
-        if not state is None:
-            state = state*0.5+0.5
-            state1 = state[0:3].sum(0)
-            state2 = state[3:6].sum(0)
-            for y in range(self.size-1, -1, -1):
-                line="%s "%(y%10)
-                for x in range(self.size):
-                    char = " "
-                    if state1[x][y]==1:
-                        char = "X"
-                    if state2[x][y]==1:
-                        char = "O"
-                    line += char+" "
-                print(line)
-            print("  "+str.join(" ",[str(i%10) for i in range(self.size)]))
-        else:
-            for y in range(self.size-1, -1, -1):
-                line="%s "%(y%10)
-                for x in range(self.size):
-                    char = " "
-                    if self.chessboard[x][y]==1:
-                        char = "X"
-                    if self.chessboard[x][y]==-1:
-                        char = "O"
-                    line += char+" "
-                print(line)
-            print("  "+str.join(" ",[str(i%10) for i in range(self.size)]))
+    def print(self):
+        for y in range(self.size-1, -1, -1):
+            line="%s "%(y%10)
+            for x in range(self.size):
+                char = " "
+                if self.chessboard[x][y]==1:
+                    char = "X"
+                if self.chessboard[x][y]==-1:
+                    char = "O"
+                line += char+" "
+            print(line)
+        print("  "+str.join(" ",[str(i%10) for i in range(self.size)]))
         print("win:",self.win_user, "curr:", self.current_player, "is_first:", self.step_count % 2 == 0)
-        print("actions", self.actions)
+        print("actions:", self.actions)
 
     def game_end(self):
         return self.terminal, self.win_user
