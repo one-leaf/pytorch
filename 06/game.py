@@ -184,12 +184,12 @@ class FiveChess(object):
         return square_state
 
     # 获得当前棋和下一次的尝试的模拟走法截图
-    # 一次最多取16笔进行返回
+    # 一次最多取8笔进行返回
     def current_and_next_state(self):
         available_list = []
         max_len = len(self.availables)
-        if max_len > 15:
-            max_len = 15
+        if max_len > 7:
+            max_len = 7
         square_state = np.zeros((max_len+1, 7, self.size, self.size))
         square_state[0] = self.current_state()
         available_list.append(self.availables)
