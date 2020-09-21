@@ -180,25 +180,6 @@ class FiveChess(object):
         square_state = (square_state - 0.5) / 0.5
         return square_state
 
-    # 获得当前棋和下一次的尝试的模拟走法截图
-    # 一次最多取8笔进行返回
-    def current_and_next_state(self):
-        available_list = []
-        actions_list = []
-        max_len = len(self.availables)
-        if max_len > 7:
-            max_len = 7
-        square_state = np.zeros((max_len+1, 7, self.size, self.size))
-        square_state[0] = self.current_state()
-        available_list.append(self.availables)
-        for i, ac in enumerate(self.availables[:max_len]):
-            game = copy.deepcopy(self)
-            game.step(ac)
-            square_state[i+1] = game.current_state()
-            available_list.append(game.availables)
-            actions_list.append(game.actions)
-        return square_state, available_list, actions_list
-
     # 打印状态
     def print(self, state=None):
         if not state is None:

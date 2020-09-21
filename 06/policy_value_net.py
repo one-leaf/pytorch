@@ -168,21 +168,6 @@ class PolicyValueNet():
             if key in self.cache:
                 return self.cache[key]
 
-        # square_state, availables, actions = game.current_and_next_state()
-        # act_probs_list, value_list = self.policy_value(square_state)
-        # for i, act in enumerate(availables):
-        #     _legal_positions = game.actions_to_positions(act)
-        #     _key = ",".join([str(x*game.size+y) for x,y in actions[i]])
-        #     act_probs = act_probs_list[i]
-        #     act_probs = act_probs.flatten()
-        #     value = value_list[i]
-        #     # actions = game.positions_to_actions(_legal_positions)
-        #     # 这里zip需要转为list放入cache，否则后续会返回为[]
-        #     act_probs_zip = list(zip(act, act_probs[_legal_positions]))
-        #     value = value[0]
-        #     self.cache[_key] = (act_probs_zip, value)       
-        # return self.cache[key]
-
         legal_positions = game.actions_to_positions(game.availables)
         current_state = game.current_state().reshape(1, -1, self.size, self.size)
         act_probs, value = self.policy_value(current_state)
