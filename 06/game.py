@@ -78,10 +78,10 @@ class FiveChess(object):
             return True, -1
 
         # 找到最后一个子
-        lastplayer = self.players[0] if self.current_player==self.players[1] else self.players[1]
-        last_x, last_y = self.players_actions[lastplayer][-1]
+        last_x, last_y = self.actions[-1]
         n = self.n_in_row
         c = self.chessboard[last_x][last_y]
+        lastplayer = self.players[0] if self.current_player == self.players[1] else self.players[1]
 
         hassame=1
         for l in range(1, n):
