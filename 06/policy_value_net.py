@@ -165,19 +165,19 @@ class PolicyValueNet():
         key = "".join([str(p) for p in legal_positions])
         if key in self.cache:
             return self.cache[key]
+
         square_state, availables = game.current_and_next_state()
         act_probs_list, value_list = self.policy_value(square_state)
-        for i, av in enumerate(availables):
-            _legal_positions = game.actions_to_positions(av)
+        for i, act in enumerate(availables):
+            _legal_positions = game.actions_to_positions(act)
             _key = "".join([str(p) for p in _legal_positions])
             act_probs = act_probs_list[i]
+            act_probs = act_probs.flatten()
             value = value_list[i]
-            actions = game.positions_to_actions(_legal_positions)
-            act_probs = zip(actions, act_probs[_legal_positions])
+            # actions = game.positions_to_actions(_legal_positions)
+            act_probs_zip = list(zip(act, act_probs[_legal_positions]))
             value = value[0]
-            self.cache[_key] = (act_probs, value)
-        if key not in self.cache:
-            raise "NO FIND KEY"            
+            self.cache[_key] = (act_probs_zip, value)       
         return self.cache[key]
 
         # current_state = game.current_state().reshape(1, -1, self.size, self.size)
