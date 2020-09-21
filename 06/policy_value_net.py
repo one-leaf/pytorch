@@ -175,6 +175,7 @@ class PolicyValueNet():
             act_probs = act_probs.flatten()
             value = value_list[i]
             # actions = game.positions_to_actions(_legal_positions)
+            # 这里zip需要转为list放入cache，否则后续会返回为[]
             act_probs_zip = list(zip(act, act_probs[_legal_positions]))
             value = value[0]
             self.cache[_key] = (act_probs_zip, value)       
