@@ -10,16 +10,9 @@ from threading import Lock
 from collections import OrderedDict
 
 class Cache(OrderedDict):
-    'Limit size, evicting the least recently looked-up key when full'
-
     def __init__(self, maxsize=128, *args, **kwds):
         self.maxsize = maxsize
         super().__init__(*args, **kwds)
-
-    def __getitem__(self, key):
-        value = super().__getitem__(key)
-        self.move_to_end(key)
-        return value
 
     def __setitem__(self, key, value):
         if key in self:
@@ -171,14 +164,9 @@ class PolicyValueNet():
         legal_positions = game.actions_to_positions(game.availables)
         key = "".join([str(p) for p in legal_positions])
         if key in self.cache:
-            print("find key")
             return self.cache[key]
-        print(game.availables)
-        print("current_and_next_state start")
         square_state, availables = game.current_and_next_state()
-        print("current_and_next_state end")
         act_probs_list, value_list = self.policy_value(square_state)
-        print("current_and_next_state network end")
         for i, av in enumerate(availables):
             _legal_positions = game.actions_to_positions(av)
             _key = "".join([str(p) for p in _legal_positions])
@@ -188,7 +176,6 @@ class PolicyValueNet():
             act_probs = zip(actions, act_probs[_legal_positions])
             value = value[0]
             self.cache[_key] = (act_probs, value)
-        print("current_and_next_state add cache end", i)
         return self.cache[key]
 
         # current_state = game.current_state().reshape(1, -1, self.size, self.size)
