@@ -36,15 +36,6 @@ class TreeNode(object):
             Params：c_puct = child 搜索深度
             Return: tuple (action, next_node)
         """
-
-        # 当探索第二步以上时，直接选择靠前的30%棋子，增加探索深度，加了一个先验概率，这个可能会导致后期不完美
-        if not self._parent is None:
-            # 获得已经下的步数
-            if len(self._cache)>50:
-                size =  int(len(self._cache)*0.3)           
-                items = [(act, self._children[act]) for act in self._cache[:size]]
-                return max(items, key=lambda act_node: act_node[1].get_value(c_puct))
-
         return max(self._children.items(), key=lambda act_node: act_node[1].get_value(c_puct))
 
     # 计算和返回这个节点的值
