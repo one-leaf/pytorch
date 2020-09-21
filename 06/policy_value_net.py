@@ -111,7 +111,7 @@ class PolicyValueNet():
         self.l2_const = l2_const  
         self.policy_value_net = Net(size).to(device)
 
-        self.cache = Cache(maxsize=1000)
+        self.cache = Cache(maxsize=10000)
         self.print_netwark()
 
         self.optimizer = optim.Adam(self.policy_value_net.parameters(), weight_decay=self.l2_const)       
@@ -173,6 +173,7 @@ class PolicyValueNet():
         if key in self.cache:
             print("find key")
             return self.cache[key]
+        print(game.availables)
         print("current_and_next_state start")
         square_state, availables = game.current_and_next_state()
         print("current_and_next_state end")
@@ -188,7 +189,6 @@ class PolicyValueNet():
             value = value[0]
             self.cache[_key] = (act_probs, value)
         print("current_and_next_state add cache end", i)
-
         return self.cache[key]
 
         # current_state = game.current_state().reshape(1, -1, self.size, self.size)
