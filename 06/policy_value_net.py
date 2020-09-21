@@ -104,7 +104,7 @@ class PolicyValueNet():
         self.l2_const = l2_const  
         self.policy_value_net = Net(size).to(device)
 
-        self.cache = Cache(maxsize=10000)
+        self.cache = Cache(maxsize=100000)
         self.print_netwark()
 
         self.optimizer = optim.Adam(self.policy_value_net.parameters(), weight_decay=self.l2_const)       
