@@ -162,15 +162,16 @@ class FiveChess(object):
         # 前面6层是自己和对手的棋包括最后三步的棋
         for i, act in enumerate(self.actions[::-1]):
             if i%2==0: 
-                idx=3
+                idx=[3,4,5]
             else:
-                idx=0
-            if i==0: idx = 5
-            if i==1: idx = 2
-            if i==2: idx = 4
-            if i==3: idx = 1
+                idx=[0,1,2]
+            if i==0: idx = [5]           
+            if i==1: idx = [2]
+            if i==2: idx = [4,5]
+            if i==3: idx = [1,2]
             x,y = act
-            square_state[idx,self.size-y-1,x] = 1.0
+            for j in idx:
+                square_state[j,self.size-y-1,x] = 1.0
 
         # 第四层为如果当前用户是先手则为1
         if self.step_count % 2 == 0:
