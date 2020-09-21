@@ -251,16 +251,18 @@ class FiveChessTrain():
                 if (i+1) % (int(self.dataset.curr_size() ** 0.3)) == 0:
                     self.policy_value_net.save_model(model_file)
                     # 收集自我对抗数据
-                    #for _ in range(self.play_batch_size):
-                    #    self.collect_selfplay_data()
-                    p_list=[]
                     for _ in range(self.play_batch_size):
-                        p = Thread(target=self.collect_selfplay_data, args=())
-                        p_list.append(p)
-                        p.start()   
+                        self.collect_selfplay_data()
 
-                    for p in p_list:
-                        p.join()   
+                    # docker 下不用多线程的速度比用多线程的速度快
+                    # p_list=[]
+                    # for _ in range(self.play_batch_size):
+                    #     p = Thread(target=self.collect_selfplay_data, args=())
+                    #     p_list.append(p)
+                    #     p.start()   
+
+                    # for p in p_list:
+                    #     p.join()   
                     step += 1
 
                     # self.collect_selfplay_data(self.play_batch_size)
