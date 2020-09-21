@@ -255,14 +255,11 @@ class MCTS(object):
             state_copy = copy.deepcopy(state)
             self._playout_network(state_copy)
 
-            # 为了提高学习效率如果有走子的次数大于100，直接放弃探索,返回。
+            # 为了提高学习效率如果有走子的方差大于1，直接放弃探索,返回。
             if n >= len(state.availables):
-                _need_end = False
-                for node in self._root._children.values():
-                    if node._n_visits > 200:
-                        _need_end = True
-                        break
-                if _need_end: break
+                _n_visits =[node._n_visits for node in self._root._children.values()]
+                if np.var(_n_visits)>100:
+                    break
         # 分解出child中的action和最优选访问次数
         act_visits = [(act, node._n_visits) for act, node in self._root._children.items() if node._n_visits!=0]
         acts, visits = zip(*act_visits)
