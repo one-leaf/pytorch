@@ -27,7 +27,7 @@ class FiveChess(object):
         self.availables = sorted(availables, key=lambda x : (x[0]-self.size//2)**2+(x[1]-self.size//2)**2)
         self.terminal = False
         self.win_user = -1
-        self.players_actions=[[],[]]
+        self.actions=[]
         return self.chessboard
  
     # 检查当前action是否有效
@@ -132,14 +132,14 @@ class FiveChess(object):
             print(action)
             raise "action error"  
         self.availables.remove(action)
+        self.actions.append(action)
+        self.step_count +=1
 
         #棋子
         color = self.colors[self.current_player]
         self.chessboard[action[0]][action[1]] = color
-        self.players_actions[self.current_player].append(action)
 
         #这一步完成
-        self.step_count +=1
         self.current_player = self.players[0] if self.current_player==self.players[1] else self.players[1]
 
         #胜负判定
@@ -160,20 +160,17 @@ class FiveChess(object):
     def current_state(self):
         square_state = np.zeros((7, self.size, self.size))
         # 前面6层是自己和对手的棋包括最后三步的棋
-        for x in range(self.size):
-            for y in range(self.size):
-                if self.chessboard[x][y]!=0:
-                    # 检测这个棋是否在最后三步
-                    player = self.players[self.colors.index(self.chessboard[x][y])]
-                    action = (x,y)
-                    last_actions = self.players_actions[player][-3:]
-                    if player == self.current_player:
-                        idx = 0 
-                    else:
-                        idx = 3    
-                    if action in last_actions:
-                        idx +=  last_actions.index(action)
-                    square_state[idx,self.size-y-1,x] = 1.0     
+        for i, act in enumerate(self.actions[::-1]):
+            if i%2==0: 
+                idx=3
+            else:
+                idx=0
+            if i==0: idx = 5
+            if i==1: idx = 2
+            if i==2: idx = 4
+            if i==3: idx = 1
+            x,y = act
+            square_state[idx,self.size-y-1,x] = 1.0
 
         # 第四层为如果当前用户是先手则为1
         if self.step_count % 2 == 0:

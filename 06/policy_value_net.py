@@ -161,7 +161,7 @@ class PolicyValueNet():
         output: a list of (action, probability) tuples for each available
         action and the score of the game state
         """
-        print(game.players_actions)
+        print(game.actions)
         legal_positions = game.actions_to_positions(game.availables)
         key = "".join([str(p) for p in legal_positions])
         if key in self.cache:
