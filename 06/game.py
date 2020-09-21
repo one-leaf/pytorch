@@ -228,7 +228,7 @@ class FiveChess(object):
                     line += char+" "
                 print(line)
             print("  "+str.join(" ",[str(i%10) for i in range(self.size)]))
-        print("win:",self.win_user, "currr_player:", self.current_player, "is_first:", self.step_count % 2 == 0)
+        print("win:",self.win_user, "curr:", self.current_player, "is_first:", self.step_count % 2 == 0)
         print("actions", self.actions)
 
     def game_end(self):
