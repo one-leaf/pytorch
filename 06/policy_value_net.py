@@ -104,7 +104,7 @@ class PolicyValueNet():
         self.l2_const = l2_const  
         self.policy_value_net = Net(size).to(device)
 
-        self.cache = Cache(maxsize=100000)
+        self.cache = Cache(maxsize=10000)
         self.print_netwark()
 
         self.optimizer = optim.Adam(self.policy_value_net.parameters(), weight_decay=self.l2_const)       
@@ -162,35 +162,36 @@ class PolicyValueNet():
         action and the score of the game state
         """
         print(game.actions)
-        legal_positions = game.actions_to_positions(game.availables)
-        key = "".join([str(p) for p in legal_positions])
+        key = ",".join([str(x*game.size+y) for x,y in game.actions])
         if key in self.cache:
             return self.cache[key]
 
-        square_state, availables = game.current_and_next_state()
-        act_probs_list, value_list = self.policy_value(square_state)
-        for i, act in enumerate(availables):
-            _legal_positions = game.actions_to_positions(act)
-            _key = "".join([str(p) for p in _legal_positions])
-            act_probs = act_probs_list[i]
-            act_probs = act_probs.flatten()
-            value = value_list[i]
-            # actions = game.positions_to_actions(_legal_positions)
-            # 这里zip需要转为list放入cache，否则后续会返回为[]
-            act_probs_zip = list(zip(act, act_probs[_legal_positions]))
-            value = value[0]
-            self.cache[_key] = (act_probs_zip, value)       
-        return self.cache[key]
+        # square_state, availables, actions = game.current_and_next_state()
+        # act_probs_list, value_list = self.policy_value(square_state)
+        # for i, act in enumerate(availables):
+        #     _legal_positions = game.actions_to_positions(act)
+        #     _key = ",".join([str(x*game.size+y) for x,y in actions[i]])
+        #     act_probs = act_probs_list[i]
+        #     act_probs = act_probs.flatten()
+        #     value = value_list[i]
+        #     # actions = game.positions_to_actions(_legal_positions)
+        #     # 这里zip需要转为list放入cache，否则后续会返回为[]
+        #     act_probs_zip = list(zip(act, act_probs[_legal_positions]))
+        #     value = value[0]
+        #     self.cache[_key] = (act_probs_zip, value)       
+        # return self.cache[key]
 
-        # current_state = game.current_state().reshape(1, -1, self.size, self.size)
-        # act_probs, value = self.policy_value(current_state)
-        # act_probs = act_probs.flatten()
-
-        # actions = game.positions_to_actions(legal_positions)
-        
-        # act_probs = zip(actions, act_probs[legal_positions])
-        # value = value[0,0]
-        # return act_probs, value
+        legal_positions = game.actions_to_positions(game.availables)
+        current_state = game.current_state().reshape(1, -1, self.size, self.size)
+        act_probs, value = self.policy_value(current_state)
+        act_probs = act_probs.flatten()
+        actions = game.positions_to_actions(legal_positions)
+        act_probs = zip(actions, act_probs[legal_positions])
+        value = value[0,0]
+        # 只缓存前3步棋
+        if len(game.actions)<4:
+            self.cache[key] = (list(act_probs), value) 
+        return act_probs, value
 
     def train_step(self, state_batch, mcts_probs, winner_batch, lr):
         """perform a training step"""
