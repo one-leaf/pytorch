@@ -161,8 +161,8 @@ class PolicyValueNet():
         output: a list of (action, probability) tuples for each available
         action and the score of the game state
         """
-        # 只缓存前3步棋
-        max_cache_step = 3
+        # 只缓存前6步棋
+        max_cache_step = 6
         if len(game.actions)<=max_cache_step:
             key = ",".join([str(x*game.size+y) for x,y in game.actions])
             if key in self.cache:
