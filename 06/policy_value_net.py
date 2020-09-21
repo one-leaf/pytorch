@@ -162,9 +162,13 @@ class PolicyValueNet():
         action and the score of the game state
         """
         print(game.actions)
-        key = ",".join([str(x*game.size+y) for x,y in game.actions])
-        if key in self.cache:
-            return self.cache[key]
+
+        # 只缓存前3步棋
+        max_cache_step = 3
+        if len(game.actions)<=max_cache_step:
+            key = ",".join([str(x*game.size+y) for x,y in game.actions])
+            if key in self.cache:
+                return self.cache[key]
 
         # square_state, availables, actions = game.current_and_next_state()
         # act_probs_list, value_list = self.policy_value(square_state)
@@ -186,11 +190,11 @@ class PolicyValueNet():
         act_probs, value = self.policy_value(current_state)
         act_probs = act_probs.flatten()
         actions = game.positions_to_actions(legal_positions)
-        act_probs = zip(actions, act_probs[legal_positions])
+        act_probs = list(zip(actions, act_probs[legal_positions]))
         value = value[0,0]
-        # 只缓存前3步棋
-        if len(game.actions)<4:
-            self.cache[key] = (list(act_probs), value) 
+
+        if len(game.actions)<=max_cache_step:
+            self.cache[key] = (act_probs, value) 
         return act_probs, value
 
     def train_step(self, state_batch, mcts_probs, winner_batch, lr):
