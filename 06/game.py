@@ -187,13 +187,12 @@ class FiveChess(object):
     # 一次最多取16笔进行返回
     def current_and_next_state(self):
         availables = []
-        batchsize = len(self.availables)+1
-        square_state = np.zeros((batchsize, 7, self.size, self.size))
-        square_state[0] = self.current_state()
-        availables.append(self.availables)
         max_len = len(self.availables)
         if max_len > 15:
             max_len = 15
+        square_state = np.zeros((max_len+1, 7, self.size, self.size))
+        square_state[0] = self.current_state()
+        availables.append(self.availables)
         for i, ac in enumerate(self.availables[:max_len]):
             game = copy.deepcopy(self)
             game.step(ac)

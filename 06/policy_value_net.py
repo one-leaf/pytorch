@@ -164,7 +164,6 @@ class PolicyValueNet():
         legal_positions = game.actions_to_positions(game.availables)
         key = "".join([str(p) for p in legal_positions])
         if key in self.cache:
-            print("cache")
             return self.cache[key]
         square_state, availables = game.current_and_next_state()
         act_probs_list, value_list = self.policy_value(square_state)
