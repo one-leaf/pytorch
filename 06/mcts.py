@@ -167,11 +167,11 @@ class MCTS(object):
             action_probs, leaf_value = self._policy(state)
             node.expand(action_probs)
         else:
-            # 游戏结束时返回真实的叶子胜负, 注意这里提升了一倍导致游戏失败或成功的分值
+            # 游戏结束时返回真实的叶子胜负, 注意这里的游戏失败或成功的分值
             if winner == -1:  # tie平局
                 leaf_value = 0.0
             else:
-                leaf_value = (2.0 if winner == state.current_player  else -2.0)
+                leaf_value = (1.0 if winner == state.current_player  else -10.0)
         # 递归更新当前节点及所有父节点的最优选中次数和Q分数,因为得到的是本次的价值，但需要更新上一次的节点，所以取反
         node.update_recursive(-leaf_value)
 
@@ -247,11 +247,23 @@ class MCTS(object):
             self._playout_network(state_copy)
 
             # 为了提高学习效率如果有走子的方差大于100，直接放弃探索,返回。
-            if n >= 500:
+            if n%10==0 and n >= self._n_playout*0.1:
                 _n_visits =[node._n_visits for node in self._root._children.values()]
-                if np.var(_n_visits)>100:
+                _select_max_count= int(0.2*len(_n_visits))
+                if _select_max_count>5:
+                    _n_visits = sorted(_n_visits)[-1*_select_max_count:]
+                var = np.var(_n_visits)
+                if var>200:
                     break
+            # if (n+1)%100==0:
+            #     act_visits = [(act, node._n_visits) for act, node in self._root._children.items() if node._n_visits!=0]
+            #     acts, visits = zip(*act_visits)
+            #     var_list = sorted(visits)[-3:]
+            #     var = np.std(visits)
+            #     m = max(visits)
+            #     print("_n_playout:", n, "var:", var, "var_list,", var_list, "_n_visits:", m , "action:" ,acts[visits.index(m)])
         # 分解出child中的action和最优选访问次数
+
         act_visits = [(act, node._n_visits) for act, node in self._root._children.items() if node._n_visits!=0]
         acts, visits = zip(*act_visits)
         # print(act_visits)
