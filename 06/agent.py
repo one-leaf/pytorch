@@ -34,7 +34,7 @@ class Agent(object):
             current_players.append(self.game.current_player)
             # perform a move
             if i==0 and random.random()>0.5: # 为了消除先手的影响，第一步随便下
-                action = random.choise(self.game.availables)
+                action = random.choice(self.game.availables)
             self.game.step(action)
             if self.is_shown:
                 self.env.render()
