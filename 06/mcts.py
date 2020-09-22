@@ -271,13 +271,6 @@ class MCTS(object):
                     if var>10000:
                         break
 
-            # if (n+1)%100==0:
-            #     act_visits = [(act, node._n_visits) for act, node in self._root._children.items() if node._n_visits!=0]
-            #     acts, visits = zip(*act_visits)
-            #     var_list = sorted(visits)[-3:]
-            #     var = np.std(visits)
-            #     m = max(visits)
-
         # 分解出child中的action和最优选访问次数
         act_visits = [(act, node._n_visits) for act, node in self._root._children.items()]
         acts, visits = zip(*act_visits)
