@@ -120,6 +120,7 @@ class MCTS(object):
             Params：state盘面 构建过程中会模拟走子，必须传入盘面的copy.deepcopy副本
         """
         # 1.Selection（在树中找到一个最好的值得探索的节点，一般策略是先选择未被探索的子节点，如果都探索过就选择UCB值最大的子节点）
+        curr_player = state.current_player
         node = self._root
         # 找到最优叶子节点：递归从child中选择并执行最大 动作Q+奖励u(P) 的动作
         while (1):
@@ -141,18 +142,19 @@ class MCTS(object):
 
         # 3.Simulation（在前面新Expansion出来的节点开始模拟游戏，直到到达游戏结束状态，这样可以收到到这个expansion出来的节点的得分是多少）
         # 使用快速随机走子评估此叶子节点继续往后走的胜负（state执行快速走子）
-        leaf_value = self._evaluate_rollout(state)
+        leaf_value = self._evaluate_rollout(state, curr_player)
         # 4.Backpropagation（把前面expansion出来的节点得分反馈到前面所有父节点中，更新这些节点的quality value和visit times，方便后面计算UCB值）
         # 递归更新当前节点及所有父节点的最优选中次数和Q分数（最优选中次数是累加的），因为得到的是本次的价值，但需要更新上一次的节点，所以取反
         node.update_recursive(-leaf_value)
 
     # 从根节点 root 到子节点执行一次探索过程
     # 这个不同于上面，上面的是纯mcts,后面多一步对当前动作进行评估的过程，这个是直接用网络来估测当前可以步数的价值
-    def _playout_network(self, state, curr_player):
+    def _playout_network(self, state):
         """
         执行一步走子，对应一次MCTS树持续构建过程（选择最优叶子节点->根据模型走子策略概率扩充mcts树->评估并更新树的最优选次数）
             Params：state盘面 构建过程中会模拟走子，必须传入盘面的copy.deepcopy副本
         """
+        curr_player = state.current_player
         node = self._root
         # 找到最优叶子节点：递归从child中选择并执行最大 动作Q+奖励u(P) 的动作
         while (1):
@@ -200,7 +202,7 @@ class MCTS(object):
         else:
             self._root = TreeNode(None, 1.0)
 
-    def _evaluate_rollout(self, state, limit=1000):
+    def _evaluate_rollout(self, state, curr_player, limit=1000):
         """使用随机快速走子策略评估叶子节点
             Params：
                 state 当前盘面
@@ -209,7 +211,6 @@ class MCTS(object):
                     如果对手获胜返回-1
                     如果平局返回0
         """
-        curr_player = state.current_player
         winner = -1
         for i in range(limit):  # 随机快速走limit次，用于快速评估当前叶子节点的优略
             end, winner = state.game_end()
@@ -259,12 +260,11 @@ class MCTS(object):
             Return: 所有action及对应概率
         """
         self._first_ations.clear()
-        curr_player = state.current_player
 
         for n in range(self._n_playout):
             # print("\r_n_playout： {:.2f}%".format(n*100 / self._n_playout), end='')
             state_copy = copy.deepcopy(state)
-            self._playout_network(state_copy, curr_player)
+            self._playout_network(state_copy)
 
             # 为了提高学习效率如果有走子的方差大于10000，直接放弃探索,返回。
             if n%10==0 and n >= self._n_playout*0.2:
