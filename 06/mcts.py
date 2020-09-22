@@ -126,25 +126,11 @@ class MCTS(object):
             if node.is_leaf():
                 break
 
-            # 如果存在优先探索队列，并且该子节点存在未探索过的
-            action == None
-            for act in self._first_ations:
-                if act in node._children and node._children[act]._n_visits == 0:
-                    action, node = act, node._children[act]
-                    break
-
             # 从child中选择最优action
-            if action is None:
-                action, node = node.select(self._c_puct)
-
+            action, node = node.select(self._c_puct)
             # 执行action走子
             state.step(action)
             
-            # 如果这一步导致棋局结束，就列为优先探索
-            end, _ = state.game_end()
-            if end:
-                self._first_ations.add(action)
-
         # 2.Expansion（就是在前面选中的子节点中走一步创建一个新的子节点。一般策略是随机自行一个操作并且这个操作不能与前面的子节点重复）
         # 走子策略返回的[(action,概率)]list
         action_probs, leaf_value = self._policy(state)
@@ -174,7 +160,7 @@ class MCTS(object):
                 break
 
             # 如果存在优先探索队列，并且该子节点存在未探索过的
-            action == None
+            action = None
             for act in self._first_ations:
                 if act in node._children and node._children[act]._n_visits == 0:
                     action, node = act, node._children[act]
@@ -185,7 +171,7 @@ class MCTS(object):
                 action, node = node.select(self._c_puct)
             # 执行action走子
             state.step(action)
-            
+
             end, _ = state.game_end()
             if end:
                 self._first_ations.add(action)
