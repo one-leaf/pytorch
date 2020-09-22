@@ -171,7 +171,7 @@ class MCTS(object):
             if winner == -1:  # tie平局
                 leaf_value = 0.0
             else:
-                leaf_value = (1.0 if winner == state.current_player  else -10.0)
+                leaf_value = (10.0 if winner == state.current_player  else -10.0)
         # 递归更新当前节点及所有父节点的最优选中次数和Q分数,因为得到的是本次的价值，但需要更新上一次的节点，所以取反
         node.update_recursive(-leaf_value)
 
