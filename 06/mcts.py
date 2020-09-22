@@ -9,6 +9,7 @@ import copy
 import logging
 from operator import itemgetter
 import heapq
+from itertools import count
 
 class TreeNode(object):
     """MCTS树中的节点类。 每个节点跟踪其自身的值Q，先验概率P及其访问次数调整的先前得分u。"""
@@ -261,7 +262,7 @@ class MCTS(object):
         """
         self._first_ations.clear()
 
-        for n in range(self._n_playout):
+        for n in count():
             # print("\r_n_playout： {:.2f}%".format(n*100 / self._n_playout), end='')
             state_copy = copy.deepcopy(state)
             self._playout_network(state_copy)
@@ -274,6 +275,12 @@ class MCTS(object):
                     var = np.var(visits)
                     if var>10000:
                         break
+            
+            # 如果得分为负数，继续找5倍的次数
+            if n>self._n_playout:
+                idx = max(range(len(visits)), key=visits.__getitem__)
+                if self._root._children[acts[idx]].get_value(5)>0 or n>self._n_playout*5:
+                    break
 
         # 分解出child中的action和最优选访问次数
         act_visits = [(act, node._n_visits) for act, node in self._root._children.items()]
