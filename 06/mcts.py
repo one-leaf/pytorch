@@ -3,6 +3,7 @@
 蒙特卡罗树搜索（MCTS）的实现
 """
 
+import random
 import numpy as np
 import copy
 import logging
@@ -365,6 +366,10 @@ class MCTSPlayer(object):
                 # logging.info(0.75 * act_probs + 0.25 * dirichlet)
                 position = np.random.choice(positions, p=0.75 * act_probs + 0.25 * dirichlet) 
                 action = state.positions_to_actions([position])[0]
+
+                if len(state.availables)==state.size**2: 
+                    action = random.choice(state.availables)
+
                 # 更新根节点并重用搜索树
                 self.mcts.update_root_with_action(action)
             else:  # 和人类对战
