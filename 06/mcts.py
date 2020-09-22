@@ -367,6 +367,7 @@ class MCTSPlayer(object):
                 position = np.random.choice(positions, p=0.75 * act_probs + 0.25 * dirichlet) 
                 action = state.positions_to_actions([position])[0]
 
+                # 如果是第一步棋，就随便下
                 if len(state.availables)==state.size**2: 
                     action = random.choice(state.availables)
 
