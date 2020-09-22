@@ -282,8 +282,8 @@ class MCTS(object):
                     value = self._root._children[acts[idx]].get_value(5)
                     if value>0 or len(self._first_ations)>=2 or n>self._n_playout*10:
                         break
-                    if value<-0.5:
-                        temp = 1e-3
+                    if value<0:
+                        temp = max(1e-3, 1+value)
                     else:
                         temp = _temp 
 
