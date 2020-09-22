@@ -283,13 +283,11 @@ class MCTS(object):
             if len(info)>=3: break
             value = self._root._children[acts[idx]].get_value(5)
             info[acts[idx]] = (visits[idx], round(value, 2))
-            if value < 0:  # 如果局面不利，降低随机性
-                temp = max(0.01, 1+value)
 
         print("_n_playout:", n, "info:", info, "first:",self._first_ations)
         # softmax概率，先用log(visites)，拉平差异，再乘以一个权重，这样给了一个可以调节的参数，
         # temp 越小，导致softmax的越肯定，也就是当temp=1e-3时，基本上返回只有一个1,其余概率都是0; 训练的时候 temp=1
-        act_probs = MCTS.softmax(1.0 / temp * np.log(np.array(visits) + 1e-10))
+        act_probs = MCTS.softmax((1/temp) * np.log(np.array(visits) + 1e-10))
         return acts, act_probs
 
     # 按访问次数返回当前状态下的动作及其概率，构建所有的树，默认10000局
