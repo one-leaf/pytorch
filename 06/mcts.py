@@ -10,6 +10,8 @@ import logging
 from operator import itemgetter
 import heapq
 
+from pyglet.libs.win32.constants import FALSE
+
 class TreeNode(object):
     """MCTS树中的节点类。 每个节点跟踪其自身的值Q，先验概率P及其访问次数调整的先前得分u。"""
 
@@ -107,6 +109,7 @@ class MCTS(object):
         self._policy = policy_value_fn  # 可走子action及对应概率，这里采用平均概率
         self._c_puct = c_puct  # MCTS child搜索收敛权重
         self._n_playout = n_playout  # 构建MCTS初始树的随机走子步数
+        self._first_ations = set()
 
     # 从根节点 root 到子节点执行一次探索过程
     # 1 如果不是叶子，就按子节点的规划执行动作，直到找到叶子
@@ -124,10 +127,25 @@ class MCTS(object):
         while (1):
             if node.is_leaf():
                 break
+
+            # 如果存在优先探索队列，并且该子节点存在未探索过的
+            action == None
+            for act in self._first_ations:
+                if node._children[act]._n_visits == 0:
+                    action, node = act, node._children[act]
+                    break
+
             # 从child中选择最优action
-            action, node = node.select(self._c_puct)
+            if action is None:
+                action, node = node.select(self._c_puct)
+                
             # 执行action走子
             state.step(action)
+            
+            # 如果这一步导致棋局结束，就列为优先探索
+            end, _ = state.game_end()
+            if end:
+                self._first_ations.add(action)
 
         # 2.Expansion（就是在前面选中的子节点中走一步创建一个新的子节点。一般策略是随机自行一个操作并且这个操作不能与前面的子节点重复）
         # 走子策略返回的[(action,概率)]list
