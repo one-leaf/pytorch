@@ -371,7 +371,7 @@ class MCTSPlayer(object):
                 action = state.positions_to_actions([position])[0]
 
                 # 如果是第一步棋，就随便下
-                if len(state.availables)==state.size**2: 
+                if len(state.availables)==state.size**2 and random.random()>0.5: 
                     action = random.choice(state.availables)
 
                 # 更新根节点并重用搜索树
