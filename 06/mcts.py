@@ -172,8 +172,9 @@ class MCTS(object):
             # 执行action走子
             state.step(action)
 
-            end, _ = state.game_end()
-            if end:
+            # 凡是导致输掉的棋，重点关注
+            end, winner = state.game_end()
+            if end and winner != state.current_player:
                 self._first_ations.add(action)
 
         # 检查游戏是否有赢家
@@ -258,7 +259,7 @@ class MCTS(object):
             Return: 所有action及对应概率
         """
         self._first_ations.clear()
-        
+
         for n in range(self._n_playout):
             # print("\r_n_playout： {:.2f}%".format(n*100 / self._n_playout), end='')
             state_copy = copy.deepcopy(state)
