@@ -247,8 +247,8 @@ class MCTS(object):
             self._playout_network(state_copy)
 
             # 为了提高学习效率如果有走子的方差大于100，直接放弃探索,返回。
-            if n%10==0 and n >= self._n_playout*0.1:
-                act_visits = [(act, node._n_visits) for act, node in self._root._children.items() if node._n_visits>1]
+            if n%10==0 and n >= self._n_playout*0.2:
+                act_visits = [(act, node._n_visits) for act, node in self._root._children.items() if node._n_visits>0]
                 acts, visits = zip(*act_visits)
                 if len(visits)>2: 
                     var = np.var(visits)
