@@ -148,7 +148,7 @@ class MCTS(object):
 
     # 从根节点 root 到子节点执行一次探索过程
     # 这个不同于上面，上面的是纯mcts,后面多一步对当前动作进行评估的过程，这个是直接用网络来估测当前可以步数的价值
-    def _playout_network(self, state):
+    def _playout_network(self, state, curr_player):
         """
         执行一步走子，对应一次MCTS树持续构建过程（选择最优叶子节点->根据模型走子策略概率扩充mcts树->评估并更新树的最优选次数）
             Params：state盘面 构建过程中会模拟走子，必须传入盘面的copy.deepcopy副本
@@ -174,7 +174,7 @@ class MCTS(object):
 
             # 凡是导致输掉的棋，重点关注
             end, winner = state.game_end()
-            if end and winner == state.current_player:
+            if end and winner != curr_player:
                 self._first_ations.add(action)
 
         # 检查游戏是否有赢家
@@ -188,7 +188,7 @@ class MCTS(object):
             if winner == -1:  # tie平局
                 leaf_value = 0.0
             else:
-                leaf_value = (1.0 if winner == state.current_player  else -10.0)
+                leaf_value = (1.0 if winner == curr_player  else -10.0)
         # 递归更新当前节点及所有父节点的最优选中次数和Q分数,因为得到的是本次的价值，但需要更新上一次的节点，所以取反
         node.update_recursive(-leaf_value)
 
@@ -259,11 +259,12 @@ class MCTS(object):
             Return: 所有action及对应概率
         """
         self._first_ations.clear()
+        curr_player = state.current_player
 
         for n in range(self._n_playout):
             # print("\r_n_playout： {:.2f}%".format(n*100 / self._n_playout), end='')
             state_copy = copy.deepcopy(state)
-            self._playout_network(state_copy)
+            self._playout_network(state_copy, curr_player)
 
             # 为了提高学习效率如果有走子的方差大于10000，直接放弃探索,返回。
             if n%10==0 and n >= self._n_playout*0.2:
