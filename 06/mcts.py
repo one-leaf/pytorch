@@ -172,10 +172,23 @@ class MCTS(object):
         while (1):
             if node.is_leaf():
                 break
+
+            # 如果存在优先探索队列，并且该子节点存在未探索过的
+            action == None
+            for act in self._first_ations:
+                if act in node._children and node._children[act]._n_visits == 0:
+                    action, node = act, node._children[act]
+                    break
+
             # 从child中选择最优action
-            action, node = node.select(self._c_puct)
+            if action is None:
+                action, node = node.select(self._c_puct)
             # 执行action走子
             state.step(action)
+            
+            end, _ = state.game_end()
+            if end:
+                self._first_ations.add(action)
 
         # 检查游戏是否有赢家
         end, winner = state.game_end()
@@ -188,7 +201,7 @@ class MCTS(object):
             if winner == -1:  # tie平局
                 leaf_value = 0.0
             else:
-                leaf_value = (10.0 if winner == state.current_player  else -10.0)
+                leaf_value = (1.0 if winner == state.current_player  else -1.0)
         # 递归更新当前节点及所有父节点的最优选中次数和Q分数,因为得到的是本次的价值，但需要更新上一次的节点，所以取反
         node.update_recursive(-leaf_value)
 
