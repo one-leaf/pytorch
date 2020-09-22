@@ -270,7 +270,10 @@ class MCTS(object):
         info={}
         for idx in sorted(range(len(visits)), key=visits.__getitem__)[::-1]:
             if len(info)>=3: break
-            info[acts[idx]] = (visits[idx], self._root._children[acts[idx]].get_value(5))
+            value = self._root._children[acts[idx]].get_value(5)
+            info[acts[idx]] = (visits[idx], value)
+            if value < 0:  # 如果局面不利，降低随机性
+                temp = max(0.01, 1+value)
 
         print("_n_playout:", n, "info:", info)
         # softmax概率，先用log(visites)，拉平差异，再乘以一个权重，这样给了一个可以调节的参数，
