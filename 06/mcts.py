@@ -131,14 +131,14 @@ class MCTS(object):
             # 如果存在优先探索队列，并且该子节点存在未探索过的
             action == None
             for act in self._first_ations:
-                if node._children[act]._n_visits == 0:
+                if act in node._children and node._children[act]._n_visits == 0:
                     action, node = act, node._children[act]
                     break
 
             # 从child中选择最优action
             if action is None:
                 action, node = node.select(self._c_puct)
-                
+
             # 执行action走子
             state.step(action)
             
