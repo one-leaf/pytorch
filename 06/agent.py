@@ -1,5 +1,7 @@
+import random
 import numpy as np
 from game import FiveChess, FiveChessEnv
+from itertools import count
 
 # 游戏的AI封装
 class Agent(object):
@@ -20,7 +22,7 @@ class Agent(object):
         self.game.reset()
         p1, p2 = self.game.players
         states, mcts_probs, current_players = [], [], []
-        while True:
+        for i in count():
             # temp 权重 ，return_prob 是否返回概率数据
             action, move_probs = player.get_action(self.game, temp=temp, return_prob=1)
             # store the data
@@ -31,6 +33,8 @@ class Agent(object):
             mcts_probs.append(move_probs)
             current_players.append(self.game.current_player)
             # perform a move
+            if i==0 and random.random()>0.5: # 为了消除先手的影响，第一步随便下
+                action = random.choise(self.game.availables)
             self.game.step(action)
             if self.is_shown:
                 self.env.render()
