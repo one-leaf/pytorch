@@ -248,23 +248,30 @@ class MCTS(object):
 
             # 为了提高学习效率如果有走子的方差大于100，直接放弃探索,返回。
             if n%10==0 and n >= self._n_playout*0.1:
-                _n_visits =[node._n_visits for node in self._root._children.values() if node._n_visits>1]
-                if len(_n_visits)>2: 
-                    var = np.var(_n_visits)
+                act_visits = [(act, node._n_visits) for act, node in self._root._children.items() if node._n_visits>2]
+                acts, visits = zip(*act_visits)
+                if len(visits)>2: 
+                    var = np.var(visits)
                     if var>10000:
                         break
+
             # if (n+1)%100==0:
             #     act_visits = [(act, node._n_visits) for act, node in self._root._children.items() if node._n_visits!=0]
             #     acts, visits = zip(*act_visits)
             #     var_list = sorted(visits)[-3:]
             #     var = np.std(visits)
             #     m = max(visits)
-        print("_n_playout:", n, "var:", var, "_n_visits:", _n_visits)
-        # 分解出child中的action和最优选访问次数
 
-        act_visits = [(act, node._n_visits) for act, node in self._root._children.items() if node._n_visits!=0]
+        # 分解出child中的action和最优选访问次数
+        act_visits = [(act, node._n_visits) for act, node in self._root._children.items()]
         acts, visits = zip(*act_visits)
-        # print(act_visits)
+
+        info={}
+        for idx in sorted(range(len(visits)), key=visits.__getitem__)[::-1]:
+            if len(info)>=3: break
+            info[acts[idx]] = (visits[idx], self._root._children[acts[idx]].get_value(5))
+
+        print("_n_playout:", n, "var:", var, "info:", info)
         # softmax概率，先用log(visites)，拉平差异，再乘以一个权重，这样给了一个可以调节的参数，
         # temp 越小，导致softmax的越肯定，也就是当temp=1e-3时，基本上返回只有一个1,其余概率都是0; 训练的时候 temp=1
         act_probs = MCTS.softmax(1.0 / temp * np.log(np.array(visits) + 1e-10))
