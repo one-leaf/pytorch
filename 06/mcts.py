@@ -10,8 +10,6 @@ import logging
 from operator import itemgetter
 import heapq
 
-from pyglet.libs.win32.constants import FALSE
-
 class TreeNode(object):
     """MCTS树中的节点类。 每个节点跟踪其自身的值Q，先验概率P及其访问次数调整的先前得分u。"""
 
