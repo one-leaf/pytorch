@@ -259,7 +259,7 @@ class MCTS(object):
             #     var_list = sorted(visits)[-3:]
             #     var = np.std(visits)
             #     m = max(visits)
-        print("_n_playout:", n, "var:", var)
+        print("_n_playout:", n, "var:", var, "_n_visits", _n_visits)
         # 分解出child中的action和最优选访问次数
 
         act_visits = [(act, node._n_visits) for act, node in self._root._children.items() if node._n_visits!=0]
