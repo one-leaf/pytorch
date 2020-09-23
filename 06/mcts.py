@@ -276,7 +276,6 @@ class MCTS(object):
             Return: 所有action及对应概率
         """
         self._first_ations.clear()
-        _temp = temp
         for n in count():
             # print("\r_n_playout： {:.2f}%".format(n*100 / self._n_playout), end='')
             state_copy = copy.deepcopy(state)
@@ -294,10 +293,12 @@ class MCTS(object):
                 # 如果得分为负数，并且不是双杀，就算10倍，争取找出一个优解
                 if n>=self._n_playout:
                     idx = max(range(len(visits)), key=visits.__getitem__)
+
+                    # 如果当前的最佳选项在必救名单直接执行
                     if acts[idx] in self._first_ations:
                         temp = 1e-3
-                    else:
-                        temp = _temp
+                        break
+
                     value = self._root._children[acts[idx]].get_value(5)
                     if value>0 or len(self._first_ations)>=2 or n>self._n_playout*10:
                         break
