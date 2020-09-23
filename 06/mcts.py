@@ -294,13 +294,13 @@ class MCTS(object):
                 # 如果得分为负数，并且不是双杀，就算10倍，争取找出一个优解
                 if n>=self._n_playout:
                     idx = max(range(len(visits)), key=visits.__getitem__)
+                    if acts[idx] in self._first_ations:
+                        temp = 1e-3
+                    else:
+                        temp = _temp
                     value = self._root._children[acts[idx]].get_value(5)
                     if value>0 or len(self._first_ations)>=2 or n>self._n_playout*10:
                         break
-                    if value<0:
-                        temp = max(1e-3, 1+value)
-                    else:
-                        temp = _temp 
 
         # 分解出child中的action和最优选访问次数
         act_visits = [(act, node._n_visits) for act, node in self._root._children.items()]
