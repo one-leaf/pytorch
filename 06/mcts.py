@@ -3,6 +3,7 @@
 蒙特卡罗树搜索（MCTS）的实现
 """
 
+from math import e
 import random
 import numpy as np
 import copy
@@ -145,7 +146,7 @@ class MCTS(object):
         # 使用快速随机走子评估此叶子节点继续往后走的胜负（state执行快速走子）
         leaf_value = self._evaluate_rollout(state)
         # 4.Backpropagation（把前面expansion出来的节点得分反馈到前面所有父节点中，更新这些节点的quality value和visit times，方便后面计算UCB值）
-        # 递归更新当前节点及所有父节点的最优选中次数和Q分数（最优选中次数是累加的），因为得到的是本次的价值，但需要更新上一次的节点，所以取反
+        # 递归更新当前节点及所有父节点的最优选中次数和Q分数（最优选中次数是累加的）
         node.update_recursive(leaf_value)
 
     # 从根节点 root 到子节点执行一次探索过程
@@ -191,8 +192,21 @@ class MCTS(object):
             if winner == -1:  # tie平局
                 leaf_value = 0.0
             else:
-                leaf_value = (10.0 if winner == curr_player  else -10.0)
-        # 递归更新当前节点及所有父节点的最优选中次数和Q分数,因为得到的是本次的价值，但需要更新上一次的节点，所以取反
+                # if state.current_player!=curr_player:
+                #     # 如果是我下棋导致，我赢了，节点＋，上级节点-，我输了，节点-
+                #     if winner == curr_player:
+                #         leaf_value = 10.0
+                #     else:
+                #         leaf_value = -10.0
+                # else:
+                #     # 如果是对手下棋导致，我赢了，则本次节点-，但上级节点+，我输了，本次节点+，上级节点-
+                #     if winner == curr_player:
+                #         leaf_value = -10.0
+                #     else:
+                #         leaf_value = +10.0
+                # 换句话说即：                
+                leaf_value = (10.0 if winner != state.current_player  else -10.0)
+        # 递归更新当前节点及所有父节点的最优选中次数和Q分数,因为得到的是本次的价值
         node.update_recursive(leaf_value)
 
     def update_root_with_action(self, action):
@@ -228,7 +242,7 @@ class MCTS(object):
         if winner == -1:  # tie平局
             return 0
         else:
-            return 1 if winner == curr_player else -1
+            return (1.0 if winner != state.current_player  else -1.0)
 
     @staticmethod
     def rollout_policy_fn(state):
