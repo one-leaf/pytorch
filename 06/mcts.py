@@ -178,7 +178,7 @@ class MCTS(object):
 
             # 凡是导致输或赢的棋，重点关注
             end, winner = state.game_end()
-            if end:# and winner != curr_player:
+            if end and winner != curr_player:
                 self._first_ations.add(action)
 
         # 检查游戏是否有赢家
