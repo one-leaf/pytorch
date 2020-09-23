@@ -143,10 +143,10 @@ class MCTS(object):
 
         # 3.Simulation（在前面新Expansion出来的节点开始模拟游戏，直到到达游戏结束状态，这样可以收到到这个expansion出来的节点的得分是多少）
         # 使用快速随机走子评估此叶子节点继续往后走的胜负（state执行快速走子）
-        leaf_value = self._evaluate_rollout(state, curr_player)
+        leaf_value = self._evaluate_rollout(state)
         # 4.Backpropagation（把前面expansion出来的节点得分反馈到前面所有父节点中，更新这些节点的quality value和visit times，方便后面计算UCB值）
         # 递归更新当前节点及所有父节点的最优选中次数和Q分数（最优选中次数是累加的），因为得到的是本次的价值，但需要更新上一次的节点，所以取反
-        node.update_recursive(-leaf_value)
+        node.update_recursive(leaf_value)
 
     # 从根节点 root 到子节点执行一次探索过程
     # 这个不同于上面，上面的是纯mcts,后面多一步对当前动作进行评估的过程，这个是直接用网络来估测当前可以步数的价值
@@ -193,7 +193,7 @@ class MCTS(object):
             else:
                 leaf_value = (10.0 if winner == curr_player  else -10.0)
         # 递归更新当前节点及所有父节点的最优选中次数和Q分数,因为得到的是本次的价值，但需要更新上一次的节点，所以取反
-        node.update_recursive(-leaf_value)
+        node.update_recursive(leaf_value)
 
     def update_root_with_action(self, action):
         """根据action更新根节点"""
@@ -203,7 +203,7 @@ class MCTS(object):
         else:
             self._root = TreeNode(None, 1.0)
 
-    def _evaluate_rollout(self, state, curr_player, limit=1000):
+    def _evaluate_rollout(self, state, limit=1000):
         """使用随机快速走子策略评估叶子节点
             Params：
                 state 当前盘面
@@ -212,6 +212,7 @@ class MCTS(object):
                     如果对手获胜返回-1
                     如果平局返回0
         """
+        curr_player = state.current_player
         winner = -1
         for i in range(limit):  # 随机快速走limit次，用于快速评估当前叶子节点的优略
             end, winner = state.game_end()
