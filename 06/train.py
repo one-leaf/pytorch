@@ -252,7 +252,7 @@ class FiveChessTrain():
                     # 收集自我对抗数据
                     for _ in range(self.play_batch_size):
                         self.collect_selfplay_data()
-                    logging.info("TRAIN Current self-play end, size: {}".format(self.dataset.curr_size()))
+                    logging.info("TRAIN {} self-play end, size: {}".format(i, self.dataset.curr_size()))
                     # docker 下不用多线程的速度比用多线程的速度快
                     # p_list=[]
                     # for _ in range(self.play_batch_size):
