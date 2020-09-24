@@ -290,15 +290,16 @@ class MCTS(object):
                     if var>10000:
                         break
             
-                # 如果得分为负数，并且不是双杀，就算10倍，争取找出一个优解
                 if n>=self._n_playout:
                     idx = max(range(len(visits)), key=visits.__getitem__)
 
                     # 如果当前的最佳选项在必救名单直接执行
                     if acts[idx] in self._first_ations:
                         temp = 1e-3
+                        print(acts[idx], temp)
                         break
 
+                    # 如果得分为负数，并且不是双杀，就算10倍，争取找出一个优解
                     value = self._root._children[acts[idx]].get_value(5)
                     if value>0 or len(self._first_ations)>=2 or n>self._n_playout*10:
                         break
