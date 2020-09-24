@@ -1,6 +1,5 @@
 # 生成对抗网络
 from __future__ import print_function
-#%matplotlib inline
 import argparse
 import os
 from os import curdir
@@ -35,7 +34,7 @@ nc = 3              # 图像颜色通道
 nz = 100            # 随机参数的向量长度
 ngf = 64            # 生成器的特征深度
 ndf = 64            # 判别器的特征深度
-num_epochs = 10000
+num_epochs = 1000   # 训练轮数
 lr =  0.0002        # 学习率为 0.0002 
 beta1 = 0.5         # 应该为 0.5 
 ngpu = 1            # GPU 个数
@@ -55,7 +54,7 @@ dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size,
                                          shuffle=True, num_workers=workers)
 
 # 选择我们运行在上面的设备
-device = torch.device("cuda:0" if (torch.cuda.is_available() and ngpu > 0) else "cpu")
+device = torch.device("cuda" if (torch.cuda.is_available() and ngpu > 0) else "cpu")
 
 print("runing on", device)
 
@@ -181,15 +180,14 @@ criterion = nn.BCELoss()
 # 混合噪声，按高斯分布采样 (64, 100, 1, 1)
 fixed_noise = torch.randn(64, nz, 1, 1, device=device)
 
-# with torch.no_grad():
-#     fake = netG(fixed_noise).detach().cpu()
-#     img = vutils.make_grid(fake, padding=2, normalize=True)
-#     plt.figure(figsize=(8,8))
-#     plt.axis("off")
-#     plt.title("Fake Images")
-#     plt.imshow(np.transpose(img,(1,2,0)))
-#     plt.show()
-#     raise "only test"
+with torch.no_grad():
+    fake = netG(fixed_noise).detach().cpu()
+    img = vutils.make_grid(fake, padding=2, normalize=True)
+    plt.figure(figsize=(8,8))
+    plt.axis("off")
+    plt.title("Fake Images")
+    plt.imshow(np.transpose(img,(1,2,0)))
+    plt.show()
 
 # 在训练期间建立真假标签的惯例
 real_label = 1
@@ -309,7 +307,6 @@ plt.ylabel("Loss")
 plt.legend()
 plt.show()
 
-#%%capture
 fig = plt.figure(figsize=(8,8))
 plt.axis("off")
 ims = [[plt.imshow(np.transpose(i,(1,2,0)), animated=True)] for i in img_list]
