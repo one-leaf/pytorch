@@ -404,7 +404,7 @@ class MCTSPlayer(object):
                 # logging.info(dirichlet)
                 # logging.info("p:")
                 # logging.info(0.75 * act_probs + 0.25 * dirichlet)
-                p = 1.0 - len(state.availables)/(state.size * state.size)*0.25  #【0.75~1】
+                p = 1.0 - len(state.availables)/(state.size * state.size)*0.1  #【0.9~1】 这里默认为 0.25
 
                 position = np.random.choice(positions, p=p * act_probs + (1-p) * dirichlet) 
                 action = state.positions_to_actions([position])[0]
