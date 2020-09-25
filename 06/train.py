@@ -39,10 +39,10 @@ class Dataset(torch.utils.data.Dataset):
         self.load_game_files()
 
     def __len__(self):
-        return self.game_batch_num
+        return len(self.file_list)#self.game_batch_num
 
     def __getitem__(self, index):
-        filename = random.choice(self.file_list)
+        filename = self.file_list[index]#random.choice(self.file_list)
         state, mcts_prob, winner = pickle.load(open(filename, "rb"))
         state = torch.from_numpy(state).float()
         mcts_prob = torch.from_numpy(mcts_prob).float()
@@ -218,7 +218,7 @@ class FiveChessTrain():
         try:
             print("start data loader")
             self.dataset = Dataset(data_dir, self.game_batch_num*self.batch_size, self.buffer_size)
-            training_loader = torch.utils.data.DataLoader(self.dataset, batch_size=self.batch_size, shuffle=False, num_workers=4,)
+            training_loader = torch.utils.data.DataLoader(self.dataset, batch_size=self.batch_size, shuffle=True, num_workers=2,)
             print("end data loader")
 
             step = 0
