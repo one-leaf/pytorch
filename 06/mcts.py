@@ -401,13 +401,13 @@ class MCTSPlayer(object):
                 dirichlet = np.random.dirichlet(0.3 * np.ones(len(act_probs)))
                 p = 1.0 - len(state.availables)/(state.size * state.size)*0.1  #【0.9~1】 这里默认为 0.25
 
-                if max(act_probs)==1:
-                    logging.info("probs:")
-                    logging.info(act_probs)
-                    logging.info("dirichlet:")
-                    logging.info(dirichlet)
-                    logging.info("p:")
-                    logging.info(p * act_probs + (1-p) * dirichlet)
+                # if max(act_probs)==1:
+                #     logging.info("probs:")
+                #     logging.info(act_probs)
+                #     logging.info("dirichlet:")
+                #     logging.info(dirichlet)
+                #     logging.info("p:")
+                #     logging.info(p * act_probs + (1-p) * dirichlet)
 
                 position = np.random.choice(positions, p=p * act_probs + (1-p) * dirichlet) 
                 action = state.positions_to_actions([position])[0]
