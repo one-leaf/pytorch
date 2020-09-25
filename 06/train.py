@@ -70,7 +70,7 @@ class Dataset(torch.utils.data.Dataset):
             pickle.dump(obj, open(savefile, "wb"))
             self.curr_game_batch_num += 1
             self.save_game_batch_num()
-            self.file_list.append(savefile)
+            # self.file_list.append(savefile)
 
     def curr_size(self):
         return len(self.file_list)
