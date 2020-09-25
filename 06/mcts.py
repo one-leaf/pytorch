@@ -316,6 +316,8 @@ class MCTS(object):
         # softmax概率，先用log(visites)，拉平差异，再乘以一个权重，这样给了一个可以调节的参数，
         # temp 越小，导致softmax的越肯定，也就是当temp=1e-3时，基本上返回只有一个1,其余概率都是0; 训练的时候 temp=1
         act_probs = MCTS.softmax((1/temp) * np.log(np.array(visits) + 1e-10))
+        if temp == 1e-4:
+            print(act_probs)
         return acts, act_probs
 
     # 按访问次数返回当前状态下的动作及其概率，构建所有的树，默认10000局
@@ -398,13 +400,14 @@ class MCTSPlayer(object):
                 # dirichlet噪声是分布的分布，sum为1，参数越大，分布越均匀，参数越小越集中
                 # 给定的是一个均匀分布，则参数越小，方差越大，扰动就越大
                 dirichlet = np.random.dirichlet(0.3 * np.ones(len(act_probs)))
+                p = 1.0 - len(state.availables)/(state.size * state.size)*0.1  #【0.9~1】 这里默认为 0.25
+
                 # logging.info("probs:")
                 # logging.info(act_probs)
                 # logging.info("dirichlet:")
                 # logging.info(dirichlet)
                 # logging.info("p:")
                 # logging.info(0.75 * act_probs + 0.25 * dirichlet)
-                p = 1.0 - len(state.availables)/(state.size * state.size)*0.1  #【0.9~1】 这里默认为 0.25
 
                 position = np.random.choice(positions, p=p * act_probs + (1-p) * dirichlet) 
                 action = state.positions_to_actions([position])[0]
