@@ -290,6 +290,7 @@ class MCTS(object):
                 if len(visits)>2: 
                     # 如果当前的最佳选项在必救名单直接执行
                     if acts[idx] in self._first_ations:
+                        print(visits)
                         temp = 1e-4
                         break
 
