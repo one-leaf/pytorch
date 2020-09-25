@@ -318,6 +318,7 @@ class MCTS(object):
         # temp 越小，导致softmax的越肯定，也就是当temp=1e-3时，基本上返回只有一个1,其余概率都是0; 训练的时候 temp=1
         act_probs = MCTS.softmax((1/temp) * np.log(np.array(visits) + 1e-10))
         if temp==1e-4:
+            print(visits)
             print(act_probs)
         return acts, act_probs
 
