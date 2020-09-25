@@ -286,17 +286,17 @@ class MCTS(object):
                 act_visits = [(act, node._n_visits) for act, node in self._root._children.items() if node._n_visits>0]
                 acts, visits = zip(*act_visits)
                 if len(visits)>2: 
-                    var = np.var(visits)
-                    if var>50**2:
-                        break
-            
-                if n>=self._n_playout:
                     idx = max(range(len(visits)), key=visits.__getitem__)
                     # 如果当前的最佳选项在必救名单直接执行
                     if acts[idx] in self._first_ations:
                         temp = 1e-4
                         break
 
+                    var = np.var(visits)
+                    if var>50**2:
+                        break
+            
+                if n>=self._n_playout:
                     # 如果得分为负数，多算2倍，争取找出一个优解
                     value = self._root._children[acts[idx]].get_value(5)
                     if value>0 or n>self._n_playout*2:
