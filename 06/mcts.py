@@ -281,13 +281,13 @@ class MCTS(object):
             state_copy = copy.deepcopy(state)
             self._playout_network(state_copy)
 
-            # 为了提高学习效率如果有走子的方差大于10000，直接放弃探索,返回。
+            # 为了提高学习效率如果有走子的标准差大于50，直接放弃探索,返回。
             if n%10==0 and n >= self._n_playout*0.2:
                 act_visits = [(act, node._n_visits) for act, node in self._root._children.items() if node._n_visits>0]
                 acts, visits = zip(*act_visits)
                 if len(visits)>2: 
                     var = np.var(visits)
-                    if var>10000:
+                    if var>50**2:
                         break
             
                 if n>=self._n_playout:
