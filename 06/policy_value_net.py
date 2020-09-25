@@ -147,11 +147,6 @@ class PolicyValueNet():
         act_probs = np.exp(log_act_probs.data.cpu().numpy())
         value = value.data.cpu().numpy()
 
-        # if random.random()<0.0001:
-        #     idx = np.argmax(act_probs)
-        #     print("state var:",state_batch_tensor.var(),"probs max:", np.max(act_probs), "probs min:", np.min(act_probs), \
-        #         "act:", (idx%self.size, self.size-(idx//self.size)-1), "value:", value)
-
         return act_probs, value
 
     # 从当前棋局获得 ((action, act_probs),...) 的可用动作+概率和当前棋盘胜率
@@ -206,7 +201,7 @@ class PolicyValueNet():
         # backward and optimize
         loss.backward()
 
-        print(loss, value_loss, policy_loss)
+        # print(loss, value_loss, policy_loss)
         # for name, parms in self.policy_value_net.named_parameters():
         #     grad_value = torch.max(parms.grad)
         #     print('name:', name, 'grad_requirs:', parms.requires_grad,' grad_value:',grad_value)
