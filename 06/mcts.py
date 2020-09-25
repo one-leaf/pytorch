@@ -285,8 +285,9 @@ class MCTS(object):
             if n%10==0 and n >= self._n_playout*0.2:
                 act_visits = [(act, node._n_visits) for act, node in self._root._children.items() if node._n_visits>0]
                 acts, visits = zip(*act_visits)
+
+                idx = max(range(len(visits)), key=visits.__getitem__)
                 if len(visits)>2: 
-                    idx = max(range(len(visits)), key=visits.__getitem__)
                     # 如果当前的最佳选项在必救名单直接执行
                     if acts[idx] in self._first_ations:
                         temp = 1e-4
