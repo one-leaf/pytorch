@@ -397,15 +397,16 @@ class MCTSPlayer(object):
                 # dirichlet噪声参数中的p 0.3：一般按照反比于每一步的可行move数量设置，所以棋盘扩大或改围棋之后这个参数需要减小（此值设置过大容易出现在自我对弈的训练中陷入到两方都只进攻不防守的困境中无法提高）
                 # dirichlet噪声是分布的分布，sum为1，参数越大，分布越均匀，参数越小越集中
                 # 给定的是一个均匀分布，则参数越小，方差越大，扰动就越大
-                p = ((state.size * state.size - len(state.availables))/(state.size * state.size))*2+1
-                dirichlet = np.random.dirichlet(p * np.ones(len(act_probs)))
+                dirichlet = np.random.dirichlet(0.3 * np.ones(len(act_probs)))
                 # logging.info("probs:")
                 # logging.info(act_probs)
                 # logging.info("dirichlet:")
                 # logging.info(dirichlet)
                 # logging.info("p:")
                 # logging.info(0.75 * act_probs + 0.25 * dirichlet)
-                position = np.random.choice(positions, p=0.75 * act_probs + 0.25 * dirichlet) 
+                p = 1.0 - len(state.availables)/(state.size * state.size)*0.25  #【0.75~1】
+
+                position = np.random.choice(positions, p=p * act_probs + (1-p) * dirichlet) 
                 action = state.positions_to_actions([position])[0]
 
                 # 如果是第一步棋，就随便下
