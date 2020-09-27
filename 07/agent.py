@@ -143,15 +143,19 @@ class Agent(object):
         return state        
 
     def game_end(self):
-        holeCount = self.getHoleCount()
-        return self.terminal, 1-holeCount/200   #self.score
+        score = 0
+        if self.terminal:
+            if self.score>0:
+                score = self.score
+            else:
+                holeCount = self.getHoleCount()
+                score = -1 * (1-holeCount/200)
+        return self.terminal, score   #self.score
 
     # 使用 mcts 训练，重用搜索树，并保存数据
     def start_self_play(self, player, temp=1e-3):
         # 这里下两局，按得分和步数对比
         states, mcts_probs, current_players = [], [], []
-        score_1 = score_2 = 0
-        holes_1 = holes_2 = 0
         self.reset()
         for i in count():
             # temp 权重 ，return_prob 是否返回概率数据
@@ -164,55 +168,10 @@ class Agent(object):
             self.step(action)
             # 如果游戏结束
             if self.terminal:
-                score_1 = self.score
                 break
         self.print()
-
-        holes_1 = self.getHoleCount()
-
-        self.reset()
-        for i in count():
-            # temp 权重 ，return_prob 是否返回概率数据
-            action, move_probs = player.get_action(self, temp=temp, return_prob=1)
-            # 保存数据
-            states.append(self.current_state())
-            mcts_probs.append(move_probs)
-            current_players.append(1)
-            # 执行一步
-            self.step(action)
-            # 如果游戏结束
-            if self.terminal:
-                score_2 = self.score
-                break
-        self.print()
-        holes_2 = self.getHoleCount()
-
-        # 按照棋局得分确定输赢,如果得分一样，就按谁的空洞最小，最小的优
+        _,score = self.game_end()
         winners_z = np.zeros(len(current_players))
-        if score_1>0:
-            winners_z[np.array(current_players) == 0] = 1.0 * score_1
-        else:
-            winners_z[np.array(current_players) == 0] = -1 * (1 - holes_1/200) 
-
-        if score_2>0:
-            winners_z[np.array(current_players) == 1] = 1.0 * score_2
-        else:
-            winners_z[np.array(current_players) == 1] = -1 * (1- holes_2/200)  
-
+        winners_z[:] = score
         winner = -1
-        # if score_2 > score_1:
-        #     winner = 1
-        # if score_1 > score_2:
-        #     winner = 0
-        # if score_1 == score_2:
-        #     if holes_1>holes_2:
-        #         winner = 1
-        #     if holes_2>holes_1:
-        #         winner = 0
-
-        # if winner != -1:
-        #     winners_z[np.array(current_players) == winner] = 1.0
-        #     winners_z[np.array(current_players) != winner] = -1.0
-                
-        print("score_0:",score_1,"score_1:",score_2,"holes_0:",holes_1,"holes_1:",holes_2,"winner:",winner)
         return winner, zip(states, mcts_probs, winners_z)
