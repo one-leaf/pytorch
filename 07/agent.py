@@ -198,5 +198,5 @@ class Agent(object):
             winners_z[np.array(current_players) == winner] = 1.0
             winners_z[np.array(current_players) != winner] = -1.0
                 
-        print("score_1:",score_1,"score_2:",score_2,"holes_1:",holes_1,"holes_2:",holes_2)
+        print("score_0:",score_1,"score_1:",score_2,"holes_0:",holes_1,"holes_1:",holes_2,"winner:",winner)
         return winner, zip(states, mcts_probs, winners_z)
