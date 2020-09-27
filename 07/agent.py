@@ -144,7 +144,7 @@ class Agent(object):
 
     def game_end(self):
         holeCount = self.getHoleCount()
-        return self.terminal, holeCount/200   #self.score
+        return self.terminal, 1-holeCount/200   #self.score
 
     # 使用 mcts 训练，重用搜索树，并保存数据
     def start_self_play(self, player, temp=1e-3):
