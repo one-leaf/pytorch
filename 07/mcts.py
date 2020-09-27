@@ -11,6 +11,7 @@ import logging
 from operator import itemgetter
 import heapq
 from itertools import count
+import time
 
 class TreeNode(object):
     """MCTS树中的节点类。 每个节点跟踪其自身的值Q，先验概率P及其访问次数调整的先前得分u。"""
@@ -245,9 +246,10 @@ class MCTS(object):
                 temp：温度参数  控制探测水平，范围(0,1]
             Return: 所有action及对应概率
         """
-        random.seed()
+        curr_time=time.time()
         for n in count():
             # print("\r_n_playout： {:.2f}%".format(n*100 / self._n_playout), end='')
+            random.seed(curr_time)
             state_copy = copy.deepcopy(state)
             self._playout_network(state_copy)
 
