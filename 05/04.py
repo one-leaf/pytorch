@@ -186,7 +186,7 @@ class ResidualBlock(nn.Module):
         self.left=nn.Sequential(
             nn.Conv2d(inchannel,outchannel,3,stride,1,bias=False),
             nn.BatchNorm2d(outchannel),
-            nn.ReLU(inplace=True),
+            nn.LeakyReLU(inplace=True),
             nn.Conv2d(outchannel,outchannel,3,1,1,bias=False),
             nn.BatchNorm2d(outchannel)
         )
@@ -196,7 +196,7 @@ class ResidualBlock(nn.Module):
         out=self.left(x)
         residual=x if self.right is None else self.right(x)
         out+=residual
-        return F.relu(out)
+        return F.leaky_relu(out)
 
 class Net(nn.Module):
     def __init__(self, output_size):
@@ -211,7 +211,7 @@ class Net(nn.Module):
         x = self.conv2(x)
         x = self.conv3(x)
         x = x.view(x.size(0),-1)
-        x = F.relu(self.fc1(x))
+        x = F.leaky_relu(self.fc1(x))
         x = self.fc2(x)
         return x
 
