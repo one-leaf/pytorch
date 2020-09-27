@@ -90,7 +90,7 @@ class Agent(object):
         # 得到当前面板的值
         for y in range(self.height):
             for x in range(self.width):
-                if self.board[x][y]==blank:
+                if self.board[x][y]!=blank:
                     board[y][x]=1
         return board
 
