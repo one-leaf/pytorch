@@ -184,13 +184,13 @@ class Agent(object):
     # 检测这一步是否优，如果好+1，不好-1，无法评价0
     def checkActionisBest(self):
         badHoleCount = self.getEmptyHolesCount()
-        if badHoleCount>self.badHoleCount: return 0
         if badHoleCount>self.badHoleCount:
             self.badHoleCount = badHoleCount
             return -1
         if badHoleCount<self.badHoleCount:
             self.badHoleCount = badHoleCount
             return 1
+        return 0
         
 
     def game_end(self):
