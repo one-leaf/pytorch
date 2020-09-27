@@ -230,7 +230,7 @@ class Net(nn.Module):
         return nn.Sequential(*layers)
 
 BATCH_SIZE = 256
-GAMMA = 0.8
+GAMMA = 0.9
 EPS_START = 0.9
 EPS_END = 0.05
 EPS_DECAY = 1000000.
@@ -244,7 +244,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 steps_done = 0
 # 200 是面板数据 10*20
 net = Net(n_actions).to(device)
-optimizer = optim.Adam(net.parameters(), lr=1e-6)
+optimizer = optim.Adam(net.parameters(), lr=1e-7)
 
 net_actions_count=torch.tensor([0,0,0,0], device=device, dtype=torch.long)
 
