@@ -251,7 +251,7 @@ class MCTS(object):
 
             # 为了提高学习效率如果有探索的标准差大于50，直接放弃探索,返回。
             if n%10==0 and n >= self._n_playout*0.1:
-                act_visits = [(act, node._n_visits) for act, node in self._root._children.items() if node._n_visits>0]
+                act_visits = [(act, node._n_visits) for act, node in self._root._children.items()]
                 acts, visits = zip(*act_visits)
                 var = np.var(visits)
                 if var>100:
