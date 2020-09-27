@@ -167,7 +167,7 @@ class Agent(object):
             mcts_probs.append(move_probs)
             current_players.append(1)
             # 执行一步
-            self.step(action, self.is_shown)
+            self.step(action)
 
             # 如果游戏结束
             if self.terminal:
