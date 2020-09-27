@@ -166,6 +166,7 @@ class Agent(object):
                 score_1 = self.score
                 break
         self.print()
+
         holes_1 = self.getHoleCount()
 
         self.reset()
@@ -187,20 +188,30 @@ class Agent(object):
 
         # 按照棋局得分确定输赢,如果得分一样，就按谁的空洞最小，最小的优
         winners_z = np.zeros(len(current_players))
-        winner = -1
-        if score_2 > score_1:
-            winner = 1
-        if score_1 > score_2:
-            winner = 0
-        if score_1 == score_2:
-            if holes_1>holes_2:
-                winner = 1
-            if holes_2>holes_1:
-                winner = 0
+        if score_1>0:
+            winners_z[np.array(current_players) == 0] = 1.0
+        else:
+            winners_z[np.array(current_players) == 0] = -1.0  
 
-        if winner != -1:
-            winners_z[np.array(current_players) == winner] = 1.0
-            winners_z[np.array(current_players) != winner] = -1.0
+        if score_2>0:
+            winners_z[np.array(current_players) == 1] = 1.0
+        else:
+            winners_z[np.array(current_players) == 1] = -1.0  
+
+        winner = -1
+        # if score_2 > score_1:
+        #     winner = 1
+        # if score_1 > score_2:
+        #     winner = 0
+        # if score_1 == score_2:
+        #     if holes_1>holes_2:
+        #         winner = 1
+        #     if holes_2>holes_1:
+        #         winner = 0
+
+        # if winner != -1:
+        #     winners_z[np.array(current_players) == winner] = 1.0
+        #     winners_z[np.array(current_players) != winner] = -1.0
                 
         print("score_0:",score_1,"score_1:",score_2,"holes_0:",holes_1,"holes_1:",holes_2,"winner:",winner)
         return winner, zip(states, mcts_probs, winners_z)
