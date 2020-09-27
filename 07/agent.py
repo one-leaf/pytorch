@@ -14,6 +14,8 @@ class Agent(object):
         else:
             self.tetromino = TetrominoEnv()
         self.availables = [KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN]
+        self.width = 10
+        self.height = 20
         self.reset()
 
     def reset(self):
@@ -84,21 +86,17 @@ class Agent(object):
 
     # 获得当前局面信息
     def getBoard(self):
-        board=[]
+        board=np.zeros(self.height, self.width)
         # 得到当前面板的值
-        for line in self.board:
-            board.append([])
-            for value in line:
-                if value==blank:
-                    board[-1].append(0)
-                else:
-                    board[-1].append(1)
-        board = np.array(board)
+        for y in range(self.height):
+            for x in range(self.width):
+                if self.board[x][y]==blank:
+                    board[y][x]=1
         return board
 
     # 获得下落方块的信息
-    def get_fallpiece_board(self):                    
-        board=[[0]*20 for _ in range(10)]
+    def get_fallpiece_board(self):   
+        board=np.zeros(self.height, self.width)
         # 需要加上当前下落方块的值
         if self.fallpiece != None:
             piece = self.fallpiece
@@ -108,21 +106,19 @@ class Agent(object):
                     if shapedraw[y][x]!=blank:
                         px, py = x+piece['x'], y+piece['y']
                         if px>=0 and py>=0:
-                            board[x+piece['x']][y+piece['y']]=1
-        board = np.array(board)
+                            board[y+piece['y']][x+piece['x']]=1
         return board
 
     # 获得待下落方块的信息
     def get_nextpiece_borad(self):
-        board=[[1]*20 for _ in range(10)]
+        board=np.zeros(self.height, self.width)
         if self.nextpiece != None:
             piece = self.nextpiece  
             shapedraw = pieces[piece['shape']][piece['rotation']]
             for x in range(templatenum):
                 for y in range(templatenum):
                     if shapedraw[y][x]!=blank:
-                        board[x][y]=0
-        board = np.array(board)
+                        board[y][x]=1
         return board
 
     # 获得当前的全部特征
