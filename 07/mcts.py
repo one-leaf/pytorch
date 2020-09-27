@@ -173,10 +173,8 @@ class MCTS(object):
             action_probs, leaf_value = self._policy(state)
             node.expand(action_probs)
         else:
-            if score>0:
-                leaf_value = score
-            else:
-                leaf_value = -1
+            leaf_value = score
+           
         # 递归更新当前节点及所有父节点的最优选中次数和Q分数,因为得到的是本次的价值
         node.update_recursive(leaf_value)
 
@@ -246,23 +244,21 @@ class MCTS(object):
                 temp：温度参数  控制探测水平，范围(0,1]
             Return: 所有action及对应概率
         """
-        curr_time=time.time()
         for n in count():
             # print("\r_n_playout： {:.2f}%".format(n*100 / self._n_playout), end='')
-            random.seed(curr_time)
             state_copy = copy.deepcopy(state)
             self._playout_network(state_copy)
 
             # 为了提高学习效率如果有探索的标准差大于50，直接放弃探索,返回。
             if n%10==0 and n >= self._n_playout*0.2:
-                # act_visits = [(act, node._n_visits) for act, node in self._root._children.items() if node._n_visits>0]
-                # acts, visits = zip(*act_visits)
+                act_visits = [(act, node._n_visits) for act, node in self._root._children.items() if node._n_visits>0]
+                acts, visits = zip(*act_visits)
 
-                # idx = max(range(len(visits)), key=visits.__getitem__)
-                # if len(visits)>=2: 
-                #     var = np.var(visits)
-                #     if var>50**2:
-                #         break
+                idx = max(range(len(visits)), key=visits.__getitem__)
+                if len(visits)>=2: 
+                    var = np.var(visits)
+                    if var>50**2:
+                        break
             
                 if n>=self._n_playout:
                     # 如果得分为负数，多算2倍，争取找出一个优解

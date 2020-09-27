@@ -143,7 +143,8 @@ class Agent(object):
         return state        
 
     def game_end(self):
-        return self.terminal, self.score
+        holeCount = self.getHoleCount()
+        return self.terminal, holeCount/200   #self.score
 
     # 使用 mcts 训练，重用搜索树，并保存数据
     def start_self_play(self, player, temp=1e-3):
@@ -189,14 +190,14 @@ class Agent(object):
         # 按照棋局得分确定输赢,如果得分一样，就按谁的空洞最小，最小的优
         winners_z = np.zeros(len(current_players))
         if score_1>0:
-            winners_z[np.array(current_players) == 0] = 1.0
+            winners_z[np.array(current_players) == 0] = 1.0 * score_1
         else:
-            winners_z[np.array(current_players) == 0] = -1.0  
+            winners_z[np.array(current_players) == 0] = -1 * (1 - holes_1/200) 
 
         if score_2>0:
-            winners_z[np.array(current_players) == 1] = 1.0
+            winners_z[np.array(current_players) == 1] = 1.0 * score_2
         else:
-            winners_z[np.array(current_players) == 1] = -1.0  
+            winners_z[np.array(current_players) == 1] = -1 * (1- holes_2/200)  
 
         winner = -1
         # if score_2 > score_1:
