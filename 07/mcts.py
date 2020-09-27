@@ -273,7 +273,6 @@ class MCTS(object):
 
         info={}
         for idx in sorted(range(len(visits)), key=visits.__getitem__)[::-1]:
-            if len(info)>=3: break
             value = self._root._children[acts[idx]].get_value(5)
             info[acts[idx]] = (visits[idx], round(value, 2))
 
