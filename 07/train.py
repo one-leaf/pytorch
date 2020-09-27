@@ -188,7 +188,7 @@ class Train():
                     # 收集自我对抗数据
                     for _ in range(self.play_batch_size):
                         self.collect_selfplay_data()
-                    logging.info("TRAIN {} self-play end, size: {}".format(i, self.dataset.curr_size()))
+                    logging.info("TRAIN {} self-play end, size: {}".format(self.dataset.curr_game_batch_num, self.dataset.curr_size()))
                     
     
         except KeyboardInterrupt:

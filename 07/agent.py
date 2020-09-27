@@ -84,6 +84,15 @@ class Agent(object):
         print(self.getBoard())
         print("level:", self.level, "score:", self.score)
 
+    # 统计空洞数量
+    def getHoleCount(self):
+        c = 0
+        for y in range(self.height):
+            for x in range(self.width):
+                if self.board[x][y]==blank:
+                    c += 1
+        return c
+
     # 获得当前局面信息
     def getBoard(self):
         board=np.zeros((self.height, self.width))
@@ -137,7 +146,7 @@ class Agent(object):
         # 这里下两局，按得分和步数对比
         states, mcts_probs, current_players = [], [], []
         score_1 = score_2 = 0
-        steps_1 = steps_2 = 0
+        holes_1 = holes_2 = 0
         self.reset()
         for i in count():
             # temp 权重 ，return_prob 是否返回概率数据
@@ -148,12 +157,13 @@ class Agent(object):
             current_players.append(0)
             # 执行一步
             self.step(action)
-            steps_1 += 1
             # 如果游戏结束
             if self.terminal:
                 score_1 = self.score
                 break
         self.print()
+        holes_1 = self.getHoleCount()
+
         self.reset()
         for i in count():
             # temp 权重 ，return_prob 是否返回概率数据
@@ -164,14 +174,14 @@ class Agent(object):
             current_players.append(1)
             # 执行一步
             self.step(action)
-            steps_2 += 1
             # 如果游戏结束
             if self.terminal:
                 score_2 = self.score
                 break
         self.print()
+        holes_2 = self.getHoleCount()
 
-        # 按照棋局得分确定输赢
+        # 按照棋局得分确定输赢,如果得分一样，就按谁的空洞最小，最小的优
         winners_z = np.zeros(len(current_players))
         winner = -1
         if score_2 > score_1:
@@ -179,10 +189,10 @@ class Agent(object):
         if score_1 > score_2:
             winner = 0
         if score_1 == score_2:
-            if steps_1>steps_2:
-                winner = 0
-            if steps_2>steps_1:
+            if holes_1>holes_2:
                 winner = 1
+            if holes_2>holes_1:
+                winner = 0
 
         if winner != -1:
             winners_z[np.array(current_players) == winner] = 1.0
