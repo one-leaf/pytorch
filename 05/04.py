@@ -230,7 +230,7 @@ class Net(nn.Module):
         return nn.Sequential(*layers)
 
 BATCH_SIZE = 256
-GAMMA = 0.9
+GAMMA = 0.8
 EPS_START = 0.9
 EPS_END = 0.05
 EPS_DECAY = 1000000.
