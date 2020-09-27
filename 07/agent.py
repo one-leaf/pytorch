@@ -146,7 +146,7 @@ class Agent(object):
         score = 0
         if self.terminal:
             if self.score>0:
-                score = self.score
+                score = 1.0 * self.score
             else:
                 holeCount = self.getHoleCount()
                 score = -1. * (holeCount/200)
