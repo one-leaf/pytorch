@@ -141,7 +141,7 @@ class Agent(object):
         # 这里下两局，按得分和步数对比
         states, mcts_probs, current_players = [], [], []
         score_1 = score_2 = 0
-
+        steps_1 = steps_2 = 0
         self.reset()
         for i in count():
             # temp 权重 ，return_prob 是否返回概率数据
@@ -152,7 +152,7 @@ class Agent(object):
             current_players.append(0)
             # 执行一步
             self.step(action)
-
+            steps_1 += 1
             # 如果游戏结束
             if self.terminal:
                 score_1 = self.score
@@ -168,7 +168,7 @@ class Agent(object):
             current_players.append(1)
             # 执行一步
             self.step(action)
-
+            steps_2 += 1
             # 如果游戏结束
             if self.terminal:
                 score_2 = self.score
@@ -181,6 +181,11 @@ class Agent(object):
             winner = 1
         if score_1 > score_2:
             winner = 0
+        if score_1 == score_2:
+            if steps_1>steps_2:
+                winner = 0
+            if steps_2>steps_1:
+                winner = 1
 
         if winner != -1:
             winners_z[np.array(current_players) == winner] = 1.0
