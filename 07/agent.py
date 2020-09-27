@@ -26,7 +26,9 @@ class Agent(object):
         self.level = 0
         self.steps = 0
         self.board = self.tetromino.getblankboard()
-    
+        # 坏洞的个数，用于评价这一步的优劣
+        self.badHoleCount = 0
+
     def step(self, action):
         # 状态 0 下落过程中 1 更换方块 2 结束一局
         state = 0
@@ -143,6 +145,53 @@ class Agent(object):
         board_2 = self.get_nextpiece_borad()
         state = np.stack([board,board_1,board_2])
         return state        
+
+    # 空洞个数 
+    def getEmptyHolesCount(self):
+        boardwidth = len(self.board)
+        boardheight = len(self.board[0])
+        holesCount = 0
+        for x in range(boardwidth):
+            find_block = False
+            for y in range(boardheight):
+                if self.board[x][y]!=blank:
+                    find_block = True
+                elif find_block:
+                    holesCount += 1   
+        # 别出现#
+        for x in range(boardwidth):
+            c = 0
+            for y in range(boardheight):
+                if self.board[x][y]!=blank: break
+                if x == 0:
+                    if self.board[x+1][y]!=blank:
+                        c += 1
+                    elif c > 0:
+                        c += 1
+                elif x == boardwidth-1:
+                    if self.board[x-1][y]!=blank:
+                        c += 1
+                    elif c > 0:
+                        c += 1
+                else:
+                    if self.board[x-1][y]!=blank and self.board[x+1][y]!=blank:
+                        c += 1
+                    elif c > 0:
+                        c += 1
+            if c>2: holesCount += c
+        return holesCount
+
+    # 检测这一步是否优，如果好+1，不好-1，无法评价0
+    def checkActionisBest(self):
+        badHoleCount = self.getEmptyHolesCount()
+        if badHoleCount>self.badHoleCount: return 0
+        if badHoleCount>self.badHoleCount:
+            self.badHoleCount = badHoleCount
+            return -1
+        if badHoleCount<self.badHoleCount:
+            self.badHoleCount = badHoleCount
+            return 1
+        
 
     def game_end(self):
         score = 0
