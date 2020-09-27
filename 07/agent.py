@@ -86,7 +86,7 @@ class Agent(object):
 
     # 获得当前局面信息
     def getBoard(self):
-        board=np.zeros(self.height, self.width)
+        board=np.zeros((self.height, self.width))
         # 得到当前面板的值
         for y in range(self.height):
             for x in range(self.width):
@@ -96,7 +96,7 @@ class Agent(object):
 
     # 获得下落方块的信息
     def get_fallpiece_board(self):   
-        board=np.zeros(self.height, self.width)
+        board=np.zeros((self.height, self.width))
         # 需要加上当前下落方块的值
         if self.fallpiece != None:
             piece = self.fallpiece
@@ -111,7 +111,7 @@ class Agent(object):
 
     # 获得待下落方块的信息
     def get_nextpiece_borad(self):
-        board=np.zeros(self.height, self.width)
+        board=np.zeros((self.height, self.width))
         if self.nextpiece != None:
             piece = self.nextpiece  
             shapedraw = pieces[piece['shape']][piece['rotation']]
