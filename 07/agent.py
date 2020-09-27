@@ -79,7 +79,7 @@ class Agent(object):
 
     # 打印
     def print(self):
-        print(self.getBoard)
+        print(self.getBoard())
         print(self.level, self.score)
 
     # 获得当前局面信息
