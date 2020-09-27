@@ -123,8 +123,6 @@ class Train():
         for obj in play_data:
             self.dataset.save(obj)
 
-        agent.print()                   
-
     def policy_update(self, sample_data, epochs=1):
         """更新策略价值网络policy-value"""
         # 训练策略价值网络

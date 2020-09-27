@@ -157,7 +157,7 @@ class Agent(object):
             if self.terminal:
                 score_1 = self.score
                 break
-        
+        self.print()
         self.reset()
         for i in count():
             # temp 权重 ，return_prob 是否返回概率数据
@@ -173,6 +173,7 @@ class Agent(object):
             if self.terminal:
                 score_2 = self.score
                 break
+        self.print()
 
         # 按照棋局得分确定输赢
         winners_z = np.zeros(len(current_players))
