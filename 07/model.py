@@ -3,6 +3,7 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
 import os
+import numpy as np
 
 # 定义残差块
 class ResidualBlock(nn.Module):
@@ -129,12 +130,11 @@ class PolicyValueNet():
         输入: 游戏
         输出: 一组（动作， 概率）和游戏当前状态的胜率
         """
-        legal_positions = game.actions_to_positions(game.availables)
         current_state = game.current_state().reshape(1, -1, self.input_height, self.input_width)
         act_probs, value = self.policy_value(current_state)
         act_probs = act_probs.flatten()
-        actions = game.positions_to_actions(legal_positions)
-        act_probs = list(zip(actions, act_probs[legal_positions]))
+        actions = game.availables
+        act_probs = list(zip(actions, act_probs))
         value = value[0,0]
         return act_probs, value
 

@@ -1,9 +1,9 @@
 import os, glob, pickle
 
 from time import time
-from game import Tetromino, pieces, templatenum, blank, black
 from model import PolicyValueNet
 import logging
+from agent import Agent
 from mcts import MCTSPlayer
 
 import sys, time
@@ -27,8 +27,6 @@ if not os.path.exists(data_dir): os.makedirs(data_dir)
 model_dir = os.path.join(curr_dir, './model/')
 if not os.path.exists(model_dir): os.makedirs(model_dir)
 model_file =  os.path.join(model_dir, 'model.pth')
-
-
 
 class Dataset(torch.utils.data.Dataset):
     def __init__(self, data_dir, buffer_size):
@@ -111,22 +109,22 @@ class Train():
         # 使用MCTS蒙特卡罗树搜索进行自我对抗
         logging.info("TRAIN Self Play starting ...")
         # 游戏代理
-        agent = Agent(Tetromino())
+        agent = Agent()
 
         # 创建使用策略价值网络来指导树搜索和评估叶节点的MCTS玩家
         mcts_player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout, is_selfplay=1)
         # 开始下棋
-        winner, play_data = agent.start_self_play(mcts_player, temp=self.temp)
+        winer, play_data = agent.start_self_play(mcts_player, temp=self.temp)
         play_data = list(play_data)[:]
         episode_len = len(play_data)
-        # 把翻转棋盘数据加到数据集里
-        play_data = self.get_equi_data(play_data)
-        logging.info("TRAIN Self Play end. length:%s saving ..." % episode_len)
 
+        # 把翻转棋盘数据加到数据集里
+        logging.info("TRAIN Self Play end. length:%s saving ..." % episode_len)
         # 保存对抗数据到data_buffer
         for obj in play_data:
             self.dataset.save(obj)
-        agent.game.print()                   
+
+        agent.print()                   
 
     def policy_update(self, sample_data, epochs=1):
         """更新策略价值网络policy-value"""
@@ -165,43 +163,28 @@ class Train():
         # entropy 信息熵，越小越好
         logging.info(("TRAIN kl:{:.5f},lr_multiplier:{:.3f},loss:{},entropy:{:.5f},var_old:{:.5f},var_new:{:.5f}"
                       ).format(kl, self.lr_multiplier, loss, entropy, explained_var_old, explained_var_new))
-        return loss, entropy
-
-    
+        return loss, entropy  
 
     def run(self):
         """启动训练"""
         try:
             print("start data loader")
-            self.dataset = Dataset(data_dir, self.game_batch_num*self.batch_size, self.buffer_size)
-            training_loader = torch.utils.data.DataLoader(self.dataset, batch_size=self.batch_size, shuffle=True, num_workers=2,)
+            self.dataset = Dataset(data_dir, self.buffer_size)
             print("end data loader")
 
             step = 0
             while self.dataset.curr_size() < self.batch_size*self.epochs:
-                logging.info("TRAIN Batch:{} starting, Size:{}, n_in_row:{}".format(step + 1, size, n_in_row))
+                logging.info("TRAIN Batch:{} starting".format(step + 1,))
                 self.collect_selfplay_data()
                 logging.info("TRAIN Batch:{} end".format(step + 1,))
                 step += 1
+
+            training_loader = torch.utils.data.DataLoader(self.dataset, batch_size=self.batch_size, shuffle=True, num_workers=2,)
 
             for i, data in enumerate(training_loader):  # 计划训练批次
                 # 使用对抗数据重新训练策略价值网络模型
                 loss, entropy = self.policy_update(data, self.epochs)
                 # 每n个batch检查一下当前模型胜率
-
-                if (i + 1) % self.check_freq == 0:
-                    # 保存buffer数据
-                    # 策略胜率评估：模型与纯MCTS玩家对战n局看胜率
-                    win_ratio = self.policy_evaluate(self.policy_evaluate_size)
-                    if win_ratio > self.best_win_ratio:  # 胜率超过历史最优模型
-                        logging.info("TRAIN New best policy!!!!!!!!batch:{} win_ratio:{}->{} pure_mcts_playout_num:{}".format(step + 1, self.best_win_ratio, win_ratio, self.pure_mcts_playout_num))
-                        self.best_win_ratio = win_ratio
-                        # 保存当前模型为最优模型best_policy
-                        self.policy_value_net.save_model(best_model_file)
-                        # 如果胜率=100%，则增加纯MCT的模拟数 (<6000的限制视mem情况)
-                        if self.best_win_ratio == 1.0: # and self.pure_mcts_playout_num < 6000:
-                            self.pure_mcts_playout_num += 1000
-                            self.best_win_ratio = 0.0
 
                 if (i+1) % (int(self.dataset.curr_size() ** 0.3)) == 0:
                     self.policy_value_net.save_model(model_file)
@@ -209,246 +192,14 @@ class Train():
                     for _ in range(self.play_batch_size):
                         self.collect_selfplay_data()
                     logging.info("TRAIN {} self-play end, size: {}".format(i, self.dataset.curr_size()))
-                    # docker 下不用多线程的速度比用多线程的速度快
-                    # p_list=[]
-                    # for _ in range(self.play_batch_size):
-                    #     p = Thread(target=self.collect_selfplay_data, args=())
-                    #     p_list.append(p)
-                    #     p.start()   
-
-                    # for p in p_list:
-                    #     p.join()   
-                    # step += 1
-
-                    # self.collect_selfplay_data(self.play_batch_size)
+                    
     
         except KeyboardInterrupt:
             logging.info('quit')
 
+if __name__ == '__main__':
+    # train
+    logging.basicConfig(format='%(asctime)s %(message)s', level=logging.DEBUG)
+    training = Train()
+    training.run()
 
-
-BATCH_SIZE = 256
-GAMMA = 0.9
-EPS_START = 0.9
-EPS_END = 0.05
-EPS_DECAY = 1000000.
-TARGET_UPDATE = 10
-Transition = namedtuple('Transition', ('state', 'action', 'next_state', 'reward'))
-
-n_actions = 4 
-buffer = deque(maxlen=100000)
-modle_file = 'data/save/05_04_checkpoint.tar'
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-steps_done = 0
-# 200 是面板数据 10*20
-net = Net(n_actions).to(device)
-optimizer = optim.Adam(net.parameters(), lr=1e-7)
-
-net_actions_count=torch.tensor([0,0,0,0], device=device, dtype=torch.long)
-
-def select_action(state, norandom=False):
-    global steps_done
-    eps_threshold = EPS_END + (EPS_START - EPS_END) * math.exp(-1. * steps_done / EPS_DECAY)
-    steps_done += 1
-    if norandom or random.random() > eps_threshold:
-        with torch.no_grad():
-            # t.max(1)将返回每行的最大列值。 
-            # 最大结果的第二列是找到最大元素的索引，因此我们选择具有较大预期奖励的行动。
-            action = net(state).max(1)[1].view(1, 1)
-            net_actions_count[action]+=1
-            return action
-    else:
-        return torch.tensor([[random.randrange(n_actions)]], device=device, dtype=torch.long)
-
-transform = transforms.Compose([
-    transforms.Normalize(mean = (0.5, 0.5, 0.5), std = (0.5, 0.5, 0.5))
-    ]
-)
-
-def optimize_model():
-    if len(buffer) < BATCH_SIZE:
-        return
-    transitions = random.sample(buffer, BATCH_SIZE)
-    batch = Transition(*zip(*transitions))
-    non_final_mask = torch.tensor(tuple(map(lambda s: s is not None,
-                                      batch.next_state)), device=device, dtype=torch.bool)
-    non_final_next_states = torch.stack([s for s in batch.next_state if s is not None])
-    state_batch = torch.stack(batch.state)
-    action_batch = torch.cat(batch.action)
-    reward_batch = torch.cat(batch.reward)
-    state_action_values = net(state_batch).gather(1, action_batch)
-    next_state_values = torch.zeros(BATCH_SIZE, device=device)
-    with torch.no_grad():
-        next_state_values[non_final_mask] = net(non_final_next_states).max(1)[0]
-    expected_state_action_values = (next_state_values * GAMMA) + reward_batch
-    loss = F.smooth_l1_loss(state_action_values, expected_state_action_values.unsqueeze(1))
-    optimizer.zero_grad()
-    loss.backward()
-    optimizer.step()
-    return loss
-
-def train(agent):
-    global GAMMA, steps_done
-    num_episodes = 100000
-    avg_step = 100.
-    avg_holesCount = 40.
-    step_episode_update = 0.
-
-    # 加载模型
-    if os.path.exists(modle_file):
-        checkpoint = torch.load(modle_file, map_location=device)
-        net_sd = checkpoint['net']
-        steps_done = checkpoint['steps_done']
-        avg_step = checkpoint['avg_step']
-        net.load_state_dict(net_sd)
-
-    for i_episode in range(num_episodes):
-        avg_loss = 0.
-        board = agent.getBoard().to(device)
-        board_1 = agent.get_fallpiece_board().to(device)
-        board_2 = agent.get_nextpiece_borad().to(device)
-        state = transform(torch.stack([board,board_1,board_2]))
-        piece_step = 0  # 方块步数
-        holesCount = 0
-        for t in count():
-            # 前10步都是随机乱走的
-            piece_step += 1
-            curr_board_height = agent.getBoardCurrHeight()
-            if piece_step<10-curr_board_height:
-                # action = torch.tensor([[3]], device=device, dtype=torch.long)
-                action = torch.tensor([[random.randrange(3)]], device=device, dtype=torch.long)
-            else:
-                action = select_action(state.unsqueeze(0), False)
-
-            action_value = action.item()
-            agent_state, _reward = agent.step(action_value, False)
-
-            # 如果出现大于5个空洞就结束
-            is_terminal = (agent_state == 2)
-
-            # 如果是一个新方块落下，设置当前方块的步数为0
-            if agent_state==1: 
-                piece_step = 0
-                            
-            # if curr_board_height > 2 + steps_done//1000000:
-            #     is_terminal = True
-
-            if is_terminal :
-                _reward = -1.
-                next_state = None
-            else:
-                if agent_state==1:
-                    if _reward==0:
-                        # 如果没有奖励且又出现空洞就惩罚
-                        curr_holesCount = agent.getEmptyHolesCount()
-                        if curr_holesCount>holesCount:
-                            _reward = -1.
-                        elif curr_holesCount==holesCount:
-                            _reward = 0.5
-                        else:
-                            _reward = 1.
-                        holesCount = curr_holesCount
-                    else:
-                        _reward += 1.
-                else:
-                    _reward += 0.5
-                board = agent.getBoard().to(device)
-                board_1 = agent.get_fallpiece_board().to(device)
-                board_2 = agent.get_nextpiece_borad().to(device)
-                next_state = transform(torch.stack([board,board_1,board_2]))
-            
-            reward = torch.tensor([_reward], device=device)
-            buffer.append(Transition(state, action, next_state, reward))
-
-            # print(t, action, reward)
-            # print(t, action, reward,  state)
-            # plt.figure()
-            # plt.imshow(np.transpose(state,(1,2,0)))
-            # if next_state!=None:
-            #     plt.figure()            
-            #     plt.imshow(np.transpose(next_state,(1,2,0)))
-            # plt.show()
-            # if  t>3:
-            #     raise "ddd"
-
-            loss = optimize_model()
-            if loss!=None:       
-                avg_loss += loss.item() 
-
-            if is_terminal:
-                agent.reset()
-                break
-
-            state = next_state
-
-        step_episode_update += t
-        avg_step = avg_step*0.999 + t*0.001
-        avg_holesCount = avg_holesCount*0.999 + holesCount*0.001
-        avg_loss = avg_loss / t
-        # if avg_loss>1: 
-        #     GAMMA = GAMMA * 0.999
-        # elif avg_loss<0.1:
-        #     GAMMA = min(GAMMA * 1.001, 0.999)  
-
-        if i_episode % TARGET_UPDATE == 0:
-            net_actions_count_value = net_actions_count.cpu().numpy()
-            print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), \
-                i_episode, steps_done, "%.2f/%.2f"%(step_episode_update/TARGET_UPDATE, avg_step), \
-                "loss:", avg_loss, "GAMMA:", GAMMA, \
-                "action_counts:",net_actions_count_value/sum(net_actions_count_value), \
-                "holesCount:", avg_holesCount )
-            step_episode_update = 0.
-            torch.save({'net': net.state_dict(),
-                        'steps_done': steps_done,
-                        'avg_step': avg_step,
-                        }, modle_file)
-            if i_episode>0 and i_episode % 1000 == 0:
-                torch.save({'net': net.state_dict(),
-                        'steps_done': steps_done,
-                        'avg_step': avg_step,
-                        }, modle_file+"_%s"%steps_done)  
-
-def test(agent):
-    # 加载模型
-    num_episodes = 10
-    if os.path.exists(modle_file):
-        print("load",modle_file)
-        checkpoint = torch.load(modle_file, map_location=device)
-    else:
-        raise "not find modle file %s"%modle_file
-    net_sd = checkpoint['net']
-    net.load_state_dict(net_sd)
-    net.eval()
-    for i_episode in range(num_episodes):
-        for t in count():
-            for event in pygame.event.get():  # 需要事件循环，否则白屏
-                if event.type == QUIT:
-                    pygame.quit()
-                    sys.exit()    
-
-            board = agent.getBoard().to(device)
-            board_1 = agent.get_fallpiece_board().to(device)
-            board_2 = agent.get_nextpiece_borad().to(device)
-            state = transform(torch.stack([board,board_1,board_2]))
-
-            # plt.imshow(np.transpose(state,(1,2,0)))
-            # plt.show()
-
-            action = net(state.unsqueeze(0)).max(1)[1].view(1, 1)
-            action_value = action.item()
-            agent_state, _reward = agent.step(action_value, True)
-
-            if agent_state==2: 
-                agent.reset()
-                break
-
-            time.sleep(0.01)
-
-if __name__ == "__main__":
-    tetromino = Tetromino()
-    agent = Agent(tetromino)
-    # train(agent)
-    if device.type == "cpu":
-        test(agent)
-    else:
-        train(agent)

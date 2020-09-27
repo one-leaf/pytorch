@@ -133,8 +133,75 @@ pieces = {'s':stemplate,
           'j':jtemplate,
           't':ttemplate}
 
-class Tetromino(object):
-
+class Tetromino(object):  
+    def calculate(self,score):
+        level = int(score/10)+1
+        fallfreq = 0.27-(level*0.02)
+        return level,fallfreq
+        
+    def getnewpiece(self):
+        shape = random.choice(list(pieces.keys()))
+        newpiece = {'shape':shape,
+                    'rotation': random.randint(0,len(pieces[shape])-1),
+                    'x': int(boardwidth)//2-int(templatenum//2),
+                    'y': -2,
+                    'color': random.randint(0,len(colors)-1)}
+        return newpiece
+    
+    def getblankboard(self):
+        board = []
+        for x in range(boardwidth):
+            board.append([blank]*boardheight)
+        return board
+    
+    def addtoboard(self,board,piece):
+        for x in range(templatenum):
+            for y in range(templatenum):
+                if pieces[piece['shape']][piece['rotation']][y][x]!=blank:
+                    board[x + piece['x']][y + piece['y']] = piece['color']
+                
+    def onboard(self,x,y):
+        return x >=0 and x<boardwidth and y<boardheight
+        
+    def validposition(self,board,piece,ax = 0,ay = 0):
+        for x in range(templatenum):
+            for y in range(templatenum):
+                aboveboard = y +piece['y'] +ay < 0
+                if aboveboard or pieces[piece['shape']][piece['rotation']][y][x]== blank:
+                    continue
+                if not self.onboard(x + piece['x']+ax,y+piece['y']+ay):
+                    return False
+                # print(piece['x'],piece['y'])
+                if board[x+piece['x']+ax][y+piece['y']+ay]!=blank:
+                    return False
+        return True
+    
+    
+    def completeline(self,board,y):
+        for x in range(boardwidth):
+            if board[x][y]==blank:
+                return False
+        return True
+    
+    def removecompleteline(self,board):
+        numremove = 0
+        y = boardheight-1
+        while y >=0:
+            if self.completeline(board,y):
+                for pulldowny in range(y,0,-1):
+                    for x in range (boardwidth):
+                        board[x][pulldowny] = board[x][pulldowny-1]
+                for x in range(boardwidth):
+                    board[x][0] = blank
+                numremove+=1
+            else:
+                y-=1
+        return numremove
+    
+    def convertsize(self,boxx,boxy):
+        return (boxx*boxsize+xmargin,boxy*boxsize+topmargin)
+    
+class TetrominoEnv(Tetromino):
     def __init__(self):
         pygame.init()
         pygame.display.set_caption('tetromino')
@@ -142,7 +209,7 @@ class Tetromino(object):
         self.disp = pygame.display.set_mode((winx,winy))
         self.bigfont = pygame.font.Font('freesansbold.ttf',100)
         self.basicfont = pygame.font.Font('freesansbold.ttf',20)
-   
+
     def rungame(self):
         board = self.getblankboard()
         lastmovedowntime = time.time()
@@ -244,19 +311,12 @@ class Tetromino(object):
                 self.drawpiece(fallpiece)
     
             pygame.display.update()
-            self.fpsclock.tick(FPS)                              
-                
-    
-    def calculate(self,score):
-        level = int(score/10)+1
-        fallfreq = 0.27-(level*0.02)
-        return level,fallfreq
-    
+            self.fpsclock.tick(FPS)       
         
     def terminal(self):
         pygame.quit()
         sys.exit()
-        
+
     def checkforquit(self):
         for event in pygame.event.get(QUIT):
             self.terminal()
@@ -289,69 +349,7 @@ class Tetromino(object):
         while self.checkforpress() == None:
             pygame.display.update()
             self.fpsclock.tick()
-        
-    def getnewpiece(self):
-        shape = random.choice(list(pieces.keys()))
-        newpiece = {'shape':shape,
-                    'rotation': random.randint(0,len(pieces[shape])-1),
-                    'x': int(boardwidth)//2-int(templatenum//2),
-                    'y': -2,
-                    'color': random.randint(0,len(colors)-1)}
-        return newpiece
-    
-    def getblankboard(self):
-        board = []
-        for x in range(boardwidth):
-            board.append([blank]*boardheight)
-        return board
-    
-    def addtoboard(self,board,piece):
-        for x in range(templatenum):
-            for y in range(templatenum):
-                if pieces[piece['shape']][piece['rotation']][y][x]!=blank:
-                    board[x + piece['x']][y + piece['y']] = piece['color']
-                
-    def onboard(self,x,y):
-        return x >=0 and x<boardwidth and y<boardheight
-        
-    def validposition(self,board,piece,ax = 0,ay = 0):
-        for x in range(templatenum):
-            for y in range(templatenum):
-                aboveboard = y +piece['y'] +ay < 0
-                if aboveboard or pieces[piece['shape']][piece['rotation']][y][x]== blank:
-                    continue
-                if not self.onboard(x + piece['x']+ax,y+piece['y']+ay):
-                    return False
-                # print(piece['x'],piece['y'])
-                if board[x+piece['x']+ax][y+piece['y']+ay]!=blank:
-                    return False
-        return True
-    
-    
-    def completeline(self,board,y):
-        for x in range(boardwidth):
-            if board[x][y]==blank:
-                return False
-        return True
-    
-    def removecompleteline(self,board):
-        numremove = 0
-        y = boardheight-1
-        while y >=0:
-            if self.completeline(board,y):
-                for pulldowny in range(y,0,-1):
-                    for x in range (boardwidth):
-                        board[x][pulldowny] = board[x][pulldowny-1]
-                for x in range(boardwidth):
-                    board[x][0] = blank
-                numremove+=1
-            else:
-                y-=1
-        return numremove
-    
-    def convertsize(self,boxx,boxy):
-        return (boxx*boxsize+xmargin,boxy*boxsize+topmargin)
-    
+
     def drawbox(self,boxx,boxy,color,pixelx = None,pixely= None):
         if color == blank:
             return

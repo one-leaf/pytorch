@@ -1,27 +1,30 @@
-from game import Tetromino, pieces, templatenum, blank, black
+from game import Tetromino, TetrominoEnv, pieces, templatenum, blank, black
 import pygame
 from pygame.locals import *
 from itertools import count
-
-import torch
+import numpy as np
 
 KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN  = 0, 1, 2, 3
 
 class Agent(object):
-    def __init__(self):
-        self.tetromino = Tetromino()
+    def __init__(self, need_draw=False):
+        self.need_draw = need_draw 
+        if not need_draw:
+            self.tetromino = Tetromino()
+        else:
+            self.tetromino = TetrominoEnv()
         self.availables = [KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN]
-        self.actions_num = 4
         self.reset()
 
     def reset(self):
         self.fallpiece = self.tetromino.getnewpiece()
         self.nextpiece = self.tetromino.getnewpiece()
+        self.terminal = False
         self.score = 0
         self.level = 0
         self.board = self.tetromino.getblankboard()
     
-    def step(self, action, need_draw=True):
+    def step(self, action):
         # 状态 0 下落过程中 1 更换方块 2 结束一局
         state = 0
         reward = 0
@@ -52,7 +55,7 @@ class Agent(object):
         else:
             self.fallpiece['y'] +=1
 
-        if need_draw:
+        if self.need_draw:
             self.tetromino.disp.fill(black)
             self.tetromino.drawboard(self.board)
             self.tetromino.drawstatus(self.score, self.level)
@@ -64,7 +67,8 @@ class Agent(object):
         if self.fallpiece == None:
             self.fallpiece = self.nextpiece
             self.nextpiece = self.tetromino.getnewpiece()
-            if not self.tetromino.validposition(self.board,self.fallpiece):   
+            if not self.tetromino.validposition(self.board,self.fallpiece):  
+                self.terminal = True 
                 state = 2       
                 return state, reward
             else: 
@@ -73,12 +77,10 @@ class Agent(object):
             state = 0
         return state, reward
 
-    def current_state(self):
-        board = self.getBoard()
-        board_1 = self.get_fallpiece_board()
-        board_2 = self.get_nextpiece_borad()
-        state = torch.stack([board,board_1,board_2])
-        return state        
+    # 打印
+    def print(self):
+        print(self.getBoard)
+        print(self.level, self.score)
 
     # 获得当前局面信息
     def getBoard(self):
@@ -91,7 +93,7 @@ class Agent(object):
                     board[-1].append(0)
                 else:
                     board[-1].append(1)
-        board = torch.tensor(board, dtype=torch.float)
+        board = np.array(board)
         return board
 
     # 获得下落方块的信息
@@ -107,7 +109,7 @@ class Agent(object):
                         px, py = x+piece['x'], y+piece['y']
                         if px>=0 and py>=0:
                             board[x+piece['x']][y+piece['y']]=1
-        board = torch.tensor(board, dtype=torch.float)
+        board = np.array(board)
         return board
 
     # 获得待下落方块的信息
@@ -120,48 +122,68 @@ class Agent(object):
                 for y in range(templatenum):
                     if shapedraw[y][x]!=blank:
                         board[x][y]=0
-        board = torch.tensor(board, dtype=torch.float)
+        board = np.array(board)
         return board
 
-    # 计算当前的最高点
-    def getBoardCurrHeight(self):
-        height=len(self.board[0])
-        for line in self.board:
-            for h, value in enumerate(line): 
-                if value!=blank:
-                    if h<height:
-                        height = h
-        return len(self.board[0]) - height
+    # 获得当前的全部特征
+    def current_state(self):
+        board = self.getBoard()
+        board_1 = self.get_fallpiece_board()
+        board_2 = self.get_nextpiece_borad()
+        state = np.stack([board,board_1,board_2])
+        return state        
+
+    def game_end(self):
+        return self.terminal, self.score
 
     # 使用 mcts 训练，重用搜索树，并保存数据
     def start_self_play(self, player, temp=1e-3):
-        self.reset()
+        # 这里下两局，按得分和步数对比
         states, mcts_probs, current_players = [], [], []
+        score_1 = score_2 = 0
+
+        self.reset()
         for i in count():
             # temp 权重 ，return_prob 是否返回概率数据
-            action, move_probs = player.get_action(self.game, temp=temp, return_prob=1)
-            # store the data
+            action, move_probs = player.get_action(self, temp=temp, return_prob=1)
+            # 保存数据
             states.append(self.current_state())
-            # print(action)
-            # print(move_probs.reshape(self.size,self.size))
-            # print(states[-1])
             mcts_probs.append(move_probs)
-            # perform a move
-            self.game.step(action)
-            if self.is_shown:
-                self.env.render()
-            end, winner = self.game.game_end()
-            if end:
-                # winner from the perspective of the current player of each state
-                winners_z = np.zeros(len(current_players))
-                if winner != -1:
-                    winners_z[np.array(current_players) == winner] = 1.0
-                    winners_z[np.array(current_players) != winner] = -1.0
-                # reset MCTS root node
-                player.reset_player()
-                if self.is_shown:
-                    if winner != -1:
-                        print("Game end. Winner is player:", winner)
-                    else:
-                        print("Game end. Tie")
-                return winner, zip(states, mcts_probs, winners_z)
+            current_players.append(0)
+            # 执行一步
+            self.step(action)
+
+            # 如果游戏结束
+            if self.terminal:
+                score_1 = self.score
+                break
+        
+        self.reset()
+        for i in count():
+            # temp 权重 ，return_prob 是否返回概率数据
+            action, move_probs = player.get_action(self, temp=temp, return_prob=1)
+            # 保存数据
+            states.append(self.current_state())
+            mcts_probs.append(move_probs)
+            current_players.append(1)
+            # 执行一步
+            self.step(action, self.is_shown)
+
+            # 如果游戏结束
+            if self.terminal:
+                score_2 = self.score
+                break
+
+        # 按照棋局得分确定输赢
+        winners_z = np.zeros(len(current_players))
+        winner = -1
+        if score_2 > score_1:
+            winner = 1
+        if score_1 > score_2:
+            winner = 0
+
+        if winner != -1:
+            winners_z[np.array(current_players) == winner] = 1.0
+            winners_z[np.array(current_players) != winner] = -1.0
+                
+        return winner, zip(states, mcts_probs, winners_z)
