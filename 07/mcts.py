@@ -197,9 +197,9 @@ class MCTS(object):
                     如果平局返回0
         """
         curr_player = state.current_player
-        winner = -1
+        score = -1
         for i in range(limit):  # 随机快速走limit次，用于快速评估当前叶子节点的优略
-            end, winner = state.game_end()
+            end, score = state.game_end()
             if end:
                 break
             # 给棋盘所有可落子位置随机分配概率，并取其中最大概率的action移动
@@ -209,10 +209,10 @@ class MCTS(object):
         else:
             # If no break from the loop, issue a warning.
             print("WARNING: rollout reached move limit")
-        if winner == -1:  # tie平局
+        if score == -1:  # tie平局
             return 0
         else:
-            return (1.0 if winner != state.current_player  else -1.0)
+            return (1.0 if score >0  else -1.0)
 
     @staticmethod
     def rollout_policy_fn(state):
