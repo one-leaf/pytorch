@@ -149,7 +149,7 @@ class Agent(object):
                 score = self.score
             else:
                 holeCount = self.getHoleCount()
-                score = -1 * (holeCount/200)
+                score = -1. * (holeCount/200)
         return self.terminal, score   #self.score
 
     # 使用 mcts 训练，重用搜索树，并保存数据
