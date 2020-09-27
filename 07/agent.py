@@ -24,12 +24,14 @@ class Agent(object):
         self.terminal = False
         self.score = 0
         self.level = 0
+        self.steps = 0
         self.board = self.tetromino.getblankboard()
     
     def step(self, action):
         # 状态 0 下落过程中 1 更换方块 2 结束一局
         state = 0
         reward = 0
+        self.steps += 1
         self.level, self.fallfreq = self.tetromino.calculate(self.score)
 
         if action == KEY_LEFT and self.tetromino.validposition(self.board,self.fallpiece,ax = -1):
@@ -86,7 +88,7 @@ class Agent(object):
     # 打印
     def print(self):
         print(self.getBoard())
-        print("level:", self.level, "score:", self.score)
+        print("level:", self.level, "score:", self.score, "steps:", self.steps)
 
     # 统计空洞数量
     def getHoleCount(self):
@@ -146,7 +148,7 @@ class Agent(object):
         score = 0
         if self.terminal:
             if self.score>0:
-                score = 1.0 * self.score
+                score = 1.0 #* self.score
             else:
                 holeCount = self.getHoleCount()
                 score = -1.0 * (holeCount/200)
