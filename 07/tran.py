@@ -74,7 +74,7 @@ class Dataset(torch.utils.data.Dataset):
     # 保存新的训练样本，但不参与到本次训练，等下一次训练加载
     def save(self, obj):
         # 文件名为buffer取余，循环保存
-        filename = "%s.pkl" % self.curr_game_batch_num % self.buffer_size
+        filename = "%s.pkl" % (self.curr_game_batch_num % self.buffer_size)
         savefile = os.path.join(self.data_dir, filename)
         pickle.dump(obj, open(savefile, "wb"))
         self.curr_game_batch_num += 1
