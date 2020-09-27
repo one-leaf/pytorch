@@ -188,7 +188,7 @@ class MCTS(object):
             action_probs, leaf_value = self._policy(state)
             node.expand(action_probs)
         else:
-            # 游戏结束时返回真实的叶子胜负, 注意这里的游戏失败或成功的分值
+            # 游戏结束时返回真实的叶子胜负, 注意这里的游戏失败或成功的分值,由于后期还会重用搜索树，所以这里不能扩大奖励或惩罚分数
             if winner == -1:  # tie平局
                 leaf_value = 0.0
             else:
@@ -205,7 +205,7 @@ class MCTS(object):
                 #     else:
                 #         leaf_value = +10.0
                 # 换句话说即：                
-                leaf_value = (10.0 if winner != state.current_player  else -10.0)
+                leaf_value = (1.0 if winner != state.current_player  else -1.0)
         # 递归更新当前节点及所有父节点的最优选中次数和Q分数,因为得到的是本次的价值
         node.update_recursive(leaf_value)
 
@@ -290,7 +290,7 @@ class MCTS(object):
                 if len(visits)>2: 
                     # 如果当前的最佳选项在必救名单直接执行
                     if acts[idx] in self._first_ations:
-                        temp = 1e-4
+                        temp = 1e-5
                         break
 
                     var = np.var(visits)
@@ -317,9 +317,6 @@ class MCTS(object):
         # softmax概率，先用log(visites)，拉平差异，再乘以一个权重，这样给了一个可以调节的参数，
         # temp 越小，导致softmax的越肯定，也就是当temp=1e-3时，基本上返回只有一个1,其余概率都是0; 训练的时候 temp=1
         act_probs = MCTS.softmax((1/temp) * np.log(np.array(visits) + 1e-10))
-        if max(act_probs)==0.5:
-            print(visits)
-            print(act_probs)
         return acts, act_probs
 
     # 按访问次数返回当前状态下的动作及其概率，构建所有的树，默认10000局
@@ -401,17 +398,12 @@ class MCTSPlayer(object):
                 # dirichlet噪声参数中的p 0.3：一般按照反比于每一步的可行move数量设置，所以棋盘扩大或改围棋之后这个参数需要减小（此值设置过大容易出现在自我对弈的训练中陷入到两方都只进攻不防守的困境中无法提高）
                 # dirichlet噪声是分布的分布，sum为1，参数越大，分布越均匀，参数越小越集中
                 # 给定的是一个均匀分布，则参数越小，方差越大，扰动就越大
+                if max(act_probs)>0.99:
+                    p=1.
+                else:
+                    p = 1.0 - len(state.availables)/(state.size * state.size)*0.1  #【0.9~1】 这里默认为 0.25
+
                 dirichlet = np.random.dirichlet(0.3 * np.ones(len(act_probs)))
-                p = 1.0 - len(state.availables)/(state.size * state.size)*0.1  #【0.9~1】 这里默认为 0.25
-
-                # if max(act_probs)==1:
-                #     logging.info("probs:")
-                #     logging.info(act_probs)
-                #     logging.info("dirichlet:")
-                #     logging.info(dirichlet)
-                #     logging.info("p:")
-                #     logging.info(p * act_probs + (1-p) * dirichlet)
-
                 position = np.random.choice(positions, p=p * act_probs + (1-p) * dirichlet) 
                 action = state.positions_to_actions([position])[0]
 
