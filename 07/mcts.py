@@ -245,6 +245,7 @@ class MCTS(object):
                 temp：温度参数  控制探测水平，范围(0,1]
             Return: 所有action及对应概率
         """
+        random.seed()
         for n in count():
             # print("\r_n_playout： {:.2f}%".format(n*100 / self._n_playout), end='')
             state_copy = copy.deepcopy(state)
