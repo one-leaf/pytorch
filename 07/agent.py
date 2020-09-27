@@ -170,7 +170,7 @@ class Agent(object):
             if self.terminal:
                 break
         self.print()
-        _,score = self.game_end()
+        _, score = self.game_end()
         winners_z = np.zeros(len(current_players))
         winners_z[:] = score
         winner = -1
