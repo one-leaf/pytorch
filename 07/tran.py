@@ -79,7 +79,7 @@ class Dataset(torch.utils.data.Dataset):
         pickle.dump(obj, open(savefile, "wb"))
         self.curr_game_batch_num += 1
         self.save_game_batch_num()
-
+        
     def curr_size(self):
         return len(self.file_list)
 
@@ -172,10 +172,10 @@ class Train():
             print("end data loader")
 
             step = 0
-            while self.dataset.curr_size() < self.batch_size*self.epochs:
-                logging.info("TRAIN Batch:{} starting".format(step + 1,))
+            while self.dataset.curr_game_batch_num < self.batch_size*self.epochs:
+                logging.info("TRAIN Batch:{} starting".format(self.dataset.curr_game_batch_num,))
                 self.collect_selfplay_data()
-                logging.info("TRAIN Batch:{} end".format(step + 1,))
+                logging.info("TRAIN Batch:{} end".format(self.dataset.curr_game_batch_num,))
                 step += 1
 
             training_loader = torch.utils.data.DataLoader(self.dataset, batch_size=self.batch_size, shuffle=True, num_workers=2,)
