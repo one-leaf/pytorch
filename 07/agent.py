@@ -77,6 +77,10 @@ class Agent(object):
                 state =1
         else:
             state = 0
+        
+        # 这里早期训练得分直接结束游戏
+        if self.score>0: self.terminal = True
+
         return state, reward
 
     # 打印
