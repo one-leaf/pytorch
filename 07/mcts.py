@@ -168,15 +168,15 @@ class MCTS(object):
 
         # 检查游戏是否有赢家
         end, score = state.game_end()
+        ext_score = state.checkActionisBest()
         if not end:  # 没有结束时，把走子策略返回的[(action,概率)]list加载到mcts树child中 ，同时降低了 leaf_value 的权重
             # 使用训练好的模型策略评估此叶子节点，返回[(action,概率)]list 以及当前玩家的后续走子胜负
             action_probs, leaf_value = self._policy(state)
             # 如果没有结束，顺便加上中途检测得分
-            ext_score = state.checkActionisBest()
             leaf_value += ext_score
             node.expand(action_probs)
         else:
-            leaf_value = score
+            leaf_value = ext_score
            
         # 递归更新当前节点及所有父节点的最优选中次数和Q分数,因为得到的是本次的价值
         node.update_recursive(leaf_value)
