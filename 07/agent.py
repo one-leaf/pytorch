@@ -227,6 +227,7 @@ class Agent(object):
             # 如果游戏结束
             if self.terminal:
                 break
+        self.checkActionisBest()
         self.print()
         _, score0 = self.game_end()
         badHoleCount0 =self.badHoleCount
@@ -245,6 +246,7 @@ class Agent(object):
             # 如果游戏结束
             if self.terminal:
                 break
+        self.checkActionisBest()
         self.print()
         _, score1 = self.game_end()
         badHoleCount1 =self.badHoleCount
