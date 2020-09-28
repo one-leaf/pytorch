@@ -270,8 +270,8 @@ class MCTS(object):
         act_visits = [(act, node._n_visits) for act, node in self._root._children.items()]
         acts, visits = zip(*act_visits)
 
-        # 如果方差大于100才打印
-        if np.var(visits)>100:
+        # 如果方差大于10000才打印
+        if np.var(visits)>10000:
             info={}
             for idx in sorted(range(len(visits)), key=visits.__getitem__)[::-1]:
                 value = self._root._children[acts[idx]].get_value(5)
