@@ -89,7 +89,7 @@ class Agent(object):
 
     # 打印
     def print(self):
-        print(self.getBoard())
+        print(self.getBoard()+self.get_fallpiece_board())
         print("level:", self.level, "score:", self.score, "steps:", self.steps)
 
     # 统计空洞数量
