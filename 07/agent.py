@@ -97,7 +97,7 @@ class Agent(object):
                 else:
                     line=line+"*"
             print(line)
-        print("level:", self.level, "score:", self.score, "steps:", self.steps)
+        print("level:", self.level, "score:", self.score, "steps:", self.steps,"badHoleCount:", self.badHoleCount)
 
     # 统计空洞数量
     def getHoleCount(self):
