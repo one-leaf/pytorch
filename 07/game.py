@@ -134,12 +134,13 @@ pieces = {'s':stemplate,
           't':ttemplate}
 
 class Tetromino(object):  
-    def calculate(self,score):
-        level = int(score/10)+1
-        fallfreq = 0.27-(level*0.02)
-        return level,fallfreq
-        
-    def getnewpiece(self):
+    def __init__(self, isRandomNextPiece=True):
+        self.nextpiece=[]
+        if not isRandomNextPiece:
+            for i in range(100):
+                self.nextpiece.append(self.getrandompiece())
+
+    def getrandompiece(self):
         shape = random.choice(list(pieces.keys()))
         newpiece = {'shape':shape,
                     'rotation': random.randint(0,len(pieces[shape])-1),
@@ -147,6 +148,16 @@ class Tetromino(object):
                     'y': -2,
                     'color': random.randint(0,len(colors)-1)}
         return newpiece
+
+    def calculate(self,score):
+        level = int(score/10)+1
+        fallfreq = 0.27-(level*0.02)
+        return level,fallfreq
+        
+    def getnewpiece(self):
+        if len(self.nextpiece)>0:
+            return self.nextpiece.pop()
+        return self.getrandompiece()    
     
     def getblankboard(self):
         board = []
@@ -203,6 +214,7 @@ class Tetromino(object):
     
 class TetrominoEnv(Tetromino):
     def __init__(self):
+        super().__init__() 
         pygame.init()
         pygame.display.set_caption('tetromino')
         self.fpsclock = pygame.time.Clock()

@@ -10,7 +10,7 @@ class Agent(object):
     def __init__(self, need_draw=False):
         self.need_draw = need_draw 
         if not need_draw:
-            self.tetromino = Tetromino()
+            self.tetromino = Tetromino(isRandomNextPiece=False)
         else:
             self.tetromino = TetrominoEnv()
         self.availables = [KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN]
