@@ -194,13 +194,9 @@ class Agent(object):
     def checkActionisBest(self):
         if self.state == 0: return 0
         badHoleCount = self.getEmptyHolesCount()
-        if badHoleCount>self.badHoleCount:
-            self.badHoleCount = badHoleCount
-            return -1000
-        if badHoleCount<self.badHoleCount:
-            self.badHoleCount = badHoleCount
-            return 1000
-        return 0        
+        v = self.badHoleCount - badHoleCount
+        self.badHoleCount = badHoleCount
+        return 1.0 * v    
 
     def game_end(self):
         score = 0
