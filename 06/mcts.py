@@ -399,9 +399,9 @@ class MCTSPlayer(object):
                 # dirichlet噪声是分布的分布，sum为1，参数越大，分布越均匀，参数越小越集中
                 # 给定的是一个均匀分布，则参数越小，方差越大，扰动就越大
                 if max(act_probs)>0.99:
-                    p=1.
+                    p= 1.
                 else:
-                    p = 1.0 - len(state.availables)/(state.size * state.size)*0.1  #【0.9~1】 这里默认为 0.25
+                    p = 1.0 - len(state.availables)/(state.size * state.size)*0.05  #【0.95~1】 这里默认为 0.25
 
                 dirichlet = np.random.dirichlet(0.3 * np.ones(len(act_probs)))
                 position = np.random.choice(positions, p=p * act_probs + (1-p) * dirichlet) 
