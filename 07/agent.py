@@ -89,7 +89,15 @@ class Agent(object):
 
     # 打印
     def print(self):
-        print(self.getBoard()+self.get_fallpiece_board())
+        info = self.getBoard()+self.get_fallpiece_board()
+        for y in range(self.height):
+            line=""
+            for x in range(self.width):
+                if info[y][x]==0:
+                    line=line+" "
+                else:
+                    line=line+"*"
+            print(line)
         print("level:", self.level, "score:", self.score, "steps:", self.steps)
 
     # 统计空洞数量
