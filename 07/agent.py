@@ -28,10 +28,11 @@ class Agent(object):
         self.board = self.tetromino.getblankboard()
         # 坏洞的个数，用于评价这一步的优劣
         self.badHoleCount = 0
+        # 状态： 0 下落过程中 1 更换方块 2 结束一局
+        self.state =0
 
     def step(self, action):
         # 状态 0 下落过程中 1 更换方块 2 结束一局
-        state = 0
         reward = 0
         self.steps += 1
         self.level, self.fallfreq = self.tetromino.calculate(self.score)
@@ -75,17 +76,17 @@ class Agent(object):
             self.nextpiece = self.tetromino.getnewpiece()
             if not self.tetromino.validposition(self.board,self.fallpiece):  
                 self.terminal = True 
-                state = 2       
-                return state, reward
+                self.state = 2       
+                return self.state, reward
             else: 
-                state =1
+                self.state =1
         else:
-            state = 0
+            self.state = 0
         
         # 这里早期训练得分直接结束游戏
         if self.score>0: self.terminal = True
 
-        return state, reward
+        return self.state, reward
 
     # 打印
     def print(self):
@@ -191,13 +192,14 @@ class Agent(object):
 
     # 检测这一步是否优，如果好+1，不好-1，无法评价0
     def checkActionisBest(self):
+        if self.state == 0: return 0
         badHoleCount = self.getEmptyHolesCount()
         if badHoleCount>self.badHoleCount:
             self.badHoleCount = badHoleCount
-            return -100
+            return -1000
         if badHoleCount<self.badHoleCount:
             self.badHoleCount = badHoleCount
-            return 100
+            return 1000
         return 0        
 
     def game_end(self):
