@@ -173,7 +173,7 @@ class MCTS(object):
             action_probs, leaf_value = self._policy(state)
             # 如果没有结束，顺便加上中途检测得分
             ext_score = state.checkActionisBest()
-            leaf_value += ext_score
+            leaf_value = ext_score
             node.expand(action_probs)
         else:
             leaf_value = score
