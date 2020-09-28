@@ -229,7 +229,7 @@ class Agent(object):
                 break
         self.checkActionisBest()
         self.print()
-        _, score0 = self.game_end()
+        score0 = self.score
         badHoleCount0 =self.badHoleCount
 
         self.tetromino=tetromino
@@ -248,7 +248,7 @@ class Agent(object):
                 break
         self.checkActionisBest()
         self.print()
-        _, score1 = self.game_end()
+        score1 = self.score
         badHoleCount1 =self.badHoleCount
 
         winner = -1
