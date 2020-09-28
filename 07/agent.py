@@ -3,6 +3,7 @@ import pygame
 from pygame.locals import *
 from itertools import count
 import numpy as np
+import copy
 
 KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN  = 0, 1, 2, 3
 
@@ -83,9 +84,6 @@ class Agent(object):
         else:
             self.state = 0
         
-        # 这里早期训练得分直接结束游戏
-        if self.score>0: self.terminal = True
-
         return self.state, reward
 
     # 打印
@@ -212,6 +210,10 @@ class Agent(object):
     def start_self_play(self, player, temp=1e-3):
         # 这里下两局，按得分和步数对比
         states, mcts_probs, current_players = [], [], []
+        tetromino = copy.deepcopy(self.tetromino)
+        
+        score0,score1,badHoleCount0,badHoleCount1=0,0,0,0
+
         self.reset()
         for i in count():
             # temp 权重 ，return_prob 是否返回概率数据
@@ -226,8 +228,35 @@ class Agent(object):
             if self.terminal:
                 break
         self.print()
-        _, score = self.game_end()
-        winners_z = np.zeros(len(current_players))
-        winners_z[:] = score
+        _, score0 = self.game_end()
+        badHoleCount0 =self.badHoleCount
+
+        self.tetromino=tetromino
+        self.reset()
+        for i in count():
+            # temp 权重 ，return_prob 是否返回概率数据
+            action, move_probs = player.get_action(self, temp=temp, return_prob=1)
+            # 保存数据
+            states.append(self.current_state())
+            mcts_probs.append(move_probs)
+            current_players.append(1)
+            # 执行一步
+            self.step(action)
+            # 如果游戏结束
+            if self.terminal:
+                break
+        self.print()
+        _, score1 = self.game_end()
+        badHoleCount1 =self.badHoleCount
+
         winner = -1
+        winners_z = np.zeros(len(current_players))
+        if score0>score1: winner=0
+        if score0<score1: winner=1
+        if score0==score1 and badHoleCount0<badHoleCount1: winner=0
+        if score0==score1 and badHoleCount0>badHoleCount1: winner=1
+
+        if winner != -1:
+            winners_z[np.array(current_players) == winner] = 1.0
+            winners_z[np.array(current_players) != winner] = -1.0
         return winner, zip(states, mcts_probs, winners_z)
