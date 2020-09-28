@@ -194,12 +194,11 @@ class Agent(object):
         badHoleCount = self.getEmptyHolesCount()
         if badHoleCount>self.badHoleCount:
             self.badHoleCount = badHoleCount
-            return -1
+            return -10
         if badHoleCount<self.badHoleCount:
             self.badHoleCount = badHoleCount
-            return 1
-        return 0
-        
+            return 10
+        return 0        
 
     def game_end(self):
         score = 0
