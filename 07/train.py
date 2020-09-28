@@ -94,7 +94,7 @@ class Train():
         self.temp = 1.0  # the temperature param
         self.n_playout = 100  # 每个动作的模拟次数
         self.buffer_size = 100000  # cache对战记录个数
-        self.play_batch_size = 2 # 每次自学习次数
+        self.play_batch_size = 1 # 每次自学习次数
         self.epochs = 5  # 每次更新策略价值网络的训练步骤数, 推荐是5
         self.kl_targ = 0.02  # 策略价值网络KL值目标
         self.best_win_ratio = 0.0
