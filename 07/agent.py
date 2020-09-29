@@ -282,6 +282,8 @@ class Agent(object):
             if steps0>steps1:
                 winner = 1
 
+        # 如果双方都没有奖励就是平局，因为很难消除
+        
         # # 如果没有奖励，则空洞少的赢
         # if score0==0 and score1==0:
         #     if badHoleCount0<badHoleCount1:
