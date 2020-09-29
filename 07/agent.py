@@ -274,12 +274,10 @@ class Agent(object):
 
         # 如果双方都有奖励，空洞少的赢,如果平局，全部奖励
         if score0>0 and score1>0:
-            if badHoleCount0<badHoleCount1:
-                winner = 0
-            if badHoleCount0>badHoleCount1:
-                winner = 1
-            if badHoleCount0==badHoleCount1:
+            if abs(badHoleCount0-badHoleCount1)<5:
                 winners_z[:] = 1.0
+            else:
+                winner = 0 if badHoleCount0<badHoleCount1 else 1
 
         # 如果双方都没有奖励就是平局，因为很难消除
 
