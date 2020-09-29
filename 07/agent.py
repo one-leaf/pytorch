@@ -243,7 +243,7 @@ class Agent(object):
                 break
         self.print()
         score0 = self.score
-        badHoleCount0 = self.getEmptyHolesCount()
+        # badHoleCount0 = self.getEmptyHolesCount()
 
         self.tetromino=tetromino
         self.reset()
@@ -261,7 +261,7 @@ class Agent(object):
                 break
         self.print()
         score1 = self.score
-        badHoleCount1 = self.getEmptyHolesCount()
+        # badHoleCount1 = self.getEmptyHolesCount()
 
         winner = -1
         winners_z = np.zeros(len(current_players))
