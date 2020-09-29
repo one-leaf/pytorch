@@ -243,6 +243,7 @@ class Agent(object):
                 break
         self.print()
         score0 = self.score
+        steps0 = i
         # badHoleCount0 = self.getEmptyHolesCount()
 
         self.tetromino=tetromino
@@ -261,6 +262,8 @@ class Agent(object):
                 break
         self.print()
         score1 = self.score
+        steps1 = i
+
         # badHoleCount1 = self.getEmptyHolesCount()
 
         winner = -1
@@ -272,8 +275,12 @@ class Agent(object):
         if score1>0 and score0==0: 
             winner = 1
 
+        # 如果双方都有奖励，步骤少的赢
         if score0>0 and score1>0:
-            winners_z[:] = 1.0
+            if steps0<steps1:
+                winner = 0
+            if steps0>steps1:
+                winner = 1
 
         # # 如果没有奖励，则空洞少的赢
         # if score0==0 and score1==0:
