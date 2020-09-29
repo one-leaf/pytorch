@@ -288,6 +288,7 @@ class MCTS(object):
                 acts, visits = zip(*act_visits)
 
                 idx = max(range(len(visits)), key=visits.__getitem__)
+                temp = state.availables/(state.size**2)
             #     if len(visits)>2: 
             #         # 如果当前的最佳选项在必救名单直接执行
             #         if acts[idx] in self._first_ations:
