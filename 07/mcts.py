@@ -277,6 +277,16 @@ class MCTS(object):
                 value = self._root._children[acts[idx]].get_value(5)
                 info[acts[idx]] = (visits[idx], round(value, 2))
             print("_n_playout:", n, "info:", info)
+            nodes=[self._root]
+            lines=[[]]
+            curr_line=0
+            while(len(nodes)>0):
+                node = nodes.pop()
+                for n in node._children:
+                    lines[-1].append([n,])
+                    nodes.append(node._children[n])
+                
+
 
         # softmax概率，先用log(visites)，拉平差异，再乘以一个权重，这样给了一个可以调节的参数，
         # temp 越小，导致softmax的越肯定，也就是当temp=1e-3时，基本上返回只有一个1,其余概率都是0; 训练的时候 temp=1

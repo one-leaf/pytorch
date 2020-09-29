@@ -65,7 +65,7 @@ class Dataset(torch.utils.data.Dataset):
 
     def save(self, obj):
         with self._save_lock:
-            filename = "%s.pkl" % self.curr_game_batch_num
+            filename = "{}.pkl".format(self.curr_game_batch_num % self.buffer_size,)
             savefile = os.path.join(self.data_dir, filename)
             pickle.dump(obj, open(savefile, "wb"))
             self.curr_game_batch_num += 1
