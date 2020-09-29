@@ -95,7 +95,7 @@ class FiveChessTrain():
         
         # 纯MCTS的模拟数，用于评估策略模型
         self.pure_mcts_playout_num = 1000 # 用户纯MCTS构建初始树时的随机走子步数
-        self.c_puct = 5  # MCTS child权重， 用来调节MCTS中 探索/乐观 的程度
+        self.c_puct = 10  # MCTS child权重， 用来调节MCTS中 探索/乐观 的程度
         if os.path.exists(model_file):
             # 使用一个训练好的策略价值网络
             self.policy_value_net = PolicyValueNet(size, model_file=model_file)
