@@ -223,7 +223,7 @@ class Agent(object):
                     for x in range(templatenum):
                         if shapedraw[y][x]!=blank:
                             px, py = x+piece['x'], y+piece['y']+t
-                            if board[py][px]!=blank:
+                            if py>=self.height or board[py][px]!=blank:
                                 find=True
                                 break
                     if find: break
