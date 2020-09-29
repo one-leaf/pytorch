@@ -132,9 +132,10 @@ class PolicyValueNet():
         """
         current_state = game.current_state().reshape(1, -1, self.input_height, self.input_width)
         act_probs, value = self.policy_value(current_state)
+
         act_probs = act_probs.flatten()
-        actions = game.availables
-        act_probs = list(zip(actions, act_probs))
+        actions = game.availables()
+        act_probs = list(zip(actions, act_probs[actions]))
         value = value[0,0]
         return act_probs, value
 

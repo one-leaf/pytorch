@@ -14,9 +14,9 @@ class Agent(object):
             self.tetromino = Tetromino(isRandomNextPiece=False)
         else:
             self.tetromino = TetrominoEnv()
-        self.availables = [KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN]
         self.width = 10
         self.height = 20
+        self.actions_num = 4
         self.reset()
 
     def reset(self):
@@ -31,6 +31,22 @@ class Agent(object):
         self.badHoleCount = 0
         # 状态： 0 下落过程中 1 更换方块 2 结束一局
         self.state =0
+
+    # 获取可用步骤
+    def availables(self):
+        acts=[KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN]
+        if not self.tetromino.validposition(self.board,self.fallpiece,ax = -1):
+            acts.remove(KEY_LEFT)
+        if not self.tetromino.validposition(self.board,self.fallpiece,ax = 1):
+            acts.remove(KEY_RIGHT)   
+        if not self.tetromino.validposition(self.board,self.fallpiece,ay = 1):
+            acts.remove(KEY_DOWN) 
+        r = self.fallpiece['rotation']  
+        self.fallpiece['rotation'] =  (self.fallpiece['rotation'] + 1) % len(pieces[self.fallpiece['shape']])
+        if not self.tetromino.validposition(self.board,self.fallpiece):
+            acts.remove(KEY_ROTATION)
+        self.fallpiece['rotation'] = r 
+        return acts         
 
     def step(self, action):
         # 状态 0 下落过程中 1 更换方块 2 结束一局
