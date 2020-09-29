@@ -101,8 +101,10 @@ class Agent(object):
         return self.state, reward
 
     # 打印
-    def print(self):
-        info = self.getBoard()+self.get_fallpiece_board()
+    def print(self, add_fallpiece=False):
+        info = self.getBoard()
+        if add_fallpiece:
+            info += self.get_fallpiece_board()
         for y in range(self.height):
             line=""
             for x in range(self.width):
@@ -169,27 +171,25 @@ class Agent(object):
 
     # 空洞个数 
     def getEmptyHolesCount(self):
-        boardwidth = len(self.board)
-        boardheight = len(self.board[0])
         holesCount = 0
-        for x in range(boardwidth):
+        for x in range(self.width):
             find_block = False
-            for y in range(boardheight):
+            for y in range(self.height):
                 if self.board[x][y]!=blank:
                     find_block = True
                 elif find_block:
                     holesCount += 1   
         # 别出现#
-        for x in range(boardwidth):
+        for x in range(self.width):
             c = 0
-            for y in range(boardheight):
+            for y in range(self.height):
                 if self.board[x][y]!=blank: break
                 if x == 0:
                     if self.board[x+1][y]!=blank:
                         c += 1
                     elif c > 0:
                         c += 1
-                elif x == boardwidth-1:
+                elif x == self.width-1:
                     if self.board[x-1][y]!=blank:
                         c += 1
                     elif c > 0:
@@ -243,8 +243,7 @@ class Agent(object):
                 break
         self.print()
         score0 = self.score
-        steps0 = i
-        # badHoleCount0 = self.getEmptyHolesCount()
+        badHoleCount0 = self.getEmptyHolesCount()
 
         self.tetromino=tetromino
         self.reset()
@@ -262,9 +261,7 @@ class Agent(object):
                 break
         self.print()
         score1 = self.score
-        steps1 = i
-
-        # badHoleCount1 = self.getEmptyHolesCount()
+        badHoleCount1 = self.getEmptyHolesCount()
 
         winner = -1
         winners_z = np.zeros(len(current_players))
@@ -275,15 +272,15 @@ class Agent(object):
         if score1>0 and score0==0: 
             winner = 1
 
-        # 如果双方都有奖励，步骤少的赢
+        # 如果双方都有奖励，空洞少的赢
         if score0>0 and score1>0:
-            if steps0<steps1:
+            if badHoleCount0<badHoleCount1:
                 winner = 0
-            if steps0>steps1:
+            if badHoleCount0>badHoleCount1:
                 winner = 1
 
         # 如果双方都没有奖励就是平局，因为很难消除
-        
+
         # # 如果没有奖励，则空洞少的赢
         # if score0==0 and score1==0:
         #     if badHoleCount0<badHoleCount1:
