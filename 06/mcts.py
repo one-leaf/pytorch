@@ -307,7 +307,7 @@ class MCTS(object):
         act_visits = [(act, node._n_visits) for act, node in self._root._children.items()]
         acts, visits = zip(*act_visits)
 
-        info={}
+        info={"depth":self.max_depth_tree}
         for idx in sorted(range(len(visits)), key=visits.__getitem__)[::-1]:
             if len(info)>=3: break
             value = self._root._children[acts[idx]].get_value(5)
@@ -318,6 +318,14 @@ class MCTS(object):
         # temp 越小，导致softmax的越肯定，也就是当temp=1e-3时，基本上返回只有一个1,其余概率都是0; 训练的时候 temp=1
         act_probs = MCTS.softmax((1/temp) * np.log(np.array(visits) + 1e-10))
         return acts, act_probs
+
+    def max_depth_tree(self, node=None):
+        if node==None:
+            node=self._root
+        l=[0]
+        for act in node._children:
+            l.append(self.max_depth_tree(node._children[act])+1)
+        return max(l)
 
     # 按访问次数返回当前状态下的动作及其概率，构建所有的树，默认10000局
     # 这个是 mcts 的标准方法
