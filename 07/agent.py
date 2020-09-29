@@ -95,6 +95,9 @@ class Agent(object):
         else:
             self.state = 0
         
+        # 早期训练中，如果得分就表示游戏结束
+        if reward>0: self.terminal=True
+
         return self.state, reward
 
     # 打印
