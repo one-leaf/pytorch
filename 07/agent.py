@@ -271,16 +271,16 @@ class Agent(object):
             winner = 0
         if score1>0 and score0==0: 
             winner = 1
-            
+
         if score0>0 and score1>0:
             winners_z[:] = 1.0
 
-        # 如果没有奖励，则空洞少的赢
-        if score0==0 and score1==0:
-            if badHoleCount0<badHoleCount1:
-                winner = 0
-            if badHoleCount0>badHoleCount1: 
-                winner = 1   
+        # # 如果没有奖励，则空洞少的赢
+        # if score0==0 and score1==0:
+        #     if badHoleCount0<badHoleCount1:
+        #         winner = 0
+        #     if badHoleCount0>badHoleCount1: 
+        #         winner = 1   
 
         if winner != -1:
             winners_z[np.array(current_players) == winner] = 1.0
