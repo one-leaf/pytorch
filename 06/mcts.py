@@ -316,7 +316,7 @@ class MCTS(object):
             value = self._root._children[acts[idx]].get_value(5)
             info[acts[idx]] = (visits[idx], round(value, 2))
 
-        temp = temp*(len(state.availables)/(state.size*state.size)**4)
+        temp = temp*(len(state.availables)/(state.size*state.size)**2)
         print("_n_playout:", n, "info:", info, "first:",self._first_ations)
         # softmax概率，先用log(visites)，拉平差异，再乘以一个权重，这样给了一个可以调节的参数，
         # temp 越小，导致softmax的越肯定，也就是当temp=1e-3时，基本上返回只有一个1,其余概率都是0; 训练的时候 temp=1
@@ -413,7 +413,7 @@ class MCTSPlayer(object):
                 if max(act_probs)>0.99:
                     p= 1.
                 else:
-                    p = 1.0 - len(state.availables)/(state.size * state.size)*0.01  #【0.99~1】 这里默认为 0.25
+                    p = 1.0 - len(state.availables)/(state.size * state.size)*0.25  #【0.99~1】 这里默认为 0.25
 
                 dirichlet = np.random.dirichlet(0.3 * np.ones(len(act_probs)))
                 position = np.random.choice(positions, p=p * act_probs + (1-p) * dirichlet) 
