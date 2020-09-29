@@ -278,7 +278,7 @@ class MCTS(object):
                 value = self._root._children[acts[idx]].get_value(5)
                 info[acts[idx]] = (visits[idx], round(value, 2))
             print("_n_playout:", n, "info:", info)
-            self.print_tree()
+            # self.print_tree()
             # nodes=[self._root]
             # lines=[[]]
             # curr_line=0
