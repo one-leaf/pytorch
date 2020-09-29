@@ -308,7 +308,7 @@ class MCTS(object):
         act_visits = [(act, node._n_visits) for act, node in self._root._children.items()]
         acts, visits = zip(*act_visits)
 
-        info={"depth":self.max_depth_tree}
+        info={"depth":self.max_depth_tree()}
         for idx in sorted(range(len(visits)), key=visits.__getitem__)[::-1]:
             if len(info)>=3: break
             value = self._root._children[acts[idx]].get_value(5)
