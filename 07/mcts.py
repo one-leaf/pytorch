@@ -156,6 +156,7 @@ class MCTS(object):
             Params：state盘面 构建过程中会模拟走子，必须传入盘面的copy.deepcopy副本
         """
         node = self._root
+        reward = 0
         # 找到最优叶子节点：递归从child中选择并执行最大 动作Q+奖励u(P) 的动作
         while (1):
             if node.is_leaf():
@@ -164,19 +165,18 @@ class MCTS(object):
             # 从child中选择最优action
             action, node = node.select(self._c_puct)
             # 执行action走子
-            state.step(action)
+            _, reward = state.step(action)
 
         # 检查游戏是否有赢家
         end, score = state.game_end()
-        ext_score = state.checkActionisBest()
         if not end:  # 没有结束时，把走子策略返回的[(action,概率)]list加载到mcts树child中 ，同时降低了 leaf_value 的权重
             # 使用训练好的模型策略评估此叶子节点，返回[(action,概率)]list 以及当前玩家的后续走子胜负
             action_probs, leaf_value = self._policy(state)
             # 如果没有结束，顺便加上中途检测得分
-            leaf_value += ext_score
+            leaf_value += reward
             node.expand(action_probs)
         else:
-            leaf_value = ext_score
+            leaf_value = reward
            
         # 递归更新当前节点及所有父节点的最优选中次数和Q分数,因为得到的是本次的价值
         node.update_recursive(leaf_value)
