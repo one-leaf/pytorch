@@ -273,7 +273,7 @@ class MCTS(object):
 
         # 打印每一个下落方块的最后一步
         if state.state!=0:
-            info={"shape":state.fallpiece["shape"]}
+            info={"shape":state.fallpiece["shape"],"dept":self.max_depth_tree()}
             for idx in sorted(range(len(visits)), key=visits.__getitem__)[::-1]:
                 value = self._root._children[acts[idx]].get_value(5)
                 info[acts[idx]] = (visits[idx], round(value, 2))
@@ -294,6 +294,14 @@ class MCTS(object):
         # temp 越小，导致softmax的越肯定，也就是当temp=1e-3时，基本上返回只有一个1,其余概率都是0; 训练的时候 temp=1
         act_probs = MCTS.softmax((1/temp) * np.log(np.array(visits) + 1e-10))
         return acts, act_probs
+
+    def max_depth_tree(self, node=None):
+        if node==None:
+            node=self._root
+        l=[0]
+        for act in node._children:
+            l.append(self.max_depth_tree(node._children[act])+1)
+        return max(l)
 
     def print_tree(self, node=None, depth=0):
         if depth == 0:
