@@ -267,10 +267,13 @@ class Agent(object):
         winners_z = np.zeros(len(current_players))
         
         # 如果有奖励，则全部赢
-        if score0>0: 
-            winners_z[np.array(current_players) == 0] = 1.0
-        if score1>0: 
-            winners_z[np.array(current_players) == 1] = 1.0
+        if score0>0 and score1==0: 
+            winner = 0
+        if score1>0 and score0==0: 
+            winner = 1
+            
+        if score0>0 and score1>0:
+            winners_z[:] = 1.0
 
         # 如果没有奖励，则空洞少的赢
         if score0==0 and score1==0:
@@ -282,4 +285,5 @@ class Agent(object):
         if winner != -1:
             winners_z[np.array(current_players) == winner] = 1.0
             winners_z[np.array(current_players) != winner] = -1.0
+        print("winner:",winner)
         return winner, zip(states, mcts_probs, winners_z)
