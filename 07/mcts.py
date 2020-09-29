@@ -273,7 +273,8 @@ class MCTS(object):
 
         # 打印每一个下落方块的最后一步
         if state.state!=0:
-            info={"shape":state.fallpiece["shape"], "depth":self.max_depth_tree()}
+            # info={"shape":state.fallpiece["shape"], "depth":self.max_depth_tree()}
+            info={"shape":state.fallpiece["shape"]}
             for idx in sorted(range(len(visits)), key=visits.__getitem__)[::-1]:
                 value = self._root._children[acts[idx]].get_value(5)
                 info[acts[idx]] = (visits[idx], round(value, 2))
