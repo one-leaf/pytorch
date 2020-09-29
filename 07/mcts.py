@@ -301,7 +301,7 @@ class MCTS(object):
             node=self._root
 
         for act in node._children:
-            print("|      " * depth + "+--" + act)
+            print("|      " * depth + "+--" + str(act))
             new_node = node[act]
             self.print_tree(new_node, depth +1)
 
