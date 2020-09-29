@@ -293,9 +293,9 @@ class MCTS(object):
                         temp = 1e-5
                         break
 
-                    var = np.var(visits)
-                    if var>50**2:
-                        break
+                    # var = np.var(visits)
+                    # if var>50**2:
+                    #     break
             
                 if n>=self._n_playout:
                     # 如果得分为负数，多算2倍，争取找出一个优解
