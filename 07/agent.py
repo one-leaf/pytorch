@@ -227,8 +227,6 @@ class Agent(object):
         # 这里下两局，按得分和步数对比
         states, mcts_probs, current_players = [], [], []
         tetromino = copy.deepcopy(self.tetromino)
-        
-        score0,score1=0,0
 
         self.reset()
         for i in count():
@@ -245,6 +243,7 @@ class Agent(object):
                 break
         self.print()
         score0 = self.score
+        badHoleCount0 = self.getEmptyHolesCount()
 
         self.tetromino=tetromino
         self.reset()
@@ -262,11 +261,21 @@ class Agent(object):
                 break
         self.print()
         score1 = self.score
+        badHoleCount1 = self.getEmptyHolesCount()
 
         winner = -1
         winners_z = np.zeros(len(current_players))
-        if score0>score1: winner=0
-        if score0<score1: winner=1
+        
+        if score0>0: 
+            winners_z[np.array(current_players) == 0] = 1.0
+        if score1>0: 
+            winners_z[np.array(current_players) == 1] = 1.0
+
+        if score0==0 and score1==0:
+            if badHoleCount0<badHoleCount1:
+                winner = 0
+            if badHoleCount0>badHoleCount1: 
+                winner = 1   
 
         if winner != -1:
             winners_z[np.array(current_players) == winner] = 1.0
