@@ -291,5 +291,5 @@ class Agent(object):
         if winner != -1:
             winners_z[np.array(current_players) == winner] = 1.0
             winners_z[np.array(current_players) != winner] = -1.0
-        print("winner:",winner)
+        print("winner:",winner,"badHoleCount0:",badHoleCount0,"badHoleCount1",badHoleCount1)
         return winner, zip(states, mcts_probs, winners_z)
