@@ -278,14 +278,14 @@ class MCTS(object):
                 value = self._root._children[acts[idx]].get_value(5)
                 info[acts[idx]] = (visits[idx], round(value, 2))
             print("_n_playout:", n, "info:", info)
-            nodes=[self._root]
-            lines=[[]]
-            curr_line=0
-            while(len(nodes)>0):
-                node = nodes.pop()
-                for n in node._children:
-                    lines[-1].append([n,])
-                    nodes.append(node._children[n])
+            # nodes=[self._root]
+            # lines=[[]]
+            # curr_line=0
+            # while(len(nodes)>0):
+            #     node = nodes.pop()
+            #     for n in node._children:
+            #         lines[-1].append([n,])
+            #         nodes.append(node._children[n])
                 
 
 
