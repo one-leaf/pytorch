@@ -32,7 +32,7 @@ class Agent(object):
         # 状态： 0 下落过程中 1 更换方块 2 结束一局
         self.state =0
 
-    # 获取可用步骤
+    # 获取可用步骤, 保留一个旋转始终有用
     def availables(self):
         acts=[KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN]
         if not self.tetromino.validposition(self.board,self.fallpiece,ax = -1):
@@ -41,11 +41,6 @@ class Agent(object):
             acts.remove(KEY_RIGHT)   
         if not self.tetromino.validposition(self.board,self.fallpiece,ay = 1):
             acts.remove(KEY_DOWN) 
-        r = self.fallpiece['rotation']  
-        self.fallpiece['rotation'] =  (self.fallpiece['rotation'] + 1) % len(pieces[self.fallpiece['shape']])
-        if not self.tetromino.validposition(self.board,self.fallpiece):
-            acts.remove(KEY_ROTATION)
-        self.fallpiece['rotation'] = r 
         return acts         
 
     def step(self, action):
