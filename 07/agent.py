@@ -104,11 +104,11 @@ class Agent(object):
             line=""
             for x in range(self.width):
                 if info[y][x]==0:
-                    line=line+" "
+                    line=line+"  "
                 else:
-                    line=line+"*"
+                    line=line+"* "
             print(line)
-        print("level:", self.level, "score:", self.score, "steps:", self.steps, "badHoleCount:", self.badHoleCount)
+        print("level:", self.level, "score:", self.score, "steps:", self.steps)
 
     # 统计空洞数量
     def getHoleCount(self):
@@ -223,7 +223,7 @@ class Agent(object):
         states, mcts_probs, current_players = [], [], []
         tetromino = copy.deepcopy(self.tetromino)
         
-        score0,score1,badHoleCount0,badHoleCount1=0,0,0,0
+        score0,score1=0,0
 
         self.reset()
         for i in count():
@@ -238,10 +238,8 @@ class Agent(object):
             # 如果游戏结束
             if self.terminal:
                 break
-        self.checkActionisBest()
         self.print()
         score0 = self.score
-        badHoleCount0 =self.badHoleCount
 
         self.tetromino=tetromino
         self.reset()
@@ -257,17 +255,13 @@ class Agent(object):
             # 如果游戏结束
             if self.terminal:
                 break
-        self.checkActionisBest()
         self.print()
         score1 = self.score
-        badHoleCount1 =self.badHoleCount
 
         winner = -1
         winners_z = np.zeros(len(current_players))
         if score0>score1: winner=0
         if score0<score1: winner=1
-        if score0==score1 and badHoleCount0<badHoleCount1: winner=0
-        if score0==score1 and badHoleCount0>badHoleCount1: winner=1
 
         if winner != -1:
             winners_z[np.array(current_players) == winner] = 1.0
