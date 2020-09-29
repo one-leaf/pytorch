@@ -278,6 +278,7 @@ class MCTS(object):
                 value = self._root._children[acts[idx]].get_value(5)
                 info[acts[idx]] = (visits[idx], round(value, 2))
             print("_n_playout:", n, "info:", info)
+            self.print_tree()
             # nodes=[self._root]
             # lines=[[]]
             # curr_line=0
@@ -293,6 +294,17 @@ class MCTS(object):
         # temp 越小，导致softmax的越肯定，也就是当temp=1e-3时，基本上返回只有一个1,其余概率都是0; 训练的时候 temp=1
         act_probs = MCTS.softmax((1/temp) * np.log(np.array(visits) + 1e-10))
         return acts, act_probs
+
+    def print_tree(self, node=None, depth=0):
+        if depth == 0:
+            print("root")
+            node=self._root
+
+        for act in node._children:
+            print("|      " * depth + "+--" + act)
+            new_node = node[act]
+            self.print_tree(new_node, depth +1)
+
 
     # 按访问次数返回当前状态下的动作及其概率，构建所有的树，默认10000局
     # 这个是 mcts 的标准方法
