@@ -199,7 +199,7 @@ class Agent(object):
                         c += 1
                     elif c > 0:
                         c += 1
-            if c>=2: holesCount += c
+            if c>=2: holesCount += c*0.5
         return holesCount
 
     # 检测这一步是否优，如果好+1，不好-1，无法评价0
