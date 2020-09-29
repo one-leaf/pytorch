@@ -170,32 +170,36 @@ class Agent(object):
         return state        
 
     # 空洞个数 
-    def getEmptyHolesCount(self):
+    def getEmptyHolesCount(self, board=None):
+        if board==None: board = self.board
+        width = len(board)
+        height = len(board[0])
+
         holesCount = 0
-        for x in range(self.width):
+        for x in range(width):
             find_block = False
-            for y in range(self.height):
-                if self.board[x][y]!=blank:
+            for y in range(height):
+                if board[x][y]!=blank:
                     find_block = True
                 elif find_block:
                     holesCount += 1   
         # 别出现#
-        for x in range(self.width):
+        for x in range(width):
             c = 0
-            for y in range(self.height):
-                if self.board[x][y]!=blank: break
+            for y in range(height):
+                if board[x][y]!=blank: break
                 if x == 0:
-                    if self.board[x+1][y]!=blank:
+                    if board[x+1][y]!=blank:
                         c += 1
                     elif c > 0:
                         c += 1
-                elif x == self.width-1:
-                    if self.board[x-1][y]!=blank:
+                elif x == width-1:
+                    if board[x-1][y]!=blank:
                         c += 1
                     elif c > 0:
                         c += 1
                 else:
-                    if self.board[x-1][y]!=blank and self.board[x+1][y]!=blank:
+                    if board[x-1][y]!=blank and board[x+1][y]!=blank:
                         c += 1
                     elif c > 0:
                         c += 1
@@ -204,10 +208,40 @@ class Agent(object):
 
     # 检测这一步是否优，如果好+1，不好-1，无法评价0
     def checkActionisBest(self):
-        if self.state == 0: return 0
+        board = [[0]*self.width for i in range(self.height)]
+        for y in range(self.height):
+            for x in range(self.width):
+                board[y][x]=self.board[x][y]
+
+        if self.fallpiece != None:
+            piece = self.fallpiece
+            shapedraw = pieces[piece['shape']][piece['rotation']]
+            offset_y = 0
+            for t in range(self.height):
+                find=False
+                for y in range(templatenum):
+                    for x in range(templatenum):
+                        if shapedraw[y][x]!=blank:
+                            px, py = x+piece['x'], y+piece['y']+t
+                            if board[py][px]!=blank:
+                                find=True
+                                break
+                    if find: break
+                if find:
+                    offset_y=t-1
+                    break
+            
+            for y in range(templatenum):
+                for x in range(templatenum):
+                    if shapedraw[y][x]!=blank:
+                        px, py = x+piece['x'], y+piece['y']+offset_y
+                        if px>=0 and py>=0:
+                            board[py][px]=shapedraw[y][x]
+        
         badHoleCount = self.getEmptyHolesCount()
         v = self.badHoleCount - badHoleCount
-        self.badHoleCount = badHoleCount
+        if self.state != 0: 
+            self.badHoleCount = badHoleCount
         # if v>0: return 1.0
         # if v<0: return -1.0
         return v*1.0    
