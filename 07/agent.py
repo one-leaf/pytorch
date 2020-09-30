@@ -181,7 +181,7 @@ class Agent(object):
             for y in range(height):
                 state = 0 if board[y][x]==blank else 1
                 if curr_state!=state:
-                    transCount += 0
+                    transCount += 1
                     curr_state = state
 
         for y in range(height):
@@ -189,14 +189,14 @@ class Agent(object):
             for x in range(width):
                 state = 0 if board[y][x]==blank else 1
                 if curr_state!=state:
-                    transCount += 0
+                    transCount += 1
                     curr_state = state
 
         return transCount
 
     # 检测这一步是否优，如果好+1，不好-1，无法评价0
     def checkActionisBest(self):
-        board = [[blank]*self.width for i in range(self.height)]
+        board = [[0]*self.width for i in range(self.height)]
         for y in range(self.height):
             for x in range(self.width):
                 board[y][x]=self.board[x][y]
