@@ -290,13 +290,13 @@ class Agent(object):
         winners_z = np.zeros(len(current_players))
         
         # 如果有奖励，则全部赢
-        if score0>0 and score1==0: 
+        if score0>0 and score0>score1: 
             winner = 0
-        if score1>0 and score0==0: 
+        if score1>0 and score1>score0: 
             winner = 1
 
         # 如果双方都有奖励，空洞少的赢,如果平局，全部奖励
-        if score0>0 and score1>0:
+        if score0>0 and score1>0 and score0==score1:
             if abs(transCount0-transCount1)<5:
                 winners_z[:] = 1.0
             else:
