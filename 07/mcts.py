@@ -388,6 +388,7 @@ class MCTSPlayer(object):
         if len(availables) > 0:  # 可用动作>0
             # 使用默认的temp = 1e-3，它几乎相当于选择具有最高概率的移动 ，训练的时候 temp = 1
             acts, act_probs = self.mcts.get_action_probs(state, temp)
+            print("acts:", acts)
             move_probs[acts] = act_probs
             if self._is_selfplay:  # 自我对抗
                 # 添加Dirichlet Noise进行探索（自我训练所需）
