@@ -28,7 +28,7 @@ class Agent(object):
         self.steps = 0
         self.board = self.tetromino.getblankboard()
         # 变化个数，用于评价这一步的优劣
-        self.transCount = 0
+        self.transCount = self.getTransCount()
         # 状态： 0 下落过程中 1 更换方块 2 结束一局
         self.state =0
 
