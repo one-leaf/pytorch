@@ -27,8 +27,8 @@ class Agent(object):
         self.level = 0
         self.steps = 0
         self.board = self.tetromino.getblankboard()
-        # 坏洞的个数，用于评价这一步的优劣
-        self.badHoleCount = 0
+        # 变化个数，用于评价这一步的优劣
+        self.transCount = 0
         # 状态： 0 下落过程中 1 更换方块 2 结束一局
         self.state =0
 
@@ -169,42 +169,30 @@ class Agent(object):
         state = np.stack([board,board_1,board_2])
         return state        
 
-    # 空洞个数 
-    def getEmptyHolesCount(self, board=None):
+    # 交替个数也就是从空到非空算一次，边界算非空 
+    def getTransCount(self, board=None):
         if board==None: board = self.board
         width = len(board)
         height = len(board[0])
 
-        holesCount = 0
+        transCount = 0
+        curr_state = 1
         for x in range(width):
-            find_block = False
             for y in range(height):
-                if board[x][y]!=blank:
-                    find_block = True
-                elif find_block:
-                    holesCount += 1   
-        # 别出现#
-        for x in range(width):
-            c = 0
-            for y in range(height):
-                if board[x][y]!=blank: break
-                if x == 0:
-                    if board[x+1][y]!=blank:
-                        c += 1
-                    elif c > 0:
-                        c += 1
-                elif x == width-1:
-                    if board[x-1][y]!=blank:
-                        c += 1
-                    elif c > 0:
-                        c += 1
-                else:
-                    if board[x-1][y]!=blank and board[x+1][y]!=blank:
-                        c += 1
-                    elif c > 0:
-                        c += 1
-            if c>=2: holesCount += c*0.5
-        return holesCount
+                state = 0 if board[x][y]==blank else 1
+                if curr_state!=state:
+                    transCount += 0
+                    curr_state = state
+
+        curr_state = 1
+        for y in range(height):
+            for x in range(width):
+                state = 0 if board[x][y]==blank else 1
+                if curr_state!=state:
+                    transCount += 0
+                    curr_state = state
+
+        return transCount
 
     # 检测这一步是否优，如果好+1，不好-1，无法评价0
     def checkActionisBest(self):
@@ -238,10 +226,10 @@ class Agent(object):
                         if px>=0 and py>=0:
                             board[py][px]=shapedraw[y][x]
         
-        badHoleCount = self.getEmptyHolesCount()
-        v = self.badHoleCount - badHoleCount
+        transCount = self.getTransCount()
+        v = self.transCount - transCount
         if self.state != 0: 
-            self.badHoleCount = badHoleCount
+            self.transCount = transCount
         # if v>0: return 1.0
         # if v<0: return -1.0
         # if badHoleCount ==0 and v==0: return 0
@@ -279,7 +267,7 @@ class Agent(object):
                 break
         self.print()
         score0 = self.score
-        badHoleCount0 = self.getEmptyHolesCount()
+        transCount0 = self.getTransCount()
 
         self.tetromino=tetromino
         self.reset()
@@ -297,7 +285,7 @@ class Agent(object):
                 break
         self.print()
         score1 = self.score
-        badHoleCount1 = self.getEmptyHolesCount()
+        transCount1 = self.getTransCount()
 
         winner = -1
         winners_z = np.zeros(len(current_players))
@@ -310,10 +298,10 @@ class Agent(object):
 
         # 如果双方都有奖励，空洞少的赢,如果平局，全部奖励
         if score0>0 and score1>0:
-            if abs(badHoleCount0-badHoleCount1)<5:
+            if abs(transCount0-transCount1)<5:
                 winners_z[:] = 1.0
             else:
-                winner = 0 if badHoleCount0<badHoleCount1 else 1
+                winner = 0 if transCount0<transCount1 else 1
 
         # 如果双方都没有奖励就是平局，因为很难消除
 
@@ -327,5 +315,5 @@ class Agent(object):
         if winner != -1:
             winners_z[np.array(current_players) == winner] = 1.0
             winners_z[np.array(current_players) != winner] = -1.0
-        print("winner:",winner,"badHoleCount0:",badHoleCount0,"badHoleCount1",badHoleCount1)
+        print("winner:",winner,"transCount0:",transCount0,"transCount1",transCount1)
         return winner, zip(states, mcts_probs, winners_z)
