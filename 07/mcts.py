@@ -280,7 +280,7 @@ class MCTS(object):
             for idx in sorted(range(len(visits)), key=visits.__getitem__)[::-1]:
                 value = self._root._children[acts[idx]].get_value(5)
                 info[acts[idx]] = (visits[idx], round(value, 2))
-            state.print(add_fallpiece=True)
+            # state.print(add_fallpiece=True)
             # print(state.checkActionisBest(include_fallpiece=True))
             print("steps:",state.steps,"_n_playout:", n, "info:", info)
             # self.print_tree()
