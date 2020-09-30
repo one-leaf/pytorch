@@ -134,10 +134,8 @@ class PolicyValueNet():
         act_probs, value = self.policy_value(current_state)
 
         act_probs = act_probs.flatten()
-        # 这里需要返回整个全量概率不能部分，否则后面的提取概率可能会出错
-        # actions = game.availables()
-        # act_probs = list(zip(actions, act_probs[actions]))
-        act_probs = list(zip(range(len(act_probs)), act_probs))
+        actions = game.availables()
+        act_probs = list(zip(actions, act_probs[actions]))
         value = value[0,0]
         return act_probs, value
 
