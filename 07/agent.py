@@ -316,3 +316,10 @@ class Agent(object):
             winners_z[np.array(current_players) != winner] = -1.0
         print("winner:",winner,"transCount0:",transCount0,"transCount1",transCount1)
         return winner, zip(states, mcts_probs, winners_z)
+
+    def start_play(self, player):
+        while True:
+            action = player.get_action(self)
+            self.step(action)
+            if self.terminal:
+                break
