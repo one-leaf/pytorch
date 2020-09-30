@@ -403,19 +403,12 @@ class MCTSPlayer(object):
 
                 # 更新根节点并重用搜索树
                 self.mcts.update_root_with_action(action)
-            else:  # 和人类对战
+            else:  # 正式玩
                 action = np.random.choice(acts, p=act_probs)
                 # 更新根节点:根据最后action向前探索树
-                root = self.mcts._root
-                for act in root._children:
-                    node = root._children[act]   
-                    if node._n_visits>0:
-                        print(act, node)
-                print("AI", action, act_probs[acts.index(action)]) 
-
                 self.mcts.update_root_with_action(None)
                 # 打印AI走子信息
-                # print("AI move: %d,%d\n" % (action[0], action[1]))
+                print("AI", action, act_probs[acts.index(action)]) 
             # print("AI:", action)
             if return_prob:
                 return action, move_probs

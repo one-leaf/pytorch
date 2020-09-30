@@ -212,9 +212,9 @@ class Tetromino(object):
     def convertsize(self,boxx,boxy):
         return (boxx*boxsize+xmargin,boxy*boxsize+topmargin)
     
-class TetrominoEnv(Tetromino):
-    def __init__(self):
-        super().__init__() 
+class TetrominoEnv(object):
+    def __init__(self, tetromino):
+        self.terminal = tetromino
         pygame.init()
         pygame.display.set_caption('tetromino')
         self.fpsclock = pygame.time.Clock()
@@ -223,7 +223,7 @@ class TetrominoEnv(Tetromino):
         self.basicfont = pygame.font.Font('freesansbold.ttf',20)
 
     def rungame(self):
-        board = self.getblankboard()
+        board = self.terminal.getblankboard()
         lastmovedowntime = time.time()
         lastmovesidetime = time.time()
         lastfalltime = time.time()
@@ -231,18 +231,18 @@ class TetrominoEnv(Tetromino):
         moveleft = False
         moveright = False
         score = 0
-        level, fallfreq = self.calculate(score)
+        level, fallfreq = self.terminal.calculate(score)
     
-        fallpiece = self.getnewpiece()
-        nextpiece = self.getnewpiece()
+        fallpiece = self.terminal.getnewpiece()
+        nextpiece = self.terminal.getnewpiece()
     
         while True:
             if fallpiece == None:
                 fallpiece = nextpiece
-                nextpiece = self.getnewpiece()
+                nextpiece = self.terminal.getnewpiece()
                 lastfalltime = time.time()
     
-                if not self.validposition(board,fallpiece):
+                if not self.terminal.validposition(board,fallpiece):
                     return
                 
             self.checkforquit()
@@ -264,12 +264,12 @@ class TetrominoEnv(Tetromino):
                         movedown = False
                         
                 elif event.type == KEYDOWN:
-                    if (event.key == K_LEFT or event.key == K_a) and self.validposition(board,fallpiece,ax = -1):
+                    if (event.key == K_LEFT or event.key == K_a) and self.terminal.validposition(board,fallpiece,ax = -1):
                         fallpiece['x']-=1
                         moveleft = True
                         moveright = False
                         lastmovesidetime = time.time()
-                    elif (event.key == K_RIGHT or event.key == K_d) and self.validposition(board,fallpiece,ax = 1):
+                    elif (event.key == K_RIGHT or event.key == K_d) and self.terminal.validposition(board,fallpiece,ax = 1):
                         fallpiece['x']+=1
                         moveright = True
                         moveleft = False
@@ -277,11 +277,11 @@ class TetrominoEnv(Tetromino):
     
                     elif (event.key == K_UP or event.key ==K_w):
                         fallpiece['rotation'] =  (fallpiece['rotation'] + 1) % len(pieces[fallpiece['shape']])
-                        if not self.validposition(board,fallpiece):
+                        if not self.terminal.validposition(board,fallpiece):
                             fallpiece['rotation'] = (fallpiece['rotation'] - 1) % len(pieces[fallpiece['shape']])
                     elif (event.key == K_DOWN or event.key ==K_s):
                         movedown = True
-                        if self.validposition(board,fallpiece, ay = 1):
+                        if self.terminal.validposition(board,fallpiece, ay = 1):
                             fallpiece['y']+=1
                         lastmovedowntime = time.time()
     
@@ -290,31 +290,33 @@ class TetrominoEnv(Tetromino):
                         moveleft = False
                         moveright = False
                         for i in range(1,boardheight):
-                            if not self.validposition(board,fallpiece,ay = i):
+                            if not self.terminal.validposition(board,fallpiece,ay = i):
                                 break
                         fallpiece['y'] += i-1
             
             if (moveleft or moveright) and time.time()-lastmovesidetime > movesidefreq:
-                if moveleft and self.validposition(board,fallpiece,ax = -1):
+                if moveleft and self.terminal.validposition(board,fallpiece,ax = -1):
                     fallpiece['x']-=1
-                if moveright and self.validposition(board,fallpiece,ax = 1):
+                if moveright and self.terminal.validposition(board,fallpiece,ax = 1):
                     fallpiece['x']+=1
                 lastmovesidetime = time.time()
     
-            if movedown and time.time()-lastmovedowntime>movedownfreq and self.validposition(board,fallpiece,ay=1):
+            if movedown and time.time()-lastmovedowntime>movedownfreq and self.terminal.validposition(board,fallpiece,ay=1):
                 fallpiece['y']+=1
                 lastmovedowntime = time.time()
             if time.time()-lastfalltime>fallfreq:
-                if not self.validposition(board,fallpiece,ay = 1):
-                    self.addtoboard(board,fallpiece)
-                    score +=self.removecompleteline(board)
-                    level,fallfreq = self.calculate(score)
+                if not self.terminal.validposition(board,fallpiece,ay = 1):
+                    self.terminal.addtoboard(board,fallpiece)
+                    score +=self.terminal.removecompleteline(board)
+                    level,fallfreq = self.terminal.calculate(score)
                     fallpiece = None
                 else:
                     fallpiece['y'] +=1
                     lastfalltime = time.time()
     
-    
+            self.render(board, score,level, fallpiece, nextpiece)
+   
+    def render(self, board, score,level, fallpiece, nextpiece):
             self.disp.fill(black)
             self.drawboard(board)
             self.drawstatus(score,level)
@@ -323,8 +325,8 @@ class TetrominoEnv(Tetromino):
                 self.drawpiece(fallpiece)
     
             pygame.display.update()
-            self.fpsclock.tick(FPS)       
-        
+            self.fpsclock.tick(FPS)    
+
     def terminal(self):
         pygame.quit()
         sys.exit()
@@ -366,7 +368,7 @@ class TetrominoEnv(Tetromino):
         if color == blank:
             return
         if pixelx == None and pixely == None:
-            pixelx,pixely = self.convertsize(boxx,boxy)
+            pixelx,pixely = self.terminal.convertsize(boxx,boxy)
         pygame.draw.rect(self.disp,colors[color],(pixelx+1 , pixely+1,boxsize-1,boxsize-1))
         
     def drawboard(self,board):
@@ -389,7 +391,7 @@ class TetrominoEnv(Tetromino):
     def drawpiece(self,piece,pixelx = None,pixely = None):
         shapedraw = pieces[piece['shape']][piece['rotation']]
         if pixelx == None and pixely == None:
-            pixelx,pixely = self.convertsize(piece['x'],piece['y'])
+            pixelx,pixely = self.terminal.convertsize(piece['x'],piece['y'])
         for x in range(templatenum):
             for y in range(templatenum):
                 if shapedraw[y][x]!=blank:
@@ -417,4 +419,5 @@ class TetrominoEnv(Tetromino):
 
 if __name__ == '__main__':
     tetromino = Tetromino()
-    tetromino.main()
+    env = TetrominoEnv(tetromino)
+    env.main()

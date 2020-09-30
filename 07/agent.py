@@ -8,12 +8,8 @@ import copy
 KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN  = 0, 1, 2, 3
 
 class Agent(object):
-    def __init__(self, need_draw=False):
-        self.need_draw = need_draw 
-        if not need_draw:
-            self.tetromino = Tetromino(isRandomNextPiece=False)
-        else:
-            self.tetromino = TetrominoEnv()
+    def __init__(self):
+        self.tetromino = Tetromino(isRandomNextPiece=False)
         self.width = 10
         self.height = 20
         self.actions_num = 4
@@ -43,7 +39,7 @@ class Agent(object):
             acts.remove(KEY_DOWN) 
         return acts         
 
-    def step(self, action):
+    def step(self, action, env=None):
         # 状态 0 下落过程中 1 更换方块 2 结束一局
         reward = 0
         self.steps += 1
@@ -74,14 +70,9 @@ class Agent(object):
         else:
             self.fallpiece['y'] +=1
 
-        if self.need_draw:
-            self.tetromino.disp.fill(black)
-            self.tetromino.drawboard(self.board)
-            self.tetromino.drawstatus(self.score, self.level)
-            self.tetromino.drawnextpiece(self.nextpiece)
-            if self.fallpiece !=None:
-                self.tetromino.drawpiece(self.fallpiece)
-            pygame.display.update()
+        if  env:
+            env.checkforquit()
+            env.render(self.board, self.score, self.level, self.fallpiece, self.nextpiece)
 
         if self.fallpiece == None:
             self.fallpiece = self.nextpiece
@@ -317,9 +308,9 @@ class Agent(object):
         print("winner:",winner,"transCount0:",transCount0,"transCount1",transCount1)
         return winner, zip(states, mcts_probs, winners_z)
 
-    def start_play(self, player):
+    def start_play(self, player, env):
         while True:
             action = player.get_action(self)
-            self.step(action)
+            self.step(action, env)
             if self.terminal:
                 break
