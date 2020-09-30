@@ -172,14 +172,14 @@ class Agent(object):
     # 交替个数也就是从空到非空算一次，边界算非空 
     def getTransCount(self, board=None):
         if board==None: board = self.board
-        width = len(board)
-        height = len(board[0])
+        height = len(board)
+        width = len(board[0])
 
         transCount = 0
         for x in range(width):
             curr_state = 1
             for y in range(height):
-                state = 0 if board[x][y]==blank else 1
+                state = 0 if board[y][x]==blank else 1
                 if curr_state!=state:
                     transCount += 0
                     curr_state = state
@@ -187,7 +187,7 @@ class Agent(object):
         for y in range(height):
             curr_state = 1
             for x in range(width):
-                state = 0 if board[x][y]==blank else 1
+                state = 0 if board[y][x]==blank else 1
                 if curr_state!=state:
                     transCount += 0
                     curr_state = state
@@ -196,7 +196,7 @@ class Agent(object):
 
     # 检测这一步是否优，如果好+1，不好-1，无法评价0
     def checkActionisBest(self):
-        board = [[0]*self.width for i in range(self.height)]
+        board = [[blank]*self.width for i in range(self.height)]
         for y in range(self.height):
             for x in range(self.width):
                 board[y][x]=self.board[x][y]
@@ -225,7 +225,6 @@ class Agent(object):
                         px, py = x+piece['x'], y+piece['y']+offset_y
                         if px>=0 and py>=0:
                             board[py][px]=shapedraw[y][x]
-        print(board)
         transCount = self.getTransCount(board)
         v = self.transCount - transCount
         if self.state != 0: 
