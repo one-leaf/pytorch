@@ -176,16 +176,16 @@ class Agent(object):
         height = len(board[0])
 
         transCount = 0
-        curr_state = 1
         for x in range(width):
+            curr_state = 1
             for y in range(height):
                 state = 0 if board[x][y]==blank else 1
                 if curr_state!=state:
                     transCount += 0
                     curr_state = state
 
-        curr_state = 1
         for y in range(height):
+            curr_state = 1
             for x in range(width):
                 state = 0 if board[x][y]==blank else 1
                 if curr_state!=state:
