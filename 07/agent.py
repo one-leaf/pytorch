@@ -234,7 +234,7 @@ class Agent(object):
         # if v<0: return -1.0
         # if badHoleCount ==0 and v==0: return 0
         # if badHoleCount ==0 and v!=0: return v
-        return v#(v/badHoleCount)     
+        return v, transCount, self.self.transCount #(v/badHoleCount)     
 
     def game_end(self):
         score = 0
