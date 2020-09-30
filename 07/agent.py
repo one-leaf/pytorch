@@ -225,7 +225,7 @@ class Agent(object):
                         px, py = x+piece['x'], y+piece['y']+offset_y
                         if px>=0 and py>=0:
                             board[py][px]=shapedraw[y][x]
-        
+        print(board)
         transCount = self.getTransCount(board)
         v = self.transCount - transCount
         if self.state != 0: 
