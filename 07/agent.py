@@ -210,7 +210,7 @@ class Agent(object):
         self.badHoleCount = badHoleCount
         # if v>0: return 1.0
         # if v<0: return -1.0
-        return v*1.0    
+        return (v/self.badHoleCount)*1.0    
 
     def game_end(self):
         score = 0
