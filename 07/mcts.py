@@ -175,7 +175,7 @@ class MCTS(object):
             # 使用训练好的模型策略评估此叶子节点，返回[(action,概率)]list 以及当前玩家的后续走子胜负
             action_probs, leaf_value = self._policy(state)
             # 如果没有结束，顺便加上中途检测得分
-            leaf_value += reward
+            leaf_value = reward
             node.expand(action_probs)
         else:
             leaf_value = reward
