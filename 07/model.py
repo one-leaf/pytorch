@@ -134,8 +134,9 @@ class PolicyValueNet():
         act_probs, value = self.policy_value(current_state)
 
         act_probs = act_probs.flatten()
-        actions = game.availables()
-        act_probs = list(zip(actions, act_probs[actions]))
+        # actions = game.availables()
+        # act_probs = list(zip(actions, act_probs[actions]))
+        act_probs = list(zip(range(len(act_probs)), act_probs))
         value = value[0,0]
         return act_probs, value
 

@@ -388,7 +388,7 @@ class MCTSPlayer(object):
         if len(availables) > 0:  # 可用动作>0
             # 使用默认的temp = 1e-3，它几乎相当于选择具有最高概率的移动 ，训练的时候 temp = 1
             acts, act_probs = self.mcts.get_action_probs(state, temp)
-            move_probs[list(acts)] = act_probs
+            move_probs[availables] = act_probs
             if self._is_selfplay:  # 自我对抗
                 # 添加Dirichlet Noise进行探索（自我训练所需）
                 # dirichlet噪声参数中的p 0.3：一般按照反比于每一步的可行move数量设置，所以棋盘扩大或改围棋之后这个参数需要减小（此值设置过大容易出现在自我对弈的训练中陷入到两方都只进攻不防守的困境中无法提高）
