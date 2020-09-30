@@ -169,8 +169,8 @@ class MCTS(object):
 
         # 检查游戏是否有赢家
         end, score = state.game_end()
-        if reward==0 :
-            reward,_,_ = state.checkActionisBest()
+        if reward==0 and state.state!=0:
+            reward,_ ,_ = state.checkActionisBest(include_fallpiece=False)
         if not end:  # 没有结束时，把走子策略返回的[(action,概率)]list加载到mcts树child中 ，同时降低了 leaf_value 的权重
             # 使用训练好的模型策略评估此叶子节点，返回[(action,概率)]list 以及当前玩家的后续走子胜负
             action_probs, leaf_value = self._policy(state)
@@ -276,7 +276,7 @@ class MCTS(object):
         # 打印每一个下落方块的最后一步
         if state.state!=0:
             # info={"shape":state.fallpiece["shape"], "depth":self.max_depth_tree()}
-            info={"shape":state.fallpiece["shape"],"Transcount":state.checkActionisBest()}
+            info={"shape":state.fallpiece["shape"],"Transcount":state.checkActionisBest(include_fallpiece=False)}
             for idx in sorted(range(len(visits)), key=visits.__getitem__)[::-1]:
                 value = self._root._children[acts[idx]].get_value(5)
                 info[acts[idx]] = (visits[idx], round(value, 2))

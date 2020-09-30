@@ -195,13 +195,13 @@ class Agent(object):
         return transCount
 
     # 检测这一步是否优，如果好+1，不好-1，无法评价0
-    def checkActionisBest(self):
+    def checkActionisBest(self, include_fallpiece=True):
         board = [[0]*self.width for i in range(self.height)]
         for y in range(self.height):
             for x in range(self.width):
                 board[y][x]=self.board[x][y]
 
-        if self.fallpiece != None:
+        if self.fallpiece != None and include_fallpiece:
             piece = self.fallpiece
             shapedraw = pieces[piece['shape']][piece['rotation']]
             offset_y = 0
