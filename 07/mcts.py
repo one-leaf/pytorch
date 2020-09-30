@@ -178,7 +178,7 @@ class MCTS(object):
             leaf_value += reward
             node.expand(action_probs)
         else:
-            leaf_value = reward
+            leaf_value = -1.0   # 如果导致游戏结束，都是负分
            
         # 递归更新当前节点及所有父节点的最优选中次数和Q分数,因为得到的是本次的价值
         node.update_recursive(leaf_value)
