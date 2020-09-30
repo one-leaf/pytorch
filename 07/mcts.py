@@ -175,7 +175,7 @@ class MCTS(object):
             # 使用训练好的模型策略评估此叶子节点，返回[(action,概率)]list 以及当前玩家的后续走子胜负
             action_probs, leaf_value = self._policy(state)
             # 如果没有结束，顺便加上中途检测得分
-            leaf_value = reward
+            leaf_value += reward
             node.expand(action_probs)
         else:
             leaf_value = reward
@@ -274,15 +274,13 @@ class MCTS(object):
         acts, visits = zip(*act_visits)
 
         # 打印每一个下落方块的最后一步
-        if True:#state.state!=0:
+        if state.state!=0:
             # info={"shape":state.fallpiece["shape"], "depth":self.max_depth_tree()}
-            info={"shape":state.fallpiece["shape"]}
+            info={"shape":state.fallpiece["shape"],"Transcount":state.checkActionisBest()}
             for idx in sorted(range(len(visits)), key=visits.__getitem__)[::-1]:
                 value = self._root._children[acts[idx]].get_value(5)
                 info[acts[idx]] = (visits[idx], round(value, 2))
-            state.print(add_fallpiece=True)
-            print(state.checkActionisBest()) 
-
+            # state.print(add_fallpiece=True)
             print("_n_playout:", n, "info:", info)
             # self.print_tree()
             # nodes=[self._root]
