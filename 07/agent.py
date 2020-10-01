@@ -266,8 +266,8 @@ class Agent(object):
                 game1.step(action)
                 if game1.state!=0: break
 
-            game0.print()
-            game1.print()
+            # game0.print()
+            # game1.print()
 
             game0_transCount = game0.getTransCount()
             game1_transCount = game1.getTransCount()
