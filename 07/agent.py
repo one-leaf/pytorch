@@ -299,6 +299,7 @@ class Agent(object):
         winners_z = np.zeros(len(winers))
         winners_z[np.array(winers) == 1] = 1.0
         winners_z[np.array(winers) == 0] = -1.0
+        game1.print()
         return -1, zip(states, mcts_probs, winners_z)
 
 
