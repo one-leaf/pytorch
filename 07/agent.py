@@ -266,6 +266,9 @@ class Agent(object):
                 game1.step(action)
                 if game1.state!=0: break
 
+            game0.print()
+            game1.print()
+
             game0_transCount = game0.getTransCount()
             game1_transCount = game1.getTransCount()
             game0_win, game1_win = -1, -1
@@ -292,8 +295,6 @@ class Agent(object):
 
             assert len(states)==len(mcts_probs)
             assert len(states)==len(winers)
-            game0.print()
-            game1.print()
 
         winners_z = np.zeros(len(winers))
         winners_z[np.array(winers) == 1] = 1.0
