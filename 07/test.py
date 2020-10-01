@@ -16,9 +16,14 @@ def run():
         env = TetrominoEnv(agent.tetromino)    
         # 神经网络的价值策略
         net_policy = PolicyValueNet(10, 20, 4, model_file=model_file)
-        mcts_ai_player = MCTSPlayer(net_policy.policy_value_fn, c_puct=5, n_playout=100)
+        # mcts_ai_player = MCTSPlayer(net_policy.policy_value_fn, c_puct=5, n_playout=100)
+        # agent.start_play(mcts_ai_player, env)
+        while not agent.terminal:
+            act_probs, value = net_policy.policy_value_fn(agent)
+            act = max(act_probs,  key=lambda act_prob: act_prob[1])[0]
+            print(act, act_probs, value)
+            agent.step(act, env)
 
-        agent.start_play(mcts_ai_player, env)
     except KeyboardInterrupt:
         print('quit')
 
