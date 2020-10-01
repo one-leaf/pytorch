@@ -275,7 +275,7 @@ class Agent(object):
 
             game0_transCount = game0.getTransCount()
             game1_transCount = game1.getTransCount()
-            # print("game0_transCount:",game0_transCount,"game1_transCount:",game1_transCount)
+            print("game0_transCount:",game0_transCount,"game1_transCount:",game1_transCount)
             game0_win, game1_win = -1, -1
             # 比谁的交换次数少
             if game0_transCount>game1_transCount:
