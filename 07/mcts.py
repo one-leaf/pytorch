@@ -183,7 +183,7 @@ class MCTS(object):
         # 尝试加一点点的修正
         if state.state==0:
             _ , new ,old = state.checkActionisBest(include_fallpiece=True)
-            leaf_value += (old-new)/old
+            leaf_value = (old-new)/old
         # 递归更新当前节点及所有父节点的最优选中次数和Q分数,因为得到的是本次的价值
         node.update_recursive(leaf_value)
 
