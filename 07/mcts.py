@@ -286,7 +286,7 @@ class MCTS(object):
         #         info[acts[idx]] = (visits[idx], round(value, 2))
         #     # state.print(add_fallpiece=True)
         #     # print(state.checkActionisBest(include_fallpiece=True))
-        #     print("useid:",state.userid,"steps:",state.steps,"_n_playout:", n, "info:", info)
+        #     print("steps:",state.steps,"_n_playout:", n, "info:", info)
         #     # self.print_tree()
         #     # nodes=[self._root]
         #     # lines=[[]]
