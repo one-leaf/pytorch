@@ -14,6 +14,7 @@ class Agent(object):
         self.height = 20
         self.actions_num = 4
         self.reset()
+        self.userid = -1
 
     def reset(self):
         self.fallpiece = self.tetromino.getnewpiece()
@@ -248,6 +249,9 @@ class Agent(object):
         game0 = copy.deepcopy(self)
         game1 = copy.deepcopy(self)
 
+        game0.userid=0
+        game1.userid=1
+
         while not (game0.terminal or game1.terminal):
             game0_states,game1_states,game0_mcts_probs,game1_mcts_probs,game0_wins,game1_wins=[],[],[],[],[],[]
 
@@ -281,6 +285,9 @@ class Agent(object):
             if game0_transCount<game1_transCount:
                 game0_win, game1_win  = 1, 0
                 game1 = copy.deepcopy(game0)
+
+            game0.userid=0
+            game1.userid=1
 
             for i in range(len(game0_states)):
                 game0_wins.append(game0_win)
