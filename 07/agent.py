@@ -245,7 +245,7 @@ class Agent(object):
         # 这里下两局，按得分和步数对比
         states, mcts_probs, winers = [], [], []
 
-        game0 = self
+        game0 = copy.deepcopy(self)
         game1 = copy.deepcopy(self)
 
         while not (game0.terminal or game1.terminal):
