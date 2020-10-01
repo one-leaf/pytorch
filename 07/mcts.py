@@ -277,10 +277,10 @@ class MCTS(object):
         act_visits = [(act, node._n_visits) for act, node in self._root._children.items()]
         acts, visits = zip(*act_visits)
 
-        # 打印每一个下落方块的最后一步
+        # 打印每一个下落方块的最后一步之后的第一步
         if  state.state!=0:
             # info={"shape":state.fallpiece["shape"], "depth":self.max_depth_tree()}
-            info={"shape":state.fallpiece["shape"],"Transcount": state.getTransCount()}
+            info={"shape":state.fallpiece["shape"]}
             for idx in sorted(range(len(visits)), key=visits.__getitem__)[::-1]:
                 value = self._root._children[acts[idx]].get_value(5)
                 info[acts[idx]] = (visits[idx], round(value, 2))
