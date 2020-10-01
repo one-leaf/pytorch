@@ -178,7 +178,7 @@ class Agent(object):
             for y in range(height)[::-1]:
                 state = 0 if board[y][x]==blank else 1
                 if curr_state!=state:
-                    transCount += 1 + (height-y-1)/height
+                    transCount += 1 + (height-y)/height
                     curr_state = state
 
         for y in range(height):
