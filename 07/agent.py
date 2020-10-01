@@ -248,8 +248,8 @@ class Agent(object):
         game0 = copy.deepcopy(self)
         game1 = copy.deepcopy(self)
 
+        game0_states,game1_states,game0_mcts_probs,game1_mcts_probs,game0_wins,game1_wins=[],[],[],[],[],[]
         while not (game0.terminal or game1.terminal):
-            game0_states,game1_states,game0_mcts_probs,game1_mcts_probs,game0_wins,game1_wins=[],[],[],[],[],[]
 
             # 一个方块一个方块的训练
             for i in count():
@@ -273,31 +273,33 @@ class Agent(object):
             game1_transCount = game1.getTransCount()
             
             print("game0_transCount:",game0_transCount,"game1_transCount:",game1_transCount)
-            game0_win, game1_win = -1, -1
-            # 比谁的交换次数少
-            if game0_transCount>game1_transCount:
-                game0_win, game1_win  = 0, 1
-                game0 = copy.deepcopy(game1)
+            # 如果有输赢，则直接出结果，如果相同，继续下一轮，直到出结果为止
+            if game0_transCount != game1_transCount:
+                game0_win, game1_win = -1, -1
+                # 比谁的交换次数少
+                if game0_transCount>game1_transCount:
+                    game0_win, game1_win  = 0, 1
+                    game0 = copy.deepcopy(game1)
 
-            if game0_transCount<game1_transCount:
-                game0_win, game1_win  = 1, 0
-                game1 = copy.deepcopy(game0)
+                if game0_transCount<game1_transCount:
+                    game0_win, game1_win  = 1, 0
+                    game1 = copy.deepcopy(game0)
 
-            for i in range(len(game0_states)):
-                game0_wins.append(game0_win)
-            for i in range(len(game1_states)):
-                game1_wins.append(game1_win)
+                for i in range(len(game0_states)):
+                    game0_wins.append(game0_win)
+                for i in range(len(game1_states)):
+                    game1_wins.append(game1_win)
 
-            for o in game0_states: states.append(o)
-            for o in game1_states: states.append(o)
-            for o in game0_mcts_probs: mcts_probs.append(o)
-            for o in game1_mcts_probs: mcts_probs.append(o)
-            for o in game0_wins: winers.append(o)
-            for o in game1_wins: winers.append(o)
+                for o in game0_states: states.append(o)
+                for o in game1_states: states.append(o)
+                for o in game0_mcts_probs: mcts_probs.append(o)
+                for o in game1_mcts_probs: mcts_probs.append(o)
+                for o in game0_wins: winers.append(o)
+                for o in game1_wins: winers.append(o)
 
-            assert len(states)==len(mcts_probs)
-            assert len(states)==len(winers)
-
+                game0_states,game1_states,game0_mcts_probs,game1_mcts_probs,game0_wins,game1_wins=[],[],[],[],[],[]
+                assert len(states)==len(mcts_probs)
+                assert len(states)==len(winers)
         winners_z = np.zeros(len(winers))
         winners_z[np.array(winers) == 1] = 1.0
         winners_z[np.array(winers) == 0] = -1.0
