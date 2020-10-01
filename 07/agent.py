@@ -243,7 +243,70 @@ class Agent(object):
     # 使用 mcts 训练，重用搜索树，并保存数据
     def start_self_play(self, player, temp=1e-3):
         # 这里下两局，按得分和步数对比
+        states, mcts_probs, winers = [], [], []
+
+        game0 = self
+        game1 = copy.deepcopy(self)
+
+        while not (game0.terminal or game1.terminal):
+            game0_states,game1_states,game0_mcts_probs,game1_mcts_probs,game0_wins,game1_wins=[],[],[],[],[],[]
+
+            # 一个方块一个方块的训练
+            for i in count():
+                action, move_probs = player.get_action(game0, temp=temp, return_prob=1)
+                game0_states.append(game0.current_state())
+                game0_mcts_probs.append(move_probs)
+                game0.step(action)
+                if game0.state!=0: break
+
+            for i in count():
+                action, move_probs = player.get_action(game1, temp=temp, return_prob=1)
+                game1_states.append(game1.current_state())
+                game1_mcts_probs.append(move_probs)
+                game1.step(action)
+                if game1.state!=0: break
+
+            game0_transCount = game0.getTransCount()
+            game1_transCount = game1.getTransCount()
+            game0_win, game1_win = -1, -1
+            # 比谁的交换次数少
+            if game0_transCount>game1_transCount:
+                game0_win, game1_win  = 0, 1
+                game0 = copy.deepcopy(game1)
+
+            if game0_transCount<game1_transCount:
+                game0_win, game1_win  = 1, 0
+                game1 = copy.deepcopy(game0)
+
+            for i in range(len(game0_states)):
+                game0_wins.append(game0_win)
+            for i in range(len(game1_states)):
+                game1_wins.append(game1_win)
+
+            for o in game0_states: states.append(o)
+            for o in game1_states: states.append(o)
+            for o in game0_mcts_probs: mcts_probs.append(o)
+            for o in game1_mcts_probs: mcts_probs.append(o)
+            for o in game0_wins: winers.append(o)
+            for o in game1_wins: winers.append(o)
+
+            assert len(states)==len(mcts_probs)
+            assert len(states)==len(winers)
+            game0.print()
+            game1.print()
+
+        winners_z = np.zeros(len(winers))
+        winners_z[np.array(winers) == 1] = 1.0
+        winners_z[np.array(winers) == 0] = -1.0
+        return -1, zip(states, mcts_probs, winners_z)
+
+
+
+    # 使用 mcts 训练，重用搜索树，并保存数据
+    def start_self_play2(self, player, temp=1e-3):
+        # 这里下两局，按得分和步数对比
         states, mcts_probs, current_players = [], [], []
+
         tetromino = copy.deepcopy(self.tetromino)
 
         self.reset()
