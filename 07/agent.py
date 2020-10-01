@@ -171,6 +171,8 @@ class Agent(object):
         width = len(board[0])
 
         transCount = 0
+
+        # 由于高度有额外的影响力，所以增加了高度的权重
         for x in range(width):
             curr_state = 1
             for y in range(height)[::-1]:
@@ -179,7 +181,6 @@ class Agent(object):
                     transCount += 1 + (height-y-1)/height
                     curr_state = state
 
-        # 由于高度有额外的影响力，所以增加了高度的权重
         for y in range(height):
             curr_state = 1
             for x in range(width):
