@@ -23,7 +23,7 @@ def run():
             act = max(act_probs,  key=lambda act_prob: act_prob[1])[0]
             print(act, act_probs, value)
             agent.step(act, env)
-
+        agent.print()
     except KeyboardInterrupt:
         print('quit')
 

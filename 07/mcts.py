@@ -169,17 +169,21 @@ class MCTS(object):
 
         # 检查游戏是否有赢家
         end, score = state.game_end()
-        if reward==0:# and state.state!=0:
-            reward, _ ,_ = state.checkActionisBest(include_fallpiece=True)
+        # if reward==0:# and state.state!=0:
+        #     reward, _ ,_ = state.checkActionisBest(include_fallpiece=True)
         if not end:  # 没有结束时，把走子策略返回的[(action,概率)]list加载到mcts树child中 ，同时降低了 leaf_value 的权重
             # 使用训练好的模型策略评估此叶子节点，返回[(action,概率)]list 以及当前玩家的后续走子胜负
             action_probs, leaf_value = self._policy(state)
             # 如果没有结束，顺便加上中途检测得分
-            leaf_value = reward
+            # leaf_value = reward
             node.expand(action_probs)
         else:
             leaf_value = -1.0   # 如果导致游戏结束，都是负分
-           
+
+        # 尝试加一点点的修正
+        if state.state==0:
+            _ , new ,old = state.checkActionisBest(include_fallpiece=True)
+            leaf_value += (old-new)/old
         # 递归更新当前节点及所有父节点的最优选中次数和Q分数,因为得到的是本次的价值
         node.update_recursive(leaf_value)
 
