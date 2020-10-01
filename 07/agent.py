@@ -299,12 +299,12 @@ class Agent(object):
 
         # 如果双方都没有奖励就是平局，因为很难消除
 
-        # # 如果没有奖励，则空洞少的赢
-        # if score0==0 and score1==0:
-        #     if badHoleCount0<badHoleCount1:
-        #         winner = 0
-        #     if badHoleCount0>badHoleCount1: 
-        #         winner = 1   
+        # 如果没有奖励，则空洞少的赢
+        if score0==0 and score1==0:
+            if transCount0<transCount1:
+                winner = 0
+            if transCount0>transCount1: 
+                winner = 1   
 
         if winner != -1:
             winners_z[np.array(current_players) == winner] = 1.0
