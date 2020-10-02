@@ -127,7 +127,9 @@ class FiveChess(object):
 
     #action 包括坐标和  例如：[1,3] 表示： 坐标（1,3）
     #输出 下一个状态，动作价值，是否结束，赢的用户
-    def step(self, action):
+    def step(self, action, oid=None):
+        if oid!=None and oid==id(self):
+            print(self.current_player, action)
         if action not in self.availables:
             print(action)
             print(self.availables)

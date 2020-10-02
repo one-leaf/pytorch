@@ -410,8 +410,8 @@ class MCTSPlayer(object):
                 action = np.random.choice(acts, p=act_probs)
                 # 更新根节点:根据最后action向前探索树
                 self.mcts.update_root_with_action(None)
-                # 打印AI走子信息
-                print("AI", action, act_probs[acts.index(action)]) 
+            # 打印AI走子信息
+            print("AI:", action, act_probs[acts.index(action)]) 
             # print("AI:", action)
             if return_prob:
                 return action, move_probs
