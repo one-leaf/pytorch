@@ -133,7 +133,7 @@ class FiveChessTrain():
         # 创建使用策略价值网络来指导树搜索和评估叶节点的MCTS玩家
         mcts_player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout, is_selfplay=1)
 
-        if random.random()>0.9:
+        if random.random()>0.5:
             pure_mcts_player = MCTSPurePlayer(c_puct=5, n_playout=self.pure_mcts_playout_num)
             print("AI VS MCTS")
         else:
