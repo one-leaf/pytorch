@@ -130,7 +130,8 @@ class FiveChess(object):
     def step(self, action):
         if action not in self.availables:
             print(action)
-            raise "action error"  
+            print(self.availables)
+            raise "action error, action not in availables"  
         self.availables.remove(action)
         self.actions.append(action)
         self.step_count +=1
