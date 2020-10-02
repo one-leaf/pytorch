@@ -133,16 +133,20 @@ class FiveChessTrain():
         # 创建使用策略价值网络来指导树搜索和评估叶节点的MCTS玩家
         mcts_player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout, is_selfplay=1)
         temp = self.temp
+        use_Mcts=False
         if random.random()>0.9:
             pure_mcts_player = MCTSPurePlayer(c_puct=5, n_playout=self.pure_mcts_playout_num)
             temp = 1e-2
+            use_Mcts=True
             print("AI VS MCTS")
         else:
             pure_mcts_player = None
 
         # 开始下棋
         winner, play_data = agent.start_self_play(mcts_player, pure_mcts_player, temp=temp)
-        
+        if use_Mcts==True and winner==pure_mcts_player.player:
+            self.pure_mcts_playout_num += 1000
+
         play_data = list(play_data)[:]
         episode_len = len(play_data)
         # 把翻转棋盘数据加到数据集里
