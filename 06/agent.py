@@ -54,8 +54,8 @@ class Agent(object):
                     winners_z[np.array(current_players) != winner] = -1.0
                 # reset MCTS root node 
                 player1.reset_player()
-                player2.reset_player()
                 if not player2 is None:
+                    player2.reset_player()
                     if winner != -1:
                         print("Game end. Winner is player:", players[winner])
                     else:
