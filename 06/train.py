@@ -135,6 +135,7 @@ class FiveChessTrain():
 
         if random.random>0.9:
             pure_mcts_player = MCTSPurePlayer(c_puct=5, n_playout=self.pure_mcts_playout_num)
+            print("AI VS MCTS")
         else:
             pure_mcts_player = None
 
