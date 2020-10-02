@@ -129,7 +129,8 @@ class FiveChess(object):
     #输出 下一个状态，动作价值，是否结束，赢的用户
     def step(self, action, oid=None):
         if oid!=None and oid==id(self):
-            print(self.current_player, action)
+            print(oid, self.current_player, action)
+            print(self.availables)
         if action not in self.availables:
             print(action)
             print(self.availables)
