@@ -172,7 +172,7 @@ class Agent(object):
 
         transCount = 0
 
-        # 由于高度有额外的影响力，所以增加了高度的权重
+        # 统计一列的个数
         for x in range(width):
             curr_state = 1
             for y in range(height)[::-1]:
@@ -181,13 +181,15 @@ class Agent(object):
                     transCount += 1 + (height-y)/height
                     curr_state = state
 
+        # 统计一行的个数
         for y in range(height):
             curr_state = 1
             for x in range(width):
                 state = 0 if board[y][x]==blank else 1
                 if curr_state!=state:
-                    transCount += 1
+                    transCount += 1 + (height-y)/height
                     curr_state = state
+            if curr_state == 0: transCount += 1 + (height-y)/height 
 
         return transCount
 
