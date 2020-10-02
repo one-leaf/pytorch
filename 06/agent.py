@@ -15,16 +15,25 @@ class Agent(object):
         self.game.reset()
 
     # 使用 mcts 训练，重用搜索树，并保存数据
-    def start_self_play(self, player, temp=1e-3):
+    def start_self_play(self, player1, player2=None, temp=1e-3):
         """ start a self-play game using a MCTS player, reuse the search tree,
         and store the self-play data: (state, mcts_probs, z) for training
         """
         self.game.reset()
         p1, p2 = self.game.players
+
+        if not player2 is None:
+            player1.set_player_ind(p1)
+            player2.set_player_ind(p2)             
+            players = {p1: player1, p2: player2}              
+        else:
+            players = {p1: player1, p2: player1}
+
         states, mcts_probs, current_players = [], [], []
         for i in count():
             # temp 权重 ，return_prob 是否返回概率数据
-            action, move_probs = player.get_action(self.game, temp=temp, return_prob=1)
+            player_in_turn = players[self.game.current_player]
+            action, move_probs = player_in_turn.get_action(self.game, temp=temp, return_prob=1)
             # store the data
             states.append(self.game.current_state())
             # print(action)
@@ -43,11 +52,12 @@ class Agent(object):
                 if winner != -1:
                     winners_z[np.array(current_players) == winner] = 1.0
                     winners_z[np.array(current_players) != winner] = -1.0
-                # reset MCTS root node
-                player.reset_player()
-                if self.is_shown:
+                # reset MCTS root node 
+                player1.reset_player()
+                player2.reset_player()
+                if not player2 is None:
                     if winner != -1:
-                        print("Game end. Winner is player:", winner)
+                        print("Game end. Winner is player:", players[winner])
                     else:
                         print("Game end. Tie")
                 return winner, zip(states, mcts_probs, winners_z)
