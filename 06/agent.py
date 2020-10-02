@@ -47,8 +47,7 @@ class Agent(object):
             else:
                 action = player_in_turn.get_action(self.game)
             # perform a move
-            oid=id(self.game)
-            self.game.step(action,oid)
+            self.game.step(action)
             if self.is_shown:
                 self.env.render()
             end, winner = self.game.game_end()
