@@ -61,7 +61,8 @@ class Agent(object):
                 player1.reset_player()
                 if not player2 is None:
                     if winner != -1:
-                        print("Game end. Winner is player:", players[winner])
+                        winner_play= player1 if winner == player1.player else player2
+                        print("Game end. Winner is player:", winner_play)
                     else:
                         print("Game end. Tie")
                 return winner, zip(states, mcts_probs, winners_z)
