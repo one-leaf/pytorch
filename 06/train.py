@@ -136,7 +136,7 @@ class FiveChessTrain():
         use_Mcts=False
         if random.random()>0.5:
             pure_mcts_player = MCTSPurePlayer(c_puct=5, n_playout=self.pure_mcts_playout_num)
-            temp = 1e-2
+            # temp = 1e-1
             use_Mcts=True
             print("AI VS MCTS")
         else:
