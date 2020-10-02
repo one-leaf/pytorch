@@ -44,6 +44,7 @@ class Agent(object):
                 current_players.append(self.game.current_player)
             else:
                 action = player_in_turn.get_action(self.game)
+            print(self.game.availables)
             # perform a move
             self.game.step(action)
             if self.is_shown:
