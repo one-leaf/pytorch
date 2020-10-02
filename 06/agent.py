@@ -40,7 +40,10 @@ class Agent(object):
                 # print(move_probs.reshape(self.size,self.size))
                 # print(states[-1])
                 mcts_probs.append(move_probs)
-                current_players.append(self.game.current_player)
+                current_players.append(self.game.current_player)   
+                # 如果包含了第二个玩家是MCTS，则AI每一步都需要重置搜索树
+                if not player2 is None:
+                    player1.mcts.update_root_with_action(None)             
             else:
                 action = player_in_turn.get_action(self.game)
             # perform a move
@@ -58,7 +61,6 @@ class Agent(object):
                 # reset MCTS root node 
                 player1.reset_player()
                 if not player2 is None:
-                    player2.reset_player()
                     if winner != -1:
                         print("Game end. Winner is player:", players[winner])
                     else:

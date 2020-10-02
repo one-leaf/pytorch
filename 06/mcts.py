@@ -173,6 +173,7 @@ class MCTS(object):
             # 从child中选择最优action
             if action is None:
                 action, node = node.select(self._c_puct)
+                
             # 执行action走子
             state.step(action)
 
