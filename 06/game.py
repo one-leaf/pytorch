@@ -130,6 +130,7 @@ class FiveChess(object):
     def step(self, action, oid=None):
         if oid!=None and oid==id(self):
             print(oid, self.current_player, action)
+            print(self.step_count, self.actions)
             print(self.availables)
         if action not in self.availables:
             print(action)
