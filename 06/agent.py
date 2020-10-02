@@ -37,13 +37,14 @@ class Agent(object):
                 action, move_probs = player_in_turn.get_action(self.game, temp=temp, return_prob=1)
                 # store the data
                 states.append(self.game.current_state())
-                # print(action)
+                print("AI:", action)
                 # print(move_probs.reshape(self.size,self.size))
                 # print(states[-1])
                 mcts_probs.append(move_probs)
                 current_players.append(self.game.current_player)
             else:
                 action = player_in_turn.get_action(self.game)
+                print("MCTS:", action)
             print(self.game.availables)
             # perform a move
             self.game.step(action)
