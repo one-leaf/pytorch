@@ -134,7 +134,7 @@ class FiveChessTrain():
         mcts_player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout, is_selfplay=1)
         temp = self.temp
         use_Mcts=False
-        if random.random()>0.9:
+        if random.random()>0.95:
             pure_mcts_player = MCTSPurePlayer(c_puct=5, n_playout=self.pure_mcts_playout_num)
             # temp = 1e-1
             use_Mcts=True
@@ -144,8 +144,9 @@ class FiveChessTrain():
 
         # 开始下棋
         winner, play_data = agent.start_self_play(mcts_player, pure_mcts_player, temp=temp)
-        if use_Mcts==True and winner==pure_mcts_player.player:
+        if use_Mcts==True and winner==mcts_player.player:
             self.pure_mcts_playout_num += 1000
+            self.policy_value_net.save_model(best_model_file)
 
         play_data = list(play_data)[:]
         episode_len = len(play_data)
