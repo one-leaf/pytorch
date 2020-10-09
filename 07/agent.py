@@ -256,19 +256,21 @@ class Agent(object):
         while not (game0.terminal or game1.terminal):
 
             # 一个方块一个方块的训练
+            # 最低训练方块
+            train_pieces_count = 5  
             for i in count():
                 action, move_probs = player.get_action(game0, temp=temp, return_prob=1)
                 game0_states.append(game0.current_state())
                 game0_mcts_probs.append(move_probs)
                 game0.step(action)
-                if game0.state!=0: break
+                if game0.terminal or (game0.state!=0 and i%train_pieces_count==0): break
 
             for i in count():
                 action, move_probs = player.get_action(game1, temp=temp, return_prob=1)
                 game1_states.append(game1.current_state())
                 game1_mcts_probs.append(move_probs)
                 game1.step(action)
-                if game1.state!=0: break
+                if game1.terminal or (game1.state!=0 and i%train_pieces_count==0): break
 
             # game0.print()
             # game1.print()
