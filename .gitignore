@@ -19,6 +19,7 @@ data128/
 test/
 fonts/
 zh_fonts/
+*_model/
 model/
 model*/
 .DS_Store
