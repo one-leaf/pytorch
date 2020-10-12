@@ -277,26 +277,17 @@ class MCTS(object):
         act_visits = [(act, node._n_visits) for act, node in self._root._children.items()]
         acts, visits = zip(*act_visits)
 
-        # # 打印每一个下落方块的最后一步之后的第一步
-        # if  state.state!=0:
-        #     # info={"shape":state.fallpiece["shape"], "depth":self.max_depth_tree()}
-        #     info={"shape":state.fallpiece["shape"]}
-        #     for idx in sorted(range(len(visits)), key=visits.__getitem__)[::-1]:
-        #         value = self._root._children[acts[idx]].get_value(5)
-        #         info[acts[idx]] = (visits[idx], round(value, 2))
-        #     # state.print(add_fallpiece=True)
-        #     # print(state.checkActionisBest(include_fallpiece=True))
-        #     print("steps:",state.steps,"_n_playout:", n, "info:", info)
-        #     # self.print_tree()
-        #     # nodes=[self._root]
-        #     # lines=[[]]
-        #     # curr_line=0
-        #     # while(len(nodes)>0):
-        #     #     node = nodes.pop()
-        #     #     for n in node._children:
-        #     #         lines[-1].append([n,])
-        #     #         nodes.append(node._children[n])
-
+        # 打印中间信息
+        if random.random()>0.99:
+            # info={"shape":state.fallpiece["shape"], "depth":self.max_depth_tree()}
+            info={"shape":state.fallpiece["shape"]}
+            for idx in sorted(range(len(visits)), key=visits.__getitem__)[::-1]:
+                value = self._root._children[acts[idx]].get_value(5)
+                info[acts[idx]] = (visits[idx], round(value, 2))
+            # state.print(add_fallpiece=True)
+            # print(state.checkActionisBest(include_fallpiece=True))
+            print("steps:",state.steps,"_n_playout:", n, "info:", info)
+            # self.print_tree()
         # softmax概率，先用log(visites)，拉平差异，再乘以一个权重，这样给了一个可以调节的参数，
         # temp 越小，导致softmax的越肯定，也就是当temp=1e-3时，基本上返回只有一个1,其余概率都是0; 训练的时候 temp=1
         act_probs = MCTS.softmax((1/temp) * np.log(np.array(visits) + 1e-10))
