@@ -28,8 +28,8 @@ class ResidualBlock(nn.Module):
 class Net(nn.Module):
     def __init__(self,input_size, output_size):
         super().__init__()
-        self.conv1=self._make_layer(3, 64, 3)
-        self.conv2=self._make_layer(64, 64, 3)
+        self.conv1=self._make_layer(3, 64, 4)
+        # self.conv2=self._make_layer(64, 64, 3)
 
         # 动作预测
         self.act_conv1 = nn.Conv2d(64, 2, 1)
@@ -43,7 +43,7 @@ class Net(nn.Module):
 
     def forward(self, x):
         x = self.conv1(x)
-        x = self.conv2(x)
+        # x = self.conv2(x)
 
         x_act = F.leaky_relu(self.act_conv1(x))
         x_act = x_act.view(x.size(0), -1)

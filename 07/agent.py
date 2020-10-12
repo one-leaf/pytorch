@@ -245,7 +245,7 @@ class Agent(object):
         return self.terminal, score   #self.score
 
     # 使用 mcts 训练，重用搜索树，并保存数据
-    def start_self_play(self, player, temp=1e-3):
+    def start_self_play2(self, player, temp=1e-3):
         # 这里下两局，按得分和步数对比
         states, mcts_probs, winers = [], [], []
 
@@ -313,10 +313,8 @@ class Agent(object):
         print("add %s to dataset"%len(winers))
         return -1, zip(states, mcts_probs, winners_z)
 
-
-
     # 使用 mcts 训练，重用搜索树，并保存数据
-    def start_self_play2(self, player, temp=1e-3):
+    def start_self_play(self, player, temp=1e-3):
         # 这里下两局，按得分和步数对比
         states, mcts_probs, current_players = [], [], []
 
@@ -337,7 +335,6 @@ class Agent(object):
                 break
         self.print()
         score0 = self.score
-        transCount0 = self.getTransCount()
 
         self.tetromino=tetromino
         self.reset()
@@ -355,37 +352,24 @@ class Agent(object):
                 break
         self.print()
         score1 = self.score
-        transCount1 = self.getTransCount()
 
         winner = -1
         winners_z = np.zeros(len(current_players))
         
-        # 如果有奖励，则全部赢
-        if score0>0 and score0>score1: 
-            winner = 0
-        if score1>0 and score1>score0: 
-            winner = 1
-
-        # 如果双方都有奖励，空洞少的赢,如果平局，全部奖励
-        if score0>0 and score1>0 and score0==score1:
-            if abs(transCount0-transCount1)<5:
-                winners_z[:] = 1.0
+        # 如果有奖励，按奖励大的赢,否则全部赢；如果没有奖励则全部输
+        if score0>0 or score1>0:
+            if score0!=score1:
+                winner = 0 if score0>score1 else 1
             else:
-                winner = 0 if transCount0<transCount1 else 1
+                winner = 2           
 
-        # 如果双方都没有奖励就是平局，因为很难消除
-
-        # 如果没有奖励，则空洞少的赢
-        if score0==0 and score1==0:
-            if transCount0<transCount1:
-                winner = 0
-            if transCount0>transCount1: 
-                winner = 1   
-
-        if winner != -1:
+        if winner in [0, 1]:
             winners_z[np.array(current_players) == winner] = 1.0
             winners_z[np.array(current_players) != winner] = -1.0
-        print("winner:",winner,"transCount0:",transCount0,"transCount1",transCount1)
+        elif winner == -1:
+            winners_z[:]=-1.0
+        elif winner == 2:
+            winners_z[:]=1.0
         return winner, zip(states, mcts_probs, winners_z)
 
     def start_play(self, player, env):
