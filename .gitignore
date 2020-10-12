@@ -4,10 +4,12 @@
 *.npz
 *.pickle
 *.pt
+cached_*
 .ideas/
 .vscode/
 __pycache__/
 checkpoints/
+outputs/
 summaries/
 logs/
 data/
@@ -17,7 +19,6 @@ data128/
 test/
 fonts/
 zh_fonts/
-*_model/
 model/
 model*/
 .DS_Store
