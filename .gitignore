@@ -4,6 +4,7 @@
 *.npz
 *.pickle
 *.pt
+*.bin
 cached_*
 .ideas/
 .vscode/

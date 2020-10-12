@@ -1,0 +1,1 @@
+由于github不允许上传大于100M的文件，所以只能自己下载 pytorch_model.bin 文件
