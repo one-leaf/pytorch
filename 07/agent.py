@@ -336,7 +336,7 @@ class Agent(object):
                 break
         self.print()
         score0 = self.score
-        steps0 = self.steps
+        steps0 = 200-len(self.tetromino.nextpiece)
 
         self.tetromino=tetromino
         self.reset()
@@ -354,7 +354,7 @@ class Agent(object):
                 break
         self.print()
         score1 = self.score
-        steps1 = self.steps
+        steps1 = 200-len(self.tetromino.nextpiece)
 
         winner = -1
         winners_z = np.zeros(len(current_players))
