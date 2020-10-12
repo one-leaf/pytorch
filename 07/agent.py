@@ -335,6 +335,7 @@ class Agent(object):
                 break
         self.print()
         score0 = self.score
+        steps0 = self.steps
 
         self.tetromino=tetromino
         self.reset()
@@ -352,24 +353,26 @@ class Agent(object):
                 break
         self.print()
         score1 = self.score
+        steps1 = self.steps
 
         winner = -1
         winners_z = np.zeros(len(current_players))
         
-        # 如果有奖励，按奖励大的赢,否则全部赢；如果没有奖励则全部输
+        # 如果有奖励，按奖励大的赢,否则全部赢；如果没有奖励则按步数，谁的步数多谁赢
         if score0>0 or score1>0:
             if score0!=score1:
                 winner = 0 if score0>score1 else 1
             else:
-                winner = 2           
+                winner = -1
+        if winner == -1:
+            if steps0!=steps1:
+                winner = 0 if steps0>steps1 else 1         
 
         if winner in [0, 1]:
             winners_z[np.array(current_players) == winner] = 1.0
             winners_z[np.array(current_players) != winner] = -1.0
         elif winner == -1:
-            winners_z[:]=-1.0
-        elif winner == 2:
-            winners_z[:]=1.0
+            winners_z[:]=0
         return winner, zip(states, mcts_probs, winners_z)
 
     def start_play(self, player, env):
