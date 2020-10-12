@@ -179,7 +179,7 @@ class FiveChess(object):
             square_state[6][:,:] = 1.0
 
         # 归一化数据
-        square_state = (square_state - 0.5) / 0.5
+        # square_state = (square_state - 0.5) / 0.5
         return square_state
 
     # 打印状态
