@@ -360,12 +360,12 @@ class Agent(object):
         winners_z = np.zeros(len(current_players))
         
         # 如果有奖励，按奖励大的赢,否则全部赢；如果没有奖励则按步数，谁的步数多谁赢
-        if score0>0 or score1>0:
-            if score0!=score1:
-                winner = 0 if score0>score1 else 1
-        else:
-            if steps0!=steps1:
-                winner = 0 if steps0>steps1 else 1         
+        # if score0>0 or score1>0:
+        #     if score0!=score1:
+        #         winner = 0 if score0>score1 else 1
+        # else:
+        if steps0!=steps1:
+            winner = 0 if steps0>steps1 else 1         
 
         if winner in [0, 1]:
             winners_z[np.array(current_players) == winner] = 1.0
