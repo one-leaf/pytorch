@@ -42,6 +42,7 @@ class Agent(object):
         if not self.tetromino.validposition(self.board,self.fallpiece):
             acts.remove(KEY_ROTATION)
         self.fallpiece['rotation'] = r
+        if len(acts)==0: acts=[KEY_ROTATION]
         return acts         
 
     def step(self, action, env=None):
