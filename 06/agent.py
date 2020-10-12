@@ -48,7 +48,7 @@ class Agent(object):
                 action = player_in_turn.get_action(self.game)
             # perform a move
             if i==0:
-                action = random.choice(self.game.availables[:16])
+                action = random.choice(self.game.availables[:9])
             self.game.step(action)
             if self.is_shown:
                 self.env.render()
