@@ -399,10 +399,9 @@ class MCTSPlayer(object):
                 #     p = 1.
                 # else:
                 #     p = 0.9  
-                # p = 0.75
-
-                # dirichlet = np.random.dirichlet(0.3 * np.ones(len(act_probs)))
-                # action = np.random.choice(acts, p= p*act_probs + (1-p)*dirichlet) 
+                p = 0.75
+                dirichlet = np.random.dirichlet(0.3 * np.ones(len(act_probs)))
+                action = np.random.choice(acts, p= p*act_probs + (1-p)*dirichlet) 
                 action = np.random.choice(acts, p= act_probs) 
 
                 # 更新根节点并重用搜索树
