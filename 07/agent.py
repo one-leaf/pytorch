@@ -363,8 +363,6 @@ class Agent(object):
         if score0>0 or score1>0:
             if score0!=score1:
                 winner = 0 if score0>score1 else 1
-            else:
-                winner = -1
         else:
             if steps0!=steps1:
                 winner = 0 if steps0>steps1 else 1         
