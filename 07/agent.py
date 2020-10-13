@@ -321,7 +321,6 @@ class Agent(object):
 
         tetromino = copy.deepcopy(self.tetromino)
         # 训练方块数
-        train_pieces_count = 8
         self.reset()
         for i in count():
             # temp 权重 ，return_prob 是否返回概率数据
@@ -333,8 +332,7 @@ class Agent(object):
             # 执行一步
             self.step(action)
             # 如果游戏结束
-            if self.terminal or (self.state!=0 and i%train_pieces_count==0):
-                break
+            if self.terminal: break
         self.print()
         score0 = self.score
         steps0 = 200-len(self.tetromino.nextpiece)
@@ -351,8 +349,7 @@ class Agent(object):
             # 执行一步
             self.step(action)
             # 如果游戏结束
-            if self.terminal or (self.state!=0 and i%train_pieces_count==0):
-                break
+            if self.terminal: break
         self.print()
         score1 = self.score
         steps1 = 200-len(self.tetromino.nextpiece)
