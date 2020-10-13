@@ -312,6 +312,7 @@ class Agent(object):
     # 使用 mcts 训练，重用搜索树，并保存数据
     def start_self_play(self, player, temp=1e-3):
         # 这里下两局，按得分和步数对比
+        # 这样会有一个问题，导致+分比-分多，导致mcts会集中到最初和最后的步骤
         states, mcts_probs, current_players = [], [], []
         max_height = 10
         tetromino = copy.deepcopy(self.tetromino)
@@ -363,8 +364,11 @@ class Agent(object):
         if winner in [0, 1]:
             winners_z[np.array(current_players) == winner] = 1.0
             winners_z[np.array(current_players) != winner] = -1.0
+        else:
+            # 如果是平局，作为负分补偿，全部给负分
+            winners_z[:] = -1.0
 
-        print("winner",winner)
+        print("winner",winner,"step0",steps0,"step1",steps1)
         return winner, zip(states, mcts_probs, winners_z)
 
     def start_play(self, player, env):
