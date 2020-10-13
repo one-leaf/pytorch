@@ -172,7 +172,7 @@ class Train():
         explained_var_old = (1 - np.var(np.array(winner_batch) - old_v.flatten()) / np.var(np.array(winner_batch)))
         explained_var_new = (1 - np.var(np.array(winner_batch) - new_v.flatten()) / np.var(np.array(winner_batch)))
         # entropy 信息熵，越小越好
-        logging.info(("TRAIN kl:{:.5f},lr_multiplier:{:.3f},v_loss:{},p_loss:{},entropy:{:.5f},var_old:{:.5f},var_new:{:.5f}"
+        logging.info(("TRAIN kl:{:.5f},lr_multiplier:{:.3f},v_loss:{:.5f},p_loss:{:.5f},entropy:{:.5f},var_old:{:.5f},var_new:{:.5f}"
                       ).format(kl, self.lr_multiplier, v_loss, p_loss, entropy, explained_var_old, explained_var_new))
         return loss, entropy  
 
