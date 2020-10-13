@@ -361,7 +361,7 @@ class Agent(object):
         #         winner = 0 if score0>score1 else 1
         # else:
         # 至少大于一个方块的相差，如果只有相差一个方块，可以认为是平局
-        if abs(steps0-steps1)>=1:
+        if abs(steps0-steps1)>1:
             winner = 0 if steps0>steps1 else 1         
 
         if winner in [0, 1]:
