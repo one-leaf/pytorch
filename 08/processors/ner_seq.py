@@ -212,7 +212,7 @@ class CluenerProcessor(DataProcessor):
         return self._create_examples(self._read_json(os.path.join(data_dir, "test.json")), "test")
 
     def get_labels(self):
-        """See base class."""
+        """X:中间英文单词后缀，忽略；B-:词开始； I-: 词后续到结束； S-:单个开始同时结束；O:无"""
         return ["X", "B-address", "B-book", "B-company", 'B-game', 'B-government', 'B-movie', 'B-name',
                 'B-organization', 'B-position','B-scene',"I-address",
                 "I-book", "I-company", 'I-game', 'I-government', 'I-movie', 'I-name',
