@@ -111,14 +111,16 @@ class Agent(object):
             print(line)
         print("level:", self.level, "score:", self.score, "steps:", self.steps)
 
-    # 统计空洞数量
-    def getHoleCount(self):
+    # 统计当前最大高度
+    def getMaxHeight(self):
         c = 0
         for y in range(self.height):
             for x in range(self.width):
-                if self.board[x][y]==blank:
-                    c += 1
-        return c
+                if self.board[x][y]!=blank:
+                    c=y
+                    break
+            if c!=0:break            
+        return self.height - c
 
     # 获得当前局面信息
     def getBoard(self):
@@ -236,14 +238,7 @@ class Agent(object):
         return v, transCount, self.transCount #(v/badHoleCount)     
 
     def game_end(self):
-        score = 0
-        if self.terminal:
-            if self.score>0:
-                score = 1.0 #* self.score
-            else:
-                holeCount = self.getHoleCount()
-                score = -1.0 * (holeCount/200)
-        return self.terminal, score   #self.score
+        return self.terminal, self.score
 
     # 使用 mcts 训练，重用搜索树，并保存数据
     def start_self_play2(self, player, temp=1e-3):
@@ -318,7 +313,7 @@ class Agent(object):
     def start_self_play(self, player, temp=1e-3):
         # 这里下两局，按得分和步数对比
         states, mcts_probs, current_players = [], [], []
-
+        max_height = 10
         tetromino = copy.deepcopy(self.tetromino)
         # 训练方块数
         self.reset()
@@ -332,7 +327,7 @@ class Agent(object):
             # 执行一步
             self.step(action)
             # 如果游戏结束
-            if self.terminal: break
+            if self.terminal or (self.state!=0 and self.getMaxHeight()>=max_height): break
         self.print()
         score0 = self.score
         steps0 = 200-len(self.tetromino.nextpiece)
@@ -349,7 +344,7 @@ class Agent(object):
             # 执行一步
             self.step(action)
             # 如果游戏结束
-            if self.terminal: break
+            if self.terminal or (self.state!=0 and self.getMaxHeight()>=max_height): break
         self.print()
         score1 = self.score
         steps1 = 200-len(self.tetromino.nextpiece)
