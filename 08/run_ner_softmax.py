@@ -203,9 +203,10 @@ def evaluate(args, model, tokenizer, prefix=""):
             for j, m in enumerate(label):
                 if j == 0:
                     continue
-                elif out_label_ids[i][j] == args.label2id['[SEP]']:
-                    metric.update(pred_paths=[temp_2], label_paths=[temp_1])
-                    break
+                # 这里有个bug。SEP在输出标签中是不存在的
+                # elif out_label_ids[i][j] == args.label2id['[SEP]']:
+                #     metric.update(pred_paths=[temp_2], label_paths=[temp_1])
+                #     break
                 else:
                     temp_1.append(args.id2label[out_label_ids[i][j]])
                     temp_2.append(preds[i][j])

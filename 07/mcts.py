@@ -394,9 +394,8 @@ class MCTSPlayer(object):
                 #     p = 0.9  
                 p = state.steps/100
                 if p>0.75: p=0.75
-                dirichlet = np.random.dirichlet(0.5 * np.ones(len(act_probs)))
+                dirichlet = np.random.dirichlet(0.2 * np.ones(len(act_probs)))
                 action = np.random.choice(acts, p= p*act_probs + (1-p)*dirichlet) 
-                action = np.random.choice(acts, p= act_probs) 
 
                 # 更新根节点并重用搜索树
                 self.mcts.update_root_with_action(action)
