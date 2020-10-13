@@ -284,7 +284,7 @@ class MCTS(object):
             self._playout_network(state_copy)
 
             if n%10==0 and n >= self._n_playout*0.2:
-                act_visits = [(act, node._n_visits) for act, node in self._root._children.items() if node._n_visits>0]
+                act_visits = [(act, node._n_visits) for act, node in self._root._children.items()]
                 acts, visits = zip(*act_visits)
 
                 idx = max(range(len(visits)), key=visits.__getitem__)
