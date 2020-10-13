@@ -184,6 +184,8 @@ class MCTS(object):
         # if state.terminal:# state.state==0:
         #     v , new ,old = state.checkActionisBest(include_fallpiece=state.state==0)
         #     leaf_value = v
+        if state.state==0:
+            leaf_value += -1.0 * np.log(state.getTransCount())
         # 递归更新当前节点及所有父节点的最优选中次数和Q分数,因为得到的是本次的价值
         node.update_recursive(leaf_value)
 
@@ -390,8 +392,8 @@ class MCTSPlayer(object):
                 #     p = 1.
                 # else:
                 #     p = 0.9  
-                p = 0.5
-                dirichlet = np.random.dirichlet(0.1 * np.ones(len(act_probs)))
+                p = 0.75
+                dirichlet = np.random.dirichlet(0.5 * np.ones(len(act_probs)))
                 action = np.random.choice(acts, p= p*act_probs + (1-p)*dirichlet) 
                 action = np.random.choice(acts, p= act_probs) 
 
