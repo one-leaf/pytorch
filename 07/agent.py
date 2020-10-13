@@ -314,7 +314,7 @@ class Agent(object):
         # 这里下两局，按得分和步数对比
         # 这样会有一个问题，导致+分比-分多，导致mcts会集中到最初和最后的步骤
         states, mcts_probs, current_players = [], [], []
-        max_height = 10
+        # max_height = 10
         tetromino = copy.deepcopy(self.tetromino)
         # 训练方块数
         self.reset()
@@ -329,7 +329,7 @@ class Agent(object):
             self.step(action)
             # 如果游戏结束
             if self.terminal: break
-            if self.state!=0 and self.getMaxHeight()>=max_height: break
+            # if self.state!=0 and self.getMaxHeight()>=max_height: break
         self.print()
         score0 = self.score
         steps0 = 200-len(self.tetromino.nextpiece)
@@ -347,7 +347,7 @@ class Agent(object):
             self.step(action)
             # 如果游戏结束
             if self.terminal: break
-            if self.state!=0 and self.getMaxHeight()>=max_height: break
+            # if self.state!=0 and self.getMaxHeight()>=max_height: break
         self.print()
         score1 = self.score
         steps1 = 200-len(self.tetromino.nextpiece)
