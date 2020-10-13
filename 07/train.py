@@ -112,8 +112,7 @@ class Train():
             extend_data.append((state, mcts_porb, winner))
             # 水平翻转
             equi_state = np.array([np.fliplr(s) for s in state])
-            print(mcts_porb.shape)
-            equi_mcts_prob = np.transpose(mcts_porb,(0,2,1,3))
+            equi_mcts_prob = mcts_porb[[0,2,1,3]]
             extend_data.append((equi_state, equi_mcts_prob, winner))
         return extend_data
 
