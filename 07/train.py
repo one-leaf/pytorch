@@ -91,7 +91,7 @@ class Train():
         # training params
         self.learn_rate = 1e-4
         self.lr_multiplier = 1.0  # 基于KL的自适应学习率
-        self.temp = 1  # the temperature param
+        self.temp = 1  # MCTS的概率参数，越大越不肯定，训练时1，预测时1e-3
         self.n_playout = 64  # 每个动作的模拟次数
         self.buffer_size = 200000  # cache对战记录个数
         self.play_batch_size = 2 # 每次自学习次数
@@ -102,6 +102,19 @@ class Train():
         self.c_puct = 5  # MCTS child权重， 用来调节MCTS中 探索/乐观 的程度 默认 5
         self.policy_value_net = PolicyValueNet(GAME_WIDTH, GAME_HEIGHT, GAME_ACTIONS_NUM, model_file=model_file)
 
+    def get_equi_data(self, play_data):
+        """
+        通过翻转增加数据集
+        play_data: [(state, mcts_prob, winner_z), ..., ...]
+        """
+        extend_data = []
+        for state, mcts_porb, winner in play_data:
+            extend_data.append((state, mcts_porb, winner))
+            # 水平翻转
+            equi_state = np.array([np.fliplr(s) for s in state])
+            equi_mcts_prob = np.transpose(mcts_porb,(0,2,1,3))
+            extend_data.append((equi_state, equi_mcts_prob, winner))
+        return extend_data
 
     def collect_selfplay_data(self):
         """收集自我对抗数据用于训练"""       
@@ -118,6 +131,7 @@ class Train():
         episode_len = len(play_data)
 
         # 把翻转棋盘数据加到数据集里
+        play_data = self.get_equi_data(play_data)
         logging.info("TRAIN Self Play end. length:%s saving ..." % episode_len)
         # 保存对抗数据到data_buffer
         for obj in play_data:
