@@ -360,7 +360,7 @@ class Agent(object):
         #     if score0!=score1:
         #         winner = 0 if score0>score1 else 1
         # else:
-        if steps0!=steps1:
+        if abs(steps0-steps1)>1:
             winner = 0 if steps0>steps1 else 1         
 
         if winner in [0, 1]:
