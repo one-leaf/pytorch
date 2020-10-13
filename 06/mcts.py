@@ -302,9 +302,10 @@ class MCTS(object):
             
                 if n>=self._n_playout:
                     # 如果得分为负数，多算2倍，争取找出一个优解
-                    value = self._root._children[acts[idx]].get_value(5)
-                    if value>0 or n>self._n_playout*2:
-                        break
+                    # 不用特意去提高负分
+                    # value = self._root._children[acts[idx]].get_value(5)
+                    # if value>0 or n>self._n_playout*2:
+                    break
 
         # 分解出child中的action和最优选访问次数
         act_visits = [(act, node._n_visits) for act, node in self._root._children.items()]
