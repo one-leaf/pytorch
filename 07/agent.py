@@ -320,7 +320,8 @@ class Agent(object):
         states, mcts_probs, current_players = [], [], []
 
         tetromino = copy.deepcopy(self.tetromino)
-
+        # 训练方块数
+        train_pieces_count = 8
         self.reset()
         for i in count():
             # temp 权重 ，return_prob 是否返回概率数据
@@ -332,7 +333,7 @@ class Agent(object):
             # 执行一步
             self.step(action)
             # 如果游戏结束
-            if self.terminal:
+            if self.terminal or (self.state!=0 and i%train_pieces_count==0):
                 break
         self.print()
         score0 = self.score
@@ -350,7 +351,7 @@ class Agent(object):
             # 执行一步
             self.step(action)
             # 如果游戏结束
-            if self.terminal:
+            if self.terminal or (self.state!=0 and i%train_pieces_count==0):
                 break
         self.print()
         score1 = self.score
