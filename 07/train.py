@@ -154,7 +154,7 @@ class Train():
 
         old_probs, old_v = self.policy_value_net.policy_value(state_batch)  
         for i in range(epochs):
-            loss, entropy = self.policy_value_net.train_step(state_batch, mcts_probs_batch, winner_batch, self.learn_rate * self.lr_multiplier)
+            loss, v_loss, p_loss, entropy = self.policy_value_net.train_step(state_batch, mcts_probs_batch, winner_batch, self.learn_rate * self.lr_multiplier)
             new_probs, new_v = self.policy_value_net.policy_value(state_batch)
 
             # 散度计算：
@@ -172,8 +172,8 @@ class Train():
         explained_var_old = (1 - np.var(np.array(winner_batch) - old_v.flatten()) / np.var(np.array(winner_batch)))
         explained_var_new = (1 - np.var(np.array(winner_batch) - new_v.flatten()) / np.var(np.array(winner_batch)))
         # entropy 信息熵，越小越好
-        logging.info(("TRAIN kl:{:.5f},lr_multiplier:{:.3f},loss:{},entropy:{:.5f},var_old:{:.5f},var_new:{:.5f}"
-                      ).format(kl, self.lr_multiplier, loss, entropy, explained_var_old, explained_var_new))
+        logging.info(("TRAIN kl:{:.5f},lr_multiplier:{:.3f},v_loss:{},p_loss:{},entropy:{:.5f},var_old:{:.5f},var_new:{:.5f}"
+                      ).format(kl, self.lr_multiplier, v_loss, p_loss, entropy, explained_var_old, explained_var_new))
         return loss, entropy  
 
     def run(self):

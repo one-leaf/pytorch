@@ -1,3 +1,4 @@
+import random
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -166,7 +167,8 @@ class PolicyValueNet():
         loss.backward()
         self.optimizer.step()
 
-        # print(loss, value_loss, policy_loss)
+        # if random.random()>0.99:
+        #     print(loss, value_loss, policy_loss)
         # for name, parms in self.policy_value_net.named_parameters():
         #     grad_value = torch.max(parms.grad)
         #     print('name:', name, 'grad_requirs:', parms.requires_grad,' grad_value:',grad_value)
@@ -176,7 +178,7 @@ class PolicyValueNet():
         entropy = -torch.mean(
                 torch.sum(torch.exp(log_act_probs) * log_act_probs, 1)
                 )
-        return loss.item(), entropy.item()
+        return loss.item(), value_loss.item(), policy_loss.item(), entropy.item()
 
     # 保存模型
     def save_model(self, model_file):
