@@ -287,7 +287,7 @@ class MCTS(object):
                 act_visits = [(act, node._n_visits) for act, node in self._root._children.items()]
                 acts, visits = zip(*act_visits)
 
-                idx = max(range(len(visits)), key=visits.__getitem__)
+                # idx = max(range(len(visits)), key=visits.__getitem__)
                 
             #     if len(visits)>2: 
             #         # 如果当前的最佳选项在必救名单直接执行
