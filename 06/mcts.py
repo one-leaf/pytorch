@@ -300,7 +300,7 @@ class MCTS(object):
 
                 # 如果方差足够大，或总数大于5倍结束
                 var = np.var(visits)
-                if var>=100 or n>=self._n_playout*5: break
+                if var>=1000 or n>=self._n_playout*5: break
             
                 # if n>=self._n_playout:
                     # 如果得分为负数，多算2倍，争取找出一个优解
