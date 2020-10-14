@@ -30,7 +30,7 @@ class Agent(object):
 
     # 获取可用步骤, 保留一个旋转始终有用
     def availables(self):
-        acts=[KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN]
+        acts=[KEY_LEFT, KEY_RIGHT, KEY_ROTATION, KEY_DOWN]
         if not self.tetromino.validposition(self.board,self.fallpiece,ax = -1):
             acts.remove(KEY_LEFT)
         if not self.tetromino.validposition(self.board,self.fallpiece,ax = 1):
