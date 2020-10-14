@@ -24,7 +24,11 @@ class FiveChess(object):
         self.current_player = self.players[start_player]
         availables = [(x,y) for x in range(self.size) for y in range(self.size)]
         # 按照先中间后两边的排序
-        self.availables = sorted(availables, key=lambda x : (x[0]-self.size//2)**2+(x[1]-self.size//2)**2)
+        # self.availables = sorted(availables, key=lambda x : (x[0]-self.size//2)**2+(x[1]-self.size//2)**2)
+        # 随机打乱位置
+        random.shuffle(availables)
+        self.availables=availables
+
         self.terminal = False
         self.win_user = -1
         self.actions=[]

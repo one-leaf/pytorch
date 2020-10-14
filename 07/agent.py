@@ -4,6 +4,7 @@ from pygame.locals import *
 from itertools import count
 import numpy as np
 import copy
+import random
 
 KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN  = 0, 1, 2, 3
 
@@ -30,7 +31,9 @@ class Agent(object):
 
     # 获取可用步骤, 保留一个旋转始终有用
     def availables(self):
-        acts=[KEY_LEFT, KEY_RIGHT, KEY_ROTATION, KEY_DOWN]
+        acts=[KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN]
+        # 为了避免mcts偏好，随机打乱
+        random.shuffle(acts)
         if not self.tetromino.validposition(self.board,self.fallpiece,ax = -1):
             acts.remove(KEY_LEFT)
         if not self.tetromino.validposition(self.board,self.fallpiece,ax = 1):
