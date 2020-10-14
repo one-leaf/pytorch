@@ -72,6 +72,55 @@ class FiveChess(object):
                     return True, self.colors.index(color)
         return False, -1        
 
+    # 检查是否存在四子连线，也就是少一子
+    def will_win(self):
+        # 找到最后一个子
+        last_x, last_y = self.actions[-1]
+        n = self.n_in_row -1
+        c = self.chessboard[last_x][last_y]
+        
+        hassame=1
+        for l in range(1, n):
+            if last_x+l==self.size or self.chessboard[last_x+l][last_y]!=c: break
+            hassame += 1
+        if hassame>=n: return True
+        for l in range(1, n):
+            if last_x-l<0 or self.chessboard[last_x-l][last_y]!=c: break
+            hassame += 1
+        if hassame>=n: return True
+
+        hassame=1
+        for l in range(1, n):
+            if last_y+l==self.size or self.chessboard[last_x][last_y+l]!=c: break
+            hassame += 1
+        if hassame>=n: return True
+        for l in range(1, n):
+            if last_y-l<0 or self.chessboard[last_x][last_y-l]!=c: break
+            hassame += 1
+        if hassame>=n: return True
+
+        hassame=1
+        for l in range(1, n):
+            if last_x+l==self.size or last_y+l==self.size or self.chessboard[last_x+l][last_y+l]!=c: break
+            hassame += 1
+        if hassame>=n: return True
+        for l in range(1, n):
+            if last_x-l<0 or last_y-l<0 or self.chessboard[last_x-l][last_y-l]!=c: break
+            hassame += 1
+        if hassame>=n: return True
+
+        hassame=1
+        for l in range(1, n):
+            if last_x-l<0 or last_y+l==self.size or self.chessboard[last_x-l][last_y+l]!=c: break
+            hassame += 1
+        if hassame>=n: return True
+        for l in range(1, n):
+            if last_x+l==self.size or last_y-l<0 or self.chessboard[last_x+l][last_y-l]!=c: break
+            hassame += 1
+        if hassame>=n: return True
+
+        return False  
+
     # 检查是否游戏结束,返回赢的用户0 或 1，如果平局返回-1
     def check_terminal(self):
         # 如果都没有足够的棋
