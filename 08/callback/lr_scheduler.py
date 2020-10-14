@@ -9,6 +9,7 @@ def get_constant_schedule(optimizer, last_epoch=-1):
     """
     return LambdaLR(optimizer, lambda _: 1, last_epoch=last_epoch)
 
+
 def get_constant_schedule_with_warmup(optimizer, num_warmup_steps, last_epoch=-1):
     """ Create a schedule with a constant learning rate preceded by a warmup
     period during which the learning rate increases linearly between 0 and 1.

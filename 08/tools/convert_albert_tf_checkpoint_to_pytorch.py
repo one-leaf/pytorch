@@ -7,7 +7,7 @@ from __future__ import print_function
 import argparse
 import torch
 from models.transformers.modeling_albert import AlbertConfig, AlbertForPreTraining, load_tf_weights_in_albert
-# from models.transformers.modeling_albert_bright import AlbertConfig, AlbertForPreTraining, load_tf_weights_in_albert
+# from model.modeling_albert_bright import AlbertConfig, AlbertForPreTraining, load_tf_weights_in_albert
 import logging
 logging.basicConfig(level=logging.INFO)
 
@@ -48,13 +48,12 @@ if __name__ == "__main__":
                                      args.pytorch_dump_path)
 
 '''
-# google
 python convert_albert_tf_checkpoint_to_pytorch.py \
     --tf_checkpoint_path=./prev_trained_model/albert_large_zh \
     --bert_config_file=./prev_trained_model/albert_large_zh/config.json \
     --pytorch_dump_path=./prev_trained_model/albert_large_zh/pytorch_model.bin
     
-# bright
+
 from model.modeling_albert_bright import AlbertConfig, AlbertForPreTraining, load_tf_weights_in_albert
 python convert_albert_tf_checkpoint_to_pytorch.py \
     --tf_checkpoint_path=./prev_trained_model/albert_base_bright \

@@ -3,7 +3,7 @@ import glob
 import logging
 import os
 import json
-
+import time
 import numpy as np
 import torch
 from torch.nn import CrossEntropyLoss
@@ -12,7 +12,9 @@ from torch.utils.data.distributed import DistributedSampler
 from callback.optimizater.adamw import AdamW
 from callback.lr_scheduler import get_linear_schedule_with_warmup
 from callback.progressbar import ProgressBar
-from tools.common import seed_everything,json_to_text
+from callback.adversarial import FGM
+
+from tools.common import seed_everything
 from tools.common import init_logger, logger
 
 from models.transformers import WEIGHTS_NAME,BertConfig,AlbertConfig
@@ -23,8 +25,7 @@ from processors.ner_seq import convert_examples_to_features
 from processors.ner_seq import ner_processors as processors
 from processors.ner_seq import collate_fn
 from metrics.ner_metrics import SeqEntityScore
-
-ALL_MODELS = sum((tuple(conf.pretrained_config_archive_map.keys()) for conf in (BertConfig,)), ())
+from tools.finetuning_argparse import get_argparse
 
 MODEL_CLASSES = {
     ## bert ernie bert_wwm bert_wwwm_ext
@@ -51,6 +52,7 @@ def train(args, train_dataset, model, tokenizer):
         "weight_decay": args.weight_decay,},
         {"params": [p for n, p in model.named_parameters() if any(nd in n for nd in no_decay)], "weight_decay": 0.0},
     ]
+    args.warmup_steps = int(t_total * args.warmup_proportion)
     optimizer = AdamW(optimizer_grouped_parameters, lr=args.learning_rate, eps=args.adam_epsilon)
     scheduler = get_linear_schedule_with_warmup(optimizer, num_warmup_steps=args.warmup_steps,
                                                 num_training_steps=t_total)
@@ -100,6 +102,8 @@ def train(args, train_dataset, model, tokenizer):
         logger.info("  Will skip the first %d steps in the first epoch", steps_trained_in_current_epoch)
 
     tr_loss, logging_loss = 0.0, 0.0
+    if args.do_adv:
+        fgm = FGM(model, emb_name=args.adv_name, epsilon=args.adv_epsilon)
     model.zero_grad()
     seed_everything(args.seed)  # Added here for reproductibility (even between python 2 and 3)
     for _ in range(int(args.num_train_epochs)):
@@ -126,6 +130,13 @@ def train(args, train_dataset, model, tokenizer):
                     scaled_loss.backward()
             else:
                 loss.backward()
+            if args.do_adv:
+                fgm.attack()
+                loss_adv = model(**inputs)[0]
+                if args.n_gpu>1:
+                    loss_adv = loss_adv.mean()
+                loss_adv.backward()
+                fgm.restore()
             pbar(step, {'loss': loss.item()})
             tr_loss += loss.item()
             if (step + 1) % args.gradient_accumulation_steps == 0:
@@ -158,7 +169,7 @@ def train(args, train_dataset, model, tokenizer):
                     torch.save(optimizer.state_dict(), os.path.join(output_dir, "optimizer.pt"))
                     torch.save(scheduler.state_dict(), os.path.join(output_dir, "scheduler.pt"))
                     logger.info("Saving optimizer and scheduler states to %s", output_dir)
-        print(" ")
+        logger.info("\n")
         if 'cuda' in str(args.device):
             torch.cuda.empty_cache()
     return global_step, tr_loss / global_step
@@ -190,28 +201,28 @@ def evaluate(args, model, tokenizer, prefix=""):
                 # XLM and RoBERTa don"t use segment_ids
                 inputs["token_type_ids"] = (batch[2] if args.model_type in ["bert", "xlnet"] else None)
             outputs = model(**inputs)
-            tmp_eval_loss, logits = outputs[:2]
-            if args.n_gpu > 1:
-                tmp_eval_loss = tmp_eval_loss.mean()  # mean() to average on multi-gpu parallel evaluating
-            eval_loss += tmp_eval_loss.item()
+        tmp_eval_loss, logits = outputs[:2]
+        if args.n_gpu > 1:
+            tmp_eval_loss = tmp_eval_loss.mean()  # mean() to average on multi-gpu parallel evaluating
+        eval_loss += tmp_eval_loss.item()
         nb_eval_steps += 1
         preds = np.argmax(logits.cpu().numpy(), axis=2).tolist()
         out_label_ids = inputs['labels'].cpu().numpy().tolist()
+        input_lens = batch[4].cpu().numpy().tolist()
         for i, label in enumerate(out_label_ids):
             temp_1 = []
             temp_2 = []
             for j, m in enumerate(label):
                 if j == 0:
                     continue
-                # 这里有个bug。SEP在输出标签中是不存在的
-                # elif out_label_ids[i][j] == args.label2id['[SEP]']:
-                #     metric.update(pred_paths=[temp_2], label_paths=[temp_1])
-                #     break
+                elif j == input_lens[i]-1:
+                    metric.update(pred_paths=[temp_2], label_paths=[temp_1])
+                    break
                 else:
                     temp_1.append(args.id2label[out_label_ids[i][j]])
                     temp_2.append(preds[i][j])
         pbar(step)
-    print(' ')
+    logger.info("\n")
     eval_loss = eval_loss / nb_eval_steps
     eval_info, entity_info = metric.result()
     results = {f'{key}': value for key, value in eval_info.items()}
@@ -241,7 +252,7 @@ def predict(args, model, tokenizer, prefix=""):
     logger.info("  Batch size = %d", 1)
 
     results = []
-
+    output_submit_file = os.path.join(pred_output_dir, prefix, "test_prediction.json")
     pbar = ProgressBar(n_total=len(test_dataloader), desc="Predicting")
     for step, batch in enumerate(test_dataloader):
         model.eval()
@@ -264,39 +275,10 @@ def predict(args, model, tokenizer, prefix=""):
         json_d['entities'] = label_entities
         results.append(json_d)
         pbar(step)
-    print(" ")
-    output_predic_file = os.path.join(pred_output_dir, prefix, "test_prediction.json")
-    output_submit_file = os.path.join(pred_output_dir, prefix, "test_submit.json")
-    with open(output_predic_file, "w") as writer:
+    logger.info("\n")
+    with open(output_submit_file, "w") as writer:
         for record in results:
             writer.write(json.dumps(record) + '\n')
-    test_text = []
-    with open(os.path.join(args.data_dir,"test.json"), 'r') as fr:
-        for line in fr:
-            test_text.append(json.loads(line))
-    test_submit = []
-    for x, y in zip(test_text, results):
-        json_d = {}
-        json_d['id'] = x['id']
-        json_d['label'] = {}
-        entities = y['entities']
-        words = list(x['text'])
-        if len(entities) != 0:
-            for subject in entities:
-                tag = subject[0]
-                start = subject[1]
-                end = subject[2]
-                word = "".join(words[start:end + 1])
-                if tag in json_d['label']:
-                    if word in json_d['label'][tag]:
-                        json_d['label'][tag][word].append([start, end])
-                    else:
-                        json_d['label'][tag][word] = [[start, end]]
-                else:
-                    json_d['label'][tag] = {}
-                    json_d['label'][tag][word] = [[start, end]]
-        test_submit.append(json_d)
-    json_to_text(output_submit_file,test_submit)
 
 def load_and_cache_examples(args, task, tokenizer, data_type='train'):
     if args.local_rank not in [-1, 0] and not evaluate:
@@ -349,84 +331,14 @@ def load_and_cache_examples(args, task, tokenizer, data_type='train'):
     return dataset
 
 def main():
-    parser = argparse.ArgumentParser()
-    # Required parameters
-    parser.add_argument("--task_name", default=None, type=str, required=True,
-                        help="The name of the task to train selected in the list: " + ", ".join(processors.keys()))
-    parser.add_argument("--data_dir",default=None,type=str,required=True,
-                        help="The input data dir. Should contain the training files for the CoNLL-2003 NER task.",)
-    parser.add_argument("--model_type",default=None,type=str,required=True,
-                        help="Model type selected in the list: " + ", ".join(MODEL_CLASSES.keys()),)
-    parser.add_argument("--model_name_or_path",default=None,type=str,required=True,
-                        help="Path to pre-trained model or shortcut name selected in the list: " + ", ".join(ALL_MODELS),)
-    parser.add_argument("--output_dir",default=None,type=str, required=True,
-                        help="The output directory where the model predictions and checkpoints will be written.", )
-    # Other parameters
-    parser.add_argument('--markup',default='bios',type=str,choices=['bios','bio'])
-    parser.add_argument('--loss_type', default='ce', type=str, choices=['lsr', 'focal', 'ce'])
-    parser.add_argument( "--labels",default="",type=str,
-                        help="Path to a file containing all labels. If not specified, CoNLL-2003 labels are used.",)
-    parser.add_argument( "--config_name", default="", type=str,
-                         help="Pretrained config name or path if not the same as model_name")
-    parser.add_argument("--tokenizer_name",default="",type=str,
-                        help="Pretrained tokenizer name or path if not the same as model_name",)
-    parser.add_argument("--cache_dir",default="",type=str,
-                        help="Where do you want to store the pre-trained models downloaded from s3", )
-    parser.add_argument("--train_max_seq_length", default=128,type=int,
-                        help="The maximum total input sequence length after tokenization. Sequences longer "
-                             "than this will be truncated, sequences shorter will be padded.",)
-    parser.add_argument("--eval_max_seq_length",default=512,type=int,
-                        help="The maximum total input sequence length after tokenization. Sequences longer "
-                             "than this will be truncated, sequences shorter will be padded.", )
-    parser.add_argument("--do_train", action="store_true", help="Whether to run training.")
-    parser.add_argument("--do_eval", action="store_true", help="Whether to run eval on the dev set.")
-    parser.add_argument("--do_predict", action="store_true", help="Whether to run predictions on the test set.")
-    parser.add_argument("--evaluate_during_training",action="store_true",
-                        help="Whether to run evaluation during training at each logging step.", )
-    parser.add_argument("--do_lower_case", action="store_true",
-                        help="Set this flag if you are using an uncased model.")
-
-    parser.add_argument("--per_gpu_train_batch_size", default=8, type=int, help="Batch size per GPU/CPU for training.")
-    parser.add_argument("--per_gpu_eval_batch_size", default=8, type=int, help="Batch size per GPU/CPU for evaluation.")
-    parser.add_argument("--gradient_accumulation_steps",type=int,default=1,
-                        help="Number of updates steps to accumulate before performing a backward/update pass.",)
-    parser.add_argument("--learning_rate", default=5e-5, type=float, help="The initial learning rate for Adam.")
-    parser.add_argument("--weight_decay", default=0.0, type=float, help="Weight decay if we apply some.")
-    parser.add_argument("--adam_epsilon", default=1e-8, type=float, help="Epsilon for Adam optimizer.")
-    parser.add_argument("--max_grad_norm", default=1.0, type=float, help="Max gradient norm.")
-    parser.add_argument("--num_train_epochs", default=3.0, type=float,
-                        help="Total number of training epochs to perform.")
-    parser.add_argument( "--max_steps", default=-1,type=int,
-                         help="If > 0: set total number of training steps to perform. Override num_train_epochs.",)
-
-    parser.add_argument("--warmup_steps", default=0, type=int, help="Linear warmup over warmup_steps.")
-    parser.add_argument("--logging_steps", type=int, default=50, help="Log every X updates steps.")
-    parser.add_argument("--save_steps", type=int, default=50, help="Save checkpoint every X updates steps.")
-    parser.add_argument("--eval_all_checkpoints",action="store_true",
-                        help="Evaluate all checkpoints starting with the same prefix as model_name ending and ending with step number",)
-    parser.add_argument("--predict_checkpoints", type=int, default=0,
-                        help="predict checkpoints starting with the same prefix as model_name ending and ending with step number")
-    parser.add_argument("--no_cuda", action="store_true", help="Avoid using CUDA when available")
-    parser.add_argument("--overwrite_output_dir", action="store_true",
-                        help="Overwrite the content of the output directory")
-    parser.add_argument("--overwrite_cache", action="store_true",
-                        help="Overwrite the cached training and evaluation sets")
-    parser.add_argument("--seed", type=int, default=42, help="random seed for initialization")
-    parser.add_argument("--fp16",action="store_true",
-                        help="Whether to use 16-bit (mixed) precision (through NVIDIA apex) instead of 32-bit",)
-    parser.add_argument("--fp16_opt_level",type=str,default="O1",
-                        help="For fp16: Apex AMP optimization level selected in ['O0', 'O1', 'O2', and 'O3']."
-                             "See details at https://nvidia.github.io/apex/amp.html",)
-    parser.add_argument("--local_rank", type=int, default=-1, help="For distributed training: local_rank")
-    parser.add_argument("--server_ip", type=str, default="", help="For distant debugging.")
-    parser.add_argument("--server_port", type=str, default="", help="For distant debugging.")
-    args = parser.parse_args()
+    args = get_argparse().parse_args()
     if not os.path.exists(args.output_dir):
         os.mkdir(args.output_dir)
     args.output_dir = args.output_dir + '{}'.format(args.model_type)
     if not os.path.exists(args.output_dir):
         os.mkdir(args.output_dir)
-    init_logger(log_file=args.output_dir + '/{}-{}.log'.format(args.model_type, args.task_name))
+    time_ = time.strftime("%Y-%m-%d-%H:%M:%S", time.localtime())
+    init_logger(log_file=args.output_dir + f'/{args.model_type}-{args.task_name}-{time_}.log')
     if os.path.exists(args.output_dir) and os.listdir(
             args.output_dir) and args.do_train and not args.overwrite_output_dir:
         raise ValueError(
@@ -470,7 +382,8 @@ def main():
     args.model_type = args.model_type.lower()
     config_class, model_class, tokenizer_class = MODEL_CLASSES[args.model_type]
     config = config_class.from_pretrained(args.config_name if args.config_name else args.model_name_or_path,
-                                          num_labels=num_labels,loss_type = args.loss_type,
+                                          num_labels=num_labels,
+                                          loss_type = args.loss_type,
                                           cache_dir=args.cache_dir if args.cache_dir else None,)
     tokenizer = tokenizer_class.from_pretrained(args.tokenizer_name if args.tokenizer_name else args.model_name_or_path,
                                                 do_lower_case=args.do_lower_case,
