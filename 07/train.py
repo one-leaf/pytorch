@@ -95,7 +95,7 @@ class Train():
         self.n_playout = 64  # 每个动作的模拟次数
         self.buffer_size = 200000  # cache对战记录个数
         self.play_batch_size = 1 # 每次自学习次数
-        self.epochs = 5  # 每次更新策略价值网络的训练步骤数, 推荐是5
+        self.epochs = 2  # 每次更新策略价值网络的训练步骤数, 推荐是5
         self.kl_targ = 0.02  # 策略价值网络KL值目标
         self.best_win_ratio = 0.0
         
@@ -197,7 +197,7 @@ class Train():
                 loss, entropy = self.policy_update(data, self.epochs)
                 # 每n个batch检查一下当前模型胜率
 
-                if i % (int(self.dataset.curr_size() ** 0.3)) == 0:
+                if (i+1) % (int(self.dataset.curr_size()/4)) == 0:
                     self.policy_value_net.save_model(model_file)
                     # 收集自我对抗数据
                     for _ in range(self.play_batch_size):
