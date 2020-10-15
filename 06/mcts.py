@@ -188,13 +188,14 @@ class MCTS(object):
 
         # 检查游戏是否有赢家
         end, winner = state.game_end()
-        if not end:
-            end, winner = state.will_win()
 
         if not end:  # 没有结束或马上结束时，把走子策略返回的[(action,概率)]list加载到mcts树child中 ，同时降低了 leaf_value 的权重
             # 使用训练好的模型策略评估此叶子节点，返回[(action,概率)]list 以及当前玩家的后续走子胜负
             action_probs, leaf_value = self._policy(state)
             node.expand(action_probs)
+            will_win, winner = state.will_win()
+            if will_win:
+                leaf_value = (1.0 if winner != state.current_player else -1.0)
         else:
             # 游戏结束时返回真实的叶子胜负, 注意这里的游戏失败或成功的分值,由于后期还会重用搜索树，所以这里不能扩大奖励或惩罚分数
             # if winner == -1:  # tie平局
