@@ -178,7 +178,7 @@ class MCTS(object):
             # leaf_value = reward
             node.expand(action_probs)
         else:
-            leaf_value = -1.0   # 如果导致游戏结束，都是负分
+            leaf_value = state.score   # 如果游戏结束，得分就是叶子的值
 
         # 早期完全使用修正,到局部修正到最后的结束时再判定
         # if state.terminal:# state.state==0:
