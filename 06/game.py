@@ -78,7 +78,8 @@ class FiveChess(object):
         last_x, last_y = self.actions[-1]
         n = self.n_in_row -1
         c = self.chessboard[last_x][last_y]
-        
+        lastplayer = self.players[0] if self.current_player == self.players[1] else self.players[1]
+
         hassame=1
         hasblank=True
         for l in range(1, n):
@@ -92,7 +93,7 @@ class FiveChess(object):
                     if self.chessboard[last_x-l][last_y]!=0: hasblank=False
                     break
                 hassame += 1
-        if hassame>=n and hasblank: return True
+        if hassame>=n and hasblank: return True, lastplayer
 
         hassame=1
         hasblank=True
@@ -107,7 +108,7 @@ class FiveChess(object):
                     if self.chessboard[last_x][last_y-l]!=0: hasblank=False
                     break
                 hassame += 1
-            if hassame>=n and hasblank: return True
+            if hassame>=n and hasblank: return True, lastplayer
 
         hassame=1
         hasblank=True
@@ -122,7 +123,7 @@ class FiveChess(object):
                     if self.chessboard[last_x-l][last_y-l]!=0: hasblank=False 
                     break
                 hassame += 1
-            if hassame>=n and hasblank: return True
+            if hassame>=n and hasblank: return True, lastplayer
 
         hassame=1
         hasblank=True
@@ -137,9 +138,9 @@ class FiveChess(object):
                     if self.chessboard[last_x+l][last_y-l]!=0: hasblank=False 
                     break
                 hassame += 1
-            if hassame>=n and hasblank: return True
+            if hassame>=n and hasblank: return True, lastplayer
 
-        return False  
+        return False, -1  
 
     # 检查是否游戏结束,返回赢的用户0 或 1，如果平局返回-1
     def check_terminal(self):
