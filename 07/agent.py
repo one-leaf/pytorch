@@ -48,11 +48,11 @@ class Agent(object):
         if len(acts)==0: acts=[KEY_ROTATION]
 
         # 如果四个动作都可用，随机干掉旋转和下降
-        if len(acts)==4: 
-            if random.random()>0.5:
-                acts.remove(KEY_ROTATION)
-            if random.random()>0.5:
-                acts.remove(KEY_DOWN)
+        # if len(acts)==4: 
+        #     if random.random()>0.5:
+        #         acts.remove(KEY_ROTATION)
+        #     if random.random()>0.5:
+        #         acts.remove(KEY_DOWN)
         return acts         
 
     def step(self, action, env=None):
