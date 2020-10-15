@@ -176,7 +176,7 @@ class FiveChess(object):
         if self.step_count<self.n_in_row*2-1:
             return False, -1
         # 如果都没有下子的位置了，或，则返回平局
-        if len(self.get_available_locations())==0:
+        if len(self.availables)==0:
             return True, -1
 
         # 找到最后一个子
