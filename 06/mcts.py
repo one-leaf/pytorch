@@ -192,25 +192,28 @@ class MCTS(object):
             # 使用训练好的模型策略评估此叶子节点，返回[(action,概率)]list 以及当前玩家的后续走子胜负
             action_probs, leaf_value = self._policy(state)
             node.expand(action_probs)
+            # 虽然没有赢，但如果是死局，也要处理
+            if state.will_win():
+                leaf_value = (1.0 if winner != state.current_player  else -1.0)
         else:
             # 游戏结束时返回真实的叶子胜负, 注意这里的游戏失败或成功的分值,由于后期还会重用搜索树，所以这里不能扩大奖励或惩罚分数
-            if winner == -1:  # tie平局
-                leaf_value = 0.0
-            else:
-                if state.current_player!=curr_player:
-                    # 如果是我下棋导致，我赢了，节点＋，上级节点-，我输了，节点-
-                    if winner == curr_player:
-                        leaf_value = 1.0
-                    else:
-                        leaf_value = -1.0
-                else:
-                    # 如果是对手下棋导致，我赢了，则本次节点-，但上级节点+，我输了，本次节点+，上级节点-
-                    if winner == curr_player:
-                        leaf_value = -1.0
-                    else:
-                        leaf_value = +100.0
-                # 换句话说即：                
-                # leaf_value = (100.0 if winner != state.current_player  else -100.0)
+            # if winner == -1:  # tie平局
+            #     leaf_value = 0.0
+            # else:
+            #     if state.current_player!=curr_player:
+            #         # 如果是我下棋导致，我赢了，节点＋，上级节点-，我输了，节点-
+            #         if winner == curr_player:
+            #             leaf_value = 1.0
+            #         else:
+            #             leaf_value = -1.0
+            #     else:
+            #         # 如果是对手下棋导致，我赢了，则本次节点-，但上级节点+，我输了，本次节点+，上级节点-
+            #         if winner == curr_player:
+            #             leaf_value = -1.0
+            #         else:
+            #             leaf_value = +100.0
+            # 换句话说即：                
+            leaf_value = (1.0 if winner != state.current_player  else -1.0)
         # 递归更新当前节点及所有父节点的最优选中次数和Q分数,因为得到的是本次的价值
         node.update_recursive(leaf_value)
 
