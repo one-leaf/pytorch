@@ -178,12 +178,13 @@ class MCTS(object):
             state.step(action)
 
             # 凡是导致游戏结束的棋，重点关注
-            end, winner = state.game_end()
-            if end: #and winner != curr_player:
-                self._first_ations.add(action)
-            # 如果这步棋快赢了，也重点关注
-            if state.will_win():
-                self._first_ations.add(action)
+            # end, winner = state.game_end()
+            # 不再干预，试试全部随机
+            # if end: #and winner != curr_player:
+            #     self._first_ations.add(action)
+            # # 如果这步棋快赢了，也重点关注
+            # if state.will_win():
+            #     self._first_ations.add(action)
 
         # 检查游戏是否有赢家
         end, winner = state.game_end()
