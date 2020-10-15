@@ -196,7 +196,7 @@ class PolicyValueNet():
         # 胜率
         value_loss = F.mse_loss(value.view(-1), winner_batch)
         policy_loss = -torch.mean(torch.sum(mcts_probs * log_act_probs, 1))
-        loss = value_loss*10 + policy_loss
+        loss = value_loss + policy_loss
 
         # backward and optimize
         loss.backward()
