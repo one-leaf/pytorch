@@ -84,6 +84,9 @@ class Agent(object):
             self.score += reward          
             self.level, self.fallfreq = self.tetromino.calculate(self.score)   
             self.fallpiece = None
+            # 这里如果得到奖励就结束游戏
+            self.terminal = True 
+            self.state = 2  
 
         if  env:
             env.checkforquit()
