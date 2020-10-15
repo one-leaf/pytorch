@@ -43,9 +43,9 @@ class TreeNode(object):
         return max(self._children.items(), key=lambda act_node: act_node[1].get_value(c_puct))
 
     # 计算和返回这个节点的值
-    # 这个公式有点奇怪：
-    # 正常应该是 UCT = self._Q/self_n + 2*sqrt(log(root._n)/(1+self._n))
-    # 这个是    UCT = self._Q        + 5*self_P*sqrt(_parent._n)/(1+self_n) 
+    # MCTS计算公式：
+    # 传统是    UCT = self._Q/self._n + 2*sqrt(log(root._n)/(1+self._n))
+    # 这个是    UCT = self._Q         + 5*self_P*sqrt(_parent._n)/(1+self_n) 
     # 在 leela-zero 中 cfg_puct 中设置的为 0.5 ，这个值如果小就多考虑mcts探索，否则加强概率的影响
     def get_value(self, c_puct):
         """计算并返回当前节点的值
