@@ -211,9 +211,12 @@ class FiveChess(object):
         return [x+(self.size-y-1)*self.size for x,y in actions]
 
     # 返回 [1, 7, size, size]
+    # alphago zero使用了17层即 [1,17,19,19] 的网络，前8层为当前玩家的最后八步，后8层为对手的最后八步，最后一层是当前玩家是否为先手，如果先手则全部为1
+    # 因此这里我们采用前3层自己的最后三步棋，后3层为对手的最后三步棋，最后一层自己是否是先手
     def current_state(self):
         square_state = np.zeros((7, self.size, self.size))
         # 前面6层是自己和对手的棋包括最后三步的棋
+        # 由于最后一步始终是对手的棋，所以倒序后，始终为
         for i, act in enumerate(self.actions[::-1]):
             if i%2==0: 
                 idx=[3,4,5]
