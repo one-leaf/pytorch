@@ -50,7 +50,7 @@ class FiveChess(object):
     # 检查是否游戏结束,返回赢的用户0 或 1，如果平局返回-1
     def check_terminal2(self):
         # 如果都没有下子的位置了，则返回平局
-        if len(self.get_available_locations())==0:
+        if len(self.availables)==0:
             return True, -1
 
         # 遍历落子位置，检查是否出现横/竖/斜线上n子相连的情况
@@ -74,13 +74,9 @@ class FiveChess(object):
 
     # 检查是否存在四子连线,两端都是空白的也算赢
     def will_win(self):
-        
         # 如果都没有足够的棋
         if self.step_count<self.n_in_row*2-2:
             return False, -1
-        # 如果都没有下子的位置了，或，则返回平局
-        if len(self.get_available_locations())==0:
-            return True, -1
 
         # 找到最后一个子
         last_x, last_y = self.actions[-1]
