@@ -227,7 +227,7 @@ class FiveChess(object):
             for j in idx:
                 square_state[j,self.size-y-1,x] = 1.0
 
-        # 第四层为如果当前用户是先手则为1
+        # 第7层为如果当前用户是先手则为1
         if self.step_count % 2 == 1:
             square_state[6][:,:] = 1.0
 
