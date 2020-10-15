@@ -74,6 +74,14 @@ class FiveChess(object):
 
     # 检查是否存在四子连线,两端都是空白的也算赢
     def will_win(self):
+        
+        # 如果都没有足够的棋
+        if self.step_count<self.n_in_row*2-2:
+            return False, -1
+        # 如果都没有下子的位置了，或，则返回平局
+        if len(self.get_available_locations())==0:
+            return True, -1
+
         # 找到最后一个子
         last_x, last_y = self.actions[-1]
         n = self.n_in_row -1
