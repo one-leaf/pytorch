@@ -280,7 +280,7 @@ class MCTS(object):
         acts, visits = zip(*act_visits)
 
         # 打印中间信息
-        if random.random()>0.99:
+        if random.random()>0.5:
             # info={"shape":state.fallpiece["shape"], "depth":self.max_depth_tree()}
             info={"shape":state.fallpiece["shape"]}
             for idx in sorted(range(len(visits)), key=visits.__getitem__)[::-1]:
