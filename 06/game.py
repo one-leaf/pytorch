@@ -87,13 +87,19 @@ class FiveChess(object):
         hassame=1
         hasblank=True
         for l in range(1, n):
-            if last_x+l==self.size or self.chessboard[last_x+l][last_y]!=c: 
+            if last_x+l==self.size:
+                hasblank=False
+                break
+            if self.chessboard[last_x+l][last_y]!=c: 
                 if self.chessboard[last_x+l][last_y]!=0: hasblank=False
                 break
             hassame += 1
         if hasblank:
             for l in range(1, n):
-                if last_x-l<0 or self.chessboard[last_x-l][last_y]!=c: 
+                if last_x-l<0:
+                    hasblank=False
+                    break
+                if self.chessboard[last_x-l][last_y]!=c: 
                     if self.chessboard[last_x-l][last_y]!=0: hasblank=False
                     break
                 hassame += 1
@@ -102,13 +108,19 @@ class FiveChess(object):
         hassame=1
         hasblank=True
         for l in range(1, n):
-            if last_y+l==self.size or self.chessboard[last_x][last_y+l]!=c: 
+            if last_y+l==self.size:
+                hasblank=False
+                break
+            if self.chessboard[last_x][last_y+l]!=c: 
                 if self.chessboard[last_x][last_y+l]!=0: hasblank=False 
                 break
             hassame += 1
         if hasblank:
             for l in range(1, n):
-                if last_y-l<0 or self.chessboard[last_x][last_y-l]!=c:
+                if last_y-l<0:
+                    hasblank=False
+                    break
+                if self.chessboard[last_x][last_y-l]!=c:
                     if self.chessboard[last_x][last_y-l]!=0: hasblank=False
                     break
                 hassame += 1
@@ -117,13 +129,19 @@ class FiveChess(object):
         hassame=1
         hasblank=True
         for l in range(1, n):
-            if last_x+l==self.size or last_y+l==self.size or self.chessboard[last_x+l][last_y+l]!=c: 
+            if last_x+l==self.size or last_y+l==self.size:
+                hasblank=False
+                break
+            if self.chessboard[last_x+l][last_y+l]!=c: 
                 if self.chessboard[last_x+l][last_y+l]!=0: hasblank=False 
                 break
             hassame += 1
         if hasblank:
             for l in range(1, n):
-                if last_x-l<0 or last_y-l<0 or self.chessboard[last_x-l][last_y-l]!=c: 
+                if last_x-l<0 or last_y-l<0:
+                    hasblank=False
+                    break
+                if self.chessboard[last_x-l][last_y-l]!=c: 
                     if self.chessboard[last_x-l][last_y-l]!=0: hasblank=False 
                     break
                 hassame += 1
@@ -132,13 +150,19 @@ class FiveChess(object):
         hassame=1
         hasblank=True
         for l in range(1, n):
-            if last_x-l<0 or last_y+l==self.size or self.chessboard[last_x-l][last_y+l]!=c: 
+            if last_x-l<0 or last_y+l==self.size:
+                hasblank=False
+                break
+            if self.chessboard[last_x-l][last_y+l]!=c: 
                 if self.chessboard[last_x-l][last_y+l]!=0: hasblank=False 
                 break
             hassame += 1
         if hasblank:
             for l in range(1, n):
-                if last_x+l==self.size or last_y-l<0 or self.chessboard[last_x+l][last_y-l]!=c: 
+                if last_x+l==self.size or last_y-l<0:
+                    hasblank=False
+                    break
+                if self.chessboard[last_x+l][last_y-l]!=c: 
                     if self.chessboard[last_x+l][last_y-l]!=0: hasblank=False 
                     break
                 hassame += 1
