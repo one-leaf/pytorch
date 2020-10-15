@@ -1,5 +1,5 @@
 CURRENT_DIR=`pwd`
-export BERT_BASE_DIR=$CURRENT_DIR/prev_trained_model/bert-base
+export BERT_BASE_DIR=$CURRENT_DIR/prev_trained_model/roberta_wwm_ext
 export DATA_DIR=$CURRENT_DIR/datasets
 export OUTPUR_DIR=$CURRENT_DIR/outputs
 TASK_NAME="cluener"
@@ -21,6 +21,6 @@ python3 run_ner_softmax.py \
   --num_train_epochs=3.0 \
   --logging_steps=448 \
   --save_steps=448 \
-  --output_dir=$OUTPUR_DIR/${TASK_NAME}_output/ \
+  --output_dir=$OUTPUR_DIR/${TASK_NAME}_softmax_output/ \
   --overwrite_output_dir \
   --seed=42
