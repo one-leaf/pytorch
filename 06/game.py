@@ -228,7 +228,7 @@ class FiveChess(object):
                 square_state[j,self.size-y-1,x] = 1.0
 
         # 第四层为如果当前用户是先手则为1
-        if self.step_count % 2 == 0:
+        if self.step_count % 2 == 1:
             square_state[6][:,:] = 1.0
 
         # 归一化数据
@@ -248,7 +248,7 @@ class FiveChess(object):
                 line += char+" "
             print(line)
         print("  "+str.join(" ",[str(i%10) for i in range(self.size)]))
-        print("win:",self.win_user, "curr:", self.current_player, "is_first:", self.step_count % 2 == 0)
+        print("win:",self.win_user, "curr:", self.current_player, "is_first:", self.step_count % 2 == 1)
         print("actions:", self.actions)
 
     def game_end(self):
