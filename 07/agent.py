@@ -32,6 +32,8 @@ class Agent(object):
         self.steps = 0
         # 每个方块的步长
         self.piecesteps = 0
+        # 方块的数量
+        self.piececount = 0
         # 面板
         self.board = self.tetromino.getblankboard()
         # 变化个数，用于评价这一步的优劣
@@ -120,6 +122,7 @@ class Agent(object):
             else: 
                 self.state =1
             self.piecesteps = 0
+            self.piececount +=1 
         else:
             self.state = 0
         
@@ -141,7 +144,7 @@ class Agent(object):
                 else:
                     line=line+"* "
             print(line)
-        print("level:", self.level, "score:", self.score, "steps:", self.steps)
+        print("level:", self.level, "score:", self.score, "steps:", self.steps,"piececount:", self.piececount)
 
     # 统计当前最大高度
     def getMaxHeight(self):
@@ -446,13 +449,13 @@ class Agent(object):
                 if self.terminal: break
                 if self.state!=0 and self.getMaxHeight()>=max_height: break
             self.print()
-            picece_count = 200-len(self.tetromino.nextpiece)
+            picece_count = self.piececount
             if picece_count>maxstep:
                 states1=states
                 mcts_probs1=states
                 winner1=[1.0 for i in range(len(states))]
                 maxstep=picece_count
-            if picece_count<minstep:
+            elif picece_count<minstep:
                 states0=states
                 mcts_probs0=states
                 winner0=[-1.0 for i in range(len(states))]
