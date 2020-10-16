@@ -455,7 +455,7 @@ class Agent(object):
                 mcts_probs1=states
                 winner1=[1.0 for i in range(len(states))]
                 maxstep=picece_count
-            elif picece_count<minstep:
+            if picece_count<minstep:
                 states0=states
                 mcts_probs0=states
                 winner0=[-1.0 for i in range(len(states))]
