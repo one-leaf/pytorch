@@ -47,12 +47,16 @@ class Agent(object):
         self.fallpiece['rotation'] = r
         if len(acts)==0: acts=[KEY_ROTATION]
 
-        # 如果四个动作都可用，随机干掉旋转和下降
-        # if len(acts)==4: 
-        #     if random.random()>0.5:
-        #         acts.remove(KEY_ROTATION)
-        #     if random.random()>0.5:
-        #         acts.remove(KEY_DOWN)
+        # 如果四个动作都可用，随机干掉某些步骤，进行剪枝，
+        if len(acts)==4: 
+            if random.random()>0.5:
+                acts.remove(KEY_ROTATION)
+            if random.random()>0.5:
+                acts.remove(KEY_DOWN)
+            if random.random()>0.5:
+                acts.remove(KEY_LEFT)
+            if random.random()>0.5:
+                acts.remove(KEY_RIGHT)                                
         return acts         
 
     def step(self, action, env=None):
