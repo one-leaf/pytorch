@@ -426,7 +426,7 @@ class Agent(object):
         # 这样会有一个问题，导致+分比-分多，导致mcts会集中到最初和最后的步骤
         # 当方块到了这个就终止游戏
         max_height = 10
-        states0,states1,mcts_probs0,mcts_probs1,winner0,winner1=None,None,None,None,None,None,None
+        states0,states1,mcts_probs0,mcts_probs1,winner0,winner1=None,None,None,None,None,None
         minstep = 10000000
         maxstep = 0
         tetromino = copy.deepcopy(self.tetromino)
