@@ -15,6 +15,7 @@ class Agent(object):
         self.height = 20
         self.actions_num = 4
         self.reset()
+        self.prev_fallpiece_board=None
 
     def reset(self):
         # 下落的方块
@@ -37,6 +38,8 @@ class Agent(object):
         self.transCount = self.getTransCount()
         # 状态： 0 下落过程中 1 更换方块 2 结束一局
         self.state =0
+        # 上一个下落方块的截图
+        self.prev_fallpiece_board=None
 
     # 获取可用步骤, 保留一个旋转始终有用
     def availables(self):
@@ -189,11 +192,16 @@ class Agent(object):
         return board
 
     # 获得当前的全部特征
+    # 这里获取最后3步的信息 1 + 2 + 1 = 4
     def current_state(self):
         board = self.getBoard()
         board_1 = self.get_fallpiece_board()
+        # 如果上一个面板为空，直接为当前下落方块
+        if self.prev_fallpiece_board==None:
+            self.prev_fallpiece_board=board_1
         board_2 = self.get_nextpiece_borad()
-        state = np.stack([board,board_1,board_2])
+        state = np.stack([board, self.prev_fallpiece_board, board_1, board_2])
+        self.prev_fallpiece_board=board_1
         return state        
 
     # 交替个数也就是从空到非空算一次，边界算非空 

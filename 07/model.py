@@ -29,7 +29,7 @@ class ResidualBlock(nn.Module):
 class Net(nn.Module):
     def __init__(self,input_size, output_size):
         super().__init__()
-        self.conv1=self._make_layer(3, 64, 4)
+        self.conv1=self._make_layer(4, 64, 4)
         # self.conv2=self._make_layer(64, 64, 3)
 
         # 动作预测
