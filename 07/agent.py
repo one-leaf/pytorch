@@ -433,7 +433,8 @@ class Agent(object):
         minstep = 10000000
         maxstep = 0
         tetromino = self.tetromino
-        for _ in range(5):
+        # 必须要找到相差3个方块以上的局面
+        while maxstep-minstep<3:
             states, mcts_probs = [], []
             self.tetromino=copy.deepcopy(tetromino)
             self.reset()
