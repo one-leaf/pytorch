@@ -429,7 +429,7 @@ class Agent(object):
         # 这样会有一个问题，导致+分比-分多，导致mcts会集中到最初和最后的步骤
         # 当方块到了这个就终止游戏
         max_height = 10
-        states0,states1,mcts_probs0,mcts_probs1,winner0,winner1=None,None,None,None,None,None
+        states0,states1,mcts_probs0,mcts_probs1,winners0,winners1=None,None,None,None,None,None
         minstep = 10000000
         maxstep = 0
         tetromino = self.tetromino
@@ -453,19 +453,20 @@ class Agent(object):
             if picece_count>maxstep:
                 states1=states
                 mcts_probs1=states
-                winner1=[1.0 for i in range(len(states))]
+                winners1=[1.0 for i in range(len(states))]
                 maxstep=picece_count
             if picece_count<minstep:
                 states0=states
                 mcts_probs0=states
-                winner0=[-1.0 for i in range(len(states))]
+                winners0=[-1.0 for i in range(len(states))]
                 minstep=picece_count
 
         print("minstep",minstep,"maxstep",maxstep)
-        states0.extend(states1)
-        mcts_probs0.extend(mcts_probs1)
-        winner0.extend(winner1)
-        print(len(states0),len(mcts_probs0),len(winner0))
-        assert len(states0)==len(mcts_probs0)==len(winner0)
-        return -1, zip(states0, mcts_probs0, winner0)
+        states = states0+states1
+        mcts_probs = mcts_probs0+mcts_probs1
+        winners= winners0+winners1
+
+        print(len(states),len(mcts_probs),len(winners))
+        assert len(states)==len(mcts_probs)==len(winners)
+        return -1, zip(states, mcts_probs, winners)
 
