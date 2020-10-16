@@ -54,6 +54,7 @@ class Dataset(torch.utils.data.Dataset):
         state, mcts_prob, winner = pickle.load(open(filename, "rb"))
         state = torch.from_numpy(state).float()
         mcts_prob = torch.from_numpy(mcts_prob).float()
+        print(winner)
         winner = torch.as_tensor(winner).float()
         return state, mcts_prob, winner
 
@@ -186,7 +187,7 @@ class Train():
             step = 0
             # 如果训练数据一半都不到，就先攒训练数据
             if self.dataset.curr_game_batch_num/self.dataset.buffer_size<0.5:
-                for _ in range(8):
+                for _ in range(2):
                     logging.info("TRAIN Batch:{} starting".format(self.dataset.curr_game_batch_num,))
                     # n_playout=self.n_playout
                     # self.n_playout=8

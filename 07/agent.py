@@ -465,5 +465,6 @@ class Agent(object):
         states0.extend(states1)
         mcts_probs0.extend(mcts_probs1)
         winner0.extend(winner1)
-        return -1, zip(states0, mcts_probs0, np.array(winner0))
+        assert len(states0)==len(mcts_probs0)==len(winner0)
+        return -1, zip(states0, mcts_probs0, winner0)
 
