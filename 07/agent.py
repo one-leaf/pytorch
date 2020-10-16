@@ -57,7 +57,7 @@ class Agent(object):
 
         # 如果四个动作都可用，干掉某些步骤，进行剪枝，
         if len(acts)==4: 
-            if self.piecesteps>5 and self.piecesteps<15:
+            if self.piecesteps>6 and self.piecesteps<15:
                 acts.remove(KEY_ROTATION)
                 acts.remove(KEY_LEFT)
                 acts.remove(KEY_RIGHT)  
