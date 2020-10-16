@@ -425,7 +425,7 @@ class Agent(object):
 
     # 使用 mcts 训练，重用搜索树，并保存数据
     def start_self_play(self, player, temp=1e-3):
-        # 这里下N局，取最好和最差的按得分和步数对比
+        # 这里下5局，取最好和最差的按得分和步数对比
         # 这样会有一个问题，导致+分比-分多，导致mcts会集中到最初和最后的步骤
         # 当方块到了这个就终止游戏
         max_height = 10
@@ -433,7 +433,7 @@ class Agent(object):
         minstep = 10000000
         maxstep = 0
         tetromino = self.tetromino
-        for _ in range(10):
+        for _ in range(5):
             states, mcts_probs = [], []
             self.tetromino=copy.deepcopy(tetromino)
             self.reset()
