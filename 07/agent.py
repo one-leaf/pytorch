@@ -347,7 +347,7 @@ class Agent(object):
         return -1, zip(states, mcts_probs, winners_z)
 
     # 使用 mcts 训练，重用搜索树，并保存数据
-    def start_self_play(self, player, temp=1e-3):
+    def start_self_play3(self, player, temp=1e-3):
         # 这里下两局，按得分和步数对比
         # 这样会有一个问题，导致+分比-分多，导致mcts会集中到最初和最后的步骤
         states, mcts_probs, current_players = [], [], []
@@ -418,3 +418,49 @@ class Agent(object):
             self.step(action, env)
             if self.terminal:
                 break
+
+
+    # 使用 mcts 训练，重用搜索树，并保存数据
+    def start_self_play(self, player, temp=1e-3):
+        # 这里下N局，取最好和最差的按得分和步数对比
+        # 这样会有一个问题，导致+分比-分多，导致mcts会集中到最初和最后的步骤
+        # 当方块到了这个就终止游戏
+        max_height = 10
+        states0,states1,mcts_probs0,mcts_probs1,winner0,winner1=None,None,None,None,None,None,None
+        minstep = 10000000
+        maxstep = 0
+        tetromino = copy.deepcopy(self.tetromino)
+        for _ in range(10):
+            states, mcts_probs = [], []
+            self.tetromino=tetromino
+            self.reset()
+            for i in count():
+                # temp 权重 ，return_prob 是否返回概率数据
+                action, move_probs = player.get_action(self, temp=temp, return_prob=1)
+                # 保存数据
+                states.append(self.current_state())
+                mcts_probs.append(move_probs)
+                # 执行一步
+                self.step(action)
+                # 如果游戏结束
+                if self.terminal: break
+                if self.state!=0 and self.getMaxHeight()>=max_height: break
+            self.print()
+            picece_count = 200-len(self.tetromino.nextpiece)
+            if picece_count>maxstep:
+                states1=states
+                mcts_probs1=states
+                winner1=[1.0 for i in range(len(states))]
+                maxstep=picece_count
+            if picece_count<minstep:
+                states0=states
+                mcts_probs0=states
+                winner0=[-1.0 for i in range(len(states))]
+                minstep=picece_count
+
+        print("minstep",minstep,"maxstep",maxstep)
+        states = states0.extend(states1)
+        mcts_probs = mcts_probs0.extend(mcts_probs1)
+        winners = winner0.extend(winner1)
+        return -1, zip(states, mcts_probs, winners)
+
