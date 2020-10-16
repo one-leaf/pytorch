@@ -190,7 +190,7 @@ class MCTS(object):
         # if state.state==0:
         #     leaf_value += -1.0 * np.log(state.getTransCount())
         # 递归更新当前节点及所有父节点的最优选中次数和Q分数,因为得到的是本次的价值
-        node.update_recursive(leaf_value+reward)
+        node.update_recursive(leaf_value+reward*100)
 
     def update_root_with_action(self, action):
         """根据action更新根节点"""
@@ -271,7 +271,7 @@ class MCTS(object):
                 # 如果只有一个选项，直接返回
                 if len(acts)==1: break
                 var = np.var(visits)
-                if var>100000:
+                if var>100:
                     break
             
                 # if n>=self._n_playout:
