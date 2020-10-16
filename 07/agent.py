@@ -197,7 +197,7 @@ class Agent(object):
         board = self.getBoard()
         board_1 = self.get_fallpiece_board()
         # 如果上一个面板为空，直接为当前下落方块
-        if self.prev_fallpiece_board==None:
+        if self.prev_fallpiece_board is None:
             self.prev_fallpiece_board=board_1
         board_2 = self.get_nextpiece_borad()
         state = np.stack([board, self.prev_fallpiece_board, board_1, board_2])
