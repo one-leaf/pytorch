@@ -184,7 +184,7 @@ class Train():
             print("end data loader")
 
             step = 0
-            while (self.dataset.curr_game_batch_num/self.buffer_size<0.5):
+            for _ in range(8):
                 logging.info("TRAIN Batch:{} starting".format(self.dataset.curr_game_batch_num,))
                 n_playout=self.n_playout
                 self.n_playout=8
@@ -192,7 +192,6 @@ class Train():
                 self.n_playout=n_playout
                 logging.info("TRAIN Batch:{} end".format(self.dataset.curr_game_batch_num,))
                 step += 1
-                if step>10: break
 
             training_loader = torch.utils.data.DataLoader(self.dataset, batch_size=self.batch_size, shuffle=True, num_workers=2,)
 
