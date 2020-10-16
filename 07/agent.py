@@ -452,19 +452,19 @@ class Agent(object):
             picece_count = self.piececount
             if picece_count>maxstep:
                 states1=states
-                mcts_probs1=states
+                mcts_probs1=mcts_probs
                 winners1=[1.0 for i in range(len(states))]
                 maxstep=picece_count
             if picece_count<minstep:
                 states0=states
-                mcts_probs0=states
+                mcts_probs0=mcts_probs
                 winners0=[-1.0 for i in range(len(states))]
                 minstep=picece_count
 
         print("minstep",minstep,"maxstep",maxstep)
         states = states0+states1
         mcts_probs = mcts_probs0+mcts_probs1
-        winners= winners0+winners1
+        winners = winners0+winners1
 
         print(len(states),len(mcts_probs),len(winners))
         assert len(states)==len(mcts_probs)==len(winners)
