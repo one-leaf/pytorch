@@ -186,7 +186,7 @@ class Train():
             step = 0
             # 如果训练数据一半都不到，就先攒训练数据
             if self.dataset.curr_game_batch_num/self.dataset.buffer_size<0.5:
-                for _ in range(2):
+                for _ in range(8):
                     logging.info("TRAIN Batch:{} starting".format(self.dataset.curr_game_batch_num,))
                     # n_playout=self.n_playout
                     # self.n_playout=8
