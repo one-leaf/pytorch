@@ -189,7 +189,7 @@ class Train():
                 self.collect_selfplay_data()
                 logging.info("TRAIN Batch:{} end".format(self.dataset.curr_game_batch_num,))
                 step += 1
-                if step>self.batch_size*10: break
+                if step>10: break
 
             training_loader = torch.utils.data.DataLoader(self.dataset, batch_size=self.batch_size, shuffle=True, num_workers=2,)
 
