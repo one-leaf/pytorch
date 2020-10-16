@@ -429,10 +429,10 @@ class Agent(object):
         states0,states1,mcts_probs0,mcts_probs1,winner0,winner1=None,None,None,None,None,None
         minstep = 10000000
         maxstep = 0
-        tetromino = copy.deepcopy(self.tetromino)
+        tetromino = self.tetromino
         for _ in range(10):
             states, mcts_probs = [], []
-            self.tetromino=tetromino
+            self.tetromino=copy.deepcopy(tetromino)
             self.reset()
             for i in count():
                 # temp 权重 ，return_prob 是否返回概率数据
