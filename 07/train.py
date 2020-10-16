@@ -184,14 +184,16 @@ class Train():
             print("end data loader")
 
             step = 0
-            for _ in range(8):
-                logging.info("TRAIN Batch:{} starting".format(self.dataset.curr_game_batch_num,))
-                # n_playout=self.n_playout
-                # self.n_playout=8
-                self.collect_selfplay_data()
-                # self.n_playout=n_playout
-                logging.info("TRAIN Batch:{} end".format(self.dataset.curr_game_batch_num,))
-                step += 1
+            # 如果训练数据一半都不到，就先攒训练数据
+            if self.dataset.curr_game_batch_num/self.dataset.buffer_size<0.5:
+                for _ in range(8):
+                    logging.info("TRAIN Batch:{} starting".format(self.dataset.curr_game_batch_num,))
+                    # n_playout=self.n_playout
+                    # self.n_playout=8
+                    self.collect_selfplay_data()
+                    # self.n_playout=n_playout
+                    logging.info("TRAIN Batch:{} end".format(self.dataset.curr_game_batch_num,))
+                    step += 1
 
             training_loader = torch.utils.data.DataLoader(self.dataset, batch_size=self.batch_size, shuffle=True, num_workers=2,)
 
