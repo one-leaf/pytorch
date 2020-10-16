@@ -459,8 +459,8 @@ class Agent(object):
                 minstep=picece_count
 
         print("minstep",minstep,"maxstep",maxstep)
-        states = states0.extend(states1)
-        mcts_probs = mcts_probs0.extend(mcts_probs1)
-        winners = winner0.extend(winner1)
-        return -1, zip(states, mcts_probs, winners)
+        states0.extend(states1)
+        mcts_probs0.extend(mcts_probs1)
+        winner0.extend(winner1)
+        return -1, zip(states0, mcts_probs0, winner0)
 
