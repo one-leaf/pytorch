@@ -49,7 +49,7 @@ class Agent(object):
             acts.remove(KEY_RIGHT)   
         if not self.tetromino.validposition(self.board,self.fallpiece,ay = 1):
             acts.remove(KEY_DOWN)
-        if self.fallpiece.shape=="o":
+        if self.fallpiece['shape']=="o":
             acts.remove(KEY_ROTATION)
         else:
             r = self.fallpiece['rotation']
