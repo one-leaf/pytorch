@@ -49,17 +49,22 @@ class Agent(object):
             acts.remove(KEY_RIGHT)   
         if not self.tetromino.validposition(self.board,self.fallpiece,ay = 1):
             acts.remove(KEY_DOWN)
-        r = self.fallpiece['rotation']
-        self.fallpiece['rotation'] =  (self.fallpiece['rotation'] + 1) % len(pieces[self.fallpiece['shape']])
-        if not self.tetromino.validposition(self.board,self.fallpiece):
+        if self.fallpiece.shape=="o":
             acts.remove(KEY_ROTATION)
-        self.fallpiece['rotation'] = r
+        else:
+            r = self.fallpiece['rotation']
+            self.fallpiece['rotation'] =  (self.fallpiece['rotation'] + 1) % len(pieces[self.fallpiece['shape']])
+            if not self.tetromino.validposition(self.board,self.fallpiece):
+                acts.remove(KEY_ROTATION)
+            self.fallpiece['rotation'] = r
 
         # 如果四个动作都可用，干掉某些步骤，进行剪枝，
-        if len(acts)==4: 
-            if self.piecesteps>6 and self.piecesteps<15:
+        if self.piecesteps>6 and self.piecesteps<15:
+            if KEY_ROTATION in acts:
                 acts.remove(KEY_ROTATION)
+            if KEY_LEFT in acts:
                 acts.remove(KEY_LEFT)
+            if KEY_RIGHT in acts:
                 acts.remove(KEY_RIGHT)  
                     
         # 如果没有一个动作可以用就向下吧
