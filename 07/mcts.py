@@ -181,7 +181,7 @@ class MCTS(object):
             leaf_value = -1   # 如果游戏结束，得分就是-1，尽量不结束游戏
 
         if reward>0:
-            print("Oh Ye!!! get a reward!!!")
+            print("Oh Ye!!! get a reward!!! reward:",reward)
 
         # 早期完全使用修正,到局部修正到最后的结束时再判定
         # if state.terminal:# state.state==0:
