@@ -186,10 +186,10 @@ class Train():
             step = 0
             for _ in range(8):
                 logging.info("TRAIN Batch:{} starting".format(self.dataset.curr_game_batch_num,))
-                n_playout=self.n_playout
-                self.n_playout=8
+                # n_playout=self.n_playout
+                # self.n_playout=8
                 self.collect_selfplay_data()
-                self.n_playout=n_playout
+                # self.n_playout=n_playout
                 logging.info("TRAIN Batch:{} end".format(self.dataset.curr_game_batch_num,))
                 step += 1
 
