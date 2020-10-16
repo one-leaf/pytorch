@@ -262,9 +262,11 @@ class MCTS(object):
             self._playout_network(state_copy)
 
             # 为了提高学习效率如果有探索的标准差大于100，直接放弃探索,返回。
-            if n%10==0:
+            if n>0:
                 act_visits = [(act, node._n_visits) for act, node in self._root._children.items()]
                 acts, visits = zip(*act_visits)
+                # 如果只有一个选项，直接返回
+                if len(acts)==1: break
                 var = np.var(visits)
                 if var>10:
                     break
