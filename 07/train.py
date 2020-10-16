@@ -184,9 +184,12 @@ class Train():
             print("end data loader")
 
             step = 0
-            for _ in range(self.buffer_size - self.dataset.curr_game_batch_num):
+            while (self.dataset.curr_game_batch_num/self.buffer_size<0.5):
                 logging.info("TRAIN Batch:{} starting".format(self.dataset.curr_game_batch_num,))
+                n_playout=self.n_playout
+                self.n_playout=32
                 self.collect_selfplay_data()
+                self.n_playout=n_playout
                 logging.info("TRAIN Batch:{} end".format(self.dataset.curr_game_batch_num,))
                 step += 1
                 if step>10: break
