@@ -466,7 +466,6 @@ class Agent(object):
         mcts_probs = mcts_probs0+mcts_probs1
         winners = winners0+winners1
 
-        print(len(states),len(mcts_probs),len(winners))
         assert len(states)==len(mcts_probs)==len(winners)
         return -1, zip(states, mcts_probs, winners)
 

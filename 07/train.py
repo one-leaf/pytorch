@@ -54,7 +54,6 @@ class Dataset(torch.utils.data.Dataset):
         state, mcts_prob, winner = pickle.load(open(filename, "rb"))
         state = torch.from_numpy(state).float()
         mcts_prob = torch.from_numpy(mcts_prob).float()
-        print(winner)
         winner = torch.as_tensor(winner).float()
         return state, mcts_prob, winner
 
