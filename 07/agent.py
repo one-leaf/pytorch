@@ -17,12 +17,21 @@ class Agent(object):
         self.reset()
 
     def reset(self):
+        # 下落的方块
         self.fallpiece = self.tetromino.getnewpiece()
+        # 下一个待下落的方块
         self.nextpiece = self.tetromino.getnewpiece()
+        # 是否结束
         self.terminal = False
+        # 得分
         self.score = 0
+        # 等级
         self.level = 0
+        # 全部步长
         self.steps = 0
+        # 每个方块的步长
+        self.piecesteps = 0
+        # 面板
         self.board = self.tetromino.getblankboard()
         # 变化个数，用于评价这一步的优劣
         self.transCount = self.getTransCount()
@@ -45,24 +54,23 @@ class Agent(object):
         if not self.tetromino.validposition(self.board,self.fallpiece):
             acts.remove(KEY_ROTATION)
         self.fallpiece['rotation'] = r
-        if len(acts)==0: acts=[KEY_ROTATION]
 
-        # 如果四个动作都可用，随机干掉某些步骤，进行剪枝，
+        # 如果四个动作都可用，干掉某些步骤，进行剪枝，
         if len(acts)==4: 
-            if random.random()>0.5:
+            if self.piecesteps>5 and self.piecesteps<15:
                 acts.remove(KEY_ROTATION)
-            if random.random()>0.5:
-                acts.remove(KEY_DOWN)
-            if random.random()>0.5:
                 acts.remove(KEY_LEFT)
-            if random.random()>0.5:
-                acts.remove(KEY_RIGHT)                                
+                acts.remove(KEY_RIGHT)  
+                    
+        # 如果没有一个动作可以用就向下吧
+        if len(acts)==0: acts=[KEY_DOWN]
         return acts         
 
     def step(self, action, env=None):
         # 状态 0 下落过程中 1 更换方块 2 结束一局
         reward = 0
         self.steps += 1
+        self.piecesteps += 1
         self.level, self.fallfreq = self.tetromino.calculate(self.score)
 
         if action == KEY_LEFT and self.tetromino.validposition(self.board,self.fallpiece,ax = -1):
@@ -103,6 +111,7 @@ class Agent(object):
                 return self.state, reward
             else: 
                 self.state =1
+            self.piecesteps = 0
         else:
             self.state = 0
         
