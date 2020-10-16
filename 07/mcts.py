@@ -271,7 +271,7 @@ class MCTS(object):
                 # 如果只有一个选项，直接返回
                 if len(acts)==1: break
                 var = np.var(visits)
-                if var>10000:
+                if var>100000:
                     break
             
                 # if n>=self._n_playout:
