@@ -464,15 +464,15 @@ class Agent(object):
                 winners0=[-1.0 for i in range(len(states))]
                 minstep=picece_count
             # 增加最小步骤
-            if picece_count==minstep:
-                states0+=states
-                mcts_probs0+=mcts_probs
-                winners0+=[-1.0 for i in range(len(states))]
+            elif picece_count==minstep:
+                states0 = states0 + states
+                mcts_probs0 = mcts_probs0 + mcts_probs
+                winners0 = winners0 + [-1.0 for i in range(len(states))]
 
         print("minstep",minstep,"maxstep",maxstep)
-        states = states0+states1
-        mcts_probs = mcts_probs0+mcts_probs1
-        winners = winners0+winners1
+        states = states0 + states1
+        mcts_probs = mcts_probs0 + mcts_probs1
+        winners = winners0 + winners1
 
         assert len(states)==len(mcts_probs)==len(winners)
         return -1, zip(states, mcts_probs, winners)
