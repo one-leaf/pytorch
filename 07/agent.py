@@ -428,13 +428,13 @@ class Agent(object):
         # 这里下5局，取最好和最差的按得分和步数对比
         # 这样会有一个问题，导致+分比-分多，导致mcts会集中到最初和最后的步骤
         # 当方块到了这个就终止游戏
-        max_height = 6
+        max_height = 4
         states0,states1,mcts_probs0,mcts_probs1,winners0,winners1=None,None,None,None,None,None
         minstep = 999999999
         maxstep = 0
         tetromino = self.tetromino
         # 必须要找到相差3个方块以上的局面
-        while maxstep-minstep<3:
+        while maxstep-minstep<2:
             states, mcts_probs = [], []
             self.tetromino=copy.deepcopy(tetromino)
             self.reset()
