@@ -264,15 +264,18 @@ class MCTS(object):
             state_copy = copy.deepcopy(state)
             self._playout_network(state_copy)
 
+            # 如果只有一个动作
+            if len(self._root._children)==1:
+                break
             # 为了提高学习效率如果有探索的标准差大于100，直接放弃探索,返回。
-            if n>0:
-                act_visits = [(act, node._n_visits) for act, node in self._root._children.items()]
-                acts, visits = zip(*act_visits)
-                # 如果只有一个选项，直接返回
-                if len(acts)==1: break
-                var = np.var(visits)
-                if var>100:
-                    break
+            # if n>0:
+            #     act_visits = [(act, node._n_visits) for act, node in self._root._children.items()]
+            #     acts, visits = zip(*act_visits)
+            #     # 如果只有一个选项，直接返回
+            #     if len(acts)==1: break
+            #     var = np.var(visits)
+            #     if var>100:
+            #         break
             
                 # if n>=self._n_playout:
                 #     # 如果得分为负数，多算2倍，争取找出一个优解

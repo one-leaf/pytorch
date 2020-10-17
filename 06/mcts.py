@@ -293,9 +293,9 @@ class MCTS(object):
             state_copy = copy.deepcopy(state)
             self._playout_network(state_copy)
 
-            if n%10==0 and n >= self._n_playout*0.2:
-                act_visits = [(act, node._n_visits) for act, node in self._root._children.items()]
-                acts, visits = zip(*act_visits)
+            # if n%10==0 and n >= self._n_playout*0.2:
+            #     act_visits = [(act, node._n_visits) for act, node in self._root._children.items()]
+            #     acts, visits = zip(*act_visits)
 
                 # idx = max(range(len(visits)), key=visits.__getitem__)
                 
@@ -306,8 +306,8 @@ class MCTS(object):
             #             break
 
                 # 如果方差足够大，或总数大于5倍结束
-                var = np.var(visits)
-                if var>=1000 or n>=self._n_playout*5: break
+                # var = np.var(visits)
+                # if var>=1000 or n>=self._n_playout*5: break
             
                 # if n>=self._n_playout:
                     # 如果得分为负数，多算2倍，争取找出一个优解
