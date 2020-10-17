@@ -451,16 +451,23 @@ class Agent(object):
                 if self.state!=0 and self.getMaxHeight()>=max_height: break
             self.print()
             picece_count = self.piececount
+            # 增加最大步骤
             if picece_count>maxstep:
                 states1=states
                 mcts_probs1=mcts_probs
                 winners1=[1.0 for i in range(len(states))]
                 maxstep=picece_count
+            # 增加最小步骤
             if picece_count<minstep:
                 states0=states
                 mcts_probs0=mcts_probs
                 winners0=[-1.0 for i in range(len(states))]
                 minstep=picece_count
+            # 增加最小步骤
+            if picece_count==minstep:
+                states0+=states
+                mcts_probs0+=mcts_probs
+                winners0+=[-1.0 for i in range(len(states))]
 
         print("minstep",minstep,"maxstep",maxstep)
         states = states0+states1
