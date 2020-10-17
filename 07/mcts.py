@@ -270,9 +270,9 @@ class MCTS(object):
                 acts, visits = zip(*act_visits)
                 # 如果只有一个选项，直接返回
                 if len(acts)==1: break
-                # var = np.var(visits)
-                # if var>10000:
-                #     break
+                var = np.var(visits)
+                if var>100:
+                    break
             
                 # if n>=self._n_playout:
                 #     # 如果得分为负数，多算2倍，争取找出一个优解
