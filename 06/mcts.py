@@ -287,8 +287,8 @@ class MCTS(object):
             Return: 所有action及对应概率
         """
         self._first_ations.clear()
-        for n in count():
-        # for n in range(self._n_playout):
+        # for n in count():
+        for n in range(self._n_playout):
             # print("\r_n_playout： {:.2f}%".format(n*100 / self._n_playout), end='')
             state_copy = copy.deepcopy(state)
             self._playout_network(state_copy)
