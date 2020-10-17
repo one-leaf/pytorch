@@ -64,7 +64,7 @@ class Agent(object):
             self.fallpiece['rotation'] = r
 
         # 如果四个动作都可用，干掉某些步骤，进行剪枝，
-        if self.piecesteps>8:
+        if self.piecesteps>6:
             if KEY_ROTATION in acts:
                 acts.remove(KEY_ROTATION)
             if KEY_LEFT in acts:
@@ -434,7 +434,7 @@ class Agent(object):
         maxstep = 0
         tetromino = self.tetromino
         # 必须要找到相差3个方块以上的局面
-        while maxstep-minstep<2:
+        while maxstep-minstep<3:
             states, mcts_probs = [], []
             self.tetromino=copy.deepcopy(tetromino)
             self.reset()
