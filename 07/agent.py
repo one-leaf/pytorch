@@ -430,7 +430,7 @@ class Agent(object):
         # 当方块到了这个就终止游戏
         max_height = 6
         states0,states1,mcts_probs0,mcts_probs1,winners0,winners1=None,None,None,None,None,None
-        minstep = 10000000
+        minstep = 999999999
         maxstep = 0
         tetromino = self.tetromino
         # 必须要找到相差3个方块以上的局面
