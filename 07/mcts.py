@@ -285,7 +285,7 @@ class MCTS(object):
         acts, visits = zip(*act_visits)
 
         # 打印中间信息
-        if state.state!=0:
+        if state.piecesteps==0:
             info={"shape":state.fallpiece["shape"], "depth":self.max_depth_tree()}
             # info={"shape":state.fallpiece["shape"]}
             for idx in sorted(range(len(visits)), key=visits.__getitem__)[::-1]:
