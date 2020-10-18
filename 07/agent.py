@@ -434,7 +434,10 @@ class Agent(object):
         maxstep = 0
         tetromino = self.tetromino
         # 必须要找到相差3个方块以上的局面
+        step = 0
         while maxstep-minstep<3:
+            step += 1
+            if step>20: break
             states, mcts_probs = [], []
             self.tetromino=copy.deepcopy(tetromino)
             self.reset()
