@@ -182,10 +182,10 @@ class MCTS(object):
 
         if reward>0:
             print("Oh Ye!!! get a reward!!! reward:",reward)
-            _node=node
-            while _node._parent:
-                print(_node)
-                _node = _node._parent
+            # _node=node
+            # while _node._parent:
+            #     print(_node)
+            #     _node = _node._parent
 
         # 早期完全使用修正,到局部修正到最后的结束时再判定
         # if state.terminal:# state.state==0:
