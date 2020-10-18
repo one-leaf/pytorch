@@ -86,7 +86,7 @@ class FiveChessTrain():
         self.learn_rate = 1e-5
         self.lr_multiplier = 1.0  # 基于KL的自适应学习率
         self.temp = 1  # the temperature param
-        self.n_playout = 500  # 每个动作的模拟次数
+        self.n_playout = 600  # 每个动作的模拟次数
         self.buffer_size = 200000  # cache对战记录个数
         self.play_batch_size = 1 # 每次自学习次数
         self.epochs = 2  # 每次更新策略价值网络的训练步骤数, 推荐是5
@@ -94,7 +94,7 @@ class FiveChessTrain():
         self.best_win_ratio = 0.0
         
         # 纯MCTS的模拟数，用于评估策略模型
-        self.pure_mcts_playout_num = 5000 # 用户纯MCTS构建初始树时的随机走子步数
+        self.pure_mcts_playout_num = 2000 # 用户纯MCTS构建初始树时的随机走子步数
         self.c_puct = 2  # MCTS child权重， 用来调节MCTS中 探索/乐观 的程度 默认 5
         if os.path.exists(model_file):
             # 使用一个训练好的策略价值网络
