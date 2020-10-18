@@ -165,8 +165,13 @@ class MCTS(object):
 
             # 如果存在优先探索队列，并且该子节点存在未探索过的
             action = None
-            for act in self._first_ations:
-                if act in node._children and node._children[act]._n_visits == 0:
+            # for act in self._first_ations:
+            #     if act in node._children and node._children[act]._n_visits == 0:
+            #         action, node = act, node._children[act]
+            #         break
+            # 如果有没有探索过的棋，无论如何尝试一下
+            for act in node._children:
+                if node._children[act]._n_visits == 0:
                     action, node = act, node._children[act]
                     break
 
