@@ -437,7 +437,7 @@ class Agent(object):
         step = 0
         while maxstep-minstep<3:
             step += 1
-            if step>10 and maxstep>minstep : break
+            if step>10 and maxstep-minstep>1 : break
             states, mcts_probs = [], []
             self.tetromino=copy.deepcopy(tetromino)
             self.reset()
