@@ -109,7 +109,7 @@ class MCTS(object):
         self._policy = policy_value_fn  # 可走子action及对应概率，这里采用平均概率
         self._c_puct = c_puct  # MCTS child搜索收敛权重
         self._n_playout = n_playout  # 构建MCTS初始树的随机走子步数
-        self._reward = 0
+        self._keep_best_step = 0     # 不按概率走，直接按最优走
 
     # 从根节点 root 到子节点执行一次探索过程
     # 1 如果不是叶子，就按子节点的规划执行动作，直到找到叶子
@@ -197,17 +197,14 @@ class MCTS(object):
         # 递归更新当前节点及所有父节点的最优选中次数和Q分数,因为得到的是本次的价值
         node.update_recursive(leaf_value+reward*10000000.)
 
-        if reward>0 or self._reward>0:
-            if reward>0:
-                print("Oh Ye!!! get a reward!!! reward:",reward)
-            else:
-                print("debug")
-            self._reward=reward
+        if reward>0:
+            print("Oh Ye!!! get a reward!!! reward:", reward)
             _node=node
             while _node._parent:
                 for ac in _node._parent._children:
                     if _node._parent._children[ac]==_node:
                         print(ac, _node)
+                        self._keep_best_step += 1 
                         break
                 _node = _node._parent
 
@@ -308,7 +305,7 @@ class MCTS(object):
         acts, visits = zip(*act_visits)
 
         # 打印中间信息
-        if True:#state.piecesteps==0:
+        if state.piecesteps==0:
             info={"shape":state.fallpiece["shape"], "depth":self.max_depth_tree()}
             # info={"shape":state.fallpiece["shape"]}
             for idx in sorted(range(len(visits)), key=visits.__getitem__)[::-1]:
@@ -422,10 +419,15 @@ class MCTSPlayer(object):
                 #     p = 0.9  
                 # p = state.steps/200
                 # if p>0.9: p=0.9
-                p=0.95
-                dirichlet = np.random.dirichlet(1*np.ones(len(act_probs)))
-                action = np.random.choice(acts, p= p*act_probs + (1-p)*dirichlet) 
-                print(" AI:", action, acts, act_probs, dirichlet)
+                if self.mcts._keep_best_step>0:
+                    idx = np.argmax(act_probs)                    
+                    action = acts[idx]
+                    self.mcts._keep_best_step -= 1
+                else:
+                    p=0.8
+                    dirichlet = np.random.dirichlet(1*np.ones(len(act_probs)))
+                    action = np.random.choice(acts, p= p*act_probs + (1-p)*dirichlet) 
+                print(" AI:", action, self.mcts._keep_best_step)
                 # 更新根节点并重用搜索树
                 self.mcts.update_root_with_action(action)
             else:  # 正式玩
