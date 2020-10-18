@@ -109,6 +109,7 @@ class MCTS(object):
         self._policy = policy_value_fn  # 可走子action及对应概率，这里采用平均概率
         self._c_puct = c_puct  # MCTS child搜索收敛权重
         self._n_playout = n_playout  # 构建MCTS初始树的随机走子步数
+        self._reward = 0
 
     # 从根节点 root 到子节点执行一次探索过程
     # 1 如果不是叶子，就按子节点的规划执行动作，直到找到叶子
@@ -173,6 +174,8 @@ class MCTS(object):
                 action, node = node.select(self._c_puct)
             # 执行action走子
             _, reward = state.step(action)
+            if reward>0:
+                print(action, "rewrad")
 
         # 检查游戏是否有赢家
         end, score = state.game_end()
@@ -187,7 +190,17 @@ class MCTS(object):
         else:
             leaf_value = -1   # 如果游戏结束，得分就是-1，尽量不结束游戏
 
-        if reward>0:
+        # 早期完全使用修正,到局部修正到最后的结束时再判定
+        # if state.terminal:# state.state==0:
+        #     v , new ,old = state.checkActionisBest(include_fallpiece=state.state==0)
+        #     leaf_value = v
+        # if state.state==0:
+        #     leaf_value += -1.0 * np.log(state.getTransCount())
+        # 递归更新当前节点及所有父节点的最优选中次数和Q分数,因为得到的是本次的价值
+        node.update_recursive(leaf_value+reward*10000000.)
+
+        if reward>0 or self._reward>0:
+            self._reward=reward
             print("Oh Ye!!! get a reward!!! reward:",reward)
             _node=node
             while _node._parent:
@@ -197,14 +210,6 @@ class MCTS(object):
                         break
                 _node = _node._parent
 
-        # 早期完全使用修正,到局部修正到最后的结束时再判定
-        # if state.terminal:# state.state==0:
-        #     v , new ,old = state.checkActionisBest(include_fallpiece=state.state==0)
-        #     leaf_value = v
-        # if state.state==0:
-        #     leaf_value += -1.0 * np.log(state.getTransCount())
-        # 递归更新当前节点及所有父节点的最优选中次数和Q分数,因为得到的是本次的价值
-        node.update_recursive(leaf_value+reward*10000000.)
 
     def update_root_with_action(self, action):
         """根据action更新根节点"""
