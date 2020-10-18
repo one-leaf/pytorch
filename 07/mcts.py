@@ -164,10 +164,10 @@ class MCTS(object):
 
             # 从child中选择最优action
             action = None
-            for act in node._children:
-                if node._children[act]._n_visits == 0:
-                    action, node = act, node._children[act]
-                    break
+            # for act in node._children:
+            #     if node._children[act]._n_visits == 0:
+            #         action, node = act, node._children[act]
+            #         break
 
             if action is None:
                 action, node = node.select(self._c_puct)
@@ -189,10 +189,13 @@ class MCTS(object):
 
         if reward>0:
             print("Oh Ye!!! get a reward!!! reward:",reward)
-            # _node=node
-            # while _node._parent:
-            #     print(_node)
-            #     _node = _node._parent
+            _node=node
+            while _node._parent:
+                for ac in _node._parent._children:
+                    if _node._parent._children[ac]==_node:
+                        print(ac, _node)
+                        break
+                _node = _node._parent
 
         # 早期完全使用修正,到局部修正到最后的结束时再判定
         # if state.terminal:# state.state==0:
