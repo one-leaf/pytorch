@@ -174,8 +174,6 @@ class MCTS(object):
                 action, node = node.select(self._c_puct)
             # 执行action走子
             _, reward = state.step(action)
-            # if reward>0:
-            #     print(action, "rewrad")
 
         # 检查游戏是否有赢家
         end, score = state.game_end()
