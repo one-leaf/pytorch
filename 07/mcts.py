@@ -216,6 +216,7 @@ class MCTS(object):
             self._root._parent = None
         else:
             self._root = TreeNode(None, 1.0)
+            self._keep_best_step = 0
 
     def _evaluate_rollout(self, state, limit=1000):
         """使用随机快速走子策略评估叶子节点
