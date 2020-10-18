@@ -428,7 +428,7 @@ class Agent(object):
         # 这里下5局，取最好和最差的按得分和步数对比
         # 这样会有一个问题，导致+分比-分多，导致mcts会集中到最初和最后的步骤
         # 当方块到了这个就终止游戏
-        max_height = 4
+        max_height = 5
         states0,states1,mcts_probs0,mcts_probs1,winners0,winners1=None,None,None,None,None,None
         minstep = 999999999
         maxstep = 0
