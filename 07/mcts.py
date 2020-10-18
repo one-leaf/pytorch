@@ -203,8 +203,8 @@ class MCTS(object):
             while _node._parent:
                 for ac in _node._parent._children:
                     if _node._parent._children[ac]==_node:
-                        print(ac, _node)
                         self._keep_best_step += 1 
+                        print(self._keep_best_step, ":", "action:", ac, _node)
                         break
                 _node = _node._parent
 
@@ -422,6 +422,7 @@ class MCTSPlayer(object):
                 if self.mcts._keep_best_step>0:
                     idx = np.argmax(act_probs)                    
                     action = acts[idx]
+                    print(" - ", self.mcts._keep_best_step, ":", "action:", action)
                     self.mcts._keep_best_step -= 1
                 else:
                     p=0.8
