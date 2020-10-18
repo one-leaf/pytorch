@@ -419,15 +419,15 @@ class MCTSPlayer(object):
                 #     p = 0.9  
                 # p = state.steps/200
                 # if p>0.9: p=0.9
-                idx = np.argmax(act_probs)                    
                 if self.mcts._keep_best_step>0:
+                    idx = np.argmax(act_probs)                    
                     action = acts[idx]
                     self.mcts._keep_best_step -= 1
                 else:
                     p=0.8
                     dirichlet = np.random.dirichlet(1*np.ones(len(act_probs)))
                     action = np.random.choice(acts, p= p*act_probs + (1-p)*dirichlet) 
-                print(" AI:", action, "max:", acts[idx], "keep:", self.mcts._keep_best_step)
+                # print(" AI:", action, "max:", acts[idx], "keep:", self.mcts._keep_best_step)
                 # 更新根节点并重用搜索树
                 self.mcts.update_root_with_action(action)
             else:  # 正式玩
