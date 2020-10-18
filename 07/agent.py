@@ -456,16 +456,20 @@ class Agent(object):
             picece_count = self.piececount
             # 增加最大步骤
             if picece_count>maxstep:
-                states1=states
-                mcts_probs1=mcts_probs
-                winners1=[1.0 for i in range(len(states))]
-                maxstep=picece_count
+                states1 = states
+                mcts_probs1 = mcts_probs
+                winners1 = [1.0 for i in range(len(states))]
+                maxstep = picece_count
+            elif picece_count==maxstep:
+                states1 = states1 + states
+                mcts_probs1 = mcts_probs1 + mcts_probs
+                winners1 = winners1+ [1.0 for i in range(len(states))]
             # 增加最小步骤
             if picece_count<minstep:
-                states0=states
-                mcts_probs0=mcts_probs
-                winners0=[-1.0 for i in range(len(states))]
-                minstep=picece_count
+                states0 = states
+                mcts_probs0 = mcts_probs
+                winners0 = [-1.0 for i in range(len(states))]
+                minstep = picece_count
             # 增加最小步骤
             elif picece_count==minstep:
                 states0 = states0 + states
