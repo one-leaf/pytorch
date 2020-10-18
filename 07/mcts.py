@@ -425,7 +425,7 @@ class MCTSPlayer(object):
                 p=0.95
                 dirichlet = np.random.dirichlet(1*np.ones(len(act_probs)))
                 action = np.random.choice(acts, p= p*act_probs + (1-p)*dirichlet) 
-                print("AI:", action)
+                print("AI:", action, act_probs, dirichlet)
                 # 更新根节点并重用搜索树
                 self.mcts.update_root_with_action(action)
             else:  # 正式玩
