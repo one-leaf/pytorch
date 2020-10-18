@@ -200,8 +200,11 @@ class MCTS(object):
         node.update_recursive(leaf_value+reward*10000000.)
 
         if reward>0 or self._reward>0:
+            if reward>0:
+                print("Oh Ye!!! get a reward!!! reward:",reward)
+            else:
+                print("debug")
             self._reward=reward
-            print("Oh Ye!!! get a reward!!! reward:",reward)
             _node=node
             while _node._parent:
                 for ac in _node._parent._children:
