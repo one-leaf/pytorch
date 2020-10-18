@@ -131,7 +131,7 @@ class Train():
         episode_len = len(play_data)
 
         # 把翻转棋盘数据加到数据集里
-        play_data = self.get_equi_data(play_data)
+        # play_data = self.get_equi_data(play_data)
         logging.info("TRAIN Self Play end. length:%s saving ..." % episode_len)
         # 保存对抗数据到data_buffer
         for obj in play_data:
