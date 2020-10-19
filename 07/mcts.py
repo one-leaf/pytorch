@@ -429,7 +429,7 @@ class MCTSPlayer(object):
                     self.mcts._keep_best_step -= 1
                 else:
                     p=0.9
-                    dirichlet = np.random.dirichlet(1*np.ones(len(act_probs)))
+                    dirichlet = np.random.dirichlet(0.1*np.ones(len(act_probs)))
                     action = np.random.choice(acts, p= p*act_probs + (1-p)*dirichlet) 
                 if action!=acts[idx]:
                     print(" random:", acts[idx], act_probs[idx], "==>", action, act_probs[acts.index(action)])
