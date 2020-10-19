@@ -431,11 +431,16 @@ class MCTSPlayer(object):
                 #     p= 1.
                 # else:
                 #     p = 1.0 - len(state.availables)/(state.size * state.size)*0.10  #【0.90~1】 这里默认为 0.25
-                
-                # dirichlet = np.random.dirichlet(0.3 * np.ones(len(act_probs)))
-                # position = np.random.choice(positions, p=p * act_probs + (1-p) * dirichlet) 
-                position = np.random.choice(positions, p=act_probs) 
+
+                p= 0.9                
+                idx = np.argmax(act_probs)                    
+                dirichlet = np.random.dirichlet(0.3 * np.ones(len(act_probs)))
+                position = np.random.choice(positions, p=p * act_probs + (1-p) * dirichlet) 
+                # position = np.random.choice(positions, p=act_probs) 
                 action = state.positions_to_actions([position])[0]
+
+                if action!=acts[idx]:
+                    print(" random:", acts[idx], act_probs[idx], "==>", action, act_probs[acts.index(action)])
 
                 # 如果是第一步棋，就随便下
                 if len(state.availables)==state.size**2 and random.random()>0.5: 
