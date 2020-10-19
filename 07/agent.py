@@ -441,6 +441,7 @@ class Agent(object):
             states, mcts_probs = [], []
             self.tetromino=copy.deepcopy(tetromino)
             self.reset()
+            player.reset_player()
             for i in count():
                 # temp 权重 ，return_prob 是否返回概率数据
                 action, move_probs = player.get_action(self, temp=temp, return_prob=1)
