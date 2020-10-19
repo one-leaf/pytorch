@@ -189,11 +189,12 @@ class MCTS(object):
             leaf_value = -1   # 如果游戏结束，得分就是-1，尽量不结束游戏
 
         # 早期完全使用修正,到局部修正到最后的结束时再判定
-        # if state.terminal:# state.state==0:
+        # if state.terminal:# state.state!=0:
         #     v , new ,old = state.checkActionisBest(include_fallpiece=state.state==0)
         #     leaf_value = v
-        # if state.state==0:
-        #     leaf_value += -1.0 * np.log(state.getTransCount())
+
+        if state.state!=0:
+            leaf_value += -1.0 * np.log(state.getTransCount())
         # 递归更新当前节点及所有父节点的最优选中次数和Q分数,因为得到的是本次的价值
         node.update_recursive(leaf_value+reward*10000000.)
 
