@@ -442,9 +442,9 @@ class MCTSPlayer(object):
                 if action!=acts[idx]:
                     print(" random:", acts[idx], act_probs[idx], "==>", action, act_probs[acts.index(action)])
 
-                # 如果是第一步棋，就随便下
-                if len(state.availables)==state.size**2 and random.random()>0.5: 
-                    action = random.choice(state.availables[:9])
+                # # 如果是第一步棋，就随便下
+                # if len(state.availables)==state.size**2 and random.random()>0.5: 
+                #     action = random.choice(state.availables[:9])
 
                 # 更新根节点并重用搜索树
                 self.mcts.update_root_with_action(action)
