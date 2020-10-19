@@ -195,7 +195,7 @@ class MCTS(object):
 
         # 给熵加一点点的支持
         if state.state!=0:
-            leaf_value += 1.0 / np.log(state.getTransCount()) - 1
+            leaf_value += np.log(50/state.getTransCount())
         # 递归更新当前节点及所有父节点的最优选中次数和Q分数,因为得到的是本次的价值
         node.update_recursive(leaf_value+reward*10000000.)
 
@@ -309,7 +309,7 @@ class MCTS(object):
 
         # 打印中间信息
         if state.piecesteps==0:
-            info={"shape":state.fallpiece["shape"], "depth":self.max_depth_tree()}
+            info={"shape":state.fallpiece["shape"], "depth":self.max_depth_tree(),"entropy":state.getTransCount()}
             # info={"shape":state.fallpiece["shape"]}
             for idx in sorted(range(len(visits)), key=visits.__getitem__)[::-1]:
                 value = self._root._children[acts[idx]].get_value(5)
