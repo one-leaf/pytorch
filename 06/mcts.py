@@ -435,7 +435,7 @@ class MCTSPlayer(object):
                 p= 0.9                
                 idx = np.argmax(act_probs)    
 
-                if act_probs[idx]>0.999:
+                if act_probs[idx]>0.90:
                     action = acts[idx]
                 else:                
                     dirichlet = np.random.dirichlet(0.3 * np.ones(len(act_probs)))

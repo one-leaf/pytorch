@@ -428,7 +428,7 @@ class MCTSPlayer(object):
                     print(" - ", self.mcts._keep_best_step, ":", "action:", action)
                     self.mcts._keep_best_step -= 1
                 else:
-                    if act_probs[idx]>0.999:
+                    if act_probs[idx]>0.90:
                         action = acts[idx]
                     else:
                         p=0.9
