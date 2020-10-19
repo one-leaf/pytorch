@@ -309,7 +309,7 @@ class MCTS(object):
 
         # 打印中间信息
         if state.piecesteps==0:
-            info={"shape":state.fallpiece["shape"], "depth":self.max_depth_tree(),"entropy":state.getTransCount()}
+            info={"shape":state.fallpiece["shape"], "depth":self.max_depth_tree()}
             # info={"shape":state.fallpiece["shape"]}
             for idx in sorted(range(len(visits)), key=visits.__getitem__)[::-1]:
                 value = self._root._children[acts[idx]].get_value(5)
@@ -428,7 +428,7 @@ class MCTSPlayer(object):
                     print(" - ", self.mcts._keep_best_step, ":", "action:", action)
                     self.mcts._keep_best_step -= 1
                 else:
-                    p=0.8
+                    p=0.9
                     dirichlet = np.random.dirichlet(1*np.ones(len(act_probs)))
                     action = np.random.choice(acts, p= p*act_probs + (1-p)*dirichlet) 
                 # print(" AI:", action, "max:", acts[idx], "keep:", self.mcts._keep_best_step)
