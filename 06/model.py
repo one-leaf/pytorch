@@ -50,8 +50,8 @@ class Net(nn.Module):
 
         # 由于每个棋盘大小对最终对应一个动作，所以补齐的效果比较好
         # 直接来2个残差网络
-        self.conv1=self._make_layer(7, 64, 4)
-        # self.conv2=self._make_layer(64, 128, 3)
+        self.conv1=self._make_layer(9, 64, 3)
+        self.conv2=self._make_layer(64, 64, 3)
         # self.conv3=self._make_layer(128, 128, 3)
 
         # 动作预测
@@ -80,7 +80,7 @@ class Net(nn.Module):
 
     def forward(self, x):
         x = self.conv1(x)
-        # x = self.conv2(x)
+        x = self.conv2(x)
         # x = self.conv3(x)
 
         # 动作
@@ -121,7 +121,7 @@ class PolicyValueNet():
 
     # 打印当前网络
     def print_netwark(self):
-        x=torch.Tensor(1,7,self.size,self.size).to(self.device)
+        x=torch.Tensor(1,9,self.size,self.size).to(self.device)
         print(self.policy_value_net)
         v,p=self.policy_value_net(x)
         print("value:",v.size())

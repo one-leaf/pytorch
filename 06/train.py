@@ -1,5 +1,5 @@
 from torch import sqrt
-from policy_value_net import PolicyValueNet  
+from model import PolicyValueNet  
 from mcts import MCTSPurePlayer, MCTSPlayer
 from agent import Agent
 import os, glob, pickle
