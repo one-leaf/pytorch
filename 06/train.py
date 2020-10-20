@@ -236,11 +236,12 @@ class FiveChessTrain():
             print("end data loader")
 
             step = 0
-            while self.dataset.curr_size() < self.batch_size*self.epochs:
-                logging.info("TRAIN Batch:{} starting, Size:{}, n_in_row:{}".format(step + 1, size, n_in_row))
-                self.collect_selfplay_data()
-                logging.info("TRAIN Batch:{} end".format(step + 1,))
-                step += 1
+            if self.dataset.curr_game_batch_num/self.dataset.buffer_size<0.5:
+                for _ in range(8):
+                    logging.info("TRAIN Batch:{} starting, Size:{}, n_in_row:{}".format(step + 1, size, n_in_row))
+                    self.collect_selfplay_data()
+                    logging.info("TRAIN Batch:{} end".format(step + 1,))
+                    step += 1
 
             for i, data in enumerate(training_loader):  # 计划训练批次
                 # 使用对抗数据重新训练策略价值网络模型
