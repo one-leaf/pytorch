@@ -158,6 +158,7 @@ class FiveChessTrain():
         for obj in play_data:
             self.dataset.save(obj)
         agent.game.print()                   
+        return play_data[-1]
 
     def policy_update(self, sample_data, epochs=1):
         """更新策略价值网络policy-value"""
@@ -238,7 +239,13 @@ class FiveChessTrain():
             if self.dataset.curr_game_batch_num/self.dataset.buffer_size<0.5:
                 for _ in range(8):
                     logging.info("TRAIN Batch:{} starting, Size:{}, n_in_row:{}".format(step + 1, size, n_in_row))
-                    self.collect_selfplay_data()
+                    state, mcts_porb, winner = self.collect_selfplay_data()
+                    print("-"*50,"state","-"*50)
+                    print(state)
+                    print("-"*50,"mcts_porb","-"*50)
+                    print(mcts_porb)
+                    print("-"*50,"winner","-"*50)
+                    print(winner)
                     logging.info("TRAIN Batch:{} end".format(step + 1,))
                     step += 1
 
