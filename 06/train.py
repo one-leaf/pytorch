@@ -232,7 +232,6 @@ class FiveChessTrain():
         try:
             print("start data loader")
             self.dataset = Dataset(data_dir, self.game_batch_num*self.batch_size, self.buffer_size)
-            training_loader = torch.utils.data.DataLoader(self.dataset, batch_size=self.batch_size, shuffle=True, num_workers=2,)
             print("end data loader")
 
             step = 0
@@ -242,6 +241,8 @@ class FiveChessTrain():
                     self.collect_selfplay_data()
                     logging.info("TRAIN Batch:{} end".format(step + 1,))
                     step += 1
+
+            training_loader = torch.utils.data.DataLoader(self.dataset, batch_size=self.batch_size, shuffle=True, num_workers=2,)
 
             for i, data in enumerate(training_loader):  # 计划训练批次
                 # 使用对抗数据重新训练策略价值网络模型
