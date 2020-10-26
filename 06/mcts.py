@@ -432,10 +432,10 @@ class MCTSPlayer(object):
                 # else:
                 #     p = 1.0 - len(state.availables)/(state.size * state.size)*0.10  #【0.90~1】 这里默认为 0.25
 
-                p= 0.9                
+                p= 0.75                
                 idx = np.argmax(act_probs)    
 
-                if act_probs[idx]>0.90:
+                if act_probs[idx]>0.90 or random.random()>0.5:
                     action = acts[idx]
                 else:                
                     dirichlet = np.random.dirichlet(0.3 * np.ones(len(act_probs)))
