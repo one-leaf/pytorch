@@ -218,7 +218,7 @@ class MCTS(object):
             #             leaf_value = +100.0
             # 换句话说即：  
             # 这里前面都大于1，提高mcts的性能              
-            leaf_value = (100.0 if winner != state.current_player else -100.0)
+            leaf_value = (10.0 if winner != state.current_player else -10.0)
         # 递归更新当前节点及所有父节点的最优选中次数和Q分数,因为得到的是本次的价值
         node.update_recursive(leaf_value)
 
