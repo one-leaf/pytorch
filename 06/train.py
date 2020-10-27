@@ -83,7 +83,7 @@ class FiveChessTrain():
         self.check_freq = 100000  # 每对战n次检查一次当前模型vs旧模型胜率        
 
         # training params
-        self.learn_rate = 1e-4
+        self.learn_rate = 1e-5
         self.lr_multiplier = 1.0  # 基于KL的自适应学习率
         self.temp = 2  # the temperature param
         self.n_playout = 500  # 每个动作的模拟次数
