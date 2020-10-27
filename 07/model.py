@@ -13,10 +13,10 @@ class ResidualBlock(nn.Module):
         super(ResidualBlock,self).__init__()
         self.left=nn.Sequential(
             nn.Conv2d(inchannel,outchannel,3,stride,1,bias=False),
-            nn.BatchNorm2d(outchannel),
+            # nn.BatchNorm2d(outchannel),
             nn.LeakyReLU(inplace=True),
             nn.Conv2d(outchannel,outchannel,3,1,1,bias=False),
-            nn.BatchNorm2d(outchannel)
+            # nn.BatchNorm2d(outchannel)
         )
         self.right=shortcut
         
@@ -29,8 +29,9 @@ class ResidualBlock(nn.Module):
 class Net(nn.Module):
     def __init__(self,input_size, output_size):
         super().__init__()
-        self.conv1=self._make_layer(4, 64, 4)
-        # self.conv2=self._make_layer(64, 64, 3)
+        self.conv1=self._make_layer(4, 64, 3)
+        self.conv2=self._make_layer(64, 64, 3)
+        self.conv3=self._make_layer(64, 64, 3)
 
         # 动作预测
         self.act_conv1 = nn.Conv2d(64, 2, 1)
@@ -44,7 +45,8 @@ class Net(nn.Module):
 
     def forward(self, x):
         x = self.conv1(x)
-        # x = self.conv2(x)
+        x = self.conv2(x)
+        x = self.conv3(x)
 
         x_act = F.leaky_relu(self.act_conv1(x))
         x_act = x_act.view(x.size(0), -1)
@@ -61,7 +63,7 @@ class Net(nn.Module):
         #构建layer,包含多个residual block
         shortcut=nn.Sequential(
             nn.Conv2d(inchannel,outchannel,1,stride,bias=False),
-            nn.BatchNorm2d(outchannel)
+            # nn.BatchNorm2d(outchannel)
         )
  
         layers=[ ]
