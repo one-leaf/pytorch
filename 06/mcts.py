@@ -189,8 +189,8 @@ class MCTS(object):
             if end: #and winner != curr_player:
                 self._first_ations.add(action)
             # # 如果这步棋快赢了，也重点关注
-            if state.will_win():
-                self._first_ations.add(action)
+            # if state.will_win():
+            #     self._first_ations.add(action)
 
         # 检查游戏是否有赢家
         end, winner = state.game_end()
