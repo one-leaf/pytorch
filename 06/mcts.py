@@ -209,7 +209,7 @@ class MCTS(object):
             #         if winner == curr_player:
             #             leaf_value = 1.0
             #         else:
-            #             leaf_value = -1.0
+            #             leaf_value = -100.0
             #     else:
             #         # 如果是对手下棋导致，我赢了，则本次节点-，但上级节点+，我输了，本次节点+，上级节点-
             #         if winner == curr_player:
@@ -218,7 +218,7 @@ class MCTS(object):
             #             leaf_value = +100.0
             # 换句话说即：  
             # 这里前面都大于1，提高mcts的性能              
-            leaf_value = (1.0 if winner != state.current_player else -1.0)
+            leaf_value = (100.0 if winner != state.current_player else -100.0)
         # 递归更新当前节点及所有父节点的最优选中次数和Q分数,因为得到的是本次的价值
         node.update_recursive(leaf_value)
 
