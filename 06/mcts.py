@@ -165,10 +165,10 @@ class MCTS(object):
 
             # 如果存在优先探索队列，并且该子节点存在未探索过的
             action = None
-            # for act in self._first_ations:
-            #     if act in node._children and node._children[act]._n_visits == 0:
-            #         action, node = act, node._children[act]
-            #         break
+            for act in self._first_ations:
+                if act in node._children and node._children[act]._n_visits == 0:
+                    action, node = act, node._children[act]
+                    break
             # 如果是根节点有没有探索过的棋，无论如何尝试一下
             if node._parent is None:
                 for act in node._children:
@@ -184,13 +184,13 @@ class MCTS(object):
             state.step(action)
 
             # 凡是导致游戏结束的棋，重点关注
-            # end, winner = state.game_end()
+            end, winner = state.game_end()
             # 不再干预，试试全部随机
-            # if end: #and winner != curr_player:
-            #     self._first_ations.add(action)
+            if end: #and winner != curr_player:
+                self._first_ations.add(action)
             # # 如果这步棋快赢了，也重点关注
-            # if state.will_win():
-            #     self._first_ations.add(action)
+            if state.will_win():
+                self._first_ations.add(action)
 
         # 检查游戏是否有赢家
         end, winner = state.game_end()
