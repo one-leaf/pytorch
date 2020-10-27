@@ -354,7 +354,7 @@ class Agent(object):
         # 这样会有一个问题，导致+分比-分多，导致mcts会集中到最初和最后的步骤
         states, mcts_probs, current_players = [], [], []
         # 当方块到了这个就终止游戏
-        max_height = 10
+        max_height = 15
         tetromino = copy.deepcopy(self.tetromino)
         # 训练方块数
         self.reset()
