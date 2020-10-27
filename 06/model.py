@@ -52,7 +52,7 @@ class Net(nn.Module):
         # 直接来2个残差网络
         self.conv1=self._make_layer(9, 64, 3)
         self.conv2=self._make_layer(64, 64, 3)
-        # self.conv3=self._make_layer(128, 128, 3)
+        self.conv3=self._make_layer(64, 64, 3)
 
         # 动作预测
         self.act_conv1 = nn.Conv2d(64, 4, 1)
@@ -62,7 +62,6 @@ class Net(nn.Module):
         self.val_conv1 = nn.Conv2d(64, 2, 1)
         self.val_fc1 = nn.Linear(2*size*size, size*size)
         self.val_fc2 = nn.Linear(size*size, 1)
-        # self.val_fc3 = nn.Linear(64, 1)
 
     def _make_layer(self,inchannel,outchannel,block_num,stride=1):
         #构建layer,包含多个residual block
@@ -81,7 +80,7 @@ class Net(nn.Module):
     def forward(self, x):
         x = self.conv1(x)
         x = self.conv2(x)
-        # x = self.conv3(x)
+        x = self.conv3(x)
 
         # 动作
         x_act = F.leaky_relu(self.act_conv1(x))

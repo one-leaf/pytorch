@@ -12,7 +12,7 @@ import torch
 from threading import Thread, Lock
 
 curr_dir = os.path.dirname(os.path.abspath(__file__))
-size = 15  # 棋盘大小
+size = 10  # 棋盘大小
 n_in_row = 5  # 几子连线
 
 data_dir = os.path.join(curr_dir, './data/%s_%s/'%(size,n_in_row))
