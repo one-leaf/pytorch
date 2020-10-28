@@ -189,7 +189,7 @@ class MCTS(object):
                 self._first_ations.add(action)
                 self._first_ations.add(state.actions[-3])
                 mstr=""
-                for act in state.actions[:-5]:
+                for act in state.actions[-5:]:
                     mstr = mstr+ " -> %s"%str(act)
                 print(mstr)  
             # # 如果这步棋快赢了，也重点关注
