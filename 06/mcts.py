@@ -169,12 +169,12 @@ class MCTS(object):
                 if act in node._children and node._children[act]._n_visits == 0:
                     action, node = act, node._children[act]
                     break
-            # 如果是根节点有没有探索过的棋，无论如何尝试一下
+            # 如果是根节点有没有探索过的棋，无论如何尝试一下,这样会导致探索的路径过于短小
             # if node._parent is None or node._parent._parent is None:
-            for act in node._children:
-                if node._children[act]._n_visits == 0:
-                    action, node = act, node._children[act]
-                    break
+            # for act in node._children:
+            #     if node._children[act]._n_visits == 0:
+            #         action, node = act, node._children[act]
+            #         break
 
             # 从child中选择最优action
             if action is None:
