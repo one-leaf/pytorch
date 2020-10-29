@@ -198,7 +198,7 @@ class MCTS(object):
         node.update_recursive(leaf_value+reward*10000000.)
 
         if reward>0:
-            print("Oh Ye!!! get a reward!!! reward:", reward)
+            # print("Oh Ye!!! get a reward!!! reward:", reward)
             _node=node
             while _node._parent:
                 for ac in _node._parent._children:
@@ -432,8 +432,8 @@ class MCTSPlayer(object):
                         p=0.75
                         dirichlet = np.random.dirichlet(0.3*np.ones(len(act_probs)))
                         action = np.random.choice(acts, p= p*act_probs + (1-p)*dirichlet) 
-                        # if action!=acts[idx]:
-                        #     print(" random:", acts[idx], act_probs[idx], "==>", action, act_probs[acts.index(action)])
+                        if action!=acts[idx]:
+                            print(" random:", acts[idx], act_probs[idx], "==>", action, act_probs[acts.index(action)])
                 # 更新根节点并重用搜索树
                 self.mcts.update_root_with_action(action)
             else:  # 正式玩
