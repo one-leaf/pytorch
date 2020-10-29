@@ -72,7 +72,7 @@ class TreeNode(object):
         """
         # 非root节点时递归update祖先
         if self._parent:
-            self._parent.update_recursive(-leaf_value)
+            self._parent.update_recursive(leaf_value)
         self.update(leaf_value)
 
     # 检查当前是否已经扩展了
