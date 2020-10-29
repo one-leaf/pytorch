@@ -186,11 +186,11 @@ class MCTS(object):
             if end: #and winner != curr_player:
                 self._first_ations.add(action)
                 self._first_ations.add(state.actions[-3])
-                if winner != curr_player:
-                    mstr=""
-                    for act in state.actions[-5:]:
-                        mstr = mstr+ " -> %s"%str(act)
-                    print(mstr)  
+                # if winner != curr_player:
+                #     mstr=""
+                #     for act in state.actions[-5:]:
+                #         mstr = mstr+ " -> %s"%str(act)
+                #     print(mstr)  
             # # 如果这步棋快赢了，也重点关注
             # if state.will_win():
             #     self._first_ations.add(action)
