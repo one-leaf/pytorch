@@ -22,7 +22,6 @@ class TreeNode(object):
         self._Q = 0  # 节点分数，用于mcts树初始构建时的充分打散（每次叶子节点被最优选中时，节点隔级-leaf_value逻辑，以避免构建树时某分支被反复选中）
         self._n_visits = 0  # 节点被最优选中的次数，用于树构建完毕后的走子选择
         self._P = prior_p  # action概率
-        self._cache = []
 
     # 扩展新的子节点
     def expand(self, action_priors):
@@ -32,7 +31,6 @@ class TreeNode(object):
         for action, prob in action_priors:
             if action not in self._children:
                 self._children[action] = TreeNode(self, prob)
-                self._cache.append(action)
 
     # 从子节点中选择最佳子节点
     def select(self, c_puct):
