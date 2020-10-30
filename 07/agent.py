@@ -64,13 +64,13 @@ class Agent(object):
             self.fallpiece['rotation'] = r
 
         # 如果四个动作都可用，干掉某些步骤，进行剪枝，
-        if self.piecesteps>10:
-            if KEY_ROTATION in acts:
-                acts.remove(KEY_ROTATION)
-            if KEY_LEFT in acts:
-                acts.remove(KEY_LEFT)
-            if KEY_RIGHT in acts:
-                acts.remove(KEY_RIGHT)  
+        # if self.piecesteps>10:
+        #     if KEY_ROTATION in acts:
+        #         acts.remove(KEY_ROTATION)
+        #     if KEY_LEFT in acts:
+        #         acts.remove(KEY_LEFT)
+        #     if KEY_RIGHT in acts:
+        #         acts.remove(KEY_RIGHT)  
                     
         # 如果没有一个动作可以用就向下吧
         if len(acts)==0: acts=[KEY_DOWN]
