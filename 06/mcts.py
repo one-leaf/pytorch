@@ -455,11 +455,11 @@ class MCTSPlayer(object):
                 position = np.random.choice(positions, p=act_probs)
                 action = state.positions_to_actions([position])[0]
                 # 更新根节点:根据最后action向前探索树
-                root = self.mcts._root
-                for act in root._children:
-                    node = root._children[act]   
-                    if node._n_visits>0:
-                        print(act, node)
+                # root = self.mcts._root
+                # for act in root._children:
+                #     node = root._children[act]   
+                #     if node._n_visits>0:
+                #         print(act, node)
                 print("AI", action, act_probs[acts.index(action)]) 
 
                 self.mcts.update_root_with_action(None)
