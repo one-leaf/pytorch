@@ -426,11 +426,11 @@ class MCTSPlayer(object):
                     # print(" - ", self.mcts._keep_best_step, ":", "action:", action)
                     self.mcts._keep_best_step -= 1
                 else:
-                    # 如果是方块前5步，有一半的几率乱走
-                    if state.piecesteps<6 and random.random()>0.5:
+                    # 如果是方块前5步，有一半的几率乱走,或5%的可能乱走
+                    if (state.piecesteps<6 and random.random()>0.5) or random.random()>0.95:
                         action = np.random.choice(acts)
-                    # 否则如果概率超过0.8或50%以上的概率都是选最大值
-                    elif act_probs[idx]>0.8 or random.random()>0.5:
+                    # 否则如果概率超过0.8选最大值
+                    elif act_probs[idx]>0.8:
                         action = acts[idx]
                     else:
                         p=0.75
