@@ -77,7 +77,7 @@ class Dataset(torch.utils.data.Dataset):
 
 class FiveChessTrain():
     def __init__(self):
-        self.policy_evaluate_size = 10  # 策略评估胜率时的模拟对局次数
+        self.policy_evaluate_size = 3  # 策略评估胜率时的模拟对局次数
         self.game_batch_num = 1000000  # selfplay对战次数
         self.batch_size = 512  # data_buffer中对战次数超过n次后开始启动模型训练
         self.check_freq = 100000  # 每对战n次检查一次当前模型vs旧模型胜率        
@@ -94,7 +94,7 @@ class FiveChessTrain():
         self.best_win_ratio = 0.0
         
         # 纯MCTS的模拟数，用于评估策略模型
-        self.pure_mcts_playout_num = 2000 # 用户纯MCTS构建初始树时的随机走子步数
+        self.pure_mcts_playout_num = 5000 # 用户纯MCTS构建初始树时的随机走子步数
         self.c_puct = 1  # MCTS child权重， 用来调节MCTS中 探索/乐观 的程度 默认 5
         if os.path.exists(model_file):
             # 使用一个训练好的策略价值网络
@@ -256,19 +256,10 @@ class FiveChessTrain():
                 loss, entropy = self.policy_update(data, self.epochs)
                 # 每n个batch检查一下当前模型胜率
 
-                if (i + 1) % self.check_freq == 0:
+                # if (i + 1) % self.check_freq == 0:
                     # 保存buffer数据
                     # 策略胜率评估：模型与纯MCTS玩家对战n局看胜率
-                    win_ratio = self.policy_evaluate(self.policy_evaluate_size)
-                    if win_ratio > self.best_win_ratio:  # 胜率超过历史最优模型
-                        logging.info("TRAIN New best policy!!!!!!!!batch:{} win_ratio:{}->{} pure_mcts_playout_num:{}".format(step + 1, self.best_win_ratio, win_ratio, self.pure_mcts_playout_num))
-                        self.best_win_ratio = win_ratio
-                        # 保存当前模型为最优模型best_policy
-                        self.policy_value_net.save_model(best_model_file)
-                        # 如果胜率=100%，则增加纯MCT的模拟数 (<6000的限制视mem情况)
-                        if self.best_win_ratio == 1.0: # and self.pure_mcts_playout_num < 6000:
-                            self.pure_mcts_playout_num += 1000
-                            self.best_win_ratio = 0.0
+
 
                 if (i+1) % (int(self.dataset.curr_size()/(self.batch_size*8))) == 0:
                     self.policy_value_net.save_model(model_file)
@@ -289,6 +280,17 @@ class FiveChessTrain():
 
                     # self.collect_selfplay_data(self.play_batch_size)
     
+            win_ratio = self.policy_evaluate(self.policy_evaluate_size)
+            if win_ratio >= self.best_win_ratio:  # 胜率超过历史最优模型
+                logging.info("TRAIN New best policy!!!!!!!!batch:{} win_ratio:{}->{} pure_mcts_playout_num:{}".format(step + 1, self.best_win_ratio, win_ratio, self.pure_mcts_playout_num))
+                self.best_win_ratio = win_ratio
+                # 保存当前模型为最优模型best_policy
+                self.policy_value_net.save_model(best_model_file)
+                # 如果胜率=100%，则增加纯MCT的模拟数 (<6000的限制视mem情况)
+                # if self.best_win_ratio == 1.0: # and self.pure_mcts_playout_num < 6000:
+                #     self.pure_mcts_playout_num += 1000
+                #     self.best_win_ratio = 0.0
+
         except KeyboardInterrupt:
             logging.info('quit')
 
