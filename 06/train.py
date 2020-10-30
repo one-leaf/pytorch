@@ -77,7 +77,7 @@ class Dataset(torch.utils.data.Dataset):
 
 class FiveChessTrain():
     def __init__(self):
-        self.policy_evaluate_size = 3  # 策略评估胜率时的模拟对局次数
+        self.policy_evaluate_size = 1  # 策略评估胜率时的模拟对局次数
         self.game_batch_num = 1000000  # selfplay对战次数
         self.batch_size = 512  # data_buffer中对战次数超过n次后开始启动模型训练
         self.check_freq = 100000  # 每对战n次检查一次当前模型vs旧模型胜率        

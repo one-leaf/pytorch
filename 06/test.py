@@ -1,6 +1,6 @@
 from agent import Agent
 from mcts import MCTSPlayer, MCTSPurePlayer
-from policy_value_net import PolicyValueNet
+from model import PolicyValueNet
 import time
 import os
 import random
@@ -44,7 +44,7 @@ class Human(object):
         return "Human {}".format(self.player)
 
 def run():
-    size = 15  # 棋盘大小
+    size = 10  # 棋盘大小
     n_in_row = 5  # 几子连线
 
     curr_dir = os.path.dirname(os.path.abspath(__file__))
