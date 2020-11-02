@@ -31,7 +31,7 @@ class ResidualBlock(nn.Module):
         self.left=nn.Sequential(
             nn.Conv2d(inchannel,outchannel,3,stride,1,bias=False),
             nn.BatchNorm2d(outchannel),
-            nn.LeakyReLU(inplace=True),
+            nn.ReLU(inplace=True),
             nn.Conv2d(outchannel,outchannel,3,1,1,bias=False),
             nn.BatchNorm2d(outchannel)
         )
@@ -41,7 +41,7 @@ class ResidualBlock(nn.Module):
         out=self.left(x)
         residual=x if self.right is None else self.right(x)
         out+=residual
-        return F.leaky_relu(out)
+        return F.relu(out)
 
 class Net(nn.Module):
 
@@ -80,22 +80,22 @@ class Net(nn.Module):
         return nn.Sequential(*layers)
 
     def forward(self, x):
-        x = F.leaky_relu(self.first_conv(x))
+        x = F.relu(self.first_conv(x))
         x = self.conv1(x)
         x = self.conv2(x)
         x = self.conv3(x)
         x = self.conv4(x)
 
         # 动作
-        x_act = F.leaky_relu(self.act_conv1(x))
+        x_act = F.relu(self.act_conv1(x))
         x_act = x_act.view(x.size(0), -1)
-        x_act = F.leaky_relu(self.act_fc1(x_act))
+        x_act = F.relu(self.act_fc1(x_act))
         x_act = F.log_softmax(self.act_fc2(x_act),dim=1)
 
         # 胜率 输出为 -1 ~ 1 之间的数字
-        x_val = F.leaky_relu(self.val_conv1(x))
+        x_val = F.relu(self.val_conv1(x))
         x_val = x_val.view(x.size(0), -1)
-        x_val = F.leaky_relu(self.val_fc1(x_val))
+        x_val = F.relu(self.val_fc1(x_val))
         x_val = torch.tanh(self.val_fc2(x_val))
         return x_act, x_val
 
