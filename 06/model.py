@@ -50,7 +50,7 @@ class Net(nn.Module):
 
         # 由于每个棋盘大小对最终对应一个动作，所以补齐的效果比较好
         # 直接来18层的残差网络
-        self.first_conv = nn.Conv2d(9, 128, 5, bias=False, padding=2)
+        self.first_conv = nn.Conv2d(9, 128, 5, 1, 2, bias=False)
         self.conv1=self._make_layer(128, 128, 2)
         self.conv2=self._make_layer(128, 128, 2)
         self.conv3=self._make_layer(128, 128, 2)
