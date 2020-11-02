@@ -80,7 +80,7 @@ class Net(nn.Module):
         return nn.Sequential(*layers)
 
     def forward(self, x):
-        x = F.leaky_relu(nn.BatchNorm2d(self.first_conv(x)))
+        x = F.leaky_relu(F.batch_norm(self.first_conv(x)))
         x = self.conv1(x)
         x = self.conv2(x)
         x = self.conv3(x)
