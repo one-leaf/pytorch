@@ -25,15 +25,15 @@ class Cache(OrderedDict):
 # 网络模型
 # 定义残差块，固定住BN的方差和均值
 class ResidualBlock(nn.Module):
-    #实现子module: Residual    Block
+    #实现子module: Residual Block
     def __init__(self,inchannel,outchannel,stride=1,shortcut=None):
         super(ResidualBlock,self).__init__()
         self.left=nn.Sequential(
             nn.Conv2d(inchannel,outchannel,3,stride,1,bias=False),
-            # nn.BatchNorm2d(outchannel, track_running_stats=False),
+            nn.BatchNorm2d(outchannel),
             nn.LeakyReLU(inplace=True),
             nn.Conv2d(outchannel,outchannel,3,1,1,bias=False),
-            # nn.BatchNorm2d(outchannel, track_running_stats=False)
+            nn.BatchNorm2d(outchannel)
         )
         self.right=shortcut
         
@@ -49,25 +49,27 @@ class Net(nn.Module):
         super(Net, self).__init__()
 
         # 由于每个棋盘大小对最终对应一个动作，所以补齐的效果比较好
-        # 直接来2个残差网络
-        self.conv1=self._make_layer(9, 64, 3)
-        self.conv2=self._make_layer(64, 64, 3)
-        self.conv3=self._make_layer(64, 64, 3)
+        # 直接来18层的残差网络
+        self.first_conv = nn.Conv2d(9, 128, 5, bias=False, padding=2)
+        self.conv1=self._make_layer(128, 128, 2)
+        self.conv2=self._make_layer(128, 128, 2)
+        self.conv3=self._make_layer(128, 128, 2)
+        self.conv4=self._make_layer(128, 128, 2)
 
         # 动作预测
-        self.act_conv1 = nn.Conv2d(64, 4, 1)
-        self.act_fc1 = nn.Linear(4*size*size, 2*size*size)
-        self.act_fc2 = nn.Linear(2*size*size, size*size)
+        self.act_conv1 = nn.Conv2d(128, 1, 1)
+        self.act_fc1 = nn.Linear(size*size, size*size)
+        self.act_fc2 = nn.Linear(size*size, size*size)
         # 动作价值
-        self.val_conv1 = nn.Conv2d(64, 2, 1)
-        self.val_fc1 = nn.Linear(2*size*size, size*size)
+        self.val_conv1 = nn.Conv2d(128, 1, 1)
+        self.val_fc1 = nn.Linear(size*size, size*size)
         self.val_fc2 = nn.Linear(size*size, 1)
 
     def _make_layer(self,inchannel,outchannel,block_num,stride=1):
         #构建layer,包含多个residual block
         shortcut=nn.Sequential(
             nn.Conv2d(inchannel,outchannel,1,stride,bias=False),
-            # nn.BatchNorm2d(outchannel, track_running_stats=False)
+            nn.BatchNorm2d(outchannel)
         )
  
         layers=[ ]
@@ -78,9 +80,11 @@ class Net(nn.Module):
         return nn.Sequential(*layers)
 
     def forward(self, x):
+        x = F.leaky_relu(nn.BatchNorm2d(self.first_conv(x)))
         x = self.conv1(x)
         x = self.conv2(x)
         x = self.conv3(x)
+        x = self.conv4(x)
 
         # 动作
         x_act = F.leaky_relu(self.act_conv1(x))
