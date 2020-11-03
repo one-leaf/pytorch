@@ -51,19 +51,21 @@ class Net(nn.Module):
         # 由于每个棋盘大小对最终对应一个动作，所以补齐的效果比较好
         # 直接来18层的残差网络
         self.first_conv = nn.Conv2d(9, 128, 5, 1, 2, bias=False)
+        self.first_conv_bn = nn.BatchNorm2d(128)
         self.conv1=self._make_layer(128, 128, 2)
         self.conv2=self._make_layer(128, 128, 2)
         self.conv3=self._make_layer(128, 128, 2)
         self.conv4=self._make_layer(128, 128, 2)
 
         # 动作预测
-        self.act_conv1 = nn.Conv2d(128, 1, 1)
-        self.act_fc1 = nn.Linear(size*size, size*size)
-        self.act_fc2 = nn.Linear(size*size, size*size)
+        self.act_conv1 = nn.Conv2d(128, 2, 1)
+        self.act_conv1_bn = nn.BatchNorm2d(2)
+        self.act_fc1 = nn.Linear(2*size*size, size*size)
         # 动作价值
         self.val_conv1 = nn.Conv2d(128, 1, 1)
-        self.val_fc1 = nn.Linear(size*size, size*size)
-        self.val_fc2 = nn.Linear(size*size, 1)
+        self.val_conv1_bn = nn.BatchNorm2d(1)
+        self.val_fc1 = nn.Linear(size*size, 128)
+        self.val_fc2 = nn.Linear(128, 1)
 
     def _make_layer(self,inchannel,outchannel,block_num,stride=1):
         #构建layer,包含多个residual block
@@ -80,20 +82,26 @@ class Net(nn.Module):
         return nn.Sequential(*layers)
 
     def forward(self, x):
-        x = F.relu(self.first_conv(x))
+        x = self.first_conv(x)
+        x = self.first_conv_bn(x)
+        x = F.relu(x)
+        x = nn.BatchNorm2d(128)
         x = self.conv1(x)
         x = self.conv2(x)
         x = self.conv3(x)
         x = self.conv4(x)
 
         # 动作
-        x_act = F.relu(self.act_conv1(x))
+        x_act = self.act_conv1(x)
+        x_act = self.act_conv1_bn(x)
+        x_act = F.relu(x)
         x_act = x_act.view(x.size(0), -1)
-        x_act = F.relu(self.act_fc1(x_act))
-        x_act = F.log_softmax(self.act_fc2(x_act),dim=1)
+        x_act = F.log_softmax(self.act_fc1(x_act),dim=1)
 
         # 胜率 输出为 -1 ~ 1 之间的数字
-        x_val = F.relu(self.val_conv1(x))
+        x_val = self.val_conv1(x)
+        x_val = self.val_conv1_bn(x)
+        x_val = F.relu(x)
         x_val = x_val.view(x.size(0), -1)
         x_val = F.relu(self.val_fc1(x_val))
         x_val = torch.tanh(self.val_fc2(x_val))
