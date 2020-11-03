@@ -54,18 +54,18 @@ class Net(nn.Module):
         self.first_conv_bn = nn.BatchNorm2d(64)
         self.conv1=self._make_layer(64, 64, 2)
         self.conv2=self._make_layer(64, 64, 2)
-        self.conv3=self._make_layer(64, 128, 2)
-        self.conv4=self._make_layer(128, 256, 2)
+        self.conv3=self._make_layer(64, 64, 2)
+        self.conv4=self._make_layer(64, 64, 2)
 
         # 动作预测
-        self.act_conv1 = nn.Conv2d(256, 2, 1)
+        self.act_conv1 = nn.Conv2d(64, 2, 1)
         self.act_conv1_bn = nn.BatchNorm2d(2)
         self.act_fc1 = nn.Linear(2*size*size, size*size)
         # 动作价值
-        self.val_conv1 = nn.Conv2d(256, 1, 1)
+        self.val_conv1 = nn.Conv2d(64, 1, 1)
         self.val_conv1_bn = nn.BatchNorm2d(1)
-        self.val_fc1 = nn.Linear(size*size, 128)
-        self.val_fc2 = nn.Linear(128, 1)
+        self.val_fc1 = nn.Linear(size*size, 64)
+        self.val_fc2 = nn.Linear(64, 1)
 
     def _make_layer(self,inchannel,outchannel,block_num,stride=1):
         #构建layer,包含多个residual block
