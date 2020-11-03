@@ -92,16 +92,16 @@ class Net(nn.Module):
 
         # 动作
         x_act = self.act_conv1(x)
-        x_act = self.act_conv1_bn(x)
-        x_act = F.relu(x)
-        x_act = x_act.view(x.size(0), -1)
+        x_act = self.act_conv1_bn(x_act)
+        x_act = F.relu(x_act)
+        x_act = x_act.view(x_act.size(0), -1)
         x_act = F.log_softmax(self.act_fc1(x_act),dim=1)
 
         # 胜率 输出为 -1 ~ 1 之间的数字
         x_val = self.val_conv1(x)
-        x_val = self.val_conv1_bn(x)
-        x_val = F.relu(x)
-        x_val = x_val.view(x.size(0), -1)
+        x_val = self.val_conv1_bn(x_val)
+        x_val = F.relu(x_val)
+        x_val = x_val.view(x_val.size(0), -1)
         x_val = F.relu(self.val_fc1(x_val))
         x_val = torch.tanh(self.val_fc2(x_val))
         return x_act, x_val
