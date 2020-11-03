@@ -85,7 +85,6 @@ class Net(nn.Module):
         x = self.first_conv(x)
         x = self.first_conv_bn(x)
         x = F.relu(x)
-        x = nn.BatchNorm2d(128)
         x = self.conv1(x)
         x = self.conv2(x)
         x = self.conv3(x)
