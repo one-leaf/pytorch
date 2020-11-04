@@ -196,7 +196,7 @@ class FiveChessTrain():
             return
 
         best_policy_value_net = PolicyValueNet(size, model_file=best_model_file)
-        best_mcts_player = MCTSPlayer(best_policy_value_net, c_puct=self.c_puct, n_playout=self.n_playout)
+        best_mcts_player = MCTSPlayer(best_policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout)
 
         win_cnt = defaultdict(int)
         for i in range(n_games):  # 对战
