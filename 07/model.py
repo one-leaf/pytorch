@@ -13,10 +13,10 @@ class ResidualBlock(nn.Module):
         super(ResidualBlock,self).__init__()
         self.left=nn.Sequential(
             nn.Conv2d(inchannel,outchannel,3,stride,1,bias=False),
-            # nn.BatchNorm2d(outchannel),
-            nn.LeakyReLU(inplace=True),
+            nn.BatchNorm2d(outchannel),
+            nn.ReLU(inplace=True),
             nn.Conv2d(outchannel,outchannel,3,1,1,bias=False),
-            # nn.BatchNorm2d(outchannel)
+            nn.BatchNorm2d(outchannel)
         )
         self.right=shortcut
         
@@ -24,38 +24,51 @@ class ResidualBlock(nn.Module):
         out=self.left(x)
         residual=x if self.right is None else self.right(x)
         out+=residual
-        return F.leaky_relu(out)
+        return F.relu(out)
 
 class Net(nn.Module):
     def __init__(self,input_size, output_size):
         super().__init__()
-        self.conv1=self._make_layer(4, 64, 3)
-        self.conv2=self._make_layer(64, 64, 3)
-        self.conv3=self._make_layer(64, 64, 3)
+        self.first_conv = nn.Conv2d(4, 64, 5, 1, 2, bias=False)
+        self.first_conv_bn = nn.BatchNorm2d(64)
+        self.conv1=self._make_layer(64, 64, 2)
+        self.conv2=self._make_layer(64, 64, 2)
+        self.conv3=self._make_layer(64, 64, 2)
+        self.conv4=self._make_layer(64, 64, 2)
 
         # 动作预测
         self.act_conv1 = nn.Conv2d(64, 2, 1)
-        self.act_fc1 = nn.Linear(2*input_size, input_size)
-        self.act_fc2 = nn.Linear(input_size, output_size)
+        self.act_conv1_bn = nn.BatchNorm2d(2)
+        self.act_fc1 = nn.Linear(2*input_size, output_size)
 
         # 动作价值
-        self.val_conv1 = nn.Conv2d(64, 2, 1)
-        self.val_fc1 = nn.Linear(2*input_size, input_size)
-        self.val_fc2 = nn.Linear(input_size, 1)
+        self.val_conv1 = nn.Conv2d(64, 1, 1)
+        self.val_conv1_bn = nn.BatchNorm2d(1)
+        self.val_fc1 = nn.Linear(input_size, 64)
+        self.val_fc2 = nn.Linear(64, 1)
 
     def forward(self, x):
+        x = self.first_conv(x)
+        x = self.first_conv_bn(x)
+        x = F.relu(x)
         x = self.conv1(x)
         x = self.conv2(x)
         x = self.conv3(x)
+        x = self.conv4(x)
 
-        x_act = F.leaky_relu(self.act_conv1(x))
-        x_act = x_act.view(x.size(0), -1)
-        x_act = F.leaky_relu(self.act_fc1(x_act))
-        x_act = F.log_softmax(self.act_fc2(x_act),dim=1)
+        # 动作
+        x_act = self.act_conv1(x)
+        x_act = self.act_conv1_bn(x_act)
+        x_act = F.relu(x_act)
+        x_act = x_act.view(x_act.size(0), -1)
+        x_act = F.log_softmax(self.act_fc1(x_act),dim=1)
 
-        x_val = F.leaky_relu(self.val_conv1(x))
-        x_val = x_val.view(x.size(0), -1)
-        x_val = F.leaky_relu(self.val_fc1(x_val))
+        # 胜率 输出为 -1 ~ 1 之间的数字
+        x_val = self.val_conv1(x)
+        x_val = self.val_conv1_bn(x_val)
+        x_val = F.relu(x_val)
+        x_val = x_val.view(x_val.size(0), -1)
+        x_val = F.relu(self.val_fc1(x_val))
         x_val = torch.tanh(self.val_fc2(x_val))
         return x_act, x_val
 
@@ -63,7 +76,7 @@ class Net(nn.Module):
         #构建layer,包含多个residual block
         shortcut=nn.Sequential(
             nn.Conv2d(inchannel,outchannel,1,stride,bias=False),
-            # nn.BatchNorm2d(outchannel)
+            nn.BatchNorm2d(outchannel)
         )
  
         layers=[ ]
