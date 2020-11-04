@@ -1,4 +1,5 @@
-from torch import sqrt
+from shutil import copyfile
+from torch import batch_norm, sqrt
 from model import PolicyValueNet  
 from mcts import MCTSPurePlayer, MCTSPlayer
 from agent import Agent
@@ -26,23 +27,25 @@ if not os.path.exists(model_dir):
 model_file =  os.path.join(model_dir, 'model_%s_%s.pth'%(size,n_in_row))
 best_model_file =  os.path.join(model_dir, 'best_model_%s_%s.pth'%(size,n_in_row))
 
+# 定义数据集
 class Dataset(torch.utils.data.Dataset):
-    def __init__(self, data_dir, game_batch_num, buffer_size):
+    # trans_count 希望训练的总记录数，为 训练轮次 * Batch_Size
+    # max_keep_size 最多保存的训练样本数
+    def __init__(self, data_dir, max_keep_size):
         self.data_dir = data_dir
-        self.game_batch_num = game_batch_num
-        self.buffer_size = buffer_size
-        self.curr_game_batch_num = 0
+        self.max_keep_size = max_keep_size
+        self.index = 0
         self.data_index_file = os.path.join(data_dir, 'index.txt')
-        self.file_list = deque(maxlen=buffer_size)        
+        self.file_list = deque(maxlen=max_keep_size)        
         self._save_lock = Lock()
-        self.load_game_batch_num()
+        self.load_index()
         self.load_game_files()
 
     def __len__(self):
-        return len(self.file_list)#self.game_batch_num
+        return len(self.file_list)
 
     def __getitem__(self, index):
-        filename = self.file_list[index]#random.choice(self.file_list)
+        filename = self.file_list[index]
         state, mcts_prob, winner = pickle.load(open(filename, "rb"))
         state = torch.from_numpy(state).float()
         mcts_prob = torch.from_numpy(mcts_prob).float()
@@ -55,47 +58,41 @@ class Dataset(torch.utils.data.Dataset):
         for filename in files:
             self.file_list.append(filename)
 
-    def save_game_batch_num(self):
+    def save_index(self):
         with open(self.data_index_file, "w") as f:
-            f.write(str(self.curr_game_batch_num))
+            f.write(str(self.index))
 
-    def load_game_batch_num(self):
+    def load_index(self):
         if os.path.exists(self.data_index_file):
-            self.curr_game_batch_num = int(open(self.data_index_file, 'r').read().strip())
+            self.index = int(open(self.data_index_file, 'r').read().strip())
 
     def save(self, obj):
         with self._save_lock:
-            filename = "{}.pkl".format(self.curr_game_batch_num % self.buffer_size,)
+            filename = "{}.pkl".format(self.index % self.max_keep_size,)
             savefile = os.path.join(self.data_dir, filename)
             pickle.dump(obj, open(savefile, "wb"))
-            self.curr_game_batch_num += 1
-            self.save_game_batch_num()
-            # self.file_list.append(savefile)
-
-    def curr_size(self):
-        return len(self.file_list)
+            self.index += 1
+            self.save_index()
 
 class FiveChessTrain():
     def __init__(self):
-        self.policy_evaluate_size = 1  # 策略评估胜率时的模拟对局次数
-        self.game_batch_num = 1000000  # selfplay对战次数
-        self.batch_size = 512  # data_buffer中对战次数超过n次后开始启动模型训练
-        self.check_freq = 100000  # 每对战n次检查一次当前模型vs旧模型胜率        
+        self.policy_evaluate_size = 10  # 策略评估胜率时的模拟对局次数
+        self.batch_size = 512  # 训练一批数据的长度
+        self.max_keep_size = 500000  # 保留最近对战样本个数 平均一局大约50个样本
 
-        # training params
+        # 训练参数
         self.learn_rate = 1e-5
         self.lr_multiplier = 1.0  # 基于KL的自适应学习率
-        self.temp = 1  # the temperature param
+        self.temp = 1  # 概率缩放程度，实际预测0.01，训练采用1
         self.n_playout = 500  # 每个动作的模拟次数
-        self.buffer_size = 10000  # cache对战记录个数
         self.play_batch_size = 1 # 每次自学习次数
-        self.epochs = 2  # 每次更新策略价值网络的训练步骤数, 推荐是5
+        self.epochs = 2  # 重复训练次数, 推荐是2
         self.kl_targ = 0.02  # 策略价值网络KL值目标
-        self.best_win_ratio = 0.0
         
         # 纯MCTS的模拟数，用于评估策略模型
         self.pure_mcts_playout_num = 4000 # 用户纯MCTS构建初始树时的随机走子步数
         self.c_puct = 1  # MCTS child权重， 用来调节MCTS中 探索/乐观 的程度 默认 5
+
         if os.path.exists(model_file):
             # 使用一个训练好的策略价值网络
             self.policy_value_net = PolicyValueNet(size, model_file=model_file)
@@ -132,29 +129,26 @@ class FiveChessTrain():
         agent = Agent(size, n_in_row, is_shown=0)
         # 创建使用策略价值网络来指导树搜索和评估叶节点的MCTS玩家
         mcts_player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout, is_selfplay=1)
-        temp = self.temp
-        use_Mcts=False
+
+        # 有一定几率和纯MCTS对抗
         if random.random()>0.99:
-            pure_mcts_player = MCTSPurePlayer(c_puct=5, n_playout=self.pure_mcts_playout_num)
-            # temp = 1e-1
-            use_Mcts=True
-            print("AI VS MCTS, pure_mcts_playout_num:", self.pure_mcts_playout_num)
+            pure_mcts_player = MCTSPurePlayer(c_puct=5, n_playout=2000)
+            print("AI VS MCTS, pure_mcts_playout_num:", 2000)
         else:
             pure_mcts_player = None
 
         # 开始下棋
-        winner, play_data = agent.start_self_play(mcts_player, pure_mcts_player, temp=temp)
-        if use_Mcts==True and winner==mcts_player.player:
-            self.pure_mcts_playout_num += 1000
-            self.policy_value_net.save_model(best_model_file)
+        winner, play_data = agent.start_self_play(mcts_player, pure_mcts_player, temp=self.temp)
 
         play_data = list(play_data)[:]
         episode_len = len(play_data)
+      
         # 把翻转棋盘数据加到数据集里
-        play_data = self.get_equi_data(play_data)
+        # 采用翻转棋盘来增加样本数据集
+        # play_data = self.get_equi_data(play_data)
         logging.info("TRAIN Self Play end. length:%s saving ..." % episode_len)
 
-        # 保存对抗数据到data_buffer
+        # 保存训练数据到data_buffer
         for obj in play_data:
             self.dataset.save(obj)
         agent.game.print()                   
@@ -163,17 +157,7 @@ class FiveChessTrain():
     def policy_update(self, sample_data, epochs=1):
         """更新策略价值网络policy-value"""
         # 训练策略价值网络
-        # 随机抽取data_buffer中的对抗数据
-        # mini_batch = self.dataset.loadData(sample_data)
         state_batch, mcts_probs_batch, winner_batch = sample_data
-        # # for x in mini_batch:
-        # #     print("-----------------")
-        # #     print(x)
-        # # state_batch = [data[0] for data in mini_batch]
-        # # mcts_probs_batch = [data[1] for data in mini_batch]
-        # # winner_batch = [data[2] for data in mini_batch]
-
-        # print(state_batch)
 
         old_probs, old_v = self.policy_value_net.policy_value(state_batch)  
         for i in range(epochs):
@@ -201,42 +185,59 @@ class FiveChessTrain():
 
     def policy_evaluate(self, n_games=10):
         """
-        策略胜率评估：模型与纯MCTS玩家对战n局看胜率
+        策略胜率评估：当前模型与最佳模型对战n局看胜率
         """
-        # AlphaGo Zero风格的MCTS玩家（使用策略价值网络来指导树搜索和评估叶节点）
+        # 当前训练好的模型
         current_mcts_player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout)
-        # 纯MCTS玩家
-        pure_mcts_player = MCTSPurePlayer(c_puct=5, n_playout=self.pure_mcts_playout_num)
+
+        # 如果不存在最佳模型，直接将当前模型保存为最佳模型
+        if not os.path.exists(best_model_file):
+            self.policy_value_net.save_model(best_model_file)
+            return
+
+        best_policy_value_net = PolicyValueNet(size, model_file=best_model_file)
+        best_mcts_player = MCTSPlayer(best_policy_value_net, c_puct=self.c_puct, n_playout=self.n_playout)
+
         win_cnt = defaultdict(int)
         for i in range(n_games):  # 对战
             agent = Agent(size, n_in_row, is_shown=0)
-            winner = agent.start_play(current_mcts_player, pure_mcts_player, start_player=i % 2)
+            winner = agent.start_play(current_mcts_player, best_mcts_player, start_player=i % 2)
             if winner == current_mcts_player.player:
-                win_cnt[0] += 1
-                print("AI Win!","win:", win_cnt[0],"lost",win_cnt[1],"tie",win_cnt[-1])
-            elif winner == -1:  # 平局
-                win_cnt[-1] += 1
+                win_cnt[0] += 1  # 赢
+                print("Curr Model Win!","win:", win_cnt[0],"lost",win_cnt[1],"tie",win_cnt[-1])
+            elif winner == -1:  
+                win_cnt[-1] += 1 # 平局
                 print("Tie!","win:", win_cnt[0],"lost",win_cnt[1],"tie",win_cnt[-1])
             else:
-                win_cnt[1] += 1
-                print("AI Lost!","win:", win_cnt[0],"lost",win_cnt[1],"tie",win_cnt[-1])
+                win_cnt[1] += 1  # 输
+                print("Curr Model Lost!","win:", win_cnt[0],"lost",win_cnt[1],"tie",win_cnt[-1])
             
             agent.game.print()
-        # MCTS的胜率 winner = 0, 1, -1 ; -1 表示平局
-        win_ratio = 1.0 * (win_cnt[0] + 0.5 * win_cnt[-1]) / n_games
-        logging.info("TRAIN Num_playouts: {}, win: {}, lose: {}, tie: {}, win_ratio: {}".format(self.pure_mcts_playout_num,
-                                                                               win_cnt[0], win_cnt[1], win_cnt[-1], win_ratio))
+        win_ratio = win_cnt[0] / n_games
+
+        logging.info("curr model vs best model: win: {}, lose: {}, tie: {}, win_ratio: {}".format(
+            win_cnt[0], win_cnt[1], win_cnt[-1], win_ratio))
+
+        # 如果当前模型的胜率大于等于0.7,保留为最佳模型
+        if win_ratio>=0.7:
+            self.policy_value_net.save_model(best_model_file)
+
+        # 如果当前模型比最佳模型差，采用最佳作为当前模型重新训练
+        if win_ratio<=0.3:
+            best_policy_value_net.save_model(model_file)
+
         return win_ratio
 
     def run(self):
         """启动训练"""
         try:
             print("start data loader")
-            self.dataset = Dataset(data_dir, self.game_batch_num*self.batch_size, self.buffer_size)
+            self.dataset = Dataset(data_dir, self.max_keep_size)
             print("end data loader")
 
+            # 早期补齐训练样本
             step = 0
-            if self.dataset.curr_game_batch_num/self.dataset.buffer_size<0.5:
+            if len(self.dataset)/self.max_keep_size<0.1:
                 for _ in range(8):
                     logging.info("TRAIN Batch:{} starting, Size:{}, n_in_row:{}".format(step + 1, size, n_in_row))
                     state, mcts_porb, winner = self.collect_selfplay_data()
@@ -248,48 +249,25 @@ class FiveChessTrain():
                     print(winner)
                     logging.info("TRAIN Batch:{} end".format(step + 1,))
                     step += 1
+                return
 
             training_loader = torch.utils.data.DataLoader(self.dataset, batch_size=self.batch_size, shuffle=True, num_workers=2,)
 
             for i, data in enumerate(training_loader):  # 计划训练批次
-                # 使用对抗数据重新训练策略价值网络模型
+                # 使用对抗数据训练策略价值网络模型
                 loss, entropy = self.policy_update(data, self.epochs)
-                # 每n个batch检查一下当前模型胜率
-
-                # if (i + 1) % self.check_freq == 0:
-                    # 保存buffer数据
-                    # 策略胜率评估：模型与纯MCTS玩家对战n局看胜率
-
-
+               
+                # 训练中间插入自我对战样本
                 if (i+1) % (int(self.dataset.curr_size()/(self.batch_size*4))) == 0:
                     self.policy_value_net.save_model(model_file)
                     # 收集自我对抗数据
                     for _ in range(self.play_batch_size):
                         self.collect_selfplay_data()
                     logging.info("TRAIN {} self-play end, size: {}".format(i, self.dataset.curr_size()))
-                    # docker 下不用多线程的速度比用多线程的速度快
-                    # p_list=[]
-                    # for _ in range(self.play_batch_size):
-                    #     p = Thread(target=self.collect_selfplay_data, args=())
-                    #     p_list.append(p)
-                    #     p.start()   
+                   
 
-                    # for p in p_list:
-                    #     p.join()   
-                    # step += 1
-
-                    # self.collect_selfplay_data(self.play_batch_size)
-            if random.random()>0.8:
-                win_ratio = self.policy_evaluate(self.policy_evaluate_size)
-                if win_ratio >= self.best_win_ratio:  # 胜率超过历史最优模型
-                    logging.info("TRAIN New best policy!!!!!!!!batch:{} win_ratio:{}->{} pure_mcts_playout_num:{}".format(step + 1, self.best_win_ratio, win_ratio, self.pure_mcts_playout_num))
-                    self.best_win_ratio = win_ratio
-                    # 保存当前模型为最优模型best_policy
-                    self.policy_value_net.save_model(best_model_file)
-                    # 如果胜率=100%，则增加纯MCT的模拟数 (<6000的限制视mem情况)
-                    # if self.best_win_ratio == 1.0: # and self.pure_mcts_playout_num < 6000:
-                    #     self.pure_mcts_playout_num += 1000
-                    #     self.best_win_ratio = 0.0
+            # 一轮训练完毕后与最佳模型进行对比
+            self.policy_evaluate(self.policy_evaluate_size)
 
         except KeyboardInterrupt:
             logging.info('quit')
