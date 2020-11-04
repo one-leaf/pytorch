@@ -78,7 +78,7 @@ class FiveChessTrain():
     def __init__(self):
         self.policy_evaluate_size = 10  # 策略评估胜率时的模拟对局次数
         self.batch_size = 512  # 训练一批数据的长度
-        self.max_keep_size = 500000  # 保留最近对战样本个数 平均一局大约50个样本
+        self.max_keep_size = 100000  # 保留最近对战样本个数 平均一局大约50个样本
 
         # 训练参数
         self.learn_rate = 1e-5
@@ -260,7 +260,7 @@ class FiveChessTrain():
                 loss, entropy = self.policy_update(data, self.epochs)
                
                 # 训练中间插入自我对战样本
-                if (i+1) % (int(self.dataset.curr_size()/(self.batch_size*4))) == 0:
+                if (i+1) % (int(self.dataset.curr_size()/(self.batch_size*10))) == 0:
                     self.policy_value_net.save_model(model_file)
                     # 收集自我对抗数据
                     for _ in range(self.play_batch_size):
