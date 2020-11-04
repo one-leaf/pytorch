@@ -148,7 +148,7 @@ class FiveChessTrain():
         # play_data = self.get_equi_data(play_data)
         logging.info("TRAIN Self Play end. length:%s saving ..." % episode_len)
 
-        # 保存训练数据到data_buffer
+        # 保存训练数据
         for obj in play_data:
             self.dataset.save(obj)
         agent.game.print()                   
@@ -201,7 +201,7 @@ class FiveChessTrain():
         win_cnt = defaultdict(int)
         for i in range(n_games):  # 对战
             agent = Agent(size, n_in_row, is_shown=0)
-            winner = agent.start_play(current_mcts_player, best_mcts_player, start_player=i % 2)
+            winner, play_data = agent.start_self_evaluate(current_mcts_player, best_mcts_player, temp=0.1, start_player=i % 2)
             if winner == current_mcts_player.player:
                 win_cnt[0] += 1  # 赢
                 print("Curr Model Win!","win:", win_cnt[0],"lost",win_cnt[1],"tie",win_cnt[-1])
@@ -213,6 +213,12 @@ class FiveChessTrain():
                 print("Curr Model Lost!","win:", win_cnt[0],"lost",win_cnt[1],"tie",win_cnt[-1])
             
             agent.game.print()
+            
+            play_data = list(play_data)[:]
+            # 保存训练数据
+            for obj in play_data:
+                self.dataset.save(obj)
+
         win_ratio = win_cnt[0] / n_games
 
         logging.info("curr model vs best model: win: {}, lose: {}, tie: {}, win_ratio: {}".format(

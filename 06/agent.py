@@ -95,3 +95,41 @@ class Agent(object):
                     else:
                         print("Game end. Tie")
                 return winner
+
+    def start_self_evaluate(self, player1, player2, temp=0.1, start_player=0):
+        """ 两个mcts 自我评测
+        """
+        if start_player not in (0, 1):
+            raise Exception('start_player should be either 0 (player1 first) '
+                            'or 1 (player2 first)')
+
+        p1, p2 = self.game.players
+        self.game.reset(start_player)
+        player1.set_player_ind(p1)
+        player2.set_player_ind(p2)
+        players = {p1: player1, p2: player2}
+        if self.is_shown:
+            self.env.render()
+
+        states, mcts_probs, current_players = [], [], []
+        for i in count():
+            player_in_turn = players[self.game.current_player]
+            action, move_probs = player_in_turn.get_action(self.game, temp=temp, return_prob=1)
+            states.append(self.game.current_state())
+            mcts_probs.append(move_probs)
+            current_players.append(self.game.current_player)  
+
+            self.game.step(action)
+
+            if self.is_shown:
+                self.env.render()
+            end, winner = self.game.game_end()
+            if end:
+                winners_z = np.zeros(len(current_players))
+                if winner != -1:
+                    winners_z[np.array(current_players) == winner] = 1.0
+                    winners_z[np.array(current_players) != winner] = -1.0
+                player1.reset_player()
+                player2.reset_player()
+
+                return winner, zip(states, mcts_probs, winners_z)
