@@ -279,17 +279,17 @@ class FiveChessTrain():
                     # step += 1
 
                     # self.collect_selfplay_data(self.play_batch_size)
-    
-            win_ratio = self.policy_evaluate(self.policy_evaluate_size)
-            if win_ratio >= self.best_win_ratio:  # 胜率超过历史最优模型
-                logging.info("TRAIN New best policy!!!!!!!!batch:{} win_ratio:{}->{} pure_mcts_playout_num:{}".format(step + 1, self.best_win_ratio, win_ratio, self.pure_mcts_playout_num))
-                self.best_win_ratio = win_ratio
-                # 保存当前模型为最优模型best_policy
-                self.policy_value_net.save_model(best_model_file)
-                # 如果胜率=100%，则增加纯MCT的模拟数 (<6000的限制视mem情况)
-                # if self.best_win_ratio == 1.0: # and self.pure_mcts_playout_num < 6000:
-                #     self.pure_mcts_playout_num += 1000
-                #     self.best_win_ratio = 0.0
+            if random.random()>0.8:
+                win_ratio = self.policy_evaluate(self.policy_evaluate_size)
+                if win_ratio >= self.best_win_ratio:  # 胜率超过历史最优模型
+                    logging.info("TRAIN New best policy!!!!!!!!batch:{} win_ratio:{}->{} pure_mcts_playout_num:{}".format(step + 1, self.best_win_ratio, win_ratio, self.pure_mcts_playout_num))
+                    self.best_win_ratio = win_ratio
+                    # 保存当前模型为最优模型best_policy
+                    self.policy_value_net.save_model(best_model_file)
+                    # 如果胜率=100%，则增加纯MCT的模拟数 (<6000的限制视mem情况)
+                    # if self.best_win_ratio == 1.0: # and self.pure_mcts_playout_num < 6000:
+                    #     self.pure_mcts_playout_num += 1000
+                    #     self.best_win_ratio = 0.0
 
         except KeyboardInterrupt:
             logging.info('quit')
