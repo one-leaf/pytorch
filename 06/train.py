@@ -221,10 +221,12 @@ class FiveChessTrain():
         # 如果当前模型的胜率大于等于0.7,保留为最佳模型
         if win_ratio>=0.7:
             self.policy_value_net.save_model(best_model_file)
+            print("save curr modle to best model")
 
         # 如果当前模型比最佳模型差，采用最佳作为当前模型重新训练
         if win_ratio<=0.3:
             best_policy_value_net.save_model(model_file)
+            print("save best modle to curr model")
 
         return win_ratio
 
@@ -265,13 +267,11 @@ class FiveChessTrain():
                         self.collect_selfplay_data()
                     logging.info("TRAIN {} self-play end, size: {}".format(i, self.dataset.curr_size()))
                    
-
             # 一轮训练完毕后与最佳模型进行对比
             self.policy_evaluate(self.policy_evaluate_size)
 
         except KeyboardInterrupt:
             logging.info('quit')
-
 
 if __name__ == '__main__':
     # train
