@@ -261,7 +261,7 @@ class FiveChessTrain():
                     # 策略胜率评估：模型与纯MCTS玩家对战n局看胜率
 
 
-                if (i+1) % (int(self.dataset.curr_size()/(self.batch_size*8))) == 0:
+                if (i+1) % (int(self.dataset.curr_size()/(self.batch_size*4))) == 0:
                     self.policy_value_net.save_model(model_file)
                     # 收集自我对抗数据
                     for _ in range(self.play_batch_size):
