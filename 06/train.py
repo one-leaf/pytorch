@@ -260,13 +260,13 @@ class FiveChessTrain():
                 return
 
             training_loader = torch.utils.data.DataLoader(self.dataset, batch_size=self.batch_size, shuffle=True, num_workers=2,)
-
+            tran_epochs = int(len(self.dataset)/(self.batch_size))
             for i, data in enumerate(training_loader):  # 计划训练批次
                 # 使用对抗数据训练策略价值网络模型
                 loss, entropy = self.policy_update(data, self.epochs)
                
                 # 训练中间插入自我对战样本
-                if (i+1) % (int(len(self.dataset)/(self.batch_size*10))) == 0:
+                if (i+1) % (tran_epochs//10) == 0:
                     self.policy_value_net.save_model(model_file)
                     # 收集自我对抗数据
                     for _ in range(self.play_batch_size):
