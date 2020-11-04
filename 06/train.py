@@ -283,5 +283,5 @@ if __name__ == '__main__':
     # train
     logging.basicConfig(format='%(asctime)s %(message)s', level=logging.DEBUG)
     training = FiveChessTrain()
-    training.policy_evaluate(training.policy_evaluate_size)
+    # training.policy_evaluate(training.policy_evaluate_size)
     training.run()
