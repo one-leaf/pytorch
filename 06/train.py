@@ -259,7 +259,7 @@ class FiveChessTrain():
                     logging.info("TRAIN Batch:{} end".format(step + 1,))
                     step += 1
                 if len(self.dataset)<self.batch_size*10:
-                    return
+                    return                
 
             training_loader = torch.utils.data.DataLoader(self.dataset, batch_size=self.batch_size, shuffle=True, num_workers=2,)
             tran_epochs = int(len(self.dataset)/(self.batch_size))
