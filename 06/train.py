@@ -140,13 +140,11 @@ class FiveChessTrain():
         # 开始下棋
         winner, play_data = agent.start_self_play(mcts_player, pure_mcts_player, temp=self.temp)
 
-        play_data = list(play_data)[:]
-        episode_len = len(play_data)
-      
+        play_data = list(play_data)[:]     
         # 把翻转棋盘数据加到数据集里
         # 采用翻转棋盘来增加样本数据集
-        # play_data = self.get_equi_data(play_data)
-        logging.info("TRAIN Self Play end. length:%s saving ..." % episode_len)
+        play_data = self.get_equi_data(play_data)
+        logging.info("Self Play end. length:%s saving ..." % len(play_data))
 
         # 保存训练数据
         for obj in play_data:
@@ -216,6 +214,8 @@ class FiveChessTrain():
 
             play_data = list(play_data)[:]
             # 保存训练数据
+            play_data = self.get_equi_data(play_data)
+            logging.info("Eval Play end. length:%s saving ..." % len(play_data))
             for obj in play_data:
                 self.dataset.save(obj)
 
