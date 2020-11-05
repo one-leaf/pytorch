@@ -187,26 +187,26 @@ class MCTS(object):
             leaf_value = -1   # 如果游戏结束，得分就是-1，尽量不结束游戏
 
         # 早期完全使用修正,到局部修正到最后的结束时再判定
-        # if state.terminal:# state.state!=0:
-        #     v , new ,old = state.checkActionisBest(include_fallpiece=state.state==0)
-        #     leaf_value = v
+        if state.state!=0:
+            v, new, old = state.checkActionisBest(include_fallpiece=state.state==0)
+            leaf_value = v
 
         # 给熵加一点点的支持
         # if state.state!=0:
         #     leaf_value -= np.log(state.getTransCount())
         # 递归更新当前节点及所有父节点的最优选中次数和Q分数,因为得到的是本次的价值
-        node.update_recursive(leaf_value+reward*10000000.)
+        node.update_recursive(leaf_value)
 
-        if reward>0:
-            # print("Oh Ye!!! get a reward!!! reward:", reward)
-            _node=node
-            while _node._parent:
-                for ac in _node._parent._children:
-                    if _node._parent._children[ac]==_node:
-                        self._keep_best_step += 1 
-                        # print(self._keep_best_step, ":", "action:", ac, _node)
-                        break
-                _node = _node._parent
+        # if reward>0:
+        #     # print("Oh Ye!!! get a reward!!! reward:", reward)
+        #     _node=node
+        #     while _node._parent:
+        #         for ac in _node._parent._children:
+        #             if _node._parent._children[ac]==_node:
+        #                 self._keep_best_step += 1 
+        #                 # print(self._keep_best_step, ":", "action:", ac, _node)
+        #                 break
+        #         _node = _node._parent
 
 
     def update_root_with_action(self, action):
