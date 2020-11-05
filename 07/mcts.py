@@ -188,7 +188,7 @@ class MCTS(object):
 
         # 早期完全使用修正,到局部修正到最后的结束时再判定
         if state.state!=0:
-            v, new, old = state.checkActionisBest(include_fallpiece=state.state==0)
+            v, new, old = state.checkActionisBest(include_fallpiece=False)
             leaf_value = v
 
         # 给熵加一点点的支持
