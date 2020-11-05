@@ -241,6 +241,7 @@ class FiveChessTrain():
         try:
             print("start data loader")
             self.dataset = Dataset(data_dir, self.max_keep_size)
+            print("dataset len:",len(self.dataset),"index:",self.dataset.index)
             print("end data loader")
 
             # 早期补齐训练样本
