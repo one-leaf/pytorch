@@ -139,6 +139,7 @@ class FiveChessTrain():
 
         # 开始下棋
         winner, play_data = agent.start_self_play(mcts_player, pure_mcts_player, temp=self.temp)
+        agent.game.print()                   
 
         play_data = list(play_data)[:]     
         # 把翻转棋盘数据加到数据集里
@@ -149,7 +150,6 @@ class FiveChessTrain():
         # 保存训练数据
         for obj in play_data:
             self.dataset.save(obj)
-        agent.game.print()                   
         return play_data[-1]
 
     def policy_update(self, sample_data, epochs=1):
