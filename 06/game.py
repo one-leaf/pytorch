@@ -189,7 +189,7 @@ class FiveChess(object):
 
         # 第11层为如果当前用户是先手则为1
         if self.step_count % 2 == 1:
-            square_state[10][:,:] = 1.0
+            square_state[-1][:,:] = 1.0
 
         return square_state
 
