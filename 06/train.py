@@ -142,9 +142,9 @@ class FiveChessTrain():
         agent.game.print()                   
 
         play_data = list(play_data)[:]     
-        # 把翻转棋盘数据加到数据集里
-        # 采用翻转棋盘来增加样本数据集
-        play_data = self.get_equi_data(play_data)
+        # 如果数据不够，就采用翻转棋盘来增加样本数据集
+        if len(self.dataset)<self.max_keep_size:
+            play_data = self.get_equi_data(play_data)
         logging.info("Self Play end. length:%s saving ..." % len(play_data))
 
         # 保存训练数据
@@ -212,9 +212,11 @@ class FiveChessTrain():
             
             agent.game.print()
 
-            play_data = list(play_data)[:]
             # 保存训练数据
-            play_data = self.get_equi_data(play_data)
+            play_data = list(play_data)[:]
+            # 如果训练数据不够，就通过翻转增加样本
+            if len(self.dataset)<self.max_keep_size:
+                play_data = self.get_equi_data(play_data)
             logging.info("Eval Play end. length:%s saving ..." % len(play_data))
             for obj in play_data:
                 self.dataset.save(obj)
