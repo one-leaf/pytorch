@@ -226,13 +226,14 @@ class FiveChessTrain():
         logging.info("curr model vs best model: win: {}, lose: {}, tie: {}, win_ratio: {}".format(
             win_cnt[0], win_cnt[1], win_cnt[-1], win_ratio))
 
-        # 如果当前模型的胜率大于等于0.8,保留为最佳模型
-        if win_ratio>=0.8:
+        # 如果当前模型的胜率大于等于0.7,保留为最佳模型
+        if win_ratio>=0.7:
             self.policy_value_net.save_model(best_model_file)
             print("save curr modle to best model")
 
         # 如果当前模型比最佳模型差，采用最佳作为当前模型重新训练
-        if win_ratio<=0.2:
+        # 如果10次输9次以上，不要当前模型了
+        if win_ratio<=0.1:
             best_policy_value_net.save_model(model_file)
             print("save best modle to curr model")
 
