@@ -199,7 +199,7 @@ class FiveChessTrain():
         win_cnt = defaultdict(int)
         for i in range(n_games):  # 对战
             agent = Agent(size, n_in_row, is_shown=0)
-            winner, play_data = agent.start_self_evaluate(current_mcts_player, best_mcts_player, temp=0.1, start_player=i % 2)
+            winner, play_data = agent.start_self_evaluate(current_mcts_player, best_mcts_player, temp=1, start_player=i % 2)
             if winner == current_mcts_player.player:
                 win_cnt[0] += 1  # 赢
                 print("Curr Model Win!","win:", win_cnt[0],"lost",win_cnt[1],"tie",win_cnt[-1])
