@@ -78,7 +78,7 @@ class FiveChessTrain():
     def __init__(self):
         self.policy_evaluate_size = 10  # 策略评估胜率时的模拟对局次数
         self.batch_size = 512  # 训练一批数据的长度
-        self.max_keep_size = 500000  # 保留最近对战样本个数 平均一局大约400~600个样本, 也就是包含了最近1000次对局数据
+        self.max_keep_size = 300000  # 保留最近对战样本个数 平均一局大约400~600个样本, 也就是包含了最近800次对局数据
 
         # 训练参数
         self.learn_rate = 1e-5
