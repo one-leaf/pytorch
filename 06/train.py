@@ -276,7 +276,7 @@ class FiveChessTrain():
                     # 收集自我对抗数据
                     for _ in range(self.play_batch_size):
                         self.collect_selfplay_data()
-                    logging.info("TRAIN {} self-play end, size: {}".format(i, len(self.dataset)))
+                    logging.info("TRAIN self-play end, {} / {}".format(i*self.batch_size, len(self.dataset)))
                    
             # 一轮训练完毕后与最佳模型进行对比
             self.policy_evaluate(self.policy_evaluate_size)
