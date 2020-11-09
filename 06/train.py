@@ -143,7 +143,7 @@ class FiveChessTrain():
 
         play_data = list(play_data)[:]     
         # 如果数据不够，就采用翻转棋盘来增加样本数据集
-        if len(self.dataset)<self.max_keep_size:
+        if len(self.dataset)<self.max_keep_size/2:
             play_data = self.get_equi_data(play_data)
         logging.info("Self Play end. length:%s saving ..." % len(play_data))
 
@@ -215,7 +215,7 @@ class FiveChessTrain():
             # 保存训练数据
             play_data = list(play_data)[:]
             # 如果训练数据不够，就通过翻转增加样本
-            if len(self.dataset)<self.max_keep_size:
+            if len(self.dataset)<self.max_keep_size/2:
                 play_data = self.get_equi_data(play_data)
             logging.info("Eval Play end. length:%s saving ..." % len(play_data))
             for obj in play_data:
