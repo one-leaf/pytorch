@@ -86,7 +86,7 @@ class FiveChessTrain():
         self.temp = 1  # 概率缩放程度，实际预测0.01，训练采用1
         self.n_playout = 500  # 每个动作的模拟次数
         self.play_batch_size = 1 # 每次自学习次数
-        self.epochs = 5  # 重复训练次数, 推荐是5
+        self.epochs = 2  # 重复训练次数, 推荐是5
         self.kl_targ = 0.02  # 策略价值网络KL值目标
         
         # 纯MCTS的模拟数，用于评估策略模型
@@ -165,7 +165,7 @@ class FiveChessTrain():
             # 散度计算：
             # D(P||Q) = sum( pi * log( pi / qi) ) = sum( pi * (log(pi) - log(qi)) )
             kl = np.mean(np.sum(old_probs * (np.log(old_probs + 1e-10) - np.log(new_probs + 1e-10)), axis=1))
-            if kl > self.kl_targ * 4:  # 如果D_KL跑偏则尽早停止
+            if kl > self.kl_targ * epochs:  # 如果D_KL跑偏则尽早停止
                 break
 
         # 自动调整学习率
