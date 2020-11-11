@@ -185,7 +185,7 @@ class MCTS(object):
             end, winner = state.game_end()
             if end: #and winner != curr_player:
                 self._first_ations.add(action)
-                self._first_ations.add(state.actions[-3])
+                # self._first_ations.add(state.actions[-3])
                 # if winner != curr_player:
                 #     mstr=""
                 #     for act in state.actions[-5:]:
