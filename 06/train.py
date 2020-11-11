@@ -100,6 +100,11 @@ class FiveChessTrain():
             # 使用一个新的的策略价值网络
             self.policy_value_net = PolicyValueNet(size)
 
+        print("start data loader")
+        self.dataset = Dataset(data_dir, self.max_keep_size)
+        print("dataset len:",len(self.dataset),"index:",self.dataset.index)
+        print("end data loader")
+
     def get_equi_data(self, play_data):
         """
         通过旋转和翻转增加数据集
@@ -242,11 +247,6 @@ class FiveChessTrain():
     def run(self):
         """启动训练"""
         try:
-            print("start data loader")
-            self.dataset = Dataset(data_dir, self.max_keep_size)
-            print("dataset len:",len(self.dataset),"index:",self.dataset.index)
-            print("end data loader")
-
             # 早期补齐训练样本
             step = 0
             if len(self.dataset)/self.max_keep_size<0.1:
@@ -288,5 +288,5 @@ if __name__ == '__main__':
     # train
     logging.basicConfig(format='%(asctime)s %(message)s', level=logging.DEBUG)
     training = FiveChessTrain()
-    # training.policy_evaluate(training.policy_evaluate_size)
+    training.policy_evaluate(training.policy_evaluate_size)
     training.run()
