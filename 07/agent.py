@@ -37,7 +37,8 @@ class Agent(object):
         # 面板
         self.board = self.tetromino.getblankboard()
         # 变化个数，用于评价这一步的优劣
-        self.transCount = self.getTransCount()
+        # self.transCount_min = self.getTransCount()
+        # self.transCount_max = 1000
         # 状态： 0 下落过程中 1 更换方块 2 结束一局
         self.state =0
         # 上一个下落方块的截图
@@ -278,10 +279,10 @@ class Agent(object):
                         if px>=0 and py>=0:
                             board[py][px]=shapedraw[y][x]
         transCount = self.getTransCount(board)
-        v = self.transCount - transCount
+        # v = self.transCount - transCount
         # if self.state != 0: 
         #     self.transCount = transCount
-        return v, transCount, self.transCount     
+        return transCount*-1e-3     
 
     def game_end(self):
         return self.terminal, self.score

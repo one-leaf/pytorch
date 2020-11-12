@@ -188,12 +188,12 @@ class MCTS(object):
 
         # 早期完全使用修正,到局部修正到最后的结束时再判定
         if state.state!=0:
-            v, new, old = state.checkActionisBest(include_fallpiece=False)            
+            v = state.checkActionisBest(include_fallpiece=False)            
             # leaf_value = v
             # leaf_value = -1*np.log(-1*v) 
-            leaf_value = 1.0/(1+np.exp(300/(v+1e-8)))
+            leaf_value = v
 
-            print("leaf_value", leaf_value, old, new)
+            print("leaf_value", leaf_value)
 
         # 给熵加一点点的支持
         # if state.state!=0:
