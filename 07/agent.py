@@ -148,13 +148,14 @@ class Agent(object):
 
     def print(self):
         for y in range(self.height):
-            line=""
+            line="| "
             for x in range(self.width):
                 if self.board[x][y]==blank:
                     line=line+"  "
                 else:
                     line=line+str(self.board[x][y])+" "
             print(line)
+        print(" -"*self.width)
         print("level:", self.level, "score:", self.score, "steps:", self.steps,"piececount:", self.piececount)
 
     # 统计当前最大高度
