@@ -191,7 +191,7 @@ class MCTS(object):
             v, new, old = state.checkActionisBest(include_fallpiece=False)            
             # leaf_value = v
             # leaf_value = -1*np.log(-1*v) 
-            leaf_value = 1.0/(1+np.exp(50/(v+1e-8)))
+            leaf_value = 1.0/(1+np.exp(300/(v+1e-8)))
 
             print("leaf_value", leaf_value, old, new)
 
