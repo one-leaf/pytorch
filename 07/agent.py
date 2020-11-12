@@ -155,7 +155,7 @@ class Agent(object):
                 else:
                     line=line+str(self.board[x][y])+" "
             print(line)
-        print(" -"*self.width)
+        print(" "+" -"*self.width)
         print("level:", self.level, "score:", self.score, "steps:", self.steps,"piececount:", self.piececount)
 
     # 统计当前最大高度
