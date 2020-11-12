@@ -425,12 +425,12 @@ class MCTSPlayer(object):
                 # p = state.steps/200
                 # if p>0.9: p=0.9
                 idx = np.argmax(act_probs)                    
-                if self.mcts._keep_best_step>0:
+                if state.piecesteps>5:# self.mcts._keep_best_step>0:
                     action = acts[idx]
                     # print(" - ", self.mcts._keep_best_step, ":", "action:", action)
-                    self.mcts._keep_best_step -= 1
+                #    self.mcts._keep_best_step -= 1
                 else:
-                    # 如果是前15个方块的前5步，有一半的几率乱走,或5%的可能乱走
+                    # 如果是前15个方块的前5步，有一半的几率乱走,或5%的可能乱走                   
                     p=0.75
                     dirichlet = np.random.dirichlet(0.3*np.ones(len(act_probs)))
                     action = np.random.choice(acts, p= p*act_probs + (1-p)*dirichlet) 
