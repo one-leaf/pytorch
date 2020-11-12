@@ -14,7 +14,7 @@ class Agent(object):
         self.width = 10
         self.height = 20
         self.actions_num = 4
-        self.reset()
+        # self.reset()
         self.prev_fallpiece_board=None
 
     def reset(self):
