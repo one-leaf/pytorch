@@ -193,7 +193,7 @@ class MCTS(object):
             # leaf_value = -1*np.log(-1*v) 
             leaf_value = v
 
-            print("leaf_value", leaf_value)
+            # print("leaf_value", leaf_value)
 
         # 给熵加一点点的支持
         # if state.state!=0:
