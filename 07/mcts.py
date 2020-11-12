@@ -191,6 +191,7 @@ class MCTS(object):
             v, new, old = state.checkActionisBest(include_fallpiece=False)            
             # leaf_value = v
             leaf_value = -1*np.log(-1*v) 
+            print("leaf_value", leaf_value)
 
         # 给熵加一点点的支持
         # if state.state!=0:
