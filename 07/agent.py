@@ -279,8 +279,8 @@ class Agent(object):
                             board[py][px]=shapedraw[y][x]
         transCount = self.getTransCount(board)
         v = self.transCount - transCount
-        if self.state != 0: 
-            self.transCount = transCount
+        # if self.state != 0: 
+        #     self.transCount = transCount
         return v, transCount, self.transCount     
 
     def game_end(self):
