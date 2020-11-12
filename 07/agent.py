@@ -282,7 +282,7 @@ class Agent(object):
         # v = self.transCount - transCount
         # if self.state != 0: 
         #     self.transCount = transCount
-        return transCount*-1e-3     
+        return transCount    
 
     def game_end(self):
         return self.terminal, self.score
