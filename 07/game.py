@@ -1,3 +1,4 @@
+from time import clock
 import pygame,sys,time,random
 from pygame.locals import*
  
@@ -139,15 +140,17 @@ class Tetromino(object):
         self.nextpiece=[]
         if not isRandomNextPiece:
             for i in range(200):
-                self.nextpiece.append(self.getrandompiece())
+                self.nextpiece.append(self.getrandompiece(i//len(colors)))
 
-    def getrandompiece(self):
+    def getrandompiece(self,color=None):
         shape = random.choice(list(pieces.keys()))
+        if color==None:
+            color = random.randint(0,len(colors)-1)
         newpiece = {'shape':shape,
                     'rotation': random.randint(0,len(pieces[shape])-1),
                     'x': int(boardwidth)//2-int(templatenum//2),
                     'y': -2,
-                    'color': random.randint(0,len(colors)-1)}
+                    'color': color}
         return newpiece
 
     def calculate(self,score):
