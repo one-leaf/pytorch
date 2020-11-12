@@ -149,7 +149,7 @@ class Agent(object):
         for y in range(self.height):
             line=""
             for x in range(self.width):
-                if self.board[x][y]!=blank:
+                if self.board[x][y]==blank:
                     line=line+"  "
                 else:
                     line=line+self.board[x][y]+" "
