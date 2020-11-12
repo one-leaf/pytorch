@@ -450,7 +450,7 @@ class Agent(object):
             player.reset_player()
             for i in count():
                 # temp 权重 ，return_prob 是否返回概率数据
-                action, move_probs = player.get_action(self, temp=temp, return_prob=1)
+                action, move_probs = player.get_action(self, temp=temp*2/(self.piecesteps+1), return_prob=1)
                 # 保存数据
                 states.append(self.current_state())
                 mcts_probs.append(move_probs)
