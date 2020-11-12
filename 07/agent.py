@@ -152,7 +152,7 @@ class Agent(object):
                 if self.board[x][y]==blank:
                     line=line+"  "
                 else:
-                    line=line+self.board[x][y]+" "
+                    line=line+str(self.board[x][y])+" "
             print(line)
         print("level:", self.level, "score:", self.score, "steps:", self.steps,"piececount:", self.piececount)
 
