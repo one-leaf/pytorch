@@ -141,6 +141,8 @@ class Tetromino(object):
         if not isRandomNextPiece:
             for i in range(200):
                 self.nextpiece.append(self.getrandompiece(i%10))
+            # 为了颜色好看倒序
+            self.nextpiece.reverse()
 
     def getrandompiece(self,color=None):
         shape = random.choice(list(pieces.keys()))
