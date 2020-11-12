@@ -461,9 +461,9 @@ class Agent(object):
                 # 如果游戏结束
                 if self.terminal: break
                 if self.state!=0 and max_height>0 and self.getMaxHeight()>=max_height: break
-                if self.state!=0 : self.print()
+                # if self.state!=0 : self.print()
 
-            # self.print()
+            self.print()
             picece_count = self.piececount
             # 增加最大步骤
             if picece_count>maxstep:
