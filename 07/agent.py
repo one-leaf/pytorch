@@ -131,7 +131,7 @@ class Agent(object):
         return self.state, reward
 
     # 打印
-    def print(self, add_fallpiece=False):
+    def print2(self, add_fallpiece=False):
         info = self.getBoard()
         if add_fallpiece:
             info += self.get_fallpiece_board()
@@ -142,6 +142,17 @@ class Agent(object):
                     line=line+"  "
                 else:
                     line=line+"* "
+            print(line)
+        print("level:", self.level, "score:", self.score, "steps:", self.steps,"piececount:", self.piececount)
+
+    def print(self):
+        for y in range(self.height):
+            line=""
+            for x in range(self.width):
+                if self.board[x][y]!=blank:
+                    line=line+"  "
+                else:
+                    line=line+self.board[x][y]+" "
             print(line)
         print("level:", self.level, "score:", self.score, "steps:", self.steps,"piececount:", self.piececount)
 

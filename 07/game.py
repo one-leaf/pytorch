@@ -21,8 +21,9 @@ yellow = (255,255,0)
 green = (0,255,0)
 purple = (255,0,255)
 red = (255,0,0)
+cyan = (0,255,255)
 blank = '.'
-colors = (yellow,green,purple,red)
+colors = (yellow,green,purple,red,cyan)
  
 stemplate = [['.....',
               '..00.',
