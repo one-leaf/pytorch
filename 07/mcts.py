@@ -432,9 +432,10 @@ class MCTSPlayer(object):
                     # self.mcts._keep_best_step -= 1
                 else:
                     # 如果是前15个方块的前5步，有一半的几率乱走,或5%的可能乱走                   
-                    p=0.75
-                    dirichlet = np.random.dirichlet(0.3*np.ones(len(act_probs)))
-                    action = np.random.choice(acts, p= p*act_probs + (1-p)*dirichlet) 
+                    # p=0.75
+                    # dirichlet = np.random.dirichlet(0.3*np.ones(len(act_probs)))
+                    # action = np.random.choice(acts, p= p*act_probs + (1-p)*dirichlet) 
+                    action = np.random.choice(acts, p= act_probs) 
                     if action!=acts[idx]:
                         print(" pices_step:", state.piecesteps, acts[idx], act_probs[idx], "==>", action, act_probs[acts.index(action)])
                 # 更新根节点并重用搜索树
