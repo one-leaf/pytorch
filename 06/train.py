@@ -86,7 +86,7 @@ class FiveChessTrain():
         self.temp = 1  # 概率缩放程度，实际预测0.01，训练采用1
         self.n_playout = 500  # 每个动作的模拟次数
         self.play_batch_size = 1 # 每次自学习次数
-        self.epochs = 2  # 重复训练次数, 推荐是5
+        self.epochs = 5  # 重复训练次数, 推荐是5
         self.kl_targ = 0.02  # 策略价值网络KL值目标
         
         # 纯MCTS的模拟数，用于评估策略模型
@@ -270,8 +270,8 @@ class FiveChessTrain():
                 # 使用对抗数据训练策略价值网络模型
                 loss, entropy = self.policy_update(data, self.epochs)
                
-                # 训练中间插入100局自我对战样本
-                if (i+1) % (tran_epochs//100) == 0:
+                # 训练中间插入50局自我对战样本
+                if (i+1) % (tran_epochs//50) == 0:
                     self.policy_value_net.save_model(model_file)
                     # 收集自我对抗数据
                     for _ in range(self.play_batch_size):
