@@ -172,8 +172,11 @@ class Tetromino(object):
     def addtoboard(self,board,piece):
         for x in range(templatenum):
             for y in range(templatenum):
+                w = x + piece['x']
+                h = y + piece['y']
                 if pieces[piece['shape']][piece['rotation']][y][x]!=blank:
-                    board[x + piece['x']][y + piece['y']] = piece['color']
+                    if w>=0 and w<boardwidth and h>=0 and h<boardheight:
+                        board[w][h] = piece['color']
                 
     def onboard(self,x,y):
         return x >=0 and x<boardwidth and y<boardheight
