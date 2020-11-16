@@ -236,11 +236,11 @@ class FiveChessTrain():
             self.policy_value_net.save_model(best_model_file)
             print("save curr modle to best model")
 
-        # 如果当前模型比最佳模型差，采用最佳作为当前模型重新训练
-        # 如果全部输了，不要当前模型了
+        # 如果当前模型比最佳模型差，采用最佳作为当前模型重新训练，
+        # 如果全部输了，再训练一次
         if win_ratio==0:
-            best_policy_value_net.save_model(model_file)
-            print("save best modle to curr model")
+            self.policy_evaluate(self.policy_evaluate_size)
+            print("lost all, add more sample")
 
         return win_ratio
 
