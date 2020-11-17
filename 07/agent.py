@@ -217,31 +217,29 @@ class Agent(object):
         return state        
 
     # 交替个数也就是从空到非空算一次，边界算非空 
+    # 高度从底部 20 --> 0 上部
     def getTransCount(self, board=None):
         if board==None: board = self.board
-        height = len(board)
-        width = len(board[0])
-
         transCount = 0
 
         # 统计一列的个数
-        for x in range(width):
+        for x in range(self.width):
             curr_state = 1
-            for y in range(height)[::-1]:
-                state = 0 if board[y][x]==blank else 1
+            for y in range(self.height)[::-1]:
+                state = 0 if board[x][y]==blank else 1
                 if curr_state!=state:
-                    transCount += 1 
+                    transCount += self.height-y+1 
                     curr_state = state
 
         # 统计一行的个数
-        for y in range(height):
+        for y in range(self.height):
             curr_state = 1
-            for x in range(width):
-                state = 0 if board[y][x]==blank else 1
+            for x in range(self.width):
+                state = 0 if board[x][y]==blank else 1
                 if curr_state!=state:
-                    transCount += 1 
+                    transCount += self.height-y+1 
                     curr_state = state
-            if curr_state == 0: transCount += 1  
+            if curr_state == 0: transCount += self.height-y+1  
 
         return transCount
 
