@@ -515,6 +515,7 @@ class Agent(object):
                 if self.state!=0 and self.piececount>=max_picece_count: break
             self.print()
             picece_count = self.getTransCount()
+            print("transCount:", picece_count)
             # 增加最大步骤
             if picece_count>maxstep:
                 states1 = states
