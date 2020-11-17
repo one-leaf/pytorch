@@ -188,11 +188,11 @@ class MCTS(object):
 
         # 早期完全使用修正,到局部修正到最后的结束时再判定
         # 这里的评价不一定是对的，所以只能给一个很小的值参考
-        if state.state!=0:
-            v = state.checkActionisBest(include_fallpiece=False)            
-            # leaf_value = v
-            # leaf_value = -1*np.log(-1*v) 
-            leaf_value += v*-1e-5
+        # if state.state!=0:
+        #     v = state.checkActionisBest(include_fallpiece=False)            
+        #     # leaf_value = v
+        #     # leaf_value = -1*np.log(-1*v) 
+        #     leaf_value += v*-1e-5
 
             # print("leaf_value", leaf_value)
 
