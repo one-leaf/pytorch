@@ -492,7 +492,7 @@ class Agent(object):
 
     def start_self_play(self, player, temp=1e-3):
         # 同时放X个方块，谁的熵最小，谁赢
-        max_picece_count = 10
+        max_picece_count = 5
         states0,states1,mcts_probs0,mcts_probs1,winners0,winners1=None,None,None,None,None,None
         tetromino = self.tetromino
         minstep = 999999999
