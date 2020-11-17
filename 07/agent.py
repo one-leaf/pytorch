@@ -230,7 +230,7 @@ class Agent(object):
             for y in range(height)[::-1]:
                 state = 0 if board[y][x]==blank else 1
                 if curr_state!=state:
-                    transCount += 1 + (height-y)
+                    transCount += 1 
                     curr_state = state
 
         # 统计一行的个数
@@ -239,9 +239,9 @@ class Agent(object):
             for x in range(width):
                 state = 0 if board[y][x]==blank else 1
                 if curr_state!=state:
-                    transCount += 1 + (height-y)
+                    transCount += 1 
                     curr_state = state
-            if curr_state == 0: transCount += 1 + (height-y)/height 
+            if curr_state == 0: transCount += 1  
 
         return transCount
 
