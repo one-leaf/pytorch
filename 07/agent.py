@@ -504,7 +504,7 @@ class Agent(object):
             player.reset_player()
             for i in count():
                 # temp 权重 ，return_prob 是否返回概率数据
-                if self.piecesteps>10 or random.random()>0.5:
+                if self.piecesteps>10-self.piececount or random.random()>0.8:
                     action, move_probs = player.get_action(self, temp=temp/(self.piecesteps+1), return_prob=1)
                     # 保存数据
                     states.append(self.current_state())
