@@ -36,9 +36,6 @@ class Agent(object):
         self.piececount = 0
         # 面板
         self.board = self.tetromino.getblankboard()
-        # 变化个数，用于评价这一步的优劣
-        # self.transCount_min = self.getTransCount()
-        # self.transCount_max = 1000
         # 状态： 0 下落过程中 1 更换方块 2 结束一局
         self.state =0
         # 上一个下落方块的截图
@@ -432,7 +429,7 @@ class Agent(object):
 
 
     # 使用 mcts 训练，重用搜索树，并保存数据
-    def start_self_play(self, player, temp=1e-3):
+    def start_self_play4(self, player, temp=1e-3):
         # 这里下5局，取最好和最差的按得分和步数对比
         # 这样会有一个问题，导致+分比-分多，导致mcts会集中到最初和最后的步骤
         # 当方块到了这个就终止游戏
@@ -495,3 +492,57 @@ class Agent(object):
         assert len(states)==len(mcts_probs)==len(winners)
         return -1, zip(states, mcts_probs, winners)
 
+    def start_self_play(self, player, temp=1e-3):
+        # 同时放X个方块，谁的熵最小，谁赢
+        max_picece_count = 10
+        states0,states1,mcts_probs0,mcts_probs1,winners0,winners1=None,None,None,None,None,None
+        tetromino = self.tetromino
+        minstep = 999999999
+        maxstep = 0
+        while maxstep-minstep<2:
+            states, mcts_probs = [], []
+            self.tetromino=copy.deepcopy(tetromino)
+            self.reset()
+            player.reset_player()
+            for i in count():
+                # temp 权重 ，return_prob 是否返回概率数据
+                action, move_probs = player.get_action(self, temp=temp*2/(self.piecesteps+1), return_prob=1)
+                # 保存数据
+                states.append(self.current_state())
+                mcts_probs.append(move_probs)
+                # 执行一步
+                self.step(action)
+                # 如果游戏结束
+                if self.terminal: break
+                if self.state!=0 and self.piececount>=max_picece_count: break
+            self.print()
+            picece_count = self.getTransCount()
+            # 增加最大步骤
+            if picece_count>maxstep:
+                states1 = states
+                mcts_probs1 = mcts_probs
+                winners1 = [-1.0 for i in range(len(states))]
+                maxstep = picece_count
+            elif picece_count==maxstep:
+                states1 = states1 + states
+                mcts_probs1 = mcts_probs1 + mcts_probs
+                winners1 = winners1+ [-1.0 for i in range(len(states))]
+            # 增加最小步骤
+            if picece_count<minstep:
+                states0 = states
+                mcts_probs0 = mcts_probs
+                winners0 = [1.0 for i in range(len(states))]
+                minstep = picece_count
+            # 增加最小步骤
+            elif picece_count==minstep:
+                states0 = states0 + states
+                mcts_probs0 = mcts_probs0 + mcts_probs
+                winners0 = winners0 + [1.0 for i in range(len(states))]
+
+        print("minstep",minstep,"maxstep",maxstep)
+        states = states0 + states1
+        mcts_probs = mcts_probs0 + mcts_probs1
+        winners = winners0 + winners1
+
+        assert len(states)==len(mcts_probs)==len(winners)
+        return -1, zip(states, mcts_probs, winners)
