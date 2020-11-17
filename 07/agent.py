@@ -504,13 +504,15 @@ class Agent(object):
             player.reset_player()
             for i in count():
                 # temp 权重 ，return_prob 是否返回概率数据
-                if self.piecesteps>10-self.piececount or random.random()>0.8:
-                    action, move_probs = player.get_action(self, temp=temp/(self.piecesteps+1), return_prob=1)
-                    # 保存数据
-                    states.append(self.current_state())
-                    mcts_probs.append(move_probs)
-                else:
+                action, move_probs = player.get_action(self, temp=temp/(self.piecesteps+1), return_prob=1)
+                # 保存数据
+                states.append(self.current_state())
+                mcts_probs.append(move_probs)
+
+                # 前几步是乱走的
+                if self.piecesteps<10-self.piececount and random.random()>0.5:
                     action = random.choice(self.availables())
+
                 # 执行一步
                 self.step(action)
                 # 如果游戏结束
