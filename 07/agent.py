@@ -510,7 +510,9 @@ class Agent(object):
                 mcts_probs.append(move_probs)
 
                 # 前几步是乱走的
-                if self.piecesteps<10-self.piececount and random.random()>0.5:
+                # if self.piecesteps<10-self.piececount and random.random()>0.5:
+                # 有10%是乱走的
+                if random.random()>0.9:
                     action = random.choice(self.availables())
 
                 # 执行一步
