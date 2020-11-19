@@ -46,20 +46,20 @@ class Agent(object):
         acts=[KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN]
         # 为了避免mcts偏好，随机打乱
         random.shuffle(acts)
-        if not self.tetromino.validposition(self.board,self.fallpiece,ax = -1):
-            acts.remove(KEY_LEFT)
-        if not self.tetromino.validposition(self.board,self.fallpiece,ax = 1):
-            acts.remove(KEY_RIGHT)   
-        if not self.tetromino.validposition(self.board,self.fallpiece,ay = 1):
-            acts.remove(KEY_DOWN)
-        if self.fallpiece['shape']=="o":
-            acts.remove(KEY_ROTATION)
-        else:
-            r = self.fallpiece['rotation']
-            self.fallpiece['rotation'] =  (self.fallpiece['rotation'] + 1) % len(pieces[self.fallpiece['shape']])
-            if not self.tetromino.validposition(self.board,self.fallpiece):
-                acts.remove(KEY_ROTATION)
-            self.fallpiece['rotation'] = r
+        # if not self.tetromino.validposition(self.board,self.fallpiece,ax = -1):
+        #     acts.remove(KEY_LEFT)
+        # if not self.tetromino.validposition(self.board,self.fallpiece,ax = 1):
+        #     acts.remove(KEY_RIGHT)   
+        # if not self.tetromino.validposition(self.board,self.fallpiece,ay = 1):
+        #     acts.remove(KEY_DOWN)
+        # if self.fallpiece['shape']=="o":
+        #     acts.remove(KEY_ROTATION)
+        # else:
+        #     r = self.fallpiece['rotation']
+        #     self.fallpiece['rotation'] =  (self.fallpiece['rotation'] + 1) % len(pieces[self.fallpiece['shape']])
+        #     if not self.tetromino.validposition(self.board,self.fallpiece):
+        #         acts.remove(KEY_ROTATION)
+        #     self.fallpiece['rotation'] = r
 
         # 如果四个动作都可用，干掉某些步骤，进行剪枝，
         # if self.piecesteps>10:
@@ -71,7 +71,7 @@ class Agent(object):
         #         acts.remove(KEY_RIGHT)  
                     
         # 如果没有一个动作可以用就向下吧
-        if len(acts)==0: acts=[KEY_DOWN]
+        # if len(acts)==0: acts=[KEY_DOWN]
         return acts         
 
     def step(self, action, env=None):

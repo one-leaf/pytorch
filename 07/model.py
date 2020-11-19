@@ -31,10 +31,10 @@ class Net(nn.Module):
         super().__init__()
         self.first_conv = nn.Conv2d(4, 64, 5, 1, 2, bias=False)
         self.first_conv_bn = nn.BatchNorm2d(64)
-        self.conv1=self._make_layer(64, 64, 2)
-        self.conv2=self._make_layer(64, 64, 2)
-        self.conv3=self._make_layer(64, 64, 2)
-        self.conv4=self._make_layer(64, 64, 2)
+        self.conv1=self._make_layer(64, 64, 3)
+        self.conv2=self._make_layer(64, 64, 4)
+        self.conv3=self._make_layer(64, 64, 4)
+        self.conv4=self._make_layer(64, 64, 3)
 
         # 动作预测
         self.act_conv1 = nn.Conv2d(64, 2, 1)
