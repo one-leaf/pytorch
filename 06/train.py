@@ -275,7 +275,7 @@ class FiveChessTrain():
             # 一轮训练完毕后与最佳模型进行对比
             win_ratio = self.policy_evaluate(self.policy_evaluate_size)
             # 如果输了，再训练一次
-            if win_ratio<=0.3:
+            if win_ratio<=0.5:
                 self.policy_evaluate(self.policy_evaluate_size)
                 print("lost all, add more sample")
         except KeyboardInterrupt:
