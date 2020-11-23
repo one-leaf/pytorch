@@ -442,7 +442,8 @@ class MCTSPlayer(object):
                     if action!=acts[idx]:
                         print(" pices_step:", state.piecesteps, acts[idx], act_probs[idx], "==>", action, act_probs[acts.index(action)])
                 # 更新根节点并重用搜索树
-                self.mcts.update_root_with_action(action)
+                # self.mcts.update_root_with_action(action)
+                self.mcts.update_root_with_action(None)
             else:  # 正式玩
                 action = np.random.choice(acts, p=act_probs)
                 # 更新根节点:根据最后action向前探索树
