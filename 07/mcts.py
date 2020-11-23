@@ -163,10 +163,10 @@ class MCTS(object):
 
             # 从child中选择最优action
             action = None
-            for act in node._children:
-                if node._children[act]._n_visits == 0:
-                    action, node = act, node._children[act]
-                    break
+            #for act in node._children:
+            #    if node._children[act]._n_visits == 0:
+            #        action, node = act, node._children[act]
+            #        break
 
             if action is None:
                 action, node = node.select(self._c_puct)
