@@ -312,7 +312,10 @@ class MCTS(object):
 
         # 打印中间信息
         if state.piecesteps==0:
-            info={"shape":state.fallpiece["shape"], "depth":self.max_depth_tree()}
+            depth = self.max_depth_tree()
+            info={"shape":state.fallpiece["shape"], "depth":depth}
+            if depth>100:
+                self.print_tree()
             # info={"shape":state.fallpiece["shape"]}
             for idx in sorted(range(len(visits)), key=visits.__getitem__)[::-1]:
                 value = self._root._children[acts[idx]].get_value(0.5)
