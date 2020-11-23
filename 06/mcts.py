@@ -181,7 +181,7 @@ class MCTS(object):
             # 执行action走子
             state.step(action)
 
-            # 凡是导致游戏结束的棋和倒数第三步棋，重点关注
+            # 凡是导致游戏结束的棋，重点关注
             end, winner = state.game_end()
             if end: #and winner != curr_player:
                 self._first_ations.add(action)
@@ -227,7 +227,7 @@ class MCTS(object):
 
     def update_root_with_action(self, action):
         """根据action更新根节点"""
-        if action in self._root._children:
+        if  action!=None: #action in self._root._children:
             self._root = self._root._children[action]
             self._root._parent = None
         else:

@@ -163,10 +163,10 @@ class MCTS(object):
 
             # 从child中选择最优action
             action = None
-            # for act in node._children:
-            #     if node._children[act]._n_visits == 0:
-            #         action, node = act, node._children[act]
-            #         break
+            for act in node._children:
+                if node._children[act]._n_visits == 0:
+                    action, node = act, node._children[act]
+                    break
 
             if action is None:
                 action, node = node.select(self._c_puct)
@@ -216,7 +216,7 @@ class MCTS(object):
 
     def update_root_with_action(self, action):
         """根据action更新根节点"""
-        if action in self._root._children:
+        if action!=None: #action in self._root._children:
             self._root = self._root._children[action]
             self._root._parent = None
         else:
@@ -314,8 +314,8 @@ class MCTS(object):
         if state.piecesteps==0:
             depth = self.max_depth_tree()
             info={"shape":state.fallpiece["shape"], "depth":depth}
-            if depth>100:
-                self.print_tree()
+            # if depth>100:
+            #     self.print_tree()
             # info={"shape":state.fallpiece["shape"]}
             for idx in sorted(range(len(visits)), key=visits.__getitem__)[::-1]:
                 value = self._root._children[acts[idx]].get_value(0.5)
