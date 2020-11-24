@@ -197,7 +197,11 @@ class MCTS(object):
             # print("leaf_value", leaf_value)
 
         # 给熵加一点点的支持
-        # if state.state!=0:
+        if state.state!=0:
+            if reward>0:
+                leaf_value = 1
+            else:
+                leaf_value = -1
         #     leaf_value -= np.log(state.getTransCount())
         # 递归更新当前节点及所有父节点的最优选中次数和Q分数,因为得到的是本次的价值
         node.update_recursive(leaf_value)
@@ -442,8 +446,8 @@ class MCTSPlayer(object):
                     if action!=acts[idx]:
                         print(" pices_step:", state.piecesteps, acts[idx], act_probs[idx], "==>", action, act_probs[acts.index(action)])
                 # 更新根节点并重用搜索树
-                # self.mcts.update_root_with_action(action)
-                self.mcts.update_root_with_action(None)
+                self.mcts.update_root_with_action(action)
+                # self.mcts.update_root_with_action(None)
             else:  # 正式玩
                 action = np.random.choice(acts, p=act_probs)
                 # 更新根节点:根据最后action向前探索树

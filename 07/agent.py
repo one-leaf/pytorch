@@ -6,7 +6,7 @@ import numpy as np
 import copy
 import random
 
-KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN  = 0, 1, 2, 3
+KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN, KEY_NONE  = 0, 1, 2, 3, -1
 
 class Agent(object):
     def __init__(self):
@@ -43,7 +43,7 @@ class Agent(object):
 
     # 获取可用步骤, 保留一个旋转始终有用
     def availables(self):
-        acts=[KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN]
+        acts=[KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN, KEY_NONE]
         # 为了避免mcts偏好，随机打乱
         random.shuffle(acts)
         if not self.tetromino.validposition(self.board,self.fallpiece,ax = -1):
@@ -61,17 +61,6 @@ class Agent(object):
                 acts.remove(KEY_ROTATION)
             self.fallpiece['rotation'] = r
 
-        # 如果四个动作都可用，干掉某些步骤，进行剪枝，
-        # if self.piecesteps>10:
-        #     if KEY_ROTATION in acts:
-        #         acts.remove(KEY_ROTATION)
-        #     if KEY_LEFT in acts:
-        #         acts.remove(KEY_LEFT)
-        #     if KEY_RIGHT in acts:
-        #         acts.remove(KEY_RIGHT)  
-                    
-        # 如果没有一个动作可以用就向下吧
-        if len(acts)==0: acts=[KEY_DOWN]
         return acts         
 
     def step(self, action, env=None):
