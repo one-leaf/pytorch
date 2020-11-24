@@ -500,8 +500,8 @@ class Agent(object):
 
                 # 前几步是乱走的
                 # if self.piecesteps<10-self.piececount and random.random()>0.5:
-                # 有50%是乱走的
-                if random.random()>0.5:
+                # 有20%是乱走的
+                if random.random()>0.8:
                     action = random.choice(self.availables())
 
                 # 执行一步
