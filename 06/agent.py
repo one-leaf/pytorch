@@ -85,6 +85,9 @@ class Agent(object):
             action = player_in_turn.get_action(self.game)
             self.game.step(action)
 
+            if self.game.check_will_win():
+                print(action,"will win!")
+
             if self.is_shown:
                 self.env.render()
             end, winner = self.game.game_end()
