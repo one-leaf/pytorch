@@ -72,6 +72,96 @@ class FiveChess(object):
                     return True, self.colors.index(color)
         return False, -1        
 
+    # 检查是否是四个子且两端都是空白位置
+    def check_will_win(self):
+        if self.step_count<self.n_in_row*2:
+            return False
+        
+        last_x, last_y = self.actions[-1]
+        n = self.n_in_row-1
+        c = self.chessboard[last_x][last_y]
+
+        hassame=1
+        curr_search_pass=True
+        for l in range(1, n):
+            curr_x = last_x+l
+            if curr_x==self.size or (self.chessboard[curr_x][last_y]!=c and self.chessboard[curr_x][last_y]!=0):
+                curr_search_pass=False
+                break 
+            if self.chessboard[curr_x][last_y]==0: break 
+            hassame += 1
+        if curr_search_pass:
+            for l in range(1, n):
+                curr_x = last_x-l
+                if curr_x<0 or (self.chessboard[curr_x][last_y]!=c and self.chessboard[curr_x][last_y]!=0):
+                    curr_search_pass=False
+                    break
+                if self.chessboard[curr_x][last_y]==0: break
+                hassame += 1
+        if curr_search_pass and hassame>=n: return True
+        
+        hassame=1
+        curr_search_pass=True
+        for l in range(1, n):
+            curr_y = last_y+l
+            if curr_y==self.size or (self.chessboard[last_x][curr_y]!=c and self.chessboard[last_x][curr_y]!=0):
+                curr_search_pass=False
+                break 
+            if self.chessboard[last_x][curr_y]==0: break 
+            hassame += 1
+        if curr_search_pass:
+            for l in range(1, n):
+                curr_y = last_y-l
+                if curr_y<0 or (self.chessboard[last_x][curr_y]!=c and self.chessboard[last_x][curr_y]!=0):
+                    curr_search_pass=False
+                    break
+                if self.chessboard[last_x][curr_y]==0: break
+                hassame += 1
+        if curr_search_pass and hassame>=n: return True
+
+        hassame=1
+        curr_search_pass=True
+        for l in range(1, n):
+            curr_x = last_x+l
+            curr_y = last_y+l
+            if curr_x == self.size or curr_y==self.size or (self.chessboard[curr_x][curr_y]!=c and self.chessboard[curr_x][curr_y]!=0):
+                curr_search_pass=False
+                break 
+            if self.chessboard[curr_x][curr_y]==0: break 
+            hassame += 1
+        if curr_search_pass:
+            for l in range(1, n):
+                curr_x = last_x-l
+                curr_y = last_y-l
+                if curr_x<0 or curr_y<0 or (self.chessboard[curr_x][curr_y]!=c and self.chessboard[curr_x][curr_y]!=0):
+                    curr_search_pass=False
+                    break
+                if self.chessboard[curr_x][curr_y]==0: break
+                hassame += 1
+        if curr_search_pass and hassame>=n: return True
+
+        hassame=1
+        curr_search_pass=True
+        for l in range(1, n):
+            curr_x = last_x-l
+            curr_y = last_y+l
+            if curr_x <0 or curr_y==self.size or (self.chessboard[curr_x][curr_y]!=c and self.chessboard[curr_x][curr_y]!=0):
+                curr_search_pass=False
+                break 
+            if self.chessboard[curr_x][curr_y]==0: break 
+            hassame += 1
+        if curr_search_pass:
+            for l in range(1, n):
+                curr_x = last_x+l
+                curr_y = last_y-l
+                if curr_x==self.size or curr_y<0 or (self.chessboard[curr_x][curr_y]!=c and self.chessboard[curr_x][curr_y]!=0):
+                    curr_search_pass=False
+                    break
+                if self.chessboard[curr_x][curr_y]==0: break
+                hassame += 1
+        if curr_search_pass and hassame>=n: return True
+        return False    
+
     # 检查是否游戏结束,返回赢的用户0 或 1，如果平局返回-1
     def check_terminal(self):
         # 如果都没有足够的棋

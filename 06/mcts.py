@@ -197,8 +197,10 @@ class MCTS(object):
 
         # 检查游戏是否有赢家
         end, winner = state.game_end()
+        need_calc_leaf_value = (not end) and state.check_will_win() # 如果游戏没有结束，且没有将要结束
 
-        if not end:  # 没有结束或马上结束时，把走子策略返回的[(action,概率)]list加载到mcts树child中 ，同时降低了 leaf_value 的权重
+        if need_calc_leaf_value: 
+            # 没有结束或马上结束时，把走子策略返回的[(action,概率)]list加载到mcts树child中 ，同时降低了 leaf_value 的权重
             # 使用训练好的模型策略评估此叶子节点，返回[(action,概率)]list 以及当前玩家的后续走子胜负
             action_probs, leaf_value = self._policy(state)
             node.expand(action_probs)
