@@ -78,7 +78,7 @@ class FiveChess(object):
             return False
         
         last_x, last_y = self.actions[-1]
-        n = self.n_in_row-1
+        n = self.n_in_row
         c = self.chessboard[last_x][last_y]
 
         hassame=1
@@ -98,7 +98,7 @@ class FiveChess(object):
                     break
                 if self.chessboard[curr_x][last_y]==0: break
                 hassame += 1
-        if curr_search_pass and hassame>=n: return True
+        if curr_search_pass and hassame>=n-1: return True
         
         hassame=1
         curr_search_pass=True
@@ -117,7 +117,7 @@ class FiveChess(object):
                     break
                 if self.chessboard[last_x][curr_y]==0: break
                 hassame += 1
-        if curr_search_pass and hassame>=n: return True
+        if curr_search_pass and hassame>=n-1: return True
 
         hassame=1
         curr_search_pass=True
@@ -138,7 +138,7 @@ class FiveChess(object):
                     break
                 if self.chessboard[curr_x][curr_y]==0: break
                 hassame += 1
-        if curr_search_pass and hassame>=n: return True
+        if curr_search_pass and hassame>=n-1: return True
 
         hassame=1
         curr_search_pass=True
@@ -159,7 +159,7 @@ class FiveChess(object):
                     break
                 if self.chessboard[curr_x][curr_y]==0: break
                 hassame += 1
-        if curr_search_pass and hassame>=n: return True
+        if curr_search_pass and hassame>=n-1: return True
         return False    
 
     # 检查是否游戏结束,返回赢的用户0 或 1，如果平局返回-1

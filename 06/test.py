@@ -67,6 +67,7 @@ def run():
 
         # 设置 start_player=0 人类先走棋
         agent.start_play(human, mcts_ai_player, start_player=0 if random.random()>0.5 else 1)
+        # agent.start_play(human, human, start_player=0 if random.random()>0.5 else 1)
     except KeyboardInterrupt:
         print('quit')
 
