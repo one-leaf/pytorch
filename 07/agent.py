@@ -285,7 +285,7 @@ class Agent(object):
 
             # 一个方块一个方块的训练
             # 最低训练方块
-            train_pieces_count = 5  
+            train_pieces_count = random.randint(3,6)  
             for i in count():
                 action, move_probs = player.get_action(game0, temp=temp, return_prob=1)
                 game0_states.append(game0.current_state())
