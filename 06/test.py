@@ -57,16 +57,16 @@ def run():
 
         # 神经网络的价值策略
         net_policy = PolicyValueNet(size, model_file = model_file)
-        mcts_ai_player = MCTSPlayer(net_policy.policy_value_fn, c_puct=5, n_playout=500, is_selfplay=False)
+        mcts_ai_player = MCTSPlayer(net_policy.policy_value_fn, c_puct=5, n_playout=600, is_selfplay=False)
 
         # 纯MCTS玩家
-        mcts_player = MCTSPurePlayer(c_puct=5, n_playout=500)
+        mcts_player = MCTSPurePlayer(c_puct=5, n_playout=2000)
 
         # 人类玩家
         human = Human(agent,is_show=1)
 
         # 设置 start_player=0 人类先走棋
-        agent.start_play(human, mcts_ai_player, start_player=0 if random.random()>0.5 else 1)
+        agent.start_play(mcts_player, mcts_ai_player, start_player=0 if random.random()>0.5 else 1)
         # agent.start_play(human, human, start_player=0 if random.random()>0.5 else 1)
     except KeyboardInterrupt:
         print('quit')

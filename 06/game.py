@@ -18,15 +18,17 @@ class FiveChess(object):
         self.colors = [-1, 1]
         self.reset()
 
-    def reset(self, start_player=0):
+    def reset(self, start_player=0, need_shuffle_availables=True):
         self.chessboard = [ [  0 for v in range(self.size)  ] for v in range(self.size) ]
         self.step_count = 0
         self.current_player = self.players[start_player]
         availables = [(x,y) for x in range(self.size) for y in range(self.size)]
-        # 按照先中间后两边的排序
-        # self.availables = sorted(availables, key=lambda x : (x[0]-self.size//2)**2+(x[1]-self.size//2)**2)
         # 随机打乱位置
-        random.shuffle(availables)
+        if need_shuffle_availables:
+            random.shuffle(availables)
+        else:
+            # 按照先中间后两边的排序
+            availables = sorted(availables, key=lambda x : (x[0]-self.size//2)**2+(x[1]-self.size//2)**2)
         self.availables=availables
 
         self.terminal = False

@@ -19,7 +19,7 @@ class Agent(object):
         """ start a self-play game using a MCTS player, reuse the search tree,
         and store the self-play data: (state, mcts_probs, z) for training
         """
-        self.game.reset(0 if random.random()>0.5 else 1)
+        self.game.reset(start_player=0 if random.random()>0.5 else 1, need_shuffle_availables = player2 is None)
         p1, p2 = self.game.players
 
         if not player2 is None:
@@ -68,13 +68,14 @@ class Agent(object):
                 return winner, zip(states, mcts_probs, winners_z)
 
     # AI和蒙特卡罗对战
-    def start_play(self, player1, player2, start_player=0):
+    def start_play(self, player1, player2, start_player=0, need_shuffle_availables=False):
         """start a game between two players"""
         if start_player not in (0, 1):
             raise Exception('start_player should be either 0 (player1 first) '
                             'or 1 (player2 first)')
         p1, p2 = self.game.players
-        self.game.reset(start_player)
+        self.game.reset(start_player=start_player, need_shuffle_availables = need_shuffle_availables)
+
         player1.set_player_ind(p1)
         player2.set_player_ind(p2)
         players = {p1: player1, p2: player2}
