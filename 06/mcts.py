@@ -443,9 +443,9 @@ class MCTSPlayer(object):
                 # position = np.random.choice(positions, p=act_probs) 
                 action = state.positions_to_actions([position])[0]
 
-                # 如果是第一步棋，就随便下
+                # 第一步棋为一手交换，随便下
                 if state.step_count==0: 
-                     action = random.choice(state.availables)
+                    action = random.choice(state.first_availables)
 
                 if action!=acts[idx]:
                     print(" random:", acts[idx], act_probs[idx], "==>", action, act_probs[acts.index(action)])

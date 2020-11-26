@@ -23,12 +23,13 @@ class FiveChess(object):
         self.step_count = 0
         self.current_player = self.players[start_player]
         availables = [(x,y) for x in range(self.size) for y in range(self.size)]
+        # 按照先中间后两边的排序
+        availables = sorted(availables, key=lambda x : (x[0]-self.size//2)**2+(x[1]-self.size//2)**2)
+        # 一手交换的第一步棋
+        self.first_availables = availables[self.size*self.size//3:self.size*self.size*2//3]
         # 随机打乱位置
         if need_shuffle_availables:
             random.shuffle(availables)
-        else:
-            # 按照先中间后两边的排序
-            availables = sorted(availables, key=lambda x : (x[0]-self.size//2)**2+(x[1]-self.size//2)**2)
         self.availables=availables
 
         self.terminal = False
