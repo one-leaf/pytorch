@@ -63,7 +63,9 @@ class TreeNode(object):
         # 访问计数
         self._n_visits += 1
         # 更新 Q, 加上叶子值和当前值的差异的平均数，如果叶子值比本节点价值高，本节点会增高，否则减少.
-        self._Q += 1.0 * (leaf_value - self._Q) / self._n_visits
+        # self._Q = (self._n_visits * self._Q + leaf_value) / self._n_visits
+        self._Q += leaf_value / self._n_visits
+        # self._Q += 1.0 * (leaf_value - self._Q) / self._n_visits
 
     # 递归更新当前和其所有的父节点
     def update_recursive(self, leaf_value):
