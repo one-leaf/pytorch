@@ -34,7 +34,8 @@ class Agent(object):
             # temp 权重 ，return_prob 是否返回概率数据
             player_in_turn = players[self.game.current_player]
             if player_in_turn==player1:
-                action, move_probs = player_in_turn.get_action(self.game, temp=temp-i/(i+10.), return_prob=1)
+                # action, move_probs = player_in_turn.get_action(self.game, temp=temp-i/(i+10.), return_prob=1)
+                action, move_probs = player_in_turn.get_action(self.game, temp=temp, return_prob=1)
                 # store the data
                 states.append(self.game.current_state())
                 # print(move_probs.reshape(self.size,self.size))
