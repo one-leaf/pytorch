@@ -438,9 +438,9 @@ class MCTSPlayer(object):
                 p= 0.75                
                 idx = np.argmax(act_probs)    
 
-                dirichlet = np.random.dirichlet(0.3 * np.ones(len(act_probs)))
-                position = np.random.choice(positions, p=p * act_probs + (1-p) * dirichlet) 
-                # position = np.random.choice(positions, p=act_probs) 
+                # dirichlet = np.random.dirichlet(0.3 * np.ones(len(act_probs)))
+                # position = np.random.choice(positions, p=p * act_probs + (1-p) * dirichlet) 
+                position = np.random.choice(positions, p=act_probs) 
                 action = state.positions_to_actions([position])[0]
 
                 # 第一步棋为一手交换，随便下
