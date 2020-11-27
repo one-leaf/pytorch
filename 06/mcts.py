@@ -42,8 +42,8 @@ class TreeNode(object):
     # 计算和返回这个节点的值
     # MCTS计算公式：
     # 传统是    UCT = self._Q/self._n + 2*sqrt(log(root._n)/(1+self._n))
-    # 这个是    UCT = self._Q         + 5*self_P*sqrt(_parent._n)/(1+self_n) 
-    # 在 leela-zero 中 cfg_puct 中设置的为 0.5 ，这个值如果小就多考虑mcts探索，否则加强概率的影响
+    # 这个是    UCT = self._Q         + c_puct*self_P*sqrt(_parent._n)/(1+self_n) 
+    # 在 leela-zero 中 c_puct 中设置的为 0.5 ，alpha zero 这个值是 0.05 ，这个值如果小就多考虑mcts探索，否则加强概率的影响
     def get_value(self, c_puct):
         """计算并返回当前节点的值
             c_puct:     一个数值，取值范围为（0， inf），调整先验概率和当前路径的权重
@@ -57,11 +57,11 @@ class TreeNode(object):
 
     # 反向更新当前节点
     def update(self, leaf_value):
-        """更新当前节点的访问次数和叶子节点评估结果
+        """更新当前节点的访问次数和叶子节点评估结果，由于父节点的访问次数总是大于子节点的访问次数，所以越往上影响越小
             leaf_value: 从当前玩家的角度看子树的评估值.
         """
-        # 访问计数
         # 更新 Q, 加上叶子值和当前值的差异的平均数，如果叶子值比本节点价值高，本节点会增高，否则减少.
+        # Q(si,ai) = W(si,ai)/n(si,ai) = Q*_n_visits/(_n_visits + 1) + leaf_value/(_n_visits+1)
         # 这个是标准公式，下面如果先+1，计算步骤会少一点
         # self._Q = (self._n_visits * self._Q + leaf_value) / (self._n_visits + 1.)
         # self._n_visits += 1
@@ -350,7 +350,12 @@ class MCTS(object):
         print(state.step_count+1,"player:",(state.current_player),"_n_playout:", n, "info:", info, "first:",self._first_ations)
         # softmax概率，先用log(visites)，拉平差异，再乘以一个权重，这样给了一个可以调节的参数，
         # temp 越小，导致softmax的越肯定，也就是当temp=1e-3时，基本上返回只有一个1,其余概率都是0; 训练的时候 temp=1
-        act_probs = MCTS.softmax((1/temp) * np.log(np.array(visits) + 1e-10))
+        # 原公式为 N^(1/temp)/sum(N^(1/temp)) 为了方便计算修改为取对数和指数 exp(1/temp * log(N)) /sum(exp(1/temp * log(N)))
+        # 论文里面提到使用 m = c_pw * n ^ k = 1 * n ^ 0.5 来代替n
+        # m = np.pow(np.pow(np.array(visits),0.5),1/temp) = np.pow(np.array(visits), 0.5/temp)
+        m = np.pow(np.array(visits), 0.5/temp)
+        act_probs = m/np.sum(m)
+        # act_probs = MCTS.softmax((1/temp) * np.log(np.array(visits) + 1e-10))
         return acts, act_probs
 
     def max_depth_tree(self, node=None):
