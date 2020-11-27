@@ -330,7 +330,9 @@ class MCTS(object):
             # self.print_tree()
         # softmax概率，先用log(visites)，拉平差异，再乘以一个权重，这样给了一个可以调节的参数，
         # temp 越小，导致softmax的越肯定，也就是当temp=1e-3时，基本上返回只有一个1,其余概率都是0; 训练的时候 temp=1
-        act_probs = MCTS.softmax((1/temp) * np.log(np.array(visits) + 1e-10))
+        # act_probs = MCTS.softmax((1/temp) * np.log(np.array(visits) + 1e-10))
+        m = np.pow(np.array(visits), 1./temp)
+        act_probs = m/np.sum(m)        
         return acts, act_probs
 
     def max_depth_tree(self, node=None):
