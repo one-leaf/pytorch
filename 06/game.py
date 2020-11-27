@@ -395,7 +395,7 @@ if __name__ == "__main__":
     def on_mouse_press(x, y, button, modifiers):
         global user_point
         user_point = (x, y)
-    fiveChess = FiveChess(size=8, n_in_row=5)
+    fiveChess = FiveChess(size=15, n_in_row=5)
     env = FiveChessEnv(fiveChess)
 
     env.reset()

@@ -137,7 +137,7 @@ class PolicyValueNet():
         print("value:",v.size())
         print("policy:",p.size())
 
-    # 根据当前状态得到，action的概率和概率
+    # 根据当前状态得到，action的概率和胜率
     def policy_value(self, state_batch):
         """
         input: a batch of states
