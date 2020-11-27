@@ -357,6 +357,11 @@ class MCTS(object):
         act_probs = m/np.sum(m)
         
         # 原公式为 N^(1/temp)/sum(N^(1/temp)) 为了方便计算修改为取对数和指数 exp(1/temp * log(N)) /sum(exp(1/temp * log(N)))
+        # 为了避免指数运算，所以上面等价于下面的算法
+        # m = (1/temp) * np.log(np.array(visits) + 1e-10)
+        # m = np.exp(m - np.max(m))
+        # probs = m/np.sum(m)
+        # 即：
         # act_probs = MCTS.softmax((1/temp) * np.log(np.array(visits) + 1e-10))
         return acts, act_probs
 
