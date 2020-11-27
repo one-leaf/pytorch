@@ -483,6 +483,11 @@ class MCTSPlayer(object):
                 #     node = root._children[act]   
                 #     if node._n_visits>0:
                 #         print(act, node)
+                
+                # 第一步棋为一手交换，随便下
+                if state.step_count==0: 
+                    action = random.choice(state.first_availables)
+
                 print("AI", action, act_probs[acts.index(action)]) 
 
                 self.mcts.update_root_with_action(None)
