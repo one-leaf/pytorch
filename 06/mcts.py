@@ -350,11 +350,13 @@ class MCTS(object):
         print(state.step_count+1,"player:",(state.current_player),"_n_playout:", n, "info:", info, "first:",self._first_ations)
         # softmax概率，先用log(visites)，拉平差异，再乘以一个权重，这样给了一个可以调节的参数，
         # temp 越小，导致softmax的越肯定，也就是当temp=1e-3时，基本上返回只有一个1,其余概率都是0; 训练的时候 temp=1
-        # 原公式为 N^(1/temp)/sum(N^(1/temp)) 为了方便计算修改为取对数和指数 exp(1/temp * log(N)) /sum(exp(1/temp * log(N)))
         # 论文里面提到使用 m = c_pw * n ^ k = 1 * n ^ 0.5 来代替n
-        # m = np.pow(np.pow(np.array(visits),0.5),1/temp) = np.pow(np.array(visits), 0.5/temp)
-        m = np.pow(np.array(visits), 0.5/temp)
+        # 实际训练中引入 temp 来动态调整， m = np.pow(visits,1/temp) 
+        # 早期temp为1，后面逐渐趋近于0
+        m = np.pow(np.array(visits), 1./temp)
         act_probs = m/np.sum(m)
+        
+        # 原公式为 N^(1/temp)/sum(N^(1/temp)) 为了方便计算修改为取对数和指数 exp(1/temp * log(N)) /sum(exp(1/temp * log(N)))
         # act_probs = MCTS.softmax((1/temp) * np.log(np.array(visits) + 1e-10))
         return acts, act_probs
 
