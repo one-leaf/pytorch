@@ -25,7 +25,6 @@ class ResidualBlock(nn.Module):
         residual=x if self.right is None else self.right(x)
         out+=residual
         return F.relu(out)
-
 class Net(nn.Module):
     def __init__(self,input_size, output_size):
         super().__init__()

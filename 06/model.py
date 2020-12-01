@@ -31,7 +31,7 @@ class ResidualBlock(nn.Module):
         self.left=nn.Sequential(
             nn.Conv2d(inchannel,outchannel,3,stride,1,bias=False),
             nn.BatchNorm2d(outchannel),
-            nn.ReLU(inplace=True),
+            nn.LeakyReLU(inplace=True),
             nn.Conv2d(outchannel,outchannel,3,1,1,bias=False),
             nn.BatchNorm2d(outchannel)
         )
@@ -84,7 +84,7 @@ class Net(nn.Module):
     def forward(self, x):
         x = self.first_conv(x)
         x = self.first_conv_bn(x)
-        x = F.relu(x)
+        x = F.leaky_relu(x)
         x = self.conv1(x)
         x = self.conv2(x)
         x = self.conv3(x)
@@ -93,16 +93,16 @@ class Net(nn.Module):
         # 动作
         x_act = self.act_conv1(x)
         x_act = self.act_conv1_bn(x_act)
-        x_act = F.relu(x_act)
+        x_act = F.leaky_relu(x_act)
         x_act = x_act.view(x_act.size(0), -1)
         x_act = F.log_softmax(self.act_fc1(x_act),dim=1)
 
         # 胜率 输出为 -1 ~ 1 之间的数字
         x_val = self.val_conv1(x)
         x_val = self.val_conv1_bn(x_val)
-        x_val = F.relu(x_val)
+        x_val = F.leaky_relu(x_val)
         x_val = x_val.view(x_val.size(0), -1)
-        x_val = F.relu(self.val_fc1(x_val))
+        x_val = F.leaky_relu(self.val_fc1(x_val))
         x_val = torch.tanh(self.val_fc2(x_val))
         return x_act, x_val
 
