@@ -4,7 +4,7 @@ from model import PolicyValueNet
 from mcts import MCTSPurePlayer, MCTSPlayer
 from agent import Agent
 import os, glob, pickle
-import sys
+import sys, time
 import random
 import logging
 import numpy as np
@@ -232,6 +232,10 @@ class FiveChessTrain():
 
         # 如果当前模型的胜率大于等于0.7,保留为最佳模型
         if win_ratio>=0.7:
+            t = os.path.getctime(best_model_file)
+            timeStruct = time.localtime(t)
+            timestr = time.strftime('%Y_%m_%d_%H_%M', timeStruct)
+            os.rename(best_model_file, best_model_file+"."+timestr)
             self.policy_value_net.save_model(best_model_file)
             print("save curr modle to best model")
 
