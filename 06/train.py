@@ -247,15 +247,16 @@ class FiveChessTrain():
         try:
             # 先训练样本20局
             step = 0
-            for _ in range(20):
+            for i in range(20):
                 logging.info("TRAIN Batch:{} starting, Size:{}, n_in_row:{}".format(step + 1, size, n_in_row))
                 state, mcts_porb, winner = self.collect_selfplay_data()
-                print("-"*50,"state","-"*50)
-                print(state)
-                print("-"*50,"mcts_porb","-"*50)
-                print(mcts_porb)
-                print("-"*50,"winner","-"*50)
-                print(winner)
+                if i == 0: 
+                    print("-"*50,"state","-"*50)
+                    print(state)
+                    print("-"*50,"mcts_porb","-"*50)
+                    print(mcts_porb)
+                    print("-"*50,"winner","-"*50)
+                    print(winner)
                 logging.info("TRAIN Batch:{} end".format(step + 1,))
                 step += 1               
 
