@@ -261,11 +261,11 @@ class FiveChessTrain():
                 step += 1               
 
             training_loader = torch.utils.data.DataLoader(self.dataset, batch_size=self.batch_size, shuffle=True, num_workers=2,)
-            tran_epochs = int(len(self.dataset)/(self.batch_size))
+            # tran_epochs = int(len(self.dataset)/(self.batch_size))
             for i, data in enumerate(training_loader):  # 计划训练批次
                 # 使用对抗数据训练策略价值网络模型
                 loss, entropy = self.policy_update(data, self.epochs)              
-                if (i+1) % tran_epochs == 0:
+                if (i+1) % 100 == 0:
                     self.policy_value_net.save_model(model_file)
                     logging.info("Train epochs {} : {} / {}".format(i, i*self.batch_size, len(self.dataset)))
                    
