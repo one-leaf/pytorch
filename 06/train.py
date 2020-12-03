@@ -267,7 +267,7 @@ class FiveChessTrain():
                 loss, entropy = self.policy_update(data, self.epochs)              
                 if (i+1) % 100 == 0:
                     self.policy_value_net.save_model(model_file)
-                    logging.info("Train epochs {} : {} / {}".format(i, i*self.batch_size, len(self.dataset)))
+                    logging.info("Train idx {} : {} / {}".format(i, i*self.batch_size, len(self.dataset)))
                    
             # 一轮训练完毕后与最佳模型进行对比
             win_ratio = self.policy_evaluate(self.policy_evaluate_size)
