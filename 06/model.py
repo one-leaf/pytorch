@@ -114,7 +114,7 @@ class PolicyValueNet():
         self.l2_const = l2_const  
         self.policy_value_net = Net(size).to(device)
 
-        self.cache = Cache(maxsize=50000)
+        self.cache = Cache(maxsize=100000)
         self.print_netwark()
 
         self.optimizer = optim.Adam(self.policy_value_net.parameters(), weight_decay=self.l2_const)       
@@ -166,10 +166,10 @@ class PolicyValueNet():
         output: a list of (action, probability) tuples for each available
         action and the score of the game state
         """
-        # 只缓存前6步棋
-        max_cache_step = 6
+        # 只缓存前10步棋
+        max_cache_step = 10
         if len(game.actions)<=max_cache_step:
-            key = ",".join([str(x*game.size+y) for x,y in game.actions])
+            key = game.get_key()
             if key in self.cache:
                 return self.cache[key]
 
