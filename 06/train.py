@@ -136,7 +136,7 @@ class FiveChessTrain():
         mcts_player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout, is_selfplay=1)
 
         # 有一定几率和纯MCTS对抗
-        if random.random()>0.95:
+        if random.random()>0.8:
             pure_mcts_player = MCTSPurePlayer(c_puct=5, n_playout=2000)
             print("AI VS MCTS, pure_mcts_playout_num:", 2000)
         else:
