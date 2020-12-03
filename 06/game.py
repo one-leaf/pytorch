@@ -40,8 +40,8 @@ class FiveChess(object):
     # 返回棋局的唯一key
     def get_key(self):
         key = " "*(self.size*self.size)
-        for x in self.size:
-            for y in self.size:
+        for x in range(self.size):
+            for y in range(self.size):
                 key[x+y*self.size]=self.chessboard[x][y]+1
         key = int(key,3)
         return str(key)
