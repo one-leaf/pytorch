@@ -1,4 +1,4 @@
-from game import Tetromino, TetrominoEnv, pieces, templatenum, blank, black
+from game import Tetromino, TetrominoEnv, pieces, templatenum, blank, calcReward
 import pygame
 from pygame.locals import *
 from itertools import count
@@ -104,7 +104,7 @@ class Agent(object):
             if not self.tetromino.validposition(self.board,self.fallpiece):  
                 self.terminal = True 
                 self.state = 2       
-                return self.state, reward
+                return self.state, calcReward(self.board, self.fallpiece)
             else: 
                 self.state =1
             self.piecesteps = 0

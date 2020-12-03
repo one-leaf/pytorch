@@ -197,11 +197,9 @@ class MCTS(object):
             # print("leaf_value", leaf_value)
 
         # 给熵加一点点的支持
-        if state.state!=0:
-            if reward>0:
-                leaf_value = 1
-            else:
-                leaf_value = -1
+        if state.state==2:
+            leaf_value = reward
+            
         #     leaf_value -= np.log(state.getTransCount())
         # 递归更新当前节点及所有父节点的最优选中次数和Q分数,因为得到的是本次的价值
         node.update_recursive(leaf_value)
