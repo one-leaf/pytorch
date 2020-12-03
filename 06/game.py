@@ -42,7 +42,7 @@ class FiveChess(object):
         key = [0 for v in range(self.size*self.size)]
         for x in range(self.size):
             for y in range(self.size):
-                key[x+y*self.size]=self.chessboard[x][y]+1
+                key[x+y*self.size]=str(self.chessboard[x][y]+1)
         key = int("".join(key),3)
         return str(key)
 
