@@ -81,7 +81,7 @@ class FiveChessTrain():
         self.max_keep_size = 800000  # 保留最近对战样本个数 平均一局大约400~600个样本, 也就是包含了最近1500次对局数据
 
         # 训练参数
-        self.learn_rate = 1e-5
+        self.learn_rate = 1e-6
         self.lr_multiplier = 1.0  # 基于KL的自适应学习率
         self.temp = 1  # 概率缩放程度，实际预测0.01，训练采用1
         self.n_playout = 200  # 每个动作的模拟次数
@@ -161,28 +161,29 @@ class FiveChessTrain():
         # 训练策略价值网络
         state_batch, mcts_probs_batch, winner_batch = sample_data
 
-        old_probs, old_v = self.policy_value_net.policy_value(state_batch)  
+        # old_probs, old_v = self.policy_value_net.policy_value(state_batch)  
         for i in range(epochs):
             loss, v_loss, p_loss, entropy = self.policy_value_net.train_step(state_batch, mcts_probs_batch, winner_batch, self.learn_rate * self.lr_multiplier)
-            new_probs, new_v = self.policy_value_net.policy_value(state_batch)
+            # new_probs, new_v = self.policy_value_net.policy_value(state_batch)
 
             # 散度计算：
             # D(P||Q) = sum( pi * log( pi / qi) ) = sum( pi * (log(pi) - log(qi)) )
-            kl = np.mean(np.sum(old_probs * (np.log(old_probs + 1e-10) - np.log(new_probs + 1e-10)), axis=1))
-            if kl > self.kl_targ * epochs:  # 如果D_KL跑偏则尽早停止
-                break
+            # kl = np.mean(np.sum(old_probs * (np.log(old_probs + 1e-10) - np.log(new_probs + 1e-10)), axis=1))
+            # if kl > self.kl_targ * epochs:  # 如果D_KL跑偏则尽早停止
+            #     break
 
         # 自动调整学习率
-        if kl > self.kl_targ * 2 and self.lr_multiplier > 0.1:
-            self.lr_multiplier /= 1.5
-        elif kl < self.kl_targ / 2 and self.lr_multiplier < 10:
-            self.lr_multiplier *= 1.5
+        # if kl > self.kl_targ * 2 and self.lr_multiplier > 0.1:
+        #     self.lr_multiplier /= 1.5
+        # elif kl < self.kl_targ / 2 and self.lr_multiplier < 10:
+        #     self.lr_multiplier *= 1.5
         # 如果学习到了，explained_var 应该趋近于 1，如果没有学习到也就是胜率都为很小值时，则为 0
-        explained_var_old = (1 - np.var(np.array(winner_batch) - old_v.flatten()) / np.var(np.array(winner_batch)))
-        explained_var_new = (1 - np.var(np.array(winner_batch) - new_v.flatten()) / np.var(np.array(winner_batch)))
+        # explained_var_old = (1 - np.var(np.array(winner_batch) - old_v.flatten()) / np.var(np.array(winner_batch)))
+        # explained_var_new = (1 - np.var(np.array(winner_batch) - new_v.flatten()) / np.var(np.array(winner_batch)))
         # entropy 信息熵，越小越好
-        logging.info(("TRAIN kl:{:.5f},lr_multiplier:{:.3f},v_loss:{:.5f},p_loss:{:.5f},entropy:{:.5f},var_old:{:.5f},var_new:{:.5f}"
-                      ).format(kl, self.lr_multiplier, v_loss, p_loss, entropy, explained_var_old, explained_var_new))
+        # logging.info(("TRAIN kl:{:.5f},lr_multiplier:{:.3f},v_loss:{:.5f},p_loss:{:.5f},entropy:{:.5f},var_old:{:.5f},var_new:{:.5f}"
+        #               ).format(kl, self.lr_multiplier, v_loss, p_loss, entropy, explained_var_old, explained_var_new))
+        logging.info(("TRAIN v_loss:{:.5f},p_loss:{:.5f},entropy:{:.5f}").format(v_loss, p_loss, entropy))
         return loss, entropy
 
     def policy_evaluate(self, n_games=10):
@@ -244,36 +245,28 @@ class FiveChessTrain():
     def run(self):
         """启动训练"""
         try:
-            # 早期补齐训练样本
+            # 先训练样本20局
             step = 0
-            if len(self.dataset)/self.max_keep_size<0.1:
-                for _ in range(8):
-                    logging.info("TRAIN Batch:{} starting, Size:{}, n_in_row:{}".format(step + 1, size, n_in_row))
-                    state, mcts_porb, winner = self.collect_selfplay_data()
-                    print("-"*50,"state","-"*50)
-                    print(state)
-                    print("-"*50,"mcts_porb","-"*50)
-                    print(mcts_porb)
-                    print("-"*50,"winner","-"*50)
-                    print(winner)
-                    logging.info("TRAIN Batch:{} end".format(step + 1,))
-                    step += 1
-                if len(self.dataset)<self.batch_size*10:
-                    return                
+            for _ in range(20):
+                logging.info("TRAIN Batch:{} starting, Size:{}, n_in_row:{}".format(step + 1, size, n_in_row))
+                state, mcts_porb, winner = self.collect_selfplay_data()
+                print("-"*50,"state","-"*50)
+                print(state)
+                print("-"*50,"mcts_porb","-"*50)
+                print(mcts_porb)
+                print("-"*50,"winner","-"*50)
+                print(winner)
+                logging.info("TRAIN Batch:{} end".format(step + 1,))
+                step += 1               
 
             training_loader = torch.utils.data.DataLoader(self.dataset, batch_size=self.batch_size, shuffle=True, num_workers=2,)
             tran_epochs = int(len(self.dataset)/(self.batch_size))
             for i, data in enumerate(training_loader):  # 计划训练批次
                 # 使用对抗数据训练策略价值网络模型
-                loss, entropy = self.policy_update(data, self.epochs)
-               
-                # 训练中间插入20局自我对战样本
-                if (i+1) % (tran_epochs//20) == 0:
+                loss, entropy = self.policy_update(data, self.epochs)              
+                if (i+1) % tran_epochs == 0:
                     self.policy_value_net.save_model(model_file)
-                    # 收集自我对抗数据
-                    for _ in range(self.play_batch_size):
-                        self.collect_selfplay_data()
-                    logging.info("TRAIN self-play end, {} / {}".format(i*self.batch_size, len(self.dataset)))
+                    logging.info("Train epochs {} : {} / {}".format(i, i*self.batch_size, len(self.dataset)))
                    
             # 一轮训练完毕后与最佳模型进行对比
             win_ratio = self.policy_evaluate(self.policy_evaluate_size)
