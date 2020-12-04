@@ -469,6 +469,10 @@ class MCTSPlayer(object):
                 if state.step_count==0: 
                     action = random.choice(state.first_availables)
 
+                # 如果是下了几步后全部取最大值
+                if state.step_count>state.n_in_row*2:
+                    action = acts[idx]
+
                 if action!=acts[idx]:
                     print(" random:", acts[idx], act_probs[idx], "==>", action, act_probs[acts.index(action)])
 
