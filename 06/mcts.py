@@ -389,12 +389,17 @@ class MCTS(object):
         acts, visits = zip(*act_visits)
 
         info={"depth":self.max_depth_tree()}
-        for idx in sorted(range(len(visits)), key=visits.__getitem__)[::-1]:
-            if len(info)>3: break
-            value = self._root._children[acts[idx]].get_value(5)
-            info[acts[idx]] = (visits[idx], round(value, 2))
+        if max(visits)-min(visits)>10:
+            for idx in sorted(range(len(visits)), key=visits.__getitem__)[::-1]:
+                if len(info)>3: break
+                value = self._root._children[acts[idx]].get_value(5)
+                info[acts[idx]] = (visits[idx], round(value, 2))
+        else:
+            for idx in range(len(visits)):
+                if len(info)>3: break
+                value = self._root._children[acts[idx]].get_value(5)
+                info[acts[idx]] = (visits[idx], round(value, 2)) 
         print(state.step_count+1,"MCTS:",(state.current_player),"_n_playout:", n, "info:", info, "first:",self._first_ations)
-        print(act_visits)
         m = np.array(visits)
         act_probs = m/np.sum(m)
         return acts, act_probs
