@@ -388,7 +388,6 @@ class MCTS(object):
         act_visits = [(act, node._n_visits) for act, node in self._root._children.items()]
         acts, visits = zip(*act_visits)
 
-
         info={"depth":self.max_depth_tree()}
         for idx in sorted(range(len(visits)), key=visits.__getitem__)[::-1]:
             if len(info)>3: break
@@ -398,8 +397,7 @@ class MCTS(object):
 
         m = np.array(visits)
         act_probs = m/np.sum(m)
-        idx = np.argmax(act_probs) 
-        return acts[idx], act_probs
+        return acts, act_probs
 
     def __str__(self):
         return "MCTS"
@@ -424,12 +422,20 @@ class MCTSPurePlayer(object):
         """计算下一步走子action"""
         if len(state.availables) > 0:  # 盘面可落子位置>0
             # 构建纯MCTS初始树(节点分布充分)，并返回child中访问量最大的action
-            action, act_probs = self.mcts.get_action(state)
+            acts, act_probs = self.mcts.get_action(state)
+
+            move_probs = np.zeros(state.size * state.size)
+            positions = state.actions_to_positions(acts)
+            move_probs[positions] = act_probs
+
+            idx = np.argmax(act_probs) 
+            action = acts[idx]
+
             # 更新根节点:根据最后action向前探索树
             self.mcts.update_root_with_action(None)
             # print("MCTS:", action)
             if return_prob:
-                return action, act_probs
+                return action, move_probs
             else:
                 return action
         else:
