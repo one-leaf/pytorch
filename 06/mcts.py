@@ -427,7 +427,7 @@ class MCTSPurePlayer(object):
             action, act_probs = self.mcts.get_action(state)
             # 更新根节点:根据最后action向前探索树
             self.mcts.update_root_with_action(None)
-            print("MCTS:", action)
+            # print("MCTS:", action)
             if return_prob:
                 return action, act_probs
             else:
