@@ -46,11 +46,8 @@ class Agent(object):
                 # if not player2 is None:
                 player1.mcts.update_root_with_action(None)             
             else:
-                action = player_in_turn.get_action(self.game)
-                move_probs = np.zeros(self.size * self.size)
-                position = self.game.actions_to_positions([action])[0]
-                move_probs[position] = 1.
-
+                action, move_probs = player_in_turn.get_action(self.game, return_prob=1)
+ 
             states.append(self.game.current_state())
             mcts_probs.append(move_probs)
             current_players.append(self.game.current_player) 

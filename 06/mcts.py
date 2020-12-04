@@ -385,7 +385,13 @@ class MCTS(object):
             state_copy = copy.deepcopy(state)
             self._playout(state_copy)
 
-        return max(self._root._children.items(), key=lambda act_node: act_node[1]._n_visits)[0]
+        act_visits = [(act, node._n_visits) for act, node in self._root._children.items()]
+        acts, visits = zip(*act_visits)
+        m = np.array(visits)
+        act_probs = m/np.sum(m)
+        idx = np.argmax(act_probs) 
+
+        return acts[idx], act_probs
 
     def __str__(self):
         return "MCTS"
@@ -406,15 +412,18 @@ class MCTSPurePlayer(object):
         """更新根节点:根据最后action向前探索树"""
         self.mcts.update_root_with_action(None)
 
-    def get_action(self, state):
+    def get_action(self, state, return_prob=0):
         """计算下一步走子action"""
         if len(state.availables) > 0:  # 盘面可落子位置>0
             # 构建纯MCTS初始树(节点分布充分)，并返回child中访问量最大的action
-            action = self.mcts.get_action(state)
+            action, act_probs = self.mcts.get_action(state)
             # 更新根节点:根据最后action向前探索树
             self.mcts.update_root_with_action(None)
             print("MCTS:", action)
-            return action
+            if return_prob:
+                return action, act_probs
+            else:
+                return action
         else:
             print("WARNING: the state is full")
 
