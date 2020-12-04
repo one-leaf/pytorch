@@ -37,16 +37,24 @@ class Agent(object):
                 action, move_probs = player_in_turn.get_action(self.game, temp=temp-i/(i+5.), return_prob=1)
                 # action, move_probs = player_in_turn.get_action(self.game, temp=temp, return_prob=1)
                 # store the data
-                states.append(self.game.current_state())
+                # states.append(self.game.current_state())
                 # print(move_probs.reshape(self.size,self.size))
                 # print(states[-1])
-                mcts_probs.append(move_probs)
-                current_players.append(self.game.current_player)   
+                # mcts_probs.append(move_probs)
+                # current_players.append(self.game.current_player)   
                 # 如果包含了第二个玩家是MCTS，则AI每一步都需要重置搜索树
-                if not player2 is None:
-                    player1.mcts.update_root_with_action(None)             
+                # if not player2 is None:
+                player1.mcts.update_root_with_action(None)             
             else:
                 action = player_in_turn.get_action(self.game)
+                move_probs = np.zeros(self.size * self.size)
+                position = self.game.actions_to_positions([action])[0]
+                move_probs[position] = 1.
+
+            states.append(self.game.current_state())
+            mcts_probs.append(move_probs)
+            current_players.append(self.game.current_player) 
+
             # perform a move
             self.game.step(action)
             if self.is_shown:

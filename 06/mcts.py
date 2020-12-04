@@ -373,7 +373,7 @@ class MCTS(object):
             l.append(self.max_depth_tree(node._children[act])+1)
         return max(l)
 
-    # 按访问次数返回当前状态下的动作及其概率，构建所有的树，默认10000局
+    # 按访问次数返回当前状态下的动作及其概率，构建所有的树
     # 这个是 mcts 的标准方法
     def get_action(self, state):
         """
@@ -483,7 +483,7 @@ class MCTSPlayer(object):
                 #     node = root._children[act]   
                 #     if node._n_visits>0:
                 #         print(act, node)
-                
+
                 # 第一步棋为一手交换，随便下
                 if state.step_count==0: 
                     action = random.choice(state.first_availables)
