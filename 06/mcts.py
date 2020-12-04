@@ -347,7 +347,7 @@ class MCTS(object):
             info[acts[idx]] = (visits[idx], round(value, 2))
 
         # temp = temp*((len(state.availables)/(state.size*state.size))**10)
-        print(state.step_count+1,"player:",(state.current_player),"_n_playout:", n, "info:", info, "first:",self._first_ations)
+        print(state.step_count+1,"AI:",(state.current_player),"_n_playout:", n, "info:", info, "first:",self._first_ations)
         # softmax概率，先用log(visites)，拉平差异，再乘以一个权重，这样给了一个可以调节的参数，
         # temp 越小，导致softmax的越肯定，也就是当temp=1e-3时，基本上返回只有一个1,其余概率都是0; 训练的时候 temp=1
         # 论文里面提到使用 m = c_pw * n ^ k = 1 * n ^ 0.5 来代替n
@@ -387,10 +387,18 @@ class MCTS(object):
 
         act_visits = [(act, node._n_visits) for act, node in self._root._children.items()]
         acts, visits = zip(*act_visits)
+
+
+        info={"depth":self.max_depth_tree()}
+        for idx in sorted(range(len(visits)), key=visits.__getitem__)[::-1]:
+            if len(info)>3: break
+            value = self._root._children[acts[idx]].get_value(5)
+            info[acts[idx]] = (visits[idx], round(value, 2))
+        print(state.step_count+1,"MCTS:",(state.current_player),"_n_playout:", n, "info:", info, "first:",self._first_ations)
+
         m = np.array(visits)
         act_probs = m/np.sum(m)
         idx = np.argmax(act_probs) 
-
         return acts[idx], act_probs
 
     def __str__(self):
