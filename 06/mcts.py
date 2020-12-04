@@ -394,7 +394,7 @@ class MCTS(object):
             value = self._root._children[acts[idx]].get_value(5)
             info[acts[idx]] = (visits[idx], round(value, 2))
         print(state.step_count+1,"MCTS:",(state.current_player),"_n_playout:", n, "info:", info, "first:",self._first_ations)
-
+        print(act_visits)
         m = np.array(visits)
         act_probs = m/np.sum(m)
         return acts, act_probs
