@@ -76,7 +76,7 @@ class Dataset(torch.utils.data.Dataset):
 
 class FiveChessTrain():
     def __init__(self):
-        self.policy_evaluate_size = 10  # 策略评估胜率时的模拟对局次数
+        self.policy_evaluate_size = 20  # 策略评估胜率时的模拟对局次数
         self.batch_size = 512  # 训练一批数据的长度
         self.max_keep_size = 500000  # 保留最近对战样本个数 平均一局大约400~600个样本, 也就是包含了最近1000次对局数据
 
@@ -271,10 +271,10 @@ class FiveChessTrain():
                    
             # 一轮训练完毕后与最佳模型进行对比
             win_ratio = self.policy_evaluate(self.policy_evaluate_size)
-            # 如果输了，再训练一次
-            if win_ratio<=0.5:
-                self.policy_evaluate(self.policy_evaluate_size)
-                print("lost all, add more sample")
+            # # 如果输了，再训练一次
+            # if win_ratio<=0.5:
+            #     self.policy_evaluate(self.policy_evaluate_size)
+            #     print("lost all, add more sample")
         except KeyboardInterrupt:
             logging.info('quit')
 
