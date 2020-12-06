@@ -44,6 +44,7 @@ class TreeNode(object):
     # 传统是    UCT = self._Q/self._n + 2*sqrt(log(root._n)/(1+self._n))
     # 这个是    UCT = self._Q         + c_puct*self_P*sqrt(_parent._n)/(1+self_n) 
     # 在 leela-zero 中 c_puct 中设置的为 0.5 ，alpha zero 这个值是 0.05 ，这个值如果小就多考虑mcts探索，否则加强概率的影响
+    # (c_puct * self._P * np.sqrt(self._parent._n_visits) + self._n_visits * self._Q + leaf_value) / (1 + self._n_visits) 
     def get_value(self, c_puct):
         """计算并返回当前节点的值
             c_puct:     一个数值，取值范围为（0， inf），调整先验概率和当前路径的权重
