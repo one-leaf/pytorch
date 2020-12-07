@@ -121,7 +121,7 @@ class PolicyValueNet():
         self.print_netwark()
 
         # self.optimizer = optim.Adam(self.policy_value_net.parameters(), weight_decay=self.l2_const)       
-        self.optimizer = optim.SGD(self.policy_value_net.parameters(), momentum=0.9, weight_decay=self.l2_const)
+        self.optimizer = optim.SGD(self.policy_value_net.parameters(), lr=1e-3, momentum=0.9, weight_decay=self.l2_const)
 
         if model_file and os.path.exists(model_file):
             print("Loading model", model_file)
