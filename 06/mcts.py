@@ -306,7 +306,9 @@ class MCTS(object):
                 temp：温度参数  控制探测水平，范围(0,1]
             Return: 所有action及对应概率
         """
-        self._first_ations.clear()
+
+        self._first_ations = [act for act in self._first_ations if act not in state.actions]
+
         # for n in count():
         for n in range(self._n_playout):
             # print("\r_n_playout： {:.2f}%".format(n*100 / self._n_playout), end='')
