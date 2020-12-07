@@ -124,7 +124,7 @@ class Agent(object):
         states, mcts_probs, current_players = [], [], []
         for i in count():
             player_in_turn = players[self.game.current_player]
-            action, move_probs = player_in_turn.get_action(self.game, temp=temp*2.0/(i+1), return_prob=1)
+            action, move_probs = player_in_turn.get_action(self.game, temp=temp, return_prob=1)
             states.append(self.game.current_state())
             mcts_probs.append(move_probs)
             current_players.append(self.game.current_player)  
