@@ -111,6 +111,8 @@ class Net(nn.Module):
 class PolicyValueNet():
     def __init__(self, size, model_file=None, device=None, l2_const=1e-4):
         self.size = size
+        if device is None:
+            device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.device=device
         self.l2_const = l2_const  
         self.policy_value_net = Net(size).to(device)
@@ -118,7 +120,8 @@ class PolicyValueNet():
         self.cache = Cache(maxsize=100000)
         self.print_netwark()
 
-        self.optimizer = optim.Adam(self.policy_value_net.parameters(), weight_decay=self.l2_const)       
+        # self.optimizer = optim.Adam(self.policy_value_net.parameters(), weight_decay=self.l2_const)       
+        self.optimizer = optim.SGD(self.policy_value_net.parameters(), momentum=0.9, weight_decay=self.l2_const)
 
         if model_file and os.path.exists(model_file):
             print("Loading model", model_file)
