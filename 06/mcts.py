@@ -307,7 +307,7 @@ class MCTS(object):
             Return: 所有action及对应概率
         """
 
-        self._first_ations = [act for act in self._first_ations if act not in state.actions]
+        self._first_ations = set([act for act in self._first_ations if act not in state.actions])
 
         # for n in count():
         for n in range(self._n_playout):
