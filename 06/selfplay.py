@@ -246,31 +246,31 @@ class FiveChessTrain():
         """启动训练"""
         try:
             # 先训练样本20局
-            # step = 0
-            # for i in range(20):
-            #     logging.info("TRAIN Batch:{} starting, Size:{}, n_in_row:{}".format(step + 1, size, n_in_row))
-            #     state, mcts_porb, winner = self.collect_selfplay_data()
-            #     if i == 0: 
-            #         print("-"*50,"state","-"*50)
-            #         print(state)
-            #         print("-"*50,"mcts_porb","-"*50)
-            #         print(mcts_porb)
-            #         print("-"*50,"winner","-"*50)
-            #         print(winner)
-            #     logging.info("TRAIN Batch:{} end".format(step + 1,))
-            #     step += 1               
+            step = 0
+            for i in range(20):
+                logging.info("TRAIN Batch:{} starting, Size:{}, n_in_row:{}".format(step + 1, size, n_in_row))
+                state, mcts_porb, winner = self.collect_selfplay_data()
+                if i == 0: 
+                    print("-"*50,"state","-"*50)
+                    print(state)
+                    print("-"*50,"mcts_porb","-"*50)
+                    print(mcts_porb)
+                    print("-"*50,"winner","-"*50)
+                    print(winner)
+                logging.info("TRAIN Batch:{} end".format(step + 1,))
+                step += 1               
 
-            training_loader = torch.utils.data.DataLoader(self.dataset, batch_size=self.batch_size, shuffle=True, num_workers=2,)
-            # tran_epochs = int(len(self.dataset)/(self.batch_size))
-            for i, data in enumerate(training_loader):  # 计划训练批次
-                # 使用对抗数据训练策略价值网络模型
-                loss, entropy = self.policy_update(data, self.epochs)              
-                if (i+1) % 100 == 0:
-                    self.policy_value_net.save_model(model_file)
-                    logging.info("Train idx {} : {} / {}".format(i, i*self.batch_size, len(self.dataset)))
+            # training_loader = torch.utils.data.DataLoader(self.dataset, batch_size=self.batch_size, shuffle=True, num_workers=2,)
+            # # tran_epochs = int(len(self.dataset)/(self.batch_size))
+            # for i, data in enumerate(training_loader):  # 计划训练批次
+            #     # 使用对抗数据训练策略价值网络模型
+            #     loss, entropy = self.policy_update(data, self.epochs)              
+            #     if (i+1) % 100 == 0:
+            #         self.policy_value_net.save_model(model_file)
+            #         logging.info("Train idx {} : {} / {}".format(i, i*self.batch_size, len(self.dataset)))
                    
             # 一轮训练完毕后与最佳模型进行对比
-            # win_ratio = self.policy_evaluate(self.policy_evaluate_size)
+            win_ratio = self.policy_evaluate(self.policy_evaluate_size)
             # # 如果输了，再训练一次
             # if win_ratio<=0.5:
             #     self.policy_evaluate(self.policy_evaluate_size)
