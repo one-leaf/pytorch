@@ -52,10 +52,11 @@ class Net(nn.Module):
         # 直接来18层的残差网络
         self.first_conv = nn.Conv2d(11, 64, 5, 1, 2, bias=False)
         self.first_conv_bn = nn.BatchNorm2d(64)
-        self.conv1=self._make_layer(64, 64, 2)
-        self.conv2=self._make_layer(64, 64, 2)
-        self.conv3=self._make_layer(64, 64, 2)
-        self.conv4=self._make_layer(64, 64, 2)
+        self.conv1=self._make_layer(64, 64, 3)
+        self.conv2=self._make_layer(64, 64, 3)
+        self.conv3=self._make_layer(64, 64, 3)
+        self.conv4=self._make_layer(64, 64, 3)
+        self.conv5=self._make_layer(64, 64, 3)
 
         # 动作预测
         self.act_conv1 = nn.Conv2d(64, 2, 1)
@@ -84,11 +85,11 @@ class Net(nn.Module):
     def forward(self, x):
         x = self.first_conv(x)
         x = self.first_conv_bn(x)
-        x = F.leaky_relu(x)
         x = self.conv1(x)
         x = self.conv2(x)
         x = self.conv3(x)
         x = self.conv4(x)
+        x = self.conv5(x)
 
         # 动作
         x_act = self.act_conv1(x)
