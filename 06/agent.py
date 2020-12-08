@@ -2,7 +2,7 @@ import random
 import numpy as np
 from game import FiveChess, FiveChessEnv
 from itertools import count
-
+from mcts import MCTSPlayer, MCTSPurePlayer
 # 游戏的AI封装
 class Agent(object):
     def __init__(self, size, n_in_row, is_shown=1):
@@ -33,7 +33,7 @@ class Agent(object):
         for i in count():
             # temp 权重 ，return_prob 是否返回概率数据
             player_in_turn = players[self.game.current_player]
-            if player_in_turn==player1:
+            if isinstance(player_in_turn, MCTSPlayer):
                 action, move_probs = player_in_turn.get_action(self.game, temp=temp, return_prob=1)
                 # action, move_probs = player_in_turn.get_action(self.game, temp=temp, return_prob=1)
                 # store the data
