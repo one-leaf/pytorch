@@ -50,23 +50,20 @@ class Net(nn.Module):
 
         # 由于每个棋盘大小对最终对应一个动作，所以补齐的效果比较好
         # 直接来18层的残差网络
-        self.first_conv = nn.Conv2d(11, 64, 5, 1, 2, bias=False)
-        self.first_conv_bn = nn.BatchNorm2d(64)
-        self.conv1=self._make_layer(64, 64, 3)
-        self.conv2=self._make_layer(64, 64, 3)
-        self.conv3=self._make_layer(64, 64, 3)
-        self.conv4=self._make_layer(64, 64, 3)
-        self.conv5=self._make_layer(64, 64, 3)
+        self.first_conv = nn.Conv2d(11,128,3,1,1, bias=False)
+        self.first_conv_bn = nn.BatchNorm2d(128)
+
+        self.conv=self._make_layer(128, 128, 19)
 
         # 动作预测
-        self.act_conv1 = nn.Conv2d(64, 2, 1)
+        self.act_conv1 = nn.Conv2d(128, 2, 1)
         self.act_conv1_bn = nn.BatchNorm2d(2)
         self.act_fc1 = nn.Linear(2*size*size, size*size)
         # 动作价值
-        self.val_conv1 = nn.Conv2d(64, 1, 1)
+        self.val_conv1 = nn.Conv2d(128, 1, 1)
         self.val_conv1_bn = nn.BatchNorm2d(1)
-        self.val_fc1 = nn.Linear(size*size, 64)
-        self.val_fc2 = nn.Linear(64, 1)
+        self.val_fc1 = nn.Linear(size*size, 128)
+        self.val_fc2 = nn.Linear(128, 1)
 
     def _make_layer(self,inchannel,outchannel,block_num,stride=1):
         #构建layer,包含多个residual block
@@ -85,11 +82,9 @@ class Net(nn.Module):
     def forward(self, x):
         x = self.first_conv(x)
         x = self.first_conv_bn(x)
-        x = self.conv1(x)
-        x = self.conv2(x)
-        x = self.conv3(x)
-        x = self.conv4(x)
-        x = self.conv5(x)
+        x = F.leaky_relu(x)
+
+        x = self.conv(x)
 
         # 动作
         x_act = self.act_conv1(x)
