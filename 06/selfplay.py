@@ -137,10 +137,10 @@ class FiveChessTrain():
 
         # 有一定几率和纯MCTS对抗
         r = random.random()
-        if r>0.6:
+        if r>0.9:
             pure_mcts_player = MCTSPurePlayer(c_puct=0, n_playout=1000)
             print("AI VS MCTS, pure_mcts_playout_num:", 1000)
-        elif r<=0.6 and r>0.5:
+        elif r<=0.9 and r>0.5:
             pure_mcts_player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=0, n_playout=self.n_playout, is_selfplay=1)
             print("AI VS AI, but c_puct=0, pure_mcts_playout_num:", 200)
         else:
