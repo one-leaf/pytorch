@@ -91,7 +91,7 @@ class FiveChessTrain():
         
         # 纯MCTS的模拟数，用于评估策略模型
         self.pure_mcts_playout_num = 4000 # 用户纯MCTS构建初始树时的随机走子步数
-        self.c_puct = 0.1  # MCTS child权重， 用来调节MCTS中 探索/乐观 的程度 默认 5
+        self.c_puct = 5  # MCTS child权重， 用来调节MCTS中 探索/乐观 的程度 默认 5
 
         if os.path.exists(model_file):
             # 使用一个训练好的策略价值网络
@@ -141,8 +141,8 @@ class FiveChessTrain():
             pure_mcts_player = MCTSPurePlayer(c_puct=5, n_playout=1000)
             print("AI VS MCTS, pure_mcts_playout_num:", 1000)
         elif r<0.9 and r>0.8:
-            pure_mcts_player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=5, n_playout=200, is_selfplay=1)
-            print("AI VS AI, but c_puct=5, pure_mcts_playout_num:", 200)
+            pure_mcts_player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=0, n_playout=200, is_selfplay=1)
+            print("AI VS AI, but c_puct=0, pure_mcts_playout_num:", 200)
         else:
             pure_mcts_player = None
 
