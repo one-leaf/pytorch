@@ -141,8 +141,8 @@ class FiveChessTrain():
             pure_mcts_player = MCTSPurePlayer(c_puct=5, n_playout=1000)
             print("AI VS MCTS, pure_mcts_playout_num:", 1000)
         elif r<0.9 and r>0.8:
-            pure_mcts_player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=0, n_playout=500, is_selfplay=1)
-            print("AI VS AI, but c_puct=0, pure_mcts_playout_num:", 500)
+            pure_mcts_player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=0, n_playout=200, is_selfplay=1)
+            print("AI VS AI, but c_puct=0, pure_mcts_playout_num:", 200)
         else:
             pure_mcts_player = None
 
