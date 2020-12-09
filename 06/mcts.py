@@ -547,14 +547,14 @@ class MCTSPlayer(object):
                 # print("AI move: %d,%d\n" % (action[0], action[1]))
             # print("AI:", action)
             if return_prob:
-                if action!=acts[idx]:
-                    positions = state.actions_to_positions([action, acts[idx]])
-                    p0 = positions[0]
-                    p1 = positions[1]
-                    prob0 = move_probs[p0]
-                    prob1 = move_probs[p1]
-                    move_probs[p0] = prob1
-                    move_probs[p1] = prob0
+                # if action!=acts[idx]:
+                #     positions = state.actions_to_positions([action, acts[idx]])
+                #     p0 = positions[0]
+                #     p1 = positions[1]
+                #     prob0 = move_probs[p0]
+                #     prob1 = move_probs[p1]
+                #     move_probs[p0] = prob1
+                #     move_probs[p1] = prob0
                 return action, move_probs
             else:
                 return action
