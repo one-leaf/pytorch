@@ -555,7 +555,6 @@ class MCTSPlayer(object):
                     prob1 = move_probs[p1]
                     move_probs[p0] = prob1
                     move_probs[p1] = prob0
-
                 return action, move_probs
             else:
                 return action
