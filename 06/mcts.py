@@ -392,6 +392,11 @@ class MCTS(object):
             state_copy = copy.deepcopy(state)
             self._playout(state_copy)
 
+            if n>len(state.availables):
+                visits = [self._root._children[act]._n_visits for act in self._root._children]
+                var = np.var(visits)
+                if var>1: break
+
         act_visits = [(act, node._n_visits) for act, node in self._root._children.items()]
         acts, visits = zip(*act_visits)
 
