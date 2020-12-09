@@ -523,7 +523,7 @@ class MCTSPlayer(object):
                 # 更新根节点并重用搜索树
                 self.mcts.update_root_with_action(action)
             else:  # 和人类对战
-                if state.step_count>=state.n_in_row*2:
+                if state.step_count>=state.n_in_row*4:
                     idx = np.argmax(act_probs)  
                     action = acts[idx]
                 else:               
