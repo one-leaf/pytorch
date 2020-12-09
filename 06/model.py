@@ -54,7 +54,7 @@ class Net(nn.Module):
         # 动作预测
         self.act_conv1 = nn.Conv2d(128, 1, 1)
         self.act_conv1_bn = nn.BatchNorm2d(1)
-        self.act_fc1 = nn.Linear(size*size, size*size+1)
+        self.act_fc1 = nn.Linear(size*size, size*size)
         # 动作价值
         self.val_conv1 = nn.Conv2d(128, 1, 1)
         self.val_conv1_bn = nn.BatchNorm2d(1)
