@@ -84,13 +84,13 @@ class FiveChessTrain():
         self.learn_rate = 1e-4
         self.lr_multiplier = 1.0  # 基于KL的自适应学习率
         self.temp = 1  # 概率缩放程度，实际预测0.01，训练采用1
-        self.n_playout = 300  # 每个动作的模拟次数
+        self.n_playout = 1000  # 每个动作的模拟次数
         self.play_batch_size = 1 # 每次自学习次数
         self.epochs = 1  # 重复训练次数, 推荐是5
         self.kl_targ = 0.02  # 策略价值网络KL值目标
         
         # 纯MCTS的模拟数，用于评估策略模型
-        self.pure_mcts_playout_num = 4000 # 用户纯MCTS构建初始树时的随机走子步数
+        self.pure_mcts_playout_num = 2000 # 用户纯MCTS构建初始树时的随机走子步数
         self.c_puct = 1  # MCTS child权重， 用来调节MCTS中 探索/乐观 的程度 默认 5
 
         if os.path.exists(model_file):
@@ -138,11 +138,11 @@ class FiveChessTrain():
         # 有一定几率和纯MCTS对抗
         r = random.random()
         if r>0.9:
-            pure_mcts_player = MCTSPurePlayer(c_puct=0, n_playout=1000)
-            print("AI VS MCTS, pure_mcts_playout_num:", 1000)
+            pure_mcts_player = MCTSPurePlayer(c_puct=0, n_playout=self.pure_mcts_playout_num)
+            print("AI VS MCTS, pure_mcts_playout_num:", self.pure_mcts_playout_num)
         elif r<=0.9 and r>0.8:
             pure_mcts_player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=0, n_playout=self.n_playout, is_selfplay=1)
-            print("AI VS AI, but c_puct=0, pure_mcts_playout_num:", 200)
+            print("AI VS AI, but c_puct=0, pure_mcts_playout_num:", self.n_playout)
         else:
             pure_mcts_player = None
 
