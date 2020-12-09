@@ -319,7 +319,7 @@ class MCTS(object):
                 visits = [self._root._children[act]._n_visits for act in self._root._children if self._root._children[act]._n_visits>0]
                 if len(visits)==1: break
                 var = np.var(visits)
-                if var>2: break
+                if var>1: break
             # if n%10==0 and n >= self._n_playout*0.2:
             #     act_visits = [(act, node._n_visits) for act, node in self._root._children.items()]
             #     acts, visits = zip(*act_visits)
