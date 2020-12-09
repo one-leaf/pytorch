@@ -54,8 +54,8 @@ class Agent(object):
                 states.append(self.game.current_state())
                 mcts_probs.append(move_probs)
                 current_players.append(self.game.current_player)
-            else:
-                print("ig", act, action)
+            # else:
+            #     print("ig", act, action)
 
             # perform a move
             self.game.step(action)
@@ -137,8 +137,8 @@ class Agent(object):
                 states.append(self.game.current_state())
                 mcts_probs.append(move_probs)
                 current_players.append(self.game.current_player)  
-            else:
-                print("ig", act, action)
+            # else:
+            #     print("ig", act, action)
 
             self.game.step(action)
 
