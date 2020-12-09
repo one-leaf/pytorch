@@ -351,8 +351,9 @@ class MCTS(object):
         # info={}
         for idx in sorted(range(len(visits)), key=visits.__getitem__)[::-1]:
             if len(info)>3: break
-            value = self._root._children[acts[idx]].get_value(5)
-            info[acts[idx]] = (visits[idx], round(value, 2))
+            # value = self._root._children[acts[idx]].get_value(5)
+            value = self._root._children[acts[idx]]._P
+            info[acts[idx]] = (visits[idx], round(value, 5))
 
         # temp = temp*((len(state.availables)/(state.size*state.size))**10)
         print(state.step_count+1,"AI:",(state.current_player),"_n_playout:", n, "info:", info, "first:",self._first_ations)
@@ -406,12 +407,12 @@ class MCTS(object):
         if max(visits)-min(visits)>10:
             for idx in sorted(range(len(visits)), key=visits.__getitem__)[::-1]:
                 if len(info)>3: break
-                value = self._root._children[acts[idx]].get_value(5)
+                value = self._root._children[acts[idx]].get_value(1)
                 info[acts[idx]] = (visits[idx], round(value, 2))
         else:
             for idx in range(len(visits)):
                 if len(info)>3: break
-                value = self._root._children[acts[idx]].get_value(5)
+                value = self._root._children[acts[idx]].get_value(1)
                 info[acts[idx]] = (visits[idx], round(value, 2)) 
         print(state.step_count+1,"MCTS:",(state.current_player),"_n_playout:", n, "info:", info, "first:",self._first_ations)
         m = np.array(visits)
