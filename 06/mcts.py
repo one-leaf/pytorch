@@ -490,6 +490,8 @@ class MCTSPlayer(object):
             acts, act_probs = self.mcts.get_action_probs(state, temp)
             positions = state.actions_to_positions(acts)
             move_probs[positions] = act_probs
+            idx = np.argmax(act_probs)    
+
             if self._is_selfplay:  # 自我对抗
                 # 添加Dirichlet Noise进行探索（自我训练所需）
                 # dirichlet噪声参数中的p 0.03：一般按照反比于每一步的可行move数量设置，所以棋盘扩大或改围棋之后这个参数需要减小（此值设置过大容易出现在自我对弈的训练中陷入到两方都只进攻不防守的困境中无法提高）
@@ -501,7 +503,6 @@ class MCTSPlayer(object):
                 #     p = 1.0 - len(state.availables)/(state.size * state.size)*0.10  #【0.90~1】 这里默认为 0.25
 
                 p= 0.75                
-                idx = np.argmax(act_probs)    
 
                 dirichlet = np.random.dirichlet(0.03 * np.ones(len(act_probs)))
                 position = np.random.choice(positions, p=p * act_probs + (1-p) * dirichlet) 
@@ -513,7 +514,7 @@ class MCTSPlayer(object):
                     action = random.choice(state.first_availables)
 
                 # 如果是下了几步后全部取最大值
-                if state.step_count>=state.n_in_row*4:
+                if state.step_count>=state.n_in_row*2:
                 # if random.random() < state.step_count*2/(state.size*state.size):
                     action = acts[idx]
 
@@ -523,8 +524,7 @@ class MCTSPlayer(object):
                 # 更新根节点并重用搜索树
                 self.mcts.update_root_with_action(action)
             else:  # 和人类对战
-                if state.step_count>=state.n_in_row*4:
-                    idx = np.argmax(act_probs)  
+                if state.step_count>=state.n_in_row*2:
                     action = acts[idx]
                 else:               
                     position = np.random.choice(positions, p=act_probs)
@@ -547,6 +547,15 @@ class MCTSPlayer(object):
                 # print("AI move: %d,%d\n" % (action[0], action[1]))
             # print("AI:", action)
             if return_prob:
+                if action!=acts[idx]:
+                    positions = state.actions_to_positions([action, acts[idx]])
+                    p0 = positions[0]
+                    p1 = positions[1]
+                    prob0 = move_probs[p0]
+                    prob1 = move_probs[p1]
+                    move_probs[p0] = prob1
+                    move_probs[p1] = prob0
+
                 return action, move_probs
             else:
                 return action
