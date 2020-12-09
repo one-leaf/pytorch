@@ -314,7 +314,7 @@ class MCTS(object):
             # print("\r_n_playout： {:.2f}%".format(n*100 / self._n_playout), end='')
             state_copy = copy.deepcopy(state)
             self._playout_network(state_copy)
-            
+
             if n>len(state.availables):
                 visits = [self._root._children[act]._n_visits for act in self._root._children]
                 var = np.var(visits)
@@ -514,8 +514,12 @@ class MCTSPlayer(object):
                 # 更新根节点并重用搜索树
                 self.mcts.update_root_with_action(action)
             else:  # 和人类对战
-                position = np.random.choice(positions, p=act_probs)
-                action = state.positions_to_actions([position])[0]
+                if state.step_count>=state.n_in_row*2:
+                    idx = np.argmax(act_probs)  
+                    action = acts[idx]
+                else:               
+                    position = np.random.choice(positions, p=act_probs)
+                    action = state.positions_to_actions([position])[0]
                 # 更新根节点:根据最后action向前探索树
                 # root = self.mcts._root
                 # for act in root._children:
