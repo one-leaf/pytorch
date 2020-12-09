@@ -380,7 +380,7 @@ class MCTS(object):
         l=[0]
         for act in node._children:
             l.append(self.max_depth_tree(node._children[act])+1)
-        return max(l)
+        return max(l)-1
 
     # 按访问次数返回当前状态下的动作及其概率，构建所有的树
     # 这个是 mcts 的标准方法
