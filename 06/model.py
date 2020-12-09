@@ -31,7 +31,7 @@ class ResidualBlock(nn.Module):
         self.left=nn.Sequential(
             nn.Conv2d(inchannel,outchannel,3,stride,1,bias=False),
             nn.BatchNorm2d(outchannel),
-            nn.relu(inplace=True),
+            nn.ReLU(inplace=True),
             nn.Conv2d(outchannel,outchannel,3,1,1,bias=False),
             nn.BatchNorm2d(outchannel)
         )
