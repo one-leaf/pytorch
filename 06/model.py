@@ -31,7 +31,7 @@ class ResidualBlock(nn.Module):
         self.left=nn.Sequential(
             nn.Conv2d(inchannel,outchannel,3,stride,1,bias=False),
             nn.BatchNorm2d(outchannel),
-            nn.LeakyReLU(inplace=True),
+            nn.relu(inplace=True),
             nn.Conv2d(outchannel,outchannel,3,1,1,bias=False),
             nn.BatchNorm2d(outchannel)
         )
@@ -44,21 +44,17 @@ class ResidualBlock(nn.Module):
         return F.relu(out)
 
 class Net(nn.Module):
-
     def __init__(self, size):
         super(Net, self).__init__()
 
         # 由于每个棋盘大小对最终对应一个动作，所以补齐的效果比较好
         # 直接来18层的残差网络
-        self.first_conv = nn.Conv2d(11,128,3,1,1, bias=False)
-        self.first_conv_bn = nn.BatchNorm2d(128)
-
-        self.conv=self._make_layer(128, 128, 19)
+        self.conv=self._make_layer(11, 128, 20)
 
         # 动作预测
-        self.act_conv1 = nn.Conv2d(128, 2, 1)
-        self.act_conv1_bn = nn.BatchNorm2d(2)
-        self.act_fc1 = nn.Linear(2*size*size, size*size)
+        self.act_conv1 = nn.Conv2d(128, 1, 1)
+        self.act_conv1_bn = nn.BatchNorm2d(1)
+        self.act_fc1 = nn.Linear(size*size, size*size+1)
         # 动作价值
         self.val_conv1 = nn.Conv2d(128, 1, 1)
         self.val_conv1_bn = nn.BatchNorm2d(1)
@@ -80,25 +76,20 @@ class Net(nn.Module):
         return nn.Sequential(*layers)
 
     def forward(self, x):
-        x = self.first_conv(x)
-        x = self.first_conv_bn(x)
-        x = F.leaky_relu(x)
-
         x = self.conv(x)
 
         # 动作
         x_act = self.act_conv1(x)
         x_act = self.act_conv1_bn(x_act)
-        x_act = F.leaky_relu(x_act)
         x_act = x_act.view(x_act.size(0), -1)
-        x_act = F.log_softmax(self.act_fc1(x_act),dim=1)
+        x_act = F.log_softmax(self.act_fc1(x_act), dim=1)
 
         # 胜率 输出为 -1 ~ 1 之间的数字
         x_val = self.val_conv1(x)
         x_val = self.val_conv1_bn(x_val)
-        x_val = F.leaky_relu(x_val)
+        x_val = F.relu(x_val)
         x_val = x_val.view(x_val.size(0), -1)
-        x_val = F.leaky_relu(self.val_fc1(x_val))
+        x_val = F.relu(self.val_fc1(x_val))
         x_val = torch.tanh(self.val_fc2(x_val))
         return x_act, x_val
 
