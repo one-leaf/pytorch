@@ -316,7 +316,7 @@ class MCTS(object):
             self._playout_network(state_copy)
 
             if n>len(state.availables):
-                visits = [self._root._children[act]._n_visits for act in self._root._children]
+                visits = [self._root._children[act]._n_visits for act in self._root._children if self._root._children[act]._n_visits>0]
                 var = np.var(visits)
                 if var>1: break
             # if n%10==0 and n >= self._n_playout*0.2:
@@ -393,7 +393,7 @@ class MCTS(object):
             self._playout(state_copy)
 
             if n>len(state.availables):
-                visits = [self._root._children[act]._n_visits for act in self._root._children]
+                visits = [self._root._children[act]._n_visits for act in self._root._children if self._root._children[act]._n_visits>0]
                 var = np.var(visits)
                 if var>1: break
 
