@@ -81,7 +81,7 @@ class FiveChessTrain():
         self.max_keep_size = 500000  # 保留最近对战样本个数 平均一局大约400~600个样本, 也就是包含了最近1000次对局数据
 
         # 训练参数
-        self.learn_rate = 1e-5
+        self.learn_rate = 1e-6
         self.lr_multiplier = 1.0  # 基于KL的自适应学习率
         self.temp = 1  # 概率缩放程度，实际预测0.01，训练采用1
         self.n_playout = 600  # 每个动作的模拟次数
