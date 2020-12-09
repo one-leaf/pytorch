@@ -350,10 +350,10 @@ class MCTS(object):
         info={"depth":self.max_depth_tree()}
         # info={}
         for idx in sorted(range(len(visits)), key=visits.__getitem__)[::-1]:
-            if len(info)>3: break
-            # value = self._root._children[acts[idx]].get_value(5)
-            value = self._root._children[acts[idx]]._P
-            info[acts[idx]] = (visits[idx], round(value, 5))
+            if len(info)>2: break
+            v = self._root._children[acts[idx]].get_value(self._c_puct)
+            p = self._root._children[acts[idx]]._P
+            info[acts[idx]] = (visits[idx], round(v,2), round(p,5))
 
         # temp = temp*((len(state.availables)/(state.size*state.size))**10)
         print(state.step_count+1,"AI:",(state.current_player),"_n_playout:", n, "info:", info, "first:",self._first_ations)
