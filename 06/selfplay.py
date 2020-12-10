@@ -3,7 +3,7 @@ from torch import batch_norm, sqrt
 from model import PolicyValueNet  
 from mcts import MCTSPurePlayer, MCTSPlayer
 from agent import Agent
-import os, glob, pickle
+import os, glob, pickle, uuid
 import sys, time
 import random
 import logging
@@ -20,6 +20,10 @@ data_dir = os.path.join(curr_dir, './data/%s_%s/'%(size,n_in_row))
 if not os.path.exists(data_dir):
     os.makedirs(data_dir)
 
+data_wait_dir = os.path.join(curr_dir, './data/%s_%s_wait/'%(size,n_in_row))
+if not os.path.exists(data_wait_dir):
+    os.makedirs(data_wait_dir)
+
 model_dir = os.path.join(curr_dir, './model/')
 if not os.path.exists(model_dir):
     os.makedirs(model_dir)
@@ -27,54 +31,7 @@ if not os.path.exists(model_dir):
 model_file =  os.path.join(model_dir, 'model_%s_%s.pth'%(size,n_in_row))
 best_model_file =  os.path.join(model_dir, 'best_model_%s_%s.pth'%(size,n_in_row))
 
-# 定义数据集
-class Dataset(torch.utils.data.Dataset):
-    # trans_count 希望训练的总记录数，为 训练轮次 * Batch_Size
-    # max_keep_size 最多保存的训练样本数
-    def __init__(self, data_dir, max_keep_size):
-        self.data_dir = data_dir
-        self.max_keep_size = max_keep_size
-        self.index = 0
-        self.data_index_file = os.path.join(data_dir, 'index.txt')
-        self.file_list = deque(maxlen=max_keep_size)        
-        self._save_lock = Lock()
-        self.load_index()
-        self.load_game_files()
-
-    def __len__(self):
-        return len(self.file_list)
-
-    def __getitem__(self, index):
-        filename = self.file_list[index]
-        state, mcts_prob, winner = pickle.load(open(filename, "rb"))
-        state = torch.from_numpy(state).float()
-        mcts_prob = torch.from_numpy(mcts_prob).float()
-        winner = torch.as_tensor(winner).float()
-        return state, mcts_prob, winner
-
-    def load_game_files(self):
-        files = glob.glob(os.path.join(self.data_dir, "*.pkl"))
-        files = sorted(files, key=lambda x: os.path.getmtime(x))
-        for filename in files:
-            self.file_list.append(filename)
-
-    def save_index(self):
-        with open(self.data_index_file, "w") as f:
-            f.write(str(self.index))
-
-    def load_index(self):
-        if os.path.exists(self.data_index_file):
-            self.index = int(open(self.data_index_file, 'r').read().strip())
-
-    def save(self, obj):
-        with self._save_lock:
-            filename = "{}.pkl".format(self.index % self.max_keep_size,)
-            savefile = os.path.join(self.data_dir, filename)
-            pickle.dump(obj, open(savefile, "wb"))
-            self.index += 1
-            self.save_index()
-
-class FiveChessTrain():
+class FiveChessPlay():
     def __init__(self):
         self.policy_evaluate_size = 20  # 策略评估胜率时的模拟对局次数
         self.batch_size = 512  # 训练一批数据的长度
@@ -100,10 +57,10 @@ class FiveChessTrain():
             # 使用一个新的的策略价值网络
             self.policy_value_net = PolicyValueNet(size)
 
-        print("start data loader")
-        self.dataset = Dataset(data_dir, self.max_keep_size)
-        print("dataset len:",len(self.dataset),"index:",self.dataset.index)
-        print("end data loader")
+    def save_wait_data(self, obj):
+        filename = "{}.pkl".format(uuid.uuid1())
+        savefile = os.path.join(self.data_wait_dir, filename)
+        pickle.dump(obj, open(savefile, "wb"))
 
     def get_equi_data(self, play_data):
         """
@@ -157,39 +114,10 @@ class FiveChessTrain():
 
         # 保存训练数据
         for obj in play_data:
-            self.dataset.save(obj)
+            self.save_wait_data(obj)
         return play_data[-1]
 
-    def policy_update(self, sample_data, epochs=1):
-        """更新策略价值网络policy-value"""
-        # 训练策略价值网络
-        state_batch, mcts_probs_batch, winner_batch = sample_data
-
-        # old_probs, old_v = self.policy_value_net.policy_value(state_batch)  
-        for i in range(epochs):
-            loss, v_loss, p_loss, entropy = self.policy_value_net.train_step(state_batch, mcts_probs_batch, winner_batch, self.learn_rate * self.lr_multiplier)
-            # new_probs, new_v = self.policy_value_net.policy_value(state_batch)
-
-            # 散度计算：
-            # D(P||Q) = sum( pi * log( pi / qi) ) = sum( pi * (log(pi) - log(qi)) )
-            # kl = np.mean(np.sum(old_probs * (np.log(old_probs + 1e-10) - np.log(new_probs + 1e-10)), axis=1))
-            # if kl > self.kl_targ * epochs:  # 如果D_KL跑偏则尽早停止
-            #     break
-
-        # 自动调整学习率
-        # if kl > self.kl_targ * 2 and self.lr_multiplier > 0.1:
-        #     self.lr_multiplier /= 1.5
-        # elif kl < self.kl_targ / 2 and self.lr_multiplier < 10:
-        #     self.lr_multiplier *= 1.5
-        # 如果学习到了，explained_var 应该趋近于 1，如果没有学习到也就是胜率都为很小值时，则为 0
-        # explained_var_old = (1 - np.var(np.array(winner_batch) - old_v.flatten()) / np.var(np.array(winner_batch)))
-        # explained_var_new = (1 - np.var(np.array(winner_batch) - new_v.flatten()) / np.var(np.array(winner_batch)))
-        # entropy 信息熵，越小越好
-        # logging.info(("TRAIN kl:{:.5f},lr_multiplier:{:.3f},v_loss:{:.5f},p_loss:{:.5f},entropy:{:.5f},var_old:{:.5f},var_new:{:.5f}"
-        #               ).format(kl, self.lr_multiplier, v_loss, p_loss, entropy, explained_var_old, explained_var_new))
-        logging.info(("TRAIN v_loss:{:.5f},p_loss:{:.5f},entropy:{:.5f}").format(v_loss, p_loss, entropy))
-        return loss, entropy
-
+    
     def policy_evaluate(self, n_games=10):
         """
         策略胜率评估：当前模型与最佳模型对战n局看胜率
@@ -224,7 +152,7 @@ class FiveChessTrain():
                 play_data = self.get_equi_data(play_data)
                 logging.info("Eval Play end. length:%s saving ..." % len(play_data))
                 for obj in play_data:
-                    self.dataset.save(obj)
+                    self.save_wait_data(obj)
 
             agent.game.print()
 
@@ -261,15 +189,6 @@ class FiveChessTrain():
                     print(winner)
                 logging.info("TRAIN Batch:{} end".format(step + 1,))
                 step += 1               
-
-            # training_loader = torch.utils.data.DataLoader(self.dataset, batch_size=self.batch_size, shuffle=True, num_workers=2,)
-            # # tran_epochs = int(len(self.dataset)/(self.batch_size))
-            # for i, data in enumerate(training_loader):  # 计划训练批次
-            #     # 使用对抗数据训练策略价值网络模型
-            #     loss, entropy = self.policy_update(data, self.epochs)              
-            #     if (i+1) % 100 == 0:
-            #         self.policy_value_net.save_model(model_file)
-            #         logging.info("Train idx {} : {} / {}".format(i, i*self.batch_size, len(self.dataset)))
                    
             # 一轮训练完毕后与最佳模型进行对比
             win_ratio = self.policy_evaluate(self.policy_evaluate_size)
@@ -281,8 +200,7 @@ class FiveChessTrain():
             logging.info('quit')
 
 if __name__ == '__main__':
-    # train
+    # play
     logging.basicConfig(format='%(asctime)s %(message)s', level=logging.DEBUG)
-    training = FiveChessTrain()
-    # training.policy_evaluate(training.policy_evaluate_size)
-    training.run()
+    playing = FiveChessPlay()
+    playing.run()

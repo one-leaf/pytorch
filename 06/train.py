@@ -20,6 +20,10 @@ data_dir = os.path.join(curr_dir, './data/%s_%s/'%(size,n_in_row))
 if not os.path.exists(data_dir):
     os.makedirs(data_dir)
 
+data_wait_dir = os.path.join(curr_dir, './data/%s_%s_wait/'%(size,n_in_row))
+if not os.path.exists(data_wait_dir):
+    os.makedirs(data_wait_dir)
+
 model_dir = os.path.join(curr_dir, './model/')
 if not os.path.exists(model_dir):
     os.makedirs(model_dir)
@@ -39,6 +43,7 @@ class Dataset(torch.utils.data.Dataset):
         self.file_list = deque(maxlen=max_keep_size)        
         self._save_lock = Lock()
         self.load_index()
+        self.copy_wait_file()
         self.load_game_files()
 
     def __len__(self):
@@ -65,6 +70,15 @@ class Dataset(torch.utils.data.Dataset):
     def load_index(self):
         if os.path.exists(self.data_index_file):
             self.index = int(open(self.data_index_file, 'r').read().strip())
+
+    def copy_wait_file(self):
+        for fn in os.listdir(data_wait_dir):
+            filename = "{}.pkl".format(self.index % self.max_keep_size,)
+            savefile = os.path.join(self.data_dir, filename)
+            if os.path.exists(savefile): os.remove(savefile)
+            os.rename(os.path.join(data_wait_dir,fn), savefile)
+            self.index += 1
+            self.save_index()        
 
     def save(self, obj):
         with self._save_lock:
@@ -105,57 +119,6 @@ class FiveChessTrain():
         print("dataset len:",len(self.dataset),"index:",self.dataset.index)
         print("end data loader")
 
-    def get_equi_data(self, play_data):
-        """
-        通过旋转和翻转增加数据集
-        play_data: [(state, mcts_prob, winner_z), ..., ...]
-        """
-        extend_data = []
-        for state, mcts_porb, winner in play_data:
-            mcts_porb = mcts_porb.reshape(size, size)
-            for i in [1, 2, 3, 4]:
-                # 逆时针旋转
-                equi_state = np.array([np.rot90(s, i) for s in state])
-                # equi_mcts_prob = np.rot90(np.flipud(mcts_porb.reshape(size, size)), i)
-                equi_mcts_prob = np.rot90(mcts_porb, i)
-                # extend_data.append((equi_state, np.flipud(equi_mcts_prob).flatten(), winner))
-                extend_data.append((equi_state, equi_mcts_prob.flatten(), winner))
-                # 水平翻转
-                equi_state = np.array([np.fliplr(s) for s in equi_state])
-                equi_mcts_prob = np.fliplr(equi_mcts_prob)
-                # extend_data.append((equi_state, np.flipud(equi_mcts_prob).flatten(), winner))
-                extend_data.append((equi_state, equi_mcts_prob.flatten(), winner))
-        return extend_data
-
-    def collect_selfplay_data(self):
-        """收集自我对抗数据用于训练"""       
-        # 使用MCTS蒙特卡罗树搜索进行自我对抗
-        logging.info("TRAIN Self Play starting ...")
-        agent = Agent(size, n_in_row, is_shown=0)
-        # 创建使用策略价值网络来指导树搜索和评估叶节点的MCTS玩家
-        mcts_player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout, is_selfplay=1)
-
-        # 有一定几率和纯MCTS对抗
-        if random.random()>0.8:
-            pure_mcts_player = MCTSPurePlayer(c_puct=5, n_playout=2000)
-            print("AI VS MCTS, pure_mcts_playout_num:", 2000)
-        else:
-            pure_mcts_player = None
-
-        # 开始下棋
-        winner, play_data = agent.start_self_play(mcts_player, pure_mcts_player, temp=self.temp)
-        agent.game.print()                   
-
-        play_data = list(play_data)[:]     
-        # 采用翻转棋盘来增加样本数据集
-        play_data = self.get_equi_data(play_data)
-        logging.info("Self Play end. length:%s saving ..." % len(play_data))
-
-        # 保存训练数据
-        for obj in play_data:
-            self.dataset.save(obj)
-        return play_data[-1]
-
     def policy_update(self, sample_data, epochs=1):
         """更新策略价值网络policy-value"""
         # 训练策略价值网络
@@ -186,95 +149,16 @@ class FiveChessTrain():
         logging.info(("TRAIN v_loss:{:.5f},p_loss:{:.5f},entropy:{:.5f}").format(v_loss, p_loss, entropy))
         return loss, entropy
 
-    def policy_evaluate(self, n_games=10):
-        """
-        策略胜率评估：当前模型与最佳模型对战n局看胜率
-        """
-        # 当前训练好的模型
-        current_mcts_player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout)
-
-        # 如果不存在最佳模型，直接将当前模型保存为最佳模型
-        if not os.path.exists(best_model_file):
-            self.policy_value_net.save_model(best_model_file)
-            return
-
-        best_policy_value_net = PolicyValueNet(size, model_file=best_model_file)
-        best_mcts_player = MCTSPlayer(best_policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout)
-
-        win_cnt = defaultdict(int)
-        for i in range(n_games):  # 对战
-            agent = Agent(size, n_in_row, is_shown=0)
-            winner, play_data = agent.start_self_evaluate(current_mcts_player, best_mcts_player, temp=1, start_player=i % 2)
-            if winner == current_mcts_player.player:
-                win_cnt[0] += 1  # 赢
-                print("Curr Model Win!","win:", win_cnt[0],"lost",win_cnt[1],"tie",win_cnt[-1])
-            elif winner == -1:  
-                win_cnt[-1] += 1 # 平局
-                print("Tie!","win:", win_cnt[0],"lost",win_cnt[1],"tie",win_cnt[-1])
-            else:
-                win_cnt[1] += 1  # 输
-                print("Curr Model Lost!","win:", win_cnt[0],"lost",win_cnt[1],"tie",win_cnt[-1])
-            
-            agent.game.print()
-
-            # 保存训练数据
-            play_data = list(play_data)[:]
-            # 如果训练数据不够，就通过翻转增加样本
-            if len(self.dataset)<self.max_keep_size/2:
-                play_data = self.get_equi_data(play_data)
-            logging.info("Eval Play end. length:%s saving ..." % len(play_data))
-            for obj in play_data:
-                self.dataset.save(obj)
-
-        win_ratio = win_cnt[0] / n_games
-
-        logging.info("curr model vs best model: win: {}, lose: {}, tie: {}, win_ratio: {}".format(
-            win_cnt[0], win_cnt[1], win_cnt[-1], win_ratio))
-
-        # 如果当前模型的胜率大于等于0.7,保留为最佳模型
-        if win_ratio>=0.7:
-            t = os.path.getctime(best_model_file)
-            timeStruct = time.localtime(t)
-            timestr = time.strftime('%Y_%m_%d_%H_%M', timeStruct)
-            os.rename(best_model_file, best_model_file+"."+timestr)
-            self.policy_value_net.save_model(best_model_file)
-            print("save curr modle to best model")
-
-        return win_ratio
 
     def run(self):
         """启动训练"""
-        try:
-            # 先训练样本20局
-            # step = 0
-            # for i in range(20):
-            #     logging.info("TRAIN Batch:{} starting, Size:{}, n_in_row:{}".format(step + 1, size, n_in_row))
-            #     state, mcts_porb, winner = self.collect_selfplay_data()
-            #     if i == 0: 
-            #         print("-"*50,"state","-"*50)
-            #         print(state)
-            #         print("-"*50,"mcts_porb","-"*50)
-            #         print(mcts_porb)
-            #         print("-"*50,"winner","-"*50)
-            #         print(winner)
-            #     logging.info("TRAIN Batch:{} end".format(step + 1,))
-            #     step += 1               
-
+        try:      
             training_loader = torch.utils.data.DataLoader(self.dataset, batch_size=self.batch_size, shuffle=True, num_workers=2,)
-            # tran_epochs = int(len(self.dataset)/(self.batch_size))
             for i, data in enumerate(training_loader):  # 计划训练批次
-                # 使用对抗数据训练策略价值网络模型
                 loss, entropy = self.policy_update(data, self.epochs)              
                 if (i+1) % 100 == 0:
                     logging.info("Train idx {} : {} / {}".format(i, i*self.batch_size, len(self.dataset)))
             self.policy_value_net.save_model(model_file)
-                   
-            # 一轮训练完毕后与最佳模型进行对比
-            # win_ratio = self.policy_evaluate(self.policy_evaluate_size)
-            # # 如果输了，再训练一次
-            # if win_ratio<=0.5:
-            #     self.policy_evaluate(self.policy_evaluate_size)
-            #     print("lost all, add more sample")
         except KeyboardInterrupt:
             logging.info('quit')
 
@@ -282,5 +166,4 @@ if __name__ == '__main__':
     # train
     logging.basicConfig(format='%(asctime)s %(message)s', level=logging.DEBUG)
     training = FiveChessTrain()
-    # training.policy_evaluate(training.policy_evaluate_size)
     training.run()
