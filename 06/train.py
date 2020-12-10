@@ -75,11 +75,11 @@ class Dataset(torch.utils.data.Dataset):
         movefiles=os.listdir(data_wait_dir)
         # 等待一秒钟，防止有数据还在写入
         time.sleep(1)
-        for fn in movefiles:
+        for i, fn in enumerate(movefiles):
             filename = "{}.pkl".format(self.index % self.max_keep_size,)
             savefile = os.path.join(self.data_dir, filename)
             if os.path.exists(savefile): os.remove(savefile)
-            print("mv file %s to %s"%(fn, savefile))
+            print("mv %s file %s to %s"%(i, fn, savefile))
             os.rename(os.path.join(data_wait_dir,fn), savefile)
             self.index += 1
             self.save_index()        
