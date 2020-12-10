@@ -195,6 +195,7 @@ class PolicyValueNet():
         # Note: the L2 penalty is incorporated in optimizer
         # 胜率
         value_loss = F.mse_loss(value.view(-1), winner_batch)
+        # 概率 log似然代价函数 log_loss = -sum(y_k*log(a_k))
         policy_loss = -torch.mean(torch.sum(mcts_probs * log_act_probs, 1))
         loss = value_loss + policy_loss
 
