@@ -175,9 +175,9 @@ class FiveChessPlay():
     def run(self):
         """启动训练"""
         try:
-            # 先训练样本20局
+            # 先训练样本50局
             step = 0
-            for i in range(20):
+            for i in range(50):
                 logging.info("TRAIN Batch:{} starting, Size:{}, n_in_row:{}".format(step + 1, size, n_in_row))
                 state, mcts_porb, winner = self.collect_selfplay_data()
                 if i == 0: 
