@@ -159,7 +159,7 @@ class FiveChessTrain():
             training_loader = torch.utils.data.DataLoader(self.dataset, batch_size=self.batch_size, shuffle=True, num_workers=2,)
             for i, data in enumerate(training_loader):  # 计划训练批次
                 loss, v_loss, p_loss, entropy = self.policy_update(data, self.epochs)              
-                if (i+1) % 100 == 0:
+                if (i+1) % 10 == 0:
                     logging.info(("TRAIN idx {} : {} / {} v_loss:{:.5f}, p_loss:{:.5f}, entropy:{:.5f}")\
                         .format(i, i*self.batch_size, dataset_len, v_loss, p_loss, entropy))
 
