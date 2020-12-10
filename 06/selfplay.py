@@ -218,17 +218,15 @@ class FiveChessTrain():
             else:
                 win_cnt[1] += 1  # 输
                 print("Curr Model Lost!","win:", win_cnt[0],"lost",win_cnt[1],"tie",win_cnt[-1])
-            
-            agent.game.print()
-
-            # 保存训练数据
-            play_data = list(play_data)[:]
-            # 如果训练数据不够，就通过翻转增加样本
-            if len(self.dataset)<self.max_keep_size/2:
+                
+                # 如果输了就保存训练数据
+                play_data = list(play_data)[:]
                 play_data = self.get_equi_data(play_data)
-            logging.info("Eval Play end. length:%s saving ..." % len(play_data))
-            for obj in play_data:
-                self.dataset.save(obj)
+                logging.info("Eval Play end. length:%s saving ..." % len(play_data))
+                for obj in play_data:
+                    self.dataset.save(obj)
+
+            agent.game.print()
 
         win_ratio = win_cnt[0] / n_games
 
