@@ -451,6 +451,10 @@ class MCTSPurePlayer(object):
             idx = np.argmax(act_probs) 
             action = acts[idx]
 
+            # 第一步棋为一手交换，随便下
+            if state.step_count==0: 
+                action = random.choice(state.first_availables)
+
             # 更新根节点:根据最后action向前探索树
             self.mcts.update_root_with_action(None)
             # print("MCTS:", action)
