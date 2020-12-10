@@ -161,7 +161,7 @@ class FiveChessPlay():
         logging.info("curr model vs best model: win: {}, lose: {}, tie: {}, win_ratio: {}".format(
             win_cnt[0], win_cnt[1], win_cnt[-1], win_ratio))
 
-        # 如果当前模型的胜率大于等于0.7,保留为最佳模型
+        # 如果当前模型的胜率大于等于0.6,保留为最佳模型
         if win_ratio>=0.6:
             t = os.path.getctime(best_model_file)
             timeStruct = time.localtime(t)
