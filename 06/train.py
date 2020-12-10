@@ -79,10 +79,10 @@ class Dataset(torch.utils.data.Dataset):
             filename = "{}.pkl".format(self.index % self.max_keep_size,)
             savefile = os.path.join(self.data_dir, filename)
             if os.path.exists(savefile): os.remove(savefile)
-            print("mv %s file %s to %s"%(i, fn, savefile))
             os.rename(os.path.join(data_wait_dir,fn), savefile)
             self.index += 1
             self.save_index()        
+        print("mv %s files to train"%len(movefiles))
 
     def save(self, obj):
         with self._save_lock:
