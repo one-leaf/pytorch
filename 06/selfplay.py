@@ -59,7 +59,7 @@ class FiveChessPlay():
 
     def save_wait_data(self, obj):
         filename = "{}.pkl".format(uuid.uuid1())
-        savefile = os.path.join(self.data_wait_dir, filename)
+        savefile = os.path.join(data_wait_dir, filename)
         pickle.dump(obj, open(savefile, "wb"))
 
     def get_equi_data(self, play_data):
