@@ -150,17 +150,20 @@ class FiveChessTrain():
         # entropy 信息熵，越小越好
         # logging.info(("TRAIN kl:{:.5f},lr_multiplier:{:.3f},v_loss:{:.5f},p_loss:{:.5f},entropy:{:.5f},var_old:{:.5f},var_new:{:.5f}"
         #               ).format(kl, self.lr_multiplier, v_loss, p_loss, entropy, explained_var_old, explained_var_new))
-        logging.info(("TRAIN v_loss:{:.5f},p_loss:{:.5f},entropy:{:.5f}").format(v_loss, p_loss, entropy))
-        return loss, entropy
+        return loss, v_loss, p_loss, entropy
 
     def run(self):
         """启动训练"""
-        try:      
+        try:
+            dataset_len = len(self.dataset)      
             training_loader = torch.utils.data.DataLoader(self.dataset, batch_size=self.batch_size, shuffle=True, num_workers=2,)
             for i, data in enumerate(training_loader):  # 计划训练批次
-                loss, entropy = self.policy_update(data, self.epochs)              
+                loss, v_loss, p_loss, entropy = self.policy_update(data, self.epochs)              
                 if (i+1) % 100 == 0:
-                    logging.info("Train idx {} : {} / {}".format(i, i*self.batch_size, len(self.dataset)))
+                    logging.info(("TRAIN idx {} : {} / {} v_loss:{:.5f}, p_loss:{:.5f}, entropy:{:.5f}")\
+                        .format(i, i*self.batch_size, dataset_len, v_loss, p_loss, entropy))
+
+                    # logging.info("Train idx {} : {} / {}".format(i, i*self.batch_size, len(self.dataset)))
             self.policy_value_net.save_model(model_file)
         except KeyboardInterrupt:
             logging.info('quit')
