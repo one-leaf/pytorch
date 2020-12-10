@@ -72,10 +72,14 @@ class Dataset(torch.utils.data.Dataset):
             self.index = int(open(self.data_index_file, 'r').read().strip())
 
     def copy_wait_file(self):
-        for fn in os.listdir(data_wait_dir):
+        movefiles=os.listdir(data_wait_dir)
+        # 等待一秒钟，防止有数据还在写入
+        time.sleep(1)
+        for fn in movefiles:
             filename = "{}.pkl".format(self.index % self.max_keep_size,)
             savefile = os.path.join(self.data_dir, filename)
             if os.path.exists(savefile): os.remove(savefile)
+            print("mv file %s to %s"%(fn, savefile))
             os.rename(os.path.join(data_wait_dir,fn), savefile)
             self.index += 1
             self.save_index()        
@@ -148,7 +152,6 @@ class FiveChessTrain():
         #               ).format(kl, self.lr_multiplier, v_loss, p_loss, entropy, explained_var_old, explained_var_new))
         logging.info(("TRAIN v_loss:{:.5f},p_loss:{:.5f},entropy:{:.5f}").format(v_loss, p_loss, entropy))
         return loss, entropy
-
 
     def run(self):
         """启动训练"""
