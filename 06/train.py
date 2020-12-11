@@ -172,14 +172,15 @@ class FiveChessTrain():
                     else:
                         new_probs, _ = self.policy_value_net.policy_value(test_batch)
                         kl = np.mean(np.sum(old_probs * (np.log(old_probs + 1e-10) - np.log(new_probs + 1e-10)), axis=1))
+                        old_probs = None
         
                         if kl > self.kl_targ * 2:
                             self.lr_multiplier /= 1.5
                         elif kl < self.kl_targ / 2 and self.lr_multiplier < 100:
                             self.lr_multiplier *= 1.5
-
-                        print("kl:",kl,"lr_multiplier:",self.lr_multiplier,"lr:",self.learn_rate*self.lr_multiplier)
-                        old_probs = None
+                        else:
+                            continue
+                        logging.info("kl:{} lr_multiplier:{} lr:{}".format(kl, self.lr_multiplier, self.learn_rate*self.lr_multiplier))
 
                     # logging.info("Train idx {} : {} / {}".format(i, i*self.batch_size, len(self.dataset)))
             self.policy_value_net.save_model(model_file)
