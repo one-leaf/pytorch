@@ -309,7 +309,7 @@ class MCTS(object):
         """
 
         self._first_ations = set([act for act in self._first_ations if act not in state.actions])
-
+        var = 0
         # for n in count():
         for n in range(self._n_playout):
             # print("\r_n_playout： {:.2f}%".format(n*100 / self._n_playout), end='')
@@ -356,7 +356,7 @@ class MCTS(object):
             info[acts[idx]] = (visits[idx], round(v,2), round(p,5))
 
         # temp = temp*((len(state.availables)/(state.size*state.size))**10)
-        print(state.step_count+1,"AI:",(state.current_player),"_n_playout:", n, "info:", info, "first:",self._first_ations)
+        print(state.step_count+1,"AI:",(state.current_player),"_n_playout:", n, "info:", info, "first:",self._first_ations, "var:", var)
         # softmax概率，先用log(visites)，拉平差异，再乘以一个权重，这样给了一个可以调节的参数，
         # temp 越小，导致softmax的越肯定，也就是当temp=1e-3时，基本上返回只有一个1,其余概率都是0; 训练的时候 temp=1
         # 论文里面提到使用 m = c_pw * n ^ k = 1 * n ^ 0.5 来代替n
@@ -390,6 +390,7 @@ class MCTS(object):
             state: 当前游戏盘面
             Return: 构建的树中访问量最大的action
         """
+        var = 0
         for n in range(self._n_playout):
             state_copy = copy.deepcopy(state)
             self._playout(state_copy)
@@ -413,7 +414,7 @@ class MCTS(object):
                 if len(info)>3: break
                 value = self._root._children[acts[idx]].get_value(1)
                 info[acts[idx]] = (visits[idx], round(value, 2)) 
-        print(state.step_count+1,"MCTS:",(state.current_player),"_n_playout:", n, "info:", info, "first:",self._first_ations)
+        print(state.step_count+1,"MCTS:",(state.current_player),"_n_playout:", n, "info:", info, "first:",self._first_ations, "var:", var)
         m = np.array(visits)
         act_probs = m/np.sum(m)
         return acts, act_probs
