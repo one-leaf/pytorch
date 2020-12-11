@@ -119,7 +119,7 @@ class MCTS(object):
         self._c_puct = c_puct  # MCTS child搜索收敛权重
         self._n_playout = n_playout  # 构建MCTS初始树的随机走子步数
         self._first_ations = set()  # 优先考虑
-        self._max_var = 6 # 达到最大方差后停止演算
+        self._max_var = 10 # 达到最大方差后停止演算
 
     # 从根节点 root 到子节点执行一次探索过程
     # 1 如果不是叶子，就按子节点的规划执行动作，直到找到叶子
@@ -357,7 +357,7 @@ class MCTS(object):
             info[acts[idx]] = (visits[idx], round(v,2), round(p,5))
 
         # temp = temp*((len(state.availables)/(state.size*state.size))**10)
-        print(state.step_count+1,"AI:",(state.current_player),"_n_playout:", n, "info:", info, "first:",self._first_ations, "var:", var)
+        print(state.step_count+1,"AI:",(state.current_player),"_n_playout:", n, "info:", info, "first:",self._first_ations, "var:", round(var,1))
         # softmax概率，先用log(visites)，拉平差异，再乘以一个权重，这样给了一个可以调节的参数，
         # temp 越小，导致softmax的越肯定，也就是当temp=1e-3时，基本上返回只有一个1,其余概率都是0; 训练的时候 temp=1
         # 论文里面提到使用 m = c_pw * n ^ k = 1 * n ^ 0.5 来代替n
@@ -416,7 +416,7 @@ class MCTS(object):
                 if len(info)>3: break
                 value = self._root._children[acts[idx]].get_value(1)
                 info[acts[idx]] = (visits[idx], round(value, 2)) 
-        print(state.step_count+1,"MCTS:",(state.current_player),"_n_playout:", n, "info:", info, "first:",self._first_ations, "var:", var)
+        print(state.step_count+1,"MCTS:",(state.current_player),"_n_playout:", n, "info:", info, "first:",self._first_ations, "var:", round(var,1))
         m = np.array(visits)
         act_probs = m/np.sum(m)
         return acts, act_probs
