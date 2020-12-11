@@ -168,9 +168,9 @@ class FiveChessTrain():
                     # 动态调整学习率
                     if old_probs is None:
                         test_batch, _, _ = data
-                        old_probs = self.policy_value_net.policy_value(test_batch) 
+                        old_probs, _ = self.policy_value_net.policy_value(test_batch) 
                     else:
-                        new_probs = self.policy_value_net.policy_value(test_batch)
+                        new_probs, _ = self.policy_value_net.policy_value(test_batch)
                         kl = np.mean(np.sum(old_probs * (np.log(old_probs + 1e-10) - np.log(new_probs + 1e-10)), axis=1))
         
                         if kl > self.kl_targ * 2:
