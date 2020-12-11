@@ -157,11 +157,29 @@ class FiveChessTrain():
         try:
             dataset_len = len(self.dataset)      
             training_loader = torch.utils.data.DataLoader(self.dataset, batch_size=self.batch_size, shuffle=True, num_workers=2,)
+            old_probs = None
+            test_batch = None
             for i, data in enumerate(training_loader):  # 计划训练批次
                 loss, v_loss, p_loss, entropy = self.policy_update(data, self.epochs)              
                 if (i+1) % 10 == 0:
                     logging.info(("TRAIN idx {} : {} / {} v_loss:{:.5f}, p_loss:{:.5f}, entropy:{:.5f}")\
                         .format(i, i*self.batch_size, dataset_len, v_loss, p_loss, entropy))
+                    
+                    # 动态调整学习率
+                    if old_probs is None:
+                        test_batch, _, _ = data
+                        old_probs = self.policy_value_net.policy_value(test_batch) 
+                    else:
+                        new_probs = self.policy_value_net.policy_value(test_batch)
+                        kl = np.mean(np.sum(old_probs * (np.log(old_probs + 1e-10) - np.log(new_probs + 1e-10)), axis=1))
+        
+                        if kl > self.kl_targ * 2:
+                            self.lr_multiplier /= 1.5
+                        elif kl < self.kl_targ / 2 and self.lr_multiplier < 100:
+                            self.lr_multiplier *= 1.5
+
+                        print("kl:",kl,"lr_multiplier:",self.lr_multiplier,"lr:",self.learn_rate*self.lr_multiplier)
+                        old_probs = None
 
                     # logging.info("Train idx {} : {} / {}".format(i, i*self.batch_size, len(self.dataset)))
             self.policy_value_net.save_model(model_file)
