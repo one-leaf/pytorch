@@ -118,7 +118,8 @@ class MCTS(object):
         self._policy = policy_value_fn  # 可走子action及对应概率，这里采用平均概率
         self._c_puct = c_puct  # MCTS child搜索收敛权重
         self._n_playout = n_playout  # 构建MCTS初始树的随机走子步数
-        self._first_ations = set()
+        self._first_ations = set()  # 优先考虑
+        self._max_var = 6 # 达到最大方差后停止演算
 
     # 从根节点 root 到子节点执行一次探索过程
     # 1 如果不是叶子，就按子节点的规划执行动作，直到找到叶子
@@ -316,10 +317,9 @@ class MCTS(object):
             self._playout_network(state_copy)
 
             if n>len(state.availables):
-                visits = [self._root._children[act]._n_visits for act in self._root._children if self._root._children[act]._n_visits>0]
-                if len(visits)==1: break
+                visits = [self._root._children[act]._n_visits for act in self._root._children]
                 var = np.var(visits)
-                if var>1: break
+                if var>self._max_var: break
             # if n%10==0 and n >= self._n_playout*0.2:
             #     act_visits = [(act, node._n_visits) for act, node in self._root._children.items()]
             #     acts, visits = zip(*act_visits)
@@ -395,10 +395,9 @@ class MCTS(object):
             self._playout(state_copy)
 
             if n>len(state.availables):
-                visits = [self._root._children[act]._n_visits for act in self._root._children if self._root._children[act]._n_visits>0]
-                if len(visits)==1: break
+                visits = [self._root._children[act]._n_visits for act in self._root._children]
                 var = np.var(visits)
-                if var>1: break
+                if var>self._max_var: break
 
         act_visits = [(act, node._n_visits) for act, node in self._root._children.items()]
         acts, visits = zip(*act_visits)
