@@ -38,7 +38,6 @@ class Agent(object):
                 # 如果包含了第二个玩家是MCTS，则AI每一步都需要重置搜索树
                 if not player2 is None:
                     player_in_turn.mcts.update_root_with_action(None)
-                    print(player_in_turn.player, "set mcts root to none")             
             else:
                 action, move_probs = player_in_turn.get_action(self.game, return_prob=1)
  
