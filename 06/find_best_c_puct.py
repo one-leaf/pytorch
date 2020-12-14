@@ -120,9 +120,9 @@ class FiveChessPlay():
         """启动训练"""
         try:
             for i in range(10000):
-                logging.info("TRAIN Batch:{} starting, Size:{}, n_in_row:{}".format(step + 1, size, n_in_row))
+                logging.info("TRAIN Batch:{} starting, Size:{}, n_in_row:{}".format(i, size, n_in_row))
                 state, mcts_porb, winner = self.collect_selfplay_data()
-                
+
                 if (i+1)%10 == 0:
                     self.policy_value_net = PolicyValueNet(size, model_file=model_file)
                     if self.c_puct_win[0]>self.c_puct_win[1]:                               
