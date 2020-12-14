@@ -123,7 +123,7 @@ class FiveChessPlay():
                 logging.info("TRAIN Batch:{} starting, Size:{}, n_in_row:{}".format(i, size, n_in_row))
                 state, mcts_porb, winner = self.collect_selfplay_data()
 
-                if (i+1)%10 == 0:
+                if (i+1)%11 == 0:
                     self.policy_value_net = PolicyValueNet(size, model_file=model_file)
                     if self.c_puct_win[0]>self.c_puct_win[1]:                               
                         self.c_puct=self.c_puct*0.9
