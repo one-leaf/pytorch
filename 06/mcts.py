@@ -316,7 +316,7 @@ class MCTS(object):
             state_copy = copy.deepcopy(state)
             self._playout_network(state_copy)
 
-            if n>len(state.availables):
+            if n>len(state.size*state.size):
                 visits = [self._root._children[act]._n_visits for act in self._root._children if self._root._children[act]._n_visits>0]
                 if len(visits)==1: break
                 var = np.var(visits)
@@ -396,7 +396,7 @@ class MCTS(object):
             state_copy = copy.deepcopy(state)
             self._playout(state_copy)
 
-            if n>len(state.availables):
+            if n>len(state.size*state.size):
                 visits = [self._root._children[act]._n_visits for act in self._root._children if self._root._children[act]._n_visits>0]
                 if len(visits)==1: break                
                 var = np.var(visits)
