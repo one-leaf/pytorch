@@ -34,14 +34,7 @@ class Agent(object):
             # temp 权重 ，return_prob 是否返回概率数据
             player_in_turn = players[self.game.current_player]
             if isinstance(player_in_turn, MCTSPlayer):
-                action, move_probs = player_in_turn.get_action(self.game, temp=temp, return_prob=1)
-                # action, move_probs = player_in_turn.get_action(self.game, temp=temp, return_prob=1)
-                # store the data
-                # states.append(self.game.current_state())
-                # print(move_probs.reshape(self.size,self.size))
-                # print(states[-1])
-                # mcts_probs.append(move_probs)
-                # current_players.append(self.game.current_player)   
+                action, move_probs = player_in_turn.get_action(self.game, temp=temp, return_prob=1)  
                 # 如果包含了第二个玩家是MCTS，则AI每一步都需要重置搜索树
                 if not player2 is None:
                     player_in_turn.mcts.update_root_with_action(None)             

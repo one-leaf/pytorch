@@ -46,6 +46,8 @@ class FiveChessPlay():
         self.epochs = 1  # 重复训练次数, 推荐是5
         self.kl_targ = 0.02  # 策略价值网络KL值目标
         
+        self.c_puct_win = [0, 0]
+
         # 纯MCTS的模拟数，用于评估策略模型
         self.pure_mcts_playout_num = 2000 # 用户纯MCTS构建初始树时的随机走子步数
         self.c_puct = 1  # MCTS child权重， 用来调节MCTS中 探索/乐观 的程度 默认 5
@@ -107,10 +109,17 @@ class FiveChessPlay():
         winner, play_data = agent.start_self_play(mcts_player, pure_mcts_player, temp=self.temp)
         agent.game.print()                   
 
+        if not pure_mcts_player is None and isinstance(pure_mcts_player, MCTSPlayer):
+            if winner == pure_mcts_player.player:
+                self.c_puct_win[1] = self.c_puct_win[1]+1
+            else:
+                self.c_puct_win[0] = self.c_puct_win[0]+1
+
         play_data = list(play_data)[:]     
         # 采用翻转棋盘来增加样本数据集
         play_data = self.get_equi_data(play_data)
         logging.info("Self Play end. length:%s saving ..." % len(play_data))
+        logging.info("c_puct:{}/0 = {}/{}".format(self.c_puct, self.c_puct_win[0], self.c_puct_win[1]))
 
         # 保存训练数据
         for obj in play_data:
