@@ -100,6 +100,7 @@ class PolicyValueNet():
         if device is None:
             device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.device=device
+        print("use", device)
         self.l2_const = l2_const  
         self.policy_value_net = Net(size).to(device)
 
