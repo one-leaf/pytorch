@@ -126,9 +126,9 @@ class FiveChessPlay():
                 if (i+1)%10 == 0:
                     self.policy_value_net = PolicyValueNet(size, model_file=model_file)
                     if self.c_puct_win[0]>self.c_puct_win[1]:                               
-                        self.c_puct=self.c_puct-0.1
+                        self.c_puct=self.c_puct*0.9
                     else:
-                        self.c_puct=self.c_puct+0.1
+                        self.c_puct=self.c_puct*1.1
                     self.c_puct_win=[0, 0]
 
         except KeyboardInterrupt:
