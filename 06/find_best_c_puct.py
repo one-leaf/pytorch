@@ -94,7 +94,7 @@ class FiveChessPlay():
         # 创建使用策略价值网络来指导树搜索和评估叶节点的MCTS玩家
         mcts_player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout, is_selfplay=1)
 
-        pure_mcts_player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=self.c_puct+0.1, n_playout=self.n_playout, is_selfplay=1)
+        pure_mcts_player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=self.c_puct*1.1, n_playout=self.n_playout, is_selfplay=1)
 
         # 开始下棋
         winner, play_data = agent.start_self_play(mcts_player, pure_mcts_player, temp=self.temp)
@@ -109,7 +109,7 @@ class FiveChessPlay():
         # 采用翻转棋盘来增加样本数据集
         play_data = self.get_equi_data(play_data)
         logging.info("Self Play end. length:%s saving ..." % len(play_data))
-        logging.info("c_puct:{}/{} = {}/{}".format(self.c_puct, self.c_puct+0.1, self.c_puct_win[0], self.c_puct_win[1]))
+        logging.info("c_puct:{}/{} = {}/{}".format(self.c_puct, self.c_puct*1.1, self.c_puct_win[0], self.c_puct_win[1]))
 
         # 保存训练数据
         for obj in play_data:
