@@ -49,6 +49,8 @@ class FiveChessPlay():
         # 纯MCTS的模拟数，用于评估策略模型
         self.pure_mcts_playout_num = 500 # 用户纯MCTS构建初始树时的随机走子步数
         self.c_puct = 1.5  # MCTS child权重， 用来调节MCTS中 探索/乐观 的程度 默认 5
+        self.mcts_win = [0, 0]
+
 
         if os.path.exists(model_file):
             # 使用一个训练好的策略价值网络
@@ -103,6 +105,13 @@ class FiveChessPlay():
         # 开始下棋
         winner, play_data = agent.start_self_play(mcts_player, pure_mcts_player, temp=self.temp)
         agent.game.print()                   
+
+        if not pure_mcts_player is None:
+            if winner == mcts_player.player:
+                self.mcts_win[0] = self.c_puct_win[0]+1
+            if winner == pure_mcts_player.player:
+                self.mcts_win[1] = self.c_puct_win[1]+1
+            logging.info("pure_mcts_playout_num:{} = {}/{}".format(self.pure_mcts_playout_num, self.mcts_win[0], self.mcts_win[1]))
 
         play_data = list(play_data)[:]     
         # 采用翻转棋盘来增加样本数据集
@@ -172,10 +181,9 @@ class FiveChessPlay():
     def run(self):
         """启动训练"""
         try:
-            # 先训练样本20局
-            step = 0
-            for i in range(20):
-                logging.info("TRAIN Batch:{} starting, Size:{}, n_in_row:{}".format(step + 1, size, n_in_row))
+            # 先训练样本10000局
+            for i in range(10000):
+                logging.info("TRAIN Batch:{} starting, Size:{}, n_in_row:{}".format(i, size, n_in_row))
                 state, mcts_porb, winner = self.collect_selfplay_data()
                 if i == 0: 
                     print("-"*50,"state","-"*50)
@@ -184,11 +192,22 @@ class FiveChessPlay():
                     print(mcts_porb)
                     print("-"*50,"winner","-"*50)
                     print(winner)
-                logging.info("TRAIN Batch:{} end".format(step + 1,))
-                step += 1               
-                   
+
+                if (i+1)%10 == 0:
+                    self.policy_evaluate(self.policy_evaluate_size)
+    
+                    if self.mcts_win[0]>self.mcts_win[1]:                               
+                        self.pure_mcts_playout_num=self.pure_mcts_playout_num-10
+                    if self.mcts_win[0]<self.mcts_win[1]:
+                        self.pure_mcts_playout_num=self.pure_mcts_playout_num+10
+                    if self.pure_mcts_playout_num<100: self.pure_mcts_playout_num=100
+                    if self.pure_mcts_playout_num>5000: self.pure_mcts_playout_num=5000
+                    
+                    self.mcts_win=[0, 0]
+                    self.policy_value_net = PolicyValueNet(size, model_file=model_file)
+
+
             # 一轮训练完毕后与最佳模型进行对比
-            win_ratio = self.policy_evaluate(self.policy_evaluate_size)
             # # 如果输了，再训练一次
             # if win_ratio<=0.5:
             #     self.policy_evaluate(self.policy_evaluate_size)
