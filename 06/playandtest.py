@@ -198,13 +198,13 @@ class FiveChessPlay():
     
                     if sum(self.mcts_win)>=10:
                         if self.mcts_win[0]>self.mcts_win[1]:                               
-                            self.pure_mcts_playout_num=self.pure_mcts_playout_num-10
-                        if self.mcts_win[0]<self.mcts_win[1]:
                             self.pure_mcts_playout_num=self.pure_mcts_playout_num+10
+                        if self.mcts_win[0]<self.mcts_win[1]:
+                            self.pure_mcts_playout_num=self.pure_mcts_playout_num-10
                         if self.pure_mcts_playout_num<100: self.pure_mcts_playout_num=100
                         if self.pure_mcts_playout_num>5000: self.pure_mcts_playout_num=5000
                         self.mcts_win=[0, 0]
-                        
+
                     self.policy_value_net = PolicyValueNet(size, model_file=model_file)
 
 
