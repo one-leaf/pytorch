@@ -44,13 +44,11 @@ class FiveChessPlay():
         self.n_playout = 1000  # 每个动作的模拟次数
         self.play_batch_size = 1 # 每次自学习次数
         self.epochs = 1  # 重复训练次数, 推荐是5
-        self.kl_targ = 0.02  # 策略价值网络KL值目标
-        
-        self.c_puct_win = [0, 0]
+        self.kl_targ = 0.02  # 策略价值网络KL值目标       
 
         # 纯MCTS的模拟数，用于评估策略模型
         self.pure_mcts_playout_num = 2000 # 用户纯MCTS构建初始树时的随机走子步数
-        self.c_puct = 1  # MCTS child权重， 用来调节MCTS中 探索/乐观 的程度 默认 5
+        self.c_puct = 1.5  # MCTS child权重， 用来调节MCTS中 探索/乐观 的程度 默认 5
 
         if os.path.exists(model_file):
             # 使用一个训练好的策略价值网络
@@ -94,43 +92,110 @@ class FiveChessPlay():
         # 创建使用策略价值网络来指导树搜索和评估叶节点的MCTS玩家
         mcts_player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout, is_selfplay=1)
 
-        pure_mcts_player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=self.c_puct*1.1, n_playout=self.n_playout, is_selfplay=1)
+        # 有一定几率和纯MCTS对抗
+        r = random.random()
+        if r>0.8:
+            pure_mcts_player = MCTSPurePlayer(c_puct=0, n_playout=self.pure_mcts_playout_num)
+            print("AI VS MCTS, pure_mcts_playout_num:", self.pure_mcts_playout_num)
+        elif r<=0.8 and r>0.7:
+            pure_mcts_player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=0, n_playout=self.n_playout, is_selfplay=1)
+            print("AI VS AI, but c_puct=0, pure_mcts_playout_num:", self.n_playout)
+        else:
+            pure_mcts_player = None
 
         # 开始下棋
         winner, play_data = agent.start_self_play(mcts_player, pure_mcts_player, temp=self.temp)
         agent.game.print()                   
 
-        if winner == mcts_player.player:
-            self.c_puct_win[0] = self.c_puct_win[0]+1
-        else:
-            self.c_puct_win[1] = self.c_puct_win[1]+1
-
         play_data = list(play_data)[:]     
         # 采用翻转棋盘来增加样本数据集
         play_data = self.get_equi_data(play_data)
         logging.info("Self Play end. length:%s saving ..." % len(play_data))
-        logging.info("c_puct:{}/{} = {}/{}".format(self.c_puct, self.c_puct*1.1, self.c_puct_win[0], self.c_puct_win[1]))
 
         # 保存训练数据
         for obj in play_data:
             self.save_wait_data(obj)
         return play_data[-1]
 
+    
+    def policy_evaluate(self, n_games=10):
+        """
+        策略胜率评估：当前模型与最佳模型对战n局看胜率
+        """
+        # 当前训练好的模型
+        current_mcts_player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout)
+
+        # 如果不存在最佳模型，直接将当前模型保存为最佳模型
+        if not os.path.exists(best_model_file):
+            self.policy_value_net.save_model(best_model_file)
+            return
+
+        best_policy_value_net = PolicyValueNet(size, model_file=best_model_file)
+        best_mcts_player = MCTSPlayer(best_policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout)
+
+        win_cnt = defaultdict(int)
+        for i in range(n_games):  # 对战
+            agent = Agent(size, n_in_row, is_shown=0)
+            winner, play_data = agent.start_self_evaluate(current_mcts_player, best_mcts_player, temp=self.temp, start_player=i % 2)
+            if winner == current_mcts_player.player:
+                win_cnt[0] += 1  # 赢
+                print("Curr Model Win!","win:", win_cnt[0],"lost",win_cnt[1],"tie",win_cnt[-1])
+            elif winner == -1:  
+                win_cnt[-1] += 1 # 平局
+                print("Tie!","win:", win_cnt[0],"lost",win_cnt[1],"tie",win_cnt[-1])
+            else:
+                win_cnt[1] += 1  # 输
+                print("Curr Model Lost!","win:", win_cnt[0],"lost",win_cnt[1],"tie",win_cnt[-1])
+                
+                # 如果输了就保存训练数据
+                play_data = list(play_data)[:]
+                play_data = self.get_equi_data(play_data)
+                logging.info("Eval Play end. length:%s saving ..." % len(play_data))
+                for obj in play_data:
+                    self.save_wait_data(obj)
+
+            agent.game.print()
+
+        win_ratio = win_cnt[0] / n_games
+
+        logging.info("curr model vs best model: win: {}, lose: {}, tie: {}, win_ratio: {}".format(
+            win_cnt[0], win_cnt[1], win_cnt[-1], win_ratio))
+
+        # 如果当前模型的胜率大于等于0.6,保留为最佳模型
+        if win_ratio>=0.6:
+            t = os.path.getctime(best_model_file)
+            timeStruct = time.localtime(t)
+            timestr = time.strftime('%Y_%m_%d_%H_%M', timeStruct)
+            os.rename(best_model_file, best_model_file+"."+timestr)
+            self.policy_value_net.save_model(best_model_file)
+            print("save curr modle to best model")
+
+        return win_ratio
+
     def run(self):
         """启动训练"""
         try:
-            for i in range(10000):
-                logging.info("TRAIN Batch:{} starting, Size:{}, n_in_row:{}".format(i, size, n_in_row))
+            # 先训练样本50局
+            step = 0
+            for i in range(50):
+                logging.info("TRAIN Batch:{} starting, Size:{}, n_in_row:{}".format(step + 1, size, n_in_row))
                 state, mcts_porb, winner = self.collect_selfplay_data()
-
-                if (i+1)%11 == 0:
-                    self.policy_value_net = PolicyValueNet(size, model_file=model_file)
-                    if self.c_puct_win[0]>self.c_puct_win[1]:                               
-                        self.c_puct=self.c_puct*0.9
-                    else:
-                        self.c_puct=self.c_puct*1.1
-                    self.c_puct_win=[0, 0]
-
+                if i == 0: 
+                    print("-"*50,"state","-"*50)
+                    print(state)
+                    print("-"*50,"mcts_porb","-"*50)
+                    print(mcts_porb)
+                    print("-"*50,"winner","-"*50)
+                    print(winner)
+                logging.info("TRAIN Batch:{} end".format(step + 1,))
+                step += 1               
+                   
+            # 一轮训练完毕后与最佳模型进行对比
+            win_ratio = self.policy_evaluate(self.policy_evaluate_size)
+            # # 如果输了，再训练一次
+            # if win_ratio<=0.5:
+            #     self.policy_evaluate(self.policy_evaluate_size)
+            #     print("lost all, add more sample")
         except KeyboardInterrupt:
             logging.info('quit')
 
