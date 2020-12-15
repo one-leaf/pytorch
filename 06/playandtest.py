@@ -47,7 +47,7 @@ class FiveChessPlay():
         self.kl_targ = 0.02  # 策略价值网络KL值目标       
 
         # 纯MCTS的模拟数，用于评估策略模型
-        self.pure_mcts_playout_num = 2000 # 用户纯MCTS构建初始树时的随机走子步数
+        self.pure_mcts_playout_num = 500 # 用户纯MCTS构建初始树时的随机走子步数
         self.c_puct = 1.5  # MCTS child权重， 用来调节MCTS中 探索/乐观 的程度 默认 5
 
         if os.path.exists(model_file):
@@ -94,12 +94,9 @@ class FiveChessPlay():
 
         # 有一定几率和纯MCTS对抗
         r = random.random()
-        if r>0.8:
+        if r>0.5:
             pure_mcts_player = MCTSPurePlayer(c_puct=0, n_playout=self.pure_mcts_playout_num)
             print("AI VS MCTS, pure_mcts_playout_num:", self.pure_mcts_playout_num)
-        elif r<=0.8 and r>0.7:
-            pure_mcts_player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=0, n_playout=self.n_playout, is_selfplay=1)
-            print("AI VS AI, but c_puct=0, pure_mcts_playout_num:", self.n_playout)
         else:
             pure_mcts_player = None
 
@@ -175,9 +172,9 @@ class FiveChessPlay():
     def run(self):
         """启动训练"""
         try:
-            # 先训练样本50局
+            # 先训练样本20局
             step = 0
-            for i in range(50):
+            for i in range(20):
                 logging.info("TRAIN Batch:{} starting, Size:{}, n_in_row:{}".format(step + 1, size, n_in_row))
                 state, mcts_porb, winner = self.collect_selfplay_data()
                 if i == 0: 
