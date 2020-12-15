@@ -108,9 +108,9 @@ class FiveChessPlay():
 
         if not pure_mcts_player is None:
             if winner == mcts_player.player:
-                self.mcts_win[0] = self.c_puct_win[0]+1
+                self.mcts_win[0] = self.mcts_win[0]+1
             if winner == pure_mcts_player.player:
-                self.mcts_win[1] = self.c_puct_win[1]+1
+                self.mcts_win[1] = self.mcts_win[1]+1
             logging.info("pure_mcts_playout_num:{} = {}/{}".format(self.pure_mcts_playout_num, self.mcts_win[0], self.mcts_win[1]))
 
         play_data = list(play_data)[:]     
