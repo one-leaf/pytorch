@@ -119,7 +119,7 @@ class MCTS(object):
         self._c_puct = c_puct  # MCTS child搜索收敛权重
         self._n_playout = n_playout  # 构建MCTS初始树的随机走子步数
         self._first_ations = set()  # 优先考虑
-        self._max_var = 10 # 达到最大方差后停止演算
+        self._max_var = 100 # 达到最大方差后停止演算
 
     # 从根节点 root 到子节点执行一次探索过程
     # 1 如果不是叶子，就按子节点的规划执行动作，直到找到叶子
@@ -316,7 +316,7 @@ class MCTS(object):
             state_copy = copy.deepcopy(state)
             self._playout_network(state_copy)
 
-            if n >= state.size*state.size:
+            if n >= len(state.availables):
                 visits = [self._root._children[act]._n_visits for act in self._root._children if self._root._children[act]._n_visits>0]
                 if len(visits)==1: break
                 var = np.var(visits)
@@ -395,12 +395,6 @@ class MCTS(object):
         for n in range(self._n_playout):
             state_copy = copy.deepcopy(state)
             self._playout(state_copy)
-
-            # if n > state.size*state.size:
-            #     visits = [self._root._children[act]._n_visits for act in self._root._children if self._root._children[act]._n_visits>0]
-            #     if len(visits)==1: break                
-            #     var = np.var(visits)
-            #     if var>self._max_var: break
 
         act_visits = [(act, node._n_visits) for act, node in self._root._children.items()]
         acts, visits = zip(*act_visits)
