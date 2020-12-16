@@ -141,7 +141,7 @@ class FiveChessPlay():
         best_mcts_player = MCTSPlayer(self.best_policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout)
 
         agent = Agent(size, n_in_row, is_shown=0)
-        winner, play_data = agent.start_self_evaluate(current_mcts_player, best_mcts_player, temp=self.temp, start_player=random.random()>0.5)
+        winner, play_data = agent.start_self_evaluate(current_mcts_player, best_mcts_player, temp=self.temp, start_player=random.choice([0,1]))
         if winner == current_mcts_player.player:
             self.best_win[0] = self.best_win[0]+1
             print("Curr Model Win!","win:", self.best_win[0],"lost",self.best_win[1])
