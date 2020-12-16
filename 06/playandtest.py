@@ -99,29 +99,30 @@ class FiveChessPlay():
         # r = random.random()
         # if r>0.5:
         pure_mcts_player = MCTSPurePlayer(c_puct=self.c_puct, n_playout=self.pure_mcts_playout_num)
-        print("AI VS MCTS, pure_mcts_playout_num:", self.pure_mcts_playout_num)
+        # print("AI VS MCTS, pure_mcts_playout_num:", self.pure_mcts_playout_num)
         # else:
         #     pure_mcts_player = None
 
         # 开始下棋
         winner, play_data = agent.start_self_play(mcts_player, pure_mcts_player, temp=self.temp)
-        agent.game.print()                   
 
         if not pure_mcts_player is None:
             if winner == mcts_player.player:
                 self.mcts_win[0] = self.mcts_win[0]+1
+                print("Curr Model Win!","win:", self.mcts_win[0],"lost",self.mcts_win[1],"playout_num",self.pure_mcts_playout_num)
             if winner == pure_mcts_player.player:
                 self.mcts_win[1] = self.mcts_win[1]+1
-            logging.info("pure_mcts_playout_num:{} = {}/{}".format(self.pure_mcts_playout_num, self.mcts_win[0], self.mcts_win[1]))
-
+                print("Curr Model Lost!","win:", self.mcts_win[0],"lost",self.mcts_win[1],"playout_num",self.pure_mcts_playout_num)
+        agent.game.print()
+                           
         play_data = list(play_data)[:]     
         # 采用翻转棋盘来增加样本数据集
         play_data = self.get_equi_data(play_data)
         logging.info("Self Play end. length:%s saving ..." % len(play_data))
-
         # 保存训练数据
         for obj in play_data:
             self.save_wait_data(obj)
+
         return play_data[-1]
 
     
