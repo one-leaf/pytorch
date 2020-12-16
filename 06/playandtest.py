@@ -95,12 +95,12 @@ class FiveChessPlay():
         mcts_player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout, is_selfplay=1)
 
         # 有一定几率和纯MCTS对抗
-        r = random.random()
-        if r>0.5:
-            pure_mcts_player = MCTSPurePlayer(c_puct=self.c_puct, n_playout=self.pure_mcts_playout_num)
-            print("AI VS MCTS, pure_mcts_playout_num:", self.pure_mcts_playout_num)
-        else:
-            pure_mcts_player = None
+        # r = random.random()
+        # if r>0.5:
+        pure_mcts_player = MCTSPurePlayer(c_puct=self.c_puct, n_playout=self.pure_mcts_playout_num)
+        print("AI VS MCTS, pure_mcts_playout_num:", self.pure_mcts_playout_num)
+        # else:
+        #     pure_mcts_player = None
 
         # 开始下棋
         winner, play_data = agent.start_self_play(mcts_player, pure_mcts_player, temp=self.temp)
