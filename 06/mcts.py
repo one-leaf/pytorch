@@ -513,15 +513,16 @@ class MCTSPlayer(object):
                 # 第一步棋为一手交换，随便下
                 if state.step_count==0: 
                     action = random.choice(state.first_availables)
-
-                # 如果是下了几步后全部取最大值
-                if state.step_count>=state.n_in_row*2:
-                # if random.random() < state.step_count*2/(state.size*state.size):
-                    act = acts[idx]
-                else:
-                    p= 0.75                
-                    dirichlet = np.random.dirichlet(0.03 * np.ones(len(act_probs)))
-                    act = np.random.choice(acts, p=p * act_probs + (1-p) * dirichlet)
+                    act =  state.action_to_position(action)
+                else:                    
+                    # 如果是下了几步后全部取最大值
+                    if state.step_count>=state.n_in_row*2:
+                    # if random.random() < state.step_count*2/(state.size*state.size):
+                        act = acts[idx]
+                    else:
+                        p= 0.75                
+                        dirichlet = np.random.dirichlet(0.03 * np.ones(len(act_probs)))
+                        act = np.random.choice(acts, p=p * act_probs + (1-p) * dirichlet)
 
                 action = state.position_to_action(act)
 
@@ -547,6 +548,7 @@ class MCTSPlayer(object):
                 # 第一步棋为一手交换，随便下
                 if state.step_count==0: 
                     action = random.choice(state.first_availables)
+                    act =  state.action_to_position(action)
 
                 if act!=acts[idx]:
                     print(" random:", state.position_to_action(acts[idx]), act_probs[idx], "==>", action, act_probs[acts.index(act)])
