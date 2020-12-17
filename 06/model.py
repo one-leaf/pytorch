@@ -24,7 +24,7 @@ class Cache(OrderedDict):
 
     def __getitem__(self, key):
         try:
-            value = super().__getitem__(self, key)
+            value = super().__getitem__(key)
         except KeyError:
             raise
         else:
