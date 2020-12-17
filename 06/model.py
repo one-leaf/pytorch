@@ -22,6 +22,15 @@ class Cache(OrderedDict):
             oldest = next(iter(self))
             del self[oldest]
 
+    def __getitem__(self, key):
+        try:
+            value = super().__getitem__(self, key)
+        except KeyError:
+            raise
+        else:
+            self.move_to_end(key)
+            return value
+
 # 网络模型
 # 定义残差块，固定住BN的方差和均值
 class ResidualBlock(nn.Module):
