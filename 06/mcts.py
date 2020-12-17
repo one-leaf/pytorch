@@ -451,8 +451,7 @@ class MCTSPurePlayer(object):
             acts, act_probs = self.mcts.get_action(state)
 
             move_probs = np.zeros(state.size * state.size)
-            positions = state.actions_to_positions(acts)
-            move_probs[positions] = act_probs
+            move_probs[acts] = act_probs
 
             idx = np.argmax(act_probs) 
             act = acts[idx]
