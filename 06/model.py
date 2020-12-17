@@ -168,8 +168,10 @@ class PolicyValueNet():
         current_state = game.current_state().reshape(1, -1, self.size, self.size)
         act_probs, value = self.policy_value(current_state)
         act_probs = act_probs.flatten()
-        actions = game.positions_to_actions(legal_positions)
-        act_probs = list(zip(actions, act_probs[legal_positions]))
+        # actions = game.positions_to_actions(legal_positions)
+        act_probs = act_probs[legal_positions] 
+        act_probs = [(game.availables[i], act_probs[i]) for i in range(len(game.availables))]
+        # act_probs = list(zip(actions, act_probs[legal_positions]))
         value = value[0,0]
 
         # if len(game.actions)<=max_cache_step:
