@@ -3,7 +3,7 @@
 蒙特卡罗树搜索（MCTS）的实现
 """
 
-from math import e
+import math
 import random
 import numpy as np
 import copy
@@ -12,7 +12,7 @@ from operator import itemgetter
 import heapq
 from itertools import count
 
-class TreeNode(object):
+class TreeNode():
     """MCTS树中的节点类。 每个节点跟踪其自身的值Q，先验概率P及其访问次数调整的先前得分u。"""
 
     def __init__(self, parent, prior_p):
@@ -28,9 +28,7 @@ class TreeNode(object):
             Params：action_priors = 走子策略函数返回的走子概率列表 [(action,概率)]
         """
         for action, prob in action_priors:
-
             self._children[action] = TreeNode(self, float(prob))
-
 
     # 从子节点中选择最佳子节点
     def select(self, c_puct):
@@ -54,7 +52,7 @@ class TreeNode(object):
             self._n_visits          当前节点的最优选次数
             self._Q                 当前节点的分数，用于mcts树初始构建时的充分打散
         """
-        _u = (c_puct * self._P * np.sqrt(self._parent._n_visits) / (1 + self._n_visits))
+        _u = (c_puct * self._P * math.sqrt(self._parent._n_visits) / (1 + self._n_visits)+1e-8)
         return self._Q + _u
 
     # 反向更新当前节点
@@ -101,7 +99,7 @@ class TreeNode(object):
         if self._parent is None:
             value= 0
         else:
-            value = self.get_value(5)
+            value = self.get_value(1.5)
         return "Node - Q: %s, P: %s, N: %s, Value: %s"%(self._Q, self._P, self._n_visits, value) 
 
 class MCTS(object):
