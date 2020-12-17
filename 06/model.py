@@ -180,6 +180,14 @@ class PolicyValueNet():
         # actions = game.positions_to_actions(legal_positions)
         # act_probs = act_probs[legal_positions] 
         act_probs = [(i, act_probs[i]) for i in legal_positions]
+
+        # 归一化
+        act_probs_sum = sum([act_probs[i] for i in legal_positions])
+        if act_probs_sum != 0:
+            act_probs = [(i, act_probs[i]/act_probs_sum) for i in legal_positions]
+        else:
+            act_probs = [(i, 1./len(legal_positions)) for i in legal_positions]
+
         # act_probs = [(game.availables[i], act_probs[i]) for i in range(len(game.availables))]
         # act_probs = list(zip(actions, act_probs[legal_positions]))
         value = value[0,0]
