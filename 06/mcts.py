@@ -28,7 +28,8 @@ class TreeNode(object):
             Params：action_priors = 走子策略函数返回的走子概率列表 [(action,概率)]
         """
         for action, prob in action_priors:
-            self._children[action] = TreeNode(self, prob)
+
+            self._children[action] = TreeNode(self, float(prob))
 
 
     # 从子节点中选择最佳子节点
