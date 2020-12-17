@@ -174,10 +174,10 @@ class MCTS(object):
                 break
 
             # 如果存在优先探索队列，并且该子节点存在未探索过的
-            action = None
-            for act in self._first_ations:
-                if act in node._children and node._children[act]._n_visits == 0:
-                    action, node = act, node._children[act]
+            act = None
+            for _act in self._first_ations:
+                if _act in node._children and node._children[_act]._n_visits == 0:
+                    act, node = _act, node._children[_act]
                     break
             # 如果是根节点有没有探索过的棋，无论如何尝试一下,这样会导致探索的路径过于短小
             # if node._parent is None or node._parent._parent is None:
@@ -187,16 +187,16 @@ class MCTS(object):
             #         break
 
             # 从child中选择最优action
-            if action is None:
-                action, node = node.select(self._c_puct)
+            if act is None:
+                act, node = node.select(self._c_puct)
 
             # 执行action走子
-            state.step(action)
+            state.step(act)
 
             # 凡是导致游戏结束的棋，重点关注
             end, winner = state.game_end()
             if end or state.check_will_win(): #and winner != curr_player:
-                self._first_ations.add(action)
+                self._first_ations.add(act)
                 # self._first_ations.add(state.actions[-3])
                 # if winner != curr_player:
                 #     mstr=""
@@ -241,10 +241,10 @@ class MCTS(object):
         # 递归更新当前节点及所有父节点的最优选中次数和Q分数,因为得到的是本次的价值
         node.update_recursive(leaf_value)
 
-    def update_root_with_action(self, action):
+    def update_root_with_action(self, act):
         """根据action更新根节点"""
-        if  action!=None: #action in self._root._children:
-            self._root = self._root._children[action]
+        if  act!=None: #action in self._root._children:
+            self._root = self._root._children[act]
             self._root._parent = None
         else:
             self._root = TreeNode(None, 1.0)
@@ -279,14 +279,14 @@ class MCTS(object):
     @staticmethod
     def rollout_policy_fn(state):
         """给棋盘所有可落子位置随机分配概率"""
-        availables = state.availables
+        availables = state.actions_to_positions(state.availables)
         action_probs = np.random.rand(len(availables))
         return [(availables[i], action_probs[i]) for i in range(len(availables))]#zip(availables, action_probs)
 
     @staticmethod
     def policy_value_fn(state):
         """给棋盘所有可落子位置分配默认平均概率 [(0, 0.015625), (action, probability), ...], 0"""
-        availables = state.availables
+        availables = state.actions_to_positions(state.availables)
         action_probs = np.ones(len(availables)) / len(availables)
         return  [(availables[i], action_probs[i]) for i in range(len(availables))], 0 # zip(availables, action_probs), 0
 
@@ -307,8 +307,8 @@ class MCTS(object):
                 temp：温度参数  控制探测水平，范围(0,1]
             Return: 所有action及对应概率
         """
-
-        self._first_ations = set([act for act in self._first_ations if act not in state.actions])
+        old_acts = state.actions_to_positions(state.actions)
+        self._first_ations = set([act for act in self._first_ations if act not in old_acts])
         var = 0
         # for n in count():
         for n in range(self._n_playout):
@@ -356,7 +356,8 @@ class MCTS(object):
             if len(info)>2: break
             v = self._root._children[acts[idx]].get_value(self._c_puct)
             p = self._root._children[acts[idx]]._P
-            info[acts[idx]] = (visits[idx], round(v,2), round(p,5))
+            action = state.position_to_action(acts[idx])
+            info[action] = (visits[idx], round(v,2), round(p,5))
 
         # temp = temp*((len(state.availables)/(state.size*state.size))**10)
         print(state.step_count+1,"AI:",(state.current_player),"_n_playout:", n, "info:", info, "first:",self._first_ations, "var:", round(var,1))
@@ -381,8 +382,8 @@ class MCTS(object):
         if node==None:
             node=self._root
         l=[0]
-        for act in node._children:
-            l.append(self.max_depth_tree(node._children[act])+1)
+        for _node in node._children.values():
+            l.append(self.max_depth_tree(_node)+1)
         return max(l)
 
     # 按访问次数返回当前状态下的动作及其概率，构建所有的树
@@ -408,12 +409,14 @@ class MCTS(object):
             for idx in sorted(range(len(visits)), key=visits.__getitem__)[::-1]:
                 if len(info)>3: break
                 value = self._root._children[acts[idx]].get_value(1)
-                info[acts[idx]] = (visits[idx], round(value, 2))
+                action = state.position_to_action(acts[idx])
+                info[action] = (visits[idx], round(value, 2))
         else:
             for idx in range(len(visits)):
                 if len(info)>3: break
                 value = self._root._children[acts[idx]].get_value(1)
-                info[acts[idx]] = (visits[idx], round(value, 2)) 
+                action = state.position_to_action(acts[idx])
+                info[action] = (visits[idx], round(value, 2)) 
         print(state.step_count+1,"MCTS:",(state.current_player),"_n_playout:", n, "info:", info, "first:",self._first_ations, "var:", round(var,1))
         m = np.array(visits)
         act_probs = m/np.sum(m)
@@ -449,11 +452,13 @@ class MCTSPurePlayer(object):
             move_probs[positions] = act_probs
 
             idx = np.argmax(act_probs) 
-            action = acts[idx]
+            act = acts[idx]
 
             # 第一步棋为一手交换，随便下
             if state.step_count==0: 
                 action = random.choice(state.first_availables)
+            else:
+                action = state.position_to_action(act)
 
             # 更新根节点:根据最后action向前探索树
             self.mcts.update_root_with_action(None)
@@ -492,8 +497,8 @@ class MCTSPlayer(object):
         if len(state.availables) > 0:  # 盘面可落子位置>0
             # 使用默认的temp = 1e-3，它几乎相当于选择具有最高概率的移动 ，训练的时候 temp = 1
             acts, act_probs = self.mcts.get_action_probs(state, temp)
-            positions = state.actions_to_positions(acts)
-            move_probs[positions] = act_probs
+            # positions = state.actions_to_positions(acts)
+            move_probs[acts] = act_probs
             idx = np.argmax(act_probs)    
 
             if self._is_selfplay:  # 自我对抗
@@ -501,17 +506,6 @@ class MCTSPlayer(object):
                 # dirichlet噪声参数中的p 0.03：一般按照反比于每一步的可行move数量设置，所以棋盘扩大或改围棋之后这个参数需要减小（此值设置过大容易出现在自我对弈的训练中陷入到两方都只进攻不防守的困境中无法提高）
                 # dirichlet噪声是分布的分布，sum为1，参数越大，分布越均匀，参数越小越集中
                 # 给定的是一个均匀分布，则参数越小，方差越大，扰动就越大
-                # if max(act_probs)>0.99:
-                #     p= 1.
-                # else:
-                #     p = 1.0 - len(state.availables)/(state.size * state.size)*0.10  #【0.90~1】 这里默认为 0.25
-
-                p= 0.75                
-
-                dirichlet = np.random.dirichlet(0.03 * np.ones(len(act_probs)))
-                position = np.random.choice(positions, p=p * act_probs + (1-p) * dirichlet) 
-                # position = np.random.choice(positions, p=act_probs) 
-                action = state.positions_to_actions([position])[0]
 
                 # 第一步棋为一手交换，随便下
                 if state.step_count==0: 
@@ -520,19 +514,26 @@ class MCTSPlayer(object):
                 # 如果是下了几步后全部取最大值
                 if state.step_count>=state.n_in_row*2:
                 # if random.random() < state.step_count*2/(state.size*state.size):
-                    action = acts[idx]
+                    act = acts[idx]
+                else:
+                    p= 0.75                
+                    dirichlet = np.random.dirichlet(0.03 * np.ones(len(act_probs)))
+                    act = np.random.choice(acts, p=p * act_probs + (1-p) * dirichlet)
 
-                if action!=acts[idx]:
-                    print(" random:", acts[idx], act_probs[idx], "==>", action, act_probs[acts.index(action)])
+                action = state.position_to_action(act)
+
+                if act!=acts[idx]:
+                    print(" random:", state.position_to_action(acts[idx]), act_probs[idx], "==>", action, act_probs[acts.index(act)])
 
                 # 更新根节点并重用搜索树
-                self.mcts.update_root_with_action(action)
+                self.mcts.update_root_with_action(act)
             else:  # 和人类对战
                 if state.step_count>=state.n_in_row*2:
-                    action = acts[idx]
+                    act = acts[idx]
                 else:               
-                    position = np.random.choice(positions, p=act_probs)
-                    action = state.positions_to_actions([position])[0]
+                    act = np.random.choice(acts, p=act_probs)
+
+                action = state.position_to_action(act)
                 # 更新根节点:根据最后action向前探索树
                 # root = self.mcts._root
                 # for act in root._children:
@@ -544,7 +545,8 @@ class MCTSPlayer(object):
                 if state.step_count==0: 
                     action = random.choice(state.first_availables)
 
-                print("AI", action, act_probs[acts.index(action)]) 
+                if act!=acts[idx]:
+                    print(" random:", state.position_to_action(acts[idx]), act_probs[idx], "==>", action, act_probs[acts.index(act)])
 
                 self.mcts.update_root_with_action(None)
                 # 打印AI走子信息

@@ -131,7 +131,7 @@ class MCTS():
                 best_act = a
 
         a = best_act
-        act = state.positions_to_actions([a])[0]
+        act = state.position_to_action(a)
         state.step(act)
 
         # 计算下一步的 v 这个v 为正数，但下一个v为负数

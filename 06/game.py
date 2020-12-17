@@ -1,3 +1,4 @@
+from typing import Tuple
 import gym
 import random
 from gym.envs.classic_control import rendering
@@ -234,6 +235,8 @@ class FiveChess(object):
     #action 包括坐标和  例如：[1,3] 表示： 坐标（1,3）
     #输出 下一个状态，动作价值，是否结束，赢的用户
     def step(self, action):
+        if isinstance(action, int):
+            action = self.position_to_action(action)
         if action not in self.availables:
             print(action)
             print(self.availables)
@@ -256,12 +259,19 @@ class FiveChess(object):
         return self.chessboard, reward, self.terminal, self.win_user
 
     # 概率的索引位置转action
+    def position_to_action(self, position):
+        return (position%self.size, self.size-(position//self.size)-1)
+
     def positions_to_actions(self, positions):
-        return [(i%self.size, self.size-(i//self.size)-1) for i in positions]
+        return [self.position_to_action(i) for i in positions]
 
     # action转概率的索引位置
+    def action_to_position(self, action):
+        x,y = action
+        return x+(self.size-y-1)*self.size
+
     def actions_to_positions(self, actions):
-        return [x+(self.size-y-1)*self.size for x,y in actions]
+        return [self.action_to_position(act) for act in actions]
 
     # 返回 [1, 11, size, size]
     # alphago zero使用了17层即 [1,17,19,19] 的网络，前8层为当前玩家的最后八步，后8层为对手的最后八步，最后一层是当前玩家是否为先手，如果先手则全部为1
