@@ -179,7 +179,7 @@ class PolicyValueNet():
         act_probs = act_probs.flatten()
         # actions = game.positions_to_actions(legal_positions)
         # act_probs = act_probs[legal_positions] 
-        act_probs = [(i, act_probs[i]) for i in legal_positions]
+        # act_probs = [(i, act_probs[i]) for i in legal_positions]
 
         # 归一化
         act_probs_sum = sum([act_probs[i] for i in legal_positions])
