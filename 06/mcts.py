@@ -28,10 +28,8 @@ class TreeNode(object):
             Params：action_priors = 走子策略函数返回的走子概率列表 [(action,概率)]
         """
         for action, prob in action_priors:
-            if action not in self._children:
-                self._children[action] = TreeNode(self, prob)
-            else:
-                raise("Why happend re add it?")
+            self._children[action] = TreeNode(self, prob)
+
 
     # 从子节点中选择最佳子节点
     def select(self, c_puct):
@@ -283,14 +281,14 @@ class MCTS(object):
         """给棋盘所有可落子位置随机分配概率"""
         availables = state.availables
         action_probs = np.random.rand(len(availables))
-        return zip(availables, action_probs)
+        return [(availables[i], action_probs[i]) for i in range(len(availables))]#zip(availables, action_probs)
 
     @staticmethod
     def policy_value_fn(state):
         """给棋盘所有可落子位置分配默认平均概率 [(0, 0.015625), (action, probability), ...], 0"""
         availables = state.availables
         action_probs = np.ones(len(availables)) / len(availables)
-        return zip(availables, action_probs), 0
+        return  [(availables[i], action_probs[i]) for i in range(len(availables))], 0 # zip(availables, action_probs), 0
 
     @staticmethod
     def softmax(x):
@@ -348,7 +346,9 @@ class MCTS(object):
 
         # 分解出child中的action和最优选访问次数
         act_visits = [(act, node._n_visits) for act, node in self._root._children.items()]
-        acts, visits = zip(*act_visits)
+        acts = [av[0] for av in act_visits]
+        visits = [av[1] for av in act_visits]
+        # acts, visits = zip(*act_visits)
 
         info={"depth":self.max_depth_tree()}
         # info={}
@@ -399,7 +399,9 @@ class MCTS(object):
             self._playout(state_copy)
 
         act_visits = [(act, node._n_visits) for act, node in self._root._children.items()]
-        acts, visits = zip(*act_visits)
+        acts = [av[0] for av in act_visits]
+        visits = [av[1] for av in act_visits]
+        # acts, visits = zip(*act_visits)
 
         info={"depth":self.max_depth_tree()}
         if max(visits)-min(visits)>10:
