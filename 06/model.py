@@ -160,9 +160,9 @@ class PolicyValueNet():
         # 只缓存前10步棋
         # max_cache_step = 10
         # if len(game.actions)<=max_cache_step:
-        #     key = game.get_key()
-        #     if key in self.cache:
-        #         return self.cache[key]
+        key = game.get_key()
+        if key in self.cache:
+            return self.cache[key]
 
         legal_positions = game.actions_to_positions(game.availables)
         current_state = game.current_state().reshape(1, -1, self.size, self.size)
@@ -175,7 +175,7 @@ class PolicyValueNet():
         value = value[0,0]
 
         # if len(game.actions)<=max_cache_step:
-        #     self.cache[key] = (act_probs, value) 
+        self.cache[key] = (act_probs, value) 
         return act_probs, value
 
     def train_step(self, state_batch, mcts_probs, winner_batch, lr):
