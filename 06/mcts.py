@@ -30,6 +30,8 @@ class TreeNode(object):
         for action, prob in action_priors:
             if action not in self._children:
                 self._children[action] = TreeNode(self, prob)
+            else:
+                raise("Why happend re add it?")
 
     # 从子节点中选择最佳子节点
     def select(self, c_puct):
