@@ -140,8 +140,9 @@ class MCTS(object):
                 break
 
             # 从child中选择最优action
-            action, node = node.select(self._c_puct)
+            act, node = node.select(self._c_puct)
             # 执行action走子
+            action = state.position_to_action(act)
             state.step(action)
             
         # 2.Expansion（就是在前面选中的子节点中走一步创建一个新的子节点。一般策略是随机自行一个操作并且这个操作不能与前面的子节点重复）
@@ -191,7 +192,8 @@ class MCTS(object):
                 act, node = node.select(self._c_puct)
 
             # 执行action走子
-            state.step(act)
+            action = state.position_to_action(act)
+            state.step(action)
 
             # 凡是导致游戏结束的棋，重点关注
             end, winner = state.game_end()
@@ -266,8 +268,9 @@ class MCTS(object):
                 break
             # 给棋盘所有可落子位置随机分配概率，并取其中最大概率的action移动
             action_probs = MCTS.rollout_policy_fn(state)
-            max_action = max(action_probs, key=itemgetter(1))[0]
-            state.step(max_action)
+            act = max(action_probs, key=itemgetter(1))[0]
+            action = state.position_to_action(act)
+            state.step(action)
         else:
             # If no break from the loop, issue a warning.
             print("WARNING: rollout reached move limit")
