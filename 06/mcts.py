@@ -165,7 +165,21 @@ class MCTSPurePlayer(object):
         """给棋盘所有可落子位置分配默认平均概率 [(0, 0.015625), (action, probability), ...], 0"""
         availables = state.actions_to_positions(state.availables)
         action_probs = np.ones(len(availables)) / len(availables)
-        return  [(availables[i], action_probs[i]) for i in range(len(availables))], 0
+
+        # 返回的 v 采用快速走子的办法
+        limit = 1000 # 最大探测次数
+        winner = -1
+        for i in range(limit):
+            end, winner = state.game_end()
+            if end:
+                break
+            action = random.choice(state.availables)
+            state.step(action)
+        v = 0
+        if winner != -1:  # 如果不是平局
+            v = 10.0 if winner == state.current_player else -10.0
+
+        return  [(availables[i], action_probs[i]) for i in range(len(availables))], v
 
     def __init__(self, c_puct=5, n_playout=2000):
         self.mcts = MCTS(MCTSPurePlayer.policy_value_fn, c_puct, n_playout)
