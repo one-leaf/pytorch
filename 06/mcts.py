@@ -65,7 +65,7 @@ class MCTS():
             act, visit = act_visits[idx]
             action = state.position_to_action(act)
             info.append([action,visit])
-        print(state.step_count+1, "AI", "n_playout:", n, "depth:" ,self.max_depth, info)
+        print(state.step_count+1, "AI", (state.current_player), "n_playout:", n, "depth:" ,self.max_depth, info)
 
         if temp == 0:
             bestAs = np.array(np.argwhere(visits == np.max(visits))).flatten()
