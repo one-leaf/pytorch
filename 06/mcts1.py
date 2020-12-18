@@ -15,10 +15,9 @@ from itertools import count
 class TreeNode():
     """MCTS树中的节点类。 每个节点跟踪其自身的值Q，先验概率P及其访问次数调整的先前得分u。"""
 
-    def __init__(self, parent, action, prior_p):
+    def __init__(self, parent, prior_p):
         self._parent = parent
-        self._A = action
-        self._children = []  # 子节点 TreeNode
+        self._children = {}  # 子节点 TreeNode
         self._Q = 0  # 节点分数，用于mcts树初始构建时的充分打散（每次叶子节点被最优选中时，节点隔级-leaf_value逻辑，以避免构建树时某分支被反复选中）
         self._n_visits = 0  # 节点被最优选中的次数，用于树构建完毕后的走子选择
         self._P = prior_p  # action概率
@@ -29,7 +28,7 @@ class TreeNode():
             Params：action_priors = 走子策略函数返回的走子概率列表 [(action,概率)]
         """
         for action, prob in action_priors:
-            self._children.append(TreeNode(self, action, float(prob)))
+            self._children[action] = TreeNode(self, float(prob))
 
     # 从子节点中选择最佳子节点
     def select(self, c_puct):
@@ -37,7 +36,7 @@ class TreeNode():
             Params：c_puct = child 搜索深度
             Return: tuple (action, next_node)
         """
-        return max(self._children, key=lambda act_node: act_node.get_value(c_puct))
+        return max(self._children.items(), key=lambda act_node: act_node[1].get_value(c_puct))
 
     # 计算和返回这个节点的值
     # MCTS计算公式：
@@ -53,8 +52,6 @@ class TreeNode():
             self._n_visits          当前节点的最优选次数
             self._Q                 当前节点的分数，用于mcts树初始构建时的充分打散
         """
-        if self._parent is None: 
-            raise("Node parent is None, can't get value")
         _u = (c_puct * self._P * math.sqrt(self._parent._n_visits) / (1 + self._n_visits)+1e-8)
         return self._Q + _u
 
@@ -91,26 +88,19 @@ class TreeNode():
     # 检查当前是否已经扩展了
     def is_leaf(self):
         """检查当前是否叶子节点"""
-        return self._children == []
+        return self._children == {}
 
     # 检查当前是否是根节点
     def is_root(self):
         """检查当前是否root节点"""
         return self._parent is None
 
-    # 由 action 获得 子节点的内容
-    def get_child_by_action(self, action):
-        for node in self._children:
-            if node._A == action:
-                return node
-        return None
-
     def __str__(self):
         if self._parent is None:
             value= 0
         else:
             value = self.get_value(1.5)
-        return "Node - A: %s, Q: %s, P: %s, N: %s, Value: %s"%(self._A, self._Q, self._P, self._n_visits, value) 
+        return "Node - Q: %s, P: %s, N: %s, Value: %s"%(self._Q, self._P, self._n_visits, value) 
 
 class MCTS(object):
     """蒙特卡罗树搜索的实现"""
@@ -123,7 +113,7 @@ class MCTS(object):
         c_puct 控制搜索速度收敛到最大值的一个权重，取值从 (0, inf) ，这个值越大前面的父节点就会被反向更新的幅度也就越大，
             也就是意味着较高的值会造成更多的依赖之前的步骤
         """
-        self._root = TreeNode(None, -1, 1.0)  # 根节点，默认概率值为1,动作为-1
+        self._root = TreeNode(None, 1.0)  # 根节点，默认概率值为1
         self._policy = policy_value_fn  # 可走子action及对应概率，这里采用平均概率
         self._c_puct = c_puct  # MCTS child搜索收敛权重
         self._n_playout = n_playout  # 构建MCTS初始树的随机走子步数
@@ -149,9 +139,9 @@ class MCTS(object):
                 break
 
             # 从child中选择最优action
-            node = node.select(self._c_puct)
+            act, node = node.select(self._c_puct)
             # 执行action走子
-            action = state.position_to_action(node._A)
+            action = state.position_to_action(act)
             state.step(action)
             
         # 2.Expansion（就是在前面选中的子节点中走一步创建一个新的子节点。一般策略是随机自行一个操作并且这个操作不能与前面的子节点重复）
@@ -185,14 +175,10 @@ class MCTS(object):
 
             # 如果存在优先探索队列，并且该子节点存在未探索过的
             act = None
-            children_acts = [_node._A for _node in node._children if _node._n_visits==0]
             for _act in self._first_ations:
-                for _node in node._children:
-                    if _act == _node._A and _node._n_visits==0:
-                        act, node = _act, _node
-                        break
-                if not act is None: break
-
+                if _act in node._children and node._children[_act]._n_visits == 0:
+                    act, node = _act, node._children[_act]
+                    break
             # 如果是根节点有没有探索过的棋，无论如何尝试一下,这样会导致探索的路径过于短小
             # if node._parent is None or node._parent._parent is None:
             # for act in node._children:
@@ -202,8 +188,8 @@ class MCTS(object):
 
             # 从child中选择最优action
             if act is None:
-                node = node.select(self._c_puct)
-                act = node._A
+                act, node = node.select(self._c_puct)
+
             # 执行action走子
             action = state.position_to_action(act)
             state.step(action)
@@ -259,10 +245,10 @@ class MCTS(object):
     def update_root_with_action(self, act):
         """根据action更新根节点"""
         if  act!=None: #action in self._root._children:
-            self._root = self._root.get_child_by_action(act)
+            self._root = self._root._children[act]
             self._root._parent = None
         else:
-            self._root = TreeNode(None, -1, 1.0)
+            self._root = TreeNode(None, 1.0)
 
     def _evaluate_rollout(self, state, limit=1000):
         """使用随机快速走子策略评估叶子节点
@@ -333,7 +319,7 @@ class MCTS(object):
             self._playout_network(state_copy)
 
             if n >= len(state.availables):
-                visits = [node._n_visits for node in self._root._children if node._n_visits>0]
+                visits = [self._root._children[act]._n_visits for act in self._root._children if self._root._children[act]._n_visits>0]
                 if len(visits)==1: break
                 var = np.var(visits)
                 if var>self._max_var: break
@@ -361,7 +347,7 @@ class MCTS(object):
                     # break
 
         # 分解出child中的action和最优选访问次数
-        act_visits = [(node._A, node._n_visits) for node in self._root._children]
+        act_visits = [(act, node._n_visits) for act, node in self._root._children.items()]
         acts = [av[0] for av in act_visits]
         visits = [av[1] for av in act_visits]
         # acts, visits = zip(*act_visits)
@@ -370,9 +356,8 @@ class MCTS(object):
         # info={}
         for idx in sorted(range(len(visits)), key=visits.__getitem__)[::-1]:
             if len(info)>2: break
-            node = self._root.get_child_by_action(acts[idx])
-            v = node.get_value(self._c_puct)
-            p = node._P
+            v = self._root._children[acts[idx]].get_value(self._c_puct)
+            p = self._root._children[acts[idx]]._P
             action = state.position_to_action(acts[idx])
             info[action] = (visits[idx], round(v,2), round(p,5))
 
@@ -399,7 +384,7 @@ class MCTS(object):
         if node==None:
             node=self._root
         l=[0]
-        for _node in node._children:
+        for _node in node._children.values():
             l.append(self.max_depth_tree(_node)+1)
         return max(l)
 
@@ -416,7 +401,7 @@ class MCTS(object):
             state_copy = copy.deepcopy(state)
             self._playout(state_copy)
 
-        act_visits = [(node._A, node._n_visits) for node in self._root._children]
+        act_visits = [(act, node._n_visits) for act, node in self._root._children.items()]
         acts = [av[0] for av in act_visits]
         visits = [av[1] for av in act_visits]
         # acts, visits = zip(*act_visits)
@@ -425,15 +410,13 @@ class MCTS(object):
         if max(visits)-min(visits)>10:
             for idx in sorted(range(len(visits)), key=visits.__getitem__)[::-1]:
                 if len(info)>3: break
-                node = self._root.get_child_by_action(acts[idx])
-                value = node.get_value(self._c_puct)
+                value = self._root._children[acts[idx]].get_value(1)
                 action = state.position_to_action(acts[idx])
                 info[action] = (visits[idx], round(value, 2))
         else:
             for idx in range(len(visits)):
                 if len(info)>3: break
-                node = self._root.get_child_by_action(acts[idx])
-                value = node.get_value(self._c_puct)
+                value = self._root._children[acts[idx]].get_value(1)
                 action = state.position_to_action(acts[idx])
                 info[action] = (visits[idx], round(value, 2)) 
         print(state.step_count+1,"MCTS:",(state.current_player),"_n_playout:", n, "info:", info, "first:",self._first_ations, "var:", round(var,1))
