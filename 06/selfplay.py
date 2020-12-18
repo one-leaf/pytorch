@@ -3,14 +3,12 @@ from torch import batch_norm, sqrt
 from model import PolicyValueNet  
 from mcts import MCTSPurePlayer, MCTSPlayer
 from agent import Agent
-import os, glob, pickle, uuid
-import sys, time
-import random
+import os, pickle, uuid
 import logging
 import numpy as np
-from collections import defaultdict, deque
-import torch
-from threading import Thread, Lock
+
+import faulthandler
+faulthandler.enable()
 
 curr_dir = os.path.dirname(os.path.abspath(__file__))
 size = 15  # 棋盘大小
