@@ -63,9 +63,8 @@ class MCTS():
             probs[bestA] = 1
             return acts, probs
 
-        visits = [x ** (1. / temp) for x in visits]
-        counts_sum = float(sum(visits))
-        probs = [x / counts_sum for x in visits]
+        m = np.power(np.array(visits), 1./temp)
+        probs = m/np.sum(m)
         return acts, probs
 
     def search(self, state):
