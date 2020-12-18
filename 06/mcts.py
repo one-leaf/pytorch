@@ -56,12 +56,12 @@ class MCTS():
         acts = [av[0] for av in act_visits]
         visits = [av[1] for av in act_visits]
 
-        info={}
+        info=[]
         for idx in sorted(range(len(visits)), key=visits.__getitem__)[::-1]:
             if len(info)>3: break
             act, visit = act_visits[idx]
             action = state.position_to_action(act)
-            info[action] = visit
+            info.append([action,visit])
         print(info)
 
         if temp == 0:
