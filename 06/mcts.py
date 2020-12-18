@@ -16,6 +16,7 @@ class MCTS():
         self._c_puct = c_puct               # 参数
         self._n_playout = n_playout         # 做几次探索
         self._max_var = 100                 # 达到最大方差后停止探索
+        self.lable = ""
 
         self.Qsa = {}  # 保存 Q 值, key: s,a
         self.Nsa = {}  # 保存 遍历次数 key: s,a
@@ -67,7 +68,7 @@ class MCTS():
             act, visit = act_visits[idx]
             action = state.position_to_action(act)
             info.append([action,visit])
-        print(state.step_count+1, "Player", state.current_player, "n_playout:", n, "depth:" ,self.max_depth, info, "var:", round(var,1))
+        print(state.step_count+1, self.lable, state.current_player, "n_playout:", n, "depth:" ,self.max_depth, info, "var:", round(var,1))
 
         if temp == 0:
             bestAs = np.array(np.argwhere(visits == np.max(visits))).flatten()
@@ -172,6 +173,7 @@ class MCTSPurePlayer(object):
     def set_player_ind(self, p):
         """指定MCTS的playerid"""
         self.player = p
+        self.mcts.lable = "MCTS(%s)"%p
 
     def reset_player(self):
         self.mcts.reset()
@@ -218,6 +220,7 @@ class MCTSPlayer(object):
     def set_player_ind(self, p):
         """指定MCTS的playerid"""
         self.player = p
+        self.mcts.lable = "AI(%s)"%p
 
     def reset_player(self):
         self.mcts.reset()
