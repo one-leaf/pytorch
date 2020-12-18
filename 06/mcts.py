@@ -67,7 +67,9 @@ class MCTS():
             if len(info)>3: break
             act, visit = act_visits[idx]
             action = state.position_to_action(act)
-            info.append([action,visit])
+            q = self.Qsa[(s, act)]
+            p = self.Ps[s][act]
+            info.append([action,visit,q,p])
         print(state.step_count+1, self.lable, "n_playout:", n, "depth:" ,self.max_depth, info, "var:", round(var,1))
 
         if temp == 0:
