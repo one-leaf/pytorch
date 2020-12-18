@@ -15,11 +15,11 @@ from itertools import count
 class TreeNode():
     """MCTS树中的节点类。 每个节点跟踪其自身的值Q，先验概率P及其访问次数调整的先前得分u。"""
 
-    def __init__(self, action, prior_p):
-        self._A = action
+    def __init__(self):
+        self._A = -1
         self._Q = 0  # 节点分数，用于mcts树初始构建时的充分打散（每次叶子节点被最优选中时，节点隔级-leaf_value逻辑，以避免构建树时某分支被反复选中）
         self._N = 0  # 节点被最优选中的次数，用于树构建完毕后的走子选择
-        self._P = prior_p  # action概率
+        self._P = 1.  # action概率
         self._children = []  # 子节点 TreeNode
         self._parent = None
 
@@ -29,7 +29,9 @@ class TreeNode():
             Params：action_priors = 走子策略函数返回的走子概率列表 [(action,概率)]
         """
         for action, prob in action_priors:
-            node = TreeNode(action, float(prob))
+            node = TreeNode()
+            node._A = action
+            node._P = prob
             node._parent = self
             self._children.append(node)
 
@@ -125,7 +127,7 @@ class MCTS(object):
         c_puct 控制搜索速度收敛到最大值的一个权重，取值从 (0, inf) ，这个值越大前面的父节点就会被反向更新的幅度也就越大，
             也就是意味着较高的值会造成更多的依赖之前的步骤
         """
-        self._root = TreeNode(-1, 1.0)  # 根节点，默认概率值为1,动作为-1
+        self._root = TreeNode()  # 根节点，默认概率值为1,动作为-1
         self._policy = policy_value_fn  # 可走子action及对应概率，这里采用平均概率
         self._c_puct = c_puct  # MCTS child搜索收敛权重
         self._n_playout = n_playout  # 构建MCTS初始树的随机走子步数
@@ -264,7 +266,7 @@ class MCTS(object):
             self._root = self._root.get_child_by_action(act)
             self._root._parent = None
         else:
-            self._root = TreeNode(-1, 1.0)
+            self._root = TreeNode()
 
     def _evaluate_rollout(self, state, limit=1000):
         """使用随机快速走子策略评估叶子节点
