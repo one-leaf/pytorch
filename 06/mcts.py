@@ -196,7 +196,7 @@ class MCTSPurePlayer(object):
                 action = state.position_to_action(act)
 
             # self.mcts.reset()
-            # print("MCTS:", action)
+            print("MCTS", self.player, action)
             if return_prob:
                 return action, move_probs
             else:
@@ -275,6 +275,8 @@ class MCTSPlayer(object):
                 # 打印AI走子信息
                 # print("AI move: %d,%d\n" % (action[0], action[1]))
             # print("AI:", action)
+            print("AI", self.player, action)
+
             if return_prob:
                 return action, move_probs
             else:
