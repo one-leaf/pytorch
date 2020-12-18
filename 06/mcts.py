@@ -207,9 +207,12 @@ class MCTSPurePlayer(object):
             # 第一步棋为一手交换，随便下
             if state.step_count==0: 
                 action = random.choice(state.first_availables)
+                act =  state.action_to_position(action)
             else:
                 action = state.position_to_action(act)
 
+            if act!=acts[idx]:
+                print(" random:", state.position_to_action(acts[idx]), act_probs[idx], "==>", action, act_probs[acts.index(act)])
             # self.mcts.reset()
             # print("MCTS", self.player, action)
             if return_prob:
