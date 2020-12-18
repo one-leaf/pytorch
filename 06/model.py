@@ -105,6 +105,7 @@ class Net(nn.Module):
 
 class PolicyValueNet():
     def __init__(self, size, model_file=None, device=None, l2_const=1e-4):
+        print("*"*200)
         self.size = size
         if device is None:
             device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -114,7 +115,7 @@ class PolicyValueNet():
         self.policy_value_net = Net(size).to(device)
 
         self.cache = Cache(maxsize=100000)
-        self.print_netwark()
+        # self.print_netwark()
 
         # self.optimizer = optim.Adam(self.policy_value_net.parameters(), weight_decay=self.l2_const)       
         self.optimizer = optim.SGD(self.policy_value_net.parameters(), lr=1e-3, momentum=0.9, weight_decay=self.l2_const)
