@@ -22,6 +22,7 @@ class MCTS():
         self.Ns = {}  # 保存 遍历次数 key: s
         self.Ps = {}  # 保存 动作概率 key: s, a
         self.Es = {}  # 保存游戏最终得分 key: s
+        print("create mcts, c_puct: {}, n_playout: {}".format(c_puct, n_playout))
 
     def reset(self):
         self.Qsa = {}  # 保存 Q 值, key: s,a
