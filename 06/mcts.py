@@ -20,9 +20,7 @@ class MCTS():
         self.Nsa = {}  # 保存 遍历次数 key: s,a
         self.Ns = {}  # 保存 遍历次数 key: s
         self.Ps = {}  # 保存 动作概率 key: s, a
-
         self.Es = {}  # 保存游戏最终得分 key: s
-        self.Vs = {}  # 保存游戏可用步骤 key: s
 
     def reset(self):
         self.Qsa = {}  # 保存 Q 值, key: s,a
@@ -30,7 +28,6 @@ class MCTS():
         self.Ns = {}  # 保存 遍历次数 key: s
         self.Ps = {}  # 保存 动作概率 key: s, a
         self.Es = {}  # 保存游戏最终得分 key: s
-        self.Vs = {}  # 保存游戏可用步骤 key: s        
 
     def get_action_probs(self, state, temp=1):
         """
@@ -97,30 +94,17 @@ class MCTS():
         # 如果当前状态没有子节点，增加子节点
         # 增加 Ps[s] Vs[s] Ns[s]
         if s not in self.Ps:
-            # 获得当前局面的概率 和 局面的打分, 这个是全量的
+            # 获得当前局面的概率 和 局面的打分, 这个已经过滤掉了不可用走子
             act_probs, v = self._policy(state)
 
-            # 得到当前所有可用动作对应的向量位置
-            positions = state.actions_to_positions(state.availables)
-            valids = np.zeros(state.size * state.size)
-            for p in positions:
-                valids[p]=1.
+            probs = np.zeros(state.size * state.size)
+            for act, prob in act_probs:
+                probs[act] = prob
+            self.Ps[s] = probs 
             
-            self.Ps[s] = act_probs * valids
-
-            sum_Ps_s = np.sum(self.Ps[s])
-            if sum_Ps_s > 0:
-                self.Ps[s] /= sum_Ps_s  # 归一化
-            else:                
-                log.error("当前所有可用走子概率的和为0")
-                self.Ps[s] = self.Ps[s] + valids
-                self.Ps[s] /= np.sum(self.Ps[s])
-
-            self.Vs[s] = valids
             self.Ns[s] = 0
             return -v
 
-        valids = self.Vs[s]
 
         # 当前最佳概率和最佳动作
         cur_best = -float('inf')
