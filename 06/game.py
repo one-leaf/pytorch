@@ -45,7 +45,7 @@ class FiveChess(object):
             for y in range(self.size):
                 key[x+y*self.size]=str(self.chessboard[x][y]+1)
         key3 = int("".join(key),3)
-        return str(hash(key3))
+        return hash(key3)
 
     # 检查当前action是否有效
     def is_valid_set_coord(self, action):
