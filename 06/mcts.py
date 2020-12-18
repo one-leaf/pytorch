@@ -265,8 +265,10 @@ class MCTS(object):
     def update_root_with_action(self, act):
         """根据action更新根节点"""
         if  act!=None: #action in self._root._children:
-            self._root = self._root.get_child_by_action(act)
-            self._root._parent = None
+            node = self._root.get_child_by_action(act)
+            node._parent = None
+            self._root._children=None
+            self._root = node
         else:
             self._root = TreeNode()
 
