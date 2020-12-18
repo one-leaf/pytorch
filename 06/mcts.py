@@ -212,7 +212,7 @@ class MCTSPurePlayer(object):
                 action = state.position_to_action(act)
 
             if act!=acts[idx]:
-                print(" random:", state.position_to_action(acts[idx]), act_probs[idx], "==>", action, act_probs[acts.index(act)])
+                print("    random:", state.position_to_action(acts[idx]), act_probs[idx], "==>", action, act_probs[acts.index(act)])
             # self.mcts.reset()
             # print("MCTS", self.player, action)
             if return_prob:
@@ -270,7 +270,7 @@ class MCTSPlayer(object):
                 action = state.position_to_action(act)
 
                 if act!=acts[idx]:
-                    print(" random:", state.position_to_action(acts[idx]), act_probs[idx], "==>", action, act_probs[acts.index(act)])
+                    print("    random:", state.position_to_action(acts[idx]), act_probs[idx], "==>", action, act_probs[acts.index(act)])
 
                 # 更新根节点并重用搜索树
                 # self.mcts.update_root_with_action(None)
@@ -288,7 +288,7 @@ class MCTSPlayer(object):
                     act =  state.action_to_position(action)
 
                 if act!=acts[idx]:
-                    print(" random:", state.position_to_action(acts[idx]), act_probs[idx], "==>", action, act_probs[acts.index(act)])
+                    print("    random:", state.position_to_action(acts[idx]), act_probs[idx], "==>", action, act_probs[acts.index(act)])
 
                 # self.mcts.update_root_with_action(None)
                 # 打印AI走子信息
