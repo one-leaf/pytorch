@@ -216,15 +216,6 @@ class MCTS(object):
             end, winner = state.game_end()
             if end or state.check_will_win(): #and winner != curr_player:
                 self._first_ations.add(act)
-                # self._first_ations.add(state.actions[-3])
-                # if winner != curr_player:
-                #     mstr=""
-                #     for act in state.actions[-5:]:
-                #         mstr = mstr+ " -> %s"%str(act)
-                #     print(mstr)  
-            # # 如果这步棋快赢了，也重点关注
-            # if state.will_win():
-            #     self._first_ations.add(action)
 
         # 检查游戏是否有赢家
         end, winner = state.game_end()
@@ -279,7 +270,6 @@ class MCTS(object):
                     如果对手获胜返回-1
                     如果平局返回0
         """
-        curr_player = state.current_player
         winner = -1
         for i in range(limit):  # 随机快速走limit次，用于快速评估当前叶子节点的优略
             end, winner = state.game_end()
@@ -332,9 +322,8 @@ class MCTS(object):
         old_acts = state.actions_to_positions(state.actions)
         self._first_ations = set([act for act in self._first_ations if act not in old_acts])
         var = 0
-        # for n in count():
+
         for n in range(self._n_playout):
-            # print("\r_n_playout： {:.2f}%".format(n*100 / self._n_playout), end='')
             state_copy = copy.deepcopy(state)
             self._playout_network(state_copy)
 
@@ -343,28 +332,6 @@ class MCTS(object):
                 if len(visits)==1: break
                 var = np.var(visits)
                 if var>self._max_var: break
-            # if n%10==0 and n >= self._n_playout*0.2:
-            #     act_visits = [(act, node._N) for act, node in self._root._children.items()]
-            #     acts, visits = zip(*act_visits)
-
-                # idx = max(range(len(visits)), key=visits.__getitem__)
-                
-            #     if len(visits)>2: 
-            #         # 如果当前的最佳选项在必救名单直接执行
-            #         if acts[idx] in self._first_ations:
-            #             temp = 1e-5
-            #             break
-
-                # 如果方差足够大，或总数大于5倍结束
-                # var = np.var(visits)
-                # if var>=1000 or n>=self._n_playout*5: break
-            
-                # if n>=self._n_playout:
-                    # 如果得分为负数，多算2倍，争取找出一个优解
-                    # 不用特意去提高负分
-                    # value = self._root._children[acts[idx]].get_value(5)
-                    # if value>0 or n>self._n_playout*2:
-                    # break
 
         # 分解出child中的action和最优选访问次数
         act_visits = [(node._A, node._N) for node in self._root._children]
@@ -559,12 +526,6 @@ class MCTSPlayer(object):
                     act = np.random.choice(acts, p=act_probs)
 
                 action = state.position_to_action(act)
-                # 更新根节点:根据最后action向前探索树
-                # root = self.mcts._root
-                # for act in root._children:
-                #     node = root._children[act]   
-                #     if node._N>0:
-                #         print(act, node)
 
                 # 第一步棋为一手交换，随便下
                 if state.step_count==0: 
@@ -579,14 +540,6 @@ class MCTSPlayer(object):
                 # print("AI move: %d,%d\n" % (action[0], action[1]))
             # print("AI:", action)
             if return_prob:
-                # if action!=acts[idx]:
-                #     positions = state.actions_to_positions([action, acts[idx]])
-                #     p0 = positions[0]
-                #     p1 = positions[1]
-                #     prob0 = move_probs[p0]
-                #     prob1 = move_probs[p1]
-                #     move_probs[p0] = prob1
-                #     move_probs[p1] = prob0
                 return action, move_probs
             else:
                 return action

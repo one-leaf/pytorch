@@ -1,7 +1,7 @@
 import logging
 import math
 import copy
-
+import random
 import numpy as np
 
 EPS = 1e-8
@@ -24,6 +24,14 @@ class MCTS():
         self.Es = {}  # 保存游戏最终得分 key: s
         self.Vs = {}  # 保存游戏可用步骤 key: s
 
+    def reset(self):
+        self.Qsa = {}  # 保存 Q 值, key: s,a
+        self.Nsa = {}  # 保存 遍历次数 key: s,a
+        self.Ns = {}  # 保存 遍历次数 key: s
+        self.Ps = {}  # 保存 动作概率 key: s, a
+        self.Es = {}  # 保存游戏最终得分 key: s
+        self.Vs = {}  # 保存游戏可用步骤 key: s        
+
     def get_action_probs(self, state, temp=1):
         """
         获得mcts模拟后的最终概率， 输入游戏的当前状态 s
@@ -33,20 +41,20 @@ class MCTS():
         """
         s = state.get_key()
 
+        available_acts = state.actions_to_positions(state.availables)
         for n in range(self._n_playout):
             state_copy = copy.deepcopy(state)
             self.search(state_copy)
             
             if n >= len(state.availables):
-
                 # 取出当前所有的 visits
-                visits = [self.Nsa[(s, a)] if (s, a) in self.Nsa else 0 for a in state.availables]
+                visits = [self.Nsa[(s, a)] if (s, a) in self.Nsa else 0 for a in available_acts]
 
                 if len(visits)==1: break
                 var = np.var(visits)
                 if var>self._max_var: break
 
-        act_visits = [(a, self.Nsa[(s, a)]) if (s, a) in self.Nsa else 0 for a in state.availables]
+        act_visits = [(a, self.Nsa[(s, a)]) if (s, a) in self.Nsa else 0 for a in available_acts]
         acts = [av[0] for av in act_visits]
         visits = [av[1] for av in act_visits]
 
@@ -147,3 +155,132 @@ class MCTS():
 
         self.Ns[s] += 1
         return -v
+
+
+class MCTSPurePlayer(object):
+    """基于纯MCTS的player"""
+
+    @staticmethod
+    def policy_value_fn(state):
+        """给棋盘所有可落子位置分配默认平均概率 [(0, 0.015625), (action, probability), ...], 0"""
+        availables = state.actions_to_positions(state.availables)
+        action_probs = np.ones(len(availables)) / len(availables)
+        return  [(availables[i], action_probs[i]) for i in range(len(availables))], 0
+
+    def __init__(self, c_puct=5, n_playout=2000):
+        self.mcts = MCTS(MCTSPurePlayer.policy_value_fn, c_puct, n_playout)
+
+    def set_player_ind(self, p):
+        """指定MCTS的playerid"""
+        self.player = p
+
+    def reset_player(self):
+        self.mcts.reset()
+
+    def get_action(self, state, return_prob=0):
+        """计算下一步走子action"""
+        if len(state.availables) > 0:  # 盘面可落子位置>0
+            # 构建纯MCTS初始树(节点分布充分)，并返回child中访问量最大的action
+            acts, act_probs = self.mcts.get_action_probs(state, temp=0)
+
+            move_probs = np.zeros(state.size * state.size)
+            move_probs[acts] = act_probs
+
+            idx = np.argmax(act_probs) 
+            act = acts[idx]
+
+            # 第一步棋为一手交换，随便下
+            if state.step_count==0: 
+                action = random.choice(state.first_availables)
+            else:
+                action = state.position_to_action(act)
+
+            # self.mcts.reset()
+            # print("MCTS:", action)
+            if return_prob:
+                return action, move_probs
+            else:
+                return action
+        else:
+            print("WARNING: the state is full")
+
+    def __str__(self):
+        return "MCTS {}".format(self.player)
+
+
+class MCTSPlayer(object):
+    """基于模型指导概率的MCTS + AI player"""
+
+    def __init__(self, policy_value_function, c_puct=5, n_playout=2000, is_selfplay=0):
+        """初始化参数"""
+        self.mcts = MCTS(policy_value_function, c_puct, n_playout)
+        self._is_selfplay = is_selfplay
+
+    def set_player_ind(self, p):
+        """指定MCTS的playerid"""
+        self.player = p
+
+    def reset_player(self):
+        self.mcts.reset()
+
+    def get_action(self, state, temp=1e-3, return_prob=0):
+        """计算下一步走子action"""
+        move_probs = np.zeros(state.size * state.size)
+        if len(state.availables) > 0:  # 盘面可落子位置>0
+            # 训练的时候 temp = 1
+            acts, act_probs = self.mcts.get_action_probs(state, temp)
+            move_probs[acts] = act_probs
+            idx = np.argmax(act_probs)    
+
+            if self._is_selfplay:  # 自我对抗
+
+                # 第一步棋为一手交换，随便下
+                if state.step_count==0: 
+                    action = random.choice(state.first_availables)
+                    act =  state.action_to_position(action)
+                else:                    
+                    # 如果是下了几步后全部取最大值
+                    if state.step_count>=state.n_in_row*2:
+                    # if random.random() < state.step_count*2/(state.size*state.size):
+                        act = acts[idx]
+                    else:
+                        p= 0.75                
+                        dirichlet = np.random.dirichlet(0.03 * np.ones(len(act_probs)))
+                        act = np.random.choice(acts, p=p * act_probs + (1-p) * dirichlet)
+
+                action = state.position_to_action(act)
+
+                if act!=acts[idx]:
+                    print(" random:", state.position_to_action(acts[idx]), act_probs[idx], "==>", action, act_probs[acts.index(act)])
+
+                # 更新根节点并重用搜索树
+                # self.mcts.update_root_with_action(None)
+            else:  # 和人类对战
+                if state.step_count>=state.n_in_row*2:
+                    act = acts[idx]
+                else:               
+                    act = np.random.choice(acts, p=act_probs)
+
+                action = state.position_to_action(act)
+
+                # 第一步棋为一手交换，随便下
+                if state.step_count==0: 
+                    action = random.choice(state.first_availables)
+                    act =  state.action_to_position(action)
+
+                if act!=acts[idx]:
+                    print(" random:", state.position_to_action(acts[idx]), act_probs[idx], "==>", action, act_probs[acts.index(act)])
+
+                # self.mcts.update_root_with_action(None)
+                # 打印AI走子信息
+                # print("AI move: %d,%d\n" % (action[0], action[1]))
+            # print("AI:", action)
+            if return_prob:
+                return action, move_probs
+            else:
+                return action
+        else:
+            print("WARNING: the board is full")
+
+    def __str__(self):
+        return "AI {}".format(self.player)
