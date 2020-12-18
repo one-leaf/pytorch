@@ -551,7 +551,7 @@ class MCTSPlayer(object):
                     print(" random:", state.position_to_action(acts[idx]), act_probs[idx], "==>", action, act_probs[acts.index(act)])
 
                 # 更新根节点并重用搜索树
-                self.mcts.update_root_with_action(act)
+                self.mcts.update_root_with_action(None)
             else:  # 和人类对战
                 if state.step_count>=state.n_in_row*2:
                     act = acts[idx]
