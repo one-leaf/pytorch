@@ -125,7 +125,7 @@ class MCTS(object):
         c_puct 控制搜索速度收敛到最大值的一个权重，取值从 (0, inf) ，这个值越大前面的父节点就会被反向更新的幅度也就越大，
             也就是意味着较高的值会造成更多的依赖之前的步骤
         """
-        self._root = TreeNode(None, -1, 1.0)  # 根节点，默认概率值为1,动作为-1
+        self._root = TreeNode(-1, 1.0)  # 根节点，默认概率值为1,动作为-1
         self._policy = policy_value_fn  # 可走子action及对应概率，这里采用平均概率
         self._c_puct = c_puct  # MCTS child搜索收敛权重
         self._n_playout = n_playout  # 构建MCTS初始树的随机走子步数
@@ -264,7 +264,7 @@ class MCTS(object):
             self._root = self._root.get_child_by_action(act)
             self._root._parent = None
         else:
-            self._root = TreeNode(None, -1, 1.0)
+            self._root = TreeNode(-1, 1.0)
 
     def _evaluate_rollout(self, state, limit=1000):
         """使用随机快速走子策略评估叶子节点
