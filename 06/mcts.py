@@ -20,7 +20,7 @@ class TreeNode():
         self._Q = 0  # 节点分数，用于mcts树初始构建时的充分打散（每次叶子节点被最优选中时，节点隔级-leaf_value逻辑，以避免构建树时某分支被反复选中）
         self._N = 0  # 节点被最优选中的次数，用于树构建完毕后的走子选择
         self._P = 1.  # action概率
-        self._children = []  # 子节点 TreeNode
+        self._children = None  # 子节点 TreeNode
         self._parent = None
 
     # 扩展新的子节点
@@ -28,6 +28,8 @@ class TreeNode():
         """把策略函数返回的 [(action,概率)] 列表追加到 child 节点上
             Params：action_priors = 走子策略函数返回的走子概率列表 [(action,概率)]
         """
+        if self._children is None:
+            self._children = []
         for action, prob in action_priors:
             node = TreeNode()
             node._A = action
@@ -41,7 +43,7 @@ class TreeNode():
             Params：c_puct = child 搜索深度
             Return: tuple (action, next_node)
         """
-        return max(self._children, key=lambda act_node: act_node.get_value(c_puct))
+        return max(self._children, key=lambda node: node.get_value(c_puct))
 
     # 计算和返回这个节点的值
     # MCTS计算公式：
@@ -95,7 +97,7 @@ class TreeNode():
     # 检查当前是否已经扩展了
     def is_leaf(self):
         """检查当前是否叶子节点"""
-        return self._children == []
+        return self._children is None or self._children == []
 
     # 检查当前是否是根节点
     def is_root(self):
