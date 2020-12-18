@@ -405,8 +405,9 @@ class MCTS(object):
         if node==None:
             node=self._root
         l=[0]
-        for _node in node._children:
-            l.append(self.max_depth_tree(_node)+1)
+        if node._children:
+            for _node in node._children:
+                l.append(self.max_depth_tree(_node)+1)
         return max(l)
 
     # 按访问次数返回当前状态下的动作及其概率，构建所有的树
