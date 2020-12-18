@@ -35,15 +35,13 @@ class Agent(object):
             player_in_turn = players[self.game.current_player]
             if isinstance(player_in_turn, MCTSPlayer):
                 action, move_probs = player_in_turn.get_action(self.game, temp=temp, return_prob=1)  
-                # 如果包含了第二个玩家是MCTS，则AI每一步都需要重置搜索树
-                # if not player2 is None:
-                #     player_in_turn.mcts.update_root_with_action(None)
+                # 如果包含了第二个玩家是MCTS，则AI每一步都需要重置搜索树               
             else:
                 action, move_probs = player_in_turn.get_action(self.game, return_prob=1)
  
             idx = np.argmax(move_probs)
             act = self.game.positions_to_actions([idx])[0]
-            if act == action and isinstance(player_in_turn, MCTSPlayer):
+            if act == action: # and isinstance(player_in_turn, MCTSPlayer):
                 states.append(self.game.current_state())
                 mcts_probs.append(move_probs)
                 current_players.append(self.game.current_player)
