@@ -16,11 +16,11 @@ class TreeNode():
     """MCTS树中的节点类。 每个节点跟踪其自身的值Q，先验概率P及其访问次数调整的先前得分u。"""
 
     def __init__(self):
-        self._A = -1
-        self._Q = 0  # 节点分数，用于mcts树初始构建时的充分打散（每次叶子节点被最优选中时，节点隔级-leaf_value逻辑，以避免构建树时某分支被反复选中）
-        self._N = 0  # 节点被最优选中的次数，用于树构建完毕后的走子选择
+        self._A = -1  # 当前动作
+        self._Q = 0   # 节点分数，用于mcts树初始构建时的充分打散（每次叶子节点被最优选中时，节点隔级-leaf_value逻辑，以避免构建树时某分支被反复选中）
+        self._N = 0   # 节点被最优选中的次数，用于树构建完毕后的走子选择
         self._P = 1.  # action概率
-        self._children = None  # 子节点 TreeNode
+        self._children = []  # 子节点 TreeNode
         self._parent = None
 
     # 扩展新的子节点
@@ -28,8 +28,6 @@ class TreeNode():
         """把策略函数返回的 [(action,概率)] 列表追加到 child 节点上
             Params：action_priors = 走子策略函数返回的走子概率列表 [(action,概率)]
         """
-        if self._children is None:
-            self._children = []
         for action, prob in action_priors:
             node = TreeNode()
             node._A = action
@@ -407,9 +405,8 @@ class MCTS(object):
         if node==None:
             node=self._root
         l=[0]
-        if node._children:
-            for _node in node._children:
-                l.append(self.max_depth_tree(_node)+1)
+        for _node in node._children:
+            l.append(self.max_depth_tree(_node)+1)
         return max(l)
 
     # 按访问次数返回当前状态下的动作及其概率，构建所有的树
