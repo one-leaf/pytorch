@@ -39,6 +39,8 @@ class MCTS():
         """
         s = state.get_key()
 
+        self.depth = 0
+
         available_acts = state.actions_to_positions(state.availables)
         for n in range(self._n_playout):
             state_copy = copy.deepcopy(state)
@@ -62,7 +64,7 @@ class MCTS():
             act, visit = act_visits[idx]
             action = state.position_to_action(act)
             info.append([action,visit])
-        print(info)
+        print(state.step_count+1, "AI", "n_playout:", n, "depth:" ,self.depth, info)
 
         if temp == 0:
             bestAs = np.array(np.argwhere(visits == np.max(visits))).flatten()
@@ -111,6 +113,8 @@ class MCTS():
             self.Ps[s] = probs 
 
             self.Ns[s] = 0
+
+            self.depth = self.depth +1
             return -v
 
 
@@ -188,7 +192,7 @@ class MCTSPurePlayer(object):
                 action = state.position_to_action(act)
 
             # self.mcts.reset()
-            print("MCTS", self.player, action)
+            # print("MCTS", self.player, action)
             if return_prob:
                 return action, move_probs
             else:
@@ -267,7 +271,7 @@ class MCTSPlayer(object):
                 # 打印AI走子信息
                 # print("AI move: %d,%d\n" % (action[0], action[1]))
             # print("AI:", action)
-            print("AI", self.player, action)
+            # print("AI", self.player, action)
 
             if return_prob:
                 return action, move_probs
