@@ -15,13 +15,13 @@ from itertools import count
 class TreeNode():
     """MCTS树中的节点类。 每个节点跟踪其自身的值Q，先验概率P及其访问次数调整的先前得分u。"""
 
-    def __init__(self, parent, action, prior_p):
-        self._parent = parent
+    def __init__(self, action, prior_p):
         self._A = action
-        self._children = []  # 子节点 TreeNode
         self._Q = 0  # 节点分数，用于mcts树初始构建时的充分打散（每次叶子节点被最优选中时，节点隔级-leaf_value逻辑，以避免构建树时某分支被反复选中）
         self._N = 0  # 节点被最优选中的次数，用于树构建完毕后的走子选择
         self._P = prior_p  # action概率
+        self._children = []  # 子节点 TreeNode
+        self._parent = None
 
     # 扩展新的子节点
     def expand(self, action_priors):
@@ -29,7 +29,9 @@ class TreeNode():
             Params：action_priors = 走子策略函数返回的走子概率列表 [(action,概率)]
         """
         for action, prob in action_priors:
-            self._children.append(TreeNode(self, action, float(prob)))
+            node = TreeNode(action, float(prob))
+            node._parent = self
+            self._children.append(node)
 
     # 从子节点中选择最佳子节点
     def select(self, c_puct):
