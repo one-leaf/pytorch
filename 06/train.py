@@ -156,7 +156,7 @@ class FiveChessTrain():
         """启动训练"""
         try:
             dataset_len = len(self.dataset)      
-            training_loader = torch.utils.data.DataLoader(self.dataset, batch_size=self.batch_size, shuffle=True, num_workers=2,)
+            training_loader = torch.utils.data.DataLoader(self.dataset, batch_size=self.batch_size, shuffle=True, num_workers=4,)
             old_probs = None
             test_batch = None
             for i, data in enumerate(training_loader):  # 计划训练批次
