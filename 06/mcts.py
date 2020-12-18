@@ -20,7 +20,7 @@ class TreeNode():
         self._A = action
         self._children = []  # 子节点 TreeNode
         self._Q = 0  # 节点分数，用于mcts树初始构建时的充分打散（每次叶子节点被最优选中时，节点隔级-leaf_value逻辑，以避免构建树时某分支被反复选中）
-        self._n_visits = 0  # 节点被最优选中的次数，用于树构建完毕后的走子选择
+        self._N = 0  # 节点被最优选中的次数，用于树构建完毕后的走子选择
         self._P = prior_p  # action概率
 
     # 扩展新的子节点
@@ -44,18 +44,18 @@ class TreeNode():
     # 传统是    UCT = self._Q/self._n + 2*sqrt(log(root._n)/(1+self._n))
     # 这个是    UCT = self._Q         + c_puct*self_P*sqrt(_parent._n)/(1+self_n) 
     # 在 leela-zero 中 c_puct 中设置的为 0.5 ，alpha zero 这个值是 0.05 ,腾讯的绝艺是 2.5 ，这个值如果小就多考虑mcts探索，否则加强概率的影响
-    # (c_puct * self._P * np.sqrt(self._parent._n_visits) + self._n_visits * self._Q + leaf_value) / (1 + self._n_visits) 
+    # (c_puct * self._P * np.sqrt(self._parent._N) + self._N * self._Q + leaf_value) / (1 + self._N) 
     def get_value(self, c_puct):
         """计算并返回当前节点的值
             c_puct:     一个数值，取值范围为（0， inf），调整先验概率和当前路径的权重
             self._P:    action概率
-            self._parent._n_visits  父节点的最优选次数
-            self._n_visits          当前节点的最优选次数
+            self._parent._N  父节点的最优选次数
+            self._N          当前节点的最优选次数
             self._Q                 当前节点的分数，用于mcts树初始构建时的充分打散
         """
         if self._parent is None: 
             raise("Node parent is None, can't get value")
-        _u = (c_puct * self._P * math.sqrt(self._parent._n_visits) / (1 + self._n_visits)+1e-8)
+        _u = (c_puct * self._P * math.sqrt(self._parent._N) / (1 + self._N)+1e-8)
         return self._Q + _u
 
     # 反向更新当前节点
@@ -64,19 +64,19 @@ class TreeNode():
             leaf_value: 从当前玩家的角度看子树的评估值.
         """
         # 更新 Q, 加上叶子值和当前值的差异的平均数，如果叶子值比本节点价值高，本节点会增高，否则减少.
-        # Q(si,ai) = W(si,ai)/n(si,ai) = Q*_n_visits/(_n_visits + 1) + leaf_value/(_n_visits+1)
+        # Q(si,ai) = W(si,ai)/n(si,ai) = Q*_N/(_N + 1) + leaf_value/(_N+1)
         # 这个是标准公式，下面如果先+1，计算步骤会少一点
-        # self._Q = (self._n_visits * self._Q + leaf_value) / (self._n_visits + 1.)
-        # self._n_visits += 1
+        # self._Q = (self._N * self._Q + leaf_value) / (self._N + 1.)
+        # self._N += 1
 
         # 变形公式推导
-        self._n_visits += 1
-        # self._Q = (self._n_visits-1) * self._Q + leaf_value) / self._n_visits
-        # self._Q = ((self._n_visits-1) * self._Q)/self._n_visits + leaf_value/self._n_visits
-        # self._Q = ((self._n_visits* self._Q - self._Q))/self._n_visits + leaf_value/self._n_visits
-        # self._Q = (self._n_visits* self._Q - self._Q)/self._n_visits + leaf_value/self._n_visits
-        # self._Q = self._Q - self._Q/self._n_visits + leaf_value/self._n_visits
-        self._Q += (leaf_value - self._Q) / self._n_visits
+        self._N += 1
+        # self._Q = (self._N-1) * self._Q + leaf_value) / self._N
+        # self._Q = ((self._N-1) * self._Q)/self._N + leaf_value/self._N
+        # self._Q = ((self._N* self._Q - self._Q))/self._N + leaf_value/self._N
+        # self._Q = (self._N* self._Q - self._Q)/self._N + leaf_value/self._N
+        # self._Q = self._Q - self._Q/self._N + leaf_value/self._N
+        self._Q += (leaf_value - self._Q) / self._N
 
     # 递归更新当前和其所有的父节点
     def update_recursive(self, leaf_value):
@@ -110,7 +110,7 @@ class TreeNode():
             value= 0
         else:
             value = self.get_value(1.5)
-        return "Node - A: %s, Q: %s, P: %s, N: %s, Value: %s"%(self._A, self._Q, self._P, self._n_visits, value) 
+        return "Node - A: %s, Q: %s, P: %s, N: %s, Value: %s"%(self._A, self._Q, self._P, self._N, value) 
 
 class MCTS(object):
     """蒙特卡罗树搜索的实现"""
@@ -185,10 +185,10 @@ class MCTS(object):
 
             # 如果存在优先探索队列，并且该子节点存在未探索过的
             act = None
-            children_acts = [_node._A for _node in node._children if _node._n_visits==0]
+            children_acts = [_node._A for _node in node._children if _node._N==0]
             for _act in self._first_ations:
                 for _node in node._children:
-                    if _act == _node._A and _node._n_visits==0:
+                    if _act == _node._A and _node._N==0:
                         act, node = _act, _node
                         break
                 if not act is None: break
@@ -196,7 +196,7 @@ class MCTS(object):
             # 如果是根节点有没有探索过的棋，无论如何尝试一下,这样会导致探索的路径过于短小
             # if node._parent is None or node._parent._parent is None:
             # for act in node._children:
-            #     if node._children[act]._n_visits == 0:
+            #     if node._children[act]._N == 0:
             #         action, node = act, node._children[act]
             #         break
 
@@ -333,12 +333,12 @@ class MCTS(object):
             self._playout_network(state_copy)
 
             if n >= len(state.availables):
-                visits = [node._n_visits for node in self._root._children if node._n_visits>0]
+                visits = [node._N for node in self._root._children if node._N>0]
                 if len(visits)==1: break
                 var = np.var(visits)
                 if var>self._max_var: break
             # if n%10==0 and n >= self._n_playout*0.2:
-            #     act_visits = [(act, node._n_visits) for act, node in self._root._children.items()]
+            #     act_visits = [(act, node._N) for act, node in self._root._children.items()]
             #     acts, visits = zip(*act_visits)
 
                 # idx = max(range(len(visits)), key=visits.__getitem__)
@@ -361,7 +361,7 @@ class MCTS(object):
                     # break
 
         # 分解出child中的action和最优选访问次数
-        act_visits = [(node._A, node._n_visits) for node in self._root._children]
+        act_visits = [(node._A, node._N) for node in self._root._children]
         acts = [av[0] for av in act_visits]
         visits = [av[1] for av in act_visits]
         # acts, visits = zip(*act_visits)
@@ -416,7 +416,7 @@ class MCTS(object):
             state_copy = copy.deepcopy(state)
             self._playout(state_copy)
 
-        act_visits = [(node._A, node._n_visits) for node in self._root._children]
+        act_visits = [(node._A, node._N) for node in self._root._children]
         acts = [av[0] for av in act_visits]
         visits = [av[1] for av in act_visits]
         # acts, visits = zip(*act_visits)
@@ -557,7 +557,7 @@ class MCTSPlayer(object):
                 # root = self.mcts._root
                 # for act in root._children:
                 #     node = root._children[act]   
-                #     if node._n_visits>0:
+                #     if node._N>0:
                 #         print(act, node)
 
                 # 第一步棋为一手交换，随便下
