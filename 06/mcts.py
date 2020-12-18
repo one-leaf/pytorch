@@ -39,13 +39,14 @@ class MCTS():
         """
         s = state.get_key()
 
-        self.depth = 0
-
+        self.max_depth = 0
         available_acts = state.actions_to_positions(state.availables)
         for n in range(self._n_playout):
+            self.depth = 0
             state_copy = copy.deepcopy(state)
             self.search(state_copy)
-            
+            if self.depth>self.max_depth: self.max_depth = self.depth
+
             if n >= len(state.availables):
                 # 取出当前所有的 visits
                 visits = [self.Nsa[(s, a)] if (s, a) in self.Nsa else 0 for a in available_acts]
@@ -64,7 +65,7 @@ class MCTS():
             act, visit = act_visits[idx]
             action = state.position_to_action(act)
             info.append([action,visit])
-        print(state.step_count+1, "AI", "n_playout:", n, "depth:" ,self.depth, info)
+        print(state.step_count+1, "AI", "n_playout:", n, "depth:" ,self.max_depth, info)
 
         if temp == 0:
             bestAs = np.array(np.argwhere(visits == np.max(visits))).flatten()
@@ -85,6 +86,8 @@ class MCTS():
             v: 当前局面的状态
         """
         s = state.get_key()
+        self.depth = self.depth +1
+
 
         # 将所有状态的得分都 cache 起来
         if s not in self.Es:
@@ -113,8 +116,6 @@ class MCTS():
             self.Ps[s] = probs 
 
             self.Ns[s] = 0
-
-            self.depth = self.depth +1
             return -v
 
 
