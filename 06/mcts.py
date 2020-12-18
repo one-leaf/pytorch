@@ -61,7 +61,7 @@ class MCTS():
             bestA = np.random.choice(bestAs)
             probs = [0] * len(visits)
             probs[bestA] = 1
-            return acts, probs
+            return acts, np.array(probs)
 
         m = np.power(np.array(visits), 1./temp)
         probs = m/np.sum(m)
