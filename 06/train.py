@@ -51,7 +51,12 @@ class Dataset(torch.utils.data.Dataset):
 
     def __getitem__(self, index):
         filename = self.file_list[index]
-        state, mcts_prob, winner = pickle.load(open(filename, "rb"))
+        try:
+            state, mcts_prob, winner = pickle.load(open(filename, "rb"))
+        except:
+            os.remove(filename)
+            raise "filename {} error can't load".format(filename)
+        
         state = torch.from_numpy(state).float()
         mcts_prob = torch.from_numpy(mcts_prob).float()
         winner = torch.as_tensor(winner).float()
