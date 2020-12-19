@@ -51,11 +51,15 @@ class Dataset(torch.utils.data.Dataset):
 
     def __getitem__(self, index):
         filename = self.file_list[index]
-        try:
-            state, mcts_prob, winner = pickle.load(open(filename, "rb"))
-        except:
-            os.remove(filename)
-            raise Exception("filename {} error can't load".format(filename))
+        while True:
+            try:
+                state, mcts_prob, winner = pickle.load(open(filename, "rb"))
+            except:
+                print("filename {} error can't load".format(filename))
+                os.remove(filename)
+                filename = random.choice(self.file_list)
+            else:
+                break
 
         state = torch.from_numpy(state).float()
         mcts_prob = torch.from_numpy(mcts_prob).float()
