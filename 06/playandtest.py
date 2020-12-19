@@ -180,7 +180,7 @@ class FiveChessPlay():
                     #     self.pure_mcts_playout_num=self.pure_mcts_playout_num+50
                     # if self.mcts_win[0]<self.mcts_win[1]:
                     #     self.pure_mcts_playout_num=self.pure_mcts_playout_num-50
-                    if self.pure_mcts_playout_num<200: self.pure_mcts_playout_num=200
+                    if self.pure_mcts_playout_num<300: self.pure_mcts_playout_num=300
                     if self.pure_mcts_playout_num>5000: self.pure_mcts_playout_num=5000
                     self.mcts_win=[0, 0]
 
