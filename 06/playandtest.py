@@ -108,11 +108,11 @@ class FiveChessPlay():
         if not pure_mcts_player is None:
             if winner == mcts_player.player:
                 self.mcts_win[0] = self.mcts_win[0]+1
-                self.pure_mcts_playout_num=self.pure_mcts_playout_num+10
+                self.pure_mcts_playout_num=min(5000, self.pure_mcts_playout_num+10)
                 print("Curr Model Win!","win:", self.mcts_win[0],"lost",self.mcts_win[1],"playout_num",self.pure_mcts_playout_num)
             if winner == pure_mcts_player.player:
                 self.mcts_win[1] = self.mcts_win[1]+1
-                self.pure_mcts_playout_num=self.pure_mcts_playout_num-10
+                self.pure_mcts_playout_num=max(300, self.pure_mcts_playout_num-10)
                 print("Curr Model Lost!","win:", self.mcts_win[0],"lost",self.mcts_win[1],"playout_num",self.pure_mcts_playout_num)
         agent.game.print()
 
@@ -180,8 +180,6 @@ class FiveChessPlay():
                     #     self.pure_mcts_playout_num=self.pure_mcts_playout_num+50
                     # if self.mcts_win[0]<self.mcts_win[1]:
                     #     self.pure_mcts_playout_num=self.pure_mcts_playout_num-50
-                    if self.pure_mcts_playout_num<300: self.pure_mcts_playout_num=300
-                    if self.pure_mcts_playout_num>5000: self.pure_mcts_playout_num=5000
                     self.mcts_win=[0, 0]
 
                     # 如果当前模型的胜率大于等于0.6,保留为最佳模型
