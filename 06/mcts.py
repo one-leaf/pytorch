@@ -15,7 +15,7 @@ class MCTS():
         self._policy = policy_value_fn      # 概率估算函数
         self._c_puct = c_puct               # 参数
         self._n_playout = n_playout         # 做几次探索
-        self._max_var = 100                 # 达到最大方差后停止探索
+        self._max_var = 200                 # 达到最大方差后停止探索
         self.lable = ""
 
         self.Qsa = {}  # 保存 Q 值, key: s,a
