@@ -130,20 +130,24 @@ class MCTS():
         cur_best = -float('inf')
         best_act = -1
 
-        # 选择具有最高置信上限的动作
+        # 如果动作 a 在优先探索步骤内，且没有从来没有被探索过，则优先探索
         for a in state.actions_to_positions(state.availables):
-            if (s, a) in self.Qsa:
-                u = self.Qsa[(s, a)] + self._c_puct * self.Ps[s][a] * math.sqrt(self.Ns[s]) / (
-                        1 + self.Nsa[(s, a)])
-            else:
-                u = self._c_puct * self.Ps[s][a] * math.sqrt(self.Ns[s] + EPS)  # 加一个EPS小量防止 Q = 0 
-
-            if u > cur_best:
-                cur_best = u
+            if a in self._first_act and not (s, a) in self.Qsa: 
                 best_act = a
+                break
 
-            # 如果动作 a 在优先探索步骤内，且没有从来没有被探索过，则优先探索
-            if a in self._first_act and not (s, a) in self.Qsa: break
+        if best_act == -1:
+            # 选择具有最高置信上限的动作
+            for a in state.actions_to_positions(state.availables):
+                if (s, a) in self.Qsa:
+                    u = self.Qsa[(s, a)] + self._c_puct * self.Ps[s][a] * math.sqrt(self.Ns[s]) / (
+                            1 + self.Nsa[(s, a)])
+                else:
+                    u = self._c_puct * self.Ps[s][a] * math.sqrt(self.Ns[s] + EPS)  # 加一个EPS小量防止 Q = 0 
+
+                if u > cur_best:
+                    cur_best = u
+                    best_act = a
 
         a = best_act
         act = state.position_to_action(a)
