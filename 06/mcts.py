@@ -17,6 +17,7 @@ class MCTS():
         self._n_playout = n_playout         # 做几次探索
         self._max_var = 100                 # 达到最大方差后停止探索
         self.lable = ""
+        self._first_act = set()          # 优先考虑的走法
 
         self.Qsa = {}  # 保存 Q 值, key: s,a
         self.Nsa = {}  # 保存 遍历次数 key: s,a
@@ -141,9 +142,16 @@ class MCTS():
                 cur_best = u
                 best_act = a
 
+            # 如果动作 a 在优先探索步骤内，且没有从来没有被探索过，则优先探索
+            if a in self._first_act and not (s, a) in self.Qsa: break
+
         a = best_act
         act = state.position_to_action(a)
         state.step(act)
+
+        # 检查是否需要优先考虑的棋
+        end, winner = state.game_end()
+        if end: self._first_act.add(a)
 
         # 计算下一步的 v 这个v 为正数，但下一个v为负数
         v = self.search(state)
