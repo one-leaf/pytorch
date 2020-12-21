@@ -104,10 +104,10 @@ class FiveChessPlay():
             self.c_puct_win[1] = self.c_puct_win[1]+1
 
         if self.c_puct_win[0]>self.c_puct_win[1]:                               
-            self.c_puct=self.c_puct*0.95
+            self.c_puct=self.c_puct-0.1
         if self.c_puct_win[0]<self.c_puct_win[1]:
             self.c_puct=self.c_puct+0.1
-        self.c_puct = max(0.1, self.c_puct)
+        self.c_puct = max(0.2, self.c_puct)
         self.c_puct = min(10, self.c_puct)
 
         play_data = list(play_data)[:]     
