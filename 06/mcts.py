@@ -102,9 +102,9 @@ class MCTS():
             v = 0
             if end:
                 if state.current_player==winner:
-                    v = 10
+                    v = 1
                 else:
-                    v = -10                         
+                    v = -1                         
             self.Es[s] = v
 
         # 如果得分不等于0，标志这局游戏结束
