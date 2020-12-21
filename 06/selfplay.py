@@ -103,6 +103,13 @@ class FiveChessPlay():
         if winner == pure_mcts_player.player:
             self.c_puct_win[1] = self.c_puct_win[1]+1
 
+        if self.c_puct_win[0]>self.c_puct_win[1]:                               
+            self.c_puct=self.c_puct*0.95
+        if self.c_puct_win[0]<self.c_puct_win[1]:
+            self.c_puct=self.c_puct+0.1
+        self.c_puct = max(0.1, self.c_puct)
+        self.c_puct = min(10, self.c_puct)
+
         play_data = list(play_data)[:]     
         # 采用翻转棋盘来增加样本数据集
         play_data = self.get_equi_data(play_data)
@@ -123,13 +130,7 @@ class FiveChessPlay():
 
                 if (i+1)%10 == 0:
                     self.policy_value_net = PolicyValueNet(size, model_file=model_file)
-                    if self.c_puct_win[0]>self.c_puct_win[1]:                               
-                        self.c_puct=self.c_puct*0.9
-                    if self.c_puct_win[0]<self.c_puct_win[1]:
-                        self.c_puct=self.c_puct*1.1
-                    if self.c_puct<0.1: self.c_puct=0.1
-                    if self.c_puct>10: self.c_puct=10
-                    self.c_puct_win=[0, 0]
+                    # self.c_puct_win=[0, 0]
 
         except KeyboardInterrupt:
             logging.info('quit')
