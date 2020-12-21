@@ -114,7 +114,7 @@ class FiveChessPlay():
         # 采用翻转棋盘来增加样本数据集
         play_data = self.get_equi_data(play_data)
         logging.info("Self Play end. length:%s saving ..." % len(play_data))
-        logging.info("c_puct:{}/{} = {}/{}".format(self.c_puct, self.c_puct*1.1, self.c_puct_win[0], self.c_puct_win[1]))
+        logging.info("c_puct:{}/{} = {}/{}".format(self.c_puct, self.c_puct+0.5, self.c_puct_win[0], self.c_puct_win[1]))
 
         # 保存训练数据
         for obj in play_data:
