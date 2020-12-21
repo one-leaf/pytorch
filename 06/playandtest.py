@@ -116,13 +116,15 @@ class FiveChessPlay():
                 print("Curr Model Lost!","win:", self.mcts_win[0],"lost",self.mcts_win[1],"playout_num",self.pure_mcts_playout_num)
         agent.game.print()
 
-        play_data = list(play_data)[:]     
-        # 采用翻转棋盘来增加样本数据集
-        play_data = self.get_equi_data(play_data)
-        logging.info("Self Play end. length:%s saving ..." % len(play_data))
-        # 保存训练数据
-        for obj in play_data:
-            self.save_wait_data(obj)
+        # 只保存输掉的训练数据
+        if winner == pure_mcts_player.player:
+            play_data = list(play_data)[:]     
+            # 采用翻转棋盘来增加样本数据集
+            play_data = self.get_equi_data(play_data)
+            logging.info("Self Play end. length:%s saving ..." % len(play_data))
+            # 保存训练数据
+            for obj in play_data:
+                self.save_wait_data(obj)
 
         return play_data[-1]
 
@@ -152,12 +154,13 @@ class FiveChessPlay():
             print("Curr Model Lost!","win:", self.best_win[0],"lost",self.best_win[1])                
         agent.game.print()
         
-        # 保存训练数据
-        play_data = list(play_data)[:]
-        play_data = self.get_equi_data(play_data)
-        logging.info("Eval Play end. length:%s saving ..." % len(play_data))
-        for obj in play_data:
-            self.save_wait_data(obj)
+        # 只保存输掉的训练数据
+        if winner == best_mcts_player.player:
+            play_data = list(play_data)[:]
+            play_data = self.get_equi_data(play_data)
+            logging.info("Eval Play end. length:%s saving ..." % len(play_data))
+            for obj in play_data:
+                self.save_wait_data(obj)
 
     def run(self):
         """启动训练"""
