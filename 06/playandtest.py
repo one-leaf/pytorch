@@ -116,9 +116,9 @@ class FiveChessPlay():
                 print("Curr Model Lost!","win:", self.mcts_win[0],"lost",self.mcts_win[1],"playout_num",self.pure_mcts_playout_num)
         agent.game.print()
 
+        play_data = list(play_data)[:]     
         # 只保存输掉的训练数据
         if winner == pure_mcts_player.player:
-            play_data = list(play_data)[:]     
             # 采用翻转棋盘来增加样本数据集
             play_data = self.get_equi_data(play_data)
             logging.info("Self Play end. length:%s saving ..." % len(play_data))
