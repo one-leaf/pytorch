@@ -198,6 +198,7 @@ class MCTSPurePlayer(object):
 
     def __init__(self, c_puct=5, n_playout=2000):
         self.mcts = MCTS(MCTSPurePlayer.policy_value_fn, c_puct, n_playout)
+        self.mcts._max_var = 300
 
     def set_player_ind(self, p):
         """指定MCTS的playerid"""
