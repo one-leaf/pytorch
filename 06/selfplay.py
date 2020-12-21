@@ -130,7 +130,7 @@ class FiveChessPlay():
 
                 if (i+1)%10 == 0:
                     self.policy_value_net = PolicyValueNet(size, model_file=model_file)
-                    # self.c_puct_win=[0, 0]
+                    self.c_puct_win=[0, 0]
 
         except KeyboardInterrupt:
             logging.info('quit')
