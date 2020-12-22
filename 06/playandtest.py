@@ -46,7 +46,7 @@ class FiveChessPlay():
         self.kl_targ = 0.02  # 策略价值网络KL值目标       
 
         # 纯MCTS的模拟数，用于评估策略模型
-        self.pure_mcts_playout_num = 400 # 用户纯MCTS构建初始树时的随机走子步数
+        self.pure_mcts_playout_num = 1000 # 用户纯MCTS构建初始树时的随机走子步数
         self.c_puct = 5  # MCTS child权重， 用来调节MCTS中 探索/乐观 的程度 默认 5
         self.mcts_win = [0, 0]  # 和纯MCTS对战胜率
         self.best_win = [0, 0]  # 和历史最佳模型对战胜率
@@ -108,11 +108,11 @@ class FiveChessPlay():
         if not pure_mcts_player is None:
             if winner == mcts_player.player:
                 self.mcts_win[0] = self.mcts_win[0]+1
-                self.pure_mcts_playout_num=min(5000, self.pure_mcts_playout_num+10)
+                self.pure_mcts_playout_num=min(5000, self.pure_mcts_playout_num+100)
                 print("Curr Model Win!","win:", self.mcts_win[0],"lost",self.mcts_win[1],"playout_num",self.pure_mcts_playout_num)
             if winner == pure_mcts_player.player:
                 self.mcts_win[1] = self.mcts_win[1]+1
-                self.pure_mcts_playout_num=max(400, self.pure_mcts_playout_num-10)
+                self.pure_mcts_playout_num=max(500, self.pure_mcts_playout_num-100)
                 print("Curr Model Lost!","win:", self.mcts_win[0],"lost",self.mcts_win[1],"playout_num",self.pure_mcts_playout_num)
         agent.game.print()
 
