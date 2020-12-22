@@ -104,7 +104,7 @@ class MCTS():
                 if state.current_player==winner:
                     v = 1
                 else:
-                    v = -1                         
+                    v = -1          
             self.Es[s] = v
 
         # 如果得分不等于0，标志这局游戏结束
@@ -155,7 +155,7 @@ class MCTS():
 
         # 检查是否需要优先考虑的棋
         end, winner = state.game_end()
-        if end: self._first_act.add(a)
+        if end or state.check_will_win(): self._first_act.add(a)
 
         # 计算下一步的 v 这个v 为正数，但下一个v为负数
         v = self.search(state)

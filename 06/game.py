@@ -173,7 +173,7 @@ class FiveChess(object):
                 if self.chessboard[curr_x][curr_y]==0: break
                 hassame += 1
         if curr_search_pass and hassame>=n-1: return True
-        return False    
+        return False
 
     # 检查是否游戏结束,返回赢的用户0 或 1，如果平局返回-1
     def check_terminal(self):
