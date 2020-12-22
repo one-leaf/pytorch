@@ -192,7 +192,7 @@ class MCTSPurePlayer(object):
             state.step(action)
         v = 0
         if winner != -1:  # 如果不是平局
-            v = 0.1 if winner != state.current_player else -0.1
+            v = 0.2 if winner != state.current_player else -0.2
 
         return  [(availables[i], action_probs[i]) for i in range(len(availables))], v
 
