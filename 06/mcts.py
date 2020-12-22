@@ -18,6 +18,7 @@ class MCTS():
         self._max_var = 100                 # 达到最大方差后停止探索
         self.lable = ""
         self._first_act = set()          # 优先考虑的走法
+        self._limit_max_var = True       # 是否限制最大方差
 
         self.Qsa = {}  # 保存 Q 值, key: s,a
         self.Nsa = {}  # 保存 遍历次数 key: s,a
@@ -57,7 +58,7 @@ class MCTS():
 
                 if len(visits)==1: break
                 var = np.var(visits)
-                if var>self._max_var: break
+                if self._limit_max_var and var>self._max_var: break
 
         act_visits = [(a, self.Nsa[(s, a)]) if (s, a) in self.Nsa else (a, 0) for a in available_acts]
         acts = [av[0] for av in act_visits]
@@ -192,12 +193,13 @@ class MCTSPurePlayer(object):
             state.step(action)
         v = 0
         if winner != -1:  # 如果不是平局
-            v = 0.1 if winner != state.current_player else -0.1
+            v = 1 if winner != state.current_player else -1
 
         return  [(availables[i], action_probs[i]) for i in range(len(availables))], v
 
     def __init__(self, c_puct=5, n_playout=2000):
         self.mcts = MCTS(MCTSPurePlayer.policy_value_fn, c_puct, n_playout)
+        self.mcts._limit_max_var = False
         # self.mcts._max_var = 300
 
     def set_player_ind(self, p):

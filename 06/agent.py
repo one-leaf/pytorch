@@ -41,7 +41,7 @@ class Agent(object):
  
             idx = np.argmax(move_probs)
             act = self.game.positions_to_actions([idx])[0]
-            if act == action: # and isinstance(player_in_turn, MCTSPlayer):
+            if act == action and isinstance(player_in_turn, MCTSPlayer):
                 states.append(self.game.current_state())
                 mcts_probs.append(move_probs)
                 current_players.append(self.game.current_player)
