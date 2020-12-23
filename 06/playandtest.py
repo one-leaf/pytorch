@@ -185,7 +185,7 @@ class FiveChessPlay():
                     #     self.pure_mcts_playout_num=self.pure_mcts_playout_num+50
                     # if self.mcts_win[0]<self.mcts_win[1]:
                     #     self.pure_mcts_playout_num=self.pure_mcts_playout_num-50
-                    self.mcts_win=[0, 0]
+                    # self.mcts_win=[0, 0]
 
                     # 如果当前模型的胜率大于等于0.6,保留为最佳模型
                     if  self.best_win[0]-self.best_win[1]>=4:
