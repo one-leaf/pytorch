@@ -74,7 +74,7 @@ class MCTS():
             p = self.Ps[s][act]
             info.append([action,visit, round(q,2), round(p,2)])
         print(state.step_count+1, self.lable, "n_playout:", n, "depth:" ,self.max_depth, info, "var:", round(var,1), \
-            "first:", state.positions_to_actions(self._first_act))
+            "first:", state.positions_to_actions(self._first_act[-3:]))
 
         if temp == 0:
             bestAs = np.array(np.argwhere(visits == np.max(visits))).flatten()
