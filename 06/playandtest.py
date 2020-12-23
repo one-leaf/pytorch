@@ -108,7 +108,7 @@ class FiveChessPlay():
         if not pure_mcts_player is None:
             if winner == mcts_player.player:
                 self.mcts_win[0] = self.mcts_win[0]+1
-                self.pure_mcts_playout_num=min(5000, self.pure_mcts_playout_num+100)
+                self.pure_mcts_playout_num=min(2000, self.pure_mcts_playout_num+100)
                 print("Curr Model Win!","win:", self.mcts_win[0],"lost",self.mcts_win[1],"playout_num",self.pure_mcts_playout_num)
             if winner == pure_mcts_player.player:
                 self.mcts_win[1] = self.mcts_win[1]+1
@@ -168,14 +168,16 @@ class FiveChessPlay():
             # 先训练样本10000局
             for i in range(10000):
                 logging.info("TRAIN Batch:{} starting, Size:{}, n_in_row:{}".format(i, size, n_in_row))
-                state, mcts_porb, winner = self.collect_selfplay_data()
-                if i == 0: 
-                    print("-"*50,"state","-"*50)
-                    print(state)
-                    print("-"*50,"mcts_porb","-"*50)
-                    print(mcts_porb)
-                    print("-"*50,"winner","-"*50)
-                    print(winner)
+                if random.random()>self.pure_mcts_playout_num*0.95/2000:
+                    state, mcts_porb, winner = self.collect_selfplay_data()
+                    if i == 0: 
+                        print("-"*50,"state","-"*50)
+                        print(state)
+                        print("-"*50,"mcts_porb","-"*50)
+                        print(mcts_porb)
+                        print("-"*50,"winner","-"*50)
+                        print(winner)
+
                 self.policy_evaluate()
 
                 if (i+1)%self.policy_evaluate_size == 0:
