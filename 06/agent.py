@@ -30,8 +30,10 @@ class Agent(object):
             players = {p1: player1, p2: player1}
 
         states, mcts_probs, current_players = [], [], []
-        _previous_step_state = -1
+        _state_keys = []
         for i in count():
+            _state_keys.append(self.game.get_key())
+
             # temp 权重 ，return_prob 是否返回概率数据
             player_in_turn = players[self.game.current_player]
             if isinstance(player_in_turn, MCTSPlayer):
@@ -56,14 +58,15 @@ class Agent(object):
             end, winner = self.game.game_end()
             if end:
                 # winner from the perspective of the current player of each state
-                if _previous_step_state!=-1:
-                    mcts = player2.mcts if player_in_turn==player1 else player1.mcts
-                    available_acts = self.game.actions_to_positions(self.game.availables + [action])
-                    act_visits = [(a, mcts.Nsa[(s, a)]) if (s, a) in mcts.Nsa else (a, 0) for a in available_acts]
-                    print(act_visits)
-                    _act = self.game.action_to_position(action)
-                    n,q,p = mcts.getInfo(_previous_step_state, _act)
-                    print("previous step state:",_previous_step_state,action, "n:",n,"q:",q,"p:",p)    
+                mcts = player2.mcts if player_in_turn==player1 else player1.mcts
+                # available_acts = self.game.actions_to_positions(self.game.availables + [action])
+                # act_visits = [(a, mcts.Nsa[(s, a)]) if (s, a) in mcts.Nsa else (a, 0) for a in available_acts]
+                # print(act_visits)
+                _act = self.game.action_to_position(action)
+                n,q,p = mcts.getInfo(_state_keys[-2], _act)
+                print("previous step state:",_state_keys[-2],action, "n:",n,"q:",q,"p:",p)    
+
+
                 winners_z = np.zeros(len(current_players))
                 if winner != -1:
                     winners_z[np.array(current_players) == winner] = 1.0
@@ -80,7 +83,7 @@ class Agent(object):
                         print("Game end. Tie")
                 return winner, zip(states, mcts_probs, winners_z)
 
-            _previous_step_state = self.game.get_key()
+            
 
 
     # AI和蒙特卡罗对战
