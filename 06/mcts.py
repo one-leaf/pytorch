@@ -102,11 +102,13 @@ class MCTS():
             end, winner = state.game_end()  
             v = 0
             # 这里是对上一步的评价，如果游戏结束或防御成功对我而言都是不利的，v为-1
-            if (end and winner!=-1) or state.is_defend(): 
+            if (end and winner!=-1): 
                 # if state.current_player==winner:
                 #     v = 1
                 # else:
-                v = 1 
+                v = -1
+            elif state.is_defend():
+                v = 1
             self.Es[s] = v
 
         # 如果得分不等于0，标志这局游戏结束
