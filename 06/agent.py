@@ -58,6 +58,9 @@ class Agent(object):
                 # winner from the perspective of the current player of each state
                 if _previous_step_state!=-1:
                     mcts = player2.mcts if player_in_turn==player1 else player1.mcts
+                    available_acts = self.game.actions_to_positions(self.game.availables + [action])
+                    act_visits = [(a, mcts.Nsa[(s, a)]) if (s, a) in mcts.Nsa else (a, 0) for a in available_acts]
+                    print(act_visits)
                     _act = self.game.action_to_position(action)
                     n,q,p = mcts.getInfo(_previous_step_state, _act)
                     print("previous step state:",_previous_step_state,action, "n:",n,"q:",q,"p:",p)    
