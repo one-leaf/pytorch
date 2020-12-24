@@ -60,7 +60,7 @@ class Agent(object):
                     mcts = player2.mcts if player_in_turn==player1 else player1.mcts
                     _act = self.game.action_to_position(action)
                     n,q,p = mcts.getInfo(_previous_step_state, _act)
-                    print("previous step state:",action, "n:",n,"q:",q,"p:",p)    
+                    print("previous step state:",_previous_step_state,action, "n:",n,"q:",q,"p:",p)    
                 winners_z = np.zeros(len(current_players))
                 if winner != -1:
                     winners_z[np.array(current_players) == winner] = 1.0
