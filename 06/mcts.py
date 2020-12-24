@@ -108,7 +108,8 @@ class MCTS():
                 # else:
                 v = -1
             elif state.is_defend():
-                v = 1
+                v = -1
+                state.print()
             self.Es[s] = v
 
         # 如果得分不等于0，标志这局游戏结束
