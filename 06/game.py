@@ -85,31 +85,51 @@ class FiveChess(object):
                     return True, self.colors.index(color)
         return False, -1        
 
-    # 检查是否是四个子且两端都是空白位置
-    def check_will_win(self):
+    # 检查是否是防守成功
+    def is_defend(self):
         if self.step_count<self.n_in_row*2:
             return False
         
         last_x, last_y = self.actions[-1]
         n = self.n_in_row
         c = self.chessboard[last_x][last_y]
+        _chessboard = copy.deepcopy(self.chessboard)
+        _chessboard[last_x][last_y]= -1 if c==1 else 1
+        isend,_ = self.check_terminal(_chessboard)
+        if isend: return True
+        return self.check_will_win(_chessboard)
+
+
+    # 检查是否是四个子且两端都是空白位置
+    def check_will_win(self, chessboard=None):
+        if self.step_count<self.n_in_row*2:
+            return False
+        
+        if chessboard==None:
+            _chessboard=self.chessboard
+        else:
+            _chessboard=chessboard
+
+        last_x, last_y = self.actions[-1]
+        n = self.n_in_row
+        c = _chessboard[last_x][last_y]
 
         hassame=1
         curr_search_pass=True
         for l in range(1, n):
             curr_x = last_x+l
-            if curr_x==self.size or (self.chessboard[curr_x][last_y]!=c and self.chessboard[curr_x][last_y]!=0):
+            if curr_x==self.size or (_chessboard[curr_x][last_y]!=c and _chessboard[curr_x][last_y]!=0):
                 curr_search_pass=False
                 break 
-            if self.chessboard[curr_x][last_y]==0: break 
+            if _chessboard[curr_x][last_y]==0: break 
             hassame += 1
         if curr_search_pass:
             for l in range(1, n):
                 curr_x = last_x-l
-                if curr_x<0 or (self.chessboard[curr_x][last_y]!=c and self.chessboard[curr_x][last_y]!=0):
+                if curr_x<0 or (_chessboard[curr_x][last_y]!=c and _chessboard[curr_x][last_y]!=0):
                     curr_search_pass=False
                     break
-                if self.chessboard[curr_x][last_y]==0: break
+                if _chessboard[curr_x][last_y]==0: break
                 hassame += 1
         if curr_search_pass and hassame>=n-1: return True
         
@@ -117,18 +137,18 @@ class FiveChess(object):
         curr_search_pass=True
         for l in range(1, n):
             curr_y = last_y+l
-            if curr_y==self.size or (self.chessboard[last_x][curr_y]!=c and self.chessboard[last_x][curr_y]!=0):
+            if curr_y==self.size or (_chessboard[last_x][curr_y]!=c and _chessboard[last_x][curr_y]!=0):
                 curr_search_pass=False
                 break 
-            if self.chessboard[last_x][curr_y]==0: break 
+            if _chessboard[last_x][curr_y]==0: break 
             hassame += 1
         if curr_search_pass:
             for l in range(1, n):
                 curr_y = last_y-l
-                if curr_y<0 or (self.chessboard[last_x][curr_y]!=c and self.chessboard[last_x][curr_y]!=0):
+                if curr_y<0 or (_chessboard[last_x][curr_y]!=c and _chessboard[last_x][curr_y]!=0):
                     curr_search_pass=False
                     break
-                if self.chessboard[last_x][curr_y]==0: break
+                if _chessboard[last_x][curr_y]==0: break
                 hassame += 1
         if curr_search_pass and hassame>=n-1: return True
 
@@ -137,19 +157,19 @@ class FiveChess(object):
         for l in range(1, n):
             curr_x = last_x+l
             curr_y = last_y+l
-            if curr_x == self.size or curr_y==self.size or (self.chessboard[curr_x][curr_y]!=c and self.chessboard[curr_x][curr_y]!=0):
+            if curr_x == self.size or curr_y==self.size or (_chessboard[curr_x][curr_y]!=c and _chessboard[curr_x][curr_y]!=0):
                 curr_search_pass=False
                 break 
-            if self.chessboard[curr_x][curr_y]==0: break 
+            if _chessboard[curr_x][curr_y]==0: break 
             hassame += 1
         if curr_search_pass:
             for l in range(1, n):
                 curr_x = last_x-l
                 curr_y = last_y-l
-                if curr_x<0 or curr_y<0 or (self.chessboard[curr_x][curr_y]!=c and self.chessboard[curr_x][curr_y]!=0):
+                if curr_x<0 or curr_y<0 or (_chessboard[curr_x][curr_y]!=c and _chessboard[curr_x][curr_y]!=0):
                     curr_search_pass=False
                     break
-                if self.chessboard[curr_x][curr_y]==0: break
+                if _chessboard[curr_x][curr_y]==0: break
                 hassame += 1
         if curr_search_pass and hassame>=n-1: return True
 
@@ -158,25 +178,25 @@ class FiveChess(object):
         for l in range(1, n):
             curr_x = last_x-l
             curr_y = last_y+l
-            if curr_x <0 or curr_y==self.size or (self.chessboard[curr_x][curr_y]!=c and self.chessboard[curr_x][curr_y]!=0):
+            if curr_x <0 or curr_y==self.size or (_chessboard[curr_x][curr_y]!=c and _chessboard[curr_x][curr_y]!=0):
                 curr_search_pass=False
                 break 
-            if self.chessboard[curr_x][curr_y]==0: break 
+            if _chessboard[curr_x][curr_y]==0: break 
             hassame += 1
         if curr_search_pass:
             for l in range(1, n):
                 curr_x = last_x+l
                 curr_y = last_y-l
-                if curr_x==self.size or curr_y<0 or (self.chessboard[curr_x][curr_y]!=c and self.chessboard[curr_x][curr_y]!=0):
+                if curr_x==self.size or curr_y<0 or (_chessboard[curr_x][curr_y]!=c and _chessboard[curr_x][curr_y]!=0):
                     curr_search_pass=False
                     break
-                if self.chessboard[curr_x][curr_y]==0: break
+                if _chessboard[curr_x][curr_y]==0: break
                 hassame += 1
         if curr_search_pass and hassame>=n-1: return True
         return False
 
     # 检查是否游戏结束,返回赢的用户0 或 1，如果平局返回-1
-    def check_terminal(self):
+    def check_terminal(self, chessboard=None):
         # 如果都没有足够的棋
         if self.step_count<self.n_in_row*2-1:
             return False, -1
@@ -184,49 +204,54 @@ class FiveChess(object):
         if len(self.availables)==0:
             return True, -1
 
+        if chessboard==None:
+            _chessboard=self.chessboard
+        else:
+            _chessboard=chessboard
+
         # 找到最后一个子
         last_x, last_y = self.actions[-1]
         n = self.n_in_row
-        c = self.chessboard[last_x][last_y]
+        c = _chessboard[last_x][last_y]
         lastplayer = self.players[0] if self.current_player == self.players[1] else self.players[1]
 
         hassame=1
         for l in range(1, n):
-            if last_x+l==self.size or self.chessboard[last_x+l][last_y]!=c: break
+            if last_x+l==self.size or _chessboard[last_x+l][last_y]!=c: break
             hassame += 1
         if hassame>=n: return True, lastplayer
         for l in range(1, n):
-            if last_x-l<0 or self.chessboard[last_x-l][last_y]!=c: break
+            if last_x-l<0 or _chessboard[last_x-l][last_y]!=c: break
             hassame += 1
         if hassame>=n: return True, lastplayer
         
         hassame=1
         for l in range(1, n):
-            if last_y+l==self.size or self.chessboard[last_x][last_y+l]!=c: break
+            if last_y+l==self.size or _chessboard[last_x][last_y+l]!=c: break
             hassame += 1
         if hassame>=n: return True, lastplayer
         for l in range(1, n):
-            if last_y-l<0 or self.chessboard[last_x][last_y-l]!=c: break
-            hassame += 1
-        if hassame>=n: return True, lastplayer
-
-        hassame=1
-        for l in range(1, n):
-            if last_x+l==self.size or last_y+l==self.size or self.chessboard[last_x+l][last_y+l]!=c: break
-            hassame += 1
-        if hassame>=n: return True, lastplayer
-        for l in range(1, n):
-            if last_x-l<0 or last_y-l<0 or self.chessboard[last_x-l][last_y-l]!=c: break
+            if last_y-l<0 or _chessboard[last_x][last_y-l]!=c: break
             hassame += 1
         if hassame>=n: return True, lastplayer
 
         hassame=1
         for l in range(1, n):
-            if last_x-l<0 or last_y+l==self.size or self.chessboard[last_x-l][last_y+l]!=c: break
+            if last_x+l==self.size or last_y+l==self.size or _chessboard[last_x+l][last_y+l]!=c: break
             hassame += 1
         if hassame>=n: return True, lastplayer
         for l in range(1, n):
-            if last_x+l==self.size or last_y-l<0 or self.chessboard[last_x+l][last_y-l]!=c: break
+            if last_x-l<0 or last_y-l<0 or _chessboard[last_x-l][last_y-l]!=c: break
+            hassame += 1
+        if hassame>=n: return True, lastplayer
+
+        hassame=1
+        for l in range(1, n):
+            if last_x-l<0 or last_y+l==self.size or _chessboard[last_x-l][last_y+l]!=c: break
+            hassame += 1
+        if hassame>=n: return True, lastplayer
+        for l in range(1, n):
+            if last_x+l==self.size or last_y-l<0 or _chessboard[last_x+l][last_y-l]!=c: break
             hassame += 1
         if hassame>=n: return True, lastplayer
 
