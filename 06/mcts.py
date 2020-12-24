@@ -66,7 +66,7 @@ class MCTS():
 
         info=[]
         for idx in sorted(range(len(visits)), key=visits.__getitem__)[::-1]:
-            if len(info)>=2: break
+            if len(info)>2: break
             act, visit = act_visits[idx]
             action = state.position_to_action(act)
             q, p= 0,0
@@ -74,7 +74,7 @@ class MCTS():
             if s in self.Ps: p = self.Ps[s][act]
             info.append([action,visit, round(q,2), round(p,2)])
         for idx in sorted(range(len(visits)), key=visits.__getitem__):
-            if len(info)>=2: break
+            if len(info)>2: break
             act, visit = act_visits[idx]
             action = state.position_to_action(act)
             q, p= 0,0
