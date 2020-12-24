@@ -108,6 +108,7 @@ class MCTS():
                 else:
                     v = -1 
             elif state.is_defend():
+                print("is_defend!!!!",state.actions[-1])
                 v = -1
 
             self.Es[s] = v
