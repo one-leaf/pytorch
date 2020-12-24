@@ -97,19 +97,16 @@ class MCTS():
         s = state.get_key()
         self.depth = self.depth +1
 
-
         # 将所有状态的得分都 cache 起来
         if s not in self.Es:
             end, winner = state.game_end()  
             v = 0
-            if end: 
-                if state.current_player==winner:
-                    v = 1
-                else:
-                    v = -1 
-                print("end",v)
-            elif state.is_defend():
-                v = -1
+            # 这里是对上一步的评价，如果游戏结束或防御成功对我而言都是不利的，v为-1
+            if (end and winner!=-1) or state.is_defend(): 
+                # if state.current_player==winner:
+                #     v = 1
+                # else:
+                v = -1 
             self.Es[s] = v
 
         # 如果得分不等于0，标志这局游戏结束
