@@ -17,7 +17,7 @@ class MCTS():
         self._n_playout = n_playout         # 做几次探索
         self._max_var = 100                 # 达到最大方差后停止探索
         self.lable = ""
-        self._first_act = set()          # 优先考虑的走法
+        # self._first_act = set()          # 优先考虑的走法,由于引入了防守奖励，所以不需要优先步骤
         self._limit_max_var = True       # 是否限制最大方差
 
         self.Qsa = {}  # 保存 Q 值, key: s,a
@@ -66,15 +66,23 @@ class MCTS():
 
         info=[]
         for idx in sorted(range(len(visits)), key=visits.__getitem__)[::-1]:
-            if len(info)>1: break
+            if len(info)>=2: break
             act, visit = act_visits[idx]
             action = state.position_to_action(act)
             q, p= 0,0
             if (s, act) in self.Qsa: q = self.Qsa[(s, act)]
             if s in self.Ps: p = self.Ps[s][act]
             info.append([action,visit, round(q,2), round(p,2)])
-        print(state.step_count+1, self.lable, "n_playout:", n, "depth:" ,self.max_depth, info, "var:", round(var,1), \
-            "first:", state.positions_to_actions(list(self._first_act)[-3:]))
+        for idx in sorted(range(len(visits)), key=visits.__getitem__):
+            if len(info)>=2: break
+            act, visit = act_visits[idx]
+            action = state.position_to_action(act)
+            q, p= 0,0
+            if (s, act) in self.Qsa: q = self.Qsa[(s, act)]
+            if s in self.Ps: p = self.Ps[s][act]
+            info.append([action,visit, round(q,2), round(p,2)])            
+        print(state.step_count+1, self.lable, "n_playout:", n, "depth:" ,self.max_depth, info, "var:", round(var,1))
+            #, \   "first:", state.positions_to_actions(list(self._first_act)[-3:]))
 
         if temp == 0:
             bestAs = np.array(np.argwhere(visits == np.max(visits))).flatten()
@@ -134,10 +142,10 @@ class MCTS():
         best_act = -1
 
         # 如果动作 a 在优先探索步骤内，且没有从来没有被探索过，则优先探索
-        for a in state.actions_to_positions(state.availables):
-            if a in self._first_act and not (s, a) in self.Qsa: 
-                best_act = a
-                break
+        # for a in state.actions_to_positions(state.availables):
+        #     if a in self._first_act and not (s, a) in self.Qsa: 
+        #         best_act = a
+        #         break
 
         if best_act == -1:
             # 选择具有最高置信上限的动作
@@ -157,7 +165,7 @@ class MCTS():
         state.step(act)
 
         # 检查是否需要优先考虑的棋
-        if end or state.check_will_win(): self._first_act.add(a)
+        # if end or state.check_will_win(): self._first_act.add(a)
 
         # 计算下一步的 v 这个v 为正数，但下一个v为负数
         v = self.search(state)
