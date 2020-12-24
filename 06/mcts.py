@@ -71,7 +71,7 @@ class MCTS():
             q, p= 0,0
             if (s, act) in self.Qsa: q = self.Qsa[(s, act)]
             if s in self.Ps: p = self.Ps[s][act]
-            if q>0 and len(info)>2: continue
+            if q>=0 and len(info)>2: continue
             info.append([action,visit, round(q,2), round(p,2)])      
         print(state.step_count+1, self.lable, "n_playout:", n, "depth:" ,self.max_depth, info, "var:", round(var,1))
             #, \   "first:", state.positions_to_actions(list(self._first_act)[-3:]))
