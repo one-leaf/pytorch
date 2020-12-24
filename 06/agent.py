@@ -30,6 +30,7 @@ class Agent(object):
             players = {p1: player1, p2: player1}
 
         states, mcts_probs, current_players = [], [], []
+        _previous_step_state = -1
         for i in count():
             # temp 权重 ，return_prob 是否返回概率数据
             player_in_turn = players[self.game.current_player]
@@ -40,7 +41,7 @@ class Agent(object):
                 action, move_probs = player_in_turn.get_action(self.game, return_prob=1)
  
             idx = np.argmax(move_probs)
-            act = self.game.positions_to_actions([idx])[0]
+            act = self.game.position_to_action(idx)
             if act == action and isinstance(player_in_turn, MCTSPlayer):
                 states.append(self.game.current_state())
                 mcts_probs.append(move_probs)
@@ -55,12 +56,19 @@ class Agent(object):
             end, winner = self.game.game_end()
             if end:
                 # winner from the perspective of the current player of each state
+                if _previous_step_state!=-1:
+                    mcts = player2.mcts if player_in_turn==player1 else player1.mcts
+                    _act = self.game.action_to_position(action)
+                    n,q,p = mcts.getInfo(_previous_step_state, _act)
+                    print("previous step state:",action, "n:",n,"q:",q,"p:",p)    
                 winners_z = np.zeros(len(current_players))
                 if winner != -1:
                     winners_z[np.array(current_players) == winner] = 1.0
                     winners_z[np.array(current_players) != winner] = -1.0
                 # reset MCTS root node 
-                player1.reset_player()
+                # player1.reset_player()
+
+
                 if not player2 is None:
                     if winner != -1:
                         winner_play= player1 if winner == player1.player else player2
@@ -68,6 +76,9 @@ class Agent(object):
                     else:
                         print("Game end. Tie")
                 return winner, zip(states, mcts_probs, winners_z)
+
+            _previous_step_state = self.game.get_key()
+
 
     # AI和蒙特卡罗对战
     def start_play(self, player1, player2, start_player=0, need_shuffle_availables=False):

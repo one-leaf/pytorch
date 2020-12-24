@@ -66,13 +66,13 @@ class MCTS():
 
         info=[]
         for idx in sorted(range(len(visits)), key=visits.__getitem__)[::-1]:
+            if len(info)>2: break
             act, visit = act_visits[idx]
             action = state.position_to_action(act)
             q, p= 0,0
             if (s, act) in self.Qsa: q = self.Qsa[(s, act)]
             if s in self.Ps: p = self.Ps[s][act]
-            if q>=0 and len(info)>2: continue
-            info.append([action,visit, round(q,2), round(p,2)])      
+            info.append([action,visit, round(q,2), round(p,2)]) 
         print(state.step_count+1, self.lable, "n_playout:", n, "depth:" ,self.max_depth, info, "var:", round(var,1))
             #, \   "first:", state.positions_to_actions(list(self._first_act)[-3:]))
 
@@ -173,6 +173,14 @@ class MCTS():
         self.Ns[s] += 1
         return -v
 
+    # 返回某个局面的action信息
+    def getInfo(self, state, act):
+        s = state
+        n = q = p = 0
+        if (s, act) in self.Nsa: n = self.Nsa[(s, act)]
+        if (s, act) in self.Qsa: q = self.Qsa[(s, act)]
+        if s in self.Ps: p = self.Ps[s][act]
+        return n, q, p
 
 class MCTSPurePlayer(object):
     """基于纯MCTS的player"""
