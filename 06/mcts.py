@@ -290,7 +290,7 @@ class MCTSPlayer(object):
                 else:                    
                     # 如果是下了几步后全部取最大值
                     # if state.step_count>=state.n_in_row*2:
-                    if random.random() < 0.2: #state.step_count*2/(state.size*state.size):
+                    if random.random() < 0.1: #state.step_count*2/(state.size*state.size):
                         act = acts[idx]
                     else:
                         p= 0.75                
