@@ -137,10 +137,10 @@ class MCTS():
         best_act = -1
 
         # 如果动作 a 在优先探索步骤内，且没有从来没有被探索过，则优先探索
-        # for a in state.actions_to_positions(state.availables):
-        #     if a in self._first_act and not (s, a) in self.Qsa: 
-        #         best_act = a
-        #         break
+        for a in state.actions_to_positions(state.availables):
+            if a in self._first_act and not (s, a) in self.Qsa: 
+                best_act = a
+                break
 
         if best_act == -1:
             # 选择具有最高置信上限的动作
@@ -160,7 +160,7 @@ class MCTS():
         state.step(act)
 
         # 检查是否需要优先考虑的棋
-        # if end or state.check_will_win(): self._first_act.add(a)
+        if end: self._first_act.add(a)
 
         # 计算下一步的 v 这个v 为正数，但下一个v为负数
         v = self.search(state)
