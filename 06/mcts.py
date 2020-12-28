@@ -303,7 +303,7 @@ class MCTSPlayer(object):
 
                 if act!=acts[idx]:
                     print("    random:", state.position_to_action(acts[idx]), act_probs[idx], "==>", action, act_probs[acts.index(act)])
-                elif state.is_defend():
+                elif state.is_defend(action):
                     print("    defensive success!")
                 # 更新根节点并重用搜索树
                 # self.mcts.update_root_with_action(None)
@@ -322,9 +322,9 @@ class MCTSPlayer(object):
 
                 if act!=acts[idx]:
                     print("    random:", state.position_to_action(acts[idx]), act_probs[idx], "==>", action, act_probs[acts.index(act)])
-                elif state.is_defend():
+                elif state.is_defend(action):
                     print("    defensive success!")
-                    
+
                 # self.mcts.update_root_with_action(None)
                 # 打印AI走子信息
                 # print("AI move: %d,%d\n" % (action[0], action[1]))

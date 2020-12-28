@@ -86,14 +86,19 @@ class FiveChess(object):
         return False, -1        
 
     # 检查是否是防守成功
-    def is_defend(self):
+    def is_defend(self, action=None):
         if self.step_count<self.n_in_row*2:
             return False
-        
-        last_x, last_y = self.actions[-1]
         n = self.n_in_row
-        c = self.chessboard[last_x][last_y]
         _chessboard = copy.deepcopy(self.chessboard)
+        if action == None:
+            last_x, last_y = self.actions[-1]
+        else:
+            last_x, last_y = action
+            color = self.colors[self.current_player]
+            _chessboard[last_x][last_y] = color
+
+        c = _chessboard[last_x][last_y]
         _chessboard[last_x][last_y]= -1 if c==1 else 1
         isend,_ = self.check_terminal(_chessboard)
         if isend: return True
