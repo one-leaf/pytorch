@@ -292,39 +292,39 @@ class MCTSPlayer(object):
                 else:                    
                     # 如果是下了几步后全部取最大值
                     # if state.step_count>=state.n_in_row*2:
-                    if random.random() > 0.5: #state.step_count*2/(state.size*state.size):
-                        act = acts[idx]
-                    else:
+                    act = acts[idx]
+                    action = state.position_to_action(act)
+                    # 如果是防守棋，不要随机
+                    if state.is_defend(action):
+                        print("    defensive success!")
+                    elif random.random() > 0.5: #state.step_count*2/(state.size*state.size):
                         p= 0.75                
                         dirichlet = np.random.dirichlet(0.03 * np.ones(len(act_probs)))
                         act = np.random.choice(acts, p=p * act_probs + (1-p) * dirichlet)
-
-                action = state.position_to_action(act)
-
+                        action = state.position_to_action(act)               
+        
                 if act!=acts[idx]:
                     print("    random:", state.position_to_action(acts[idx]), act_probs[idx], "==>", action, act_probs[acts.index(act)])
-                elif state.is_defend(action):
-                    print("    defensive success!")
+                    
                 # 更新根节点并重用搜索树
                 # self.mcts.update_root_with_action(None)
             else:  # 和人类对战
-                if state.step_count>=state.n_in_row*2:
-                    act = acts[idx]
-                else:               
-                    act = np.random.choice(acts, p=act_probs)
-
-                action = state.position_to_action(act)
-
-                # 第一步棋为一手交换，随便下
                 if state.step_count==0: 
                     action = random.choice(state.first_availables)
                     act =  state.action_to_position(action)
+                else: 
+                    act = acts[idx]
+                    action = state.position_to_action(act)
+                    # 如果是防守棋，不要随机
+                    if state.is_defend(action):
+                        print("    defensive success!")
+                    elif state.step_count<state.n_in_row*2:
+                        act = np.random.choice(acts, p=act_probs)
+                        action = state.position_to_action(act)
 
                 if act!=acts[idx]:
                     print("    random:", state.position_to_action(acts[idx]), act_probs[idx], "==>", action, act_probs[acts.index(act)])
-                elif state.is_defend(action):
-                    print("    defensive success!")
-
+                
                 # self.mcts.update_root_with_action(None)
                 # 打印AI走子信息
                 # print("AI move: %d,%d\n" % (action[0], action[1]))
