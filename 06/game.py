@@ -101,8 +101,35 @@ class FiveChess(object):
         c = _chessboard[last_x][last_y]
         _chessboard[last_x][last_y]= -1 if c==1 else 1
         isend,_ = self.check_terminal(_chessboard)
-        if isend: return True
-        return self.check_will_win(_chessboard)
+        if isend: 
+            print("win")
+            for y in range(self.size-1, -1, -1):
+                line="%s "%(y%10)
+                for x in range(self.size):
+                    char = " "
+                    if _chessboard[x][y]==1:
+                        char = "X"
+                    if _chessboard[x][y]==-1:
+                        char = "O"
+                    line += char+" "
+                print(line)
+            return True
+        will_win = self.check_will_win(_chessboard)
+        if will_win:
+            print("will win")
+            for y in range(self.size-1, -1, -1):
+                line="%s "%(y%10)
+                for x in range(self.size):
+                    char = " "
+                    if _chessboard[x][y]==1:
+                        char = "X"
+                    if _chessboard[x][y]==-1:
+                        char = "O"
+                    line += char+" "
+                print(line)
+            return True
+        return False            
+        
 
 
     # 检查是否是四个子且两端都是空白位置
