@@ -100,7 +100,7 @@ class FiveChess(object):
 
         c = _chessboard[last_x][last_y]
         _chessboard[last_x][last_y]= -1 if c==1 else 1
-        isend,_ = self.check_terminal(_chessboard)
+        isend,_ = self.check_terminal(_chessboard, (last_x, last_y))
         if isend: 
             if debug:
                 print("win", (last_x, last_y))
@@ -235,7 +235,7 @@ class FiveChess(object):
         return False
 
     # 检查是否游戏结束,返回赢的用户0 或 1，如果平局返回-1
-    def check_terminal(self, chessboard=None):
+    def check_terminal(self, chessboard=None, action=None):
         # 如果都没有足够的棋
         if self.step_count<self.n_in_row*2-1:
             return False, -1
@@ -249,7 +249,11 @@ class FiveChess(object):
             _chessboard=chessboard
 
         # 找到最后一个子
-        last_x, last_y = self.actions[-1]
+        if action ==None:
+            last_x, last_y = self.actions[-1]
+        else:
+            last_x, last_y = action
+            
         n = self.n_in_row
         c = _chessboard[last_x][last_y]
         lastplayer = self.players[0] if self.current_player == self.players[1] else self.players[1]
