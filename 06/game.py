@@ -116,7 +116,7 @@ class FiveChess(object):
                     print(line)
                 print("  "+str.join(" ",[str(i%10) for i in range(self.size)]))
             return True
-        will_win = self.check_will_win(_chessboard)
+        will_win = self.check_will_win(_chessboard, (last_x, last_y))
         if will_win:
             if debug:
                 print("will win", (last_x, last_y))
@@ -137,7 +137,7 @@ class FiveChess(object):
 
 
     # 检查是否是四个子且两端都是空白位置
-    def check_will_win(self, chessboard=None):
+    def check_will_win(self, chessboard=None, action=None):
         if self.step_count<self.n_in_row*2:
             return False
         
@@ -145,8 +145,11 @@ class FiveChess(object):
             _chessboard=self.chessboard
         else:
             _chessboard=chessboard
+        if action==None:
+            last_x, last_y = self.actions[-1]
+        else:
+            last_x, last_y = action
 
-        last_x, last_y = self.actions[-1]
         n = self.n_in_row
         c = _chessboard[last_x][last_y]
 
