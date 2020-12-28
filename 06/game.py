@@ -102,7 +102,7 @@ class FiveChess(object):
         _chessboard[last_x][last_y]= -1 if c==1 else 1
         isend,_ = self.check_terminal(_chessboard)
         if isend: 
-            print("win")
+            print("win", (last_x, last_y))
             for y in range(self.size-1, -1, -1):
                 line="%s "%(y%10)
                 for x in range(self.size):
@@ -116,7 +116,7 @@ class FiveChess(object):
             return True
         will_win = self.check_will_win(_chessboard)
         if will_win:
-            print("will win")
+            print("will win", (last_x, last_y))
             for y in range(self.size-1, -1, -1):
                 line="%s "%(y%10)
                 for x in range(self.size):
