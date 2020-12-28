@@ -244,6 +244,7 @@ class MCTSPurePlayer(object):
 
             if act!=acts[idx]:
                 print("    random:", state.position_to_action(acts[idx]), act_probs[idx], "==>", action, act_probs[acts.index(act)])
+              
             # self.mcts.reset()
             # print("MCTS", self.player, action)
             if return_prob:
@@ -302,7 +303,8 @@ class MCTSPlayer(object):
 
                 if act!=acts[idx]:
                     print("    random:", state.position_to_action(acts[idx]), act_probs[idx], "==>", action, act_probs[acts.index(act)])
-
+                elif state.is_defend():
+                    print("    defensive success!")
                 # 更新根节点并重用搜索树
                 # self.mcts.update_root_with_action(None)
             else:  # 和人类对战
