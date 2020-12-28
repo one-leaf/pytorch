@@ -106,9 +106,9 @@ class MCTS():
                 # if state.current_player==winner:
                 #     v = 1
                 # else:
-                v = -1
+                v = -2
             elif state.is_defend():
-                v = -0.9
+                v = -1.5
                 # state.print()
             self.Es[s] = v
 
