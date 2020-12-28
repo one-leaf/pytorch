@@ -86,7 +86,7 @@ class FiveChess(object):
         return False, -1        
 
     # 检查是否是防守成功
-    def is_defend(self, action=None):
+    def is_defend(self, action=None, debug=False):
         if self.step_count<self.n_in_row*2:
             return False
         n = self.n_in_row
@@ -102,31 +102,35 @@ class FiveChess(object):
         _chessboard[last_x][last_y]= -1 if c==1 else 1
         isend,_ = self.check_terminal(_chessboard)
         if isend: 
-            print("win", (last_x, last_y))
-            # for y in range(self.size-1, -1, -1):
-            #     line="%s "%(y%10)
-            #     for x in range(self.size):
-            #         char = " "
-            #         if _chessboard[x][y]==1:
-            #             char = "X"
-            #         if _chessboard[x][y]==-1:
-            #             char = "O"
-            #         line += char+" "
-            #     print(line)
+            if debug:
+                print("win", (last_x, last_y))
+                for y in range(self.size-1, -1, -1):
+                    line="%s "%(y%10)
+                    for x in range(self.size):
+                        char = " "
+                        if _chessboard[x][y]==1:
+                            char = "X"
+                        if _chessboard[x][y]==-1:
+                            char = "O"
+                        line += char+" "
+                    print(line)
+                print("  "+str.join(" ",[str(i%10) for i in range(self.size)]))
             return True
         will_win = self.check_will_win(_chessboard)
         if will_win:
-            print("will win", (last_x, last_y))
-            # for y in range(self.size-1, -1, -1):
-            #     line="%s "%(y%10)
-            #     for x in range(self.size):
-            #         char = " "
-            #         if _chessboard[x][y]==1:
-            #             char = "X"
-            #         if _chessboard[x][y]==-1:
-            #             char = "O"
-            #         line += char+" "
-            #     print(line)
+            if debug:
+                print("will win", (last_x, last_y))
+                for y in range(self.size-1, -1, -1):
+                    line="%s "%(y%10)
+                    for x in range(self.size):
+                        char = " "
+                        if _chessboard[x][y]==1:
+                            char = "X"
+                        if _chessboard[x][y]==-1:
+                            char = "O"
+                        line += char+" "
+                    print(line)
+                print("  "+str.join(" ",[str(i%10) for i in range(self.size)]))    
             return True
         return False            
         
