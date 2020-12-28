@@ -160,7 +160,8 @@ class MCTS():
         state.step(act)
 
         # 检查是否需要优先考虑的棋
-        if end: self._first_act.add(a)
+        end, _ = state.game_end()
+        if end or state.is_defend(): self._first_act.add(a)
 
         # 计算下一步的 v 这个v 为正数，但下一个v为负数
         v = self.search(state)
