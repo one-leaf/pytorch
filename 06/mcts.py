@@ -115,10 +115,9 @@ class MCTS():
                 #     v = 1
                 # else:
                 v = -2
-                
             # 这个有问题，需要不仅检查将要赢，而且还要检查对手会不会马上赢，计算量太大，放弃
-            # elif state.check_will_win():
-            #     v = -2
+            elif state.check_will_win():
+                v = -2
             self.Es[s] = v
 
         # 如果得分不等于0，标志这局游戏结束
