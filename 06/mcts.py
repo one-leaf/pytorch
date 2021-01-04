@@ -110,7 +110,7 @@ class MCTS():
                 # else:
                 v = -1
             elif state.is_defend():
-                v = -1.5
+                v = -0.5
                 # state.print()
             self.Es[s] = v
 
