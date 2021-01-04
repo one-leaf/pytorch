@@ -198,7 +198,7 @@ class FiveChessPlay():
                         self.best_policy_value_net = None
                         print("save curr modle to best model")
                     else:
-                        print("curr:",v,"<0.65, lost")
+                        print("curr:",v,"< 0.65, keep best model")
                     self.best_win=[0,0]
 
                     self.policy_value_net = PolicyValueNet(size, model_file=model_file)
