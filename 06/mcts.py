@@ -86,7 +86,12 @@ class MCTS():
             return acts, np.array(probs), qs
 
         m = np.power(np.array(visits), 1./temp)
-        probs = m/np.sum(m)
+        m_sum = np.sum(m)
+        if m_sum<=0:
+            v_len = len(acts)
+            probs = np.ones(v_len)/v_len
+        else:
+            probs = m/m_sum
         return acts, probs, qs
 
     def search(self, state):
