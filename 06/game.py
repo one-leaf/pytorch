@@ -136,11 +136,11 @@ class FiveChess(object):
         
 
 
-    # 检查是否是四个子且两端都是空白位置
+    # 检查是否是四个子且两端都是空白位置，并且剩余的都没有一步可以赢的
     def check_will_win(self, chessboard=None, action=None):
         if self.step_count<self.n_in_row*2:
             return False
-        
+
         if chessboard==None:
             _chessboard=self.chessboard
         else:

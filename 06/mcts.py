@@ -115,8 +115,8 @@ class MCTS():
                 #     v = 1
                 # else:
                 v = -2
-            elif state.check_will_win():
-                v = -2
+            # elif state.check_will_win():
+            #     v = -2
             self.Es[s] = v
 
         # 如果得分不等于0，标志这局游戏结束
@@ -135,6 +135,7 @@ class MCTS():
             self.Ps[s] = probs 
 
             self.Ns[s] = 0
+
             return -v
 
         # 当前最佳概率和最佳动作
