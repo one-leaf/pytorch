@@ -61,8 +61,10 @@ class MCTS():
                 if self._limit_max_var and var>self._max_var: break
 
         act_visits = [(a, self.Nsa[(s, a)]) if (s, a) in self.Nsa else (a, 0) for a in available_acts]
+        act_Qs = [(a, self.Qsa[(s, a)]) if (s, a) in self.Qsa else (a, 0) for a in available_acts]
         acts = [av[0] for av in act_visits]
         visits = [av[1] for av in act_visits]
+        qs = [round(av[1],2) for av in act_Qs]
 
         info=[]
         for idx in sorted(range(len(visits)), key=visits.__getitem__)[::-1]:
@@ -81,11 +83,11 @@ class MCTS():
             bestA = np.random.choice(bestAs)
             probs = [0] * len(visits)
             probs[bestA] = 1
-            return acts, np.array(probs)
+            return acts, np.array(probs), qs
 
         m = np.power(np.array(visits), 1./temp)
         probs = m/np.sum(m)
-        return acts, probs
+        return acts, probs, qs
 
     def search(self, state):
         """
@@ -227,7 +229,7 @@ class MCTSPurePlayer(object):
         """计算下一步走子action"""
         if len(state.availables) > 0:  # 盘面可落子位置>0
             # 构建纯MCTS初始树(节点分布充分)，并返回child中访问量最大的action
-            acts, act_probs = self.mcts.get_action_probs(state, temp=0)
+            acts, act_probs, act_qs = self.mcts.get_action_probs(state, temp=0)
 
             move_probs = np.zeros(state.size * state.size)
             move_probs[acts] = act_probs
@@ -243,10 +245,9 @@ class MCTSPurePlayer(object):
                 action = state.position_to_action(act)
 
             if act!=acts[idx]:
-                print("    random:", state.position_to_action(acts[idx]), act_probs[idx], "==>", action, act_probs[acts.index(act)])
-              
-            # self.mcts.reset()
-            # print("MCTS", self.player, action)
+                print("    random:", state.position_to_action(acts[idx]), act_probs[idx], act_qs[idx], \
+                     "==>", action, act_probs[acts.index(act)], act_qs[acts.index(act)])
+
             if return_prob:
                 return action, move_probs
             else:
@@ -279,7 +280,7 @@ class MCTSPlayer(object):
         move_probs = np.zeros(state.size * state.size)
         if len(state.availables) > 0:  # 盘面可落子位置>0
             # 训练的时候 temp = 1
-            acts, act_probs = self.mcts.get_action_probs(state, temp)
+            acts, act_probs, act_qs = self.mcts.get_action_probs(state, temp)
             move_probs[acts] = act_probs
             idx = np.argmax(act_probs)    
 
@@ -294,20 +295,16 @@ class MCTSPlayer(object):
                     # if state.step_count>=state.n_in_row*2:
                     act = acts[idx]
                     action = state.position_to_action(act)
-                    # 如果是防守棋，不要随机
-                    if state.is_defend(action):
-                        print("    defensive success!")
-                    elif random.random() > 0.5: #state.step_count*2/(state.size*state.size):
+                    # 如果盘面看好，可以随机
+                    if act_qs[idx] > 0 and random.random() > 0.5: 
                         p= 0.75                
                         dirichlet = np.random.dirichlet(0.03 * np.ones(len(act_probs)))
                         act = np.random.choice(acts, p=p * act_probs + (1-p) * dirichlet)
                         action = state.position_to_action(act)               
         
                 if act!=acts[idx]:
-                    print("    random:", state.position_to_action(acts[idx]), act_probs[idx], "==>", action, act_probs[acts.index(act)])
-                    
-                # 更新根节点并重用搜索树
-                # self.mcts.update_root_with_action(None)
+                    print("    random:", state.position_to_action(acts[idx]), act_probs[idx], act_qs[idx], \
+                        "==>", action, act_probs[acts.index(act)], act_qs[acts.index(act)])                    
             else:  # 和人类对战
                 if state.step_count==0: 
                     action = random.choice(state.first_availables)
@@ -315,22 +312,14 @@ class MCTSPlayer(object):
                 else: 
                     act = acts[idx]
                     action = state.position_to_action(act)
-                    # 如果是防守棋，不要随机
-                    if state.is_defend(action):
-                        print("    defensive success!")
-                    elif state.step_count<state.n_in_row*2:
+                    # 如果盘面看好，可以随机
+                    if act_qs[idx] > 0 and random.random() > 0.5: 
                         act = np.random.choice(acts, p=act_probs)
                         action = state.position_to_action(act)
 
                 if act!=acts[idx]:
-                    print("    random:", state.position_to_action(acts[idx]), act_probs[idx], "==>", action, act_probs[acts.index(act)])
-                
-                # self.mcts.update_root_with_action(None)
-                # 打印AI走子信息
-                # print("AI move: %d,%d\n" % (action[0], action[1]))
-            # print("AI:", action)
-            # print("AI", self.player, action)
-
+                    print("    random:", state.position_to_action(acts[idx]), act_probs[idx], act_qs[idx], \
+                        "==>", action, act_probs[acts.index(act)], act_qs[acts.index(act)])               
             if return_prob:
                 return action, move_probs
             else:
