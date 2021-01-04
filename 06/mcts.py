@@ -103,20 +103,16 @@ class MCTS():
         if s not in self.Es:
             end, winner = state.game_end()  
             v = 0
-            # 这里是对上一步的评价，如果游戏结束或防御成功对我而言都是不利的，v为-1
+            # 这里是对上一步的评价，如果游戏结束对我而言都是不利的，v为-1
             if (end and winner!=-1): 
                 # if state.current_player==winner:
                 #     v = 1
                 # else:
-                v = -1
-            elif state.is_defend():
-                v = -0.5
-                # state.print()
+                v = -2
             self.Es[s] = v
 
         # 如果得分不等于0，标志这局游戏结束
-        end, _ = state.game_end()
-        if end: #self.Es[s] != 0:
+        if self.Es[s] != 0:
             return -self.Es[s]
 
         # 如果当前状态没有子节点，增加子节点
@@ -132,7 +128,6 @@ class MCTS():
 
             self.Ns[s] = 0
             return -v
-
 
         # 当前最佳概率和最佳动作
         cur_best = -float('inf')
