@@ -155,12 +155,12 @@ class FiveChessPlay():
         agent.game.print()
         
         # 只保存输掉的训练数据
-        if winner == best_mcts_player.player:
-            play_data = list(play_data)[:]
-            play_data = self.get_equi_data(play_data)
-            logging.info("Eval Play end. length:%s saving ..." % len(play_data))
-            for obj in play_data:
-                self.save_wait_data(obj)
+        # if winner == best_mcts_player.player:
+        play_data = list(play_data)[:]
+        play_data = self.get_equi_data(play_data)
+        logging.info("Eval Play end. length:%s saving ..." % len(play_data))
+        for obj in play_data:
+            self.save_wait_data(obj)
 
     def run(self):
         """启动训练"""
@@ -188,7 +188,8 @@ class FiveChessPlay():
                     # self.mcts_win=[0, 0]
 
                     # 如果当前模型的胜率大于等于0.7,保留为最佳模型
-                    if  self.best_win[0]/self.policy_evaluate_size>=0.7:
+                    v = 1.0*self.best_win[0]/self.policy_evaluate_size
+                    if  v>=0.65:
                         t = os.path.getctime(best_model_file)
                         timeStruct = time.localtime(t)
                         timestr = time.strftime('%Y_%m_%d_%H_%M', timeStruct)
@@ -196,6 +197,8 @@ class FiveChessPlay():
                         self.policy_value_net.save_model(best_model_file)
                         self.best_policy_value_net = None
                         print("save curr modle to best model")
+                    else:
+                        print("curr:",v,"<0.65, lost")
                     self.best_win=[0,0]
 
                     self.policy_value_net = PolicyValueNet(size, model_file=model_file)
