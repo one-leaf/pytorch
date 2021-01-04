@@ -140,7 +140,7 @@ class MCTS():
 
             self.Ns[s] = 0
 
-            return -v
+            return -v/2
 
         # 当前最佳概率和最佳动作
         cur_best = -float('inf')
