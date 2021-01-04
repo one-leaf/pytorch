@@ -55,14 +55,13 @@ class MCTS():
             if n >= len(state.availables):
                 # 取出当前所有的 visits
                 visits = [self.Nsa[(s, a)] if (s, a) in self.Nsa else 0 for a in available_acts]
-                values = [self.Qsa[(s, a)] if (s, a) in self.Qsa else 0 for a in available_acts]
                 if len(visits)==1: break
                 if sum(visits)==0: break
 
                 # 如果当前最大访问次数的值为负数或方差没有到最大值，继续                
                 idx = np.argmax(visits)
                 var = np.var(visits)
-                if values[idx] >0 and self._limit_max_var and var>self._max_var: break
+                if self._limit_max_var and var>self._max_var: break
 
         act_visits = [(a, self.Nsa[(s, a)]) if (s, a) in self.Nsa else (a, 0) for a in available_acts]
         act_Qs = [(a, self.Qsa[(s, a)]) if (s, a) in self.Qsa else (a, 0) for a in available_acts]
