@@ -57,6 +57,7 @@ class MCTS():
                 visits = [self.Nsa[(s, a)] if (s, a) in self.Nsa else 0 for a in available_acts]
 
                 if len(visits)==1: break
+                if sum(visits)==0: break
                 var = np.var(visits)
                 if self._limit_max_var and var>self._max_var: break
 
