@@ -32,7 +32,7 @@ best_model_file =  os.path.join(model_dir, 'best_model_%s_%s.pth'%(size,n_in_row
 
 class FiveChessPlay():
     def __init__(self):
-        self.policy_evaluate_size = 20  # 策略评估胜率时的模拟对局次数
+        self.policy_evaluate_size = 100  # 策略评估胜率时的模拟对局次数
         self.batch_size = 512  # 训练一批数据的长度
         self.max_keep_size = 500000  # 保留最近对战样本个数 平均一局大约400~600个样本, 也就是包含了最近1000次对局数据
 
@@ -187,8 +187,8 @@ class FiveChessPlay():
                     #     self.pure_mcts_playout_num=self.pure_mcts_playout_num-50
                     # self.mcts_win=[0, 0]
 
-                    # 如果当前模型的胜率大于等于0.6,保留为最佳模型
-                    if  self.best_win[0]-self.best_win[1]>=4:
+                    # 如果当前模型的胜率大于等于0.7,保留为最佳模型
+                    if  self.best_win[0]/self.policy_evaluate_size>=0.7:
                         t = os.path.getctime(best_model_file)
                         timeStruct = time.localtime(t)
                         timestr = time.strftime('%Y_%m_%d_%H_%M', timeStruct)
