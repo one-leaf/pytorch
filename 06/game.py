@@ -133,8 +133,6 @@ class FiveChess(object):
                 print("  "+str.join(" ",[str(i%10) for i in range(self.size)]))    
             return True
         return False            
-        
-
 
     # 检查是否是四个子且两端都是空白位置，并且剩余的都没有一步可以赢的
     def check_will_win(self, chessboard=None, action=None):
@@ -152,6 +150,17 @@ class FiveChess(object):
 
         n = self.n_in_row
         c = _chessboard[last_x][last_y]
+
+        # 检查有没有可能对手一步就赢了
+        p_c = -1 if c==1 else 1
+        p_chessboard = copy.deepcopy(_chessboard)
+        for x in range(self.size):
+            for y in range(self.size):                
+                if p_chessboard[x,y]==0: continue
+                p_chessboard[x][y]=p_c
+                end,_ = self.check_terminal(p_chessboard, (x,y))
+                if end: return False
+                p_chessboard[x][y]=0
 
         hassame=1
         curr_search_pass=True
