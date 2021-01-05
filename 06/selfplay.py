@@ -93,8 +93,8 @@ class FiveChessPlay():
         if i%2==0:     
             # self.n_playout = 300
             mcts_player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout, is_selfplay=1)
-            # pure_mcts_player = None
-            mcts_player.mcts._limit_max_var=False
+            pure_mcts_player = None
+            # mcts_player.mcts._limit_max_var=False
         else:
             # self.n_playout = 1000
             mcts_player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout, is_selfplay=1)
