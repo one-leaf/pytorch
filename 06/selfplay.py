@@ -39,7 +39,7 @@ class FiveChessPlay():
         self.learn_rate = 1e-4
         self.lr_multiplier = 1.0  # 基于KL的自适应学习率
         self.temp = 1  # 概率缩放程度，实际预测0.01，训练采用1
-        self.n_playout = 1000  # 每个动作的模拟次数
+        self.n_playout = 600  # 每个动作的模拟次数
         self.play_batch_size = 1 # 每次自学习次数
         self.epochs = 1  # 重复训练次数, 推荐是5
         self.kl_targ = 0.02  # 策略价值网络KL值目标
@@ -95,6 +95,8 @@ class FiveChessPlay():
         else:
             mcts_player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=self.c_puct+0.5, n_playout=self.n_playout, is_selfplay=1)
 
+        mcts_player.mcts._limit_max_var=False
+
         # pure_mcts_player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=self.c_puct+0.5, n_playout=self.n_playout, is_selfplay=1)
 
         # 开始下棋
@@ -125,7 +127,7 @@ class FiveChessPlay():
                 state, mcts_porb, winner = self.collect_selfplay_data(i)
 
                 if (i+1)%10 == 0:
-                    
+
                     if self.c_puct_win[0]>self.c_puct_win[1]:                               
                         self.c_puct=self.c_puct-0.1
                     if self.c_puct_win[0]<self.c_puct_win[1]:
