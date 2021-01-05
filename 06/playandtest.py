@@ -180,7 +180,8 @@ class FiveChessPlay():
 
                 self.policy_evaluate()
 
-                if (i+1)%self.policy_evaluate_size == 0:
+                rate_of_winning = 0.65
+                if (i+1)%self.policy_evaluate_size == 0 or self.best_win[1]>(self.policy_evaluate_size*(1-rate_of_winning)):
                     # if self.mcts_win[0]>self.mcts_win[1]:                               
                     #     self.pure_mcts_playout_num=self.pure_mcts_playout_num+50
                     # if self.mcts_win[0]<self.mcts_win[1]:
@@ -189,7 +190,7 @@ class FiveChessPlay():
 
                     # 如果当前模型的胜率大于等于0.7,保留为最佳模型
                     v = 1.0*self.best_win[0]/self.policy_evaluate_size
-                    if  v>=0.65:
+                    if  v >= rate_of_winning:
                         t = os.path.getctime(best_model_file)
                         timeStruct = time.localtime(t)
                         timestr = time.strftime('%Y_%m_%d_%H_%M', timeStruct)
@@ -199,8 +200,8 @@ class FiveChessPlay():
                         print("save curr modle to best model")
                     else:
                         print("curr:",v,"< 0.65, keep best model")
+                    
                     self.best_win=[0,0]
-
                     self.policy_value_net = PolicyValueNet(size, model_file=model_file)
 
 
