@@ -140,7 +140,8 @@ class MCTS():
 
             self.Ns[s] = 0
 
-            return -v
+            # 由于五子棋不同于围棋，局面变化大，所以将局面预测值减半，提高mcts的影响力
+            return -v/2
 
         # 当前最佳概率和最佳动作
         cur_best = -float('inf')
