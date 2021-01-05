@@ -39,7 +39,7 @@ class FiveChessPlay():
         self.learn_rate = 1e-4
         self.lr_multiplier = 1.0  # 基于KL的自适应学习率
         self.temp = 1  # 概率缩放程度，实际预测0.01，训练采用1
-        self.n_playout = 250  # 每个动作的模拟次数
+        self.n_playout = 1000  # 每个动作的模拟次数
         self.play_batch_size = 1 # 每次自学习次数
         self.epochs = 1  # 重复训练次数, 推荐是5
         self.kl_targ = 0.02  # 策略价值网络KL值目标
@@ -92,21 +92,23 @@ class FiveChessPlay():
         # 创建使用策略价值网络来指导树搜索和评估叶节点的MCTS玩家   
         if i%2==0:     
             mcts_player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout, is_selfplay=1)
+            pure_mcts_player = None
+            mcts_player.mcts._limit_max_var=False
+            self.n_playout = 300
         else:
-            mcts_player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=self.c_puct+0.5, n_playout=self.n_playout, is_selfplay=1)
-
-        mcts_player.mcts._limit_max_var=False
-
-        # pure_mcts_player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=self.c_puct+0.5, n_playout=self.n_playout, is_selfplay=1)
-
+            mcts_player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout, is_selfplay=1)
+            pure_mcts_player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=self.c_puct+0.5, n_playout=self.n_playout, is_selfplay=1)
+            self.n_playout = 1000
+            
         # 开始下棋
-        _, play_data = agent.start_self_play(mcts_player, None, temp=self.temp)
+        winner, play_data = agent.start_self_play(mcts_player, pure_mcts_player, temp=self.temp)
         agent.game.print()                   
 
-        if i%2==0:
-            self.c_puct_win[0] = self.c_puct_win[0]+1
-        else:
-            self.c_puct_win[1] = self.c_puct_win[1]+1
+        if pure_mcts_player!=None:
+            if winner == mcts_player.player:
+                self.c_puct_win[0] = self.c_puct_win[0]+1
+            else:
+                self.c_puct_win[1] = self.c_puct_win[1]+1
 
         play_data = list(play_data)[:]     
         # 采用翻转棋盘来增加样本数据集
@@ -126,7 +128,7 @@ class FiveChessPlay():
                 logging.info("TRAIN Batch:{} starting, Size:{}, n_in_row:{}".format(i, size, n_in_row))
                 state, mcts_porb, winner = self.collect_selfplay_data(i)
 
-                if (i+1)%10 == 0:
+                if sum(self.c_puct_win) >= 10:
 
                     if self.c_puct_win[0]>self.c_puct_win[1]:                               
                         self.c_puct=self.c_puct-0.1
