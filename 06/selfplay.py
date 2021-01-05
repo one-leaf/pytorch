@@ -84,31 +84,27 @@ class FiveChessPlay():
                 extend_data.append((equi_state, equi_mcts_prob.flatten(), winner))
         return extend_data
 
-    def collect_selfplay_data(self):
+    def collect_selfplay_data(self,i):
         """收集自我对抗数据用于训练"""       
         # 使用MCTS蒙特卡罗树搜索进行自我对抗
         logging.info("TRAIN Self Play starting ...")
         agent = Agent(size, n_in_row, is_shown=0)
-        # 创建使用策略价值网络来指导树搜索和评估叶节点的MCTS玩家
-        mcts_player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout, is_selfplay=1)
+        # 创建使用策略价值网络来指导树搜索和评估叶节点的MCTS玩家   
+        if i%2==0:     
+            mcts_player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout, is_selfplay=1)
+        else:
+            mcts_player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=self.c_puct+0.5, n_playout=self.n_playout, is_selfplay=1)
 
-        pure_mcts_player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=self.c_puct+0.5, n_playout=self.n_playout, is_selfplay=1)
+        # pure_mcts_player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=self.c_puct+0.5, n_playout=self.n_playout, is_selfplay=1)
 
         # 开始下棋
-        winner, play_data = agent.start_self_play(mcts_player, pure_mcts_player, temp=self.temp)
+        _, play_data = agent.start_self_play(mcts_player, None, temp=self.temp)
         agent.game.print()                   
 
-        if winner == mcts_player.player:
+        if i%2==0:
             self.c_puct_win[0] = self.c_puct_win[0]+1
-        if winner == pure_mcts_player.player:
+        else:
             self.c_puct_win[1] = self.c_puct_win[1]+1
-
-        if self.c_puct_win[0]>self.c_puct_win[1]:                               
-            self.c_puct=self.c_puct-0.1
-        if self.c_puct_win[0]<self.c_puct_win[1]:
-            self.c_puct=self.c_puct+0.1
-        self.c_puct = max(0.2, self.c_puct)
-        self.c_puct = min(10, self.c_puct)
 
         play_data = list(play_data)[:]     
         # 采用翻转棋盘来增加样本数据集
@@ -126,9 +122,17 @@ class FiveChessPlay():
         try:
             for i in range(10000):
                 logging.info("TRAIN Batch:{} starting, Size:{}, n_in_row:{}".format(i, size, n_in_row))
-                state, mcts_porb, winner = self.collect_selfplay_data()
+                state, mcts_porb, winner = self.collect_selfplay_data(i)
 
                 if (i+1)%10 == 0:
+                    
+                    if self.c_puct_win[0]>self.c_puct_win[1]:                               
+                        self.c_puct=self.c_puct-0.1
+                    if self.c_puct_win[0]<self.c_puct_win[1]:
+                        self.c_puct=self.c_puct+0.1
+                    self.c_puct = max(0.2, self.c_puct)
+                    self.c_puct = min(10, self.c_puct)
+
                     self.policy_value_net = PolicyValueNet(size, model_file=model_file)
                     self.c_puct_win=[0, 0]
 
