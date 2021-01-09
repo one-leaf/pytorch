@@ -83,15 +83,16 @@ class Dataset(torch.utils.data.Dataset):
     def copy_wait_file(self):
         movefiles=os.listdir(data_wait_dir)
         # 等待一秒钟，防止有数据还在写入
-        time.sleep(1)
+        time.sleep(2)
         for i, fn in enumerate(movefiles):
             filename = "{}.pkl".format(self.index % self.max_keep_size,)
             savefile = os.path.join(self.data_dir, filename)
             if os.path.exists(savefile): os.remove(savefile)
             os.rename(os.path.join(data_wait_dir,fn), savefile)
             self.index += 1
-            self.save_index()        
-        print("mv %s files to train"%len(movefiles))
+            self.save_index() 
+            if i>3000: break       
+        print("mv %s files to train"%i)
 
     def save(self, obj):
         with self._save_lock:
