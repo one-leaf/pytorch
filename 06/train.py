@@ -91,7 +91,7 @@ class Dataset(torch.utils.data.Dataset):
             os.rename(os.path.join(data_wait_dir,fn), savefile)
             self.index += 1
             self.save_index() 
-            if i>3000: break       
+            if i>=3000: break       
         print("mv %s files to train"%i)
 
     def save(self, obj):
