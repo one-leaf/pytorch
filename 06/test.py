@@ -60,7 +60,7 @@ def run():
         mcts_ai_player = MCTSPlayer(net_policy.policy_value_fn, c_puct=3, n_playout=500, is_selfplay=False)
 
         # 纯MCTS玩家
-        mcts_player = MCTSPurePlayer(c_puct=5, n_playout=2000)
+        # mcts_player = MCTSPurePlayer(c_puct=5, n_playout=2000)
 
         # 人类玩家
         human = Human(agent,is_show=1)
