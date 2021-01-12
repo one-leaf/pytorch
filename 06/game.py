@@ -156,7 +156,7 @@ class FiveChess(object):
         p_chessboard = copy.deepcopy(_chessboard)
         for x in range(self.size):
             for y in range(self.size):                
-                if p_chessboard[x,y]==0: continue
+                if p_chessboard[x][y]==0: continue
                 p_chessboard[x][y]=p_c
                 end,_ = self.check_terminal(p_chessboard, (x,y))
                 if end: return False
