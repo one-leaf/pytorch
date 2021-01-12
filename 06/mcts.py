@@ -284,7 +284,7 @@ class MCTSPlayer(object):
     def reset_player(self):
         self.mcts.reset()
 
-    def get_action(self, state, temp=1e-3, return_prob=0):
+    def get_action(self, state, temp=0, return_prob=0):
         """计算下一步走子action"""
         move_probs = np.zeros(state.size * state.size)
         if len(state.availables) > 0:  # 盘面可落子位置>0

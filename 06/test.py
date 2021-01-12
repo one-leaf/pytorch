@@ -57,7 +57,7 @@ def run():
 
         # 神经网络的价值策略
         net_policy = PolicyValueNet(size, model_file = model_file)
-        mcts_ai_player = MCTSPlayer(net_policy.policy_value_fn, c_puct=3, n_playout=500, is_selfplay=False)
+        mcts_ai_player = MCTSPlayer(net_policy.policy_value_fn, c_puct=3, n_playout=500, is_selfplay=1)
 
         # 纯MCTS玩家
         # mcts_player = MCTSPurePlayer(c_puct=5, n_playout=2000)
