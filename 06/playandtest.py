@@ -40,7 +40,7 @@ class FiveChessPlay():
         self.learn_rate = 1e-4
         self.lr_multiplier = 1.0  # 基于KL的自适应学习率
         self.temp = 1  # 概率缩放程度，实际预测0.01，训练采用1
-        self.n_playout = 300  # 每个动作的模拟次数
+        self.n_playout = 500  # 每个动作的模拟次数
         self.play_batch_size = 1 # 每次自学习次数
         self.epochs = 1  # 重复训练次数, 推荐是5
         self.kl_targ = 0.02  # 策略价值网络KL值目标       
@@ -143,6 +143,9 @@ class FiveChessPlay():
         if self.best_policy_value_net is None:
             self.best_policy_value_net = PolicyValueNet(size, model_file=best_model_file)
         best_mcts_player = MCTSPlayer(self.best_policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout)
+
+        current_mcts_player.mcts._limit_max_var=False
+        best_mcts_player.mcts._limit_max_var=False
 
         agent = Agent(size, n_in_row, is_shown=0)
         winner, play_data = agent.start_self_evaluate(current_mcts_player, best_mcts_player, temp=self.temp, start_player=random.choice([0,1]))

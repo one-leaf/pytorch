@@ -297,7 +297,8 @@ class MCTSPlayer(object):
 
                 # 第一步棋为一手交换，随便下
                 if state.step_count==0: 
-                    action = random.choice(state.first_availables)
+                    # action = random.choice(state.first_availables)
+                    action = random.choice(state.availables)
                     act =  state.action_to_position(action)
                 else:                    
                     # 如果是下了几步后全部取最大值
