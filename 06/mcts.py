@@ -141,17 +141,20 @@ class MCTS():
             self.Ns[s] = 0
 
             # 由于五子棋不同于围棋，局面变化大，所以将局面预测值减半，提高mcts的影响力
-            return -v/2
+            # 训练后期不需要了
+            # v = v * 0.5
+            return -v
 
         # 当前最佳概率和最佳动作
         cur_best = -float('inf')
         best_act = -1
 
         # 如果动作 a 在优先探索步骤内，且没有从来没有被探索过，则优先探索
-        for a in state.actions_to_positions(state.availables):
-            if a in self._first_act and not (s, a) in self.Qsa: 
-                best_act = a
-                break
+        # 训练后期不需要了
+        # for a in state.actions_to_positions(state.availables):
+        #     if a in self._first_act and not (s, a) in self.Qsa: 
+        #         best_act = a
+        #         break
 
         if best_act == -1:
             # 选择具有最高置信上限的动作
@@ -171,8 +174,9 @@ class MCTS():
         state.step(act)
 
         # 检查是否需要优先考虑的棋
-        end, _ = state.game_end()
-        if end: self._first_act.add(a)
+        # 训练后期不需要了
+        # end, _ = state.game_end()
+        # if end: self._first_act.add(a)
 
         # 计算下一步的 v 这个v 为正数，但下一个v为负数
         v = self.search(state)
