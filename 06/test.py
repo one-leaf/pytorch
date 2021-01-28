@@ -19,9 +19,10 @@ class Human(object):
         self.player = None        
         self.agent = agent      
         self.user_click_point=None
+        self.is_show = is_show
         def on_mouse_press(x, y, button, modifiers):
             self.user_click_point = (x, y)
-        if is_show:
+        if self.is_show:
             self.agent.env.render()
             self.agent.env.viewer.window.on_mouse_press = on_mouse_press
 
@@ -38,6 +39,8 @@ class Human(object):
             self.agent.env.render()
             time.sleep(0.1)
         print(action)
+        if self.is_show:
+            self.agent.env.render(mode="human",close=False)
         return action
 
     def __str__(self):
@@ -63,10 +66,12 @@ def run():
         # mcts_player = MCTSPurePlayer(c_puct=5, n_playout=2000)
 
         # 人类玩家
-        human = Human(agent,is_show=1)
+        human = Human(agent, is_show=1)
 
         # 设置 start_player=0 AI先走棋
         agent.start_play(mcts_ai_player, human, start_player=0)
+        agent.game.print()                   
+        agent.env.close()
         # agent.start_play(human, human, start_player=0 if random.random()>0.5 else 1)
     except KeyboardInterrupt:
         print('quit')
