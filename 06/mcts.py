@@ -113,11 +113,12 @@ class MCTS():
             end, winner = state.game_end()  
             v = 0
             # 这里是对上一步的评价，如果游戏结束对我而言都是不利的，v为-1
-            if (end and winner!=-1): 
+            # 这里增加了最终的奖励，提升对步骤的优化
+            if (end and winner != -1): 
                 # if state.current_player==winner:
-                #     v = 1
+                #     v = 1 * 2
                 # else:
-                v = -1
+                v = -1 * 2
             # 这个有问题，计算量有点大，放弃
             # elif state.check_will_win():
             #     v = -2
@@ -140,9 +141,8 @@ class MCTS():
 
             self.Ns[s] = 0
 
-            # 由于五子棋不同于围棋，局面变化大，所以将局面预测值减半，提高mcts的影响力
-            # 训练后期不需要了
-            # v = v * 0.5
+            # 由于五子棋不同于围棋，局面变化大，所以将局面预测值降低一点，提高mcts的影响力
+            # v = v * 0.9
             return -v
 
         # 当前最佳概率和最佳动作
