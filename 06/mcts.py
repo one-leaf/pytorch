@@ -131,6 +131,10 @@ class MCTS():
         # 如果当前状态没有子节点，增加子节点
         # 增加 Ps[s] Vs[s] Ns[s]
         if s not in self.Ps:
+            # 如果没有可以走的棋了，搜索结束
+            if len(state.availables)==0:
+                return 0
+                
             # 获得当前局面的概率 和 局面的打分, 这个已经过滤掉了不可用走子
             act_probs, v = self._policy(state)
 
