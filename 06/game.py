@@ -436,7 +436,6 @@ class FiveChessEnv(gym.Env):
         space = 50
         width = (screen_width - space*2)/(self.fiveChess.size-1)
 
-
         if self.viewer is None:
             self.viewer = rendering.Viewer(screen_width, screen_height)
             bg = rendering.FilledPolygon([(0,0),(screen_width,0),(screen_width,screen_height),(0,screen_height),(0,0)])
@@ -463,7 +462,6 @@ class FiveChessEnv(gym.Env):
                           color=(255, 255, 255, 255))
                 self.viewer.add_geom(DrawText(lable))
 
-        # label on the bottom
             for i in range(self.fiveChess.size):
                 line = rendering.Line((space+i*width,space),(space+i*width,screen_height - space))
                 line.set_color(1, 1, 1)
@@ -476,6 +474,7 @@ class FiveChessEnv(gym.Env):
                           color=(255, 255, 255, 255))   
                 self.viewer.add_geom(DrawText(lable))
 
+                # label on the bottom
                 lable = pyglet.text.Label(str(chr(ord('A')+i)),
                           font_name='Courier', font_size=11,
                           x=space+i*width, y=space -20,
@@ -495,6 +494,14 @@ class FiveChessEnv(gym.Env):
                     self.chess[x].append([c,ct])
                     self.viewer.add_geom(c)
 
+            #最后落子标记
+            self.laststep_lable = pyglet.text.Label(str(chr(ord('X'))),
+                          font_name='Courier', font_size=11,
+                          x=-1*space, y=-1*space,
+                          anchor_x='center', anchor_y='center',
+                          color=(255, 0, 0, 255))
+            self.viewer.add_geom(DrawText(self.laststep_lable))
+
         for x in range(self.fiveChess.size):
             for y in range(self.fiveChess.size):	
                 if self.fiveChess.chessboard[x][y]!=0:
@@ -505,6 +512,11 @@ class FiveChessEnv(gym.Env):
                         self.chess[x][y][0].set_color(0,0,0)
                 else:
                     self.chess[x][y][1].set_translation(-1*width,-1*width)
+
+        if self.fiveChess.step_count>0:
+            x,y =  self.fiveChess.actions[-1]
+            self.laststep_lable.x=space+x*width
+            self.laststep_lable.y=space+y*width
 
         return self.viewer.render(return_rgb_array=mode == 'rgb_array')
 
