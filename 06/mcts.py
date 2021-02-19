@@ -118,7 +118,7 @@ class MCTS():
                 # if state.current_player==winner:
                 #     v = 1 * 2
                 # else:
-                v = -1 * 2
+                v = -1 * 1
             # 这个有问题，计算量有点大，放弃
             # elif state.check_will_win():
             #     v = -2
