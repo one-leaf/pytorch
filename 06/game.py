@@ -1,10 +1,19 @@
 from typing import Tuple
 import gym
 import random
+
 from gym.envs.classic_control import rendering
+import pyglet
+
 import time
 import numpy as np
 import copy
+
+class DrawText:
+    def __init__(self, label:pyglet.text.Label):
+        self.label=label
+    def render(self):
+        self.label.draw()
 
 class FiveChess(object):
     def __init__(self, size=15, n_in_row=5):
@@ -426,7 +435,8 @@ class FiveChessEnv(gym.Env):
         screen_height = 800
         space = 50
         width = (screen_width - space*2)/(self.fiveChess.size-1)
- 
+
+
         if self.viewer is None:
             self.viewer = rendering.Viewer(screen_width, screen_height)
             bg = rendering.FilledPolygon([(0,0),(screen_width,0),(screen_width,screen_height),(0,screen_height),(0,0)])
@@ -437,11 +447,42 @@ class FiveChessEnv(gym.Env):
                 line = rendering.Line((space,space+i*width),(screen_width-space,space+i*width))
                 line.set_color(1, 1, 1)
                 self.viewer.add_geom(line)
+                
+                # label on the left
+                lable = pyglet.text.Label(str(i),
+                          font_name='Courier', font_size=11,
+                          x=screen_width-space+20, y=space+i*width,
+                          anchor_x='center', anchor_y='center',
+                          color=(255, 255, 255, 255))
+                self.viewer.add_geom(DrawText(lable))
+
+                lable = pyglet.text.Label(str(self.fiveChess.size-i),
+                          font_name='Courier', font_size=11,
+                          x=space-20, y=space+i*width,
+                          anchor_x='center', anchor_y='center',
+                          color=(255, 255, 255, 255))
+                self.viewer.add_geom(DrawText(lable))
+
+        # label on the bottom
             for i in range(self.fiveChess.size):
                 line = rendering.Line((space+i*width,space),(space+i*width,screen_height - space))
                 line.set_color(1, 1, 1)
                 self.viewer.add_geom(line)
-                
+
+                lable = pyglet.text.Label(str(i),
+                          font_name='Courier', font_size=11,
+                          x=space+i*width, y=screen_height-space+20,
+                          anchor_x='center', anchor_y='center',
+                          color=(255, 255, 255, 255))   
+                self.viewer.add_geom(DrawText(lable))
+
+                lable = pyglet.text.Label(str(chr(ord('A')+i)),
+                          font_name='Courier', font_size=11,
+                          x=space+i*width, y=space -20,
+                          anchor_x='center', anchor_y='center',
+                          color=(255, 255, 255, 255))
+                self.viewer.add_geom(DrawText(lable))
+
             #棋子
             self.chess = []
             for x in range(self.fiveChess.size):
