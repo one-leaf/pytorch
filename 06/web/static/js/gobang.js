@@ -36,6 +36,7 @@ var cookieHandle = {
 $(function () {
     fiveChess.init();
 });
+
 var fiveChess = {
     NO_CHESS: 0,
     BLACK_CHESS: -1,
@@ -366,6 +367,42 @@ var fiveChess = {
     },
     //AI下棋
     AImoveChess: function () {
+        this.isPlayerTurn = false;
+        $.getJSON('/step', {
+            actions=[]
+        }, function (data) {
+            action = data.action;
+
+            var maxWeight = 0, i, j, tem;
+            for (i = 14; i >= 0; i--) {
+                for (j = 14; j >= 0; j--) {
+                    if (this.chessArr[i][j] !== this.NO_CHESS) {
+                        continue;
+                    }
+                    tem = this.computeWeight(i, j);
+                    if (tem > maxWeight) {
+                        maxWeight = tem;
+                    }
+                }
+            }
+
+            var maxX, maxY = action;
+            this.playChess(maxX, maxY, this.AIPlayer);
+            this.AILastChess = [maxX, maxY];
+            if ((maxWeight >= 100000 && maxWeight < 250000) || (maxWeight >= 500000)) {
+                this.showResult(false);
+                this.gameOver();
+            }
+            else {
+                this.isPlayerTurn = true;
+            }
+
+            $("#result_info").html("胜率：" + data.info * 100  + "%");
+        })
+
+    },
+
+    AImoveChessLocal: function () {
         this.isPlayerTurn = false;
         var maxX = 0,
             maxY = 0,
