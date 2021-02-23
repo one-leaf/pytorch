@@ -495,7 +495,7 @@ class FiveChessEnv(gym.Env):
                     self.viewer.add_geom(c)
 
             #最后落子标记
-            self.laststep_lable = pyglet.text.Label(str(chr(ord('X'))),
+            self.laststep_lable = pyglet.text.Label(str(chr(ord('+'))),
                           font_name='Courier', font_size=11,
                           x=-1*space, y=-1*space,
                           anchor_x='center', anchor_y='center',
