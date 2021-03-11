@@ -94,31 +94,41 @@ class FiveChessPlay():
         # 创建使用策略价值网络来指导树搜索和评估叶节点的MCTS玩家
         mcts_player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout, is_selfplay=1)
 
+        files = os.listdir(model_dir)
+        his_best_model_files=[]
+        for file in files:
+            if file.startswith("best_model_15_5.pth."):
+                his_best_model_files.append(file)
+        curr_best_model_file = random.choice(his_best_model_files)
+        curr_best_policy_value_net = PolicyValueNet(size, model_file=curr_best_model_file)
+        his_best_mcts_player = MCTSPlayer(curr_best_policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout)
+
         # 有一定几率和纯MCTS对抗
         # r = random.random()
         # if r>0.5:
-        pure_mcts_player = MCTSPurePlayer(c_puct=self.c_puct, n_playout=self.pure_mcts_playout_num)
+        # pure_mcts_player = MCTSPurePlayer(c_puct=self.c_puct, n_playout=self.pure_mcts_playout_num)
         # print("AI VS MCTS, pure_mcts_playout_num:", self.pure_mcts_playout_num)
         # else:
         #     pure_mcts_player = None
 
         # 开始下棋
-        winner, play_data = agent.start_self_play(mcts_player, pure_mcts_player, temp=self.temp)
+        winner, play_data = agent.start_self_play(mcts_player, his_best_mcts_player, temp=self.temp)
 
-        if not pure_mcts_player is None:
+        if not his_best_mcts_player is None:
             if winner == mcts_player.player:
                 self.mcts_win[0] = self.mcts_win[0]+1
-                self.pure_mcts_playout_num=min(2000, self.pure_mcts_playout_num+100)
+                # self.pure_mcts_playout_num=min(2000, self.pure_mcts_playout_num+100)
                 print("Curr Model Win!","win:", self.mcts_win[0],"lost",self.mcts_win[1],"playout_num",self.pure_mcts_playout_num)
-            if winner == pure_mcts_player.player:
+            if winner == his_best_mcts_player.player:
                 self.mcts_win[1] = self.mcts_win[1]+1
                 self.pure_mcts_playout_num=max(500, self.pure_mcts_playout_num-100)
                 print("Curr Model Lost!","win:", self.mcts_win[0],"lost",self.mcts_win[1],"playout_num",self.pure_mcts_playout_num)
         agent.game.print()
 
         play_data = list(play_data)[:]     
+
         # 只保存输掉的训练数据
-        if winner == pure_mcts_player.player:
+        if winner == his_best_mcts_player.player:
             # 采用翻转棋盘来增加样本数据集
             play_data = self.get_equi_data(play_data)
             logging.info("Self Play end. length:%s saving ..." % len(play_data))
@@ -158,12 +168,12 @@ class FiveChessPlay():
         agent.game.print()
         
         # 只保存输掉的训练数据
-        # if winner == best_mcts_player.player:
-        play_data = list(play_data)[:]
-        play_data = self.get_equi_data(play_data)
-        logging.info("Eval Play end. length:%s saving ..." % len(play_data))
-        for obj in play_data:
-            self.save_wait_data(obj)
+        if winner == best_mcts_player.player:
+            play_data = list(play_data)[:]
+            play_data = self.get_equi_data(play_data)
+            logging.info("Eval Play end. length:%s saving ..." % len(play_data))
+            for obj in play_data:
+                self.save_wait_data(obj)
 
     def run(self):
         """启动训练"""
@@ -171,7 +181,9 @@ class FiveChessPlay():
             # 先训练样本10000局
             for i in range(10000):
                 logging.info("TRAIN Batch:{} starting, Size:{}, n_in_row:{}".format(i, size, n_in_row))
-                if random.random()>self.pure_mcts_playout_num*0.95/2000:
+
+                # 有 0.2 的概率中间插入一局和历史最佳模型对战样本
+                if random.random()>0.8:
                     state, mcts_porb, winner = self.collect_selfplay_data()
                     if i == 0: 
                         print("-"*50,"state","-"*50)
@@ -183,7 +195,7 @@ class FiveChessPlay():
 
                 self.policy_evaluate()
 
-                rate_of_winning = 0.65
+                rate_of_winning = 0.6
                 if (i+1)%self.policy_evaluate_size == 0 or self.best_win[1]>(self.policy_evaluate_size*(1-rate_of_winning)):
                     # if self.mcts_win[0]>self.mcts_win[1]:                               
                     #     self.pure_mcts_playout_num=self.pure_mcts_playout_num+50
@@ -191,7 +203,7 @@ class FiveChessPlay():
                     #     self.pure_mcts_playout_num=self.pure_mcts_playout_num-50
                     # self.mcts_win=[0, 0]
 
-                    # 如果当前模型的胜率大于等于0.7,保留为最佳模型
+                    # 如果当前模型的胜率大于等于0.6,保留为最佳模型
                     v = 1.0*self.best_win[0]/self.policy_evaluate_size
                     if  v >= rate_of_winning:
                         t = os.path.getctime(best_model_file)
