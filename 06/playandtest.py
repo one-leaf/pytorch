@@ -92,7 +92,7 @@ class FiveChessPlay():
         logging.info("TRAIN Self Play starting ...")
         agent = Agent(size, n_in_row, is_shown=0)
         # 创建使用策略价值网络来指导树搜索和评估叶节点的MCTS玩家
-        mcts_player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout, is_selfplay=1)
+        mcts_player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout, is_selfplay=0)
 
         files = os.listdir(model_dir)
         his_best_model_files=[]
@@ -101,10 +101,13 @@ class FiveChessPlay():
                 his_best_model_files.append(file)
         curr_best_model_file = random.choice(his_best_model_files)
         curr_best_model_file = os.path.join(model_dir, curr_best_model_file)
-        
+
         print("loading", curr_best_model_file)
         curr_best_policy_value_net = PolicyValueNet(size, model_file=curr_best_model_file)
-        his_best_mcts_player = MCTSPlayer(curr_best_policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout)
+        his_best_mcts_player = MCTSPlayer(curr_best_policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout, is_selfplay=0)
+
+        his_best_mcts_player.mcts._limit_max_var=False
+        mcts_player.mcts._limit_max_var=False
 
         # 有一定几率和纯MCTS对抗
         # r = random.random()
