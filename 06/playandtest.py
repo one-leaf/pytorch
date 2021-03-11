@@ -100,6 +100,7 @@ class FiveChessPlay():
             if file.startswith("best_model_15_5.pth."):
                 his_best_model_files.append(file)
         curr_best_model_file = random.choice(his_best_model_files)
+        print("loading", curr_best_model_file)
         curr_best_policy_value_net = PolicyValueNet(size, model_file=curr_best_model_file)
         his_best_mcts_player = MCTSPlayer(curr_best_policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout)
 
