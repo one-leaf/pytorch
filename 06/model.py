@@ -9,6 +9,7 @@ import random
 from threading import Lock
 from collections import OrderedDict
 import json
+import hashlib
 class Cache(OrderedDict):
     def __init__(self, maxsize=128, *args, **kwds):
         self.maxsize = maxsize
@@ -131,8 +132,13 @@ class PolicyValueNet():
             try:
                 import redis
                 pool = redis.ConnectionPool(host='192.168.1.10', port=6379, decode_responses=True)
-                self.cache = redis.Redis(connection_pool=pool)                
-                self.cache_key = str(hash(os.stat(model_file).st_mtime))
+                self.cache = redis.Redis(connection_pool=pool)     
+
+                md5obj = hashlib.md5()
+                with open(model_file,'rb') as f:
+                    md5obj.update(f.read())
+                self.cache_key = md5obj.hexdigest()
+                
                 self.use_redis = True
                 if model_file.find("best")>0:                    
                     self.cache_ex = 60 * 60 * 24
