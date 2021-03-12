@@ -104,7 +104,8 @@ class Net(nn.Module):
 
 
 class PolicyValueNet():
-    def __init__(self, size, model_file=None, device=None, l2_const=1e-4):
+    # 默认 L2 = 1e-4 ，降低到 1e-5
+    def __init__(self, size, model_file=None, device=None, l2_const=1e-5):
         print("*"*100)
         self.size = size
         if device is None:
