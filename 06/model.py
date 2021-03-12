@@ -138,7 +138,7 @@ class PolicyValueNet():
                 with open(model_file,'rb') as f:
                     md5obj.update(f.read())
                 self.cache_key = md5obj.hexdigest()
-                
+
                 self.use_redis = True
                 if model_file.find("best")>0:                    
                     self.cache_ex = 60 * 60 * 24
@@ -198,11 +198,14 @@ class PolicyValueNet():
         #     return self.cache[key]
         cache_key = ""
         if self.use_redis:
-            key = game.get_key()
-            cache_key = self.cache_key+":"+ str(key)
-            value = self.cache.get(cache_key)
-            if value:
-                return json.loads(value)
+            try:
+                key = game.get_key()
+                cache_key = self.cache_key+":"+ str(key)
+                value = self.cache.get(cache_key)
+                if value:
+                    return json.loads(value)
+            except Exception as e:
+                print(e)
 
         legal_positions = game.actions_to_positions(game.availables)
         current_state = game.current_state().reshape(1, -1, self.size, self.size)
