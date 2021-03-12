@@ -209,7 +209,7 @@ class PolicyValueNet():
         # 归一化
         act_probs_sum = sum([act_probs[i] for i in legal_positions])
         if act_probs_sum != 0:
-            act_probs = [(i, act_probs[i]/act_probs_sum) for i in legal_positions]
+            act_probs = [(i, float(act_probs[i]/act_probs_sum)) for i in legal_positions]
         else:
             act_probs = [(i, 1./len(legal_positions)) for i in legal_positions]
 
