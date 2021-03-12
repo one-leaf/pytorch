@@ -132,7 +132,7 @@ class PolicyValueNet():
                 import redis
                 pool = redis.ConnectionPool(host='192.168.1.10', port=6379, decode_responses=True)
                 self.cache = redis.Redis(connection_pool=pool)                
-                self.cache_key = hash(os.stat(model_file).st_mtime)
+                self.cache_key = str(hash(os.stat(model_file).st_mtime))
                 self.use_redis = True
                 if model_file.find("best")>0:                    
                     self.cache_ex = 60 * 60 * 24
@@ -193,7 +193,7 @@ class PolicyValueNet():
         cache_key = ""
         if self.use_redis:
             key = game.get_key()
-            cache_key = self.cache_key+"/"+key
+            cache_key = self.cache_key+":"+ str(key)
             value = self.cache.get(cache_key)
             if value:
                 return json.loads(value)
