@@ -215,7 +215,7 @@ class PolicyValueNet():
 
         # act_probs = [(game.availables[i], act_probs[i]) for i in range(len(game.availables))]
         # act_probs = list(zip(actions, act_probs[legal_positions]))
-        value = value[0,0]
+        value = float(value[0,0])
 
         # if len(game.actions)<=max_cache_step:
         # self.cache[key] = (act_probs, value) 
