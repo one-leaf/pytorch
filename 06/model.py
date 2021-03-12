@@ -8,7 +8,7 @@ import os
 import random
 from threading import Lock
 from collections import OrderedDict
-
+import json
 class Cache(OrderedDict):
     def __init__(self, maxsize=128, *args, **kwds):
         self.maxsize = maxsize
@@ -126,6 +126,22 @@ class PolicyValueNet():
             net_sd = torch.load(model_file, map_location=self.device)
             self.policy_value_net.load_state_dict(net_sd)
 
+        self.use_redis=False
+        if model_file:
+            try:
+                import redis
+                pool = redis.ConnectionPool(host='192.168.1.10', port=6379, decode_responses=True)
+                self.cache = redis.Redis(connection_pool=pool)                
+                self.cache_key = hash(os.stat(model_file).st_mtime)
+                self.use_redis = True
+                if model_file.find("best")>0:                    
+                    self.cache_ex = 60 * 60 * 24
+                else:
+                    self.cache_ex = 60 * 60
+                print("use redis")
+            except:
+                print("Can't use redis")
+
     # 设置学习率
     def set_learning_rate(self, lr):
         for param_group in self.optimizer.param_groups:
@@ -174,6 +190,13 @@ class PolicyValueNet():
         # key = game.get_key()
         # if key in self.cache:
         #     return self.cache[key]
+        cache_key = ""
+        if self.use_redis:
+            key = game.get_key()
+            cache_key = self.cache_key+"/"+key
+            value = self.cache.get(cache_key)
+            if value:
+                return json.loads(value)
 
         legal_positions = game.actions_to_positions(game.availables)
         current_state = game.current_state().reshape(1, -1, self.size, self.size)
@@ -196,6 +219,11 @@ class PolicyValueNet():
 
         # if len(game.actions)<=max_cache_step:
         # self.cache[key] = (act_probs, value) 
+
+        # 如果使用缓存，则缓存结果1小时
+        if self.use_redis:
+            self.cache.set(cache_key, json.dumps((act_probs, value)), ex=self.cache_ex)
+
         return act_probs, value
 
     def train_step(self, state_batch, mcts_probs, winner_batch, lr):
