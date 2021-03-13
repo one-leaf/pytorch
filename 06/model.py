@@ -231,7 +231,10 @@ class PolicyValueNet():
 
         # 如果使用缓存，则缓存结果1小时
         if self.use_redis:
-            self.cache.set(cache_key, json.dumps((act_probs, value)), ex=self.cache_ex)
+            try:
+                self.cache.set(cache_key, json.dumps((act_probs, value)), ex=self.cache_ex)
+            except Exception as e:
+                print(e)    
 
         return act_probs, value
 
