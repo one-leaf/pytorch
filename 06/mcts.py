@@ -313,10 +313,10 @@ class MCTSPlayer(object):
                     # 如果是下了几步后全部取最大值
 
                     # 如果得分不足，再循环一次，找到最佳点
-                    if abs(act_qs[idx])<0.5:
-                        acts, act_probs, act_qs = self.mcts.get_action_probs(state, temp)
-                        move_probs[acts] = act_probs
-                        idx = np.argmax(act_probs) 
+                    # if abs(act_qs[idx])<0.5:
+                    #     acts, act_probs, act_qs = self.mcts.get_action_probs(state, temp)
+                    #     move_probs[acts] = act_probs
+                    #     idx = np.argmax(act_probs) 
                     
                     # if state.step_count>=state.n_in_row*2:
 
@@ -325,7 +325,7 @@ class MCTSPlayer(object):
                     # 如果标准差低于0.02，可以随机
                     # if act_qs[idx]>0 and state.step_count<state.n_in_row:
                     # print(np.std(act_probs))              
-                    if np.std(act_probs)<0.02: 
+                    if np.std(act_probs)<0.02 or state.step_count<state.n_in_row: 
                         p= 0.9                 
                         dirichlet = np.random.dirichlet(0.03 * np.ones(len(act_probs)))
                         act = np.random.choice(acts, p=p * act_probs + (1.0-p) * dirichlet)
