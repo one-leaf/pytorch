@@ -315,11 +315,11 @@ class MCTSPlayer(object):
                     act = acts[idx]
                     action = state.position_to_action(act)
                     # 如果盘面看好，可以随机
-                    if act_qs[idx]>0 and state.step_count<state.n_in_row: 
-                        p= 0.75                
-                        dirichlet = np.random.dirichlet(0.03 * np.ones(len(act_probs)))
-                        act = np.random.choice(acts, p=p * act_probs + (1-p) * dirichlet)
-                        action = state.position_to_action(act)               
+                    # if act_qs[idx]>0 and state.step_count<state.n_in_row: 
+                    p= 0.75 + 0.25 * (state.step_count / (state.size*state.size))                 
+                    dirichlet = np.random.dirichlet(0.03 * np.ones(len(act_probs)))
+                    act = np.random.choice(acts, p=p * act_probs + (1-p) * dirichlet)
+                    action = state.position_to_action(act)               
         
                 if act!=acts[idx]:
                     print("    random:", state.position_to_action(acts[idx]), act_probs[idx], act_qs[idx], \
