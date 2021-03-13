@@ -78,7 +78,7 @@ class MCTS():
             q, p= 0,0
             if (s, act) in self.Qsa: q = self.Qsa[(s, act)]
             if s in self.Ps: p = self.Ps[s][act]
-            info.append([action,visit, round(q,2), round(p,2)]) 
+            info.append([action, visit, round(q,2), round(p,2)]) 
         print(state.step_count+1, self.lable, s ,"n_playout:", n, "depth:" ,self.max_depth, info, "var:", round(var,1))
             #, \   "first:", state.positions_to_actions(list(self._first_act)[-3:]))
 
@@ -316,13 +316,13 @@ class MCTSPlayer(object):
                     action = state.position_to_action(act)
                     # 如果盘面看好，可以随机
                     # if act_qs[idx]>0 and state.step_count<state.n_in_row:
-                    if np.var(act_qs[idx])<500: 
+                    if np.var(act_qs[idx])<200: 
                         p= 0.75                 
                         dirichlet = np.random.dirichlet(0.03 * np.ones(len(act_probs)))
                         act = np.random.choice(acts, p=p * act_probs + (1.0-p) * dirichlet)
                         action = state.position_to_action(act)
-                    else:
-                        print(np.var(act_qs[idx]))              
+                    # else:
+                    #     print(np.var(act_qs[idx]))              
         
                 if act!=acts[idx]:
                     print("    random:", state.position_to_action(acts[idx]), act_probs[idx], act_qs[idx], \
