@@ -316,13 +316,12 @@ class MCTSPlayer(object):
                     action = state.position_to_action(act)
                     # 如果方差低于100，可以随机
                     # if act_qs[idx]>0 and state.step_count<state.n_in_row:
-                    if np.var(act_probs)<0.01: 
+                    print(np.std(act_probs))              
+                    if np.std(act_probs)<0.01: 
                         p= 0.9                 
                         dirichlet = np.random.dirichlet(0.03 * np.ones(len(act_probs)))
                         act = np.random.choice(acts, p=p * act_probs + (1.0-p) * dirichlet)
                         action = state.position_to_action(act)
-                    # else:
-                    #     print(np.var(act_qs[idx]))              
         
                 if act!=acts[idx]:
                     print("    random:", state.position_to_action(acts[idx]), act_probs[idx], act_qs[idx], \
