@@ -140,10 +140,6 @@ class PolicyValueNet():
                 self.cache_key = md5obj.hexdigest()
 
                 self.use_redis = True
-                if model_file.find("best")>0:                    
-                    self.cache_ex = 60 * 60 * 24
-                else:
-                    self.cache_ex = 60 * 60
                 print("use redis")
             except:
                 print("Can't use redis")
@@ -203,6 +199,8 @@ class PolicyValueNet():
                 cache_key = self.cache_key+":"+ str(key)
                 value = self.cache.get(cache_key)
                 if value:
+                    # 如果当前有缓存，则将这个key过期时间继续延长1小时
+                    self.cache.expire(cache_key, 60*60)
                     return json.loads(value)
             except Exception as e:
                 print(e)
@@ -232,7 +230,7 @@ class PolicyValueNet():
         # 如果使用缓存，则缓存结果1小时
         if self.use_redis:
             try:
-                self.cache.set(cache_key, json.dumps((act_probs, value)), ex=self.cache_ex)
+                self.cache.set(cache_key, json.dumps((act_probs, value)), ex=60*60)
             except Exception as e:
                 print(e)    
 
