@@ -93,7 +93,7 @@ var fiveChess = {
             }
         });
         this.resetChessBoard();
-        $("#result_info").html("胜率：" + (this.winGames * 100 / this.totalGames | 0) + "%");
+        $("#result_info").html("AI胜率：0%");
     },
     //重置棋盘
     resetChessBoard: function () {
@@ -245,7 +245,7 @@ var fiveChess = {
         this.isGameStart = false;
         $(".operating-panel a").removeClass("disable");
         $("#replay_btn").html("开&nbsp;&nbsp;&nbsp;始");
-        $("#result_info").html("胜率：" + (this.winGames * 100 / this.totalGames | 0) + "%");
+        $("#result_info").html("AI胜率：0%");
     },
 
     //下棋 i行，j列，color颜色
@@ -367,43 +367,41 @@ var fiveChess = {
     },
     //AI下棋
     AImoveChess: function () {
-        this.isPlayerTurn = false;
-
         $.ajax({
             url: '/step',
             data: { "steps": [] },
             dataType: 'json',
             context: this,
-            complete: function (data) {
-                var _this = $(this);
-                console.log(_this);
+            success: function (data, textStatus) {  
+                this.isPlayerTurn = false;
 
                 var action = data.action;
                 var maxWeight = 0, i, j, tem;
                 for (i = 14; i >= 0; i--) {
                     for (j = 14; j >= 0; j--) {
-                        if (_this.chessArr[i][j] !== _this.NO_CHESS) {
+                        if (this.chessArr[i][j] !== this.NO_CHESS) {
                             continue;
                         }
-                        tem = _this.computeWeight(i, j);
+                        tem = this.computeWeight(i, j);
                         if (tem > maxWeight) {
                             maxWeight = tem;
                         }
                     }
                 }
 
-                var maxX, maxY = action;
-                _this.playChess(maxX, maxY, _this.AIPlayer);
-                _this.AILastChess = [maxX, maxY];
+                var maxX = action[0]
+                var maxY = action[1]
+                this.playChess(maxX, maxY, this.AIPlayer);
+                this.AILastChess = [maxX, maxY];
                 if ((maxWeight >= 100000 && maxWeight < 250000) || (maxWeight >= 500000)) {
-                    _this.showResult(false);
-                    _this.gameOver();
+                    this.showResult(false);
+                    this.gameOver();
                 }
                 else {
-                    _this.isPlayerTurn = true;
+                    this.isPlayerTurn = true;
                 }
 
-                $("#result_info").html("胜率：" + data.info * 100 + "%");
+                $("#result_info").html("AI胜率：" + (data.info*100).toFixed(2) + "%");
             }
         });
     },

@@ -13,7 +13,7 @@ def step():
     act = (random.randint(0,14),random.randint(0,14))
     info = random.random()
     result={"action":act,"info":info}      # action：下一步的动作， info：当前AI胜率
-    return jsonify(result=result)
+    return jsonify(result)
 
 if __name__ =="__main__":
     app.run(debug=True, port=8080)
