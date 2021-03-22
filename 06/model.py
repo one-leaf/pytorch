@@ -127,22 +127,22 @@ class PolicyValueNet():
             net_sd = torch.load(model_file, map_location=self.device)
             self.policy_value_net.load_state_dict(net_sd)
 
-        self.use_redis=False
-        if model_file:
-            try:
-                import redis
-                pool = redis.ConnectionPool(host='192.168.1.10', port=6379, decode_responses=True)
-                self.cache = redis.Redis(connection_pool=pool)     
+        # self.use_redis=False
+        # if model_file:
+        #     try:
+        #         import redis
+        #         pool = redis.ConnectionPool(host='192.168.1.10', port=6379, decode_responses=True)
+        #         self.cache = redis.Redis(connection_pool=pool)     
 
-                md5obj = hashlib.md5()
-                with open(model_file,'rb') as f:
-                    md5obj.update(f.read())
-                self.cache_key = md5obj.hexdigest()
+        #         md5obj = hashlib.md5()
+        #         with open(model_file,'rb') as f:
+        #             md5obj.update(f.read())
+        #         self.cache_key = md5obj.hexdigest()
 
-                self.use_redis = True
-                print("use redis")
-            except:
-                print("Can't use redis")
+        #         self.use_redis = True
+        #         print("use redis")
+        #     except:
+        #         print("Can't use redis")
 
     # 设置学习率
     def set_learning_rate(self, lr):
@@ -192,18 +192,19 @@ class PolicyValueNet():
         # key = game.get_key()
         # if key in self.cache:
         #     return self.cache[key]
-        cache_key = ""
-        if self.use_redis:
-            try:
-                key = game.get_key()
-                cache_key = self.cache_key+":"+ str(key)
-                value = self.cache.get(cache_key)
-                if value:
-                    # 如果当前有缓存，则将这个key过期时间继续延长1小时
-                    self.cache.expire(cache_key, 60*60)
-                    return json.loads(value)
-            except Exception as e:
-                print(e)
+
+        # cache_key = ""
+        # if self.use_redis:
+        #     try:
+        #         key = game.get_key()
+        #         cache_key = self.cache_key+":"+ str(key)
+        #         value = self.cache.get(cache_key)
+        #         if value:
+        #             # 如果当前有缓存，则将这个key过期时间继续延长1小时
+        #             self.cache.expire(cache_key, 60*60)
+        #             return json.loads(value)
+        #     except Exception as e:
+        #         print(e)
 
         legal_positions = game.actions_to_positions(game.availables)
         current_state = game.current_state().reshape(1, -1, self.size, self.size)
@@ -228,11 +229,11 @@ class PolicyValueNet():
         # self.cache[key] = (act_probs, value) 
 
         # 如果使用缓存，则缓存结果1小时
-        if self.use_redis:
-            try:
-                self.cache.set(cache_key, json.dumps((act_probs, value)), ex=60*60)
-            except Exception as e:
-                print(e)    
+        # if self.use_redis:
+        #     try:
+        #         self.cache.set(cache_key, json.dumps((act_probs, value)), ex=60*60)
+        #     except Exception as e:
+        #         print(e)    
 
         return act_probs, value
 
