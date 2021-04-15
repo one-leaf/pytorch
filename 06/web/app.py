@@ -1,5 +1,11 @@
 from flask import Flask, render_template, jsonify, request
 import random
+import zmq
+import os
+import hashlib
+import json
+
+curr_dir = os.path.dirname(__file__)
 
 app = Flask(__name__, static_url_path='')
 
@@ -7,12 +13,45 @@ app = Flask(__name__, static_url_path='')
 def index():
     return render_template('index.html')
 
-@app.route('/step')
+@app.route('/step', methods=['POST'])
 def step():
-    steps = request.args.get('steps', [])
-    act = (random.randint(0,14),random.randint(0,14))
-    info = random.random()
-    result={"action":act,"info":info}      # action：下一步的动作， info：当前AI胜率
+    actions = request.json['actions']
+    actions_str = json.dumps(actions)
+    # 检查是否存在Cache，如果存在，直接返回
+    hl = hashlib.md5()
+    hl.update(actions_str.encode("UTF-8"))
+    md5 = hl.hexdigest()
+    filename = os.path.join(curr_dir, "cache", md5[:2], md5)
+    if os.path.exists(filename):
+        return open(filename,encoding="UTF-8").read()
+
+    # 采用zmq连接消息处理队列
+    context = zmq.Context()
+    socket = context.socket(zmq.REQ)
+    socket.connect("tcp://192.168.1.10:5555")
+
+    # 设置超时时间
+    poll = zmq.Poller()
+    poll.register(socket, zmq.POLLIN)
+    socket.send_string(actions_str)
+
+    socks = dict(poll.poll(300000))
+    if socket in socks and socks.get(socket) == zmq.POLLIN:
+        response = socket.recv()
+        response = response.decode('utf-8')
+        socket.close()
+        context.term()
+        # 保存到Cache目录
+        save_path = os.path.dirname(filename)
+        if not os.path.exists(save_path):
+            os.makedirs(save_path)
+        if response.find("error")<0: 
+            with open(filename, "w") as f:
+                f.write(response)
+    else:
+        response = "{'action':[]}"
+
+    result=json.loads(response)
     return jsonify(result)
 
 if __name__ =="__main__":

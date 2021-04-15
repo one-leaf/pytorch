@@ -52,6 +52,7 @@ var fiveChess = {
     isGameOver: false, //游戏结束
     playerLastChess: [], //玩家最后下子位置
     AILastChess: [], //AI最后下子位置
+    actions: [], //所有的动作
 
     init: function () {
         this.chessBoardHtml = $("div.chessboard").html();
@@ -109,6 +110,8 @@ var fiveChess = {
                 this.chessArr[i][j] = this.NO_CHESS;
             }
         }
+        //将步骤置空
+        this.actions=[]
         //player下棋事件
         var _fiveChess = this;
         $("div.chessboard div").click(function () {
@@ -258,6 +261,7 @@ var fiveChess = {
         else {
             $("div.chessboard div:eq(" + (i * 15 + j) + ")").addClass(color);
         }
+        this.actions.push([i,j]);
     },
     //玩家是否取胜
     playerWinOrNot: function (i, j) {
@@ -367,13 +371,14 @@ var fiveChess = {
     },
     //AI下棋
     AImoveChess: function () {
+        this.isPlayerTurn = false;
         $.ajax({
+            type: "POST",
             url: '/step',
-            data: { "steps": [] },
-            dataType: 'json',
+            data: JSON.stringify({actions: this.actions}, null, '\t'),
+            contentType: 'application/json;charset=UTF-8',
             context: this,
             success: function (data, textStatus) {  
-                this.isPlayerTurn = false;
 
                 var action = data.action;
                 var maxWeight = 0, i, j, tem;
@@ -393,6 +398,7 @@ var fiveChess = {
                 var maxY = action[1]
                 this.playChess(maxX, maxY, this.AIPlayer);
                 this.AILastChess = [maxX, maxY];
+
                 if ((maxWeight >= 100000 && maxWeight < 250000) || (maxWeight >= 500000)) {
                     this.showResult(false);
                     this.gameOver();

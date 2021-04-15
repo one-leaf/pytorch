@@ -318,6 +318,20 @@ class FiveChess(object):
 
         return False, -1   
 
+    # 不检查直接下
+    def step_nocheck(self, action):
+        self.availables.remove(action)
+        self.actions.append(action)
+        self.step_count +=1
+
+        #棋子
+        color = self.colors[self.current_player]
+        self.chessboard[action[0]][action[1]] = color
+
+        #这一步完成
+        self.current_player = self.players[0] if self.current_player==self.players[1] else self.players[1]
+
+
     #action 包括坐标和  例如：[1,3] 表示： 坐标（1,3）
     #输出 下一个状态，动作价值，是否结束，赢的用户
     def step(self, action):
