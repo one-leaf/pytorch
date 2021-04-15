@@ -18,7 +18,7 @@ n_playout = 300
 
 def main(debug=False):
     curr_dir = os.path.dirname(os.path.abspath(__file__))
-    model_file = os.path.join(curr_dir, "../model/model_15_5.pth")
+    model_file = os.path.join(curr_dir, "../model/best_model_15_5.pth")
     policy_value_net = PolicyValueNet(size, model_file=model_file)
 
     context = zmq.Context()
