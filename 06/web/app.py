@@ -23,12 +23,14 @@ def index():
 def step():
     actions = request.json['actions']
     actions_str = json.dumps(actions)
+    print("POST", actions_str)
     # 检查是否存在Cache，如果存在，直接返回
     hl = hashlib.md5()
     hl.update(actions_str.encode("UTF-8"))
     md5 = hl.hexdigest()
     filename = os.path.join(curr_dir, "cache", md5[:2], md5)
     if os.path.exists(filename):
+        print("Cache return")
         return open(filename,encoding="UTF-8").read()
 
     # 设置超时时间
