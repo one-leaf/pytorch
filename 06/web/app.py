@@ -11,6 +11,7 @@ HOST = '192.168.1.10'
 PORT = 5555
 TASK_SOCKET = zmq.Context().socket(zmq.REQ)
 TASK_SOCKET.connect('tcp://{}:{}'.format(HOST, PORT))
+print("connected to zmq server")
 
 app = Flask(__name__, static_url_path='')
 
@@ -33,12 +34,15 @@ def step():
     # 设置超时时间
     # poll = zmq.Poller()
     # poll.register(TASK_SOCKET, zmq.POLLIN)
+    print("send to zmq:",actions_str)
     TASK_SOCKET.send_string(actions_str)
+    print("witting from zmq")
 
     # socks = dict(poll.poll(600000))
     # if TASK_SOCKET in socks and socks.get(TASK_SOCKET) == zmq.POLLIN:
     response = TASK_SOCKET.recv()
     response = response.decode('utf-8')
+    print("recv from zmq:", response)
     # 保存到Cache目录
     save_path = os.path.dirname(filename)
     if not os.path.exists(save_path):
