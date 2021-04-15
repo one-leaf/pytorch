@@ -13,8 +13,8 @@ from game import FiveChess
 
 size = 15
 n_in_row = 5
-c_puct = 5
-n_playout = 300
+c_puct = 4
+n_playout = 500
 
 def main(debug=False):
     curr_dir = os.path.dirname(os.path.abspath(__file__))
