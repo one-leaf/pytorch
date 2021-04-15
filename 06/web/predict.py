@@ -5,7 +5,10 @@ import traceback
 import os
 
 import sys 
-sys.path.append("..")
+
+curr_dir = os.path.dirname(os.path.abspath(__file__))
+p_dir = os.path.join(curr_dir,"../")
+sys.path.append(p_dir)
 
 from model import PolicyValueNet  
 from mcts import  MCTSPlayer
@@ -17,7 +20,7 @@ c_puct = 4
 n_playout = 500
 
 def main(debug=False):
-    curr_dir = os.path.dirname(os.path.abspath(__file__))
+    
     model_file = os.path.join(curr_dir, "../model/best_model_15_5.pth")
     policy_value_net = PolicyValueNet(size, model_file=model_file)
 
