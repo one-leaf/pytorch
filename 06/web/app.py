@@ -39,7 +39,7 @@ def step():
     # poll.register(TASK_SOCKET, zmq.POLLIN)
     print("send to zmq:",actions_str)
     TASK_SOCKET.send_string(actions_str)
-    print("witting from zmq")
+    print("waitting for zmq")
 
     # socks = dict(poll.poll(600000))
     # if TASK_SOCKET in socks and socks.get(TASK_SOCKET) == zmq.POLLIN:
