@@ -7,6 +7,11 @@ import json
 
 curr_dir = os.path.dirname(__file__)
 
+HOST = '192.168.1.10'
+PORT = 5555
+TASK_SOCKET = zmq.Context().socket(zmq.REQ)
+TASK_SOCKET.connect('tcp://{}:{}'.format(HOST, PORT))
+
 app = Flask(__name__, static_url_path='')
 
 @app.route('/')
@@ -25,31 +30,24 @@ def step():
     if os.path.exists(filename):
         return open(filename,encoding="UTF-8").read()
 
-    # 采用zmq连接消息处理队列
-    context = zmq.Context()
-    socket = context.socket(zmq.REQ)
-    socket.connect("tcp://192.168.1.10:5555")
-
     # 设置超时时间
-    poll = zmq.Poller()
-    poll.register(socket, zmq.POLLIN)
-    socket.send_string(actions_str)
+    # poll = zmq.Poller()
+    # poll.register(TASK_SOCKET, zmq.POLLIN)
+    TASK_SOCKET.send_string(actions_str)
 
-    socks = dict(poll.poll(300000))
-    if socket in socks and socks.get(socket) == zmq.POLLIN:
-        response = socket.recv()
-        response = response.decode('utf-8')
-        socket.close()
-        context.term()
-        # 保存到Cache目录
-        save_path = os.path.dirname(filename)
-        if not os.path.exists(save_path):
-            os.makedirs(save_path)
-        if response.find("error")<0: 
-            with open(filename, "w") as f:
-                f.write(response)
-    else:
-        response = "{'action':[]}"
+    # socks = dict(poll.poll(600000))
+    # if TASK_SOCKET in socks and socks.get(TASK_SOCKET) == zmq.POLLIN:
+    response = TASK_SOCKET.recv()
+    response = response.decode('utf-8')
+    # 保存到Cache目录
+    save_path = os.path.dirname(filename)
+    if not os.path.exists(save_path):
+        os.makedirs(save_path)
+    if response.find("error")<0: 
+        with open(filename, "w") as f:
+            f.write(response)
+    # else:
+    #     response = "{'action':[]}"
 
     result=json.loads(response)
     return jsonify(result)
