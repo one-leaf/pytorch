@@ -407,7 +407,7 @@ var fiveChess = {
                     this.isPlayerTurn = true;
                 }
 
-                $("#result_info").html("AI胜率：" + (data.value*100).toFixed(2) + "%");
+                $("#result_info").html("AI胜率：" + (data.value*100) + "%");
             }
         });
     },
