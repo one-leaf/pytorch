@@ -31,7 +31,7 @@ def step():
     hl.update(actions_str.encode("UTF-8"))
     md5 = hl.hexdigest()
     filename = os.path.join(curr_dir, "cache", md5[:2], md5)
-    if os.path.exists(filename):
+    if os.path.exists(filename) and len(actions)>0:
         result = json.loads(open(filename,encoding="UTF-8").read())
         print("Cache return", result)
         return jsonify(result)
