@@ -1,3 +1,5 @@
+# gunicorn -w 4 --bind 0.0.0.0:8080 app:app
+
 from flask import Flask, render_template, jsonify, request
 import random
 import zmq
