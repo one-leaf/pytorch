@@ -293,9 +293,10 @@ class MCTSPlayer(object):
     def reset_player(self):
         self.mcts.reset()
 
-    def get_action(self, state, temp=0, return_prob=0):
+    def get_action(self, state, temp=0, return_prob=0, return_value=0):
         """计算下一步走子action"""
         move_probs = np.zeros(state.size * state.size)
+        value = 0
         if len(state.availables) > 0:  # 盘面可落子位置>0
             # 训练的时候 temp = 1
             acts, act_probs, act_qs = self.mcts.get_action_probs(state, temp)
@@ -322,6 +323,8 @@ class MCTSPlayer(object):
 
                     act = acts[idx]
                     action = state.position_to_action(act)
+                    value = act_qs[idx]
+                    
                     # 如果标准差低于0.02，可以随机
                     # if act_qs[idx]>0 and state.step_count<state.n_in_row:
                     # print(np.std(act_probs))              
@@ -341,6 +344,8 @@ class MCTSPlayer(object):
                 else: 
                     act = acts[idx]
                     action = state.position_to_action(act)
+                    value = act_qs[idx]
+
                     # 如果盘面看好，可以随机
                     # if act_qs[idx]>0 and state.step_count<state.n_in_row: 
                     #     act = np.random.choice(acts, p=act_probs)
@@ -348,9 +353,11 @@ class MCTSPlayer(object):
 
                 if act!=acts[idx]:
                     print("    random:", state.position_to_action(acts[idx]), act_probs[idx], act_qs[idx], \
-                        "==>", action, act_probs[acts.index(act)], act_qs[acts.index(act)])               
+                        "==>", action, act_probs[acts.index(act)], act_qs[acts.index(act)])  
             if return_prob:
                 return action, move_probs
+            elif return_value:
+                return action, value        
             else:
                 return action
         else:

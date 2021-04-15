@@ -40,9 +40,9 @@ def main(debug=False):
                 step=(act[0],act[1])
                 game.step_nocheck(step)
 
-            action = mcts_player.get_action(game)
+            action, value = mcts_player.get_action(game, return_value=1)
 
-            result = {"action":action}
+            result = {"action":action, "value": value}
 
             print(result)
 
