@@ -30,8 +30,9 @@ def step():
     md5 = hl.hexdigest()
     filename = os.path.join(curr_dir, "cache", md5[:2], md5)
     if os.path.exists(filename):
-        print("Cache return")
-        return open(filename,encoding="UTF-8").read()
+        result = json.loads(open(filename,encoding="UTF-8").read())
+        print("Cache return", result)
+        return jsonify(result)
 
     # 设置超时时间
     # poll = zmq.Poller()
