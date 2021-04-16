@@ -6,7 +6,7 @@ function gitpush()
     error_str1="fatal"
     error_str2="error"
 
-    # push
+    # pull
     while true
     do
         echo "***开始pull本地仓库***"
