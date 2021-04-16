@@ -94,6 +94,9 @@ class Dataset(torch.utils.data.Dataset):
             self.save_index() 
             if i>=3000: break       
         print("mv %s files to train"%i)
+        if i==0:
+            time.sleep(60)
+            raise "NEED SOME DATA TO TRAIN"
 
     def save(self, obj):
         with self._save_lock:
