@@ -96,7 +96,7 @@ class Dataset(torch.utils.data.Dataset):
         print("mv %s files to train"%i)
         if i==0:
             time.sleep(60)
-            raise "NEED SOME NEW DATA TO TRAIN"
+            raise Exception("NEED SOME NEW DATA TO TRAIN")
 
     def save(self, obj):
         with self._save_lock:
