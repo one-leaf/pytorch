@@ -82,8 +82,8 @@ class Dataset(torch.utils.data.Dataset):
 
     def copy_wait_file(self):
         movefiles=os.listdir(data_wait_dir)
-        # 等待一秒钟，防止有数据还在写入
-        time.sleep(2)
+        # 等待5秒钟，防止有数据还在写入
+        time.sleep(5)
         i = 0
         for i, fn in enumerate(movefiles):
             filename = "{}.pkl".format(self.index % self.max_keep_size,)
