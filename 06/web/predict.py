@@ -17,7 +17,7 @@ from game import FiveChess
 size = 15
 n_in_row = 5
 c_puct = 4
-n_playout = 500
+n_playout = 1000
 
 def main(debug=False):
     
