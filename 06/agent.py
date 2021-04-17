@@ -31,6 +31,12 @@ class Agent(object):
 
         states, mcts_probs, current_players = [], [], []
         _state_keys = []
+
+        # 先随机走1~3步，增加样本的复杂度
+        for i in range(random.randint(1,3)):
+            act = random.choice(self.game.availables)
+            self.game.step(act)
+
         for i in count():
             _state_keys.append(self.game.get_key())
 

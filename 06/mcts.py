@@ -306,7 +306,8 @@ class MCTSPlayer(object):
             if self._is_selfplay:  # 自我对抗
 
                 # 第一步棋为一手交换，随便下
-                if state.step_count==0: 
+                # 前4步有50%的几率随便下
+                if False:#state.step_count==0: 
                     # action = random.choice(state.first_availables)
                     action = random.choice(state.availables)
                     act =  state.action_to_position(action)
@@ -314,10 +315,10 @@ class MCTSPlayer(object):
                     # 如果是下了几步后全部取最大值
 
                     # 如果得分为负数，且不是死局，再循环一次，找到最佳点
-                    if act_qs[idx]<0 and act_qs[idx]>-0.8:
-                        acts, act_probs, act_qs = self.mcts.get_action_probs(state, temp)
-                        move_probs[acts] = act_probs
-                        idx = np.argmax(act_probs) 
+                    # if act_qs[idx]<0 and act_qs[idx]>-0.8:
+                    #     acts, act_probs, act_qs = self.mcts.get_action_probs(state, temp)
+                    #     move_probs[acts] = act_probs
+                    #     idx = np.argmax(act_probs) 
                     
                     # if state.step_count>=state.n_in_row*2:
 
