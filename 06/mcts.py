@@ -64,7 +64,7 @@ class MCTS():
                 var = np.var(visits)
                 if values[idx]>0 and self._limit_max_var and var>self._max_var: break
                 # 如果判定必输或必赢，直接结束
-                if (values[idx]==-1 or values[idx]==1) and var>self._max_var: break
+                if (values[idx]<=-0.99 or values[idx]>=0.99) and var>self._max_var: break
 
         act_visits = [(a, self.Nsa[(s, a)]) if (s, a) in self.Nsa else (a, 0) for a in available_acts]
         act_Qs = [(a, self.Qsa[(s, a)]) if (s, a) in self.Qsa else (a, 0) for a in available_acts]
