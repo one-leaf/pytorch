@@ -15,7 +15,7 @@ class MCTS():
         self._policy = policy_value_fn      # 概率估算函数
         self._c_puct = c_puct               # 参数
         self._n_playout = n_playout         # 做几次探索
-        self._max_var = 1000                # 达到最大方差后停止探索
+        self._max_var = 100                # 达到最大方差后停止探索
         self.lable = ""
         self._first_act = set()          # 优先考虑的走法,由于引入了防守奖励，所以不需要优先步骤
         self._limit_max_var = True       # 是否限制最大方差
@@ -63,6 +63,8 @@ class MCTS():
                 idx = np.argmax(visits)
                 var = np.var(visits)
                 if values[idx]>0 and self._limit_max_var and var>self._max_var: break
+                # 如果判定必输或必赢，直接结束
+                if (values[idx]==-1 or values[idx]==1) and var>self._max_var: break
 
         act_visits = [(a, self.Nsa[(s, a)]) if (s, a) in self.Nsa else (a, 0) for a in available_acts]
         act_Qs = [(a, self.Qsa[(s, a)]) if (s, a) in self.Qsa else (a, 0) for a in available_acts]
