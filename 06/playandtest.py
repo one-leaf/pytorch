@@ -113,7 +113,7 @@ class FiveChessPlay():
             if weights_max==weights_min:
                 his_best_model_weights[i] = 1./len(his_best_model_weights)
             else:
-                his_best_model_weights[i] = (his_best_model_weights[i]-weights_min)/(weights_max-weights_min)
+                his_best_model_weights[i] = 1.0*(his_best_model_weights[i]-weights_min)/(weights_max-weights_min)
 
         curr_best_model_file = random.choices(his_best_model_files,weights=his_best_model_weights)[0]
         print(self.best_model_files_win)
