@@ -198,8 +198,8 @@ class FiveChessPlay():
     def run(self):
         """启动训练"""
         try:
-            # 先训练样本10000局
-            for i in range(10000):
+            # 先训练样本100000局
+            for i in range(100000):
                 logging.info("TRAIN Batch:{} starting, Size:{}, n_in_row:{}".format(i, size, n_in_row))
 
                 # 有 0.2 的概率中间插入一局和历史最佳模型对战样本
