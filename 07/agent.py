@@ -42,7 +42,10 @@ class Agent(object):
         self.prev_fallpiece_board=None
 
     # 获取可用步骤, 保留一个旋转始终有用
+    # 将单人游戏变为双人博弈，一个正常下，一个只下走，
     def availables(self):
+        if self.steps%2==1: return [KEY_DOWN,]
+
         acts=[KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN, KEY_NONE]
         # 为了避免mcts偏好，随机打乱
         random.shuffle(acts)
@@ -84,8 +87,8 @@ class Agent(object):
             if not self.tetromino.validposition(self.board,self.fallpiece):
                 self.fallpiece['rotation'] = (self.fallpiece['rotation'] - 1) % len(pieces[self.fallpiece['shape']])
 
-        if self.tetromino.validposition(self.board,self.fallpiece,ay = 1):
-            self.fallpiece['y'] +=1
+        # if self.tetromino.validposition(self.board,self.fallpiece,ay = 1):
+        #     self.fallpiece['y'] +=1
 
         if not self.tetromino.validposition(self.board,self.fallpiece,ay = 1):
             self.tetromino.addtoboard(self.board,self.fallpiece)
@@ -104,7 +107,7 @@ class Agent(object):
             if not self.tetromino.validposition(self.board,self.fallpiece):  
                 self.terminal = True 
                 self.state = 2       
-                return self.state, calcReward(self.board, self.fallpiece)
+                return self.state, reward # calcReward(self.board, self.fallpiece)
             else: 
                 self.state =1
             self.piecesteps = 0
@@ -272,273 +275,329 @@ class Agent(object):
     def game_end(self):
         return self.terminal, self.score
 
-    # 使用 mcts 训练，重用搜索树，并保存数据
-    def start_self_play2(self, player, temp=1e-3):
-        # 这里下两局，按得分和步数对比
-        states, mcts_probs, winers = [], [], []
+    # 这里假定第一个人选择下[左移，右移，翻转，下降，无动作]，第二个人只有[下降]
+    def start_self_play(self, player, temp=1e-3):       
+        states, mcts_probs = [], []
+        self.reset()
+        player.reset_player()
+        for i in count():
+            # temp 权重 ，return_prob 是否返回概率数据
+            action, move_probs = player.get_action(self, temp=temp/(self.piecesteps+1), return_prob=1)
+            # 保存数据
+            states.append(self.current_state())
+            mcts_probs.append(move_probs)
 
-        game0 = copy.deepcopy(self)
-        game1 = copy.deepcopy(self)
+            # 前几步是乱走的
+            # if self.piecesteps<10-self.piececount and random.random()>0.5:
+            # 有20%是乱走的
+            if random.random()>0.8:
+                action = random.choice(self.availables())
 
-        game0_states,game1_states,game0_mcts_probs,game1_mcts_probs,game0_wins,game1_wins=[],[],[],[],[],[]
-        while not (game0.terminal or game1.terminal):
+            # 执行一步
+            self.step(action)
+            # 如果游戏结束
+            if self.terminal: break
+            if self.state!=0 and self.piececount>=max_picece_count: break
+        self.print()
+        picece_count = self.getTransCount()
+        print("transCount:", picece_count)
+        # 增加最大步骤
+        if picece_count>maxstep:
+            states1 = states
+            mcts_probs1 = mcts_probs
+            winners1 = [-1.0 for i in range(len(states))]
+            maxstep = picece_count
+        elif picece_count==maxstep:
+            states1 = states1 + states
+            mcts_probs1 = mcts_probs1 + mcts_probs
+            winners1 = winners1+ [-1.0 for i in range(len(states))]
+        # 增加最小步骤
+        if picece_count<minstep:
+            states0 = states
+            mcts_probs0 = mcts_probs
+            winners0 = [1.0 for i in range(len(states))]
+            minstep = picece_count
+        # 增加最小步骤
+        elif picece_count==minstep:
+            states0 = states0 + states
+            mcts_probs0 = mcts_probs0 + mcts_probs
+            winners0 = winners0 + [1.0 for i in range(len(states))]
 
-            # 一个方块一个方块的训练
-            # 最低训练方块
-            train_pieces_count = random.randint(3,6)  
-            for i in count():
-                action, move_probs = player.get_action(game0, temp=temp, return_prob=1)
-                game0_states.append(game0.current_state())
-                game0_mcts_probs.append(move_probs)
-                game0.step(action)
-                if game0.terminal or (game0.state!=0 and i%train_pieces_count==0): break
+        print("minstep",minstep,"maxstep",maxstep)
+        states = states0 + states1
+        mcts_probs = mcts_probs0 + mcts_probs1
+        winners = winners0 + winners1
 
-            for i in count():
-                action, move_probs = player.get_action(game1, temp=temp, return_prob=1)
-                game1_states.append(game1.current_state())
-                game1_mcts_probs.append(move_probs)
-                game1.step(action)
-                if game1.terminal or (game1.state!=0 and i%train_pieces_count==0): break
+        assert len(states)==len(mcts_probs)==len(winners)
+        return -1, zip(states, mcts_probs, winners)
 
-            # game0.print()
-            # game1.print()
+    # # 使用 mcts 训练，重用搜索树，并保存数据
+    # def start_self_play2(self, player, temp=1e-3):
+    #     # 这里下两局，按得分和步数对比
+    #     states, mcts_probs, winers = [], [], []
 
-            game0_transCount = game0.getTransCount()
-            game1_transCount = game1.getTransCount()
+    #     game0 = copy.deepcopy(self)
+    #     game1 = copy.deepcopy(self)
+
+    #     game0_states,game1_states,game0_mcts_probs,game1_mcts_probs,game0_wins,game1_wins=[],[],[],[],[],[]
+    #     while not (game0.terminal or game1.terminal):
+
+    #         # 一个方块一个方块的训练
+    #         # 最低训练方块
+    #         train_pieces_count = random.randint(3,6)  
+    #         for i in count():
+    #             action, move_probs = player.get_action(game0, temp=temp, return_prob=1)
+    #             game0_states.append(game0.current_state())
+    #             game0_mcts_probs.append(move_probs)
+    #             game0.step(action)
+    #             if game0.terminal or (game0.state!=0 and i%train_pieces_count==0): break
+
+    #         for i in count():
+    #             action, move_probs = player.get_action(game1, temp=temp, return_prob=1)
+    #             game1_states.append(game1.current_state())
+    #             game1_mcts_probs.append(move_probs)
+    #             game1.step(action)
+    #             if game1.terminal or (game1.state!=0 and i%train_pieces_count==0): break
+
+    #         # game0.print()
+    #         # game1.print()
+
+    #         game0_transCount = game0.getTransCount()
+    #         game1_transCount = game1.getTransCount()
             
-            print("game0_transCount:",game0_transCount,"game1_transCount:",game1_transCount)
-            # 如果有输赢，则直接出结果，如果相同，继续下一轮，直到出结果为止
-            if game0_transCount != game1_transCount:
-                game0_win, game1_win = -1, -1
-                # 比谁的交换次数少
-                if game0_transCount>game1_transCount:
-                    game0_win, game1_win  = 0, 1
-                    game0 = copy.deepcopy(game1)
+    #         print("game0_transCount:",game0_transCount,"game1_transCount:",game1_transCount)
+    #         # 如果有输赢，则直接出结果，如果相同，继续下一轮，直到出结果为止
+    #         if game0_transCount != game1_transCount:
+    #             game0_win, game1_win = -1, -1
+    #             # 比谁的交换次数少
+    #             if game0_transCount>game1_transCount:
+    #                 game0_win, game1_win  = 0, 1
+    #                 game0 = copy.deepcopy(game1)
 
-                if game0_transCount<game1_transCount:
-                    game0_win, game1_win  = 1, 0
-                    game1 = copy.deepcopy(game0)
+    #             if game0_transCount<game1_transCount:
+    #                 game0_win, game1_win  = 1, 0
+    #                 game1 = copy.deepcopy(game0)
 
-                for i in range(len(game0_states)):
-                    game0_wins.append(game0_win)
-                for i in range(len(game1_states)):
-                    game1_wins.append(game1_win)
+    #             for i in range(len(game0_states)):
+    #                 game0_wins.append(game0_win)
+    #             for i in range(len(game1_states)):
+    #                 game1_wins.append(game1_win)
 
-                for o in game0_states: states.append(o)
-                for o in game1_states: states.append(o)
-                for o in game0_mcts_probs: mcts_probs.append(o)
-                for o in game1_mcts_probs: mcts_probs.append(o)
-                for o in game0_wins: winers.append(o)
-                for o in game1_wins: winers.append(o)
+    #             for o in game0_states: states.append(o)
+    #             for o in game1_states: states.append(o)
+    #             for o in game0_mcts_probs: mcts_probs.append(o)
+    #             for o in game1_mcts_probs: mcts_probs.append(o)
+    #             for o in game0_wins: winers.append(o)
+    #             for o in game1_wins: winers.append(o)
 
-                game0_states,game1_states,game0_mcts_probs,game1_mcts_probs,game0_wins,game1_wins=[],[],[],[],[],[]
-                assert len(states)==len(mcts_probs)
-                assert len(states)==len(winers)
-        winners_z = np.zeros(len(winers))
-        winners_z[np.array(winers) == 1] = 1.0
-        winners_z[np.array(winers) == 0] = -1.0
-        game1.print()
-        print("add %s to dataset"%len(winers))
-        return -1, zip(states, mcts_probs, winners_z)
+    #             game0_states,game1_states,game0_mcts_probs,game1_mcts_probs,game0_wins,game1_wins=[],[],[],[],[],[]
+    #             assert len(states)==len(mcts_probs)
+    #             assert len(states)==len(winers)
+    #     winners_z = np.zeros(len(winers))
+    #     winners_z[np.array(winers) == 1] = 1.0
+    #     winners_z[np.array(winers) == 0] = -1.0
+    #     game1.print()
+    #     print("add %s to dataset"%len(winers))
+    #     return -1, zip(states, mcts_probs, winners_z)
 
-    # 使用 mcts 训练，重用搜索树，并保存数据
-    def start_self_play3(self, player, temp=1e-3):
-        # 这里下两局，按得分和步数对比
-        # 这样会有一个问题，导致+分比-分多，导致mcts会集中到最初和最后的步骤
-        states, mcts_probs, current_players = [], [], []
-        # 当方块到了这个就终止游戏
-        max_height = 15
-        tetromino = copy.deepcopy(self.tetromino)
-        # 训练方块数
-        self.reset()
-        for i in count():
-            # temp 权重 ，return_prob 是否返回概率数据
-            action, move_probs = player.get_action(self, temp=temp, return_prob=1)
-            # 保存数据
-            states.append(self.current_state())
-            mcts_probs.append(move_probs)
-            current_players.append(0)
-            # 执行一步
-            self.step(action)
-            # 如果游戏结束
-            if self.terminal: break
-            if self.state!=0 and self.getMaxHeight()>=max_height: break
-        self.print()
-        score0 = self.score
-        steps0 = 200-len(self.tetromino.nextpiece)
+    # # 使用 mcts 训练，重用搜索树，并保存数据
+    # def start_self_play3(self, player, temp=1e-3):
+    #     # 这里下两局，按得分和步数对比
+    #     # 这样会有一个问题，导致+分比-分多，导致mcts会集中到最初和最后的步骤
+    #     states, mcts_probs, current_players = [], [], []
+    #     # 当方块到了这个就终止游戏
+    #     max_height = 15
+    #     tetromino = copy.deepcopy(self.tetromino)
+    #     # 训练方块数
+    #     self.reset()
+    #     for i in count():
+    #         # temp 权重 ，return_prob 是否返回概率数据
+    #         action, move_probs = player.get_action(self, temp=temp, return_prob=1)
+    #         # 保存数据
+    #         states.append(self.current_state())
+    #         mcts_probs.append(move_probs)
+    #         current_players.append(0)
+    #         # 执行一步
+    #         self.step(action)
+    #         # 如果游戏结束
+    #         if self.terminal: break
+    #         if self.state!=0 and self.getMaxHeight()>=max_height: break
+    #     self.print()
+    #     score0 = self.score
+    #     steps0 = 200-len(self.tetromino.nextpiece)
 
-        self.tetromino=tetromino
-        self.reset()
-        for i in count():
-            # temp 权重 ，return_prob 是否返回概率数据
-            action, move_probs = player.get_action(self, temp=temp, return_prob=1)
-            # 保存数据
-            states.append(self.current_state())
-            mcts_probs.append(move_probs)
-            current_players.append(1)
-            # 执行一步
-            self.step(action)
-            # 如果游戏结束
-            if self.terminal: break
-            if self.state!=0 and self.getMaxHeight()>=max_height: break
-        self.print()
-        score1 = self.score
-        steps1 = 200-len(self.tetromino.nextpiece)
+    #     self.tetromino=tetromino
+    #     self.reset()
+    #     for i in count():
+    #         # temp 权重 ，return_prob 是否返回概率数据
+    #         action, move_probs = player.get_action(self, temp=temp, return_prob=1)
+    #         # 保存数据
+    #         states.append(self.current_state())
+    #         mcts_probs.append(move_probs)
+    #         current_players.append(1)
+    #         # 执行一步
+    #         self.step(action)
+    #         # 如果游戏结束
+    #         if self.terminal: break
+    #         if self.state!=0 and self.getMaxHeight()>=max_height: break
+    #     self.print()
+    #     score1 = self.score
+    #     steps1 = 200-len(self.tetromino.nextpiece)
 
-        winner = -1
-        winners_z = np.zeros(len(current_players))
+    #     winner = -1
+    #     winners_z = np.zeros(len(current_players))
         
-        # 如果有奖励，按奖励大的赢,否则全部赢；如果没有奖励则按步数，谁的步数多谁赢
-        # if score0>0 or score1>0:
-        #     if score0!=score1:
-        #         winner = 0 if score0>score1 else 1
-        # else:
-        # 至少大于1个方块的相差，如果只有相差1个方块，可以认为是平局
-        if abs(steps0-steps1)>1:
-            winner = 0 if steps0>steps1 else 1         
+    #     # 如果有奖励，按奖励大的赢,否则全部赢；如果没有奖励则按步数，谁的步数多谁赢
+    #     # if score0>0 or score1>0:
+    #     #     if score0!=score1:
+    #     #         winner = 0 if score0>score1 else 1
+    #     # else:
+    #     # 至少大于1个方块的相差，如果只有相差1个方块，可以认为是平局
+    #     if abs(steps0-steps1)>1:
+    #         winner = 0 if steps0>steps1 else 1         
 
-        if winner in [0, 1]:
-            winners_z[np.array(current_players) == winner] = 1.0
-            winners_z[np.array(current_players) != winner] = -1.0
-        else:
-            # 如果是平局，作为负分补偿，全部给负分
-            winners_z[:] = -1.0
+    #     if winner in [0, 1]:
+    #         winners_z[np.array(current_players) == winner] = 1.0
+    #         winners_z[np.array(current_players) != winner] = -1.0
+    #     else:
+    #         # 如果是平局，作为负分补偿，全部给负分
+    #         winners_z[:] = -1.0
 
-        print("winner",winner,"step0",steps0,"step1",steps1)
-        return winner, zip(states, mcts_probs, winners_z)
+    #     print("winner",winner,"step0",steps0,"step1",steps1)
+    #     return winner, zip(states, mcts_probs, winners_z)
 
-    def start_play(self, player, env):
-        while True:
-            action = player.get_action(self)
-            self.step(action, env)
-            if self.terminal:
-                break
+    # def start_play(self, player, env):
+    #     while True:
+    #         action = player.get_action(self)
+    #         self.step(action, env)
+    #         if self.terminal:
+    #             break
 
 
-    # 使用 mcts 训练，重用搜索树，并保存数据
-    def start_self_play4(self, player, temp=1e-3):
-        # 这里下5局，取最好和最差的按得分和步数对比
-        # 这样会有一个问题，导致+分比-分多，导致mcts会集中到最初和最后的步骤
-        # 当方块到了这个就终止游戏
-        max_height = 0
-        states0,states1,mcts_probs0,mcts_probs1,winners0,winners1=None,None,None,None,None,None
-        minstep = 999999999
-        maxstep = 0
-        tetromino = self.tetromino
-        # 必须要找到相差2个方块以上的局面
-        step = 0
-        while maxstep-minstep<2:
-            step += 1
-            if step>10 and maxstep-minstep>1 : break
-            states, mcts_probs = [], []
-            self.tetromino=copy.deepcopy(tetromino)
-            self.reset()
-            player.reset_player()
-            for i in count():
-                # temp 权重 ，return_prob 是否返回概率数据
-                action, move_probs = player.get_action(self, temp=temp*2/(self.piecesteps+1), return_prob=1)
-                # 保存数据
-                states.append(self.current_state())
-                mcts_probs.append(move_probs)
-                # 执行一步
-                self.step(action)
-                # 如果游戏结束
-                if self.terminal: break
-                if self.state!=0 and max_height>0 and self.getMaxHeight()>=max_height: break
-                # if self.state!=0 : self.print()
+    # # 使用 mcts 训练，重用搜索树，并保存数据
+    # def start_self_play4(self, player, temp=1e-3):
+    #     # 这里下5局，取最好和最差的按得分和步数对比
+    #     # 这样会有一个问题，导致+分比-分多，导致mcts会集中到最初和最后的步骤
+    #     # 当方块到了这个就终止游戏
+    #     max_height = 0
+    #     states0,states1,mcts_probs0,mcts_probs1,winners0,winners1=None,None,None,None,None,None
+    #     minstep = 999999999
+    #     maxstep = 0
+    #     tetromino = self.tetromino
+    #     # 必须要找到相差2个方块以上的局面
+    #     step = 0
+    #     while maxstep-minstep<2:
+    #         step += 1
+    #         if step>10 and maxstep-minstep>1 : break
+    #         states, mcts_probs = [], []
+    #         self.tetromino=copy.deepcopy(tetromino)
+    #         self.reset()
+    #         player.reset_player()
+    #         for i in count():
+    #             # temp 权重 ，return_prob 是否返回概率数据
+    #             action, move_probs = player.get_action(self, temp=temp*2/(self.piecesteps+1), return_prob=1)
+    #             # 保存数据
+    #             states.append(self.current_state())
+    #             mcts_probs.append(move_probs)
+    #             # 执行一步
+    #             self.step(action)
+    #             # 如果游戏结束
+    #             if self.terminal: break
+    #             if self.state!=0 and max_height>0 and self.getMaxHeight()>=max_height: break
+    #             # if self.state!=0 : self.print()
 
-            self.print()
-            picece_count = self.piececount
-            # 增加最大步骤
-            if picece_count>maxstep:
-                states1 = states
-                mcts_probs1 = mcts_probs
-                winners1 = [1.0 for i in range(len(states))]
-                maxstep = picece_count
-            elif picece_count==maxstep:
-                states1 = states1 + states
-                mcts_probs1 = mcts_probs1 + mcts_probs
-                winners1 = winners1+ [1.0 for i in range(len(states))]
-            # 增加最小步骤
-            if picece_count<minstep:
-                states0 = states
-                mcts_probs0 = mcts_probs
-                winners0 = [-1.0 for i in range(len(states))]
-                minstep = picece_count
-            # 增加最小步骤
-            elif picece_count==minstep:
-                states0 = states0 + states
-                mcts_probs0 = mcts_probs0 + mcts_probs
-                winners0 = winners0 + [-1.0 for i in range(len(states))]
+    #         self.print()
+    #         picece_count = self.piececount
+    #         # 增加最大步骤
+    #         if picece_count>maxstep:
+    #             states1 = states
+    #             mcts_probs1 = mcts_probs
+    #             winners1 = [1.0 for i in range(len(states))]
+    #             maxstep = picece_count
+    #         elif picece_count==maxstep:
+    #             states1 = states1 + states
+    #             mcts_probs1 = mcts_probs1 + mcts_probs
+    #             winners1 = winners1+ [1.0 for i in range(len(states))]
+    #         # 增加最小步骤
+    #         if picece_count<minstep:
+    #             states0 = states
+    #             mcts_probs0 = mcts_probs
+    #             winners0 = [-1.0 for i in range(len(states))]
+    #             minstep = picece_count
+    #         # 增加最小步骤
+    #         elif picece_count==minstep:
+    #             states0 = states0 + states
+    #             mcts_probs0 = mcts_probs0 + mcts_probs
+    #             winners0 = winners0 + [-1.0 for i in range(len(states))]
 
-        print("minstep",minstep,"maxstep",maxstep)
-        states = states0 + states1
-        mcts_probs = mcts_probs0 + mcts_probs1
-        winners = winners0 + winners1
+    #     print("minstep",minstep,"maxstep",maxstep)
+    #     states = states0 + states1
+    #     mcts_probs = mcts_probs0 + mcts_probs1
+    #     winners = winners0 + winners1
 
-        assert len(states)==len(mcts_probs)==len(winners)
-        return -1, zip(states, mcts_probs, winners)
+    #     assert len(states)==len(mcts_probs)==len(winners)
+    #     return -1, zip(states, mcts_probs, winners)
 
-    def start_self_play(self, player, temp=1e-3):
-        # 同时放X个方块，谁的熵最小，谁赢
-        max_picece_count = random.randint(3,6)  
+    # def start_self_play(self, player, temp=1e-3):
+    #     # 同时放X个方块，谁的熵最小，谁赢
+    #     max_picece_count = random.randint(3,6)  
 
-        states0,states1,mcts_probs0,mcts_probs1,winners0,winners1=None,None,None,None,None,None
-        tetromino = self.tetromino
-        minstep = 999999999
-        maxstep = 0
-        while maxstep-minstep<2:
-            states, mcts_probs = [], []
-            self.tetromino=copy.deepcopy(tetromino)
-            self.reset()
-            player.reset_player()
-            for i in count():
-                # temp 权重 ，return_prob 是否返回概率数据
-                action, move_probs = player.get_action(self, temp=temp/(self.piecesteps+1), return_prob=1)
-                # 保存数据
-                states.append(self.current_state())
-                mcts_probs.append(move_probs)
+    #     states0,states1,mcts_probs0,mcts_probs1,winners0,winners1=None,None,None,None,None,None
+    #     tetromino = self.tetromino
+    #     minstep = 999999999
+    #     maxstep = 0
+    #     while maxstep-minstep<2:
+    #         states, mcts_probs = [], []
+    #         self.tetromino=copy.deepcopy(tetromino)
+    #         self.reset()
+    #         player.reset_player()
+    #         for i in count():
+    #             # temp 权重 ，return_prob 是否返回概率数据
+    #             action, move_probs = player.get_action(self, temp=temp/(self.piecesteps+1), return_prob=1)
+    #             # 保存数据
+    #             states.append(self.current_state())
+    #             mcts_probs.append(move_probs)
 
-                # 前几步是乱走的
-                # if self.piecesteps<10-self.piececount and random.random()>0.5:
-                # 有20%是乱走的
-                if random.random()>0.8:
-                    action = random.choice(self.availables())
+    #             # 前几步是乱走的
+    #             # if self.piecesteps<10-self.piececount and random.random()>0.5:
+    #             # 有20%是乱走的
+    #             if random.random()>0.8:
+    #                 action = random.choice(self.availables())
 
-                # 执行一步
-                self.step(action)
-                # 如果游戏结束
-                if self.terminal: break
-                if self.state!=0 and self.piececount>=max_picece_count: break
-            self.print()
-            picece_count = self.getTransCount()
-            print("transCount:", picece_count)
-            # 增加最大步骤
-            if picece_count>maxstep:
-                states1 = states
-                mcts_probs1 = mcts_probs
-                winners1 = [-1.0 for i in range(len(states))]
-                maxstep = picece_count
-            elif picece_count==maxstep:
-                states1 = states1 + states
-                mcts_probs1 = mcts_probs1 + mcts_probs
-                winners1 = winners1+ [-1.0 for i in range(len(states))]
-            # 增加最小步骤
-            if picece_count<minstep:
-                states0 = states
-                mcts_probs0 = mcts_probs
-                winners0 = [1.0 for i in range(len(states))]
-                minstep = picece_count
-            # 增加最小步骤
-            elif picece_count==minstep:
-                states0 = states0 + states
-                mcts_probs0 = mcts_probs0 + mcts_probs
-                winners0 = winners0 + [1.0 for i in range(len(states))]
+    #             # 执行一步
+    #             self.step(action)
+    #             # 如果游戏结束
+    #             if self.terminal: break
+    #             if self.state!=0 and self.piececount>=max_picece_count: break
+    #         self.print()
+    #         picece_count = self.getTransCount()
+    #         print("transCount:", picece_count)
+    #         # 增加最大步骤
+    #         if picece_count>maxstep:
+    #             states1 = states
+    #             mcts_probs1 = mcts_probs
+    #             winners1 = [-1.0 for i in range(len(states))]
+    #             maxstep = picece_count
+    #         elif picece_count==maxstep:
+    #             states1 = states1 + states
+    #             mcts_probs1 = mcts_probs1 + mcts_probs
+    #             winners1 = winners1+ [-1.0 for i in range(len(states))]
+    #         # 增加最小步骤
+    #         if picece_count<minstep:
+    #             states0 = states
+    #             mcts_probs0 = mcts_probs
+    #             winners0 = [1.0 for i in range(len(states))]
+    #             minstep = picece_count
+    #         # 增加最小步骤
+    #         elif picece_count==minstep:
+    #             states0 = states0 + states
+    #             mcts_probs0 = mcts_probs0 + mcts_probs
+    #             winners0 = winners0 + [1.0 for i in range(len(states))]
 
-        print("minstep",minstep,"maxstep",maxstep)
-        states = states0 + states1
-        mcts_probs = mcts_probs0 + mcts_probs1
-        winners = winners0 + winners1
+    #     print("minstep",minstep,"maxstep",maxstep)
+    #     states = states0 + states1
+    #     mcts_probs = mcts_probs0 + mcts_probs1
+    #     winners = winners0 + winners1
 
-        assert len(states)==len(mcts_probs)==len(winners)
-        return -1, zip(states, mcts_probs, winners)
+    #     assert len(states)==len(mcts_probs)==len(winners)
+    #     return -1, zip(states, mcts_probs, winners)

@@ -59,6 +59,9 @@ class FiveChessPlay():
             self.policy_value_net = PolicyValueNet(size)
         self.best_policy_value_net = None
 
+        # 保存历史最佳模型赢的次数，赢的越高，越要继续对战
+        self.best_model_files_win={}
+
     def save_wait_data(self, obj):
         filename = "{}.pkl".format(uuid.uuid1())
         savefile = os.path.join(data_wait_dir, filename)
@@ -96,14 +99,23 @@ class FiveChessPlay():
 
         files = os.listdir(model_dir)
         his_best_model_files=[]
+        his_best_model_weights=[]
         for file in files:
             if file.startswith("best_model_15_5.pth."):
+                if file not in self.best_model_files_win:
+                    self.best_model_files_win[file]=0
                 his_best_model_files.append(file)
-        curr_best_model_file = random.choice(his_best_model_files)
-        curr_best_model_file = os.path.join(model_dir, curr_best_model_file)
+                his_best_model_weights.append(self.best_model_files_win[file])
 
+        weights_min=min(his_best_model_weights)
+        weights_max=max(his_best_model_weights)
+        for i in range(len(his_best_model_weights)):
+            his_best_model_weights[i] = (his_best_model_weights[i]-weights_min)/(weights_max-weights_min)
+
+        curr_best_model_file = random.choices(his_best_model_files,weights=his_best_model_weights)[0]
+        print(self.best_model_files_win)
         print("loading", curr_best_model_file)
-        curr_best_policy_value_net = PolicyValueNet(size, model_file=curr_best_model_file)
+        curr_best_policy_value_net = PolicyValueNet(size, model_file=os.path.join(model_dir, curr_best_model_file))
         his_best_mcts_player = MCTSPlayer(curr_best_policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout, is_selfplay=0)
 
         his_best_mcts_player.mcts._limit_max_var=False
@@ -133,14 +145,17 @@ class FiveChessPlay():
 
         play_data = list(play_data)[:]     
 
-        # 只保存输掉的训练数据
         if winner == his_best_mcts_player.player:
-            # 采用翻转棋盘来增加样本数据集
-            play_data = self.get_equi_data(play_data)
-            logging.info("Self Play end. length:%s saving ..." % len(play_data))
-            # 保存训练数据
-            for obj in play_data:
-                self.save_wait_data(obj)
+            self.best_model_files_win[curr_best_model_file] += 1
+        if winner == mcts_player.player:
+            self.best_model_files_win[curr_best_model_file] -= 1
+        
+        # 采用翻转棋盘来增加样本数据集
+        play_data = self.get_equi_data(play_data)
+        logging.info("Self Play end. length:%s saving ..." % len(play_data))
+        # 保存训练数据
+        for obj in play_data:
+            self.save_wait_data(obj)
 
         return play_data[-1]
 
@@ -173,13 +188,12 @@ class FiveChessPlay():
             print("Curr Model Lost!","win:", self.best_win[0],"lost",self.best_win[1])                
         agent.game.print()
         
-        # 只保存输掉的训练数据
-        if winner == best_mcts_player.player:
-            play_data = list(play_data)[:]
-            play_data = self.get_equi_data(play_data)
-            logging.info("Eval Play end. length:%s saving ..." % len(play_data))
-            for obj in play_data:
-                self.save_wait_data(obj)
+        # 保存训练数据
+        play_data = list(play_data)[:]
+        play_data = self.get_equi_data(play_data)
+        logging.info("Eval Play end. length:%s saving ..." % len(play_data))
+        for obj in play_data:
+            self.save_wait_data(obj)
 
     def run(self):
         """启动训练"""
