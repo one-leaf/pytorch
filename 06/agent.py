@@ -141,6 +141,11 @@ class Agent(object):
             self.env.render()
 
         states, mcts_probs, current_players = [], [], []
+
+        # 为了公平，第一手为先手交换棋
+        act = random.choice(self.game.first_availables)
+        self.game.step(act)
+
         for i in count():
             player_in_turn = players[self.game.current_player]
             action, move_probs = player_in_turn.get_action(self.game, temp=temp, return_prob=1)
