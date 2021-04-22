@@ -102,7 +102,11 @@ class FiveChessPlay():
 
         # 开始下棋
         winner, play_data = agent.start_self_play(mcts_player, pure_mcts_player, temp=self.temp)
-        agent.game.print()                   
+        agent.game.print()
+                           
+        if winner is None or play_data is None:
+            print("give up this agent")
+            return
 
         if pure_mcts_player!=None:
             if winner == mcts_player.player:
@@ -119,14 +123,13 @@ class FiveChessPlay():
         # 保存训练数据
         for obj in play_data:
             self.save_wait_data(obj)
-        return play_data[-1]
 
     def run(self):
         """启动训练,并动态调整c_puct参数"""
         try:
             for i in range(10000):
                 logging.info("TRAIN Batch:{} starting, Size:{}, n_in_row:{}".format(i, size, n_in_row))
-                state, mcts_porb, winner = self.collect_selfplay_data(i)
+                self.collect_selfplay_data(i)
 
                 if sum(self.c_puct_win) >= 10:
 

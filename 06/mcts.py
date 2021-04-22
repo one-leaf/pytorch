@@ -362,7 +362,9 @@ class MCTSPlayer(object):
                 if act!=acts[idx]:
                     print("    random:", state.position_to_action(acts[idx]), act_probs[idx], act_qs[idx], \
                         "==>", action, act_probs[acts.index(act)], act_qs[acts.index(act)])  
-            if return_prob:
+            if return_prob and return_value:
+                return action, move_probs, value
+            elif return_prob:
                 return action, move_probs
             elif return_value:
                 return action, value        

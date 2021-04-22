@@ -43,11 +43,16 @@ class Agent(object):
             # temp 权重 ，return_prob 是否返回概率数据
             player_in_turn = players[self.game.current_player]
             if isinstance(player_in_turn, MCTSPlayer):
-                action, move_probs = player_in_turn.get_action(self.game, temp=temp, return_prob=1)  
+                action, move_probs, value = player_in_turn.get_action(self.game, temp=temp, return_prob=1, return_value=1)  
                 # 如果包含了第二个玩家是MCTS，则AI每一步都需要重置搜索树               
             else:
-                action, move_probs = player_in_turn.get_action(self.game, return_prob=1)
- 
+                action, move_probs, value = player_in_turn.get_action(self.game, return_prob=1, return_value=1)
+
+            # 如果第一步就是-1或1，直接放弃
+            if i==0 and player2 is None:
+                if value==-1 or value==1:
+                    return None, None
+
             idx = np.argmax(move_probs)
             act = self.game.position_to_action(idx)
             if act == action and isinstance(player_in_turn, MCTSPlayer):
