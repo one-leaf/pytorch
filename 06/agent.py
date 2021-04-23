@@ -32,7 +32,7 @@ class Agent(object):
         states, mcts_probs, current_players = [], [], []
         _state_keys = []
 
-        # 先随机走1~3步，增加样本的复杂度
+        # 先随机走1~2步，增加样本的复杂度
         for i in range(random.randint(1,2)):
             act = random.choice(self.game.availables)
             self.game.step(act)
