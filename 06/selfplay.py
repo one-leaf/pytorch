@@ -99,8 +99,8 @@ class FiveChessPlay():
                 best_policy_value_net = PolicyValueNet(size, model_file=best_model_file)
             else:
                 best_policy_value_net = self.policy_value_net
-            mcts_player = MCTSPlayer(best_policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout, is_selfplay=1)
-            pure_mcts_player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=self.c_puct+0.5, n_playout=self.n_playout, is_selfplay=1)
+            mcts_player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout, is_selfplay=1)
+            pure_mcts_player = MCTSPlayer(best_policy_value_net.policy_value_fn, c_puct=self.c_puct+0.5, n_playout=self.n_playout, is_selfplay=1)
             mcts_player.mcts._limit_max_var=False
             pure_mcts_player.mcts._limit_max_var=False
 
