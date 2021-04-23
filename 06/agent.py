@@ -33,7 +33,7 @@ class Agent(object):
         _state_keys = []
 
         # 先随机走1~3步，增加样本的复杂度
-        for i in range(random.randint(1,3)):
+        for i in range(random.randint(1,2)):
             act = random.choice(self.game.availables)
             self.game.step(act)
 
