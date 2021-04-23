@@ -90,12 +90,16 @@ class FiveChessPlay():
         logging.info("TRAIN Self Play starting ...")
         agent = Agent(size, n_in_row, is_shown=0)
         # 创建使用策略价值网络来指导树搜索和评估叶节点的MCTS玩家   
-        if True :#i%2==0:     
+        if i%2==0:     
             mcts_player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout, is_selfplay=1)
             pure_mcts_player = None
             mcts_player.mcts._limit_max_var=False
         else:
-            mcts_player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout, is_selfplay=1)
+            if os.path.exists(best_model_file):
+                best_policy_value_net = PolicyValueNet(size, model_file=best_model_file)
+            else:
+                best_policy_value_net = self.policy_value_net
+            mcts_player = MCTSPlayer(best_policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout, is_selfplay=1)
             pure_mcts_player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=self.c_puct+0.5, n_playout=self.n_playout, is_selfplay=1)
             mcts_player.mcts._limit_max_var=False
             pure_mcts_player.mcts._limit_max_var=False
@@ -103,7 +107,7 @@ class FiveChessPlay():
         # 开始下棋
         winner, play_data = agent.start_self_play(mcts_player, pure_mcts_player, temp=self.temp)
         agent.game.print()
-                           
+
         if winner is None or play_data is None:
             print("give up this agent")
             return
