@@ -25,51 +25,84 @@ class ResidualBlock(nn.Module):
         residual=x if self.right is None else self.right(x)
         out+=residual
         return F.relu(out)
+# class Net(nn.Module):
+#     def __init__(self,input_size, output_size):
+#         super().__init__()
+#         self.first_conv = nn.Conv2d(4, 64, 5, 1, 2, bias=False)
+#         self.first_conv_bn = nn.BatchNorm2d(64)
+#         self.conv1=self._make_layer(64, 64, 3)
+#         self.conv2=self._make_layer(64, 64, 4)
+#         self.conv3=self._make_layer(64, 64, 4)
+#         self.conv4=self._make_layer(64, 64, 3)
+
+#         # 动作预测
+#         self.act_conv1 = nn.Conv2d(64, 2, 1)
+#         self.act_conv1_bn = nn.BatchNorm2d(2)
+#         self.act_fc1 = nn.Linear(2*input_size, output_size)
+
+#         # 动作价值
+#         self.val_conv1 = nn.Conv2d(64, 1, 1)
+#         self.val_conv1_bn = nn.BatchNorm2d(1)
+#         self.val_fc1 = nn.Linear(input_size, 64)
+#         self.val_fc2 = nn.Linear(64, 1)
+
+#     def forward(self, x):
+#         x = self.first_conv(x)
+#         x = self.first_conv_bn(x)
+#         x = F.relu(x)
+#         x = self.conv1(x)
+#         x = self.conv2(x)
+#         x = self.conv3(x)
+#         x = self.conv4(x)
+
+#         # 动作
+#         x_act = self.act_conv1(x)
+#         x_act = self.act_conv1_bn(x_act)
+#         x_act = F.relu(x_act)
+#         x_act = x_act.view(x_act.size(0), -1)
+#         x_act = F.log_softmax(self.act_fc1(x_act),dim=1)
+
+#         # 胜率 输出为 -1 ~ 1 之间的数字
+#         x_val = self.val_conv1(x)
+#         x_val = self.val_conv1_bn(x_val)
+#         x_val = F.relu(x_val)
+#         x_val = x_val.view(x_val.size(0), -1)
+#         x_val = F.relu(self.val_fc1(x_val))
+#         x_val = torch.tanh(self.val_fc2(x_val))
+#         return x_act, x_val
+
+#     def _make_layer(self,inchannel,outchannel,block_num,stride=1):
+#         #构建layer,包含多个residual block
+#         shortcut=nn.Sequential(
+#             nn.Conv2d(inchannel,outchannel,1,stride,bias=False),
+#             nn.BatchNorm2d(outchannel)
+#         )
+ 
+#         layers=[ ]
+#         layers.append(ResidualBlock(inchannel,outchannel,stride,shortcut))
+        
+#         for i in range(1,block_num):
+#             layers.append(ResidualBlock(outchannel,outchannel))
+#         return nn.Sequential(*layers)
+
+
 class Net(nn.Module):
-    def __init__(self,input_size, output_size):
-        super().__init__()
-        self.first_conv = nn.Conv2d(4, 64, 5, 1, 2, bias=False)
-        self.first_conv_bn = nn.BatchNorm2d(64)
-        self.conv1=self._make_layer(64, 64, 3)
-        self.conv2=self._make_layer(64, 64, 4)
-        self.conv3=self._make_layer(64, 64, 4)
-        self.conv4=self._make_layer(64, 64, 3)
+    def __init__(self, image_size, action_size):
+        super(Net, self).__init__()
+
+        # 由于每个棋盘大小对最终对应一个动作，所以补齐的效果比较好
+        # 直接来18层的残差网络
+        self.conv=self._make_layer(4, 128, 20)
 
         # 动作预测
-        self.act_conv1 = nn.Conv2d(64, 2, 1)
-        self.act_conv1_bn = nn.BatchNorm2d(2)
-        self.act_fc1 = nn.Linear(2*input_size, output_size)
-
+        self.act_conv1 = nn.Conv2d(128, 1, 1)
+        self.act_conv1_bn = nn.BatchNorm2d(1)
+        self.act_fc1 = nn.Linear(image_size, action_size)
         # 动作价值
-        self.val_conv1 = nn.Conv2d(64, 1, 1)
+        self.val_conv1 = nn.Conv2d(128, 1, 1)
         self.val_conv1_bn = nn.BatchNorm2d(1)
-        self.val_fc1 = nn.Linear(input_size, 64)
-        self.val_fc2 = nn.Linear(64, 1)
-
-    def forward(self, x):
-        x = self.first_conv(x)
-        x = self.first_conv_bn(x)
-        x = F.relu(x)
-        x = self.conv1(x)
-        x = self.conv2(x)
-        x = self.conv3(x)
-        x = self.conv4(x)
-
-        # 动作
-        x_act = self.act_conv1(x)
-        x_act = self.act_conv1_bn(x_act)
-        x_act = F.relu(x_act)
-        x_act = x_act.view(x_act.size(0), -1)
-        x_act = F.log_softmax(self.act_fc1(x_act),dim=1)
-
-        # 胜率 输出为 -1 ~ 1 之间的数字
-        x_val = self.val_conv1(x)
-        x_val = self.val_conv1_bn(x_val)
-        x_val = F.relu(x_val)
-        x_val = x_val.view(x_val.size(0), -1)
-        x_val = F.relu(self.val_fc1(x_val))
-        x_val = torch.tanh(self.val_fc2(x_val))
-        return x_act, x_val
+        self.val_fc1 = nn.Linear(image_size, 128)
+        self.val_fc2 = nn.Linear(128, 1)
 
     def _make_layer(self,inchannel,outchannel,block_num,stride=1):
         #构建layer,包含多个residual block
@@ -85,7 +118,23 @@ class Net(nn.Module):
             layers.append(ResidualBlock(outchannel,outchannel))
         return nn.Sequential(*layers)
 
+    def forward(self, x):
+        x = self.conv(x)
 
+        # 动作
+        x_act = self.act_conv1(x)
+        x_act = self.act_conv1_bn(x_act)
+        x_act = x_act.view(x_act.size(0), -1)
+        x_act = F.log_softmax(self.act_fc1(x_act), dim=1)
+
+        # 胜率 输出为 -1 ~ 1 之间的数字
+        x_val = self.val_conv1(x)
+        x_val = self.val_conv1_bn(x_val)
+        x_val = F.relu(x_val)
+        x_val = x_val.view(x_val.size(0), -1)
+        x_val = F.relu(self.val_fc1(x_val))
+        x_val = torch.tanh(self.val_fc2(x_val))
+        return x_act, x_val
 class PolicyValueNet():
     def __init__(self, input_width, input_height, output_size, model_file=None, device=None, l2_const=1e-4):
         self.input_width = input_width
@@ -149,7 +198,7 @@ class PolicyValueNet():
         act_probs, value = self.policy_value(current_state)
 
         act_probs = act_probs.flatten()
-        actions = game.availables()
+        actions = game.availables
         act_probs = list(zip(actions, act_probs[actions]))
         value = value[0,0]
         return act_probs, value

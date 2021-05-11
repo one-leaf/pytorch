@@ -17,7 +17,7 @@ import numpy as np
 import torch
 
 # 定义游戏的动作
-GAME_ACTIONS_NUM = 4 
+GAME_ACTIONS_NUM = 5 
 GAME_WIDTH, GAME_HEIGHT = 10, 20
 
 # 定义游戏的保存文件名和路径

@@ -6,16 +6,17 @@ import numpy as np
 import copy
 import random
 
-KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN, KEY_NONE  = 0, 1, 2, 3, -1
+KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN, KEY_NONE  = 0, 1, 2, 3, 4
+ACTIONS = [KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN, KEY_NONE]
 
 class Agent(object):
     def __init__(self):
         self.tetromino = Tetromino(isRandomNextPiece=False)
         self.width = 10
         self.height = 20
-        self.actions_num = 4
-        # self.reset()
-        self.prev_fallpiece_board=None
+        self.actions_num = len(ACTIONS)
+        self.reset()        
+        # self.prev_fallpiece_board=None
 
     def reset(self):
         # 下落的方块
@@ -40,10 +41,27 @@ class Agent(object):
         self.state =0
         # 上一个下落方块的截图
         self.prev_fallpiece_board=None
+        # 下一个可用步骤
+        self.availables=ACTIONS
+
+    # 概率的索引位置转action
+    def position_to_action(self, position):
+        return ACTIONS[position]
+
+    def positions_to_actions(self, positions):
+        return [self.position_to_action(i) for i in positions]
+
+    # action转概率的索引位置
+    def action_to_position(self, action):
+        return ACTIONS.index(action)
+
+    def actions_to_positions(self, actions):
+        return [self.action_to_position(act) for act in actions]
+
 
     # 获取可用步骤, 保留一个旋转始终有用
     # 将单人游戏变为双人博弈，一个正常下，一个只下走，
-    def availables(self):
+    def get_availables(self):
         if self.steps%2==1: return [KEY_DOWN,]
 
         acts=[KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN, KEY_NONE]
@@ -118,7 +136,22 @@ class Agent(object):
         # 早期训练中，如果得分就表示游戏结束
         # if reward>0: self.terminal=True
 
+        self.availables = self.get_availables()
+
         return self.state, reward
+
+    def get_key(self):
+        info = self.getBoard()
+        info += self.get_fallpiece_board()
+        key = [0 for v in range(self.height*self.width)]
+        for x in range(self.height):
+            for y in range(self.width):
+                if info[x][y]==0:
+                    key[x+y*self.height]='0'
+                else:
+                    key[x+y*self.height]='1'
+        key3 = int("".join(key),3)
+        return hash(key3)
 
     # 打印
     def print2(self, add_fallpiece=False):
@@ -276,129 +309,124 @@ class Agent(object):
         return self.terminal, self.score
 
     # 这里假定第一个人选择下[左移，右移，翻转，下降，无动作]，第二个人只有[下降]
-    def start_self_play(self, player, temp=1e-3):       
-        states, mcts_probs = [], []
-        self.reset()
-        player.reset_player()
-        for i in count():
-            # temp 权重 ，return_prob 是否返回概率数据
-            action, move_probs = player.get_action(self, temp=temp/(self.piecesteps+1), return_prob=1)
-            # 保存数据
-            states.append(self.current_state())
-            mcts_probs.append(move_probs)
+    # def start_self_play(self, player, temp=1e-3):       
+    #     states, mcts_probs = [], []
+    #     self.reset()
+    #     player.reset_player()
+    #     for i in count():
+    #         # temp 权重 ，return_prob 是否返回概率数据
+    #         action, move_probs = player.get_action(self, temp=temp/(self.piecesteps+1), return_prob=1)
+    #         # 保存数据
+    #         states.append(self.current_state())
+    #         mcts_probs.append(move_probs)
 
-            # 前几步是乱走的
-            # if self.piecesteps<10-self.piececount and random.random()>0.5:
-            # 有20%是乱走的
-            if random.random()>0.8:
-                action = random.choice(self.availables())
+    #         # 前几步是乱走的
+    #         # if self.piecesteps<10-self.piececount and random.random()>0.5:
+    #         # 有20%是乱走的
+    #         # if random.random()>0.8:
+    #         #     action = random.choice(self.availables())
 
-            # 执行一步
-            self.step(action)
-            # 如果游戏结束
-            if self.terminal: break
-            if self.state!=0 and self.piececount>=max_picece_count: break
-        self.print()
-        picece_count = self.getTransCount()
-        print("transCount:", picece_count)
-        # 增加最大步骤
-        if picece_count>maxstep:
-            states1 = states
-            mcts_probs1 = mcts_probs
-            winners1 = [-1.0 for i in range(len(states))]
-            maxstep = picece_count
-        elif picece_count==maxstep:
-            states1 = states1 + states
-            mcts_probs1 = mcts_probs1 + mcts_probs
-            winners1 = winners1+ [-1.0 for i in range(len(states))]
-        # 增加最小步骤
-        if picece_count<minstep:
-            states0 = states
-            mcts_probs0 = mcts_probs
-            winners0 = [1.0 for i in range(len(states))]
-            minstep = picece_count
-        # 增加最小步骤
-        elif picece_count==minstep:
-            states0 = states0 + states
-            mcts_probs0 = mcts_probs0 + mcts_probs
-            winners0 = winners0 + [1.0 for i in range(len(states))]
+    #         # 执行一步
+    #         self.step(action)
+    #         # 如果游戏结束
+    #         if self.terminal: break
+    #     self.print()
 
-        print("minstep",minstep,"maxstep",maxstep)
-        states = states0 + states1
-        mcts_probs = mcts_probs0 + mcts_probs1
-        winners = winners0 + winners1
+    #     picece_count = self.getTransCount()
+    #     print("transCount:", picece_count)
+    #     # 增加最大步骤
+    #     if picece_count>maxstep:
+    #         states1 = states
+    #         mcts_probs1 = mcts_probs
+    #         winners1 = [-1.0 for i in range(len(states))]
+    #         maxstep = picece_count
+    #     elif picece_count==maxstep:
+    #         states1 = states1 + states
+    #         mcts_probs1 = mcts_probs1 + mcts_probs
+    #         winners1 = winners1+ [-1.0 for i in range(len(states))]
+    #     # 增加最小步骤
+    #     if picece_count<minstep:
+    #         states0 = states
+    #         mcts_probs0 = mcts_probs
+    #         winners0 = [1.0 for i in range(len(states))]
+    #         minstep = picece_count
+    #     # 增加最小步骤
+    #     elif picece_count==minstep:
+    #         states0 = states0 + states
+    #         mcts_probs0 = mcts_probs0 + mcts_probs
+    #         winners0 = winners0 + [1.0 for i in range(len(states))]
 
-        assert len(states)==len(mcts_probs)==len(winners)
-        return -1, zip(states, mcts_probs, winners)
+    #     print("minstep",minstep,"maxstep",maxstep)
+    #     states = states0 + states1
+    #     mcts_probs = mcts_probs0 + mcts_probs1
+    #     winners = winners0 + winners1
+
+    #     assert len(states)==len(mcts_probs)==len(winners)
+    #     return -1, zip(states, mcts_probs, winners)
 
     # # 使用 mcts 训练，重用搜索树，并保存数据
-    # def start_self_play2(self, player, temp=1e-3):
-    #     # 这里下两局，按得分和步数对比
-    #     states, mcts_probs, winers = [], [], []
+    def start_self_play(self, player, temp=1e-3):
+        # 这里下两局，按步数对比
+        states, mcts_probs, winers = [], [], []
 
-    #     game0 = copy.deepcopy(self)
-    #     game1 = copy.deepcopy(self)
+        game0 = copy.deepcopy(self)
+        game1 = copy.deepcopy(self)
 
-    #     game0_states,game1_states,game0_mcts_probs,game1_mcts_probs,game0_wins,game1_wins=[],[],[],[],[],[]
-    #     while not (game0.terminal or game1.terminal):
+        game0_states,game1_states,game0_mcts_probs,game1_mcts_probs,game0_wins,game1_wins=[],[],[],[],[],[]
 
-    #         # 一个方块一个方块的训练
-    #         # 最低训练方块
-    #         train_pieces_count = random.randint(3,6)  
-    #         for i in count():
-    #             action, move_probs = player.get_action(game0, temp=temp, return_prob=1)
-    #             game0_states.append(game0.current_state())
-    #             game0_mcts_probs.append(move_probs)
-    #             game0.step(action)
-    #             if game0.terminal or (game0.state!=0 and i%train_pieces_count==0): break
+        train_pieces_count = random.randint(3,6)  
+        for i in count():
+            action, move_probs = player.get_action(game0, temp=temp, return_prob=1) 
+            game0_states.append(game0.current_state())
+            game0_mcts_probs.append(move_probs)
+            game0.step(action)
+            if game0.terminal or (game0.state!=0 and i%train_pieces_count==0): break
 
-    #         for i in count():
-    #             action, move_probs = player.get_action(game1, temp=temp, return_prob=1)
-    #             game1_states.append(game1.current_state())
-    #             game1_mcts_probs.append(move_probs)
-    #             game1.step(action)
-    #             if game1.terminal or (game1.state!=0 and i%train_pieces_count==0): break
+        for i in count():
+            action, move_probs = player.get_action(game1, temp=temp, return_prob=1)
+            game1_states.append(game1.current_state())
+            game1_mcts_probs.append(move_probs)
+            game1.step(action)
+            if game1.terminal or (game1.state!=0 and i%train_pieces_count==0): break
 
-    #         # game0.print()
-    #         # game1.print()
+        game0.print()
+        game1.print()
 
-    #         game0_transCount = game0.getTransCount()
-    #         game1_transCount = game1.getTransCount()
+        game0_transCount = game0.getTransCount()
+        game1_transCount = game1.getTransCount()
             
-    #         print("game0_transCount:",game0_transCount,"game1_transCount:",game1_transCount)
-    #         # 如果有输赢，则直接出结果，如果相同，继续下一轮，直到出结果为止
-    #         if game0_transCount != game1_transCount:
-    #             game0_win, game1_win = -1, -1
-    #             # 比谁的交换次数少
-    #             if game0_transCount>game1_transCount:
-    #                 game0_win, game1_win  = 0, 1
-    #                 game0 = copy.deepcopy(game1)
+        print("game0_transCount:",game0_transCount,"game1_transCount:",game1_transCount)
+        # 如果有输赢，则直接出结果，如果相同，继续下一轮，直到出结果为止
+        game0_win, game1_win = -1, -1
+        # 比谁的交换次数少
+        if game0_transCount>game1_transCount:
+            game0_win, game1_win  = 0, 1
 
-    #             if game0_transCount<game1_transCount:
-    #                 game0_win, game1_win  = 1, 0
-    #                 game1 = copy.deepcopy(game0)
+        if game0_transCount<game1_transCount:
+            game0_win, game1_win  = 1, 0
 
-    #             for i in range(len(game0_states)):
-    #                 game0_wins.append(game0_win)
-    #             for i in range(len(game1_states)):
-    #                 game1_wins.append(game1_win)
+        for i in range(len(game0_states)):
+            game0_wins.append(game0_win)
+        for i in range(len(game1_states)):
+            game1_wins.append(game1_win)
 
-    #             for o in game0_states: states.append(o)
-    #             for o in game1_states: states.append(o)
-    #             for o in game0_mcts_probs: mcts_probs.append(o)
-    #             for o in game1_mcts_probs: mcts_probs.append(o)
-    #             for o in game0_wins: winers.append(o)
-    #             for o in game1_wins: winers.append(o)
+        for o in game0_states: states.append(o)
+        for o in game1_states: states.append(o)
+        for o in game0_mcts_probs: mcts_probs.append(o)
+        for o in game1_mcts_probs: mcts_probs.append(o)
+        for o in game0_wins: winers.append(o)
+        for o in game1_wins: winers.append(o)
 
-    #             game0_states,game1_states,game0_mcts_probs,game1_mcts_probs,game0_wins,game1_wins=[],[],[],[],[],[]
-    #             assert len(states)==len(mcts_probs)
-    #             assert len(states)==len(winers)
-    #     winners_z = np.zeros(len(winers))
-    #     winners_z[np.array(winers) == 1] = 1.0
-    #     winners_z[np.array(winers) == 0] = -1.0
-    #     game1.print()
-    #     print("add %s to dataset"%len(winers))
-    #     return -1, zip(states, mcts_probs, winners_z)
+        game0_states,game1_states,game0_mcts_probs,game1_mcts_probs,game0_wins,game1_wins=[],[],[],[],[],[]
+        assert len(states)==len(mcts_probs)
+        assert len(states)==len(winers)
+
+        winners_z = np.zeros(len(winers))
+        winners_z[np.array(winers) == 1] = 1.0
+        winners_z[np.array(winers) == 0] = -1.0
+
+        print("add %s to dataset"%len(winers))
+        return -1, zip(states, mcts_probs, winners_z)
 
     # # 使用 mcts 训练，重用搜索树，并保存数据
     # def start_self_play3(self, player, temp=1e-3):

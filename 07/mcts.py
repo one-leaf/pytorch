@@ -81,7 +81,7 @@ class MCTS():
             if (s, act) in self.Qsa: q = self.Qsa[(s, act)]
             if s in self.Ps: p = self.Ps[s][act]
             info.append([action, visit, round(q,2), round(p,2)]) 
-        print(state.step_count+1, self.lable, s ,"n_playout:", n, "depth:" ,self.max_depth, info, "var:", round(var,1))
+        print(state.steps+1, self.lable, s ,"n_playout:", n, "depth:" ,self.max_depth, info, "var:", round(var,1))
             #, \   "first:", state.positions_to_actions(list(self._first_act)[-3:]))
 
         if temp == 0:
@@ -140,7 +140,7 @@ class MCTS():
             # 获得当前局面的概率 和 局面的打分, 这个已经过滤掉了不可用走子
             act_probs, v = self._policy(state)
 
-            probs = np.zeros(state.size * state.size)
+            probs = np.zeros(state.actions_num)
             for act, prob in act_probs:
                 probs[act] = prob
             self.Ps[s] = probs 
@@ -297,49 +297,32 @@ class MCTSPlayer(object):
 
     def get_action(self, state, temp=0, return_prob=0, return_value=0):
         """计算下一步走子action"""
-        move_probs = np.zeros(state.size * state.size)
+        move_probs = np.zeros(state.actions_num)
         value = 0
-        if len(state.availables) > 0:  # 盘面可落子位置>0
+        if not state.terminal:  # 如果游戏没有结束
             # 训练的时候 temp = 1
             acts, act_probs, act_qs = self.mcts.get_action_probs(state, temp)
             move_probs[acts] = act_probs
             idx = np.argmax(act_probs)    
 
             if self._is_selfplay:  # 自我对抗
+                act = acts[idx]
+                # action = state.position_to_action(act)
+                value = act_qs[idx]
 
-                # 第一步棋为一手交换，随便下
-                # 前4步有50%的几率随便下
-                if False:#state.step_count==0: 
-                    # action = random.choice(state.first_availables)
-                    action = random.choice(state.availables)
-                    act =  state.action_to_position(action)
-                else:                    
-                    # 如果是下了几步后全部取最大值
+                # 如果标准差低于0.02，可以随机
+                # if act_qs[idx]>0 and state.step_count<state.n_in_row:
+                # print(np.std(act_probs))              
+                # if np.std(act_probs)<0.02 : 
+                p = 0.75                 
+                dirichlet = np.random.dirichlet(0.03 * np.ones(len(act_probs)))
+                act = np.random.choice(acts, p=p * act_probs + (1.0-p) * dirichlet)
+                action = state.position_to_action(act)
 
-                    # 如果得分为负数，且不是死局，再循环一次，找到最佳点
-                    # if act_qs[idx]<0 and act_qs[idx]>-0.8:
-                    #     acts, act_probs, act_qs = self.mcts.get_action_probs(state, temp)
-                    #     move_probs[acts] = act_probs
-                    #     idx = np.argmax(act_probs) 
-                    
-                    # if state.step_count>=state.n_in_row*2:
-
-                    act = acts[idx]
-                    action = state.position_to_action(act)
-                    value = act_qs[idx]
-
-                    # 如果标准差低于0.02，可以随机
-                    # if act_qs[idx]>0 and state.step_count<state.n_in_row:
-                    # print(np.std(act_probs))              
-                    if np.std(act_probs)<0.02 or state.step_count<state.n_in_row: 
-                        p= 0.9                 
-                        dirichlet = np.random.dirichlet(0.03 * np.ones(len(act_probs)))
-                        act = np.random.choice(acts, p=p * act_probs + (1.0-p) * dirichlet)
-                        action = state.position_to_action(act)
-        
                 if act!=acts[idx]:
                     print("    random:", state.position_to_action(acts[idx]), act_probs[idx], act_qs[idx], \
-                        "==>", action, act_probs[acts.index(act)], act_qs[acts.index(act)])                    
+                        "==>", action, act_probs[acts.index(act)], act_qs[acts.index(act)])  
+                                                                  
             else:  # 和人类对战
                 if state.step_count==0: 
                     action = random.choice(state.first_availables)
