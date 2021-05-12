@@ -93,7 +93,7 @@ class Train():
         self.lr_multiplier = 1.0  # 基于KL的自适应学习率
         self.temp = 1  # MCTS的概率参数，越大越不肯定，训练时1，预测时1e-3
         self.n_playout = 64  # 每个动作的模拟次数
-        self.buffer_size = 300000  # cache对战记录个数
+        self.buffer_size = 100000  # cache对战记录个数
         self.play_batch_size = 1 # 每次自学习次数
         self.epochs = 2  # 每次更新策略价值网络的训练步骤数, 推荐是5
         self.kl_targ = 0.02  # 策略价值网络KL值目标
