@@ -72,17 +72,18 @@ class MCTS():
         visits = [av[1] for av in act_visits]
         qs = [round(av[1],2) for av in act_Qs]
 
-        info=[]
-        for idx in sorted(range(len(visits)), key=visits.__getitem__)[::-1]:
-            if len(info)>2: break
-            act, visit = act_visits[idx]
-            action = state.position_to_action(act)
-            q, p= 0,0
-            if (s, act) in self.Qsa: q = self.Qsa[(s, act)]
-            if s in self.Ps: p = self.Ps[s][act]
-            info.append([action, visit, round(q,2), round(p,2)]) 
-        print(state.steps+1, self.lable, s ,"n_playout:", n, "depth:" ,self.max_depth, info, "var:", round(var,1))
-            #, \   "first:", state.positions_to_actions(list(self._first_act)[-3:]))
+        if state.steps%2==1:
+            info=[]
+            for idx in sorted(range(len(visits)), key=visits.__getitem__)[::-1]:
+                if len(info)>2: break
+                act, visit = act_visits[idx]
+                action = state.position_to_action(act)
+                q, p= 0,0
+                if (s, act) in self.Qsa: q = self.Qsa[(s, act)]
+                if s in self.Ps: p = self.Ps[s][act]
+                info.append([action, visit, round(q,2), round(p,2)]) 
+            print(state.steps+1, self.lable, s ,"n_playout:", n, "depth:" ,self.max_depth, info, "var:", round(var,1))
+                #, \   "first:", state.positions_to_actions(list(self._first_act)[-3:]))
 
         if temp == 0:
             bestAs = np.array(np.argwhere(visits == np.max(visits))).flatten()
