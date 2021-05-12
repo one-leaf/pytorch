@@ -1,3 +1,4 @@
+from numpy.core.shape_base import stack
 from game import Tetromino, TetrominoEnv, pieces, templatenum, blank, calcReward
 import pygame
 from pygame.locals import *
@@ -16,7 +17,6 @@ class Agent(object):
         self.height = 20
         self.actions_num = len(ACTIONS)
         self.reset()        
-        # self.prev_fallpiece_board=None
 
     def reset(self):
         # 下落的方块
@@ -40,7 +40,7 @@ class Agent(object):
         # 状态： 0 下落过程中 1 更换方块 2 结束一局
         self.state =0
         # 上一个下落方块的截图
-        self.prev_fallpiece_board=None
+        self.prev_fallpiece_boards=None
         # 下一个可用步骤
         self.availables=ACTIONS
 
@@ -229,16 +229,34 @@ class Agent(object):
         return board
 
     # 获得当前的全部特征
-    # 这里获取最后3步的信息 1 + 2 + 1 = 4
+    # 这里获取最后3步的信息 背景 + 最后三步的下落方块位置 + 下一次的方块 + 是否是先手 = 6
+    # 返回 [6, height, width]
     def current_state(self):
-        board = self.getBoard()
-        board_1 = self.get_fallpiece_board()
+        board_background = self.getBoard()
+        board_fallpiece = self.get_fallpiece_board()
+
         # 如果上一个面板为空，直接为当前下落方块
-        if self.prev_fallpiece_board is None:
-            self.prev_fallpiece_board=board_1
-        board_2 = self.get_nextpiece_borad()
-        state = np.stack([board, self.prev_fallpiece_board, board_1, board_2])
-        self.prev_fallpiece_board=board_1
+        if self.prev_fallpiece_boards is None:
+            self.prev_fallpiece_boards=[board_fallpiece,board_fallpiece,board_fallpiece]
+
+        board_nextpiece = self.get_nextpiece_borad()
+
+        prev_state = np.zeros([3, self.height, self.width])
+        for i in range(3):
+            for h in range(self.height):
+                for w in range(self.width):
+                    if self.prev_fallpiece_boards[i][h][w]==1:
+                        prev_state[i,h,w]=1.0
+        
+        step_state = np.zeros(self.height, self.width)
+        if self.steps%2==0:
+            step_state = np.ones(self.height, self.width)
+
+        state = np.stack([board_background, prev_state[0], prev_state[1], prev_state[2], board_nextpiece, step_state])
+        self.prev_fallpiece_board[0]=self.prev_fallpiece_board[1]
+        self.prev_fallpiece_board[1]=self.prev_fallpiece_board[2]
+        self.prev_fallpiece_board[2]=board_fallpiece
+
         return state        
 
     # 交替个数也就是从空到非空算一次，边界算非空 
@@ -380,24 +398,24 @@ class Agent(object):
         player.reset_player()
         for i in count():
             # 只保留有效的步数
-            if game0.steps%2==0:
-                action, move_probs = player.get_action(game0, temp=temp, return_prob=1) 
-                game0_states.append(game0.current_state())
-                game0_mcts_probs.append(move_probs)
-            else:
-                action = KEY_DOWN
+            # if game0.steps%2==0:
+            action, move_probs = player.get_action(game0, temp=temp, return_prob=1) 
+            game0_states.append(game0.current_state())
+            game0_mcts_probs.append(move_probs)
+            # else:
+            #     action = KEY_DOWN
             game0.step(action)
             if game0.terminal or game0.piececount>=train_pieces_count: break
 
         player.reset_player()
         for i in count():
             # 只保留有效的步数
-            if game1.steps%2==0:
-                action, move_probs = player.get_action(game1, temp=temp, return_prob=1)
-                game1_states.append(game1.current_state())
-                game1_mcts_probs.append(move_probs)
-            else:
-                action = KEY_DOWN
+            # if game1.steps%2==0:
+            action, move_probs = player.get_action(game1, temp=temp, return_prob=1)
+            game1_states.append(game1.current_state())
+            game1_mcts_probs.append(move_probs)
+            # else:
+            #     action = KEY_DOWN
             game1.step(action)
             if game1.terminal or game1.piececount>=train_pieces_count: break
 
