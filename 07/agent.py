@@ -378,15 +378,17 @@ class Agent(object):
         print("max pieces count:",train_pieces_count)
         for i in count():
             action, move_probs = player.get_action(game0, temp=temp, return_prob=1) 
-            game0_states.append(game0.current_state())
-            game0_mcts_probs.append(move_probs)
+            if game0.steps%2==0:
+                game0_states.append(game0.current_state())
+                game0_mcts_probs.append(move_probs)
             game0.step(action)
             if game0.terminal or game0.piececount>=train_pieces_count: break
 
         for i in count():
             action, move_probs = player.get_action(game1, temp=temp, return_prob=1)
-            game1_states.append(game1.current_state())
-            game1_mcts_probs.append(move_probs)
+            if game1.steps%2==0:
+                game1_states.append(game1.current_state())
+                game1_mcts_probs.append(move_probs)
             game1.step(action)
             if game1.terminal or game1.piececount>=train_pieces_count: break
 
