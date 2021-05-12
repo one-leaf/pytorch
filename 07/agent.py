@@ -378,6 +378,7 @@ class Agent(object):
         print("max pieces count:",train_pieces_count)
         for i in count():
             action, move_probs = player.get_action(game0, temp=temp, return_prob=1) 
+            # 只保留有效的步数
             if game0.steps%2==0:
                 game0_states.append(game0.current_state())
                 game0_mcts_probs.append(move_probs)
@@ -386,6 +387,7 @@ class Agent(object):
 
         for i in count():
             action, move_probs = player.get_action(game1, temp=temp, return_prob=1)
+            # 只保留有效的步数
             if game1.steps%2==0:
                 game1_states.append(game1.current_state())
                 game1_mcts_probs.append(move_probs)
