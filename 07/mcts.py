@@ -251,7 +251,7 @@ class MCTSPurePlayer(object):
             # 构建纯MCTS初始树(节点分布充分)，并返回child中访问量最大的action
             acts, act_probs, act_qs = self.mcts.get_action_probs(state, temp=0)
 
-            move_probs = np.zeros(state.size * state.size)
+            move_probs = np.zeros(state.actions_num)
             move_probs[acts] = act_probs
 
             idx = np.argmax(act_probs) 
