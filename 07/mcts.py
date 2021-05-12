@@ -124,6 +124,11 @@ class MCTS():
             # 这个有问题，计算量有点大，放弃
             # elif state.check_will_win():
             #     v = -2
+
+            # 如果触底了，表示下降赢了
+            if (state.state==1 and state.steps%2==1):
+                v = -1 * 1
+
             self.Es[s] = v
 
         # 如果得分不等于0，标志这局游戏结束
