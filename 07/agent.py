@@ -248,9 +248,9 @@ class Agent(object):
                     if self.prev_fallpiece_boards[i][h][w]==1:
                         prev_state[i,h,w]=1.0
         
-        step_state = np.zeros(self.height, self.width)
+        step_state = np.zeros([self.height, self.width])
         if self.steps%2==0:
-            step_state = np.ones(self.height, self.width)
+            step_state = np.ones([self.height, self.width])
 
         state = np.stack([board_background, prev_state[0], prev_state[1], prev_state[2], board_nextpiece, step_state])
         self.prev_fallpiece_board[0]=self.prev_fallpiece_board[1]
