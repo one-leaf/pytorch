@@ -296,7 +296,7 @@ class MCTSPlayer(object):
     def reset_player(self):
         self.mcts.reset()
 
-    def get_action(self, state, temp=0, return_prob=0, return_value=0):
+    def get_action(self, state, temp=0, return_prob=0, return_value=0):        
         """计算下一步走子action"""
         move_probs = np.zeros(state.actions_num)
         value = 0

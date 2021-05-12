@@ -376,24 +376,28 @@ class Agent(object):
 
         train_pieces_count = random.randint(3,6)  
         print("max pieces count:",train_pieces_count)
-        
+
         player.reset_player()
         for i in count():
-            action, move_probs = player.get_action(game0, temp=temp, return_prob=1) 
             # 只保留有效的步数
             if game0.steps%2==0:
+                action, move_probs = player.get_action(game0, temp=temp, return_prob=1) 
                 game0_states.append(game0.current_state())
                 game0_mcts_probs.append(move_probs)
+            else:
+                action = KEY_DOWN
             game0.step(action)
             if game0.terminal or game0.piececount>=train_pieces_count: break
 
         player.reset_player()
         for i in count():
-            action, move_probs = player.get_action(game1, temp=temp, return_prob=1)
             # 只保留有效的步数
             if game1.steps%2==0:
+                action, move_probs = player.get_action(game1, temp=temp, return_prob=1)
                 game1_states.append(game1.current_state())
                 game1_mcts_probs.append(move_probs)
+            else:
+                action = KEY_DOWN
             game1.step(action)
             if game1.terminal or game1.piececount>=train_pieces_count: break
 
