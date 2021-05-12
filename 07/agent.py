@@ -7,8 +7,8 @@ import numpy as np
 import copy
 import random
 
-KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN, KEY_NONE  = 0, 1, 2, 3, 4
-ACTIONS = [KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN, KEY_NONE]
+KEY_NONE, KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN = 0, 1, 2, 3, 4
+ACTIONS = [KEY_NONE, KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN]
 
 class Agent(object):
     def __init__(self):
@@ -53,10 +53,10 @@ class Agent(object):
 
     # action转概率的索引位置
     def action_to_position(self, action):
-        return ACTIONS.index(action)
+        return action
 
     def actions_to_positions(self, actions):
-        return [self.action_to_position(act) for act in actions]
+        return [act for act in actions]
 
 
     # 获取可用步骤, 保留一个旋转始终有用
@@ -65,8 +65,6 @@ class Agent(object):
         if self.steps%2==1: return [KEY_DOWN,]
 
         acts=[KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN, KEY_NONE]
-        # 为了避免mcts偏好，随机打乱
-        random.shuffle(acts)
         if not self.tetromino.validposition(self.board,self.fallpiece,ax = -1):
             acts.remove(KEY_LEFT)
         if not self.tetromino.validposition(self.board,self.fallpiece,ax = 1):
@@ -253,9 +251,9 @@ class Agent(object):
             step_state = np.ones([self.height, self.width])
 
         state = np.stack([board_background, prev_state[0], prev_state[1], prev_state[2], board_nextpiece, step_state])
-        self.prev_fallpiece_board[0]=self.prev_fallpiece_board[1]
-        self.prev_fallpiece_board[1]=self.prev_fallpiece_board[2]
-        self.prev_fallpiece_board[2]=board_fallpiece
+        self.prev_fallpiece_boards[0] = self.prev_fallpiece_boards[1]
+        self.prev_fallpiece_boards[1] = self.prev_fallpiece_boards[2]
+        self.prev_fallpiece_boards[2] = board_fallpiece
 
         return state        
 
@@ -427,18 +425,26 @@ class Agent(object):
             
         print("game0_transCount:",game0_transCount,"game1_transCount:",game1_transCount)
         # 如果有输赢，则直接出结果，如果相同，继续下一轮，直到出结果为止
-        game0_win, game1_win = -1, -1
+        game0_win, game1_win = 0, 0
+
         # 比谁的交换次数少
         if game0_transCount>game1_transCount:
-            game0_win, game1_win  = 0, 1
+            game0_win, game1_win  = -1, 1
 
         if game0_transCount<game1_transCount:
-            game0_win, game1_win  = 1, 0
+            game0_win, game1_win  = 1, -1
 
         for i in range(len(game0_states)):
-            game0_wins.append(game0_win)
+            if i%2==0:
+                game0_wins.append(game0_win)
+            else:
+                game0_wins.append(game0_win*-1)
+
         for i in range(len(game1_states)):
-            game1_wins.append(game1_win)
+            if i%2==0:
+                game1_wins.append(game1_win)
+            else:
+                game1_wins.append(game1_win*-1)
 
         for o in game0_states: states.append(o)
         for o in game1_states: states.append(o)
@@ -453,7 +459,7 @@ class Agent(object):
 
         winners_z = np.zeros(len(winers))
         winners_z[np.array(winers) == 1] = 1.0
-        winners_z[np.array(winers) == 0] = -1.0
+        winners_z[np.array(winers) == -1] = -1.0
 
         print("add %s to dataset"%len(winers))
         return -1, zip(states, mcts_probs, winners_z)
