@@ -200,14 +200,12 @@ class Train():
             for i, data in enumerate(training_loader):  # 计划训练批次
                 # 使用对抗数据重新训练策略价值网络模型
                 loss, entropy = self.policy_update(data, self.epochs)
-                # 每n个batch检查一下当前模型胜率
 
-                if (i+1) % (round(self.dataset.curr_size()/(self.batch_size*50))) == 0:
-                    self.policy_value_net.save_model(model_file)
-                    # 收集自我对抗数据
-                    for _ in range(self.play_batch_size):
-                        self.collect_selfplay_data()
-                    logging.info("TRAIN {} self-play end, size: {}".format(self.dataset.curr_game_batch_num, self.dataset.curr_size()))
+            self.policy_value_net.save_model(model_file)
+            # 收集自我对抗数据
+            for _ in range(self.play_batch_size):
+                self.collect_selfplay_data()
+            logging.info("TRAIN {} self-play end, size: {}".format(self.dataset.curr_game_batch_num, self.dataset.curr_size()))
                     
     
         except KeyboardInterrupt:
