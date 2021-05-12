@@ -72,7 +72,7 @@ class MCTS():
         visits = [av[1] for av in act_visits]
         qs = [round(av[1],2) for av in act_Qs]
 
-        if state.steps%2==1:
+        if state.steps%2==0:
             info=[]
             for idx in sorted(range(len(visits)), key=visits.__getitem__)[::-1]:
                 if len(info)>2: break
