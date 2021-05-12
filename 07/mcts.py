@@ -315,7 +315,8 @@ class MCTSPlayer(object):
                 # if act_qs[idx]>0 and state.step_count<state.n_in_row:
                 # print(np.std(act_probs))              
                 # if np.std(act_probs)<0.02 : 
-                p = 0.75                 
+                # 早期多随机
+                p = 0.25                 
                 dirichlet = np.random.dirichlet(0.03 * np.ones(len(act_probs)))
                 act = np.random.choice(acts, p=p * act_probs + (1.0-p) * dirichlet)
                 action = state.position_to_action(act)
