@@ -126,16 +126,14 @@ class MCTS():
             #     v = -2
 
             # 如果触底了，表示下降赢了
-            if (state.state==1 and state.steps%2==0):
+            if state.state==1:
                 v = -1 
-            
+                print('steps',state.steps,v)
             # 如果有得分
             if state.reward>0:
-                if state.steps%2==0:
-                    v = 1
-                else:
-                    v = -1
-
+                v = 1
+                print('steps',state.steps,v)
+                
             self.Es[s] = v
 
         # 如果得分不等于0，标志这局游戏结束
