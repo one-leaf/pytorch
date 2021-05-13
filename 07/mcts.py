@@ -116,23 +116,24 @@ class MCTS():
             v = 0
             # 这里是对上一步的评价，如果游戏结束对我而言都是不利的，v为-1
             # 这里增加了最终的奖励，提升对步骤的优化
-            if (end and winner != -1): 
+            # if (end and winner != -1): 
                 # if state.current_player==winner:
                 #     v = 1 * 2
                 # else:
-                v = -1 * 1
+                # v = -1 * 1
             # 这个有问题，计算量有点大，放弃
             # elif state.check_will_win():
             #     v = -2
 
+            # 如果结束了
+            if end and state.steps%2==1:
+                v = -1
             # 如果触底了，表示下降赢了
-            if state.state==1:
-                v = -1 
-                print('steps',state.steps,v)
+            if state.state==1 and state.steps%2==1:
+                v = -1
             # 如果有得分
-            if state.reward>0:
+            if state.reward>0 and state.steps%2==0:
                 v = 1
-                print('steps',state.steps,v)
                 
             self.Es[s] = v
 
