@@ -141,7 +141,12 @@ class PolicyValueNet():
         self.input_height = input_height
         self.input_size = input_width * input_height
         self.output_size = output_size
+
+        if device is None:
+            device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.device=device
+        print("use", device)
+
         self.l2_const = l2_const  
         self.policy_value_net = Net(self.input_size, self.output_size).to(device)
         self.print_netwark()
