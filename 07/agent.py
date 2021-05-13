@@ -27,6 +27,8 @@ class Agent(object):
         self.terminal = False
         # 得分
         self.score = 0
+        # 当前步得分
+        self.reward = 0
         # 等级
         self.level = 0
         # 全部步长
@@ -84,7 +86,7 @@ class Agent(object):
 
     def step(self, action, env=None):
         # 状态 0 下落过程中 1 更换方块 2 结束一局
-        reward = 0
+        self.reward = 0
         self.steps += 1
         self.piecesteps += 1
         self.level, self.fallfreq = self.tetromino.calculate(self.score)
@@ -108,8 +110,8 @@ class Agent(object):
 
         if not self.tetromino.validposition(self.board,self.fallpiece,ay = 1):
             self.tetromino.addtoboard(self.board,self.fallpiece)
-            reward = self.tetromino.removecompleteline(self.board) 
-            self.score += reward          
+            self.reward = self.tetromino.removecompleteline(self.board) 
+            self.score += self.reward          
             self.level, self.fallfreq = self.tetromino.calculate(self.score)   
             self.fallpiece = None
 
@@ -123,7 +125,7 @@ class Agent(object):
             if not self.tetromino.validposition(self.board,self.fallpiece):  
                 self.terminal = True 
                 self.state = 2       
-                return self.state, reward # calcReward(self.board, self.fallpiece)
+                return self.state, self.reward # calcReward(self.board, self.fallpiece)
             else: 
                 self.state =1
             self.piecesteps = 0
@@ -136,7 +138,7 @@ class Agent(object):
 
         self.availables = self.get_availables()
 
-        return self.state, reward
+        return self.state, self.reward
 
     def get_key(self):
         info = self.getBoard()

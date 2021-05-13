@@ -126,8 +126,15 @@ class MCTS():
             #     v = -2
 
             # 如果触底了，表示下降赢了
-            if (state.state==1 and state.steps%2==1):
-                v = -1 * 1
+            if (state.state==1 and state.steps%2==0):
+                v = -1 
+            
+            # 如果有得分
+            if state.reward>0:
+                if state.steps%2==0:
+                    v = 1
+                else:
+                    v = -1
 
             self.Es[s] = v
 
