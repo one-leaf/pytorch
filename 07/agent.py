@@ -143,15 +143,14 @@ class Agent(object):
         return self.state, self.reward
 
     def get_key(self):
-        info = self.getBoard()
-        info += self.get_fallpiece_board()
+        info = self.getBoard() + self.get_fallpiece_board()
         key = [0 for v in range(self.height*self.width)]
         for x in range(self.height):
             for y in range(self.width):
                 if info[x][y]==0:
-                    key[x+y*self.height]='0'
+                    key[x*self.width+y]='0'
                 else:
-                    key[x+y*self.height]='1'
+                    key[x*self.width+y]='1'
         # key.append(str(self.steps%2))
         key3 = int("".join(key),3)
         return hash(key3)
