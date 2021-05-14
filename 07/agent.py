@@ -1,5 +1,6 @@
 from numpy.core.shape_base import stack
-from game import Tetromino, TetrominoEnv, pieces, templatenum, blank, calcReward
+from game import Tetromino, TetrominoEnv, pieces, templatenum, blank, 
+from game import calcReward, rowTransitions, colTransitions, emptyHoles, wellNums 
 import pygame
 from pygame.locals import *
 from itertools import count
@@ -45,8 +46,7 @@ class Agent(object):
         self.prev_fallpiece_boards=None
         # 下一个可用步骤
         self.availables=ACTIONS
-        # 对当前局面的评估
-        self.exscore = 0
+        
 
     # 概率的索引位置转action
     def position_to_action(self, position):
@@ -115,7 +115,6 @@ class Agent(object):
             self.reward = self.tetromino.removecompleteline(self.board) 
             self.score += self.reward          
             self.level, self.fallfreq = self.tetromino.calculate(self.score)   
-            self.exscore = calcReward(self.board, self.fallpiece)
             self.fallpiece = None
 
         if  env:
@@ -267,6 +266,16 @@ class Agent(object):
     # 高度从底部 20 --> 0 上部
     def getTransCount(self, board=None):
         if board==None: board = self.board
+
+        _rowTransitions = rowTransitions(board)
+        _colTransitions = colTransitions(board)
+        _emptyHoles = emptyHoles(board)
+        _wellNums = wellNums(board)
+        return  -3.2178882868487753 * _rowTransitions \
+                + -9.348695305445199 * _colTransitions \
+                + -7.899265427351652 * _emptyHoles \
+                + -3.3855972247263626 * _wellNums; 
+
         transCount = 0
 
         # 统计一列的个数
@@ -426,8 +435,8 @@ class Agent(object):
         game0.print()
         game1.print()
 
-        game0_transCount = game0.exscore #game0.getTransCount()
-        game1_transCount = game1.exscore #game1.getTransCount()
+        game0_transCount = game0.getTransCount()
+        game1_transCount = game1.getTransCount()
             
         print("game0_exscore:",game0_transCount,"game1_exscore:",game1_transCount)
         # 如果有输赢，则直接出结果，如果相同，继续下一轮，直到出结果为止
