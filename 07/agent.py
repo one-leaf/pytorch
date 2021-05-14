@@ -457,12 +457,14 @@ class Agent(object):
         for o in game1_wins: winers.append(o)
 
         game0_states,game1_states,game0_mcts_probs,game1_mcts_probs,game0_wins,game1_wins=[],[],[],[],[],[]
-        assert len(states)==len(mcts_probs)
-        assert len(states)==len(winers)
+        winners_z = np.array(winers)
 
-        winners_z = np.zeros(len(winers))
-        winners_z[np.array(winers) == 1] = 1.0
-        winners_z[np.array(winers) == -1] = -1.0
+        assert len(states)==len(mcts_probs)
+        assert len(states)==len(winners_z)
+
+        # winners_z = np.zeros(len(winers))
+        # winners_z[np.array(winers) == 1] = 1.0
+        # winners_z[np.array(winers) == -1] = -1.0
 
         print("add %s to dataset"%len(winers))
         return -1, zip(states, mcts_probs, winners_z)
