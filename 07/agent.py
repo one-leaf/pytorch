@@ -45,6 +45,8 @@ class Agent(object):
         self.prev_fallpiece_boards=None
         # 下一个可用步骤
         self.availables=ACTIONS
+        # 对当前局面的评估
+        self.exscore = 0
 
     # 概率的索引位置转action
     def position_to_action(self, position):
@@ -113,6 +115,7 @@ class Agent(object):
             self.reward = self.tetromino.removecompleteline(self.board) 
             self.score += self.reward          
             self.level, self.fallfreq = self.tetromino.calculate(self.score)   
+            self.exscore = calcReward(self.board, self.fallpiece)
             self.fallpiece = None
 
         if  env:
@@ -125,7 +128,7 @@ class Agent(object):
             if not self.tetromino.validposition(self.board,self.fallpiece):  
                 self.terminal = True 
                 self.state = 2       
-                return self.state, self.reward # calcReward(self.board, self.fallpiece)
+                return self.state, self.reward # 
             else: 
                 self.state =1
             self.piecesteps = 0
@@ -288,41 +291,41 @@ class Agent(object):
         return transCount
 
     # 检测这一步是否优，如果好+1，不好-1，无法评价0
-    def checkActionisBest(self, include_fallpiece=True):
-        board = [[0]*self.width for i in range(self.height)]
-        for y in range(self.height):
-            for x in range(self.width):
-                board[y][x]=self.board[x][y]
+    # def checkActionisBest(self, include_fallpiece=True):
+    #     board = [[0]*self.width for i in range(self.height)]
+    #     for y in range(self.height):
+    #         for x in range(self.width):
+    #             board[y][x]=self.board[x][y]
 
-        if self.fallpiece != None and include_fallpiece:
-            piece = self.fallpiece
-            shapedraw = pieces[piece['shape']][piece['rotation']]
-            offset_y = 0
-            for t in range(self.height):
-                find=False
-                for y in range(templatenum):
-                    for x in range(templatenum):
-                        if shapedraw[y][x]!=blank:
-                            px, py = x+piece['x'], y+piece['y']+t
-                            if py>=self.height or board[py][px]!=blank:
-                                find=True
-                                break
-                    if find: break
-                if find:
-                    offset_y=t-1
-                    break
+    #     if self.fallpiece != None and include_fallpiece:
+    #         piece = self.fallpiece
+    #         shapedraw = pieces[piece['shape']][piece['rotation']]
+    #         offset_y = 0
+    #         for t in range(self.height):
+    #             find=False
+    #             for y in range(templatenum):
+    #                 for x in range(templatenum):
+    #                     if shapedraw[y][x]!=blank:
+    #                         px, py = x+piece['x'], y+piece['y']+t
+    #                         if py>=self.height or board[py][px]!=blank:
+    #                             find=True
+    #                             break
+    #                 if find: break
+    #             if find:
+    #                 offset_y=t-1
+    #                 break
             
-            for y in range(templatenum):
-                for x in range(templatenum):
-                    if shapedraw[y][x]!=blank:
-                        px, py = x+piece['x'], y+piece['y']+offset_y
-                        if px>=0 and py>=0:
-                            board[py][px]=shapedraw[y][x]
-        transCount = self.getTransCount(board)
-        # v = self.transCount - transCount
-        # if self.state != 0: 
-        #     self.transCount = transCount
-        return transCount    
+    #         for y in range(templatenum):
+    #             for x in range(templatenum):
+    #                 if shapedraw[y][x]!=blank:
+    #                     px, py = x+piece['x'], y+piece['y']+offset_y
+    #                     if px>=0 and py>=0:
+    #                         board[py][px]=shapedraw[y][x]
+    #     transCount = self.getTransCount(board)
+    #     # v = self.transCount - transCount
+    #     # if self.state != 0: 
+    #     #     self.transCount = transCount
+    #     return transCount    
 
     def game_end(self):
         return self.terminal, 0#, self.score
@@ -423,10 +426,10 @@ class Agent(object):
         game0.print()
         game1.print()
 
-        game0_transCount = game0.getTransCount()
-        game1_transCount = game1.getTransCount()
+        game0_transCount = game0.exscore #game0.getTransCount()
+        game1_transCount = game1.exscore #game1.getTransCount()
             
-        print("game0_transCount:",game0_transCount,"game1_transCount:",game1_transCount)
+        print("game0_exscore:",game0_transCount,"game1_exscore:",game1_transCount)
         # 如果有输赢，则直接出结果，如果相同，继续下一轮，直到出结果为止
         game0_win, game1_win = 0, 0
 
