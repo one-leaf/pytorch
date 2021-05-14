@@ -128,13 +128,17 @@ class MCTS():
             # 如果结束了,肯定输了
             if end :
                 v = 0.5 
-            # 如果触底了，表示输了，鼓励主动下落，同时惩罚被动下落
+            # 如果触底了，表示输了
             if state.state==1:
-                v = 0.5
+                if state.steps%2==0:
+                    v = 0.5
+                else:
+                    v = -0.5
+
             # 如果得分，表示赢了
             # 如果是下落时赢了，上一把奖励
             if state.reward>0:
-                if state.steps %2==1:
+                if state.steps%2==1:
                     v = 1
                 else:
                     v = -1
