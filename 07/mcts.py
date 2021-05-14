@@ -71,7 +71,7 @@ class MCTS():
         visits = [av[1] for av in act_visits]
         qs = [round(av[1],2) for av in act_Qs]
 
-        if state.steps%2==0:
+        if 1:#state.steps%2==0:
             info=[]
             for idx in sorted(range(len(visits)), key=visits.__getitem__)[::-1]:
                 if len(info)>2: break
@@ -145,19 +145,9 @@ class MCTS():
             # 获得当前局面的概率 和 局面的打分, 这个已经过滤掉了不可用走子
             act_probs, v = self._policy(state)
 
-            # 如果触底了，表示输了
-            if state.state==1:
-                if state.steps%2==0:
-                    v = v+0.5               
-                else:
-                    v = v-0.5
-
-            # 如果得分，表示赢了
-            if state.reward>0:
-                if state.steps%2==0:
-                    v = -1
-                else:
-                    v = 1
+            # 如果触底但没有得分，表示输了
+            if state.state==1 and state.reward==0:
+                v = v+0.5               
 
             probs = np.zeros(state.actions_num)
             for act, prob in act_probs:
