@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # 进行git的函数，处理从add到push
 function gitpush()
