@@ -125,12 +125,9 @@ class MCTS():
             # elif state.check_will_win():
             #     v = -2
 
-            # 如果结束了,肯定输了
-            if end :
-                v = 0.5 
             # 如果触底了，表示输了
-            if state.state==1:
-                if state.steps%2==0:
+            if state.state==1 or end:
+                if state.steps%2==1:
                     v = 0.5
                 else:
                     v = -0.5
@@ -138,7 +135,7 @@ class MCTS():
             # 如果得分，表示赢了
             # 如果是下落时赢了，上一把奖励
             if state.reward>0:
-                if state.steps%2==1:
+                if state.steps%2==0:
                     v = 1
                 else:
                     v = -1
