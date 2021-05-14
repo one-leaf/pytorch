@@ -81,7 +81,7 @@ class MCTS():
                 if (s, act) in self.Qsa: q = self.Qsa[(s, act)]
                 if s in self.Ps: p = self.Ps[s][act]
                 info.append([action, visit, round(q,2), round(p,2)]) 
-            print(state.steps+1, self.lable, s ,"n_playout:", n, "depth:" ,self.max_depth, info, "var:", round(var,1))
+            print(state.steps, self.lable, s ,"n_playout:", n, "depth:" ,self.max_depth, info, "var:", round(var,1))
                 #, \   "first:", state.positions_to_actions(list(self._first_act)[-3:]))
 
         if temp == 0:
@@ -128,12 +128,16 @@ class MCTS():
             # 如果结束了,肯定输了
             if end :
                 v = 0.5 
-            # 如果触底了，表示输了
+            # 如果触底了，表示输了，鼓励主动下落，同时惩罚被动下落
             if state.state==1:
                 v = 0.5
-            # 如果有得分，表示赢了
+            # 如果得分，表示赢了
+            # 如果是下落时赢了，上一把奖励
             if state.reward>0:
-                v = -1
+                if state.steps %2==1:
+                    v = 1
+                else:
+                    v = -1
                 
             self.Es[s] = v
 
