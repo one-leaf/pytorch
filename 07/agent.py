@@ -1,5 +1,5 @@
 from numpy.core.shape_base import stack
-from game import Tetromino, TetrominoEnv, pieces, templatenum, blank, 
+from game import Tetromino, TetrominoEnv, pieces, templatenum, blank 
 from game import calcReward, rowTransitions, colTransitions, emptyHoles, wellNums 
 import pygame
 from pygame.locals import *
