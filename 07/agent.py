@@ -152,7 +152,7 @@ class Agent(object):
                     key[x+y*self.height]='0'
                 else:
                     key[x+y*self.height]='1'
-        # key.append(str(self.steps%2))
+        key.append(str(self.steps%2))
         key3 = int("".join(key),3)
         return hash(key3)
 
