@@ -271,10 +271,10 @@ class Agent(object):
         _colTransitions = colTransitions(board)
         _emptyHoles = emptyHoles(board)
         _wellNums = wellNums(board)
-        return  -3.2178882868487753 * _rowTransitions \
-                + -9.348695305445199 * _colTransitions \
-                + -7.899265427351652 * _emptyHoles \
-                + -3.3855972247263626 * _wellNums; 
+        return  3.2178882868487753 * _rowTransitions \
+                + 9.348695305445199 * _colTransitions \
+                + 7.899265427351652 * _emptyHoles \
+                + 3.3855972247263626 * _wellNums; 
 
         transCount = 0
 
