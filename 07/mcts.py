@@ -125,15 +125,15 @@ class MCTS():
             # elif state.check_will_win():
             #     v = -2
 
-            # 如果结束了
-            if end and state.steps%2==1:
-                v = -1
-            # 如果触底了，表示下降赢了
-            if state.state==1 and state.steps%2==1:
-                v = -1
-            # 如果有得分
-            if state.reward>0 and state.steps%2==0:
+            # 如果结束了,肯定输了
+            if end :
                 v = 1
+            # 如果触底了，表示输了
+            if state.state==1:
+                v = 1
+            # 如果有得分，表示赢了
+            if state.reward>0:
+                v = -1
                 
             self.Es[s] = v
 
@@ -326,7 +326,7 @@ class MCTSPlayer(object):
                 # print(np.std(act_probs))              
                 # if np.std(act_probs)<0.02 : 
                 # 早期多随机
-                p = 0.5                 
+                p = 0.75                 
                 dirichlet = np.random.dirichlet(0.03 * np.ones(len(act_probs)))
                 act = np.random.choice(acts, p=p * act_probs + (1.0-p) * dirichlet)
                 action = state.position_to_action(act)
