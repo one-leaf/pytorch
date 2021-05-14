@@ -127,10 +127,10 @@ class MCTS():
 
             # 如果结束了,肯定输了
             if end :
-                v = 1
+                v = 0.5 
             # 如果触底了，表示输了
             if state.state==1:
-                v = 1
+                v = 0.5
             # 如果有得分，表示赢了
             if state.reward>0:
                 v = -1
