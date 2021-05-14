@@ -125,17 +125,10 @@ class MCTS():
             # elif state.check_will_win():
             #     v = -2
 
-            # 如果触底了，表示输了
-            if state.state==1 or end:
-                if state.steps%2==1:
-                    v = -0.5               
+            # 游戏结束双方都输掉了
+            if end:
+               v = 1 
 
-            # 如果得分，表示赢了
-            # 如果是下落时赢了，上一把奖励
-            if state.reward>0:
-                if state.steps%2==1:
-                    v = 1
-                
             self.Es[s] = v
 
         # 如果得分不等于0，标志这局游戏结束
@@ -151,6 +144,20 @@ class MCTS():
                 
             # 获得当前局面的概率 和 局面的打分, 这个已经过滤掉了不可用走子
             act_probs, v = self._policy(state)
+
+            # 如果触底了，表示输了
+            if state.state==1:
+                if state.steps%2==0:
+                    v = v+0.5               
+                else:
+                    v = v-0.5
+
+            # 如果得分，表示赢了
+            if state.reward>0:
+                if state.steps%2==0:
+                    v = -1
+                else:
+                    v = 1
 
             probs = np.zeros(state.actions_num)
             for act, prob in act_probs:
