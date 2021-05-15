@@ -98,6 +98,7 @@ class Dataset(torch.utils.data.Dataset):
             if i>=1000: break       
         print("mv %s files to train"%i)
         if i==0:
+            print("SLEEP 60s for watting data")
             time.sleep(60)
             raise Exception("NEED SOME NEW DATA TO TRAIN")
 
