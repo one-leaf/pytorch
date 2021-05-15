@@ -99,7 +99,7 @@ class Agent(object):
         if action == KEY_RIGHT and self.tetromino.validposition(self.board,self.fallpiece,ax = 1):
             self.fallpiece['x']+=1  
 
-        if (action == KEY_DOWN or action == KEY_DOWN2)and self.tetromino.validposition(self.board,self.fallpiece,ay = 1):
+        if (action == KEY_DOWN or action == KEY_DOWN2) and self.tetromino.validposition(self.board,self.fallpiece,ay = 1):
             self.fallpiece['y']+=1  
 
         if action == KEY_ROTATION:
