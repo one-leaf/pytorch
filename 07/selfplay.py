@@ -11,9 +11,7 @@ import sys, time
 from itertools import count
 from collections import deque
 from collections import namedtuple
-import os, math, random
-
-from threading import Thread, Lock
+import os, math, random, uuid
 
 import numpy as np
 import torch
@@ -26,26 +24,29 @@ GAME_WIDTH, GAME_HEIGHT = 10, 20
 curr_dir = os.path.dirname(os.path.abspath(__file__))
 data_dir = os.path.join(curr_dir, './data/')
 if not os.path.exists(data_dir): os.makedirs(data_dir)
+
 data_wait_dir = os.path.join(curr_dir, './data/wait/')
 if not os.path.exists(data_wait_dir): os.makedirs(data_wait_dir)
+
 model_dir = os.path.join(curr_dir, './model/')
 if not os.path.exists(model_dir): os.makedirs(model_dir)
 model_file =  os.path.join(model_dir, 'model.pth')
 
 class Dataset(torch.utils.data.Dataset):
-    def __init__(self, data_dir, max_keep_size):
+    def __init__(self, data_dir, buffer_size):
         # 训练数据存放路径
         self.data_dir = data_dir                
         # 训练数据最大保存个数
-        self.max_keep_size = max_keep_size
+        self.buffer_size = buffer_size
 
         # 当前训练数据索引保存文件
         self.data_index_file = os.path.join(data_dir, 'index.txt')
-        self.file_list = deque(maxlen=max_keep_size)    
-        self._save_lock = Lock()
+        # 当前训练数据索引
+        self.curr_game_batch_num = 0        
+        self.load_game_batch_num()
 
-        self.load_index()
-        self.copy_wait_file()
+        # 当前数据训练文件
+        self.file_list = []
         self.load_game_files()
 
     def __len__(self):
@@ -54,15 +55,7 @@ class Dataset(torch.utils.data.Dataset):
     def __getitem__(self, index):
         filename = self.file_list[index]
         # 状态，步骤的概率，最终得分
-        while True:
-            try:
-                state, mcts_prob, winner = pickle.load(open(filename, "rb"))
-            except:
-                print("filename {} error can't load".format(filename))
-                os.remove(filename)
-                filename = random.choice(self.file_list)
-            else:
-                break
+        state, mcts_prob, winner = pickle.load(open(filename, "rb"))
         state = torch.from_numpy(state).float()
         mcts_prob = torch.from_numpy(mcts_prob).float()
         winner = torch.as_tensor(winner).float()
@@ -74,40 +67,23 @@ class Dataset(torch.utils.data.Dataset):
         for filename in files:
             self.file_list.append(filename)
 
-    def save_index(self):
+    def save_game_batch_num(self):
         with open(self.data_index_file, "w") as f:
-            f.write(str(self.index))
+            f.write(str(self.curr_game_batch_num))
 
-    def load_index(self):
+    def load_game_batch_num(self):
         if os.path.exists(self.data_index_file):
-            self.index = int(open(self.data_index_file, 'r').read().strip())
-
-    def copy_wait_file(self):
-        movefiles=os.listdir(data_wait_dir)
-        # 等待5秒钟，防止有数据还在写入
-        time.sleep(5)
-        i = 0
-        for i, fn in enumerate(movefiles):
-            filename = "{}.pkl".format(self.index % self.max_keep_size,)
-            savefile = os.path.join(self.data_dir, filename)
-            if os.path.exists(savefile): os.remove(savefile)
-            os.rename(os.path.join(data_wait_dir,fn), savefile)
-            self.index += 1
-            self.save_index() 
-            if i>=1000: break       
-        print("mv %s files to train"%i)
-        if i==0:
-            time.sleep(60)
-            raise Exception("NEED SOME NEW DATA TO TRAIN")
+            self.curr_game_batch_num = int(open(self.data_index_file, 'r').read().strip())
 
     # 保存新的训练样本，但不参与到本次训练，等下一次训练加载
     def save(self, obj):
         # 文件名为buffer取余，循环保存
-        filename = "{}.pkl".format(self.curr_game_batch_num % self.buffer_size,)
-        savefile = os.path.join(self.data_dir, filename)
+        filename = "{}.pkl".format(uuid.uuid1())
+        # filename = "{}.pkl".format(self.curr_game_batch_num % self.buffer_size,)
+        savefile = os.path.join(self.data_wait_dir, filename)
         pickle.dump(obj, open(savefile, "wb"))
-        self.curr_game_batch_num += 1
-        self.save_game_batch_num()
+        # self.curr_game_batch_num += 1
+        # self.save_game_batch_num()
         
     def curr_size(self):
         return len(self.file_list)
@@ -122,7 +98,7 @@ class Train():
         self.lr_multiplier = 1.0  # 基于KL的自适应学习率
         self.temp = 1  # MCTS的概率参数，越大越不肯定，训练时1，预测时1e-3
         self.n_playout = 100  # 每个动作的模拟战记录个数
-        self.play_batch_size = 1 # 每次自学习次数
+        self.play_batch_size = 5 # 每次自学习次数
         self.buffer_size = 100000  # cache对次数
         self.epochs = 2  # 每次更新策略价值网络的训练步骤数, 推荐是5
         self.kl_targ = 0.02  # 策略价值网络KL值目标
@@ -208,9 +184,9 @@ class Train():
     def run(self):
         """启动训练"""
         try:
-            print("start data loader")
-            self.dataset = Dataset(data_dir, self.buffer_size)
-            print("end data loader")
+            # print("start data loader")
+            # self.dataset = Dataset(data_dir, self.buffer_size)
+            # print("end data loader")
 
             # step = 0
             # # 如果训练数据一半都不到，就先攒训练数据
@@ -224,17 +200,17 @@ class Train():
             #         logging.info("TRAIN Batch:{} end".format(self.dataset.curr_game_batch_num,))
             #         step += 1
 
-            training_loader = torch.utils.data.DataLoader(self.dataset, batch_size=self.batch_size, shuffle=True, num_workers=2,)
+            # training_loader = torch.utils.data.DataLoader(self.dataset, batch_size=self.batch_size, shuffle=True, num_workers=2,)
 
-            for i, data in enumerate(training_loader):  # 计划训练批次
-                # 使用对抗数据重新训练策略价值网络模型
-                loss, entropy = self.policy_update(data, self.epochs)
+            # for i, data in enumerate(training_loader):  # 计划训练批次
+            #     # 使用对抗数据重新训练策略价值网络模型
+            #     loss, entropy = self.policy_update(data, self.epochs)
 
-            self.policy_value_net.save_model(model_file)
+            # self.policy_value_net.save_model(model_file)
             # 收集自我对抗数据
-            # for _ in range(self.play_batch_size):
-            #     self.collect_selfplay_data()
-            # logging.info("TRAIN {} self-play end, size: {}".format(self.dataset.curr_game_batch_num, self.dataset.curr_size()))
+            for _ in range(self.play_batch_size):
+                self.collect_selfplay_data()
+            logging.info("TRAIN {} self-play end, size: {}".format(self.dataset.curr_game_batch_num, self.dataset.curr_size()))
                     
     
         except KeyboardInterrupt:
