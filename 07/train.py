@@ -43,7 +43,6 @@ class Dataset(torch.utils.data.Dataset):
         self.file_list = deque(maxlen=max_keep_size)    
         self._save_lock = Lock()
 
-        self.index = 0
         self.load_index()
         self.copy_wait_file()
         self.load_game_files()
@@ -81,6 +80,8 @@ class Dataset(torch.utils.data.Dataset):
     def load_index(self):
         if os.path.exists(self.data_index_file):
             self.index = int(open(self.data_index_file, 'r').read().strip())
+        else:
+            self.index = 0
 
     def copy_wait_file(self):
         movefiles=os.listdir(data_wait_dir)
