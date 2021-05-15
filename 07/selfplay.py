@@ -184,9 +184,9 @@ class Train():
     def run(self):
         """启动训练"""
         try:
-            # print("start data loader")
-            # self.dataset = Dataset(data_dir, self.buffer_size)
-            # print("end data loader")
+            print("start data loader")
+            self.dataset = Dataset(data_dir, self.buffer_size)
+            print("end data loader")
 
             # step = 0
             # # 如果训练数据一半都不到，就先攒训练数据
