@@ -80,7 +80,7 @@ class Dataset(torch.utils.data.Dataset):
         # 文件名为buffer取余，循环保存
         filename = "{}.pkl".format(uuid.uuid1())
         # filename = "{}.pkl".format(self.curr_game_batch_num % self.buffer_size,)
-        savefile = os.path.join(self.data_wait_dir, filename)
+        savefile = os.path.join(data_wait_dir, filename)
         pickle.dump(obj, open(savefile, "wb"))
         # self.curr_game_batch_num += 1
         # self.save_game_batch_num()
