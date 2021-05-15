@@ -3,7 +3,7 @@ import os, glob, pickle
 from time import time
 from model import PolicyValueNet
 import logging
-from agent import Agent
+from agent import Agent, ACTIONS
 from mcts import MCTSPlayer
 
 import sys, time
@@ -19,7 +19,7 @@ import numpy as np
 import torch
 
 # 定义游戏的动作
-GAME_ACTIONS_NUM = 5 
+GAME_ACTIONS_NUM = len(ACTIONS) 
 GAME_WIDTH, GAME_HEIGHT = 10, 20
 
 # 定义游戏的保存文件名和路径

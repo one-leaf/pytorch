@@ -8,8 +8,8 @@ import numpy as np
 import copy
 import random
 
-KEY_NONE, KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN = 0, 1, 2, 3, 4
-ACTIONS = [KEY_NONE, KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN]
+KEY_NONE, KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN , KEY_DOWN2= 0, 1, 2, 3, 4, 5
+ACTIONS = [KEY_NONE, KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN, KEY_DOWN2]
 
 class Agent(object):
     def __init__(self):
@@ -66,7 +66,7 @@ class Agent(object):
     # 获取可用步骤, 保留一个旋转始终有用
     # 将单人游戏变为双人博弈，一个正常下，一个只下走，
     def get_availables(self):
-        if self.steps%2==1: return [KEY_DOWN,]
+        if self.steps%2==1: return [KEY_DOWN2,]
 
         acts=[KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN, KEY_NONE]
         if not self.tetromino.validposition(self.board,self.fallpiece,ax = -1):
@@ -99,7 +99,7 @@ class Agent(object):
         if action == KEY_RIGHT and self.tetromino.validposition(self.board,self.fallpiece,ax = 1):
             self.fallpiece['x']+=1  
 
-        if action == KEY_DOWN and self.tetromino.validposition(self.board,self.fallpiece,ay = 1):
+        if (action == KEY_DOWN or action == KEY_DOWN2)and self.tetromino.validposition(self.board,self.fallpiece,ay = 1):
             self.fallpiece['y']+=1  
 
         if action == KEY_ROTATION:
