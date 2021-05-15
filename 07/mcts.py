@@ -147,6 +147,7 @@ class MCTS():
 
             # 如果是下降时触底，并且没有得分，表示赢了，即上一步输了
             if state.state==1 and state.reward==0:
+                print(state.steps)
                 if state.steps%2==0: 
                     v = v-0.5               
 
