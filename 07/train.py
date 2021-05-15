@@ -38,12 +38,12 @@ class Dataset(torch.utils.data.Dataset):
         self.data_dir = data_dir                
         # 训练数据最大保存个数
         self.max_keep_size = max_keep_size
-
         # 当前训练数据索引保存文件
         self.data_index_file = os.path.join(data_dir, 'index.txt')
         self.file_list = deque(maxlen=max_keep_size)    
         self._save_lock = Lock()
 
+        self.index = 0
         self.load_index()
         self.copy_wait_file()
         self.load_game_files()
