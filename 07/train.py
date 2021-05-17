@@ -229,6 +229,9 @@ class Train():
             training_loader = torch.utils.data.DataLoader(self.dataset, batch_size=self.batch_size, shuffle=True, num_workers=2,)
 
             for i, data in enumerate(training_loader):  # 计划训练批次
+                if i==0:
+                    for obj in data:
+                        print(obj[0])
                 # 使用对抗数据重新训练策略价值网络模型
                 loss, entropy = self.policy_update(data, self.epochs)
 
