@@ -402,7 +402,7 @@ class Agent(object):
         game0 = copy.deepcopy(self)
         game1 = copy.deepcopy(self)
 
-        game0_states,game1_states,game0_mcts_probs,game1_mcts_probs,game0_wins,game1_wins=[],[],[],[],[],[]
+        game0_states,game1_states,game0_mcts_probs,game1_mcts_probs,game0_players,game1_players=[],[],[],[],[],[]
 
         train_pieces_count = random.randint(3,6)  
         print("max pieces count:",train_pieces_count)
@@ -410,24 +410,22 @@ class Agent(object):
         player.reset_player()
         for i in count():
             # 只保留有效的步数
-            # if game0.steps%2==0:
             action, move_probs = player.get_action(game0, temp=temp, return_prob=1) 
-            game0_states.append(game0.current_state())
-            game0_mcts_probs.append(move_probs)
-            # else:
-            #     action = KEY_DOWN
+            if game0.steps%2==0:
+                game0_states.append(game0.current_state())
+                game0_mcts_probs.append(move_probs)
+                game0_players.append(game0.steps%2)
             game0.step(action)
             if game0.terminal or game0.piececount>=train_pieces_count: break
 
         player.reset_player()
         for i in count():
             # 只保留有效的步数
-            # if game1.steps%2==0:
             action, move_probs = player.get_action(game1, temp=temp, return_prob=1)
-            game1_states.append(game1.current_state())
-            game1_mcts_probs.append(move_probs)
-            # else:
-            #     action = KEY_DOWN
+            if game1.steps%2==0:
+                game1_states.append(game1.current_state())
+                game1_mcts_probs.append(move_probs)
+                game1_players.append(game1.steps%2)
             game1.step(action)
             if game1.terminal or game1.piececount>=train_pieces_count: break
 
@@ -448,24 +446,24 @@ class Agent(object):
         if game0_transCount<game1_transCount:
             game0_win, game1_win  = 1, -1
 
-        for i in range(len(game0_states)):
-            if i%2==0:
-                game0_wins.append(game0_win)
-            else:
-                game0_wins.append(game0_win*-1)
+        winers = []
 
-        for i in range(len(game1_states)):
-            if i%2==0:
-                game1_wins.append(game1_win)
+        for i in game0_players:
+            if i==0:
+                winers.append(game0_win)
             else:
-                game1_wins.append(game1_win*-1)
+                winers.append(game0_win*-1)
+
+        for i in game1_players:
+            if i==0:
+                winers.append(game1_win)
+            else:
+                winers.append(game1_win*-1)
 
         for o in game0_states: states.append(o)
         for o in game1_states: states.append(o)
         for o in game0_mcts_probs: mcts_probs.append(o)
         for o in game1_mcts_probs: mcts_probs.append(o)
-        for o in game0_wins: winers.append(o)
-        for o in game1_wins: winers.append(o)
 
         game0_states,game1_states,game0_mcts_probs,game1_mcts_probs,game0_wins,game1_wins=[],[],[],[],[],[]
         winners_z = np.array(winers)
