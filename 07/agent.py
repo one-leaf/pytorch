@@ -474,6 +474,9 @@ class Agent(object):
         # winners_z = np.zeros(len(winers))
         # winners_z[np.array(winers) == 1] = 1.0
         # winners_z[np.array(winers) == -1] = -1.0
+        print(states[0])
+        print(mcts_probs[0])
+        print(winners_z[0])
 
         print("add %s to dataset"%len(winers))
         return -1, zip(states, mcts_probs, winners_z)
