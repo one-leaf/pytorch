@@ -45,7 +45,7 @@ class Agent(object):
         # 上一个下落方块的截图
         self.prev_fallpiece_boards=None
         # 下一个可用步骤
-        self.availables=ACTIONS
+        self.availables=self.get_availables()
         
 
     # 概率的索引位置转action
