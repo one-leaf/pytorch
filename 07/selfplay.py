@@ -140,7 +140,10 @@ class Train():
         logging.info("TRAIN Self Play end. length:%s saving ..." % episode_len)
         # 保存对抗数据到data_buffer
         for obj in play_data:
-            self.dataset.save(obj)
+            filename = "{}.pkl".format(uuid.uuid1())
+            savefile = os.path.join(data_wait_dir, filename)
+            pickle.dump(obj, open(savefile, "wb"))
+            # self.dataset.save(obj)
 
     def policy_update(self, sample_data, epochs=1):
         """更新策略价值网络policy-value"""
@@ -184,9 +187,9 @@ class Train():
     def run(self):
         """启动训练"""
         try:
-            print("start data loader")
-            self.dataset = Dataset(data_dir, self.buffer_size)
-            print("end data loader")
+            # print("start data loader")
+            # self.dataset = Dataset(data_dir, self.buffer_size)
+            # print("end data loader")
 
             # step = 0
             # # 如果训练数据一半都不到，就先攒训练数据
@@ -208,9 +211,9 @@ class Train():
 
             # self.policy_value_net.save_model(model_file)
             # 收集自我对抗数据
-            for _ in range(self.play_batch_size):
-                self.collect_selfplay_data()
-            logging.info("TRAIN {} self-play end, size: {}".format(self.dataset.curr_game_batch_num, self.dataset.curr_size()))
+            # for _ in range(self.play_batch_size):
+            self.collect_selfplay_data()
+            # logging.info("TRAIN {} self-play end, size: {}".format(self.dataset.curr_game_batch_num, self.dataset.curr_size()))
                     
     
         except KeyboardInterrupt:
