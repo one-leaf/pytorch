@@ -44,9 +44,11 @@ class Agent(object):
         self.state =0
         # 上一个下落方块的截图
         self.prev_fallpiece_boards=None
+        # 当前player
+        self.curr_player = 0           
         # 下一个可用步骤
         self.availables=self.get_availables()
-        
+             
 
     # 概率的索引位置转action
     def position_to_action(self, position):
@@ -66,7 +68,7 @@ class Agent(object):
     # 获取可用步骤, 保留一个旋转始终有用
     # 将单人游戏变为双人博弈，一个正常下，一个只下走，
     def get_availables(self):
-        if self.steps%2==1: return [KEY_DOWN2,]
+        if self.curr_player==1: return [KEY_DOWN2,]
 
         acts=[KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN, KEY_NONE]
         if not self.tetromino.validposition(self.board,self.fallpiece,ax = -1):
@@ -91,6 +93,8 @@ class Agent(object):
         self.reward = 0
         self.steps += 1
         self.piecesteps += 1
+        self.curr_player = (self.curr_player+1)%2
+
         self.level, self.fallfreq = self.tetromino.calculate(self.score)
 
         if action == KEY_LEFT and self.tetromino.validposition(self.board,self.fallpiece,ax = -1):
@@ -132,6 +136,7 @@ class Agent(object):
                 self.state =1
             self.piecesteps = 0
             self.piececount +=1 
+            self.curr_player = 0
         else:
             self.state = 0
         
@@ -238,7 +243,7 @@ class Agent(object):
         board_fallpiece = self.get_fallpiece_board()
         board_nextpiece = self.get_nextpiece_borad()
         
-        if self.steps%2==0:
+        if self.curr_player==0:
             step_state = np.ones([self.height, self.width])
         else:
             step_state = np.zeros([self.height, self.width])
@@ -395,7 +400,7 @@ class Agent(object):
         player.reset_player()
         for i in count():
             if game0.piecesteps<=15:
-                if game0.steps%2==0:
+                if self.curr_player==0:
                     action = random.choice([KEY_ROTATION, KEY_LEFT, KEY_RIGHT])
                 else:
                     action = KEY_DOWN2
@@ -413,7 +418,7 @@ class Agent(object):
         player.reset_player()
         for i in count():
             if game1.piecesteps<=15:
-                if game1.steps%2==0:
+                if self.curr_player==0:
                     action = random.choice([KEY_ROTATION, KEY_LEFT, KEY_RIGHT])
                 else:
                     action = KEY_DOWN2
