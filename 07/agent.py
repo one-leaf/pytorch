@@ -411,7 +411,7 @@ class Agent(object):
             if self.curr_player==0 or random.random()>0.75:
                 game0_states.append(game0.current_state())
                 game0_mcts_probs.append(move_probs)
-                game0_players.append(game0.steps%2)
+                game0_players.append(self.curr_player)
             game0.step(action)
             if game0.terminal or game0.piececount>=train_pieces_count: break
 
@@ -429,7 +429,7 @@ class Agent(object):
             if self.curr_player==0 or random.random()>0.75:
                 game1_states.append(game1.current_state())
                 game1_mcts_probs.append(move_probs)
-                game1_players.append(game1.steps%2)
+                game1_players.append(self.curr_player)
             game1.step(action)
             if game1.terminal or game1.piececount>=train_pieces_count: break
 
