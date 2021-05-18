@@ -411,7 +411,7 @@ class Agent(object):
         for i in count():
             # 只保留有效的步数
             action, move_probs = player.get_action(game0, temp=temp, return_prob=1) 
-            if game0.steps%2==0 or random.random()>0.8:
+            if game0.steps%2==0 or random.random()>0.5:
                 game0_states.append(game0.current_state())
                 game0_mcts_probs.append(move_probs)
                 game0_players.append(game0.steps%2)
