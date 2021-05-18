@@ -231,34 +231,19 @@ class Agent(object):
         return board
 
     # 获得当前的全部特征
-    # 这里获取最后3步的信息 背景 + 最后三步的下落方块位置 + 下一次的方块 + 是否是先手 = 6
+    # 这里获取最后3步的信息 背景 + 下落方块位置 + 下一次的方块 + 是否是先手 = 6
     # 返回 [6, height, width]
     def current_state(self):
         board_background = self.getBoard()
         board_fallpiece = self.get_fallpiece_board()
-
-        # 如果上一个面板为空，直接为当前下落方块
-        if self.prev_fallpiece_boards is None:
-            self.prev_fallpiece_boards=[board_fallpiece,board_fallpiece,board_fallpiece]
-
         board_nextpiece = self.get_nextpiece_borad()
-
-        prev_state = np.zeros([3, self.height, self.width])
-        for i in range(3):
-            for h in range(self.height):
-                for w in range(self.width):
-                    if self.prev_fallpiece_boards[i][h][w]==1:
-                        prev_state[i,h,w]=1.0
         
-        step_state = np.zeros([self.height, self.width])
         if self.steps%2==0:
             step_state = np.ones([self.height, self.width])
+        else:
+            step_state = np.zeros([self.height, self.width])
 
-        state = np.stack([board_background, prev_state[0], prev_state[1], prev_state[2], board_nextpiece, step_state])
-        self.prev_fallpiece_boards[0] = self.prev_fallpiece_boards[1]
-        self.prev_fallpiece_boards[1] = self.prev_fallpiece_boards[2]
-        self.prev_fallpiece_boards[2] = board_fallpiece
-
+        state = np.stack([board_background, board_fallpiece, board_nextpiece, step_state])
         return state        
 
     # 交替个数也就是从空到非空算一次，边界算非空 
