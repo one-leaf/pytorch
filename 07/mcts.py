@@ -149,7 +149,7 @@ class MCTS():
             if state.state==1 and state.reward==0:
                 # print(state.curr_player)
                 if state.curr_player==0: 
-                    v = v-0.2               
+                    v = v-0.5               
 
             probs = np.zeros(state.actions_num)
             for act, prob in act_probs:
