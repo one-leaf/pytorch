@@ -408,7 +408,7 @@ class Agent(object):
                 continue
             # 只保留有效的步数
             action, move_probs = player.get_action(game0, temp=temp, return_prob=1) 
-            if game0.curr_player==0 or random.random()>0.75:
+            if game0.curr_player==0 or random.random()>0.9:
                 game0_states.append(game0.current_state())
                 game0_mcts_probs.append(move_probs)
                 game0_players.append(game0.curr_player)
@@ -426,7 +426,7 @@ class Agent(object):
                 continue
             # 只保留有效的步数
             action, move_probs = player.get_action(game1, temp=temp, return_prob=1)
-            if game1.curr_player==0 or random.random()>0.75:
+            if game1.curr_player==0 or random.random()>0.9:
                 game1_states.append(game1.current_state())
                 game1_mcts_probs.append(move_probs)
                 game1_players.append(game1.curr_player)
