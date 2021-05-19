@@ -96,7 +96,7 @@ class Dataset(torch.utils.data.Dataset):
             self.index += 1
             self.save_index() 
             if i>=1000 and i>len(movefiles)*0.1: break       
-        print("mv %s files to train"%i)
+        print("mv %s/%s files to train"%(i,len(movefiles)))
         if i==0:
             print("SLEEP 60s for watting data")
             time.sleep(60)
