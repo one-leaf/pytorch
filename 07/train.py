@@ -126,11 +126,11 @@ class Train():
         self.n_playout = 64  # 每个动作的模拟战记录个数
         self.play_batch_size = 1 # 每次自学习次数
         self.buffer_size = 100000  # cache对次数
-        self.epochs = 2  # 每次更新策略价值网络的训练步骤数, 推荐是5
+        self.epochs = 5  # 每次更新策略价值网络的训练步骤数, 推荐是5
         self.kl_targ = 0.02  # 策略价值网络KL值目标
         self.best_win_ratio = 0.0
         
-        self.c_puct = 1.0  # MCTS child权重， 用来调节MCTS中 探索/乐观 的程度 默认 5
+        self.c_puct = 0.5  # MCTS child权重， 用来调节MCTS中 探索/乐观 的程度 默认 5
         self.policy_value_net = PolicyValueNet(GAME_WIDTH, GAME_HEIGHT, GAME_ACTIONS_NUM, model_file=model_file)
 
     def get_equi_data(self, play_data):
