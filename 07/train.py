@@ -249,7 +249,7 @@ class Train():
                         kl = np.mean(np.sum(old_probs * (np.log(old_probs + 1e-10) - np.log(new_probs + 1e-10)), axis=1))
                         
                         logging.info("probs before: {} now: {}".format(old_probs[0], new_probs[0]))      
-                        logging.info("value before: {} now: {} ".format(old_value[0], new_value[0]))   
+                        logging.info("value before: {} now: {}".format(old_value[0], new_value[0]))   
                         old_probs = None
                         
                         if kl > self.kl_targ * 2:
