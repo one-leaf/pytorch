@@ -126,7 +126,7 @@ class Train():
         self.n_playout = 64  # 每个动作的模拟战记录个数
         self.play_batch_size = 1 # 每次自学习次数
         self.buffer_size = 100000  # cache对次数
-        self.epochs = 5  # 每次更新策略价值网络的训练步骤数, 推荐是5
+        self.epochs = 1  # 每次更新策略价值网络的训练步骤数, 推荐是5
         self.kl_targ = 0.02  # 策略价值网络KL值目标
         self.best_win_ratio = 0.0
         
@@ -183,29 +183,29 @@ class Train():
 
         # print(state_batch)
 
-        old_probs, old_v = self.policy_value_net.policy_value(state_batch)  
+        # old_probs, old_v = self.policy_value_net.policy_value(state_batch)  
         for i in range(epochs):
             loss, v_loss, p_loss, entropy = self.policy_value_net.train_step(state_batch, mcts_probs_batch, winner_batch, self.learn_rate * self.lr_multiplier)
-            new_probs, new_v = self.policy_value_net.policy_value(state_batch)
+            # new_probs, new_v = self.policy_value_net.policy_value(state_batch)
 
             # 散度计算：
             # D(P||Q) = sum( pi * log( pi / qi) ) = sum( pi * (log(pi) - log(qi)) )
-            kl = np.mean(np.sum(old_probs * (np.log(old_probs + 1e-10) - np.log(new_probs + 1e-10)), axis=1))
-            if kl > self.kl_targ * 4:  # 如果D_KL跑偏则尽早停止
-                break
+            # kl = np.mean(np.sum(old_probs * (np.log(old_probs + 1e-10) - np.log(new_probs + 1e-10)), axis=1))
+            # if kl > self.kl_targ * 4:  # 如果D_KL跑偏则尽早停止
+            #     break
 
         # 自动调整学习率
-        if kl > self.kl_targ * 2 and self.lr_multiplier > 0.1:
-            self.lr_multiplier /= 1.5
-        elif kl < self.kl_targ / 2 and self.lr_multiplier < 10:
-            self.lr_multiplier *= 1.5
+        # if kl > self.kl_targ * 2 and self.lr_multiplier > 0.1:
+        #     self.lr_multiplier /= 1.5
+        # elif kl < self.kl_targ / 2 and self.lr_multiplier < 10:
+        #     self.lr_multiplier *= 1.5
         # 如果学习到了，explained_var 应该趋近于 1，如果没有学习到也就是胜率都为很小值时，则为 0
-        explained_var_old = (1 - np.var(np.array(winner_batch) - old_v.flatten()) / np.var(np.array(winner_batch)))
-        explained_var_new = (1 - np.var(np.array(winner_batch) - new_v.flatten()) / np.var(np.array(winner_batch)))
+        # explained_var_old = (1 - np.var(np.array(winner_batch) - old_v.flatten()) / np.var(np.array(winner_batch)))
+        # explained_var_new = (1 - np.var(np.array(winner_batch) - new_v.flatten()) / np.var(np.array(winner_batch)))
         # entropy 信息熵，越小越好
-        logging.info(("TRAIN kl:{:.5f},lr_multiplier:{:.3f},v_loss:{:.5f},p_loss:{:.5f},entropy:{:.5f},var_old:{:.5f},var_new:{:.5f}"
-                      ).format(kl, self.lr_multiplier, v_loss, p_loss, entropy, explained_var_old, explained_var_new))
-        return loss, entropy  
+        # logging.info(("TRAIN kl:{:.5f},lr_multiplier:{:.3f},v_loss:{:.5f},p_loss:{:.5f},entropy:{:.5f},var_old:{:.5f},var_new:{:.5f}"
+        #               ).format(kl, self.lr_multiplier, v_loss, p_loss, entropy, explained_var_old, explained_var_new))
+        return loss, v_loss, p_loss, entropy
 
     def run(self):
         """启动训练"""
@@ -225,15 +225,40 @@ class Train():
             #         # self.n_playout=n_playout
             #         logging.info("TRAIN Batch:{} end".format(self.dataset.curr_game_batch_num,))
             #         step += 1
-
+            dataset_len = len(self.dataset)  
             training_loader = torch.utils.data.DataLoader(self.dataset, batch_size=self.batch_size, shuffle=True, num_workers=2,)
-
+            old_probs = None
+            test_batch = None
             for i, data in enumerate(training_loader):  # 计划训练批次
                 if i==0:
                     for obj in data:
                         print(obj[0])
                 # 使用对抗数据重新训练策略价值网络模型
-                loss, entropy = self.policy_update(data, self.epochs)
+                loss, v_loss, p_loss, entropy = self.policy_update(data, self.epochs)
+
+                if (i+1) % 10 == 0:
+                    logging.info(("TRAIN idx {} : {} / {} v_loss:{:.5f}, p_loss:{:.5f}, entropy:{:.5f}")\
+                        .format(i, i*self.batch_size, dataset_len, v_loss, p_loss, entropy))
+                    
+                    # 动态调整学习率
+                    if old_probs is None:
+                        test_batch, _, _ = data
+                        old_probs, _ = self.policy_value_net.policy_value(test_batch) 
+                    else:
+                        new_probs, _ = self.policy_value_net.policy_value(test_batch)
+                        kl = np.mean(np.sum(old_probs * (np.log(old_probs + 1e-10) - np.log(new_probs + 1e-10)), axis=1))
+                        old_probs = None
+        
+                        if kl > self.kl_targ * 2:
+                            self.lr_multiplier /= 1.5
+                        elif kl < self.kl_targ / 2 and self.lr_multiplier < 100:
+                            self.lr_multiplier *= 1.5
+                        else:
+                            continue
+
+                        logging.info("kl:{} lr_multiplier:{} lr:{}".format(kl, self.lr_multiplier, self.learn_rate*self.lr_multiplier))
+
+
 
             self.policy_value_net.save_model(model_file)
             # 收集自我对抗数据
