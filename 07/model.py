@@ -228,7 +228,7 @@ class PolicyValueNet():
         # Note: the L2 penalty is incorporated in optimizer
         # 胜率
 
-        indices = torch.LongTensor([3])
+        indices = torch.LongTensor([3]).to(self.device)
         mask = torch.index_select(state_batch,1,indices)  # 取出mask层 [batchsize, 1, 10, 20]
         mask = torch.mean(mask,[1,2,3])
         print(mask.item())
