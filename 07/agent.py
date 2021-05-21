@@ -399,12 +399,13 @@ class Agent(object):
 
         player.reset_player()
         for i in count():
-            if game0.piecesteps<=15:
+            if random.random() > game0.piecesteps/40:
                 if game0.curr_player==0:
                     action = random.choice([KEY_ROTATION, KEY_LEFT, KEY_RIGHT])
                 else:
                     action = KEY_DOWN
                 game0.step(action)
+                if game0.terminal or game0.piececount>=train_pieces_count: break
                 continue
             # 只保留有效的步数
             action, move_probs = player.get_action(game0, temp=temp, return_prob=1) 
@@ -420,12 +421,13 @@ class Agent(object):
 
         player.reset_player()
         for i in count():
-            if game1.piecesteps<=15:
+            if random.random() > game1.piecesteps/40:
                 if game1.curr_player==0:
                     action = random.choice([KEY_ROTATION, KEY_LEFT, KEY_RIGHT])
                 else:
                     action = KEY_DOWN
                 game1.step(action)
+                if game1.terminal or game1.piececount>=train_pieces_count: break
                 continue
             # 只保留有效的步数
             action, move_probs = player.get_action(game1, temp=temp, return_prob=1)
