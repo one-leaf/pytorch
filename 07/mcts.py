@@ -148,8 +148,8 @@ class MCTS():
             # 如果是下降时触底，并且没有得分，表示赢了，即上一步输了，给一个微小的偏好
             if state.state==1 and state.reward==0:
                 # print(state.curr_player)
-                if state.curr_player==0: 
-                    v = -1               
+                #if state.curr_player==0: 
+                v = -1               
 
             probs = np.zeros(state.actions_num)
             for act, prob in act_probs:
