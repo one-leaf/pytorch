@@ -233,6 +233,10 @@ class PolicyValueNet():
         mask = torch.mean(mask,[1,2,3])  # 确定mask [0,1,0,0....1] shape: [batchsize]
         value_loss = F.mse_loss(value.view(-1), winner_batch)
         policy_loss = -torch.mean(torch.sum(mcts_probs * log_act_probs, 1) * mask)
+        print(mask.data.cpu().numpy())
+        print(mcts_probs.data.cpu().numpy())
+        print(torch.sum(mcts_probs * log_act_probs, 1).data.cpu().numpy())
+        print((torch.sum(mcts_probs * log_act_probs, 1) * mask).data.cpu().numpy())
         loss = value_loss + policy_loss
 
         # 反向传播并更新
