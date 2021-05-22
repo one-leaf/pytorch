@@ -156,7 +156,7 @@ class Agent(object):
                     key[x*self.width+y]='0'
                 else:
                     key[x*self.width+y]='1'
-        key.append(str(self.steps%2))
+        key.append(str(self.curr_player))
         key3 = int("".join(key),3)
         return hash(key3)
 
