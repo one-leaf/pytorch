@@ -417,7 +417,7 @@ class Agent(object):
                 # game0_mcts_probs.append(np.ones(self.actions_num)/self.actions_num)
 
             game0.step(action)
-            game0.print()
+            game0.print2(True)
             if game0.terminal or game0.piececount>=train_pieces_count: break
 
         player.reset_player()
@@ -440,7 +440,7 @@ class Agent(object):
                 # game1_mcts_probs.append(np.ones(self.actions_num)/self.actions_num)
 
             game1.step(action)
-            game1.print()            
+            game1.print2(True)            
             if game1.terminal or game1.piececount>=train_pieces_count: break
 
         game0.print()
