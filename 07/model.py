@@ -233,10 +233,11 @@ class PolicyValueNet():
         act_probs, value = self.policy_value(current_state)
 
         act_probs = act_probs.flatten()
+        # act_probs = np.ones([5])/5
         actions = game.availables
         act_probs = list(zip(actions, act_probs[actions]))
         value = value[0,0]
-
+        # value = 0
         self.cache[key] = (act_probs, value) 
         return act_probs, value
 
