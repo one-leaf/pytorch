@@ -131,9 +131,9 @@ class MCTS():
 
             if state.state==1:
                 if state.reward==0:
-                    v = 1
-                else:
                     v = -1
+                else:
+                    v = 1
 
             self.Es[s] = v
 
