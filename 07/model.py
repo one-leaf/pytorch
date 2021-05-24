@@ -5,6 +5,29 @@ import torch.optim as optim
 import torch.nn.functional as F
 import os
 import numpy as np
+from collections import OrderedDict
+
+class Cache(OrderedDict):
+    def __init__(self, maxsize=128, *args, **kwds):
+        self.maxsize = maxsize
+        super().__init__(*args, **kwds)
+
+    def __setitem__(self, key, value):
+        if key in self:
+            self.move_to_end(key)
+        super().__setitem__(key, value)
+        if len(self) > self.maxsize:
+            oldest = next(iter(self))
+            del self[oldest]
+
+    def __getitem__(self, key):
+        try:
+            value = super().__getitem__(key)
+        except KeyError:
+            raise
+        else:
+            self.move_to_end(key)
+            return value
 
 # 定义残差块
 class ResidualBlock(nn.Module):
@@ -158,6 +181,8 @@ class PolicyValueNet():
             net_sd = torch.load(model_file, map_location=self.device)
             self.policy_value_net.load_state_dict(net_sd)
 
+        self.cache = Cache(maxsize=500000)
+
     # 设置学习率
     def set_learning_rate(self, lr):
         for param_group in self.optimizer.param_groups:
@@ -199,6 +224,11 @@ class PolicyValueNet():
         输入: 游戏
         输出: 一组（动作， 概率）和游戏当前状态的胜率
         """
+
+        key = game.get_key()
+        if key in self.cache:
+            return self.cache[key]       
+
         current_state = game.current_state().reshape(1, -1, self.input_height, self.input_width)
         act_probs, value = self.policy_value(current_state)
 
@@ -206,6 +236,8 @@ class PolicyValueNet():
         actions = game.availables
         act_probs = list(zip(actions, act_probs[actions]))
         value = value[0,0]
+
+        self.cache[key] = (act_probs, value) 
         return act_probs, value
 
     def train_step(self, state_batch, mcts_probs, winner_batch, lr):
