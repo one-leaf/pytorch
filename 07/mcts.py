@@ -129,8 +129,9 @@ class MCTS():
             if end:
                v = 1 
 
+            # 谁先落下来谁赢，这样由于下落的可能高，就倒逼正常走子远离下落
             if state.state==1:
-                if state.reward==0:
+                if state.reward==0 and state.curr_player==0:
                     v = -1
                 else:
                     v = 1
