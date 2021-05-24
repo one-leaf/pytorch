@@ -423,7 +423,7 @@ class Agent(object):
 
         player.reset_player()
         for i in count():
-            if random.random() > game1.piecesteps/40:
+            if game1.piecesteps<16:
                 if game1.curr_player==0:
                     action = random.choice([KEY_ROTATION, KEY_LEFT, KEY_RIGHT])
                 else:
