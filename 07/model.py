@@ -270,11 +270,12 @@ class PolicyValueNet():
         # Note: the L2 penalty is incorporated in optimizer
         # 胜率
 
-        indices = torch.LongTensor([3]).to(self.device)
-        mask = torch.index_select(state_batch,1,indices)  # 取出mask层 [batchsize, 1, 10, 20]
-        mask = torch.mean(mask,[1,2,3])  # 确定mask [0,1,0,0....1] shape: [batchsize]
+        # indices = torch.LongTensor([3]).to(self.device)
+        # mask = torch.index_select(state_batch,1,indices)  # 取出mask层 [batchsize, 1, 10, 20]
+        # mask = torch.mean(mask,[1,2,3])  # 确定mask [0,1,0,0....1] shape: [batchsize]
+        # policy_loss = -torch.mean(torch.sum(mcts_probs * log_act_probs, 1) * mask)
         value_loss = F.mse_loss(value.view(-1), winner_batch)
-        policy_loss = -torch.mean(torch.sum(mcts_probs * log_act_probs, 1) * mask)
+        policy_loss = -torch.mean(torch.sum(mcts_probs * log_act_probs, 1))
         # print(mask.data.cpu().numpy())
         # print(mcts_probs.data.cpu().numpy())
         # print(torch.sum(mcts_probs * log_act_probs, 1).data.cpu().numpy())
