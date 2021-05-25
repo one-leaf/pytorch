@@ -1,6 +1,6 @@
 from numpy.core.shape_base import stack
 from game import Tetromino, TetrominoEnv, pieces, templatenum, blank 
-from game import calcReward, rowTransitions, colTransitions, emptyHoles, wellNums 
+from game import calcReward, rowTransitions, colTransitions, emptyHoles, wellNums, landingHeight 
 import pygame
 from pygame.locals import *
 from itertools import count
@@ -45,11 +45,13 @@ class Agent(object):
         # 上一个下落方块的截图
         self.prev_fallpiece_boards=None
         # 当前player
-        self.curr_player = 0           
+        self.curr_player = 0  
+        # 触底的玩家 
+        self.state_player = -1        
         # 下一个可用步骤
         self.availables=self.get_availables()
         # 当前已经下落的方块
-        self.currshapes=""
+        self.fallpiece_height=0
              
 
     # 概率的索引位置转action
@@ -72,7 +74,7 @@ class Agent(object):
     def get_availables(self):
         if self.curr_player==1: return [KEY_DOWN,]
 
-        acts=[KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_NONE, KEY_DOWN]
+        acts=[KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_NONE]
         if not self.tetromino.validposition(self.board,self.fallpiece,ax = -1):
             acts.remove(KEY_LEFT)
         if not self.tetromino.validposition(self.board,self.fallpiece,ax = 1):
@@ -121,7 +123,7 @@ class Agent(object):
             self.reward = self.tetromino.removecompleteline(self.board) 
             self.score += self.reward          
             self.level, self.fallfreq = self.tetromino.calculate(self.score)   
-            self.currshapes = self.currshapes + self.fallpiece['shape']
+            self.fallpiece_height = landingHeight(self.fallpiece)
             self.fallpiece = None
 
         if  env:
@@ -136,9 +138,10 @@ class Agent(object):
                 self.state = 2       
                 return self.state, self.reward # 
             else: 
-                self.state =1
+                self.state = 1
             self.piecesteps = 0
             self.piececount +=1 
+            self.state_player = self.curr_player
             self.curr_player = 0
         else:
             self.state = 0
@@ -160,7 +163,7 @@ class Agent(object):
                 else:
                     key[x*self.width+y]='1'
         if include_curr_player:
-            key.append(str(self.curr_player))
+            key.insert(0, str(self.curr_player))
         key3 = int("".join(key),3)
         return hash(key3)
 

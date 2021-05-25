@@ -81,7 +81,7 @@ class MCTS():
                 if (s, act) in self.Qsa: q = self.Qsa[(s, act)]
                 if s in self.Ps: p = self.Ps[s][act]
                 info.append([action, visit, round(q,2), round(p,2)]) 
-            print(state.steps, self.lable, s ,"n_playout:", n, "depth:" ,self.max_depth, info, "var:", round(var,1))
+            print(state.steps, state.piecesteps, state.state ,self.lable, s ,"n_playout:", n, "depth:" ,self.max_depth, info, "var:", round(var,1))
                 #, \   "first:", state.positions_to_actions(list(self._first_act)[-3:]))
 
         if temp == 0:
@@ -131,11 +131,15 @@ class MCTS():
 
             # 谁先落下来谁赢，这样由于下落的可能高，就倒逼正常走子远离下落
             if state.state==1:
-                max_height = state.getMaxHeight()
-                if state.reward==0:
-                    v =  0.1/max_height
+                max_height = state.fallpiece_height
+                if state.state_player==0:
+                    v =  0.1 / max_height 
                 else:
-                    v = -0.1/max_height
+                    v =  -0.01 / max_height             
+                # if state.reward==0:
+                #     v =  0.1/max_height
+                # else:
+                #     v = -0.1/max_height
 
             self.Es[s] = v
 
@@ -159,7 +163,10 @@ class MCTS():
             #         v = 1
             #     else:
             #         v = -1
-                            
+            # if state.state!=0:
+            #     max_height = state.fallpiece_height
+            #     v =  v - 0.1 / max_height  
+            #     print(v)               
 
             probs = np.zeros(state.actions_num)
             for act, prob in act_probs:

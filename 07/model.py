@@ -165,7 +165,7 @@ class PolicyValueNet():
         self.input_height = input_height
         self.input_size = input_width * input_height
         self.output_size = output_size
-
+        
         if device is None:
             device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.device=device
@@ -177,10 +177,12 @@ class PolicyValueNet():
 
         self.optimizer = optim.Adam(self.policy_value_net.parameters(), weight_decay=self.l2_const)       
 
+        self.load_model_file=False
         if model_file and os.path.exists(model_file):
             print("Loading model", model_file)
             net_sd = torch.load(model_file, map_location=self.device)
             self.policy_value_net.load_state_dict(net_sd)
+            self.load_model_file = True
 
         self.cache = Cache(maxsize=500000)
 
@@ -229,12 +231,16 @@ class PolicyValueNet():
         key = game.get_key(include_curr_player=False)
         if key in self.cache:
             act_probs, value = self.cache[key] 
-        else:        
-            current_state = game.current_state().reshape(1, -1, self.input_height, self.input_width)
-            act_probs, value = self.policy_value(current_state)
+        else:
+            if self.load_model_file:
+                current_state = game.current_state().reshape(1, -1, self.input_height, self.input_width)
+                act_probs, value = self.policy_value(current_state)
+                act_probs = act_probs.flatten()
+            else:
+                act_len=game.actions_num
+                act_probs=np.ones([act_len])/act_len
+                value = np.array([[0]])
 
-            act_probs = act_probs.flatten()
-            # act_probs = np.ones([5])/5
             actions = game.availables
             act_probs = list(zip(actions, act_probs[actions]))
             value = value[0,0]
