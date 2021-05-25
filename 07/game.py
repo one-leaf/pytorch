@@ -23,7 +23,7 @@ purple = (255,0,255)
 red = (255,0,0)
 cyan = (0,255,255)
 blank = '.'
-colors = (yellow,green,purple,red,cyan)
+colors = (yellow,green,purple,red,cyan,(128,128,0),(0,128,0),(128,0,128),(128,0,0),(0,128,128))
  
 stemplate = [['.....',
               '..00.',
@@ -507,7 +507,7 @@ class TetrominoEnv(object):
             return
         if pixelx == None and pixely == None:
             pixelx,pixely = self.terminal.convertsize(boxx,boxy)
-        pygame.draw.rect(self.disp,colors[color],(pixelx+1 , pixely+1,boxsize-1,boxsize-1))
+        pygame.draw.rect(self.disp,colors[color],(pixelx+1 , pixely+1, boxsize-1, boxsize-1))
         
     def drawboard(self,board):
         pygame.draw.rect(self.disp,blue,(xmargin-3,topmargin-7,boardwidth*boxsize+8,boardheight*boxsize+8),5)

@@ -48,6 +48,8 @@ class Agent(object):
         self.curr_player = 0           
         # 下一个可用步骤
         self.availables=self.get_availables()
+        # 当前已经下落的方块
+        self.currshapes=""
              
 
     # 概率的索引位置转action
@@ -119,6 +121,7 @@ class Agent(object):
             self.reward = self.tetromino.removecompleteline(self.board) 
             self.score += self.reward          
             self.level, self.fallfreq = self.tetromino.calculate(self.score)   
+            self.currshapes = self.currshapes + self.fallpiece['shape']
             self.fallpiece = None
 
         if  env:
@@ -147,7 +150,7 @@ class Agent(object):
 
         return self.state, self.reward
 
-    def get_key(self):
+    def get_key(self, include_curr_player=True):
         info = self.getBoard() + self.get_fallpiece_board()
         key = [0 for v in range(self.height*self.width)]
         for x in range(self.height):
@@ -156,7 +159,8 @@ class Agent(object):
                     key[x*self.width+y]='0'
                 else:
                     key[x*self.width+y]='1'
-        key.append(str(self.curr_player))
+        if include_curr_player:
+            key.append(str(self.curr_player))
         key3 = int("".join(key),3)
         return hash(key3)
 
@@ -236,19 +240,19 @@ class Agent(object):
         return board
 
     # 获得当前的全部特征
-    # 这里获取最后3步的信息 背景 + 下落方块位置 + 下一次的方块 + 是否是先手 = 6
-    # 返回 [6, height, width]
+    # 背景 + 下落方块位置 + 下一次的方块 = 3
+    # 返回 [3, height, width]
     def current_state(self):
         board_background = self.getBoard()
         board_fallpiece = self.get_fallpiece_board()
         board_nextpiece = self.get_nextpiece_borad()
         
-        if self.curr_player==0:
-            step_state = np.ones([self.height, self.width])
-        else:
-            step_state = np.zeros([self.height, self.width])
+        # if self.curr_player==0:
+        #     step_state = np.ones([self.height, self.width])
+        # else:
+        #     step_state = np.zeros([self.height, self.width])
 
-        state = np.stack([board_background, board_fallpiece, board_nextpiece, step_state])
+        state = np.stack([board_background, board_fallpiece, board_nextpiece])
         return state        
 
     # 交替个数也就是从空到非空算一次，边界算非空 

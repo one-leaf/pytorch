@@ -133,9 +133,9 @@ class MCTS():
             if state.state==1:
                 max_height = state.getMaxHeight()
                 if state.reward==0:
-                    v = 1/max_height
+                    v =  0.1/max_height
                 else:
-                    v = -1/max_height
+                    v = -0.1/max_height
 
             self.Es[s] = v
 
@@ -346,18 +346,14 @@ class MCTSPlayer(object):
                         "==>", action, act_probs[acts.index(act)], act_qs[acts.index(act)])  
                                                                   
             else:  # 和人类对战
-                if state.step_count==0: 
-                    action = random.choice(state.first_availables)
-                    act =  state.action_to_position(action)
-                else: 
-                    act = acts[idx]
-                    action = state.position_to_action(act)
-                    value = act_qs[idx]
+                act = acts[idx]
+                action = state.position_to_action(act)
+                value = act_qs[idx]
 
-                    # 如果盘面看好，可以随机
-                    # if act_qs[idx]>0 and state.step_count<state.n_in_row: 
-                    #     act = np.random.choice(acts, p=act_probs)
-                    #     action = state.position_to_action(act)
+                # 如果盘面看好，可以随机
+                # if act_qs[idx]>0 and state.step_count<state.n_in_row: 
+                #     act = np.random.choice(acts, p=act_probs)
+                #     action = state.position_to_action(act)
 
                 if act!=acts[idx]:
                     print("    random:", state.position_to_action(acts[idx]), act_probs[idx], act_qs[idx], \

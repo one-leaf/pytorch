@@ -48,6 +48,7 @@ class ResidualBlock(nn.Module):
         residual=x if self.right is None else self.right(x)
         out+=residual
         return F.relu(out)
+
 # class Net(nn.Module):
 #     def __init__(self,input_size, output_size):
 #         super().__init__()
@@ -114,8 +115,8 @@ class Net(nn.Module):
         super(Net, self).__init__()
 
         # 由于每个棋盘大小对最终对应一个动作，所以补齐的效果比较好
-        # 直接来9层的残差网络
-        self.conv=self._make_layer(4, 128, 10)
+        # 直接来7层的残差网络
+        self.conv=self._make_layer(3, 128, 7)
 
         # 动作预测
         self.act_conv1 = nn.Conv2d(128, 1, 1)
@@ -190,7 +191,7 @@ class PolicyValueNet():
 
     # 打印当前网络
     def print_netwark(self):
-        x = torch.Tensor(1,4,20,10).to(self.device)
+        x = torch.Tensor(1,3,20,10).to(self.device)
         print(self.policy_value_net)
         v, p = self.policy_value_net(x)
         print("value:", v.size())
@@ -225,21 +226,29 @@ class PolicyValueNet():
         输出: 一组（动作， 概率）和游戏当前状态的胜率
         """
 
-        key = game.get_key()
+        key = game.get_key(include_curr_player=False)
         if key in self.cache:
-            return self.cache[key]       
+            act_probs, value = self.cache[key] 
+        else:        
+            current_state = game.current_state().reshape(1, -1, self.input_height, self.input_width)
+            act_probs, value = self.policy_value(current_state)
 
-        current_state = game.current_state().reshape(1, -1, self.input_height, self.input_width)
-        act_probs, value = self.policy_value(current_state)
+            act_probs = act_probs.flatten()
+            # act_probs = np.ones([5])/5
+            actions = game.availables
+            act_probs = list(zip(actions, act_probs[actions]))
+            value = value[0,0]
+            # value = 0
+            self.cache[key] = (act_probs, value) 
 
-        act_probs = act_probs.flatten()
-        # act_probs = np.ones([5])/5
-        actions = game.availables
-        act_probs = list(zip(actions, act_probs[actions]))
-        value = value[0,0]
-        # value = 0
-        self.cache[key] = (act_probs, value) 
-        return act_probs, value
+        if game.curr_player==1:
+            act_len=game.actions_num
+            act_probs=np.ones([act_len])/act_len
+            actions = game.availables
+            act_probs = list(zip(actions, act_probs[actions]))
+            return act_probs, value*-1.0
+        else:
+            return act_probs, value
 
     def train_step(self, state_batch, mcts_probs, winner_batch, lr):
         """训练一次"""
