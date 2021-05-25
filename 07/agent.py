@@ -72,7 +72,7 @@ class Agent(object):
     def get_availables(self):
         if self.curr_player==1: return [KEY_DOWN,]
 
-        acts=[KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_NONE]
+        acts=[KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_NONE, KEY_DOWN]
         if not self.tetromino.validposition(self.board,self.fallpiece,ax = -1):
             acts.remove(KEY_LEFT)
         if not self.tetromino.validposition(self.board,self.fallpiece,ax = 1):
