@@ -414,13 +414,11 @@ class Agent(object):
                 continue
 
             action, move_probs = player.get_action(game0, temp=temp, return_prob=1) 
-            game0_states.append(game0.current_state())
-            game0_players.append(game0.curr_player)
-            # if game0.curr_player==0:
-            game0_mcts_probs.append(move_probs)
-            # else:
-                # game0_mcts_probs.append(np.ones(self.actions_num)/self.actions_num)
-
+            if game0.curr_player==0:
+                game0_states.append(game0.current_state())
+                game0_players.append(game0.curr_player)
+                game0_mcts_probs.append(move_probs)
+ 
             game0.step(action)
             # game0.print2(True)
             if game0.terminal or game0.piececount>=train_pieces_count: break
@@ -437,13 +435,11 @@ class Agent(object):
                 continue
             # 只保留有效的步数
             action, move_probs = player.get_action(game1, temp=temp, return_prob=1)
-            game1_states.append(game1.current_state())
-            game1_players.append(game1.curr_player)
-            # if game1.curr_player==0:
-            game1_mcts_probs.append(move_probs)
-            # else:
-                # game1_mcts_probs.append(np.ones(self.actions_num)/self.actions_num)
-
+            if game1.curr_player==0:
+                game1_states.append(game1.current_state())
+                game1_players.append(game1.curr_player)
+                game1_mcts_probs.append(move_probs)
+    
             game1.step(action)
             # game1.print2(True)            
             if game1.terminal or game1.piececount>=train_pieces_count: break
