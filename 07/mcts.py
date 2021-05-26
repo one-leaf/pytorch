@@ -107,7 +107,7 @@ class MCTS():
         返回:
             v: 当前局面的状态
         """
-        s = state.get_key()
+        s = state.get_key(False)
         self.depth = self.depth +1
 
         # 将所有状态的得分都 cache 起来
@@ -132,10 +132,11 @@ class MCTS():
             # 谁先落下来谁赢，这样由于下落的可能高，就倒逼正常走子远离下落
             if state.state==1:
                 max_height = state.fallpiece_height
+                k=0.1
                 if state.state_player==0:
-                    v =  0.1 / max_height 
+                    v =  k * (1 - (max_height/20))  
                 else:
-                    v =  -0.01 / max_height             
+                    v =  k * (1 - (max_height/20)) * -1 #-0.01 / max_height             
                 # if state.reward==0:
                 #     v =  0.1/max_height
                 # else:
