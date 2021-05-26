@@ -405,7 +405,7 @@ class Agent(object):
         print("max pieces count:",train_pieces_count)
 
         player.reset_player()
-        ig_steps = random.random(0,16)
+        ig_steps = random.randint(0,16)
         for i in count():            
             # 只保留有效的步数
             if game0.piecesteps<ig_steps:
