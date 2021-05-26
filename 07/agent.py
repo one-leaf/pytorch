@@ -405,9 +405,10 @@ class Agent(object):
         print("max pieces count:",train_pieces_count)
 
         player.reset_player()
+        ig_steps = random.random(0,16)
         for i in count():            
             # 只保留有效的步数
-            if game0.piecesteps<16:
+            if game0.piecesteps<ig_steps:
                 if game0.curr_player==0:
                     action = random.choice([KEY_ROTATION, KEY_LEFT, KEY_RIGHT])
                 else:
@@ -428,7 +429,7 @@ class Agent(object):
 
         player.reset_player()
         for i in count():
-            if game1.piecesteps<16:
+            if game1.piecesteps<ig_steps:
                 if game1.curr_player==0:
                     action = random.choice([KEY_ROTATION, KEY_LEFT, KEY_RIGHT])
                 else:
