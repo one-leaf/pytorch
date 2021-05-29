@@ -130,17 +130,17 @@ class MCTS():
                v = 1 
 
             # 谁先落下来谁赢，这样由于下落的可能高，就倒逼正常走子远离下落
-            if state.state==1:
-                max_height = state.fallpiece_height
-                k=0.01
-                if state.state_player==0:
-                    v =  k * (1 - (max_height/20))  
-                else:
-                    v =  k * (1 - (max_height/20)) * -1 #-0.01 / max_height             
-                # if state.reward==0:
-                #     v =  0.1/max_height
-                # else:
-                #     v = -0.1/max_height
+            # if state.state==1:
+            #     max_height = state.fallpiece_height
+            #     k=0.01
+            #     if state.state_player==0:
+            #         v =  k * (1 - (max_height/20))  
+            #     else:
+            #         v =  k * (1 - (max_height/20)) * -1 #-0.01 / max_height             
+            #     # if state.reward==0:
+            #     #     v =  0.1/max_height
+            #     # else:
+            #     #     v = -0.1/max_height
 
             self.Es[s] = v
 
