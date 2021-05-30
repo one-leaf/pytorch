@@ -127,7 +127,8 @@ class MCTS():
 
             # 游戏结束双方都输掉了
             if end:
-               v = 1 
+                max_height=state.getMaxHeight()
+                v = -1. / max_height
 
             # 谁先落下来谁赢，这样由于下落的可能高，就倒逼正常走子远离下落
             # if state.state==1:
@@ -143,7 +144,7 @@ class MCTS():
             #     #     v = -0.1/max_height
 
             if state.reward >0:
-                v = -1
+                v = -1.
                 print("GET!!!")
 
             self.Es[s] = v
