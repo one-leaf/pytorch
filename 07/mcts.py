@@ -144,7 +144,8 @@ class MCTS():
 
             if state.reward >0:
                 v = -1
-                
+                print("GET!!!")
+
             self.Es[s] = v
 
         # 如果得分不等于0，标志这局游戏结束
