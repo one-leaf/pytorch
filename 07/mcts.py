@@ -142,6 +142,9 @@ class MCTS():
             #     # else:
             #     #     v = -0.1/max_height
 
+            if state.reward >0:
+                v = -1
+                
             self.Es[s] = v
 
         # 如果得分不等于0，标志这局游戏结束
