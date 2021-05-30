@@ -333,7 +333,7 @@ class Agent(object):
     #     return transCount    
 
     def game_end(self):
-        return self.terminal, 0#, self.score
+        return self.terminal, self.score
 
     # 这里假定第一个人选择下[左移，右移，翻转，下降，无动作]，第二个人只有[下降]
     # def start_self_play(self, player, temp=1e-3):       
@@ -414,7 +414,9 @@ class Agent(object):
                 else:
                     action = KEY_DOWN
                 game0.step(action)
-                if game0.terminal or game0.piececount>=train_pieces_count: break
+                if game0.terminal or game0.piececount>=train_pieces_count: 
+                    game0.terminal = True
+                    break
                 continue
 
             action, move_probs = player.get_action(game0, temp=temp, return_prob=1) 
@@ -425,7 +427,9 @@ class Agent(object):
  
             game0.step(action)
             # game0.print2(True)
-            if game0.terminal or game0.piececount>=train_pieces_count: break
+            if game0.terminal or game0.piececount>=train_pieces_count: 
+                game0.terminal = True
+                break
 
         player.reset_player()
         for i in count():
@@ -435,7 +439,9 @@ class Agent(object):
                 else:
                     action = KEY_DOWN
                 game1.step(action)
-                if game1.terminal or game1.piececount>=train_pieces_count: break
+                if game1.terminal or game1.piececount>=train_pieces_count:
+                    game1.terminal = True
+                    break
                 continue
             # 只保留有效的步数
             action, move_probs = player.get_action(game1, temp=temp, return_prob=1)
@@ -446,7 +452,9 @@ class Agent(object):
     
             game1.step(action)
             # game1.print2(True)            
-            if game1.terminal or game1.piececount>=train_pieces_count: break
+            if game1.terminal or game1.piececount>=train_pieces_count: 
+                game1.terminal = True
+                break
 
         game0.print()
         game1.print()

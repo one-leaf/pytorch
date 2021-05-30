@@ -112,7 +112,7 @@ class MCTS():
 
         # 将所有状态的得分都 cache 起来
         if s not in self.Es:
-            end, winner = state.game_end()  
+            end, _ = state.game_end()  
             v = 0
             # 这里是对上一步的评价，如果游戏结束对我而言都是不利的，v为-1
             # 这里增加了最终的奖励，提升对步骤的优化
