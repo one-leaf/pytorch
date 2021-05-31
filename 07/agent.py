@@ -422,12 +422,14 @@ class Agent(object):
             #         game0.terminal = True
             #         break
             #     continue
-
-            action, move_probs = player.get_action(game0, temp=temp, return_prob=1) 
+               
             if game0.curr_player==0:
+                action, move_probs = player.get_action(game0, temp=temp, return_prob=1) 
                 game0_states.append(game0.current_state())
                 game0_players.append(game0.curr_player)
                 game0_mcts_probs.append(move_probs)
+            else:
+                action = KEY_DOWN
  
             game0.step(action)
             # game0.print2(True)
