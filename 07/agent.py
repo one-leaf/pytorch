@@ -459,19 +459,21 @@ class Agent(object):
         game0.print()
         game1.print()
 
-        game0_transCount = game0.getTransCount()
-        game1_transCount = game1.getTransCount()
+        game0_exscore = -1 * game0.getMaxHeight()
+        game1_exscore = -1 * game1.getMaxHeight()
+
+        # game0_exscore = -1 * game0.getTransCount()
+        # game1_exscore = -1 * game1.getTransCount()
             
-        print("game0_exscore:",game0_transCount,"game1_exscore:",game1_transCount)
+        print("game0_exscore:",game0_exscore,"game1_exscore:",game1_exscore)
         # 如果有输赢，则直接出结果，如果相同，继续下一轮，直到出结果为止
         game0_win, game1_win = 0, 0
 
-        # 比谁的交换次数少
-        if game0_transCount>game1_transCount:
-            game0_win, game1_win  = -1, 1
-
-        if game0_transCount<game1_transCount:
+        if game0_exscore>game1_exscore:
             game0_win, game1_win  = 1, -1
+
+        if game0_exscore<game1_exscore:
+            game0_win, game1_win  = -1, 1
 
         winers = []
 
