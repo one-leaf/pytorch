@@ -131,9 +131,9 @@ class MCTS():
             if end:
                 max_height=state.getMaxHeight()
                 if state.state_player==0:
-                    v = 10 - max_height
+                    v = max_height -10
                 else:
-                    v =  max_height - 10
+                    v = 10 - max_height
 
             # 谁先落下来谁赢，这样由于下落的可能高，就倒逼正常走子远离下落
             # if state.state==1:
