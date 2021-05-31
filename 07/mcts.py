@@ -131,7 +131,7 @@ class MCTS():
             if end:
                 max_height=state.getMaxHeight()
                 if state.state_player==0:
-                    v = -1 * max_height
+                    v = 10 - max_height
                 else:
                     v =  max_height 
 
