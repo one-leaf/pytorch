@@ -3,6 +3,8 @@ import math
 import copy
 import random
 import numpy as np
+import sys
+sys.setrecursionlimit(10000)
 
 EPS = 1e-8
 
