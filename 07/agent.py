@@ -138,7 +138,7 @@ class Agent(object):
             self.piecesteps = 0
             self.piececount +=1 
 
-            if not self.tetromino.validposition(self.board,self.fallpiece) or (self.limit_piece_count>0 and self.piececount>self.limit_piece_count):  
+            if not self.tetromino.validposition(self.board,self.fallpiece) or (self.limit_piece_count>0 and self.piececount>=self.limit_piece_count):  
                 self.terminal = True 
                 self.state = 2       
                 return self.state, self.reward # 
