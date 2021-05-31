@@ -408,16 +408,16 @@ class Agent(object):
         ig_steps = random.randint(0,20)
         for i in count():            
             # 只保留有效的步数
-            if game0.piecesteps<ig_steps:
-                if game0.curr_player==0:
-                    action = random.choice([KEY_ROTATION, KEY_LEFT, KEY_RIGHT])
-                else:
-                    action = KEY_DOWN
-                game0.step(action)
-                if game0.terminal or game0.piececount>=train_pieces_count: 
-                    game0.terminal = True
-                    break
-                continue
+            # if game0.piecesteps<ig_steps:
+            #     if game0.curr_player==0:
+            #         action = random.choice([KEY_ROTATION, KEY_LEFT, KEY_RIGHT])
+            #     else:
+            #         action = KEY_DOWN
+            #     game0.step(action)
+            #     if game0.terminal or game0.piececount>=train_pieces_count: 
+            #         game0.terminal = True
+            #         break
+            #     continue
 
             action, move_probs = player.get_action(game0, temp=temp, return_prob=1) 
             if game0.curr_player==0:
@@ -433,16 +433,16 @@ class Agent(object):
 
         player.reset_player()
         for i in count():
-            if game1.piecesteps<ig_steps:
-                if game1.curr_player==0:
-                    action = random.choice([KEY_ROTATION, KEY_LEFT, KEY_RIGHT])
-                else:
-                    action = KEY_DOWN
-                game1.step(action)
-                if game1.terminal or game1.piececount>=train_pieces_count:
-                    game1.terminal = True
-                    break
-                continue
+            # if game1.piecesteps<ig_steps:
+            #     if game1.curr_player==0:
+            #         action = random.choice([KEY_ROTATION, KEY_LEFT, KEY_RIGHT])
+            #     else:
+            #         action = KEY_DOWN
+            #     game1.step(action)
+            #     if game1.terminal or game1.piececount>=train_pieces_count:
+            #         game1.terminal = True
+            #         break
+            #     continue
             # 只保留有效的步数
             action, move_probs = player.get_action(game1, temp=temp, return_prob=1)
             if game1.curr_player==0:
