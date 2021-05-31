@@ -16,7 +16,7 @@ class Agent(object):
         self.tetromino = Tetromino(isRandomNextPiece=False)
         self.width = 10
         self.height = 20
-        self.actions_num = len(ACTIONS)
+        self.actions_num = len(ACTIONS)    
         self.reset()        
 
     def reset(self):
@@ -52,6 +52,8 @@ class Agent(object):
         self.availables=self.get_availables()
         # 当前已经下落的方块
         self.fallpiece_height=0
+        # 最大方块数量
+        self.limit_piece_count = 0   
              
 
     # 概率的索引位置转action
@@ -133,14 +135,16 @@ class Agent(object):
         if self.fallpiece == None:
             self.fallpiece = self.nextpiece
             self.nextpiece = self.tetromino.getnewpiece()
-            if not self.tetromino.validposition(self.board,self.fallpiece):  
+            self.piecesteps = 0
+            self.piececount +=1 
+
+            if not self.tetromino.validposition(self.board,self.fallpiece) or (self.limit_piece_count>0 and self.piececount>self.limit_piece_count):  
                 self.terminal = True 
                 self.state = 2       
                 return self.state, self.reward # 
             else: 
                 self.state = 1
-            self.piecesteps = 0
-            self.piececount +=1 
+
             self.state_player = self.curr_player
             self.curr_player = 0
         else:
@@ -403,8 +407,8 @@ class Agent(object):
 
         train_pieces_count = random.randint(1,6)  
         print("max pieces count:",train_pieces_count)
-
         player.reset_player()
+        game0.limit_piece_count = train_pieces_count
         ig_steps = random.randint(0,20)
         for i in count():            
             # 只保留有效的步数
@@ -427,11 +431,11 @@ class Agent(object):
  
             game0.step(action)
             # game0.print2(True)
-            if game0.terminal or game0.piececount>=train_pieces_count: 
-                game0.terminal = True
+            if game0.terminal : 
                 break
 
         player.reset_player()
+        game1.limit_piece_count = train_pieces_count
         for i in count():
             # if game1.piecesteps<ig_steps:
             #     if game1.curr_player==0:
@@ -452,8 +456,7 @@ class Agent(object):
     
             game1.step(action)
             # game1.print2(True)            
-            if game1.terminal or game1.piececount>=train_pieces_count: 
-                game1.terminal = True
+            if game1.terminal: 
                 break
 
         game0.print()
