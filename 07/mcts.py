@@ -188,7 +188,7 @@ class MCTS():
 
             if state.state==1:
                 ph=state.pieces_height
-                ph_avg=sum(ph)/len(ph)
+                # ph_avg=sum(ph)/len(ph)
                 # print(state.state_player, ph_avg, ph)
                 if ph[-1]>=max(ph):
                     v = v+0.1 
