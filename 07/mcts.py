@@ -130,10 +130,11 @@ class MCTS():
             # 游戏结束双方都输掉了
             if end:
                 max_height=state.getMaxHeight()
-                if state.state_player==0:
-                    v = max_height -10
-                else:
-                    v = 10 - max_height
+                v = 1./max_height 
+                # if state.state_player==0:
+                #     v = max_height/10 - 1
+                # else:
+                #     v = 1 - max_height/10
 
             # 谁先落下来谁赢，这样由于下落的可能高，就倒逼正常走子远离下落
             # if state.state==1:
@@ -149,10 +150,7 @@ class MCTS():
             #     #     v = -0.1/max_height
 
             if state.reward >0:
-                if state.state_player==0:
-                    v= 1.
-                else:
-                    v = -1.
+                v = -1.
                 print("GET!!!")
 
             self.Es[s] = v
