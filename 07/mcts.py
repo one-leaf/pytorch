@@ -129,8 +129,25 @@ class MCTS():
 
             # 游戏结束双方都输掉了
             if end:
-                max_height=state.getMaxHeight()
-                v = 1./max_height 
+                ph=state.pieces_height
+                ph_avg=sum(ph)/len(ph)
+                ph_max=max(ph)
+                if ph[-1]>=ph_max:
+                    v = 1
+                else:
+                    v = -1
+
+                # print("end",state.state_player,ph_avg,ph)
+                # if state.state_player == 0 :
+                #     if ph[-1]==max(ph):
+                #         v = -1 
+                #     else:
+                #         v = 1
+                # else:
+                #     if ph[-1]>ph_avg:
+                #         v = -1
+                #     else:
+                #         v = 1 
                 # if state.state_player==0:
                 #     v = max_height/10 - 1
                 # else:
@@ -168,6 +185,31 @@ class MCTS():
                 
             # 获得当前局面的概率 和 局面的打分, 这个已经过滤掉了不可用走子
             act_probs, v = self._policy(state)
+
+            if state.state==1:
+                ph=state.pieces_height
+                ph_avg=sum(ph)/len(ph)
+                # print(state.state_player, ph_avg, ph)
+                if ph[-1]>=max(ph):
+                    v = 1 
+                else:
+                    v = -1
+
+                # if state.state_player == 0 :
+                #     if ph[-1]==max(ph):
+                #         v = -1 
+                #     else:
+                #         v = 1
+                # else:
+                #     if ph[-1]>ph_avg:
+                #         v = -1
+                #     else:
+                #         v = 1 
+                # if ph[-1]>ph_avg:
+                #     v = 1
+                # else:
+                #     v = -1
+
 
             # 如果是下降时触底，并且没有得分，表示赢了，即上一步输了，给一个微小的偏好
             # if state.state==1:

@@ -54,7 +54,8 @@ class Agent(object):
         self.fallpiece_height=0
         # 最大方块数量
         self.limit_piece_count = 0   
-             
+        # 每个方块的高度
+        self.pieces_height = []     
 
     # 概率的索引位置转action
     def position_to_action(self, position):
@@ -132,6 +133,7 @@ class Agent(object):
             self.score += self.reward          
             self.level, self.fallfreq = self.tetromino.calculate(self.score)   
             self.fallpiece_height = landingHeight(self.fallpiece)
+            self.pieces_height.append( self.height - self.fallpiece['y'])
             self.fallpiece = None
 
         if  env:

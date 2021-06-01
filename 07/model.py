@@ -239,7 +239,7 @@ class PolicyValueNet():
             else:
                 act_len=game.actions_num
                 act_probs=np.ones([act_len])/act_len
-                value = np.array([[0]])
+                value = np.array([[0.]])
 
             actions = game.availables
             act_probs = list(zip(actions, act_probs[actions]))
@@ -252,7 +252,7 @@ class PolicyValueNet():
             act_probs=np.ones([act_len])/act_len
             actions = game.availables
             act_probs = list(zip(actions, act_probs[actions]))
-            return act_probs, 0#,value*-1+0.1
+            return act_probs, -1.#value*-1
         else:
             return act_probs, value
 
