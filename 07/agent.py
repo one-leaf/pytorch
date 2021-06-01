@@ -472,11 +472,11 @@ class Agent(object):
         game0.print()
         game1.print()
 
-        game0_exscore = -1 * game0.getMaxHeight()
-        game1_exscore = -1 * game1.getMaxHeight()
+        #game0_exscore = -1 * game0.getMaxHeight()
+        #game1_exscore = -1 * game1.getMaxHeight()
 
-        # game0_exscore = -1 * game0.getTransCount()
-        # game1_exscore = -1 * game1.getTransCount()
+        game0_exscore = -1 * game0.getTransCount()
+        game1_exscore = -1 * game1.getTransCount()
             
         print("game0_exscore:",game0_exscore,"game1_exscore:",game1_exscore)
         # 如果有输赢，则直接出结果，如果相同，继续下一轮，直到出结果为止
