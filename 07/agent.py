@@ -416,7 +416,7 @@ class Agent(object):
         train_pieces_count = random.randint(1,4)  
         print("max pieces count:",train_pieces_count)
         player.reset_player()
-        game0.limit_piece_count = train_pieces_count
+        # game0.limit_piece_count = train_pieces_count
         ig_steps = random.randint(0,20)
         for i in count():            
             # 只保留有效的步数
@@ -441,11 +441,11 @@ class Agent(object):
  
             game0.step(action)
             # game0.print2(True)
-            if game0.terminal : 
+            if game0.terminal or game0.piececount>=train_pieces_count: 
                 break
 
         player.reset_player()
-        game1.limit_piece_count = train_pieces_count
+        # game1.limit_piece_count = train_pieces_count
         for i in count():
             # if game1.piecesteps<ig_steps:
             #     if game1.curr_player==0:
@@ -466,7 +466,7 @@ class Agent(object):
     
             game1.step(action)
             # game1.print2(True)            
-            if game1.terminal: 
+            if game1.terminal or game1.piececount>=train_pieces_count: 
                 break
 
         game0.print()
