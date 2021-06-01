@@ -83,15 +83,21 @@ class Agent(object):
             acts.remove(KEY_RIGHT)   
         # if not self.tetromino.validposition(self.board,self.fallpiece,ay = 1):
         #     acts.remove(KEY_DOWN)
-        if self.fallpiece['shape']=="o":
+
+        # 只允许前面旋转
+        if self.piecesteps>len(pieces[self.fallpiece['shape']]):
             acts.remove(KEY_ROTATION)
         else:
-            r = self.fallpiece['rotation']
-            self.fallpiece['rotation'] =  (self.fallpiece['rotation'] + 1) % len(pieces[self.fallpiece['shape']])
-            if not self.tetromino.validposition(self.board,self.fallpiece):
+            if self.fallpiece['shape']=="o":
                 acts.remove(KEY_ROTATION)
-            self.fallpiece['rotation'] = r
+            else:
+                r = self.fallpiece['rotation']
+                self.fallpiece['rotation'] =  (self.fallpiece['rotation'] + 1) % len(pieces[self.fallpiece['shape']])
+                if not self.tetromino.validposition(self.board,self.fallpiece):
+                    acts.remove(KEY_ROTATION)
+                self.fallpiece['rotation'] = r
 
+        random.shuffle(acts)
         return acts         
 
     def step(self, action, env=None):
