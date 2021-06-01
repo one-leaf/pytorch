@@ -130,7 +130,6 @@ class MCTS():
             # 游戏结束双方都输掉了
             if end:
                 ph=state.pieces_height
-                ph_avg=sum(ph)/len(ph)
                 ph_max=max(ph)
                 if ph[-1]>=ph_max:
                     v = 1
