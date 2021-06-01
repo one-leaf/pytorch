@@ -182,46 +182,6 @@ class MCTS():
                 
             # 获得当前局面的概率 和 局面的打分, 这个已经过滤掉了不可用走子
             act_probs, v = self._policy(state)
-
-            if state.state==1:
-                ph=state.pieces_height
-                # ph_avg=sum(ph)/len(ph)
-                # print(state.state_player, ph_avg, ph)
-                if ph[-1]>=max(ph):
-                    v = v+0.1 
-                else:
-                    v = v-0.1
-
-                # if state.state_player == 0 :
-                #     if ph[-1]==max(ph):
-                #         v = -1 
-                #     else:
-                #         v = 1
-                # else:
-                #     if ph[-1]>ph_avg:
-                #         v = -1
-                #     else:
-                #         v = 1 
-                # if ph[-1]>ph_avg:
-                #     v = 1
-                # else:
-                #     v = -1
-                
-            if state.reward >0:
-                v = -1.
-                print("GET!!!")
-
-            # 如果是下降时触底，并且没有得分，表示赢了，即上一步输了，给一个微小的偏好
-            # if state.state==1:
-            #     if state.reward==0:
-            #         v = 1
-            #     else:
-            #         v = -1
-            # if state.state!=0:
-            #     max_height = state.fallpiece_height
-            #     v =  v - 0.1 / max_height  
-            #     print(v)               
-
             probs = np.zeros(state.actions_num)
             for act, prob in act_probs:
                 probs[act] = prob
@@ -229,9 +189,6 @@ class MCTS():
 
             self.Ns[s] = 0
 
-            # 由于五子棋不同于围棋，局面变化大，所以将局面预测值降低一点，提高mcts的影响力
-            # 这里放弃这种做法，直接提升最终奖励为2
-            # v = v * 0.9
             return -v
 
         # 当前最佳概率和最佳动作
@@ -262,13 +219,19 @@ class MCTS():
         act = state.position_to_action(a)
         state.step(act)
 
-        # 检查是否需要优先考虑的棋
-        # 训练后期不需要了
-        # end, _ = state.game_end()
-        # if end: self._first_act.add(a)
-
         # 计算下一步的 v 这个v 为正数，但下一个v为负数
         v = self.search(state)
+
+        if state.state==1:
+            ph=state.pieces_height
+            if ph[-1]>=max(ph):
+                v = v+0.1 
+            else:
+                v = v-0.1
+                
+        if state.reward >0:
+            v = -1.
+            print("GET!!!")
 
         # 更新 Q 值 和 访问次数
         if (s, a) in self.Qsa:
