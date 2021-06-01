@@ -191,9 +191,9 @@ class MCTS():
                 ph_avg=sum(ph)/len(ph)
                 # print(state.state_player, ph_avg, ph)
                 if ph[-1]>=max(ph):
-                    v = 1 
+                    v = v+0.1 
                 else:
-                    v = -1
+                    v = v-0.1
 
                 # if state.state_player == 0 :
                 #     if ph[-1]==max(ph):
