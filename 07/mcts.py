@@ -165,9 +165,7 @@ class MCTS():
             #     # else:
             #     #     v = -0.1/max_height
 
-            if state.reward >0:
-                v = -1.
-                print("GET!!!")
+            
 
             self.Es[s] = v
 
@@ -208,7 +206,10 @@ class MCTS():
                 #     v = 1
                 # else:
                 #     v = -1
-
+                
+            if state.reward >0:
+                v = -1.
+                print("GET!!!")
 
             # 如果是下降时触底，并且没有得分，表示赢了，即上一步输了，给一个微小的偏好
             # if state.state==1:
