@@ -56,6 +56,8 @@ class Agent(object):
         self.limit_piece_count = 0   
         # 每个方块的高度
         self.pieces_height = []     
+        # 下降的状态
+        self.fallpiece_status = []
 
     # 概率的索引位置转action
     def position_to_action(self, position):
@@ -126,6 +128,7 @@ class Agent(object):
 
         # if self.tetromino.validposition(self.board,self.fallpiece,ay = 1):
         #     self.fallpiece['y'] +=1
+        self.fallpiece_status.append(self.get_fallpiece_board())
 
         if not self.tetromino.validposition(self.board,self.fallpiece,ay = 1):
             self.tetromino.addtoboard(self.board,self.fallpiece)
@@ -135,6 +138,7 @@ class Agent(object):
             self.fallpiece_height = landingHeight(self.fallpiece)
             self.pieces_height.append(self.fallpiece_height)
             self.fallpiece = None
+            self.fallpiece_status = []
 
         if  env:
             env.checkforquit()
@@ -154,7 +158,8 @@ class Agent(object):
                 self.state = 1
 
             self.state_player = self.curr_player
-            self.curr_player = 0
+            self.curr_player = 0  
+            self.fallpiece_status.append(self.get_fallpiece_board())          
         else:
             self.state = 0
         
@@ -259,15 +264,25 @@ class Agent(object):
     # 返回 [3, height, width]
     def current_state(self):
         board_background = self.getBoard()
+        if len(self.fallpiece_status)>2:
+            board_fallpiece =  self.fallpiece_status[-1]
+            board_fallpiece_prev = self.fallpiece_status[-3]  
+        elif len(self.fallpiece_status)>0:
+            board_fallpiece =  self.fallpiece_status[-1]
+            board_fallpiece_prev = self.fallpiece_status[-1]
+        else:
+            board_fallpiece = np.zeros((self.height, self.width))
+            board_fallpiece_prev = np.zeros((self.height, self.width))
+
         board_fallpiece = self.get_fallpiece_board()
-        board_nextpiece = self.get_nextpiece_borad()
+        # board_nextpiece = self.get_nextpiece_borad()
         
         # if self.curr_player==0:
         #     step_state = np.ones([self.height, self.width])
         # else:
         #     step_state = np.zeros([self.height, self.width])
 
-        state = np.stack([board_background, board_fallpiece, board_nextpiece])
+        state = np.stack([board_background, board_fallpiece_prev, board_fallpiece])
         return state        
 
     # 交替个数也就是从空到非空算一次，边界算非空 
