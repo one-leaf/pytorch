@@ -187,7 +187,7 @@ class Agent(object):
     def print2(self, add_fallpiece=False):
         info = self.getBoard()
         if add_fallpiece:
-            info += self.get_fallpiece_board()
+            info += self.fallpiece_status[-1]
         for y in range(self.height):
             line=""
             for x in range(self.width):
@@ -270,7 +270,7 @@ class Agent(object):
             board_fallpiece =  self.fallpiece_status[-1]
             board_fallpiece_prev = self.fallpiece_status[-1]
 
-        board_fallpiece = self.get_fallpiece_board()
+        # board_fallpiece = self.get_fallpiece_board()
         # board_nextpiece = self.get_nextpiece_borad()
         
         # if self.curr_player==0:
