@@ -268,7 +268,7 @@ class Agent(object):
             board_fallpiece_prev = self.fallpiece_status[-3]  
         else:
             board_fallpiece =  self.fallpiece_status[-1]
-            board_fallpiece_prev = self.fallpiece_status[-1]
+            board_fallpiece_prev = np.zeros((self.height, self.width))
 
         # board_fallpiece = self.get_fallpiece_board()
         # board_nextpiece = self.get_nextpiece_borad()
