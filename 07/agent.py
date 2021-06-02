@@ -57,7 +57,7 @@ class Agent(object):
         # 每个方块的高度
         self.pieces_height = []     
         # 下降的状态
-        self.fallpiece_status = []
+        self.fallpiece_status = [self.get_fallpiece_board()]
 
     # 概率的索引位置转action
     def position_to_action(self, position):
@@ -138,7 +138,6 @@ class Agent(object):
             self.fallpiece_height = landingHeight(self.fallpiece)
             self.pieces_height.append(self.fallpiece_height)
             self.fallpiece = None
-            self.fallpiece_status = []
 
         if  env:
             env.checkforquit()
@@ -159,7 +158,7 @@ class Agent(object):
 
             self.state_player = self.curr_player
             self.curr_player = 0  
-            self.fallpiece_status.append(self.get_fallpiece_board())          
+            self.fallpiece_status=[self.get_fallpiece_board()]          
         else:
             self.state = 0
         
@@ -171,7 +170,7 @@ class Agent(object):
         return self.state, self.reward
 
     def get_key(self, include_curr_player=True):
-        info = self.getBoard() + self.get_fallpiece_board()
+        info = self.getBoard() + self.fallpiece_status[-1]
         key = [0 for v in range(self.height*self.width)]
         for x in range(self.height):
             for y in range(self.width):
@@ -267,12 +266,9 @@ class Agent(object):
         if len(self.fallpiece_status)>2:
             board_fallpiece =  self.fallpiece_status[-1]
             board_fallpiece_prev = self.fallpiece_status[-3]  
-        elif len(self.fallpiece_status)>0:
+        else:
             board_fallpiece =  self.fallpiece_status[-1]
             board_fallpiece_prev = self.fallpiece_status[-1]
-        else:
-            board_fallpiece = np.zeros((self.height, self.width))
-            board_fallpiece_prev = np.zeros((self.height, self.width))
 
         board_fallpiece = self.get_fallpiece_board()
         # board_nextpiece = self.get_nextpiece_borad()
