@@ -263,11 +263,10 @@ class Agent(object):
     # 返回 [3, height, width]
     def current_state(self):
         board_background = self.getBoard()
-        if len(self.fallpiece_status)>2:
-            board_fallpiece =  self.fallpiece_status[-1]
+        board_fallpiece =  self.fallpiece_status[-1]
+        if len(self.fallpiece_status)>2:           
             board_fallpiece_prev = self.fallpiece_status[-3]  
         else:
-            board_fallpiece =  self.fallpiece_status[-1]
             board_fallpiece_prev = np.zeros((self.height, self.width))
 
         # board_fallpiece = self.get_fallpiece_board()
