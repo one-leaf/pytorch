@@ -225,9 +225,9 @@ class MCTS():
         if state.state==1:
             ph=state.pieces_height
             if ph[-1]>=max(ph):
-                v = v+0.2 
+                v = v+0.1 
             else:
-                v = v-0.2
+                v = v-0.1
                 
         if state.reward >0:
             v = -1.
