@@ -180,7 +180,7 @@ class Agent(object):
                     key[x*self.width+y]='1'
         if include_curr_player:
             key.insert(0, str(self.curr_player))
-        key3 = int("".join(key),3)
+        key3 = int("".join(key),2)
         return hash(key3)
 
     # 打印
