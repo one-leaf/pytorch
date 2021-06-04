@@ -112,13 +112,13 @@ class Agent(object):
 
     def step(self, action, env=None):
         # 状态 0 下落过程中 1 更换方块 2 结束一局
-        self.ig_action = action
         
         self.reward = 0
         self.steps += 1
         self.piecesteps += 1
         self.curr_player = (self.curr_player+1)%2
-
+        self.state_player = self.curr_player
+ 
         self.level, self.fallfreq = self.tetromino.calculate(self.score)
 
         if action == KEY_LEFT and self.tetromino.validposition(self.board,self.fallpiece,ax = -1):
