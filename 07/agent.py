@@ -48,8 +48,6 @@ class Agent(object):
         self.curr_player = 0  
         # 触底的玩家 
         self.state_player = -1        
-        # 下一个可用步骤
-        self.availables=self.get_availables()
         # 当前已经下落的方块
         self.fallpiece_height=0
         # 最大方块数量
@@ -58,6 +56,10 @@ class Agent(object):
         self.pieces_height = []     
         # 下降的状态
         self.fallpiece_status = [self.get_fallpiece_board()]
+        # 忽略的步骤
+        self.ig_action = None
+        # 下一个可用步骤
+        self.availables=self.get_availables()
 
     # 概率的索引位置转action
     def position_to_action(self, position):
@@ -80,6 +82,7 @@ class Agent(object):
         if self.curr_player==1: return [KEY_DOWN,]
 
         acts=[KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_NONE]
+
         if not self.tetromino.validposition(self.board,self.fallpiece,ax = -1):
             acts.remove(KEY_LEFT)
         if not self.tetromino.validposition(self.board,self.fallpiece,ax = 1):
@@ -101,6 +104,10 @@ class Agent(object):
                 self.fallpiece['rotation'] = r
 
         random.shuffle(acts)
+        if self.ig_action!=None and len(acts)>=2:
+            if self.ig_action in acts:
+                acts.remove(self.ig_action)
+
         return acts         
 
     def step(self, action, env=None):
@@ -427,7 +434,9 @@ class Agent(object):
         print("max pieces count:",train_pieces_count)
         player.reset_player()
         # game0.limit_piece_count = train_pieces_count
-        ig_steps = random.randint(0,20)
+        actions = {}
+        for i in range(train_pieces_count):
+            actions[i]=[]
         for i in count():            
             # 只保留有效的步数
             # if game0.piecesteps<ig_steps:
@@ -446,7 +455,8 @@ class Agent(object):
                 game0_states.append(game0.current_state())
                 game0_players.append(game0.curr_player)
                 game0_mcts_probs.append(move_probs)
- 
+
+            actions[game0.piececount].append(action)
             game0.step(action)
             # game0.print2(True)
             if game0.terminal or game0.piececount>=train_pieces_count: 
@@ -466,6 +476,11 @@ class Agent(object):
             #         break
             #     continue
             # 只保留有效的步数
+            if game1.piecesteps<=len(actions[game1.piececount]):
+                game1.ig_action=actions[game1.piececount][game1.piececount]
+            else:
+                game1.ig_action=None
+                
             action, move_probs = player.get_action(game1, temp=temp, return_prob=1)
             if game1.curr_player==0:
                 game1_states.append(game1.current_state())
