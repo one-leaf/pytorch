@@ -112,6 +112,8 @@ class Agent(object):
 
     def step(self, action, env=None):
         # 状态 0 下落过程中 1 更换方块 2 结束一局
+        self.ig_action = action
+        
         self.reward = 0
         self.steps += 1
         self.piecesteps += 1
@@ -434,9 +436,7 @@ class Agent(object):
         print("max pieces count:",train_pieces_count)
         player.reset_player()
         # game0.limit_piece_count = train_pieces_count
-        actions = {}
-        for i in range(train_pieces_count):
-            actions[i]=[]
+
         for i in count():            
             # 只保留有效的步数
             # if game0.piecesteps<ig_steps:
@@ -456,7 +456,6 @@ class Agent(object):
                 game0_players.append(game0.curr_player)
                 game0_mcts_probs.append(move_probs)
 
-            actions[game0.piececount].append(action)
             game0.step(action)
             # game0.print2(True)
             if game0.terminal or game0.piececount>=train_pieces_count: 
@@ -476,11 +475,7 @@ class Agent(object):
             #         break
             #     continue
             # 只保留有效的步数
-            if game1.piecesteps<=len(actions[game1.piececount]):
-                game1.ig_action=actions[game1.piececount][game1.piececount]
-            else:
-                game1.ig_action=None
-                
+
             action, move_probs = player.get_action(game1, temp=temp, return_prob=1)
             if game1.curr_player==0:
                 game1_states.append(game1.current_state())
