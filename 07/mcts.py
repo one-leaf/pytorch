@@ -135,7 +135,8 @@ class MCTS():
                     v = 1
                 else:
                     v = -1
-
+                if state.state_player == 0:
+                    v = -1 * v
                 # print("end",state.state_player,ph_avg,ph)
                 # if state.state_player == 0 :
                 #     if ph[-1]==max(ph):
@@ -222,12 +223,12 @@ class MCTS():
         # 计算下一步的 v 这个v 为正数，但下一个v为负数
         v = self.search(state)
 
-        if state.state==1:
+        if state.state==1 and state.state_player==0:
             ph=state.pieces_height
             if ph[-1]>=max(ph):
-                v = v+0.1 
+                v = v-0.1 
             else:
-                v = v-0.1
+                v = v+0.1
                 
         if state.reward >0:
             v = -1.
