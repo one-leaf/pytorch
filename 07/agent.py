@@ -463,6 +463,7 @@ class Agent(object):
 
         player.reset_player()
         # game1.limit_piece_count = train_pieces_count
+        game1.ig_action = KEY_NONE
         for i in count():
             # if game1.piecesteps<ig_steps:
             #     if game1.curr_player==0:
