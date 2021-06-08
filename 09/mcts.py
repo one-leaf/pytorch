@@ -3,8 +3,6 @@ import math
 import copy
 import random
 import numpy as np
-import sys
-sys.setrecursionlimit(10000)
 
 EPS = 1e-8
 
@@ -73,18 +71,17 @@ class MCTS():
         visits = [av[1] for av in act_visits]
         qs = [round(av[1],2) for av in act_Qs]
 
-        if 1:#state.steps%2==0:
-            info=[]
-            for idx in sorted(range(len(visits)), key=visits.__getitem__)[::-1]:
-                if len(info)>2: break
-                act, visit = act_visits[idx]
-                action = state.position_to_action(act)
-                q, p= 0,0
-                if (s, act) in self.Qsa: q = self.Qsa[(s, act)]
-                if s in self.Ps: p = self.Ps[s][act]
-                info.append([action, visit, round(q,2), round(p,2)]) 
-            print(state.steps, state.piecesteps, state.piececount ,self.lable, s ,"n_playout:", n, "depth:" ,self.max_depth, info, "var:", round(var,1))
-                #, \   "first:", state.positions_to_actions(list(self._first_act)[-3:]))
+        info=[]
+        for idx in sorted(range(len(visits)), key=visits.__getitem__)[::-1]:
+            if len(info)>2: break
+            act, visit = act_visits[idx]
+            action = state.position_to_action(act)
+            q, p= 0,0
+            if (s, act) in self.Qsa: q = self.Qsa[(s, act)]
+            if s in self.Ps: p = self.Ps[s][act]
+            info.append([action, visit, round(q,2), round(p,2)]) 
+        print(state.steps, state.piecesteps, state.piececount ,self.lable, s ,"n_playout:", n, "depth:" ,self.max_depth, info, "var:", round(var,1))
+            #, \   "first:", state.positions_to_actions(list(self._first_act)[-3:]))
 
         if temp == 0:
             bestAs = np.array(np.argwhere(visits == np.max(visits))).flatten()
@@ -109,78 +106,27 @@ class MCTS():
         返回:
             v: 当前局面的状态
         """
-        s = state.get_key(True)
+        s = state.get_key()
         self.depth = self.depth +1
-
+        # print(self.depth, s)
         # 将所有状态的得分都 cache 起来
         if s not in self.Es:
-            end, _ = state.game_end()  
+            end, winner = state.game_end()  
             v = 0
             # 这里是对上一步的评价，如果游戏结束对我而言都是不利的，v为-1
             # 这里增加了最终的奖励，提升对步骤的优化
-            # if (end and winner != -1): 
-                # if state.current_player==winner:
-                #     v = 1 * 2
-                # else:
-                # v = -1 * 1
-            # 这个有问题，计算量有点大，放弃
-            # elif state.check_will_win():
-            #     v = -2
-
-            # 游戏结束双方都输掉了
-            if end:
-                ph=state.pieces_height
-                ph_max=max(ph)
-                if ph[-1]>=ph_max:
-                    v = 1
-                else:
-                    v = -1
-                if state.state_player == 0:
-                    v = -1 * v
-                # print("end",state.state_player,ph_avg,ph)
-                # if state.state_player == 0 :
-                #     if ph[-1]==max(ph):
-                #         v = -1 
-                #     else:
-                #         v = 1
-                # else:
-                #     if ph[-1]>ph_avg:
-                #         v = -1
-                #     else:
-                #         v = 1 
-                # if state.state_player==0:
-                #     v = max_height/10 - 1
-                # else:
-                #     v = 1 - max_height/10
-
-            # 谁先落下来谁赢，这样由于下落的可能高，就倒逼正常走子远离下落
-            # if state.state==1:
-            #     max_height = state.fallpiece_height
-            #     k=0.01
-            #     if state.state_player==0:
-            #         v =  k * (1 - (max_height/20))  
-            #     else:
-            #         v =  k * (1 - (max_height/20)) * -1 #-0.01 / max_height             
-            #     # if state.reward==0:
-            #     #     v =  0.1/max_height
-            #     # else:
-            #     #     v = -0.1/max_height
-
-            
+            if (end and winner != -1): 
+                v = -1 * 1
 
             self.Es[s] = v
 
         # 如果得分不等于0，标志这局游戏结束
-        if self.Es[s] != 0:
+        if self.Es[s] != 0 or state.terminal:
             return -self.Es[s]
 
         # 如果当前状态没有子节点，增加子节点
         # 增加 Ps[s] Vs[s] Ns[s]
-        if s not in self.Ps:
-            # 如果没有可以走的棋了，搜索结束
-            if len(state.availables)==0:
-                return 0
-                
+        if s not in self.Ps:                          
             # 获得当前局面的概率 和 局面的打分, 这个已经过滤掉了不可用走子
             act_probs, v = self._policy(state)
             probs = np.zeros(state.actions_num)
@@ -219,27 +165,10 @@ class MCTS():
         a = best_act
         act = state.position_to_action(a)
         state.step(act)
-
-        # 计算下一步的 v 这个v 为正数，但下一个v为负数
-        
-        if state.state==1 or state.reward >0: 
-            ph=state.pieces_height
-            # avg_ph = sum(ph)/len(ph)
-            # v = (-1./avg_ph)
-            # v = avg_ph/20 不能用这个，这个会导致粘连
-            ph_max=max(ph)
-            if ph[-1]>=ph_max:
-                v = 0.1
-            else:
-                v = -0.1
-            if state.reward >0:
-                v = -1.
-                print("GET!!!")   
-            if state.state_player == 1:
-                v = -1 * v            
-         
-        else:
-            v = self.search(state)
+        # print("action",act,state.terminal)
+        # state.print()
+        # 计算下一步的 v 这个v 为正数，但下一个v为负数        
+        v = self.search(state)
 
         # 更新 Q 值 和 访问次数
         if (s, a) in self.Qsa:
@@ -363,15 +292,11 @@ class MCTSPlayer(object):
                 # action = state.position_to_action(act)
                 value = act_qs[idx]
 
-                # 如果标准差低于0.02，可以随机
-                # if act_qs[idx]>0 and state.step_count<state.n_in_row:
-                # print(np.std(act_probs))              
-                # if np.std(act_probs)<0.02 : 
                 # 早期多随机
-                if state.piecesteps<20:
-                    p = 0.5                 
-                    dirichlet = np.random.dirichlet(0.03 * np.ones(len(act_probs)))
-                    act = np.random.choice(acts, p=p * act_probs + (1.0-p) * dirichlet)
+                # if state.piecesteps<10:
+                #     p = 0.75                 
+                #     dirichlet = np.random.dirichlet(0.03 * np.ones(len(act_probs)))
+                #     act = np.random.choice(acts, p=p * act_probs + (1.0-p) * dirichlet)
                 action = state.position_to_action(act)
 
                 if act!=acts[idx]:

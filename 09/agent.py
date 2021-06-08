@@ -75,12 +75,9 @@ class Agent(object):
     def actions_to_positions(self, actions):
         return [act for act in actions]
 
-
     # 获取可用步骤, 保留一个旋转始终有用
     # 将单人游戏变为双人博弈，一个正常下，一个只下走，
     def get_availables(self):
-        if self.curr_player==1: return [KEY_DOWN,]
-
         acts=[KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN, KEY_NONE]
 
         if not self.tetromino.validposition(self.board,self.fallpiece,ax = -1):
@@ -116,9 +113,8 @@ class Agent(object):
         self.reward = 0
         self.steps += 1
         self.piecesteps += 1
-        self.curr_player = (self.curr_player+1)%2
-        self.state_player = self.curr_player
- 
+        
+
         self.level, self.fallfreq = self.tetromino.calculate(self.score)
 
         if action == KEY_LEFT and self.tetromino.validposition(self.board,self.fallpiece,ax = -1):
@@ -135,15 +131,22 @@ class Agent(object):
             if not self.tetromino.validposition(self.board,self.fallpiece):
                 self.fallpiece['rotation'] = (self.fallpiece['rotation'] - 1) % len(pieces[self.fallpiece['shape']])
 
-        # if self.tetromino.validposition(self.board,self.fallpiece,ay = 1):
-        #     self.fallpiece['y'] +=1
+        if self.tetromino.validposition(self.board,self.fallpiece,ay = 1):
+            self.fallpiece['y'] +=1
+
         self.fallpiece_status.append(self.get_fallpiece_board())
 
         if not self.tetromino.validposition(self.board,self.fallpiece,ay = 1):
             self.tetromino.addtoboard(self.board,self.fallpiece)
             self.reward = self.tetromino.removecompleteline(self.board) 
+            
+            if self.reward >0:
+                self.terminal = True 
+                self.state = 2       
+                return self.state, self.reward
+            
             self.score += self.reward          
-            self.level, self.fallfreq = self.tetromino.calculate(self.score)   
+            # self.level, self.fallfreq = self.tetromino.calculate(self.score)   
             self.fallpiece_height = landingHeight(self.fallpiece)
             self.pieces_height.append(self.fallpiece_height)
             self.fallpiece = None
@@ -161,12 +164,10 @@ class Agent(object):
             if not self.tetromino.validposition(self.board,self.fallpiece) or (self.limit_piece_count>0 and self.piececount>=self.limit_piece_count):  
                 self.terminal = True 
                 self.state = 2       
-                return self.state, self.reward # 
+                return self.state, self.reward 
             else: 
                 self.state = 1
 
-            self.state_player = self.curr_player
-            self.curr_player = 0  
             self.fallpiece_status=[self.get_fallpiece_board()]          
         else:
             self.state = 0
@@ -176,9 +177,11 @@ class Agent(object):
 
         self.availables = self.get_availables()
 
+        self.curr_player = self.steps%2
+
         return self.state, self.reward
 
-    def get_key(self, include_curr_player=True):
+    def get_key(self):
         info = self.getBoard() + self.fallpiece_status[-1]
         key = [0 for v in range(self.height*self.width)]
         for x in range(self.height):
@@ -187,8 +190,6 @@ class Agent(object):
                     key[x*self.width+y]='0'
                 else:
                     key[x*self.width+y]='1'
-        if include_curr_player:
-            key.insert(0, str(self.curr_player))
         key3 = int("".join(key),2)
         return hash(key3)
 
@@ -268,25 +269,23 @@ class Agent(object):
         return board
 
     # 获得当前的全部特征
-    # 背景 + 下落方块位置 + 下一次的方块 = 3
+    # 背景 + 自己的步骤 + 自己上一次的步骤 + 对手的步骤 + 对手上一次的步骤 = 5
     # 返回 [3, height, width]
     def current_state(self):
         board_background = self.getBoard()
-        board_fallpiece =  self.fallpiece_status[-1]
-        if len(self.fallpiece_status)>2:           
-            board_fallpiece_prev = self.fallpiece_status[-3]  
-        else:
-            board_fallpiece_prev = np.zeros((self.height, self.width))
+        board_fallpiece = self.fallpiece_status[-1]
+        board_fallpiece_p = np.zeros((self.height, self.width))  
+        board_fallpiece2 = np.zeros((self.height, self.width))
+        board_fallpiece2_p =  np.zeros((self.height, self.width))
 
-        # board_fallpiece = self.get_fallpiece_board()
-        # board_nextpiece = self.get_nextpiece_borad()
-        
-        # if self.curr_player==0:
-        #     step_state = np.ones([self.height, self.width])
-        # else:
-        #     step_state = np.zeros([self.height, self.width])
+        if len(self.fallpiece_status)>1:
+            board_fallpiece2 = self.fallpiece_status[-2]
+        if len(self.fallpiece_status)>2:
+            board_fallpiece_p = self.fallpiece_status[-3]  
+        if len(self.fallpiece_status)>3:
+            board_fallpiece2_p = self.fallpiece_status[-4]  
 
-        state = np.stack([board_background, board_fallpiece_prev, board_fallpiece])
+        state = np.stack([board_background, board_fallpiece_p, board_fallpiece, board_fallpiece2_p, board_fallpiece2])
         return state        
 
     # 交替个数也就是从空到非空算一次，边界算非空 
@@ -364,7 +363,9 @@ class Agent(object):
     #     return transCount    
 
     def game_end(self):
-        return self.terminal, self.score
+        if self.reward>0:
+            return self.terminal, self.curr_player 
+        return self.terminal, -1
 
     # 这里假定第一个人选择下[左移，右移，翻转，下降，无动作]，第二个人只有[下降]
     # def start_self_play(self, player, temp=1e-3):       
@@ -423,124 +424,124 @@ class Agent(object):
     #     return -1, zip(states, mcts_probs, winners)
 
     # # 使用 mcts 训练，重用搜索树，并保存数据
-    def start_self_play(self, player, temp=1e-3):
-        # 这里下两局，按步数对比
-        states, mcts_probs, winers = [], [], []
+    # def start_self_play(self, player, temp=1e-3):
+    #     # 这里下两局，按步数对比
+    #     states, mcts_probs, winers = [], [], []
 
-        game0 = copy.deepcopy(self)
-        game1 = copy.deepcopy(self)
+    #     game0 = copy.deepcopy(self)
+    #     game1 = copy.deepcopy(self)
 
-        game0_states,game1_states,game0_mcts_probs,game1_mcts_probs,game0_players,game1_players=[],[],[],[],[],[]
+    #     game0_states,game1_states,game0_mcts_probs,game1_mcts_probs,game0_players,game1_players=[],[],[],[],[],[]
 
-        train_pieces_count = random.randint(2,8)  
-        print("max pieces count:",train_pieces_count)
-        player.reset_player()
-        # game0.limit_piece_count = train_pieces_count
-        game0.ig_action = KEY_DOWN
-        for i in count():            
-            # 只保留有效的步数
-            # if game0.piecesteps<ig_steps:
-            #     if game0.curr_player==0:
-            #         action = random.choice([KEY_ROTATION, KEY_LEFT, KEY_RIGHT])
-            #     else:
-            #         action = KEY_DOWN
-            #     game0.step(action)
-            #     if game0.terminal or game0.piececount>=train_pieces_count: 
-            #         game0.terminal = True
-            #         break
-            #     continue
+    #     train_pieces_count = random.randint(2,8)  
+    #     print("max pieces count:",train_pieces_count)
+    #     player.reset_player()
+    #     # game0.limit_piece_count = train_pieces_count
+    #     game0.ig_action = KEY_DOWN
+    #     for i in count():            
+    #         # 只保留有效的步数
+    #         # if game0.piecesteps<ig_steps:
+    #         #     if game0.curr_player==0:
+    #         #         action = random.choice([KEY_ROTATION, KEY_LEFT, KEY_RIGHT])
+    #         #     else:
+    #         #         action = KEY_DOWN
+    #         #     game0.step(action)
+    #         #     if game0.terminal or game0.piececount>=train_pieces_count: 
+    #         #         game0.terminal = True
+    #         #         break
+    #         #     continue
                
-            action, move_probs = player.get_action(game0, temp=temp, return_prob=1) 
-            if game0.curr_player==0:
-                game0_states.append(game0.current_state())
-                game0_players.append(game0.curr_player)
-                game0_mcts_probs.append(move_probs)
+    #         action, move_probs = player.get_action(game0, temp=temp, return_prob=1) 
+    #         if game0.curr_player==0:
+    #             game0_states.append(game0.current_state())
+    #             game0_players.append(game0.curr_player)
+    #             game0_mcts_probs.append(move_probs)
 
-            game0.step(action)
-            # game0.print2(True)
-            if game0.terminal or game0.piececount>=train_pieces_count: 
-                break
+    #         game0.step(action)
+    #         # game0.print2(True)
+    #         if game0.terminal or game0.piececount>=train_pieces_count: 
+    #             break
 
-        player.reset_player()
-        # game1.limit_piece_count = train_pieces_count
-        game1.ig_action = KEY_NONE
-        for i in count():
-            # if game1.piecesteps<ig_steps:
-            #     if game1.curr_player==0:
-            #         action = random.choice([KEY_ROTATION, KEY_LEFT, KEY_RIGHT])
-            #     else:
-            #         action = KEY_DOWN
-            #     game1.step(action)
-            #     if game1.terminal or game1.piececount>=train_pieces_count:
-            #         game1.terminal = True
-            #         break
-            #     continue
-            # 只保留有效的步数
+    #     player.reset_player()
+    #     # game1.limit_piece_count = train_pieces_count
+    #     game1.ig_action = KEY_NONE
+    #     for i in count():
+    #         # if game1.piecesteps<ig_steps:
+    #         #     if game1.curr_player==0:
+    #         #         action = random.choice([KEY_ROTATION, KEY_LEFT, KEY_RIGHT])
+    #         #     else:
+    #         #         action = KEY_DOWN
+    #         #     game1.step(action)
+    #         #     if game1.terminal or game1.piececount>=train_pieces_count:
+    #         #         game1.terminal = True
+    #         #         break
+    #         #     continue
+    #         # 只保留有效的步数
 
-            action, move_probs = player.get_action(game1, temp=temp, return_prob=1)
-            if game1.curr_player==0:
-                game1_states.append(game1.current_state())
-                game1_players.append(game1.curr_player)
-                game1_mcts_probs.append(move_probs)
+    #         action, move_probs = player.get_action(game1, temp=temp, return_prob=1)
+    #         if game1.curr_player==0:
+    #             game1_states.append(game1.current_state())
+    #             game1_players.append(game1.curr_player)
+    #             game1_mcts_probs.append(move_probs)
     
-            game1.step(action)
-            # game1.print2(True)            
-            if game1.terminal or game1.piececount>=train_pieces_count: 
-                break
+    #         game1.step(action)
+    #         # game1.print2(True)            
+    #         if game1.terminal or game1.piececount>=train_pieces_count: 
+    #             break
 
-        game0.print()
-        game1.print()
+    #     game0.print()
+    #     game1.print()
 
-        #game0_exscore = -1 * game0.getMaxHeight()
-        #game1_exscore = -1 * game1.getMaxHeight()
+    #     #game0_exscore = -1 * game0.getMaxHeight()
+    #     #game1_exscore = -1 * game1.getMaxHeight()
 
-        game0_exscore = -1 * game0.getTransCount()
-        game1_exscore = -1 * game1.getTransCount()
+    #     game0_exscore = -1 * game0.getTransCount()
+    #     game1_exscore = -1 * game1.getTransCount()
             
-        print("game0_exscore:",game0_exscore,"game1_exscore:",game1_exscore)
-        # 如果有输赢，则直接出结果，如果相同，继续下一轮，直到出结果为止
-        game0_win, game1_win = 0, 0
+    #     print("game0_exscore:",game0_exscore,"game1_exscore:",game1_exscore)
+    #     # 如果有输赢，则直接出结果，如果相同，继续下一轮，直到出结果为止
+    #     game0_win, game1_win = 0, 0
 
-        if game0_exscore>game1_exscore:
-            game0_win, game1_win  = 1, -1
+    #     if game0_exscore>game1_exscore:
+    #         game0_win, game1_win  = 1, -1
 
-        if game0_exscore<game1_exscore:
-            game0_win, game1_win  = -1, 1
+    #     if game0_exscore<game1_exscore:
+    #         game0_win, game1_win  = -1, 1
 
-        winers = []
+    #     winers = []
 
-        for i in game0_players:
-            if i==0:
-                winers.append(game0_win)
-            else:
-                winers.append(game0_win*-1)
+    #     for i in game0_players:
+    #         if i==0:
+    #             winers.append(game0_win)
+    #         else:
+    #             winers.append(game0_win*-1)
 
-        for i in game1_players:
-            if i==0:
-                winers.append(game1_win)
-            else:
-                winers.append(game1_win*-1)
+    #     for i in game1_players:
+    #         if i==0:
+    #             winers.append(game1_win)
+    #         else:
+    #             winers.append(game1_win*-1)
 
-        for o in game0_states: states.append(o)
-        for o in game1_states: states.append(o)
-        for o in game0_mcts_probs: mcts_probs.append(o)
-        for o in game1_mcts_probs: mcts_probs.append(o)
+    #     for o in game0_states: states.append(o)
+    #     for o in game1_states: states.append(o)
+    #     for o in game0_mcts_probs: mcts_probs.append(o)
+    #     for o in game1_mcts_probs: mcts_probs.append(o)
 
-        game0_states,game1_states,game0_mcts_probs,game1_mcts_probs,game0_wins,game1_wins=[],[],[],[],[],[]
-        winners_z = np.array(winers)
+    #     game0_states,game1_states,game0_mcts_probs,game1_mcts_probs,game0_wins,game1_wins=[],[],[],[],[],[]
+    #     winners_z = np.array(winers)
 
-        assert len(states)==len(mcts_probs)
-        assert len(states)==len(winners_z)
+    #     assert len(states)==len(mcts_probs)
+    #     assert len(states)==len(winners_z)
 
-        # winners_z = np.zeros(len(winers))
-        # winners_z[np.array(winers) == 1] = 1.0
-        # winners_z[np.array(winers) == -1] = -1.0
-        # print(states[-1])
-        # print(mcts_probs[-1])
-        # print(winners_z[-1])
+    #     # winners_z = np.zeros(len(winers))
+    #     # winners_z[np.array(winers) == 1] = 1.0
+    #     # winners_z[np.array(winers) == -1] = -1.0
+    #     # print(states[-1])
+    #     # print(mcts_probs[-1])
+    #     # print(winners_z[-1])
 
-        print("add %s to dataset"%len(winers))
-        return -1, zip(states, mcts_probs, winners_z)
+    #     print("add %s to dataset"%len(winers))
+    #     return -1, zip(states, mcts_probs, winners_z)
 
     # # 使用 mcts 训练，重用搜索树，并保存数据
     # def start_self_play3(self, player, temp=1e-3):
@@ -743,3 +744,57 @@ class Agent(object):
 
     #     assert len(states)==len(mcts_probs)==len(winners)
     #     return -1, zip(states, mcts_probs, winners)
+
+    # 使用 mcts 训练，重用搜索树，并保存数据
+    def start_self_play(self, player, temp=1e-3):
+        """ start a self-play game using a MCTS player, reuse the search tree,
+        and store the self-play data: (state, mcts_probs, z) for training
+        """
+        self.reset()
+
+        states, mcts_probs, current_players = [], [], []
+
+        # # 先随机走1~2步，增加样本的复杂度
+        # for i in range(random.randint(1,2)):
+        #     act = random.choice(self.availables)
+        #     self.step(act)
+
+        for i in count():
+            max_height = self.getMaxHeight()
+            print(max_height)
+
+            if self.piecesteps < (15 - max_height)/2:
+                act = random.choice(self.availables)
+                self.step(act)
+                continue
+
+            if max_height>10:
+                print("Game end. Tie")
+                self.print()
+                return -1, None
+
+            action, move_probs = player.get_action(self, temp=temp, return_prob=1) 
+
+            # idx = np.argmax(move_probs)
+            # act = self.position_to_action(idx)
+            # if act==action:
+            states.append(self.current_state())
+            mcts_probs.append(move_probs)
+            current_players.append(self.curr_player)
+
+            self.step(action)
+
+            end, winner = self.game_end()
+            if end:
+                winners_z = np.zeros(len(current_players))
+                if winner != -1:
+                    winners_z[np.array(current_players) == winner] = 1.0
+                    winners_z[np.array(current_players) != winner] = -1.0
+
+                    print("Game end. Winner is player:", winner)
+                else:
+                    print("Game end. Tie")
+                
+                self.print()
+
+                return winner, zip(states, mcts_probs, winners_z)
