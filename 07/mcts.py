@@ -46,7 +46,6 @@ class MCTS():
         s = state.get_key()
 
         self.max_depth = 0
-        var = 0
         available_acts = state.actions_to_positions(state.availables)
         for n in range(self._n_playout):
             self.depth = 0
@@ -54,26 +53,13 @@ class MCTS():
             self.search(state_copy)
             if self.depth>self.max_depth: self.max_depth = self.depth
 
-            # 取出当前所有的 visits
-            # visits = [self.Nsa[(s, a)] if (s, a) in self.Nsa else 0 for a in available_acts]
-            # values = [self.Qsa[(s, a)] if (s, a) in self.Qsa else 0 for a in available_acts]
-            # if len(visits)==1: break
-            # if sum(visits)==0: break
-
-            # # 如果当前最大访问次数的值为负数或方差没有到最大值，继续                
-            # idx = np.argmax(visits)
-            # var = np.var(visits)
-            # if values[idx]>0 and self._limit_max_var and var>self._max_var: break
-            # # 如果判定必输或必赢，直接结束
-            # if (values[idx]<=-0.99 or values[idx]>=0.99) and var>self._max_var: break
-
         act_visits = [(a, self.Nsa[(s, a)]) if (s, a) in self.Nsa else (a, 0) for a in available_acts]
         act_Qs = [(a, self.Qsa[(s, a)]) if (s, a) in self.Qsa else (a, 0) for a in available_acts]
         acts = [av[0] for av in act_visits]
         visits = [av[1] for av in act_visits]
         qs = [round(av[1],2) for av in act_Qs]
 
-        if 1:#state.steps%2==0:
+        if state.steps%2==0:
             info=[]
             for idx in sorted(range(len(visits)), key=visits.__getitem__)[::-1]:
                 if len(info)>2: break
@@ -83,7 +69,7 @@ class MCTS():
                 if (s, act) in self.Qsa: q = self.Qsa[(s, act)]
                 if s in self.Ps: p = self.Ps[s][act]
                 info.append([action, visit, round(q,2), round(p,2)]) 
-            print(state.steps, state.piecesteps, state.piececount ,self.lable, s ,"n_playout:", n, "depth:" ,self.max_depth, info, "var:", round(var,1))
+            print(state.steps, state.piecesteps, state.piececount ,self.lable, s ,"n_playout:", n, "depth:" ,self.max_depth, info)
                 #, \   "first:", state.positions_to_actions(list(self._first_act)[-3:]))
 
         if temp == 0:
