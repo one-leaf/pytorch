@@ -225,9 +225,9 @@ class MCTS():
             # v = avg_ph/20 不能用这个，这个会导致粘连
             ph_max=max(ph)
             if ph[-1]>=ph_max:
-                v = 0.1
+                v = 0.8
             else:
-                v = -0.1
+                v = -0.8
             if state.reward >0:
                 v = -1.
                 print("GET!!!")   
