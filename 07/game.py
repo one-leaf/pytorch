@@ -270,7 +270,7 @@ class Tetromino(object):
     def __init__(self, isRandomNextPiece=True):
         self.nextpiece=[]
         if not isRandomNextPiece:
-            for i in range(200,0,-1):
+            for i in range(100):
                 self.nextpiece.append(self.getrandompiece(i%10))
 
     def getrandompiece(self,color=None):
