@@ -81,7 +81,7 @@ class Agent(object):
     def get_availables(self):
         if self.curr_player==1: return [KEY_DOWN,]
 
-        acts=[KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN, KEY_NONE]
+        acts=[KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_NONE]
 
         if not self.tetromino.validposition(self.board,self.fallpiece,ax = -1):
             acts.remove(KEY_LEFT)
@@ -441,7 +441,7 @@ class Agent(object):
         print("max pieces count:",train_pieces_count)
         player.reset_player()
         # game0.limit_piece_count = train_pieces_count
-        game0.ig_action = KEY_DOWN
+        # game0.ig_action = KEY_DOWN
         for i in count():            
             # 只保留有效的步数
             # if game0.piecesteps<ig_steps:
