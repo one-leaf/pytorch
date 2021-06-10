@@ -48,8 +48,6 @@ class Agent(object):
         self.curr_player = 0  
         # 触底的玩家 
         self.state_player = -1        
-        # 当前已经下落的方块
-        self.fallpiece_height=0
         # 最大方块数量
         self.limit_piece_count = 0   
         # 每个方块的高度
@@ -147,8 +145,8 @@ class Agent(object):
             
             self.score += self.reward          
             # self.level, self.fallfreq = self.tetromino.calculate(self.score)   
-            self.fallpiece_height = landingHeight(self.fallpiece)
-            self.pieces_height.append(self.fallpiece_height)
+            # self.fallpiece_height = landingHeight(self.fallpiece)
+            self.pieces_height.append(self.getMaxHeight())
             self.fallpiece = None
 
         if  env:
