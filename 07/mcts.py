@@ -116,7 +116,10 @@ class MCTS():
             # 游戏结束双方都输掉了
             if end:
                 ph=state.pieces_height
-                ph_max=sum(ph)/len(ph)
+                if len(ph)>2:
+                    ph_max=ph[-2]
+                else:
+                    ph_max=0
 
                 if ph[-1]>ph_max:
                     v = 1
@@ -209,22 +212,23 @@ class MCTS():
             print("GET!!!")   
             if state.state_player == 1:
                 v = -1 * v        
-        else:
-            v = self.search(state)
-
-            if state.state==1 or state.reward >0: 
+        elif state.state==1: 
                 ph=state.pieces_height
                 # avg_ph = sum(ph)/len(ph)
                 # v = (-1./avg_ph)
                 # v = avg_ph/20 不能用这个，这个会导致粘连
-                k=1
-                if state.state_player == 1:
-                    k = -1                         
-                ph_max=sum(ph)/len(ph)
-                if ph[-1]>ph_max:
-                    v = v+k*0.2
+                if len(ph)>2:
+                    ph_max=ph[-2]
                 else:
-                    v = v-k*0.2
+                    ph_max=0
+                if ph[-1]>ph_max:
+                    v = 0.1
+                else:
+                    v = -0.1
+                if state.state_player == 1:
+                    v = -1 * v    
+        else:
+            v = self.search(state)
 
         # 更新 Q 值 和 访问次数
         if (s, a) in self.Qsa:
