@@ -144,8 +144,8 @@ class Agent(object):
             self.reward = self.tetromino.removecompleteline(self.board) 
             self.score += self.reward          
             self.level, self.fallfreq = self.tetromino.calculate(self.score)   
-            self.fallpiece_height = landingHeight(self.fallpiece)
-            self.pieces_height.append(self.fallpiece_height)
+            # self.fallpiece_height = landingHeight(self.fallpiece)
+            self.pieces_height.append(self.getMaxHeight())
             self.fallpiece = None
 
         if  env:
