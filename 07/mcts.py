@@ -116,7 +116,7 @@ class MCTS():
             # 游戏结束双方都输掉了
             if end:
                 ph=state.pieces_height
-                ph_max=max(ph)
+                ph_max=sum(ph)/len(ph)
 
                 if ph[-1]>ph_max:
                     v = 1
@@ -220,7 +220,7 @@ class MCTS():
                 k=1
                 if state.state_player == 1:
                     k = -1                         
-                ph_max=max(ph)
+                ph_max=sum(ph)/len(ph)
                 if ph[-1]>ph_max:
                     v = v+k*0.2
                 else:
