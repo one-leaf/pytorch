@@ -91,17 +91,17 @@ class Agent(object):
         #     acts.remove(KEY_DOWN)
 
         # 只允许前面旋转
-        if self.piecesteps>len(pieces[self.fallpiece['shape']]):
+        # if self.piecesteps>len(pieces[self.fallpiece['shape']]):
+        #     acts.remove(KEY_ROTATION)
+        # else:
+        if self.fallpiece['shape']=="o":
             acts.remove(KEY_ROTATION)
         else:
-            if self.fallpiece['shape']=="o":
+            r = self.fallpiece['rotation']
+            self.fallpiece['rotation'] =  (self.fallpiece['rotation'] + 1) % len(pieces[self.fallpiece['shape']])
+            if not self.tetromino.validposition(self.board,self.fallpiece):
                 acts.remove(KEY_ROTATION)
-            else:
-                r = self.fallpiece['rotation']
-                self.fallpiece['rotation'] =  (self.fallpiece['rotation'] + 1) % len(pieces[self.fallpiece['shape']])
-                if not self.tetromino.validposition(self.board,self.fallpiece):
-                    acts.remove(KEY_ROTATION)
-                self.fallpiece['rotation'] = r
+            self.fallpiece['rotation'] = r
 
         random.shuffle(acts)
         if self.ig_action!=None and len(acts)>=2:
@@ -441,7 +441,7 @@ class Agent(object):
         print("max pieces count:",train_pieces_count)
         player.reset_player()
         # game0.limit_piece_count = train_pieces_count
-        # game0.ig_action = KEY_DOWN
+        game0.ig_action = KEY_ROTATION
         for i in count():            
             # 只保留有效的步数
             # if game0.piecesteps<ig_steps:
