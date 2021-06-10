@@ -203,23 +203,27 @@ class MCTS():
         state.step(act)
 
         # 计算下一步的 v 这个v 为正数，但下一个v为负数
-        v = self.search(state)
-
-        if state.state==1 or state.reward >0: 
-            ph=state.pieces_height
-            # avg_ph = sum(ph)/len(ph)
-            # v = (-1./avg_ph)
-            # v = avg_ph/20 不能用这个，这个会导致粘连
-            ph_max=max(ph)
-            if ph[-1]>=ph_max:
-                v = v+0.2
-            else:
-                v = v-0.2
-            if state.reward >0:
-                v = -1.
-                print("GET!!!")   
+        if state.reward >0:
+            v = -1.
+            print("GET!!!")   
             if state.state_player == 1:
-                v = -1 * v                        
+                v = -1 * v        
+        else:
+            v = self.search(state)
+
+            if state.state==1 or state.reward >0: 
+                ph=state.pieces_height
+                # avg_ph = sum(ph)/len(ph)
+                # v = (-1./avg_ph)
+                # v = avg_ph/20 不能用这个，这个会导致粘连
+                k=1
+                if state.state_player == 1:
+                    k = -1                         
+                ph_max=max(ph)
+                if ph[-1]>=ph_max:
+                    v = v+k*0.2
+                else:
+                    v = v-k*0.2
 
         # 更新 Q 值 和 访问次数
         if (s, a) in self.Qsa:
