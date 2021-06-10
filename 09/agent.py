@@ -58,6 +58,8 @@ class Agent(object):
         self.ig_action = None
         # 下一个可用步骤
         self.availables=self.get_availables()
+        # 最大游戏高度
+        self.limit_max_height = -1
 
     # 概率的索引位置转action
     def position_to_action(self, position):
@@ -111,7 +113,6 @@ class Agent(object):
         self.reward = 0
         self.steps += 1
         self.piecesteps += 1
-        
 
         self.level, self.fallfreq = self.tetromino.calculate(self.score)
 
@@ -132,6 +133,8 @@ class Agent(object):
         if self.tetromino.validposition(self.board,self.fallpiece,ay = 1):
             self.fallpiece['y'] +=1
 
+        fallpiece_y = self.fallpiece['y']
+
         self.fallpiece_status.append(self.get_fallpiece_board())
 
         if not self.tetromino.validposition(self.board,self.fallpiece,ay = 1):
@@ -146,7 +149,7 @@ class Agent(object):
             self.score += self.reward          
             # self.level, self.fallfreq = self.tetromino.calculate(self.score)   
             # self.fallpiece_height = landingHeight(self.fallpiece)
-            self.pieces_height.append(self.getMaxHeight())
+            self.pieces_height.append(fallpiece_y)
             self.fallpiece = None
 
         if  env:
@@ -159,7 +162,10 @@ class Agent(object):
             self.piecesteps = 0
             self.piececount +=1 
 
-            if not self.tetromino.validposition(self.board,self.fallpiece) or (self.limit_piece_count>0 and self.piececount>=self.limit_piece_count):  
+            if (not self.tetromino.validposition(self.board,self.fallpiece)) or \
+                (self.limit_piece_count>0 and self.piececount>=self.limit_piece_count) or \
+                (self.limit_max_height>0 and fallpiece_y<self.limit_max_height):  
+                
                 self.terminal = True 
                 self.state = 2       
                 return self.state, self.reward 
@@ -749,7 +755,7 @@ class Agent(object):
         and store the self-play data: (state, mcts_probs, z) for training
         """
         self.reset()
-
+        self.limit_max_height=0
         states, mcts_probs, current_players = [], [], []
 
         # # 先随机走1~2步，增加样本的复杂度
@@ -759,17 +765,11 @@ class Agent(object):
 
         for i in count():
             max_height = self.getMaxHeight()
-            print(max_height)
 
             if self.piecesteps < (15 - max_height)/2:
                 act = random.choice(self.availables)
                 self.step(act)
                 continue
-
-            if max_height>10:
-                print("Game end. Tie")
-                self.print()
-                return -1, None
 
             action, move_probs = player.get_action(self, temp=temp, return_prob=1) 
 
@@ -788,9 +788,10 @@ class Agent(object):
                 if winner != -1:
                     winners_z[np.array(current_players) == winner] = 1.0
                     winners_z[np.array(current_players) != winner] = -1.0
-
                     print("Game end. Winner is player:", winner)
                 else:
+                    winners_z[np.array(current_players) == winner] = -1.0
+                    winners_z[np.array(current_players) != winner] = -1.0
                     print("Game end. Tie")
                 
                 self.print()

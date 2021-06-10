@@ -115,13 +115,16 @@ class MCTS():
             v = 0
             # 这里是对上一步的评价，如果游戏结束对我而言都是不利的，v为-1
             # 这里增加了最终的奖励，提升对步骤的优化
-            if (end and winner != -1): 
-                v = -1 * 1
+            if end:
+                if winner != -1: 
+                    v = -1
+                else:
+                    v = 1 
 
             self.Es[s] = v
 
         # 如果得分不等于0，标志这局游戏结束
-        if self.Es[s] != 0 or state.terminal:
+        if self.Es[s] != 0:
             return -self.Es[s]
 
         # 如果当前状态没有子节点，增加子节点

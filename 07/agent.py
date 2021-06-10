@@ -58,6 +58,8 @@ class Agent(object):
         self.ig_action = None
         # 下一个可用步骤
         self.availables=self.get_availables()
+        # 最大游戏高度
+        self.limit_max_height = -1
 
     # 概率的索引位置转action
     def position_to_action(self, position):
@@ -135,6 +137,9 @@ class Agent(object):
 
         # if self.tetromino.validposition(self.board,self.fallpiece,ay = 1):
         #     self.fallpiece['y'] +=1
+
+        fallpiece_y = self.fallpiece['y']
+
         self.fallpiece_status.append(self.get_fallpiece_board())
 
         if not self.tetromino.validposition(self.board,self.fallpiece,ay = 1):
@@ -143,7 +148,7 @@ class Agent(object):
             self.score += self.reward          
             self.level, self.fallfreq = self.tetromino.calculate(self.score)   
             # self.fallpiece_height = landingHeight(self.fallpiece)
-            self.pieces_height.append(self.getMaxHeight())
+            self.pieces_height.append(20-fallpiece_y)
             self.fallpiece = None
 
         if  env:
@@ -156,7 +161,9 @@ class Agent(object):
             self.piecesteps = 0
             self.piececount +=1 
 
-            if not self.tetromino.validposition(self.board,self.fallpiece) or (self.limit_piece_count>0 and self.piececount>=self.limit_piece_count):  
+            if (not self.tetromino.validposition(self.board,self.fallpiece)) or \
+                (self.limit_piece_count>0 and self.piececount>=self.limit_piece_count) or \
+                (self.limit_max_height>0 and fallpiece_y<self.limit_max_height):  
                 self.terminal = True 
                 self.state = 2       
                 return self.state, self.reward # 
