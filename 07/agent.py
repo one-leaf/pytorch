@@ -437,10 +437,11 @@ class Agent(object):
 
         game0_states,game1_states,game0_mcts_probs,game1_mcts_probs,game0_players,game1_players=[],[],[],[],[],[]
 
-        train_pieces_count = random.randint(2,8)  
+        train_pieces_count = random.randint(3,10)  
         print("max pieces count:",train_pieces_count)
         player.reset_player()
         # game0.limit_piece_count = train_pieces_count
+        # game0.limit_max_height = 10
         game0.ig_action = KEY_ROTATION
         for i in count():            
             # 只保留有效的步数
