@@ -81,7 +81,7 @@ class Agent(object):
     def get_availables(self):
         if self.curr_player==1: return [KEY_DOWN,]
         if self.fallpiece['y']<=10: return [KEY_DOWN,]
-        
+
         acts=[KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_NONE]
 
         if not self.tetromino.validposition(self.board,self.fallpiece,ax = -1):
@@ -91,10 +91,6 @@ class Agent(object):
         # if not self.tetromino.validposition(self.board,self.fallpiece,ay = 1):
         #     acts.remove(KEY_DOWN)
 
-        # 只允许前面旋转
-        # if self.piecesteps>len(pieces[self.fallpiece['shape']]):
-        #     acts.remove(KEY_ROTATION)
-        # else:
         if self.fallpiece['shape']=="o":
             acts.remove(KEY_ROTATION)
         else:
