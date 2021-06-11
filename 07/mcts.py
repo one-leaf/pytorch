@@ -210,17 +210,18 @@ class MCTS():
             if state.state_player == 1:
                 v = -1 * v        
         elif state.state==1: 
-                ph=state.pieces_height
-                # avg_ph = sum(ph)/len(ph)
-                # v = (-1./avg_ph)
-                # v = avg_ph/20 不能用这个，这个会导致粘连
-                ph_max=max(ph)
-                if ph[-1]>=ph_max:
-                    v = 0.1
-                else:
-                    v = -0.1
-                if state.state_player == 1:
-                    v = -1 * v    
+            ph=state.pieces_height
+            # avg_ph = sum(ph)/len(ph)
+            # v = (-1./avg_ph)
+            # v = avg_ph/20 不能用这个，这个会导致粘连
+            ph_max=max(ph)
+            if ph[-1]>=ph_max:
+                v = 0.1
+            else:
+                v = -0.1
+            if state.state_player == 1:
+                v = -1 * v    
+            v = v + self.search(state)
         else:
             v = self.search(state)
 
