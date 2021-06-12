@@ -206,7 +206,7 @@ class MCTS():
         # 计算下一步的 v 这个v 为正数，但下一个v为负数
         if state.reward >0:
             v = -1.
-            print("GET!!!")   
+            print("!",end="")   
             if state.state_player == 1:
                 v = -1 * v        
         elif state.state==1: 
