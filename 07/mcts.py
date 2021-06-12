@@ -352,8 +352,8 @@ class MCTSPlayer(object):
                 # print(np.std(act_probs))              
                 # if np.std(act_probs)<0.02 : 
                 # 早期多随机
-                if state.piecesteps<20:
-                    p = 0.5                 
+                if act_probs[idx]<0.8:
+                    p = 0.75                 
                     dirichlet = np.random.dirichlet(0.03 * np.ones(len(act_probs)))
                     act = np.random.choice(acts, p=p * act_probs + (1.0-p) * dirichlet)
                 action = state.position_to_action(act)
