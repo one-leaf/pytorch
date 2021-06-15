@@ -437,7 +437,7 @@ class Agent(object):
         train_pieces_count = random.randint(3,10)  
         print("max pieces count:",train_pieces_count)
         player.reset_player()
-        # game0.limit_piece_count = train_pieces_count
+        game0.limit_piece_count = train_pieces_count
         game0.limit_max_height = 10
         game0.ig_action = KEY_ROTATION
         for i in count():            
@@ -461,11 +461,17 @@ class Agent(object):
 
             game0.step(action)
             # game0.print2(True)
-            if game0.terminal or game0.piececount>=train_pieces_count: 
+            if game0.terminal or game0.reward>0:# or game0.piececount>=train_pieces_count: 
                 break
 
+        if game0.reward>0:
+            game0.print()
+            game0_winners = np.ones([len(game0_states)])
+            return -1, zip(game0_states, game0_mcts_probs, game0_winners)
+
+
         player.reset_player()
-        # game1.limit_piece_count = train_pieces_count
+        game1.limit_piece_count = train_pieces_count
         game1.limit_max_height = 10
         game1.ig_action = KEY_NONE
         for i in count():
@@ -489,8 +495,13 @@ class Agent(object):
     
             game1.step(action)
             # game1.print2(True)            
-            if game1.terminal or game1.piececount>=train_pieces_count: 
+            if game1.terminal or game1.reward>0:# or game1.piececount>=train_pieces_count: 
                 break
+
+        if game1.reward>0:
+            game1.print()
+            game1_winners = np.ones([len(game1_states)])
+            return -1, zip(game1_states, game1_mcts_probs, game1_winners)
 
         game0.print()
         game1.print()
