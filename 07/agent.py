@@ -439,7 +439,7 @@ class Agent(object):
         player.reset_player()
         game0.limit_piece_count = train_pieces_count
         game0.limit_max_height = 10
-        game0.ig_action = KEY_ROTATION
+        #game0.ig_action = KEY_ROTATION
         for i in count():            
             # 只保留有效的步数
             # if game0.piecesteps<ig_steps:
@@ -473,7 +473,7 @@ class Agent(object):
         player.reset_player()
         game1.limit_piece_count = train_pieces_count
         game1.limit_max_height = 10
-        game1.ig_action = KEY_NONE
+        #game1.ig_action = KEY_NONE
         for i in count():
             # if game1.piecesteps<ig_steps:
             #     if game1.curr_player==0:
