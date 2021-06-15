@@ -114,46 +114,19 @@ class MCTS():
             #     v = -2
 
             # 游戏结束双方都输掉了
-            if end:
-                ph=state.pieces_height
-                ph_max=max(ph)
-
-                if ph[-1]>=ph_max:
-                    v = 1
-                else:
+            if end or state.reward >0:
+                if state.reward >0:
                     v = -1
-                if state.state_player == 0:
+                else:
+                    ph=state.pieces_height
+                    ph_max=max(ph)
+
+                    if ph[-1]>=ph_max:
+                        v = 1
+                    else:
+                        v = -1
+                if state.state_player == 1:
                     v = -1 * v
-                # print("end",state.state_player,ph_avg,ph)
-                # if state.state_player == 0 :
-                #     if ph[-1]==max(ph):
-                #         v = -1 
-                #     else:
-                #         v = 1
-                # else:
-                #     if ph[-1]>ph_avg:
-                #         v = -1
-                #     else:
-                #         v = 1 
-                # if state.state_player==0:
-                #     v = max_height/10 - 1
-                # else:
-                #     v = 1 - max_height/10
-
-            # 谁先落下来谁赢，这样由于下落的可能高，就倒逼正常走子远离下落
-            # if state.state==1:
-            #     max_height = state.fallpiece_height
-            #     k=0.01
-            #     if state.state_player==0:
-            #         v =  k * (1 - (max_height/20))  
-            #     else:
-            #         v =  k * (1 - (max_height/20)) * -1 #-0.01 / max_height             
-            #     # if state.reward==0:
-            #     #     v =  0.1/max_height
-            #     # else:
-            #     #     v = -0.1/max_height
-
-            
 
             self.Es[s] = v
 
@@ -204,26 +177,26 @@ class MCTS():
         state.step(act)
 
         # 计算下一步的 v 这个v 为正数，但下一个v为负数
-        if state.reward >0:
-            v = -1.
-            print("!",end="")   
-            if state.state_player == 1:
-                v = -1 * v        
-        elif state.state==1: 
-            ph=state.pieces_height
-            # avg_ph = sum(ph)/len(ph)
-            # v = (-1./avg_ph)
-            # v = avg_ph/20 不能用这个，这个会导致粘连
-            ph_max=max(ph)
-            if ph[-1]>=ph_max:
-                v = 0.1
-            else:
-                v = -0.1
-            if state.state_player == 1:
-                v = -1 * v    
-            v = v + self.search(state)
-        else:
-            v = self.search(state)
+        # if state.reward >0:
+        #     v = -1.
+        #     print("!",end="")   
+        #     if state.state_player == 1:
+        #         v = -1 * v        
+        # elif state.state==1: 
+        #     ph=state.pieces_height
+        #     # avg_ph = sum(ph)/len(ph)
+        #     # v = (-1./avg_ph)
+        #     # v = avg_ph/20 不能用这个，这个会导致粘连
+        #     ph_max=max(ph)
+        #     if ph[-1]>=ph_max:
+        #         v = 0.1
+        #     else:
+        #         v = -0.1
+        #     if state.state_player == 1:
+        #         v = -1 * v    
+        #     v = v + self.search(state)
+        # else:
+        v = self.search(state)
 
         # 更新 Q 值 和 访问次数
         if (s, a) in self.Qsa:
