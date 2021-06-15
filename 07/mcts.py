@@ -125,7 +125,7 @@ class MCTS():
                         v = 0.1
                     else:
                         v = -0.1
-                if state.state_player == 1:
+                if state.state_player == 0:
                     v = -1 * v
 
             self.Es[s] = v
