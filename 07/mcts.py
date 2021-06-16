@@ -95,7 +95,7 @@ class MCTS():
         返回:
             v: 当前局面的状态
         """
-        s = state.get_key(True)
+        s = state.get_key(False)
         self.depth = self.depth +1
 
         # 将所有状态的得分都 cache 起来
