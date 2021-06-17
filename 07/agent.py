@@ -516,11 +516,18 @@ class Agent(object):
         # 如果有输赢，则直接出结果，如果相同，继续下一轮，直到出结果为止
         game0_win, game1_win = 0, 0
 
+        if game0.piececount<game0.limit_piece_count:
+            game0_win = -1
+        if game1.piececount<game1.limit_piece_count:
+            game1_win = -1
+
         if game0_exscore>game1_exscore:
-            game0_win, game1_win  = 1, -1
+            if game0_win==0: game0_win = 1
+            if game1_win==0: game1_win = -1
 
         if game0_exscore<game1_exscore:
-            game0_win, game1_win  = -1, 1
+            if game0_win==0: game0_win = -1
+            if game1_win==0: game1_win = 1
 
         winers = []
 
