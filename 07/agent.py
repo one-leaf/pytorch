@@ -529,6 +529,7 @@ class Agent(object):
             if game0_win==0: game0_win = -1
             if game1_win==0: game1_win = 1
 
+        print("game0",game0_win,"game1",game0_win)
         winers = []
 
         for i in game0_players:
