@@ -118,7 +118,7 @@ class MCTS():
                 if state.reward >0:
                     v = -1
                 else:
-                    v = 1
+                    v = 0
                     # ph=state.pieces_height
                     # ph_min=min(ph)
 
