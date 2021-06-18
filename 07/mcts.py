@@ -122,8 +122,8 @@ class MCTS():
                     ph_max=max(ph)
                     if ph[-1]>=ph_max:
                         v = 1
-                        
-                if state.state_player == 1:
+
+                if state.state_player == 0:
                     v = -1 * v
 
             self.Es[s] = v
