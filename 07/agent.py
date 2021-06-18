@@ -436,7 +436,6 @@ class Agent(object):
 
         train_pieces_count = random.randint(3,10)  
         print("max pieces count:",train_pieces_count)
-        player.reset_player()
         game0.limit_piece_count = train_pieces_count
         game0.limit_max_height = 10
         #game0.ig_action = KEY_ROTATION
@@ -470,7 +469,6 @@ class Agent(object):
             return -1, zip(game0_states, game0_mcts_probs, game0_winners)
 
 
-        player.reset_player()
         game1.limit_piece_count = train_pieces_count
         game1.limit_max_height = 10
         #game1.ig_action = KEY_NONE
@@ -516,9 +514,9 @@ class Agent(object):
         # 如果有输赢，则直接出结果，如果相同，继续下一轮，直到出结果为止
         game0_win, game1_win = 0, 0
 
-        if game0.piececount<game0.limit_piece_count:
+        if game0.piececount<train_pieces_count:
             game0_win = -1
-        if game1.piececount<game1.limit_piece_count:
+        if game1.piececount<train_pieces_count:
             game1_win = -1
 
         if game0_exscore>game1_exscore:
@@ -529,7 +527,7 @@ class Agent(object):
             if game0_win==0: game0_win = -1
             if game1_win==0: game1_win = 1
 
-        print("game0",game0_win,"game1",game0_win)
+        print("game0",game0_win,"game1",game1_win,"")
         winers = []
 
         for i in game0_players:
