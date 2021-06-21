@@ -326,7 +326,7 @@ class MCTSPlayer(object):
                 # print(np.std(act_probs))              
                 # if np.std(act_probs)<0.02 : 
                 # 早期多随机
-                if act_probs[idx]<0.7:
+                if act_probs[idx]<0.99:
                     p = 0.5                 
                     dirichlet = np.random.dirichlet(0.03 * np.ones(len(act_probs)))
                     act = np.random.choice(acts, p=p * act_probs + (1.0-p) * dirichlet)
