@@ -80,7 +80,7 @@ class Agent(object):
     # 将单人游戏变为双人博弈，一个正常下，一个只下走，
     def get_availables(self):
         if self.curr_player==1: return [KEY_DOWN,]
-        if self.fallpiece['y']>10: return [KEY_NONE,]
+        # if self.fallpiece['y']>10: return [KEY_NONE,]
 
         acts=[KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_NONE]
 
