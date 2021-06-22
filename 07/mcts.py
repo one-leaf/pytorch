@@ -125,10 +125,10 @@ class MCTS():
                     else:
                         v = 1
 
-                # 如果上一步的玩家是下降
-                if state.state_player == 1:
-                    v = -1 * v
-
+                # 如果上一步的玩家是
+                # if state.state_player == 0:
+                #v = -1 * v
+                print("end",end,"reward",state.reward,"state_player",state.state_player,"curr_player",state.curr_player,"v",v)
             self.Es[s] = v
 
         # 如果得分不等于0，标志这局游戏结束

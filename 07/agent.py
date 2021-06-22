@@ -158,18 +158,21 @@ class Agent(object):
             self.piecesteps = 0
             self.piececount +=1 
 
-            if (not self.tetromino.validposition(self.board,self.fallpiece)) or \
-                (self.limit_piece_count>0 and self.piececount>=self.limit_piece_count) or \
-                (self.limit_max_height>0 and fallpiece_y<self.limit_max_height):  
-                self.terminal = True 
-                self.state = 2       
-                return self.state, self.reward # 
-            else: 
-                self.state = 1
-
             self.state_player = self.curr_player
             self.curr_player = 0  
             self.fallpiece_status=[self.get_fallpiece_board()]          
+
+            # print(self.limit_piece_count, self.piececount)
+            if (self.limit_piece_count>0 and self.piececount>=self.limit_piece_count) or \
+                (self.limit_max_height>0 and fallpiece_y<self.limit_max_height):
+                self.terminal = True 
+                self.state = 1
+                return self.state, self.reward # 
+
+            if (not self.tetromino.validposition(self.board,self.fallpiece)): 
+                self.terminal = True 
+                self.state = 2
+                return self.state, self.reward # 
         else:
             self.state = 0
         
