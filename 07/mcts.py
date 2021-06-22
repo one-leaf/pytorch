@@ -116,18 +116,18 @@ class MCTS():
             # 游戏结束双方都输掉了
             if end or state.reward >0:
                 if state.reward >0:
-                    v = -1
+                    v = 1
                 else:
                     ph=state.pieces_height
                     ph_avg=sum(ph)/len(ph)
-                    if ph[-1]<ph_avg:
-                        v = -1
-                    else:
+                    if ph[-1]<=ph_avg:
                         v = 1
+                    else:
+                        v = -1
 
                 # 如果上一步的玩家是
-                # if state.state_player == 0:
-                #v = -1 * v
+                if state.state_player == 1:
+                    v = -1 * v
                 print("end",end,"reward",state.reward,"state_player",state.state_player,"curr_player",state.curr_player,"v",v)
             self.Es[s] = v
 
