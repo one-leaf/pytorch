@@ -158,8 +158,8 @@ class Agent(object):
             self.piecesteps = 0
             self.piececount +=1 
 
-            self.state_player = self.curr_player
-            self.curr_player = 0  
+            # self.state_player = self.curr_player
+            # self.curr_player = 0  
             self.fallpiece_status=[self.get_fallpiece_board()]          
 
             # print(self.limit_piece_count, self.piececount)
@@ -183,7 +183,7 @@ class Agent(object):
 
         return self.state, self.reward
 
-    def get_key(self, include_curr_player=True):
+    def get_key(self, include_curr_player=False):
         info = self.getBoard() + self.fallpiece_status[-1]
         key = [0 for v in range(self.height*self.width)]
         for x in range(self.height):
