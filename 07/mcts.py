@@ -120,10 +120,7 @@ class MCTS():
                 else:
                     ph=state.pieces_height
                     ph_avg=sum(ph)/len(ph)
-                    if ph[-1]<=ph_avg:
-                        v = 1
-                    else:
-                        v = -1
+                    v = 1/ph_avg
 
                 # 如果上一步的玩家是
                 if state.curr_player == 0:
