@@ -252,7 +252,7 @@ class PolicyValueNet():
             act_probs=np.ones([act_len])/act_len
             actions = game.availables
             act_probs = list(zip(actions, act_probs[actions]))
-            return act_probs, value*-1#value*-0.75+0.25*random.random()
+            return act_probs, 0#value*-0.75+0.25*random.random()
         else:
             return act_probs, value
 
