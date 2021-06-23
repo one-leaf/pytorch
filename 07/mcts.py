@@ -125,7 +125,7 @@ class MCTS():
                 # 如果上一步的玩家是
                 if state.curr_player == 0:
                     v = -1 * v
-                # print("end",end,"reward",state.reward,"state_player",state.state_player,"curr_player",state.curr_player,"v",v)
+                print("end",end,"v",v,"reward",state.reward,"state_player",state.state_player,"curr_player",state.curr_player,"ph",ph)
                 # print("ph",ph)
                 # state.print()
             self.Es[s] = v
