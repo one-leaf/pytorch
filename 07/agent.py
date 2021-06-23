@@ -510,10 +510,6 @@ class Agent(object):
         #game0_exscore = -1 * game0.getMaxHeight()
         #game1_exscore = -1 * game1.getMaxHeight()
 
-        game0_exscore = -1 * game0.getTransCount()
-        game1_exscore = -1 * game1.getTransCount()
-            
-        print("game0_exscore:",game0_exscore,"game1_exscore:",game1_exscore)
         # 如果有输赢，则直接出结果，如果相同，继续下一轮，直到出结果为止
         game0_win, game1_win = 0, 0
 
@@ -521,14 +517,28 @@ class Agent(object):
             game0_win = -1
         if game1.piececount<train_pieces_count:
             game1_win = -1
+        if game0_win == -1 and game1_win==0:
+            game1_win = 1
+        if game1_win == -1 and game0_win==0:
+            game0_win = 1
 
-        if game0_exscore>game1_exscore:
-            if game0_win==0: game0_win = 1
-            if game1_win==0: game1_win = -1
+        if game1_win==0 and game0_win==0:
+            game0_exscore = -1 * game0.getTransCount()
+            game1_exscore = -1 * game1.getTransCount()
+                
+            print("game0_exscore:",game0_exscore,"game1_exscore:",game1_exscore)
 
-        if game0_exscore<game1_exscore:
-            if game0_win==0: game0_win = -1
-            if game1_win==0: game1_win = 1
+            if game0_exscore>game1_exscore:
+                game0_win = 1
+                game1_win = -1
+
+            if game0_exscore<game1_exscore:
+                game0_win = -1
+                game1_win = 1
+
+            if game0_exscore==game1_exscore:
+                game0_win = 1
+                game1_win = 1
 
         print("game0",game0_win,"game1",game1_win,"")
         winers = []
