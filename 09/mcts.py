@@ -119,7 +119,7 @@ class MCTS():
                 if winner != -1: 
                     v = -1
                 else:
-                    v = 1 
+                    v = 0 
 
             self.Es[s] = v
 

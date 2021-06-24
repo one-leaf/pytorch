@@ -59,7 +59,7 @@ class MCTS():
         visits = [av[1] for av in act_visits]
         qs = [round(av[1],2) for av in act_Qs]
 
-        if state.state_player == 0:
+        if state.state_player != 1:
             info=[]
             for idx in sorted(range(len(visits)), key=visits.__getitem__)[::-1]:
                 if len(info)>2: break
@@ -124,7 +124,7 @@ class MCTS():
                     ph_avg=sum(ph)/len(ph)
                     v = 1/ph_avg
 
-                # 如果上一步的玩家是
+                # 如果当前玩家是
                 if state.curr_player == 0:
                     v = -1 * v
                 print("end",end,"v",v,"reward",state.reward,"state_player",state.state_player,"curr_player",state.curr_player,"ph",state.pieces_height)
@@ -199,7 +199,9 @@ class MCTS():
         #     v = v + self.search(state)
         # else:
         v = self.search(state)
-
+        # if abs(v)>0.1:
+        #     state.print2(True)
+        #     print("act", act, "curr_play", state.curr_player, "v", v)
         # 更新 Q 值 和 访问次数
         if (s, a) in self.Qsa:
             self.Qsa[(s, a)] = (self.Nsa[(s, a)] * self.Qsa[(s, a)] + v) / (self.Nsa[(s, a)] + 1)

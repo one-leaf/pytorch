@@ -13,7 +13,8 @@ def run():
 
     try:
         agent = Agent()    
-        agent.limit_piece_count = 4
+        agent.limit_piece_count = 8
+        agent.limit_max_height = 10
         env = TetrominoEnv(agent.tetromino)    
         # 神经网络的价值策略
         net_policy = PolicyValueNet(10, 20, 5, model_file=model_file)
