@@ -117,6 +117,8 @@ class MCTS():
             if end or state.reward >0:
                 if state.reward >0:
                     v = 1
+                elif state.reward < 0:
+                    v = -1
                 else:
                     ph=state.pieces_height
                     ph_avg=sum(ph)/len(ph)
