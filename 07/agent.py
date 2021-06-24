@@ -437,7 +437,7 @@ class Agent(object):
 
         game0_states,game1_states,game0_mcts_probs,game1_mcts_probs,game0_players,game1_players=[],[],[],[],[],[]
 
-        train_pieces_count = random.randint(3,10)  
+        train_pieces_count = random.randint(3,7)  
         print("max pieces count:",train_pieces_count)
         game0.limit_piece_count = train_pieces_count
         game0.limit_max_height = 10
