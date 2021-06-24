@@ -167,7 +167,8 @@ class Agent(object):
                 (self.limit_max_height>0 and fallpiece_y<self.limit_max_height):
                 self.terminal = True 
                 self.state = 1
-                return self.state, -1 # 
+                self.reward = -1 
+                return self.state, self.reward # 
 
             if (not self.tetromino.validposition(self.board,self.fallpiece)): 
                 self.terminal = True 
