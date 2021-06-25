@@ -115,8 +115,8 @@ class Net(nn.Module):
         super(Net, self).__init__()
 
         # 由于每个棋盘大小对最终对应一个动作，所以补齐的效果比较好
-        # 直接来7层的残差网络
-        self.conv=self._make_layer(5, 128, 7)
+        # 直接来9层的残差网络
+        self.conv=self._make_layer(5, 128, 9)
 
         # 动作预测
         self.act_conv1 = nn.Conv2d(128, 1, 1)

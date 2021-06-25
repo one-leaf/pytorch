@@ -149,7 +149,7 @@ class Agent(object):
             self.score += self.reward          
             # self.level, self.fallfreq = self.tetromino.calculate(self.score)   
             # self.fallpiece_height = landingHeight(self.fallpiece)
-            self.pieces_height.append(fallpiece_y)
+            self.pieces_height.append(20-fallpiece_y)
             self.fallpiece = None
 
         if  env:
@@ -167,7 +167,8 @@ class Agent(object):
                 (self.limit_max_height>0 and fallpiece_y<self.limit_max_height):  
                 
                 self.terminal = True 
-                self.state = 2       
+                self.state = 2
+                self.reward = -1       
                 return self.state, self.reward 
             else: 
                 self.state = 1
@@ -369,6 +370,8 @@ class Agent(object):
     def game_end(self):
         if self.reward>0:
             return self.terminal, self.curr_player 
+        if self.reward<0:
+            return self.terminal, (self.curr_player+1)%2 
         return self.terminal, -1
 
     # 这里假定第一个人选择下[左移，右移，翻转，下降，无动作]，第二个人只有[下降]
@@ -755,7 +758,7 @@ class Agent(object):
         and store the self-play data: (state, mcts_probs, z) for training
         """
         self.reset()
-        self.limit_max_height=0
+        self.limit_max_height=10
         states, mcts_probs, current_players = [], [], []
 
         # # 先随机走1~2步，增加样本的复杂度
