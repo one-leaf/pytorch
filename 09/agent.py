@@ -794,5 +794,5 @@ class Agent(object):
                     # print("Game end. Tie")
                 
                 self.print()
-                print("curr_player",self.curr_player,"winner",winner)
+                print("curr_player",self.curr_player,"winner",winner,"pieces_y",self.pieces_height)
                 return winner, zip(states, mcts_probs, winners_z)
