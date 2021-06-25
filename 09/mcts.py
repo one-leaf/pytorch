@@ -15,10 +15,8 @@ class MCTS():
         self._policy = policy_value_fn      # 概率估算函数
         self._c_puct = c_puct               # 参数
         self._n_playout = n_playout         # 做几次探索
-        self._max_var = 100                # 达到最大方差后停止探索
         self.lable = ""
         self._first_act = set()          # 优先考虑的走法,由于引入了防守奖励，所以不需要优先步骤
-        self._limit_max_var = False       # 是否限制最大方差
 
         self.Qsa = {}  # 保存 Q 值, key: s,a
         self.Nsa = {}  # 保存 遍历次数 key: s,a
@@ -44,7 +42,6 @@ class MCTS():
         s = state.get_key()
 
         self.max_depth = 0
-        var = 0
         available_acts = state.actions_to_positions(state.availables)
         for n in range(self._n_playout):
             self.depth = 0
@@ -80,7 +77,7 @@ class MCTS():
             if (s, act) in self.Qsa: q = self.Qsa[(s, act)]
             if s in self.Ps: p = self.Ps[s][act]
             info.append([action, visit, round(q,2), round(p,2)]) 
-        print(state.steps, state.piecesteps, state.piececount ,self.lable, s ,"n_playout:", n, "depth:" ,self.max_depth, info, "var:", round(var,1))
+        print(state.steps, state.piecesteps, state.piececount ,self.lable, s ,"n_playout:", n, "depth:" ,self.max_depth, info,)
             #, \   "first:", state.positions_to_actions(list(self._first_act)[-3:]))
 
         if temp == 0:
@@ -221,8 +218,6 @@ class MCTSPurePlayer(object):
 
     def __init__(self, c_puct=5, n_playout=2000):
         self.mcts = MCTS(MCTSPurePlayer.policy_value_fn, c_puct, n_playout)
-        self.mcts._limit_max_var = False
-        # self.mcts._max_var = 300
 
     def set_player_ind(self, p):
         """指定MCTS的playerid"""
