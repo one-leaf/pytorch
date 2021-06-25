@@ -45,11 +45,7 @@ class Agent(object):
         # 上一个下落方块的截图
         self.prev_fallpiece_boards=None
         # 当前player
-        self.curr_player = 0  
-        # 触底的玩家 
-        self.state_player = -1        
-        # 最大方块数量
-        self.limit_piece_count = 0   
+        self.curr_player = 0         
         # 每个方块的高度
         self.pieces_height = []     
         # 下降的状态
@@ -163,7 +159,6 @@ class Agent(object):
             self.piececount +=1 
 
             if (not self.tetromino.validposition(self.board,self.fallpiece)) or \
-                (self.limit_piece_count>0 and self.piececount>=self.limit_piece_count) or \
                 (self.limit_max_height>0 and fallpiece_y<self.limit_max_height):  
                 
                 self.terminal = True 
