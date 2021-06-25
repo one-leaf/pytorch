@@ -94,10 +94,10 @@ class Train():
         self.batch_size = 512     # data_buffer中对战次数超过n次后开始启动模型训练
 
         # training params
-        self.learn_rate = 1e-5
+        self.learn_rate = 1e-4
         self.lr_multiplier = 1.0  # 基于KL的自适应学习率
         self.temp = 1  # MCTS的概率参数，越大越不肯定，训练时1，预测时1e-3
-        self.n_playout = 2000  # 每个动作的模拟战记录个数
+        self.n_playout = 100  # 每个动作的模拟战记录个数
         self.play_batch_size = 5 # 每次自学习次数
         self.buffer_size = 500000  # cache对次数
         self.epochs = 2  # 每次更新策略价值网络的训练步骤数, 推荐是5
