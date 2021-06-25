@@ -84,8 +84,8 @@ class Agent(object):
             acts.remove(KEY_LEFT)
         if not self.tetromino.validposition(self.board,self.fallpiece,ax = 1):
             acts.remove(KEY_RIGHT)   
-        # if not self.tetromino.validposition(self.board,self.fallpiece,ay = 1):
-        #     acts.remove(KEY_DOWN)
+        if not self.tetromino.validposition(self.board,self.fallpiece,ay = 1):
+            acts.remove(KEY_DOWN)
 
         # 只允许前面旋转
         if self.piecesteps>len(pieces[self.fallpiece['shape']]):
