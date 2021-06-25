@@ -769,7 +769,7 @@ class Agent(object):
         for i in count():
             max_height = self.getMaxHeight()
 
-            if self.piecesteps < (15 - max_height)/2:
+            if self.piecesteps < (10 - max_height)/2:
                 act = random.choice(self.availables)
                 self.step(act)
                 continue

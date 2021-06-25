@@ -328,7 +328,7 @@ class MCTSPlayer(object):
             else:
                 return action
         else:
-            print("WARNING: the board is full")
+            print("WARNING: game is terminal")
 
     def __str__(self):
         return "AI {}".format(self.player)
