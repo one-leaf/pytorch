@@ -178,7 +178,8 @@ class Agent(object):
             self.state = 0
         
         # 早期训练中，如果得分就表示游戏结束
-        # if reward>0: self.terminal=True
+        if self.reward!=0: 
+            self.terminal=True
 
         self.availables = self.get_availables()
 
@@ -369,9 +370,9 @@ class Agent(object):
 
     def game_end(self):
         if self.reward>0:
-            return self.terminal, self.curr_player 
-        if self.reward<0:
             return self.terminal, (self.curr_player+1)%2 
+        if self.reward<0:
+            return self.terminal, self.curr_player 
         return self.terminal, -1
 
     # 这里假定第一个人选择下[左移，右移，翻转，下降，无动作]，第二个人只有[下降]
@@ -798,5 +799,5 @@ class Agent(object):
                     print("Game end. Tie")
                 
                 self.print()
-
+                print("curr_player",self.curr_player,"winner",winner)
                 return winner, zip(states, mcts_probs, winners_z)
