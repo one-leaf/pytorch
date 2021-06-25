@@ -114,7 +114,7 @@ class MCTS():
             #     v = -2
 
             # 游戏结束双方都输掉了
-            if end or state.reward >0:
+            if end or state.reward !=0:
                 if state.reward >0:
                     v = 1
                 elif state.reward < 0:
