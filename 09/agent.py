@@ -13,13 +13,13 @@ ACTIONS = [KEY_NONE, KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN]
 
 class Agent(object):
     def __init__(self):
-        self.tetromino = Tetromino()
         self.width = 10
         self.height = 20
         self.actions_num = len(ACTIONS)    
         self.reset()        
 
     def reset(self):
+        self.tetromino = Tetromino()
         # 下落的方块
         self.fallpiece = self.tetromino.getnewpiece()
         # 下一个待下落的方块
