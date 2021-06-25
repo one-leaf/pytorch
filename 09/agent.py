@@ -768,12 +768,12 @@ class Agent(object):
         #     self.step(act)
 
         for i in count():
-            max_height = self.getMaxHeight()
+            # max_height = self.getMaxHeight()
 
-            if self.piecesteps < (10 - max_height)/2:
-                act = random.choice(self.availables)
-                self.step(act)
-                continue
+            # if self.piecesteps < (10 - max_height)/2:
+            #     act = random.choice(self.availables)
+            #     self.step(act)
+            #     continue
 
             action, move_probs = player.get_action(self, temp=temp, return_prob=1) 
 
@@ -792,11 +792,11 @@ class Agent(object):
                 if winner != -1:
                     winners_z[np.array(current_players) == winner] = 1.0
                     winners_z[np.array(current_players) != winner] = -1.0
-                    print("Game end. Winner is player:", winner)
+                    # print("Game end. Winner is player:", winner)
                 else:
                     winners_z[np.array(current_players) == winner] = -1.0
                     winners_z[np.array(current_players) != winner] = -1.0
-                    print("Game end. Tie")
+                    # print("Game end. Tie")
                 
                 self.print()
                 print("curr_player",self.curr_player,"winner",winner)
