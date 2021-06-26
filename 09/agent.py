@@ -184,15 +184,16 @@ class Agent(object):
 
     def get_key(self):
         info = self.getBoard() + self.fallpiece_status[-1]
-        key = [0 for v in range(self.height*self.width)]
-        for x in range(self.height):
-            for y in range(self.width):
-                if info[x][y]==0:
-                    key[x*self.width+y]='0'
-                else:
-                    key[x*self.width+y]='1'
-        key3 = int("".join(key),2)
-        return hash(key3)
+        return hash(info.data.tobytes())        
+        # key = [0 for v in range(self.height*self.width)]
+        # for x in range(self.height):
+        #     for y in range(self.width):
+        #         if info[x][y]==0:
+        #             key[x*self.width+y]='0'
+        #         else:
+        #             key[x*self.width+y]='1'
+        # key3 = int("".join(key),2)
+        # return hash(key3)
 
     # 打印
     def print2(self, add_fallpiece=False):
