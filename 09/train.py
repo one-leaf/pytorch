@@ -73,6 +73,7 @@ class Dataset(torch.utils.data.Dataset):
         for i,filename in enumerate(files):
             if i >= self.max_keep_size:
                 os.remove(filename)
+                print("delete", filename)
             else:
                 self.file_list.append(filename)
 
