@@ -69,7 +69,7 @@ class Dataset(torch.utils.data.Dataset):
 
     def load_game_files(self):
         files = glob.glob(os.path.join(self.data_dir, "*.pkl"))
-        files = sorted(files, key=lambda x: os.path.getmtime(x))
+        files = sorted(files, key=lambda x: os.path.getmtime(x), reverse=True)
         for i,filename in enumerate(files):
             if i >= self.max_keep_size:
                 os.remove(filename)
