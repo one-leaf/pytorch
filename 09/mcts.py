@@ -115,8 +115,6 @@ class MCTS():
             if end:
                 if state.curr_player==winner: 
                     v = 1
-                elif winner == -1:
-                    v = 0
                 else:
                     v = -1 
                 print("v",v,"reward",state.reward,"curr_player",state.curr_player,"ph",state.pieces_height)
