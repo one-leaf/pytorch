@@ -782,6 +782,9 @@ class Agent(object):
 
             self.step(action)
 
+            if self.state!=0:
+                print(self.pieces_height)
+
             end, winner = self.game_end()
             if end:
                 winners_z = np.zeros(len(current_players))
