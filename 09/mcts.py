@@ -114,11 +114,11 @@ class MCTS():
             # 这里增加了最终的奖励，提升对步骤的优化
             if end:
                 if state.curr_player==winner: 
-                    v = -1
+                    v = 1
                 elif winner == -1:
                     v = 0
                 else:
-                    v = 1 
+                    v = -1 
                 print("v",v,"reward",state.reward,"curr_player",state.curr_player,"ph",state.pieces_height)
             self.Es[s] = v
 
