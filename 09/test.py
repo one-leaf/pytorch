@@ -21,16 +21,11 @@ def run():
         mcts_ai_player = MCTSPlayer(net_policy.policy_value_fn, c_puct=1, n_playout=64)
         # agent.start_play(mcts_ai_player, env)
         while not agent.terminal:
-            if agent.curr_player == 0:
-                # act_probs, value = net_policy.policy_value_fn(agent)
-                # act = max(act_probs,  key=lambda act_prob: act_prob[1])[0]
-                # print(act, act_probs, value)
-                act = mcts_ai_player.get_action(agent)
-            else:
-                act = 4
+            act = mcts_ai_player.get_action(agent)
             # agent.step(act, env)
             agent.step(act)
-        agent.print()
+            print(agent.get_availables())
+            agent.print2(True)
     except KeyboardInterrupt:
         print('quit')
 
