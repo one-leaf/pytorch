@@ -159,6 +159,7 @@ class Train():
         result["steps"] = result["steps"] + agent.piececount
         result["agent"] = result["agent"] + 1
         if result["agent"]>0 and result["agent"]%100==0:
+            result["reward_avg_"+str(result["agent"])]=result["reward"]/result["agent"]
             result["steps_avg_"+str(result["agent"])]=result["steps"]/result["agent"]
         json.dump(result, open(jsonfile,"w"), ensure_ascii=False)
 
