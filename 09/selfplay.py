@@ -153,10 +153,13 @@ class Train():
         if os.path.exists(jsonfile):
             result=json.load(open(jsonfile,"r"))
         else:
-            result={"reward":0,"steps":10}
+            result={"reward":0,"steps":0,"agent":0}
         if agent.score>0:
             result["reward"] = result["reward"] + 1
-        result["steps"] = agent.piececount*0.001 + result["steps"]*0.999
+        result["steps"] = result["steps"] + agent.piececount
+        result["agent"] = result["agent"] + 1
+        if result["agent"]>0 and result["agent"]%100==0:
+            result["steps_avg_"+str(result["agent"])]=result["steps"]/result["agent"]
         json.dump(result, open(jsonfile,"w"), ensure_ascii=False)
 
     def policy_update(self, sample_data, epochs=1):
