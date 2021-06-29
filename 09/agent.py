@@ -10,7 +10,7 @@ import random
 
 KEY_NONE, KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN = 0, 1, 2, 3, 4
 ACTIONS = [KEY_NONE, KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN]
-ACTIONS_NAME = ["N","R","L","R","D"]
+ACTIONS_NAME = ["N","O","L","R","D"]
 class Agent(object):
     def __init__(self):
         self.width = 10
