@@ -156,7 +156,7 @@ class Train():
             result={"reward":0,"steps":10}
         if agent.score>0:
             result["reward"] = result["reward"] + 1
-        result["steps"] = agent.piececount*0.001+result["steps"]*0.999
+        result["steps"] = agent.piececount*0.001 + result["steps"]*0.999
         json.dump(result, open(jsonfile,"w"), ensure_ascii=False)
 
     def policy_update(self, sample_data, epochs=1):
