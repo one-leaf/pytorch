@@ -6,7 +6,7 @@ import logging
 from agent import Agent, ACTIONS
 from mcts import MCTSPlayer
 
-import sys, time
+import sys, time, json
 
 from itertools import count
 from collections import deque
@@ -149,6 +149,16 @@ class Train():
             pickle.dump(obj, open(savefile, "wb"))
             # self.dataset.save(obj)
 
+        jsonfile = os.path.join(data_dir, "result.json")
+        if os.path.exists(jsonfile):
+            result=json.load(open(jsonfile,"r"))
+        else:
+            result={"reward":0,"steps":10}
+        if agent.score>0:
+            result["reward"] += 1
+        result["steps"] = agent.piececount*0.001+result["steps"]*0.999
+        json.dump(result, open(jsonfile,"w"), ensure_ascii=False)
+
     def policy_update(self, sample_data, epochs=1):
         """更新策略价值网络policy-value"""
         # 训练策略价值网络
@@ -218,6 +228,7 @@ class Train():
             # for _ in range(self.play_batch_size):
             self.collect_selfplay_data()
             # logging.info("TRAIN {} self-play end, size: {}".format(self.dataset.curr_game_batch_num, self.dataset.curr_size()))
+
                     
     
         except KeyboardInterrupt:
