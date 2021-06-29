@@ -70,14 +70,14 @@ class MCTS():
 
         info=[]
         for idx in sorted(range(len(visits)), key=visits.__getitem__)[::-1]:
-            if len(info)>2: break
+            # if len(info)>2: break
             act, visit = act_visits[idx]
             action = state.position_to_action_name(act)
             q, p= 0,0
             if (s, act) in self.Qsa: q = self.Qsa[(s, act)]
             if s in self.Ps: p = self.Ps[s][act]
             info.append([action, visit, round(q,2), round(p,2)]) 
-        print(state.steps, state.piecesteps, state.piececount ,self.lable, s ,"n_playout:", n, "depth:" ,self.max_depth, info,)
+        print(state.steps, state.piecesteps, state.piececount, "n:", n, "depth:" ,self.max_depth, info,)
             #, \   "first:", state.positions_to_actions(list(self._first_act)[-3:]))
 
         if temp == 0:
