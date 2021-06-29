@@ -10,7 +10,7 @@ import random
 
 KEY_NONE, KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN = 0, 1, 2, 3, 4
 ACTIONS = [KEY_NONE, KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN]
-
+ACTIONS_NAME = ["N","R","L","R","D"]
 class Agent(object):
     def __init__(self):
         self.width = 10
@@ -60,6 +60,9 @@ class Agent(object):
     # 概率的索引位置转action
     def position_to_action(self, position):
         return ACTIONS[position]
+
+    def position_to_action_name(self, position):
+        return ACTIONS_NAME[position]
 
     def positions_to_actions(self, positions):
         return [self.position_to_action(i) for i in positions]
@@ -201,13 +204,14 @@ class Agent(object):
         if add_fallpiece:
             info += self.fallpiece_status[-1]
         for y in range(self.height):
-            line=""
+            line=str(y%10)+" "
             for x in range(self.width):
                 if info[y][x]==0:
                     line=line+"  "
                 else:
                     line=line+"* "
             print(line)
+        print(" "+" -"*self.width)            
         print("level:", self.level, "score:", self.score, "steps:", self.steps,"piececount:", self.piececount)
 
     def print(self):

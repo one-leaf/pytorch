@@ -72,7 +72,7 @@ class MCTS():
         for idx in sorted(range(len(visits)), key=visits.__getitem__)[::-1]:
             if len(info)>2: break
             act, visit = act_visits[idx]
-            action = state.position_to_action(act)
+            action = state.position_to_action_name(act)
             q, p= 0,0
             if (s, act) in self.Qsa: q = self.Qsa[(s, act)]
             if s in self.Ps: p = self.Ps[s][act]
