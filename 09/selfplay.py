@@ -161,7 +161,7 @@ class Train():
         result["steps"] = result["steps"] + agent.piececount
         result["agent"] = result["agent"] + 1
         if result["agent"]>0 and result["agent"]%1000==0:
-            for key in result:
+            for key in list(result.keys()):
                 if key.isdigit():
                     c = int(key)
                     if c%1000!=0:
