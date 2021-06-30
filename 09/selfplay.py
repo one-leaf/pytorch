@@ -150,6 +150,7 @@ class Train():
             # self.dataset.save(obj)
 
         if agent.limit_max_height!=10: return
+
         jsonfile = os.path.join(data_dir, "result.json")
         if os.path.exists(jsonfile):
             result=json.load(open(jsonfile,"r"))
@@ -159,9 +160,17 @@ class Train():
             result["reward"] = result["reward"] + 1
         result["steps"] = result["steps"] + agent.piececount
         result["agent"] = result["agent"] + 1
+        if result["agent"]>0 and result["agent"]%1000==0:
+            for key in result:
+                if key.isdigit():
+                    c = int(key)
+                    if c%1000!=0:
+                        del result[key]
+
         if result["agent"]>0 and result["agent"]%100==0:
             result[str(result["agent"])]={"reward":result["reward"]/result["agent"],
                                             "steps":result["steps"]/result["agent"]}
+        
         json.dump(result, open(jsonfile,"w"), ensure_ascii=False)
 
     def policy_update(self, sample_data, epochs=1):
