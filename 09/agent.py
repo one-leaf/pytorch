@@ -112,8 +112,8 @@ class Agent(object):
         self.reward = 0
         self.steps += 1
         self.piecesteps += 1
-
         self.level, self.fallfreq = self.tetromino.calculate(self.score)
+        self.curr_player = self.steps%2
 
         if action == KEY_LEFT and self.tetromino.validposition(self.board,self.fallpiece,ax = -1):
             self.fallpiece['x']-=1
@@ -166,7 +166,8 @@ class Agent(object):
                 
                 self.terminal = True 
                 self.state = 2
-                self.reward = -1       
+                self.reward = -1      
+                self.availables = []
                 return self.state, self.reward 
             else: 
                 self.state = 1
@@ -180,8 +181,6 @@ class Agent(object):
         #     self.terminal=True
 
         self.availables = self.get_availables()
-
-        self.curr_player = self.steps%2
 
         return self.state, self.reward
 
