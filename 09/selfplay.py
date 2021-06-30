@@ -149,6 +149,7 @@ class Train():
             pickle.dump(obj, open(savefile, "wb"))
             # self.dataset.save(obj)
 
+        if agent.limit_max_height!=10: return
         jsonfile = os.path.join(data_dir, "result.json")
         if os.path.exists(jsonfile):
             result=json.load(open(jsonfile,"r"))

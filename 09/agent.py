@@ -759,6 +759,10 @@ class Agent(object):
         """
         self.reset()
         self.limit_max_height=10
+        
+        if random.random()>0.8:
+            self.limit_max_height=5
+
         states, mcts_probs, current_players = [], [], []
 
         # # 先随机走1~2步，增加样本的复杂度
