@@ -761,7 +761,7 @@ class Agent(object):
         self.limit_max_height=10
         
         if random.random()>0.8:
-            self.limit_max_height=5
+            self.limit_max_height=15
 
         states, mcts_probs, current_players = [], [], []
 
