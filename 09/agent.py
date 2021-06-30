@@ -794,16 +794,19 @@ class Agent(object):
 
             end, winner = self.game_end()
             if end:
-                winners_z = np.zeros(len(current_players))
-                if winner != -1:
-                    winners_z[np.array(current_players) == winner] = 1.0
-                    winners_z[np.array(current_players) != winner] = -1.0
-                    # print("Game end. Winner is player:", winner)
+                if self.score > 0:
+                    winners_z = np.ones(len(current_players))
                 else:
-                    winners_z[np.array(current_players) == winner] = -1.0
-                    winners_z[np.array(current_players) != winner] = -1.0
-                    # print("Game end. Tie")
-                
+                    winners_z = np.zeros(len(current_players))
+                    if winner != -1:
+                        winners_z[np.array(current_players) == winner] = 1.0
+                        winners_z[np.array(current_players) != winner] = -1.0
+                        # print("Game end. Winner is player:", winner)
+                    else:
+                        winners_z[np.array(current_players) == winner] = -1.0
+                        winners_z[np.array(current_players) != winner] = -1.0
+                        # print("Game end. Tie")
+                    
                 self.print()
                 print("curr_player",self.curr_player,"winner",winner,"pieces_y",self.pieces_height)
                 return winner, zip(states, mcts_probs, winners_z)
