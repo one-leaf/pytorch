@@ -301,8 +301,8 @@ class MCTSPlayer(object):
                 action = state.position_to_action(act)
 
                 if act!=acts[idx]:
-                    print("    random:", state.position_to_action(acts[idx]), act_probs[idx], act_qs[idx], \
-                        "==>", action, act_probs[acts.index(act)], act_qs[acts.index(act)])  
+                    print("    random:", state.position_to_action_name(acts[idx]), act_qs[idx], act_probs[idx],\
+                        "==>", state.position_to_action_name(act), act_qs[acts.index(act)], act_probs[acts.index(act)])  
                                                                   
             else:  # 和人类对战
                 act = acts[idx]
