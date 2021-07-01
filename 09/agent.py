@@ -790,7 +790,7 @@ class Agent(object):
             self.step(action)
 
             if self.state!=0:
-                print(self.pieces_heigh, "next", self.fallpiece['shape'])
+                print(self.pieces_height, "next", self.fallpiece['shape'])
 
             end, winner = self.game_end()
             if end:
