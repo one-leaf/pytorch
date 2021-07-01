@@ -167,8 +167,11 @@ class MCTS():
         state.step(act)
         # print("action",act,state.terminal)
         # state.print()
-        # 计算下一步的 v 这个v 为正数，但下一个v为负数        
-        v = self.search(state)
+        # 计算下一步的 v 这个v 为正数，但下一个v为负数 
+        if state.reward>0:
+            v = 1
+        else:       
+            v = self.search(state)
 
         # 更新 Q 值 和 访问次数
         if (s, a) in self.Qsa:

@@ -138,14 +138,14 @@ class Agent(object):
 
         if not self.tetromino.validposition(self.board,self.fallpiece,ay = 1):
             self.tetromino.addtoboard(self.board,self.fallpiece)
-            reward = self.tetromino.removecompleteline(self.board) 
+            self.reward = self.tetromino.removecompleteline(self.board) 
             
             # if self.reward >0:
             #     self.terminal = True 
             #     self.state = 2       
             #     return self.state, self.reward
             
-            self.score += reward          
+            self.score += self.reward          
             # self.level, self.fallfreq = self.tetromino.calculate(self.score)   
             # self.fallpiece_height = landingHeight(self.fallpiece)
             self.pieces_height.append(20-fallpiece_y)
