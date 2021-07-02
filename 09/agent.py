@@ -798,8 +798,8 @@ class Agent(object):
                 if self.score > 0:
                     winners_z = np.ones(len(current_players))
                 else:
-                    if self.piececount<self.limit_max_height: winner = -1
-                    
+                    if self.piececount<=self.limit_max_height: winner = -1
+
                     winners_z = np.zeros(len(current_players))
                     if winner != -1:
                         winners_z[np.array(current_players) == winner] = 1.0
