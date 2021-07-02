@@ -162,7 +162,7 @@ class Agent(object):
             self.piececount +=1 
 
             if (not self.tetromino.validposition(self.board,self.fallpiece)) or \
-                (self.limit_max_height>0 and fallpiece_y<self.limit_max_height):  
+                (self.limit_max_height>0 and fallpiece_y<(20-self.limit_max_height)):  
                 
                 self.terminal = True 
                 self.state = 2
@@ -761,7 +761,7 @@ class Agent(object):
         self.limit_max_height=10
         
         if random.random()>0.5:
-            self.limit_max_height=20-random.randint(5,8)
+            self.limit_max_height=random.randint(5,8)
             self.ig_action=random.choice([None,KEY_NONE,KEY_DOWN])
 
         states, mcts_probs, current_players = [], [], []
@@ -798,6 +798,8 @@ class Agent(object):
                 if self.score > 0:
                     winners_z = np.ones(len(current_players))
                 else:
+                    if self.piececount<self.limit_max_height: winner = -1
+                    
                     winners_z = np.zeros(len(current_players))
                     if winner != -1:
                         winners_z[np.array(current_players) == winner] = 1.0
@@ -809,5 +811,5 @@ class Agent(object):
                         # print("Game end. Tie")
                     
                 self.print()
-                print("curr_player",self.curr_player,"winner",winner,"limit_height",20-self.limit_max_height,"pieces_y",self.pieces_height)
+                print("curr_player",self.curr_player,"winner",winner,"limit_height",self.limit_max_height,"pieces_y",self.pieces_height)
                 return winner, zip(states, mcts_probs, winners_z)
