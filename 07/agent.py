@@ -554,8 +554,8 @@ class Agent(object):
                 game1_win = 1
 
             if game0_exscore==game1_exscore:
-                game0_win = 1
-                game1_win = 1
+                game0_win = -1
+                game1_win = -1
 
         print("game0",game0_win,"game1",game1_win,"")
         winers, mask = [],[]
