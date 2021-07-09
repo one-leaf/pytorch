@@ -186,7 +186,7 @@ class Train():
 
         # old_probs, old_v = self.policy_value_net.policy_value(state_batch)  
         for i in range(epochs):
-            loss, v_loss, p_loss, entropy = self.policy_value_net.train_step(state_batch, mcts_probs_batch, winner_batch, mask_batch, self.learn_rate * self.lr_multiplier)
+            loss, b_loss, v_loss, p_loss, entropy = self.policy_value_net.train_step(state_batch, mcts_probs_batch, winner_batch, mask_batch, self.learn_rate * self.lr_multiplier)
             # new_probs, new_v = self.policy_value_net.policy_value(state_batch)
 
             # 散度计算：
@@ -206,7 +206,7 @@ class Train():
         # entropy 信息熵，越小越好
         # logging.info(("TRAIN kl:{:.5f},lr_multiplier:{:.3f},v_loss:{:.5f},p_loss:{:.5f},entropy:{:.5f},var_old:{:.5f},var_new:{:.5f}"
         #               ).format(kl, self.lr_multiplier, v_loss, p_loss, entropy, explained_var_old, explained_var_new))
-        return loss, v_loss, p_loss, entropy
+        return loss, b_loss, v_loss, p_loss, entropy
 
     def run(self):
         """启动训练"""
@@ -235,10 +235,10 @@ class Train():
                     for obj in data:
                         print(obj[0])
                 # 使用对抗数据重新训练策略价值网络模型
-                loss, v_loss, p_loss, entropy = self.policy_update(data, self.epochs)
+                loss, b_loss, v_loss, p_loss, entropy = self.policy_update(data, self.epochs)
 
-                logging.info(("TRAIN idx {} : {} / {} v_loss:{:.5f}, p_loss:{:.5f}, entropy:{:.5f}")\
-                    .format(i, i*self.batch_size, dataset_len, v_loss, p_loss, entropy))
+                logging.info(("TRAIN idx {} : {} / {} b_loss:{:.5f}, v_loss:{:.5f}, p_loss:{:.5f}, entropy:{:.5f}")\
+                    .format(i, i*self.batch_size, dataset_len, b_loss, v_loss, p_loss, entropy))
 
                 if (i+1) % 10 == 0:
                     
