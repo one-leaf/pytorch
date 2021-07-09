@@ -161,7 +161,6 @@ class Agent(object):
             self.piecesteps = 0
             self.piececount +=1 
             self.state = 1
-            self.curr_player = 0  
             self.fallpiece_status=[self.get_fallpiece_board()]          
 
             # print(self.limit_piece_count, self.piececount)
@@ -176,6 +175,8 @@ class Agent(object):
                 self.terminal = True 
                 self.state = 2
                 return self.state, self.reward # 
+
+            self.curr_player = 0  
         else:
             self.state = 0
             self.curr_player = (self.curr_player+1)%2
