@@ -245,13 +245,13 @@ class Train():
                     # 动态调整学习率
                     if old_probs is None:
                         test_batch, _, _, _ = data
-                        old_probs, old_value = self.policy_value_net.policy_value(test_batch) 
+                        old_probs, old_value, old_bvalue = self.policy_value_net.policy_value(test_batch) 
                     else:
-                        new_probs, new_value = self.policy_value_net.policy_value(test_batch)
+                        new_probs, new_value, new_bvalue = self.policy_value_net.policy_value(test_batch)
                         kl = np.mean(np.sum(old_probs * (np.log(old_probs + 1e-10) - np.log(new_probs + 1e-10)), axis=1))
                         
-                        logging.info("probs var before: {} now: {}".format(np.var(old_probs), np.var(new_probs)))      
-                        logging.info("value var before: {} now: {} [0]: {} {}".format(np.var(old_value), np.var(new_value), old_value[0], new_value[0]))   
+                        # logging.info("probs var before: {} now: {}".format(np.var(old_probs), np.var(new_probs)))      
+                        # logging.info("value var before: {} now: {} [0]: {} {}".format(np.var(old_value), np.var(new_value), old_value[0], new_value[0]))   
                         old_probs = None
                         
                         if kl > self.kl_targ * 2:
