@@ -109,24 +109,31 @@ class ResidualBlock(nn.Module):
 #             layers.append(ResidualBlock(outchannel,outchannel))
 #         return nn.Sequential(*layers)
 
-
 class Net(nn.Module):
     def __init__(self, image_size, action_size):
         super(Net, self).__init__()
 
         # 由于每个棋盘大小对最终对应一个动作，所以补齐的效果比较好
-        # 直接来7层的残差网络
-        self.conv=self._make_layer(3, 128, 7)
+        # 直接来9层的残差网络
+        self.conv=self._make_layer(3, 128, 9)
 
         # 动作预测
         self.act_conv1 = nn.Conv2d(128, 1, 1)
         self.act_conv1_bn = nn.BatchNorm2d(1)
         self.act_fc1 = nn.Linear(image_size, action_size)
+
         # 动作价值
         self.val_conv1 = nn.Conv2d(128, 1, 1)
         self.val_conv1_bn = nn.BatchNorm2d(1)
         self.val_fc1 = nn.Linear(image_size, 128)
         self.val_fc2 = nn.Linear(128, 1)
+
+        # 注意力
+        self.bval_conv1 = nn.Conv2d(128, 1, 1)
+        self.bval_conv1_bn = nn.BatchNorm2d(1)
+        self.bval_fc1 = nn.Linear(image_size, 128)
+        self.bval_fc2 = nn.Linear(128, 1)
+
 
     def _make_layer(self,inchannel,outchannel,block_num,stride=1):
         #构建layer,包含多个residual block
@@ -158,7 +165,18 @@ class Net(nn.Module):
         x_val = x_val.view(x_val.size(0), -1)
         x_val = F.relu(self.val_fc1(x_val))
         x_val = torch.tanh(self.val_fc2(x_val))
-        return x_act, x_val
+
+        # 注意力 输出为 -1 ~ 1 之间的数字
+        b_val = self.bval_conv1(x)
+        b_val = self.bval_conv1_bn(b_val)
+        b_val = F.relu(b_val)
+        b_val = x_val.view(b_val.size(0), -1)
+        b_val = F.relu(self.bval_fc1(b_val))
+        b_val = torch.tanh(self.bval_fc2(b_val))
+
+        return x_act, x_val, b_val
+
+
 class PolicyValueNet():
     def __init__(self, input_width, input_height, output_size, model_file=None, device=None, l2_const=1e-4):
         self.input_width = input_width
@@ -214,12 +232,12 @@ class PolicyValueNet():
         # 由于样本不足，导致单张局面做预测时的分布与平均分布相差很大，会出现无法预测的情况，所以不加 eval() 锁定bn为平均方差
         # 或者 设置 BN 的 track_running_stats=False ，不使用全局的方差，直接用每批的方差来标准化。
         with torch.no_grad(): 
-            log_act_probs, value = self.policy_value_net.forward(state_batch_tensor)
+            log_act_probs, value, bvalue = self.policy_value_net.forward(state_batch_tensor)
         # 还原成标准的概率
         act_probs = np.exp(log_act_probs.data.cpu().numpy())
         value = value.data.cpu().numpy()
-
-        return act_probs, value
+        bvalue = bvalue.data.cpu().numpy()
+        return act_probs, value, bvalue
 
     # 从当前游戏获得 ((action, act_probs),...) 的可用动作+概率和当前游戏胜率
     def policy_value_fn(self, game):
@@ -230,38 +248,36 @@ class PolicyValueNet():
 
         key = game.get_key(include_curr_player=False)
         if key in self.cache:
-            act_probs, value = self.cache[key] 
+            act_probs, value, bvalue = self.cache[key] 
         else:
             if self.load_model_file:
                 current_state = game.current_state().reshape(1, -1, self.input_height, self.input_width)
-                act_probs, value = self.policy_value(current_state)
+                act_probs, value, bvalue = self.policy_value(current_state)
                 act_probs = act_probs.flatten()
             else:
                 act_len=game.actions_num
                 act_probs=np.ones([act_len])/act_len
                 value = np.array([[0.]])
+                bvalue = np.array([[0.]])
 
             actions = game.availables
             act_probs = list(zip(actions, act_probs[actions]))
             value = value[0,0]
-            # value = 0
-            self.cache[key] = (act_probs, value) 
+            bvalue = bvalue[0,0]
+            self.cache[key] = (act_probs, value, bvalue) 
 
         if game.curr_player==1:
-            act_len=game.actions_num
-            act_probs=np.ones([act_len])/act_len
-            actions = game.availables
-            act_probs = list(zip(actions, act_probs[actions]))
-            return act_probs, (value*0.75+0.25*random.random())*-1
+            return np.ones([act_len])/act_len,bvalue
         else:
             return act_probs, value
 
-    def train_step(self, state_batch, mcts_probs, winner_batch, lr):
+    def train_step(self, state_batch, mcts_probs, winner_batch, mask_batch, lr):
         """训练一次"""
         # 输入赋值       
         state_batch = torch.FloatTensor(state_batch).to(self.device)
         mcts_probs = torch.FloatTensor(mcts_probs).to(self.device)
         winner_batch = torch.FloatTensor(winner_batch).to(self.device)
+        mask_batch = torch.FloatTensor(mask_batch).to(self.device)
 
         # 参数梯度清零
         self.optimizer.zero_grad()
@@ -270,34 +286,19 @@ class PolicyValueNet():
 
         # 前向传播
         self.policy_value_net.train()
-        log_act_probs, value = self.policy_value_net(state_batch)
+        log_act_probs, value, bvalue = self.policy_value_net(state_batch)
 
-        # define the loss = (z - v)^2 - pi^T * log(p) + c||theta||^2
-        # Note: the L2 penalty is incorporated in optimizer
-        # 胜率
-
-        # indices = torch.LongTensor([3]).to(self.device)
-        # mask = torch.index_select(state_batch,1,indices)  # 取出mask层 [batchsize, 1, 10, 20]
-        # mask = torch.mean(mask,[1,2,3])  # 确定mask [0,1,0,0....1] shape: [batchsize]
-        # policy_loss = -torch.mean(torch.sum(mcts_probs * log_act_probs, 1) * mask)
-        value_loss = F.mse_loss(value.view(-1), winner_batch)
-        policy_loss = -torch.mean(torch.sum(mcts_probs * log_act_probs, 1))
-        # print(mask.data.cpu().numpy())
-        # print(mcts_probs.data.cpu().numpy())
-        # print(torch.sum(mcts_probs * log_act_probs, 1).data.cpu().numpy())
-        # print((torch.sum(mcts_probs * log_act_probs, 1) * mask).data.cpu().numpy())
-        loss = value_loss + policy_loss
+        value_loss = torch.sum(((value.view(-1)-winner_batch)*mask_batch)**2.0) / torch.sum(mask_batch)
+        policy_loss = -torch.sum(torch.sum(mcts_probs * log_act_probs, 1)*mask_batch) / torch.sum(mask_batch)
+        b_mask_batch = torch.abs(mask_batch-1)
+        b_value_loss = torch.sum(((bvalue.view(-1)-winner_batch)*b_mask_batch)**2.0) / torch.sum(b_mask_batch)
+        # value_loss = F.mse_loss(value.view(-1), winner_batch)
+        # policy_loss = -torch.mean(torch.sum(mcts_probs * log_act_probs, 1))
+        loss = value_loss + policy_loss + b_value_loss
 
         # 反向传播并更新
         loss.backward()
-        self.optimizer.step()
-
-        # if random.random()>0.99:
-        #     print(loss, value_loss, policy_loss)
-        # for name, parms in self.policy_value_net.named_parameters():
-        #     grad_value = torch.max(parms.grad)
-        #     print('name:', name, 'grad_requirs:', parms.requires_grad,' grad_value:',grad_value)
-        # raise "ss"
+        self.optimizer.step()   
 
         # 计算信息熵，越小越好, 只用于监控
         entropy = -torch.mean(

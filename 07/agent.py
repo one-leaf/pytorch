@@ -88,8 +88,8 @@ class Agent(object):
             acts.remove(KEY_LEFT)
         if not self.tetromino.validposition(self.board,self.fallpiece,ax = 1):
             acts.remove(KEY_RIGHT)   
-        # if not self.tetromino.validposition(self.board,self.fallpiece,ay = 1):
-        #     acts.remove(KEY_DOWN)
+        if not self.tetromino.validposition(self.board,self.fallpiece,ay = 1):
+            acts.remove(KEY_DOWN)
 
         if self.fallpiece['shape']=="o":
             acts.remove(KEY_ROTATION)
@@ -436,7 +436,8 @@ class Agent(object):
         game0 = copy.deepcopy(self)
         game1 = copy.deepcopy(self)
 
-        game0_states,game1_states,game0_mcts_probs,game1_mcts_probs,game0_players,game1_players=[],[],[],[],[],[]
+        game0_states,game1_states,game0_mcts_probs,game0_mask=[],[],[],[]
+        game1_mcts_probs,game0_players,game1_players,game1_mask=[],[],[],[]
 
         train_pieces_count = random.randint(3,7)  
         print("max pieces count:",train_pieces_count)
@@ -457,10 +458,14 @@ class Agent(object):
             #     continue
                
             action, move_probs = player.get_action(game0, temp=temp, return_prob=1) 
+            game0_states.append(game0.current_state())
+            game0_players.append(game0.curr_player)
             if game0.curr_player==0:
-                game0_states.append(game0.current_state())
-                game0_players.append(game0.curr_player)
                 game0_mcts_probs.append(move_probs)
+                game0_mask.append(1)
+            else:
+                game0_mcts_probs.append(np.ones([game0.actions_num])/game0.actions_num)
+                game0_mask.append(0)
 
             game0.step(action)
             # game0.print2(True)
@@ -469,8 +474,8 @@ class Agent(object):
 
         if game0.reward>0:
             game0.print()
-            game0_winners = np.ones([len(game0_states)])
-            return -1, zip(game0_states, game0_mcts_probs, game0_winners)
+            game0_winners = np.ones([len(game0_states)])*game0_mask
+            return -1, zip(game0_states, game0_mcts_probs, game0_winners, game0_mask)
 
 
         game1.limit_piece_count = train_pieces_count
@@ -490,11 +495,15 @@ class Agent(object):
             # 只保留有效的步数
 
             action, move_probs = player.get_action(game1, temp=temp, return_prob=1)
+            game1_states.append(game1.current_state())
+            game1_players.append(game1.curr_player)
             if game1.curr_player==0:
-                game1_states.append(game1.current_state())
-                game1_players.append(game1.curr_player)
                 game1_mcts_probs.append(move_probs)
-    
+                game1_mask.append(1)
+            else:
+                game1_mcts_probs.append(np.ones([game1.actions_num])/game1.actions_num)
+                game1_mask.append(0)
+
             game1.step(action)
             # game1.print2(True)            
             if game1.terminal or game1.reward>0:# or game1.piececount>=train_pieces_count: 
@@ -502,18 +511,15 @@ class Agent(object):
 
         if game1.reward>0:
             game1.print()
-            game1_winners = np.ones([len(game1_states)])
-            return -1, zip(game1_states, game1_mcts_probs, game1_winners)
+            game1_winners = np.ones([len(game1_states)])*game1_mask
+            return -1, zip(game1_states, game1_mcts_probs, game1_winners, game1_mask)
 
         game0.print()
         game1.print()
 
-        #game0_exscore = -1 * game0.getMaxHeight()
-        #game1_exscore = -1 * game1.getMaxHeight()
 
-        # 如果有输赢，则直接出结果，如果相同，继续下一轮，直到出结果为止
+        # 检查谁下的好
         game0_win, game1_win = 0, 0
-
         if game0.piececount<train_pieces_count:
             game0_win = -1
         if game1.piececount<train_pieces_count:
@@ -542,7 +548,7 @@ class Agent(object):
                 game1_win = 1
 
         print("game0",game0_win,"game1",game1_win,"")
-        winers = []
+        winers, mask = [],[]
 
         for i in game0_players:
             if i==0:
@@ -560,12 +566,15 @@ class Agent(object):
         for o in game1_states: states.append(o)
         for o in game0_mcts_probs: mcts_probs.append(o)
         for o in game1_mcts_probs: mcts_probs.append(o)
+        for o in game0_mask: mask.append(o)
+        for o in game1_mask: mask.append(o)
 
-        game0_states,game1_states,game0_mcts_probs,game1_mcts_probs,game0_wins,game1_wins=[],[],[],[],[],[]
+        game0_states,game1_states,game0_mcts_probs,game1_mcts_probs,game0_mask,game1_mask=[],[],[],[],[],[]
         winners_z = np.array(winers)
 
         assert len(states)==len(mcts_probs)
         assert len(states)==len(winners_z)
+        assert len(states)==len(mask)
 
         # winners_z = np.zeros(len(winers))
         # winners_z[np.array(winers) == 1] = 1.0
@@ -575,7 +584,7 @@ class Agent(object):
         # print(winners_z[-1])
 
         print("add %s to dataset"%len(winers))
-        return -1, zip(states, mcts_probs, winners_z)
+        return -1, zip(states, mcts_probs, winners_z, mask)
 
     # # 使用 mcts 训练，重用搜索树，并保存数据
     # def start_self_play3(self, player, temp=1e-3):
