@@ -160,7 +160,7 @@ class Train():
                     if c%1000!=0:
                         del result[key]
 
-        if result["agent"]>0 and result["agent"]%100==0:
+        if result["agent"]>0 and result["agent"]%100<=1:
             result[str(result["agent"])]={"reward":result["reward"]/result["agent"],
                                             "steps":result["steps"]/result["agent"]}
         
