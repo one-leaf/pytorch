@@ -131,7 +131,7 @@ class Train():
         # 创建使用策略价值网络来指导树搜索和评估叶节点的MCTS玩家
         mcts_player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout, is_selfplay=1)
         # 开始下棋
-        winer, play_data = agent.start_self_play(mcts_player, temp=self.temp)
+        reward, piececount, play_data = agent.start_self_play(mcts_player, temp=self.temp)
         play_data = list(play_data)[:]
         episode_len = len(play_data)
 
@@ -150,9 +150,8 @@ class Train():
             result=json.load(open(jsonfile,"r"))
         else:
             result={"reward":0,"steps":0,"agent":0}
-        if agent.score>0:
-            result["reward"] = result["reward"] + 1
-        result["steps"] = result["steps"] + agent.piececount
+        result["reward"] = result["reward"] + reward
+        result["steps"] = result["steps"] + piececount
         result["agent"] = result["agent"] + 1
         if result["agent"]>0 and result["agent"]%1000==0:
             for key in list(result.keys()):
