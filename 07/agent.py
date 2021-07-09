@@ -10,6 +10,7 @@ import random
 
 KEY_NONE, KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN = 0, 1, 2, 3, 4
 ACTIONS = [KEY_NONE, KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN]
+ACTIONS_NAME = ["N","O","L","R","D"]
 
 class Agent(object):
     def __init__(self):
@@ -47,7 +48,7 @@ class Agent(object):
         # 当前player
         self.curr_player = 0  
         # 触底的玩家 
-        self.state_player = -1        
+        self.prev_player = -1        
         # 最大方块数量
         self.limit_piece_count = 0   
         # 每个方块的高度
@@ -64,6 +65,9 @@ class Agent(object):
     # 概率的索引位置转action
     def position_to_action(self, position):
         return ACTIONS[position]
+
+    def position_to_action_name(self, position):
+        return ACTIONS_NAME[position]
 
     def positions_to_actions(self, positions):
         return [self.position_to_action(i) for i in positions]
@@ -113,8 +117,7 @@ class Agent(object):
         self.reward = 0
         self.steps += 1
         self.piecesteps += 1
-        self.curr_player = (self.curr_player+1)%2
-        self.state_player = self.curr_player
+        self.prev_player = self.curr_player
  
         self.level, self.fallfreq = self.tetromino.calculate(self.score)
 
@@ -158,8 +161,7 @@ class Agent(object):
             self.piecesteps = 0
             self.piececount +=1 
 
-            # self.state_player = self.curr_player
-            # self.curr_player = 0  
+            self.curr_player = 0  
             self.fallpiece_status=[self.get_fallpiece_board()]          
 
             # print(self.limit_piece_count, self.piececount)
@@ -179,25 +181,15 @@ class Agent(object):
         
         # 早期训练中，如果得分就表示游戏结束
         # if reward>0: self.terminal=True
-
+        self.curr_player = (self.curr_player+1)%2
         self.availables = self.get_availables()
 
         return self.state, self.reward
 
-    def get_key(self, include_curr_player=False):
+    def get_key(self):
         info = self.getBoard() + self.fallpiece_status[-1]
-        key = [0 for v in range(self.height*self.width)]
-        for x in range(self.height):
-            for y in range(self.width):
-                if info[x][y]==0:
-                    key[x*self.width+y]='0'
-                else:
-                    key[x*self.width+y]='1'
-        if include_curr_player:
-            key.insert(0, str(self.curr_player))
-        key3 = int("".join(key),2)
-        return hash(key3)
-
+        return hash(info.data.tobytes())   
+        
     # 打印
     def print2(self, add_fallpiece=False):
         info = self.getBoard()
@@ -278,11 +270,20 @@ class Agent(object):
     # 返回 [3, height, width]
     def current_state(self):
         board_background = self.getBoard()
-        board_fallpiece =  self.fallpiece_status[-1]
+        fallpiece_1 =  self.fallpiece_status[-1]
+        fallpiece_2 = np.zeros((self.height, self.width))
+        fallpiece_3 = np.zeros((self.height, self.width))
+        fallpiece_4 = np.zeros((self.height, self.width))
+        fallpiece_5 = np.zeros((self.height, self.width))
+
+        if len(self.fallpiece_status)>1:           
+            fallpiece_2 = self.fallpiece_status[-2]  
         if len(self.fallpiece_status)>2:           
-            board_fallpiece_prev = self.fallpiece_status[-3]  
-        else:
-            board_fallpiece_prev = np.zeros((self.height, self.width))
+            fallpiece_3 = self.fallpiece_status[-3]  
+        if len(self.fallpiece_status)>3:           
+            fallpiece_4 = self.fallpiece_status[-4]  
+        if len(self.fallpiece_status)>4:           
+            fallpiece_5 = self.fallpiece_status[-5]  
 
         # board_fallpiece = self.get_fallpiece_board()
         # board_nextpiece = self.get_nextpiece_borad()
@@ -292,7 +293,7 @@ class Agent(object):
         # else:
         #     step_state = np.zeros([self.height, self.width])
 
-        state = np.stack([board_background, board_fallpiece_prev, board_fallpiece])
+        state = np.stack([board_background, fallpiece_5, fallpiece_4, fallpiece_3, fallpiece_2, fallpiece_1])
         return state        
 
     # 交替个数也就是从空到非空算一次，边界算非空 
@@ -370,7 +371,11 @@ class Agent(object):
     #     return transCount    
 
     def game_end(self):
-        return self.terminal, self.score
+        if self.reward>0:
+            return self.terminal, self.prev_player 
+        if self.reward<0:
+            return self.terminal, self.curr_player 
+        return self.terminal, -1
 
     # 这里假定第一个人选择下[左移，右移，翻转，下降，无动作]，第二个人只有[下降]
     # def start_self_play(self, player, temp=1e-3):       
@@ -441,7 +446,7 @@ class Agent(object):
 
         train_pieces_count = random.randint(3,7)  
         print("max pieces count:",train_pieces_count)
-        game0.limit_piece_count = train_pieces_count
+        # game0.limit_piece_count = train_pieces_count
         game0.limit_max_height = 10
         #game0.ig_action = KEY_ROTATION
         for i in count():            
@@ -478,7 +483,7 @@ class Agent(object):
             return -1, zip(game0_states, game0_mcts_probs, game0_winners, game0_mask)
 
 
-        game1.limit_piece_count = train_pieces_count
+        # game1.limit_piece_count = train_pieces_count
         game1.limit_max_height = 10
         #game1.ig_action = KEY_NONE
         for i in count():
@@ -517,13 +522,16 @@ class Agent(object):
         game0.print()
         game1.print()
 
-
         # 检查谁下的好
         game0_win, game1_win = 0, 0
-        if game0.piececount<train_pieces_count:
-            game0_win = -1
-        if game1.piececount<train_pieces_count:
-            game1_win = -1
+        if game0.piececount!=game1.piececount:
+            if game0.piececount>game1.piececount:
+                game0_win = 1
+                game1_win = -1
+            else:
+                game0_win = -1
+                game1_win = 1
+
         if game0_win == -1 and game1_win==0:
             game1_win = 1
         if game1_win == -1 and game0_win==0:

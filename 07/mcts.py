@@ -59,17 +59,16 @@ class MCTS():
         visits = [av[1] for av in act_visits]
         qs = [round(av[1],2) for av in act_Qs]
 
-        if state.state_player != 1:
-            info=[]
-            for idx in sorted(range(len(visits)), key=visits.__getitem__)[::-1]:
-                if len(info)>2: break
-                act, visit = act_visits[idx]
-                action = state.position_to_action(act)
-                q, p= 0,0
-                if (s, act) in self.Qsa: q = self.Qsa[(s, act)]
-                if s in self.Ps: p = self.Ps[s][act]
-                info.append([action, visit, round(q,2), round(p,2)]) 
-            print(state.steps, state.piececount, state.piecesteps, self.lable, s ,"n_playout:", n, "depth:" ,self.max_depth, info)
+        info=[]
+        for idx in sorted(range(len(visits)), key=visits.__getitem__)[::-1]:
+            # if len(info)>2: break
+            act, visit = act_visits[idx]
+            action = state.position_to_action_name(act)
+            q, p= 0,0
+            if (s, act) in self.Qsa: q = self.Qsa[(s, act)]
+            if s in self.Ps: p = self.Ps[s][act]
+            info.append([action, visit, round(q,2), round(p,2)]) 
+        print(state.steps, state.piecesteps, state.piececount, "n:", n, "depth:" ,self.max_depth, info,)
                 #, \   "first:", state.positions_to_actions(list(self._first_act)[-3:]))
 
         if temp == 0:
@@ -95,41 +94,21 @@ class MCTS():
         返回:
             v: 当前局面的状态
         """
-        s = state.get_key(False)
+        s = state.get_key()
         self.depth = self.depth +1
 
         # 将所有状态的得分都 cache 起来
         if s not in self.Es:
-            end, _ = state.game_end()  
+            end, winner = state.game_end()  
             v = 0
             # 这里是对上一步的评价，如果游戏结束对我而言都是不利的，v为-1
             # 这里增加了最终的奖励，提升对步骤的优化
-            # if (end and winner != -1): 
-                # if state.current_player==winner:
-                #     v = 1 * 2
-                # else:
-                # v = -1 * 1
-            # 这个有问题，计算量有点大，放弃
-            # elif state.check_will_win():
-            #     v = -2
-
-            # 游戏结束双方都输掉了
-            if end or state.reward !=0:
-                if state.reward >0:
+            if end:
+                if state.curr_player==winner: 
                     v = 1
-                elif state.reward < 0:
-                    v = -1
                 else:
-                    ph=state.pieces_height
-                    ph_avg=sum(ph)/len(ph)
-                    v = 1/ph_avg
-
-                # 如果当前玩家是
-                if state.curr_player == 0:
-                    v = -1 * v
-                print("end",end,"v",v,"reward",state.reward,"state_player",state.state_player,"curr_player",state.curr_player,"ph",state.pieces_height)
-                # print("ph",ph)
-                # state.print()
+                    v = -1 
+                print("v",v,"reward",state.reward,"curr_player",state.curr_player,"ph",state.pieces_height)
             self.Es[s] = v
 
         # 如果得分不等于0，标志这局游戏结束
@@ -336,8 +315,8 @@ class MCTSPlayer(object):
                 action = state.position_to_action(act)
 
                 if act!=acts[idx]:
-                    print("    random:", state.position_to_action(acts[idx]), act_probs[idx], act_qs[idx], \
-                        "==>", action, act_probs[acts.index(act)], act_qs[acts.index(act)])  
+                    print("    random:", state.position_to_action_name(acts[idx]), "==>", state.position_to_action_name(act))  
+
                                                                   
             else:  # 和人类对战
                 act = acts[idx]

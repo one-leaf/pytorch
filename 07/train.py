@@ -55,7 +55,7 @@ class Dataset(torch.utils.data.Dataset):
         # 状态，步骤的概率，最终得分
         while True:
             try:
-                state, mcts_prob, winner = pickle.load(open(filename, "rb"))
+                state, mcts_prob, winner, mask = pickle.load(open(filename, "rb"))
             except:
                 print("filename {} error can't load".format(filename))
                 os.remove(filename)
@@ -65,7 +65,8 @@ class Dataset(torch.utils.data.Dataset):
         state = torch.from_numpy(state).float()
         mcts_prob = torch.from_numpy(mcts_prob).float()
         winner = torch.as_tensor(winner).float()
-        return state, mcts_prob, winner
+        mask = torch.as_tensor(mask).float()
+        return state, mcts_prob, winner, mask
 
     def load_game_files(self):
         files = glob.glob(os.path.join(self.data_dir, "*.pkl"))
@@ -173,7 +174,7 @@ class Train():
         # 训练策略价值网络
         # 随机抽取data_buffer中的对抗数据
         # mini_batch = self.dataset.loadData(sample_data)
-        state_batch, mcts_probs_batch, winner_batch = sample_data
+        state_batch, mcts_probs_batch, winner_batch, mask_batch = sample_data
         # # for x in mini_batch:
         # #     print("-----------------")
         # #     print(x)
@@ -185,7 +186,7 @@ class Train():
 
         # old_probs, old_v = self.policy_value_net.policy_value(state_batch)  
         for i in range(epochs):
-            loss, v_loss, p_loss, entropy = self.policy_value_net.train_step(state_batch, mcts_probs_batch, winner_batch, self.learn_rate * self.lr_multiplier)
+            loss, v_loss, p_loss, entropy = self.policy_value_net.train_step(state_batch, mcts_probs_batch, winner_batch, mask_batch, self.learn_rate * self.lr_multiplier)
             # new_probs, new_v = self.policy_value_net.policy_value(state_batch)
 
             # 散度计算：

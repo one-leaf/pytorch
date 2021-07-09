@@ -115,7 +115,7 @@ class Net(nn.Module):
 
         # 由于每个棋盘大小对最终对应一个动作，所以补齐的效果比较好
         # 直接来9层的残差网络
-        self.conv=self._make_layer(3, 128, 9)
+        self.conv=self._make_layer(6, 128, 9)
 
         # 动作预测
         self.act_conv1 = nn.Conv2d(128, 1, 1)
@@ -170,7 +170,7 @@ class Net(nn.Module):
         b_val = self.bval_conv1(x)
         b_val = self.bval_conv1_bn(b_val)
         b_val = F.relu(b_val)
-        b_val = x_val.view(b_val.size(0), -1)
+        b_val = b_val.view(b_val.size(0), -1)
         b_val = F.relu(self.bval_fc1(b_val))
         b_val = torch.tanh(self.bval_fc2(b_val))
 
@@ -211,11 +211,12 @@ class PolicyValueNet():
 
     # 打印当前网络
     def print_netwark(self):
-        x = torch.Tensor(1,3,20,10).to(self.device)
+        x = torch.Tensor(1,6,20,10).to(self.device)
         print(self.policy_value_net)
-        v, p = self.policy_value_net(x)
-        print("value:", v.size())
+        p,v,b = self.policy_value_net(x)
         print("policy:", p.size())
+        print("value:", v.size())
+        print("bvalue:", b.size())
 
     # 根据当前状态得到，action的概率和概率
     def policy_value(self, state_batch):
@@ -246,7 +247,7 @@ class PolicyValueNet():
         输出: 一组（动作， 概率）和游戏当前状态的胜率
         """
 
-        key = game.get_key(include_curr_player=False)
+        key = game.get_key()
         if key in self.cache:
             act_probs, value, bvalue = self.cache[key] 
         else:
@@ -267,7 +268,7 @@ class PolicyValueNet():
             self.cache[key] = (act_probs, value, bvalue) 
 
         if game.curr_player==1:
-            return np.ones([act_len])/act_len,bvalue
+            return list(zip(actions, np.ones([len(actions)])/len(actions))), bvalue
         else:
             return act_probs, value
 
