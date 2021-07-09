@@ -475,6 +475,8 @@ class Agent(object):
                 game0_mask.append(0)
 
             game0.step(action)
+            if game0.state!=0:
+                print(game0.pieces_height, "next", game0.fallpiece['shape'])
             # game0.print2(True)
             if game0.terminal or game0.reward>0:# or game0.piececount>=train_pieces_count: 
                 break
@@ -512,6 +514,8 @@ class Agent(object):
                 game1_mask.append(0)
 
             game1.step(action)
+            if game1.state!=0:
+                print(game1.pieces_height, "next", game1.fallpiece['shape'])            
             # game1.print2(True)            
             if game1.terminal or game1.reward>0:# or game1.piececount>=train_pieces_count: 
                 break
