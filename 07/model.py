@@ -268,6 +268,7 @@ class PolicyValueNet():
             self.cache[key] = (act_probs, value, bvalue) 
 
         if game.curr_player==1:
+            actions = game.availables
             return list(zip(actions, np.ones([len(actions)])/len(actions))), bvalue
         else:
             return act_probs, value
