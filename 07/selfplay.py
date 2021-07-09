@@ -153,11 +153,11 @@ class Train():
         result["reward"] = result["reward"] + reward
         result["steps"] = result["steps"] + piececount
         result["agent"] = result["agent"] + ac
-        if result["agent"]>0 and result["agent"]%1000==0:
+        if result["agent"]>0 and result["agent"]%1000<=1:
             for key in list(result.keys()):
                 if key.isdigit():
                     c = int(key)
-                    if c%1000!=0:
+                    if c%1000>10:
                         del result[key]
 
         if result["agent"]>0 and result["agent"]%100<=1:
