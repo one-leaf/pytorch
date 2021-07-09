@@ -244,7 +244,7 @@ class Train():
                     
                     # 动态调整学习率
                     if old_probs is None:
-                        test_batch, _, _ = data
+                        test_batch, _, _, _ = data
                         old_probs, old_value = self.policy_value_net.policy_value(test_batch) 
                     else:
                         new_probs, new_value = self.policy_value_net.policy_value(test_batch)
