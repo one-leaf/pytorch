@@ -68,7 +68,7 @@ class MCTS():
             if (s, act) in self.Qsa: q = self.Qsa[(s, act)]
             if s in self.Ps: p = self.Ps[s][act]
             info.append([action, visit, round(q,2), round(p,2)]) 
-        print(state.steps, state.piecesteps, state.piececount, "n:", n, "depth:" ,self.max_depth, info,)
+        print(state.steps, state.piecesteps, state.piececount, state.curr_player, "n:", n, "depth:" ,self.max_depth, info,)
                 #, \   "first:", state.positions_to_actions(list(self._first_act)[-3:]))
 
         if temp == 0:
