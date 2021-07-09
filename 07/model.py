@@ -247,7 +247,7 @@ class PolicyValueNet():
         输出: 一组（动作， 概率）和游戏当前状态的胜率
         """
 
-        key = game.get_key()
+        key = game.get_key(False)
         if key in self.cache:
             act_probs, value, bvalue = self.cache[key] 
         else:
