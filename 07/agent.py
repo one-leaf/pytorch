@@ -118,7 +118,8 @@ class Agent(object):
         self.steps += 1
         self.piecesteps += 1
         self.prev_player = self.curr_player
- 
+        self.curr_player = (self.curr_player+1)%2
+
         self.level, self.fallfreq = self.tetromino.calculate(self.score)
 
         if action == KEY_LEFT and self.tetromino.validposition(self.board,self.fallpiece,ax = -1):
@@ -175,11 +176,9 @@ class Agent(object):
                 self.terminal = True 
                 self.state = 2
                 return self.state, self.reward # 
-
-            self.curr_player = 0  
         else:
             self.state = 0
-            self.curr_player = (self.curr_player+1)%2
+            
         # 早期训练中，如果得分就表示游戏结束
         # if reward>0: self.terminal=True
             
