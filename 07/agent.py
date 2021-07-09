@@ -187,7 +187,9 @@ class Agent(object):
         return self.state, self.reward
 
     def get_key(self):
-        info = self.getBoard() + self.fallpiece_status[-1]
+        info = self.getBoard() + self.fallpiece_status[-1] 
+        if self.curr_player==1:
+            info = info + np.ones((self.height, self.width))
         return hash(info.data.tobytes())   
         
     # 打印
