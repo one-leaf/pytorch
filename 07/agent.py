@@ -374,9 +374,9 @@ class Agent(object):
 
     def game_end(self):
         if self.reward>0:
-            return self.terminal, self.prev_player 
+            return self.terminal, 0 
         if self.reward<0:
-            return self.terminal, self.curr_player 
+            return self.terminal, 1 
         return self.terminal, -1
 
     # 这里假定第一个人选择下[左移，右移，翻转，下降，无动作]，第二个人只有[下降]
