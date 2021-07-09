@@ -160,7 +160,7 @@ class Agent(object):
             self.nextpiece = self.tetromino.getnewpiece()
             self.piecesteps = 0
             self.piececount +=1 
-
+            self.state = 1
             self.curr_player = 0  
             self.fallpiece_status=[self.get_fallpiece_board()]          
 
@@ -178,10 +178,10 @@ class Agent(object):
                 return self.state, self.reward # 
         else:
             self.state = 0
-        
+            self.curr_player = (self.curr_player+1)%2
         # 早期训练中，如果得分就表示游戏结束
         # if reward>0: self.terminal=True
-        self.curr_player = (self.curr_player+1)%2
+            
         self.availables = self.get_availables()
 
         return self.state, self.reward
