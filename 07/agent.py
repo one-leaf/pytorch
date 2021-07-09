@@ -539,7 +539,7 @@ class Agent(object):
                 game1_win = 1
         else:
             game0_win = -1 
-            game1_win = 1
+            game1_win = -1
 
         # if game0_win == -1 and game1_win==0:
         #     game1_win = 1
