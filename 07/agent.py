@@ -480,7 +480,7 @@ class Agent(object):
         if game0.reward>0:
             game0.print()
             game0_winners = np.ones([len(game0_states)])*game0_mask
-            return 1, game0.piececount, zip(game0_states, game0_mcts_probs, game0_winners, game0_mask)
+            return 1, game0.piececount, 1, zip(game0_states, game0_mcts_probs, game0_winners, game0_mask)
 
 
         # game1.limit_piece_count = train_pieces_count
@@ -517,7 +517,7 @@ class Agent(object):
         if game1.reward>0:
             game1.print()
             game1_winners = np.ones([len(game1_states)])*game1_mask
-            return 1, game1.piececount, zip(game1_states, game1_mcts_probs, game1_winners, game1_mask)
+            return 1, game1.piececount, 1, zip(game1_states, game1_mcts_probs, game1_winners, game1_mask)
 
         game0.print()
         game1.print()
@@ -592,7 +592,7 @@ class Agent(object):
         # print(winners_z[-1])
 
         print("add %s to dataset"%len(winers))
-        return 0, game0.piececount+game1.piececount, zip(states, mcts_probs, winners_z, mask)
+        return 0, game0.piececount+game1.piececount, 2, zip(states, mcts_probs, winners_z, mask)
 
     # # 使用 mcts 训练，重用搜索树，并保存数据
     # def start_self_play3(self, player, temp=1e-3):
