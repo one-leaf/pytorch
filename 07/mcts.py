@@ -108,7 +108,7 @@ class MCTS():
                     v = 1
                 else:
                     v = -1 
-                print("curr_player",state.curr_player,"v",v,"reward",state.reward,"ph",state.pieces_height)
+                print("curr_player",state.curr_player,"winner",winner,"v",v,"reward",state.reward,"ph",state.pieces_height)
             self.Es[s] = v
 
         # 如果得分不等于0，标志这局游戏结束
