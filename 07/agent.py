@@ -372,12 +372,16 @@ class Agent(object):
     #     #     self.transCount = transCount
     #     return transCount    
 
+    # 检查游戏是否结束，如果有奖励，下棋的赢了，否则输了
     def game_end(self):
-        if self.reward>0:
-            return self.terminal, 0 
-        if self.reward<0:
-            return self.terminal, 1 
-        return self.terminal, -1
+        if self.terminal:
+            if self.score>0:
+                return True, 0 
+            else:
+                return True, 1
+        else:
+            return False, -1 
+        
 
     # 这里假定第一个人选择下[左移，右移，翻转，下降，无动作]，第二个人只有[下降]
     # def start_self_play(self, player, temp=1e-3):       
