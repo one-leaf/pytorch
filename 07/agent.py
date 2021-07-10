@@ -46,9 +46,7 @@ class Agent(object):
         # 上一个下落方块的截图
         self.prev_fallpiece_boards=None
         # 当前player
-        self.curr_player = 0  
-        # 触底的玩家 
-        self.prev_player = -1        
+        self.curr_player = 0       
         # 最大方块数量
         self.limit_piece_count = 0   
         # 每个方块的高度
@@ -117,9 +115,8 @@ class Agent(object):
         self.reward = 0
         self.steps += 1
         self.piecesteps += 1
-        self.prev_player = self.curr_player
-        self.curr_player = (self.curr_player+1)%2
-
+        # self.curr_player = (self.curr_player+1)%2
+        self.curr_player = 1 if self.curr_player==0 else 0
         self.level, self.fallfreq = self.tetromino.calculate(self.score)
 
         if action == KEY_LEFT and self.tetromino.validposition(self.board,self.fallpiece,ax = -1):
