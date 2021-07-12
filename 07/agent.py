@@ -521,17 +521,18 @@ class Agent(object):
             if game1.terminal:# or game1.piececount>=train_pieces_count: 
                 break
 
-        if game1.score>0:
-            game1.print()
-            game1_winners = np.ones([len(game1_states)])*game1_mask
-            return 1, game1.piececount, 1, zip(game1_states, game1_mcts_probs, game1_winners, game1_mask)
-
         game0.print()
         game1.print()
-
-        # 检查谁下的好
+        
         game0_win, game1_win = 0, 0
-        if game0.piececount!=game1.piececount:
+        # 检查谁下的好
+        if game1.score>0:
+            game0_win = -1
+            game1_win = 1
+            # game1.print()
+            # game1_winners = np.ones([len(game1_states)])*game1_mask
+            # return 1, game1.piececount, 1, zip(game1_states, game1_mcts_probs, game1_winners, game1_mask)
+        elif game0.piececount!=game1.piececount:
             if game0.piececount>game1.piececount:
                 game0_win = 1
                 game1_win = -1
