@@ -479,10 +479,10 @@ class Agent(object):
             if game0.state!=0:
                 print(game0.pieces_height, "next", game0.fallpiece['shape'])
             # game0.print2(True)
-            if game0.terminal or game0.reward>0:# or game0.piececount>=train_pieces_count: 
+            if game0.terminal:# or game0.piececount>=train_pieces_count: 
                 break
 
-        if game0.reward>0:
+        if game0.score>0:
             game0.print()
             game0_winners = np.ones([len(game0_states)])*game0_mask
             return 1, game0.piececount, 1, zip(game0_states, game0_mcts_probs, game0_winners, game0_mask)
@@ -518,10 +518,10 @@ class Agent(object):
             if game1.state!=0:
                 print(game1.pieces_height, "next", game1.fallpiece['shape'])            
             # game1.print2(True)            
-            if game1.terminal or game1.reward>0:# or game1.piececount>=train_pieces_count: 
+            if game1.terminal:# or game1.piececount>=train_pieces_count: 
                 break
 
-        if game1.reward>0:
+        if game1.score>0:
             game1.print()
             game1_winners = np.ones([len(game1_states)])*game1_mask
             return 1, game1.piececount, 1, zip(game1_states, game1_mcts_probs, game1_winners, game1_mask)
