@@ -162,17 +162,17 @@ class Agent(object):
             self.fallpiece_status=[self.get_fallpiece_board()]          
 
             # print(self.limit_piece_count, self.piececount)
-            if (self.limit_piece_count>0 and self.piececount>=self.limit_piece_count) or \
-                (self.limit_max_height>0 and fallpiece_y<self.limit_max_height):
+            if (not self.tetromino.validposition(self.board,self.fallpiece)) or \
+                (self.limit_max_height>0 and fallpiece_y<(20-self.limit_max_height)):  
                 self.terminal = True 
                 self.state = 1
                 self.reward = -1 
                 return self.state, self.reward # 
 
-            if (not self.tetromino.validposition(self.board,self.fallpiece)): 
-                self.terminal = True 
-                self.state = 2
-                return self.state, self.reward # 
+            # if (not self.tetromino.validposition(self.board,self.fallpiece)): 
+            #     self.terminal = True 
+            #     self.state = 2
+            #     return self.state, self.reward # 
         else:
             self.state = 0
             
@@ -448,7 +448,7 @@ class Agent(object):
         game1.limit_max_height = 10
 
         if random.random()>0.5:
-            limit_max_height=random.randint(4,8)
+            limit_max_height=random.randint(4,9)
             # ig_action=random.choice([None,KEY_NONE,KEY_DOWN])
             game0.limit_max_height = limit_max_height
             game1.limit_max_height = limit_max_height
