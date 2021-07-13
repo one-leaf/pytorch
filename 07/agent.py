@@ -449,11 +449,11 @@ class Agent(object):
 
         if random.random()>0.5:
             limit_max_height=random.randint(4,8)
-            ig_action=random.choice([None,KEY_NONE,KEY_DOWN])
+            # ig_action=random.choice([None,KEY_NONE,KEY_DOWN])
             game0.limit_max_height = limit_max_height
             game1.limit_max_height = limit_max_height
-            game0.ig_action = ig_action
-            game1.ig_action = ig_action
+            # game0.ig_action = ig_action
+            # game1.ig_action = ig_action
 
 
         game0_states,game1_states,game0_mcts_probs,game0_mask=[],[],[],[]
