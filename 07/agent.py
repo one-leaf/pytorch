@@ -498,7 +498,7 @@ class Agent(object):
         if game0.score>0:
             game0.print()
             game0_winners = np.ones([len(game0_states)])*game0_mask
-            reward =0, piececount=0, agentcount=0
+            reward=0, piececount=0, agentcount=0
             if game0.limit_max_height==10:
                 reward = 1
                 piececount = game0.piececount
@@ -620,7 +620,7 @@ class Agent(object):
         # print(winners_z[-1])
 
         print("add %s to dataset"%len(winers))
-        reward =0, piececount=0, agentcount=0
+        reward=0, piececount=0, agentcount=0
         if game0.limit_max_height==10 and game1.limit_max_height==10:
             if game1.reward>0:
                 reward = 1
