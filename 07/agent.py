@@ -503,7 +503,7 @@ class Agent(object):
             if game0.limit_max_height==10:
                 reward = 1
                 piececount = game0.piececount
-                agentcount = 1,
+                agentcount = 1
             return reward, piececount, agentcount, zip(game0_states, game0_mcts_probs, game0_winners, game0_mask)
 
 
@@ -626,7 +626,7 @@ class Agent(object):
             if game1.reward>0:
                 reward = 1
             piececount = game0.piececount+game1.piececount
-            agentcount = 2,
+            agentcount = 2
         
         return reward, piececount, agentcount, zip(states, mcts_probs, winners_z, mask)
 
