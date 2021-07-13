@@ -444,13 +444,26 @@ class Agent(object):
         game0 = copy.deepcopy(self)
         game1 = copy.deepcopy(self)
 
+        game0.limit_max_height = 10
+        game1.limit_max_height = 10
+
+        if random.random()>0.5:
+            limit_max_height=random.randint(4,8)
+            ig_action=random.choice([None,KEY_NONE,KEY_DOWN])
+            game0.limit_max_height = limit_max_height
+            game1.limit_max_height = limit_max_height
+            game0.ig_action = ig_action
+            game1.ig_action = ig_action
+
+
         game0_states,game1_states,game0_mcts_probs,game0_mask=[],[],[],[]
         game1_mcts_probs,game0_players,game1_players,game1_mask=[],[],[],[]
 
         # train_pieces_count = random.randint(3,7)  
         # print("max pieces count:",train_pieces_count)
         # game0.limit_piece_count = train_pieces_count
-        game0.limit_max_height = 10
+
+
         #game0.ig_action = KEY_ROTATION
         for i in count():            
             # 只保留有效的步数
@@ -485,11 +498,15 @@ class Agent(object):
         if game0.score>0:
             game0.print()
             game0_winners = np.ones([len(game0_states)])*game0_mask
-            return 1, game0.piececount, 1, zip(game0_states, game0_mcts_probs, game0_winners, game0_mask)
+            reward =0, piececount=0, agentcount=0
+            if game0.limit_max_height==10:
+                reward = 1
+                piececount = game0.piececount
+                agentcount = 1,
+            return reward, piececount, agentcount, zip(game0_states, game0_mcts_probs, game0_winners, game0_mask)
 
 
         # game1.limit_piece_count = train_pieces_count
-        game1.limit_max_height = 10
         #game1.ig_action = KEY_NONE
         for i in count():
             # if game1.piecesteps<ig_steps:
@@ -603,7 +620,14 @@ class Agent(object):
         # print(winners_z[-1])
 
         print("add %s to dataset"%len(winers))
-        return 0, game0.piececount+game1.piececount, 2, zip(states, mcts_probs, winners_z, mask)
+        reward =0, piececount=0, agentcount=0
+        if game0.limit_max_height==10 and game1.limit_max_height==10:
+            if game1.reward>0:
+                reward = 1
+            piececount = game0.piececount+game1.piececount
+            agentcount = 2,
+        
+        return reward, piececount, agentcount, zip(states, mcts_probs, winners_z, mask)
 
     # # 使用 mcts 训练，重用搜索树，并保存数据
     # def start_self_play3(self, player, temp=1e-3):
