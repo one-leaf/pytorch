@@ -455,6 +455,7 @@ class Agent(object):
             # game0.ig_action = ig_action
             # game1.ig_action = ig_action
 
+        print("limit_max_height", game0.limit_max_height)
 
         game0_states,game1_states,game0_mcts_probs,game0_mask=[],[],[],[]
         game1_mcts_probs,game0_players,game1_players,game1_mask=[],[],[],[]
