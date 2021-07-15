@@ -163,7 +163,7 @@ class Agent(object):
 
             # print(self.limit_piece_count, self.piececount)
             if (not self.tetromino.validposition(self.board,self.fallpiece)) or \
-                (self.limit_max_height>0 and fallpiece_y<(20-self.limit_max_height)):  
+                (self.limit_max_height>0 and (20-fallpiece_y)<self.limit_max_height):  
                 self.terminal = True 
                 self.state = 1
                 self.reward = -1 
