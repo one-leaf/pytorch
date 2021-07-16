@@ -548,7 +548,7 @@ class Agent(object):
         if game1.score>0:
             game0_win = -1
             game1_win = 1
-        elif abs(p0-p1)>2 or max(p0,p1)-game0.limit_max_height>2:
+        elif p0!=p1 and max(p0,p1)-game0.limit_max_height>3:
             if p0>p1:
                 game0_win = 1
                 game1_win = -1
