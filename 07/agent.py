@@ -581,7 +581,7 @@ class Agent(object):
         #         game0_win = -1
         #         game1_win = -1
 
-        print("game0",game0_win,"game1",game1_win,"")
+        print("game0",game0_win,"game1",game1_win,"limit_max_height", game0.limit_max_height)
         winers, mask = [],[]
 
         for i in game0_players:
