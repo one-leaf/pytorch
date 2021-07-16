@@ -547,9 +547,6 @@ class Agent(object):
         if game1.score>0:
             game0_win = -1
             game1_win = 1
-            # game1.print()
-            # game1_winners = np.ones([len(game1_states)])*game1_mask
-            # return 1, game1.piececount, 1, zip(game1_states, game1_mcts_probs, game1_winners, game1_mask)
         elif game0.piececount!=game1.piececount:
             if game0.piececount>game1.piececount:
                 game0_win = 1
@@ -558,8 +555,8 @@ class Agent(object):
                 game0_win = -1
                 game1_win = 1
         else:
-            game0_win = -1 
-            game1_win = -1
+            game0_win = 0 
+            game1_win = 0
 
         # if game0_win == -1 and game1_win==0:
         #     game1_win = 1
