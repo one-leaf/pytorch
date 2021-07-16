@@ -544,11 +544,12 @@ class Agent(object):
         
         game0_win, game1_win = 0, 0
         # 检查谁下的好
+        p0, p1 = game0.piececount, game1.piececount
         if game1.score>0:
             game0_win = -1
             game1_win = 1
-        elif abs(game0.piececount-game1.piececount)>2:
-            if game0.piececount>game1.piececount:
+        elif abs(p0-p1)>2 or max(p0,p1)-game0.limit_max_height>2:
+            if p0>p1:
                 game0_win = 1
                 game1_win = -1
             else:
