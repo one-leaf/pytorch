@@ -133,13 +133,6 @@ class MCTS():
         cur_best = -float('inf')
         best_act = -1
 
-        # 如果动作 a 在优先探索步骤内，且没有从来没有被探索过，则优先探索
-        # 训练后期不需要了
-        # for a in state.actions_to_positions(state.availables):
-        #     if a in self._first_act and not (s, a) in self.Qsa: 
-        #         best_act = a
-        #         break
-
         if best_act == -1:
             # 选择具有最高置信上限的动作
             for a in state.actions_to_positions(state.availables):
@@ -158,29 +151,14 @@ class MCTS():
         state.step(act)
 
         # 计算下一步的 v 这个v 为正数，但下一个v为负数
-        # if state.reward >0:
-        #     v = -1.
-        #     print("!",end="")   
-        #     if state.state_player == 1:
-        #         v = -1 * v        
-        # elif state.state==1: 
-        #     ph=state.pieces_height
-        #     # avg_ph = sum(ph)/len(ph)
-        #     # v = (-1./avg_ph)
-        #     # v = avg_ph/20 不能用这个，这个会导致粘连
-        #     ph_max=max(ph)
-        #     if ph[-1]>=ph_max:
-        #         v = 0.1
-        #     else:
-        #         v = -0.1
-        #     if state.state_player == 1:
-        #         v = -1 * v    
-        #     v = v + self.search(state)
-        # else:
-        v = self.search(state)
-        # if abs(v)>0.1:
-        #     state.print2(True)
-        #     print("act", act, "curr_play", state.curr_player, "v", v)
+        if state.state!=0 and state.reward>0:
+            if state.curr_player==0:
+                v = 1
+            else:
+                v = -1
+        else:
+            v = self.search(state)
+
         # 更新 Q 值 和 访问次数
         if (s, a) in self.Qsa:
             self.Qsa[(s, a)] = (self.Nsa[(s, a)] * self.Qsa[(s, a)] + v) / (self.Nsa[(s, a)] + 1)
