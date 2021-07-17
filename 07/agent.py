@@ -555,6 +555,9 @@ class Agent(object):
             else:
                 game0_win = -1
                 game1_win = 1
+        elif p0==p1 and p0-game0.limit_max_height>3:
+            game0_win = 1 
+            game1_win = 1
         else:
             game0_win = -1 
             game1_win = -1
