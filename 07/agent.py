@@ -547,9 +547,9 @@ class Agent(object):
         p0, p1 = game0.piececount, game1.piececount
         if game1.score>0:
             game1_win = 1
-        if p0-game0.limit_max_height>4:
+        if p0-game0.limit_max_height>5:
             game0_win = 1
-        if p1-game1.limit_max_height>4:
+        if p1-game1.limit_max_height>5:
             game1_win = 1
 
         # if game0_win == -1 and game1_win==0:
