@@ -538,14 +538,28 @@ class Agent(object):
         game0_win, game1_win = -1, -1
         # 检查谁下的好
         p0, p1 = game0.piececount, game1.piececount
-        if game0.score>0:
+
+        if game0.score>game1.score:
             game0_win = 1
-        if game1.score>0:
+            game1_win = -1
+        elif game0.score<game1.score:
+            game0_win = -1
             game1_win = 1
-        if p0-game0.limit_max_height>5:
-            game0_win = 1
-        if p1-game1.limit_max_height>5:
-            game1_win = 1
+        else:
+            if game0.score>0:
+                if p0>p1:
+                    game0_win = 1
+                    game1_win = -1
+                elif p0<p1:
+                    game0_win = -1
+                    game1_win = 1
+                else:
+                    game0_win = 1
+                    game1_win = 1
+            else:
+                game0_win = -1
+                game1_win = -1
+
 
         # if game0_win == -1 and game1_win==0:
         #     game1_win = 1
