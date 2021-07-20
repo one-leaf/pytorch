@@ -493,7 +493,7 @@ class Agent(object):
             if game0.state!=0:
                 game0.limit_max_height = max(game0.pieces_height)+2
                 if game0.limit_max_height>10: game0.limit_max_height=10
-                print(game0.pieces_height, "limit_max_height", game0.limit_max_height, "next", game0.fallpiece['shape'])
+                print(game0.pieces_height, 'len', len(game0.pieces_height), "limit_max_height", game0.limit_max_height, "next", game0.fallpiece['shape'])
             # game0.print2(True)
             if game0.terminal:# or game0.piececount>=train_pieces_count: 
                 break
@@ -527,7 +527,7 @@ class Agent(object):
             if game1.state!=0:
                 game1.limit_max_height = max(game1.pieces_height)+2
                 if game1.limit_max_height>10: game1.limit_max_height=10
-                print(game1.pieces_height, "limit_max_height", game1.limit_max_height ,"next", game1.fallpiece['shape'])            
+                print(game1.pieces_height, "len", len(game1.pieces_height), "limit_max_height", game1.limit_max_height ,"next", game1.fallpiece['shape'])            
             # game1.print2(True)            
             if game1.terminal:# or game1.piececount>=train_pieces_count: 
                 break
