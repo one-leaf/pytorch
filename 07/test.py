@@ -18,7 +18,7 @@ def run():
         env = TetrominoEnv(agent.tetromino)    
         # 神经网络的价值策略
         net_policy = PolicyValueNet(10, 20, 5, model_file=model_file)
-        mcts_ai_player = MCTSPlayer(net_policy.policy_value_fn, c_puct=1, n_playout=128)
+        mcts_ai_player = MCTSPlayer(net_policy.policy_value_fn, c_puct=1, n_playout=64)
         # agent.start_play(mcts_ai_player, env)
         while not agent.terminal:
             if agent.curr_player == 0:
