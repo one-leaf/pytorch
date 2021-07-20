@@ -372,10 +372,10 @@ class Agent(object):
     # 检查游戏是否结束，如果有奖励，下棋的赢了，否则输了
     def game_end(self):
         if self.terminal:
-            if self.reward>0:
-                return True, 0 
-            else:
-                return True, 1
+            # if self.score>0:
+            #     return True, 0 
+            # else:
+            return True, 1
         else:
             return False, -1 
         
