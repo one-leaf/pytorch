@@ -496,17 +496,6 @@ class Agent(object):
             if game0.terminal:# or game0.piececount>=train_pieces_count: 
                 break
 
-        if game0.score>0:
-            game0.print()
-            game0_winners = np.ones([len(game0_states)])*game0_mask
-            reward, piececount, agentcount = 0, 0, 0
-            if game0.limit_max_height==10:
-                reward = 1
-                piececount = game0.piececount
-                agentcount = 1
-            return reward, piececount, agentcount, zip(game0_states, game0_mcts_probs, game0_winners, game0_mask)
-
-
         # game1.limit_piece_count = train_pieces_count
         #game1.ig_action = KEY_NONE
         for i in count():
@@ -545,6 +534,8 @@ class Agent(object):
         game0_win, game1_win = -1, -1
         # 检查谁下的好
         p0, p1 = game0.piececount, game1.piececount
+        if game0.score>0:
+            game0_win = 1
         if game1.score>0:
             game1_win = 1
         if p0-game0.limit_max_height>5:
@@ -614,8 +605,10 @@ class Agent(object):
         print("add %s to dataset"%len(winers))
         reward, piececount, agentcount = 0, 0, 0
         if game0.limit_max_height==10 and game1.limit_max_height==10:
+            if game0.reward>0:
+                reward += 1
             if game1.reward>0:
-                reward = 1
+                reward += 1
             piececount = game0.piececount+game1.piececount
             agentcount = 2
         
