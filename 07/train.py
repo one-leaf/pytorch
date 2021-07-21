@@ -42,7 +42,7 @@ class Dataset(torch.utils.data.Dataset):
         self.data_index_file = os.path.join(data_dir, 'index.txt')
         self.file_list = deque(maxlen=max_keep_size)    
         self._save_lock = Lock()
-
+        self.win_count = 0
         self.load_index()
         self.copy_wait_file()
         self.load_game_files()
@@ -66,6 +66,8 @@ class Dataset(torch.utils.data.Dataset):
         mcts_prob = torch.from_numpy(mcts_prob).float()
         winner = torch.as_tensor(winner).float()
         mask = torch.as_tensor(mask).float()
+        if mask==1 and winner==1:
+            self.win_count += 1
         return state, mcts_prob, winner, mask
 
     def load_game_files(self):
@@ -267,8 +269,9 @@ class Train():
                         logging.info("kl:{} lr_multiplier:{} lr:{}".format(kl, self.lr_multiplier, self.learn_rate*self.lr_multiplier))
 
 
-
             self.policy_value_net.save_model(model_file)
+
+            print("win:",self.dataset.win_count,"totle:",self.dataset.curr_size,"proportion:", 1.0*self.dataset.win_count/self.dataset.curr_size)
             # 收集自我对抗数据
             # for _ in range(self.play_batch_size):
             #     self.collect_selfplay_data()
