@@ -66,7 +66,7 @@ class Dataset(torch.utils.data.Dataset):
         mcts_prob = torch.from_numpy(mcts_prob).float()
         winner = torch.as_tensor(winner).float()
         mask = torch.as_tensor(mask).float()
-        if mask==1 and winner==1:
+        if mask>0 and winner>0:
             self.win_count += 1
         return state, mcts_prob, winner, mask
 
