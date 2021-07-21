@@ -143,6 +143,7 @@ class Train():
             filename = "{}.pkl".format(uuid.uuid1())
             savefile = os.path.join(data_wait_dir, filename)
             pickle.dump(obj, open(savefile, "wb"))
+            
             # self.dataset.save(obj)
         
         jsonfile = os.path.join(data_dir, "result.json")

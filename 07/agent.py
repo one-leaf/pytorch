@@ -605,15 +605,17 @@ class Agent(object):
         for o in game1_mask: mask.append(o)
 
         game0_states,game1_states,game0_mcts_probs,game1_mcts_probs,game0_mask,game1_mask=[],[],[],[],[],[]
-        winners_z = np.array(winers)
+
+        # winners_z = np.array(winers)
+        winners_z = np.zeros(len(winers))
+        winners_z[np.array(winers) == 1] = 1.0
+        winners_z[np.array(winers) == -1] = -1.0
 
         assert len(states)==len(mcts_probs)
         assert len(states)==len(winners_z)
         assert len(states)==len(mask)
 
-        # winners_z = np.zeros(len(winers))
-        # winners_z[np.array(winers) == 1] = 1.0
-        # winners_z[np.array(winers) == -1] = -1.0
+
         # print(states[-1])
         # print(mcts_probs[-1])
         # print(winners_z[-1])
