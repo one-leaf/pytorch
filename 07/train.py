@@ -179,6 +179,8 @@ class Train():
         # 随机抽取data_buffer中的对抗数据
         # mini_batch = self.dataset.loadData(sample_data)
         state_batch, mcts_probs_batch, winner_batch, mask_batch = sample_data
+        totle = torch.sum(winner_batch*mask_batch)
+        print(totle.item())
         # # for x in mini_batch:
         # #     print("-----------------")
         # #     print(x)
