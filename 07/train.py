@@ -33,7 +33,7 @@ if not os.path.exists(model_dir): os.makedirs(model_dir)
 model_file =  os.path.join(model_dir, 'model.pth')
 
 class Dataset(torch.utils.data.Dataset):
-    def __init__(self, data_dir, max_keep_size):
+    def __init__(self, data_dir, max_keep_size, counts):
         # 训练数据存放路径
         self.data_dir = data_dir                
         # 训练数据最大保存个数
@@ -42,13 +42,10 @@ class Dataset(torch.utils.data.Dataset):
         self.data_index_file = os.path.join(data_dir, 'index.txt')
         self.file_list = deque(maxlen=max_keep_size)    
         self._save_lock = Lock()
-        self.counts = [0,0]
+        self.counts = counts
         self.load_index()
         self.copy_wait_file()
         self.load_game_files()
-
-    def get_counts(self):
-        return self.counts
 
     def __len__(self):
         return len(self.file_list)
@@ -226,7 +223,8 @@ class Train():
         """启动训练"""
         try:
             print("start data loader")
-            self.dataset = Dataset(data_dir, self.buffer_size)
+            self.counts=[0,0]
+            self.dataset = Dataset(data_dir, self.buffer_size, self.counts)
             print("end data loader")
 
             # step = 0
@@ -278,8 +276,8 @@ class Train():
 
 
             self.policy_value_net.save_model(model_file)
-            counts = self.dataset.get_counts()
-            print("win:",counts[0],"lost:",counts[1])
+            
+            print("win:",self.counts[0],"lost:",self.counts[1])
             # 收集自我对抗数据
             # for _ in range(self.play_batch_size):
             #     self.collect_selfplay_data()
