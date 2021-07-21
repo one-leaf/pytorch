@@ -278,8 +278,8 @@ class Train():
 
 
             self.policy_value_net.save_model(model_file)
-
-            print("win:",self.dataset.win_count,"lost:",self.dataset.lost_count)
+            counts = self.dataset.get_counts()
+            print("win:",counts[0],"lost:",counts[1])
             # 收集自我对抗数据
             # for _ in range(self.play_batch_size):
             #     self.collect_selfplay_data()
