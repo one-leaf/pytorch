@@ -63,7 +63,8 @@ class Dataset(torch.utils.data.Dataset):
             else:
                 break
         if mask>0 and winner>0: self.win_count += 1
-
+        if index<100:
+            print("mask",mask,"winner",winner)
         state = torch.from_numpy(state).float()
         mcts_prob = torch.from_numpy(mcts_prob).float()
         winner = torch.as_tensor(winner).float()
