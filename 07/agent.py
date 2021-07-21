@@ -585,14 +585,14 @@ class Agent(object):
         print("game0",game0_win,"game1",game1_win,"limit_max_height", game0.limit_max_height)
         winers, mask = [],[]
 
-        for i in game0_players:
-            if i==0:
+        for m in game0_mask:
+            if m==1:
                 winers.append(game0_win)
             else:
                 winers.append(game0_win*-1)
 
-        for i in game1_players:
-            if i==0:
+        for m in game1_mask:
+            if m==1:
                 winers.append(game1_win)
             else:
                 winers.append(game1_win*-1)
