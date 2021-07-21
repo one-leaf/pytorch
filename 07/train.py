@@ -62,12 +62,12 @@ class Dataset(torch.utils.data.Dataset):
                 filename = random.choice(self.file_list)
             else:
                 break
+        if mask>0 and winner>0: self.win_count += 1
+
         state = torch.from_numpy(state).float()
         mcts_prob = torch.from_numpy(mcts_prob).float()
         winner = torch.as_tensor(winner).float()
         mask = torch.as_tensor(mask).float()
-        if mask>0 and winner>0:
-            self.win_count += 1
         return state, mcts_prob, winner, mask
 
     def load_game_files(self):
