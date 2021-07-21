@@ -271,7 +271,7 @@ class Train():
 
             self.policy_value_net.save_model(model_file)
 
-            print("win:",self.dataset.win_count,"totle:",self.dataset.curr_size,"proportion:", 1.0*self.dataset.win_count/self.dataset.curr_size)
+            print("win:",self.dataset.win_count,"totle:",self.dataset.curr_size(),"proportion:", 1.0*self.dataset.win_count/self.dataset.curr_size())
             # 收集自我对抗数据
             # for _ in range(self.play_batch_size):
             #     self.collect_selfplay_data()
