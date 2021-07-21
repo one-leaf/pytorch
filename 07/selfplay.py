@@ -143,9 +143,6 @@ class Train():
             filename = "{}.pkl".format(uuid.uuid1())
             savefile = os.path.join(data_wait_dir, filename)
             pickle.dump(obj, open(savefile, "wb"))
-            state, mcts_prob, winner, mask = obj
-            if mask==1 and winner==1:
-                print("========ok, win===========")
             # self.dataset.save(obj)
         
         jsonfile = os.path.join(data_dir, "result.json")

@@ -43,6 +43,7 @@ class Dataset(torch.utils.data.Dataset):
         self.file_list = deque(maxlen=max_keep_size)    
         self._save_lock = Lock()
         self.win_count = 0
+        self.lost_count = 0
         self.load_index()
         self.copy_wait_file()
         self.load_game_files()
@@ -62,7 +63,11 @@ class Dataset(torch.utils.data.Dataset):
                 filename = random.choice(self.file_list)
             else:
                 break
-        if mask==1 and winner==1: self.win_count += 1
+        if mask==1:
+            if winner == 1:
+                self.win_count = self.win_count + 1
+            else:
+                self.lost_count = self.lost_count + 1
         # if index<500 and mask==1:
         #     print("mask",mask,"winner",winner)
         state = torch.from_numpy(state).float()
@@ -272,7 +277,7 @@ class Train():
 
             self.policy_value_net.save_model(model_file)
 
-            print("win:",self.dataset.win_count,"totle:",self.dataset.curr_size(),"proportion:", 1.0*self.dataset.win_count/self.dataset.curr_size())
+            print("win:",self.dataset.win_count,"lost:",self.dataset.lost_count)
             # 收集自我对抗数据
             # for _ in range(self.play_batch_size):
             #     self.collect_selfplay_data()
