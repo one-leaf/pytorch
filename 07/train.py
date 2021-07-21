@@ -180,7 +180,7 @@ class Train():
         # mini_batch = self.dataset.loadData(sample_data)
         state_batch, mcts_probs_batch, winner_batch, mask_batch = sample_data
         totle = torch.sum(winner_batch*mask_batch)
-        print(totle.item())
+        totle_value = totle.item()
         # # for x in mini_batch:
         # #     print("-----------------")
         # #     print(x)
@@ -212,7 +212,7 @@ class Train():
         # entropy 信息熵，越小越好
         # logging.info(("TRAIN kl:{:.5f},lr_multiplier:{:.3f},v_loss:{:.5f},p_loss:{:.5f},entropy:{:.5f},var_old:{:.5f},var_new:{:.5f}"
         #               ).format(kl, self.lr_multiplier, v_loss, p_loss, entropy, explained_var_old, explained_var_new))
-        return loss, b_loss, v_loss, p_loss, entropy
+        return totle_value, b_loss, v_loss, p_loss, entropy
 
     def run(self):
         """启动训练"""
@@ -236,13 +236,14 @@ class Train():
             training_loader = torch.utils.data.DataLoader(self.dataset, batch_size=self.batch_size, shuffle=True, num_workers=1,)
             old_probs = None
             test_batch = None
+            totle = 0
             for i, data in enumerate(training_loader):  # 计划训练批次
                 if i==0:
                     for obj in data:
                         print(obj[0])
                 # 使用对抗数据重新训练策略价值网络模型
-                loss, b_loss, v_loss, p_loss, entropy = self.policy_update(data, self.epochs)
-
+                totle_value, b_loss, v_loss, p_loss, entropy = self.policy_update(data, self.epochs)
+                totle = totle + totle_value
                 logging.info(("TRAIN idx {} : {} / {} b_loss:{:.5f}, v_loss:{:.5f}, p_loss:{:.5f}, entropy:{:.5f}")\
                     .format(i, i*self.batch_size, dataset_len, b_loss, v_loss, p_loss, entropy))
 
@@ -275,7 +276,7 @@ class Train():
             # for _ in range(self.play_batch_size):
             #     self.collect_selfplay_data()
             # logging.info("TRAIN {} self-play end, size: {}".format(self.dataset.curr_game_batch_num, self.dataset.curr_size()))
-                    
+            print("win+loss:",totle)        
     
         except KeyboardInterrupt:
             logging.info('quit')
