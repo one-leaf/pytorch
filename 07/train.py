@@ -42,11 +42,13 @@ class Dataset(torch.utils.data.Dataset):
         self.data_index_file = os.path.join(data_dir, 'index.txt')
         self.file_list = deque(maxlen=max_keep_size)    
         self._save_lock = Lock()
-        self.win_count = 0
-        self.lost_count = 0
+        self.counts = [0,0]
         self.load_index()
         self.copy_wait_file()
         self.load_game_files()
+
+    def get_counts(self):
+        return self.counts
 
     def __len__(self):
         return len(self.file_list)
@@ -65,9 +67,9 @@ class Dataset(torch.utils.data.Dataset):
                 break
         if mask==1:
             if winner == 1:
-                self.win_count = self.win_count + 1
+                self.counts[0] = self.counts[0] + 1
             else:
-                self.lost_count = self.lost_count + 1
+                self.counts[1] = self.counts[1] + 1
         # if index<500 and mask==1:
         #     print("mask",mask,"winner",winner)
         state = torch.from_numpy(state).float()
