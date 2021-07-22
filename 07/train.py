@@ -276,7 +276,8 @@ class Train():
             # for _ in range(self.play_batch_size):
             #     self.collect_selfplay_data()
             # logging.info("TRAIN {} self-play end, size: {}".format(self.dataset.curr_game_batch_num, self.dataset.curr_size()))
-            print("win+loss:",totle)        
+            win = (totle+dataset_len//2)//2
+            print("win:", win, "lost:", dataset_len//2-win, "prop:", win/(dataset_len//2))        
     
         except KeyboardInterrupt:
             logging.info('quit')
