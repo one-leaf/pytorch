@@ -128,43 +128,46 @@ class Train():
         # 游戏代理
         agent = Agent()
 
-        # 创建使用策略价值网络来指导树搜索和评估叶节点的MCTS玩家
-        mcts_player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout, is_selfplay=1)
-        # 开始下棋
-        reward, piececount, agentcount, play_data = agent.start_self_play(mcts_player, temp=self.temp)
-        play_data = list(play_data)[:]
-        episode_len = len(play_data)
+        for _ in range(3):
+            # 创建使用策略价值网络来指导树搜索和评估叶节点的MCTS玩家
+            mcts_player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout, is_selfplay=1)
+            # 开始下棋
+            reward, piececount, agentcount, play_data = agent.start_self_play(mcts_player, temp=self.temp)
+            play_data = list(play_data)[:]
+            episode_len = len(play_data)
 
-        # 把翻转棋盘数据加到数据集里
-        # play_data = self.get_equi_data(play_data)
-        logging.info("TRAIN Self Play end. length:%s saving ..." % episode_len)
-        # 保存对抗数据到data_buffer
-        for obj in play_data:
-            filename = "{}.pkl".format(uuid.uuid1())
-            savefile = os.path.join(data_wait_dir, filename)
-            pickle.dump(obj, open(savefile, "wb"))
-            # self.dataset.save(obj)
-        
-        jsonfile = os.path.join(data_dir, "result.json")
-        if os.path.exists(jsonfile):
-            result=json.load(open(jsonfile,"r"))
-        else:
-            result={"reward":0,"steps":0,"agent":0}
-        result["reward"] = result["reward"] + reward
-        result["steps"] = result["steps"] + piececount
-        result["agent"] = result["agent"] + agentcount
-        if result["agent"]>0 and result["agent"]%1000<=1:
-            for key in list(result.keys()):
-                if key.isdigit():
-                    c = int(key)
-                    if c%1000>10:
-                        del result[key]
+            # 把翻转棋盘数据加到数据集里
+            # play_data = self.get_equi_data(play_data)
+            logging.info("TRAIN Self Play end. length:%s saving ..." % episode_len)
+            # 保存对抗数据到data_buffer
+            for obj in play_data:
+                filename = "{}.pkl".format(uuid.uuid1())
+                savefile = os.path.join(data_wait_dir, filename)
+                pickle.dump(obj, open(savefile, "wb"))
+                # self.dataset.save(obj)
+            
+            jsonfile = os.path.join(data_dir, "result.json")
+            if os.path.exists(jsonfile):
+                result=json.load(open(jsonfile,"r"))
+            else:
+                result={"reward":0,"steps":0,"agent":0}
+            result["reward"] = result["reward"] + reward
+            result["steps"] = result["steps"] + piececount
+            result["agent"] = result["agent"] + agentcount
+            if result["agent"]>0 and result["agent"]%1000<=1:
+                for key in list(result.keys()):
+                    if key.isdigit():
+                        c = int(key)
+                        if c%1000>10:
+                            del result[key]
 
-        if result["agent"]>0 and result["agent"]%100<=1:
-            result[str(result["agent"])]={"reward":result["reward"]/result["agent"],
-                                            "steps":result["steps"]/result["agent"]}
-        
-        json.dump(result, open(jsonfile,"w"), ensure_ascii=False)
+            if result["agent"]>0 and result["agent"]%100<=1:
+                result[str(result["agent"])]={"reward":result["reward"]/result["agent"],
+                                                "steps":result["steps"]/result["agent"]}
+            
+            json.dump(result, open(jsonfile,"w"), ensure_ascii=False)
+
+            if reward>=2: break          
 
     def policy_update(self, sample_data, epochs=1):
         """更新策略价值网络policy-value"""
