@@ -444,8 +444,8 @@ class Agent(object):
         game0 = copy.deepcopy(self)
         game1 = copy.deepcopy(self)
 
-        game0.limit_max_height = 4
-        game1.limit_max_height = 4
+        game0.limit_max_height = 5
+        game1.limit_max_height = 5
 
         limit_max_height=random.choice([5,10])
         #     # ig_action=random.choice([None,KEY_NONE,KEY_DOWN])
