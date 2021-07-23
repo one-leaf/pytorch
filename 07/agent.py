@@ -556,7 +556,16 @@ class Agent(object):
                 else:
                     game0_win = 1
                     game1_win = 1
-
+        elif limit_max_height == 5:
+                if p0>p1:
+                    game0_win = 1
+                    game1_win = -1
+                elif p0<p1:
+                    game0_win = -1
+                    game1_win = 1
+                else:
+                    game0_win = -1
+                    game1_win = -1
 
         # if game0_win == -1 and game1_win==0:
         #     game1_win = 1
