@@ -447,8 +447,7 @@ class Agent(object):
         game0.limit_max_height = 4
         game1.limit_max_height = 4
 
-        # if random.random()>0.5:
-        #     limit_max_height=random.randint(3,9)
+        limit_max_height=random.choice([5,10])
         #     # ig_action=random.choice([None,KEY_NONE,KEY_DOWN])
         #     game0.limit_max_height = limit_max_height
         #     game1.limit_max_height = limit_max_height
@@ -492,7 +491,7 @@ class Agent(object):
             game0.step(action)
             if game0.state!=0:
                 game0.limit_max_height = max(game0.pieces_height)+2
-                if game0.limit_max_height>10: game0.limit_max_height=10
+                if game0.limit_max_height>limit_max_height: game0.limit_max_height=limit_max_height
                 print(game0.pieces_height, 'len', len(game0.pieces_height), "limit_max_height", game0.limit_max_height, "next", game0.fallpiece['shape'])
             # game0.print2(True)
             if game0.terminal:# or game0.piececount>=train_pieces_count: 
@@ -526,7 +525,7 @@ class Agent(object):
             game1.step(action)
             if game1.state!=0:
                 game1.limit_max_height = max(game1.pieces_height)+2
-                if game1.limit_max_height>10: game1.limit_max_height=10
+                if game1.limit_max_height>limit_max_height: game1.limit_max_height=limit_max_height
                 print(game1.pieces_height, "len", len(game1.pieces_height), "limit_max_height", game1.limit_max_height ,"next", game1.fallpiece['shape'])            
             # game1.print2(True)            
             if game1.terminal:# or game1.piececount>=train_pieces_count: 
@@ -622,10 +621,14 @@ class Agent(object):
 
         print("add %s to dataset"%len(winers))
         reward, piececount, agentcount = 0, 0, 0
-        # if game0.limit_max_height==10 and game1.limit_max_height==10:
-        reward = game0.score + game1.score  
-        piececount = game0.piececount+game1.piececount
-        agentcount = 2
+        if game0.limit_max_height==10:
+            reward += game0.score   
+            piececount += game0.piececount
+            agentcount += 1
+        if  game1.limit_max_height==10:
+            reward += game1.score  
+            piececount += game1.piececount
+            agentcount += 1
         
         return reward, piececount, agentcount, zip(states, mcts_probs, winners_z, mask)
 
