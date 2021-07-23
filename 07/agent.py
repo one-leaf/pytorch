@@ -539,8 +539,8 @@ class Agent(object):
         # 检查谁下的好
         p0, p1 = game0.piececount, game1.piececount
 
-        # 低于消除2行的全部为输，至少要消除2行才做判定
-        if game0.score>=2 or game1.score>=2:
+        # 低于消除1行的全部为输，至少要消除1行才做判定
+        if game0.score>=1 or game1.score>=1:
             if game0.score>game1.score:
                 game0_win = 1
                 game1_win = -1

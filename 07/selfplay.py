@@ -167,7 +167,7 @@ class Train():
             
             json.dump(result, open(jsonfile,"w"), ensure_ascii=False)
 
-            if reward>=2: break          
+            if reward>=1: break          
 
     def policy_update(self, sample_data, epochs=1):
         """更新策略价值网络policy-value"""
