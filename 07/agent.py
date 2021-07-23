@@ -621,14 +621,10 @@ class Agent(object):
 
         print("add %s to dataset"%len(winers))
         reward, piececount, agentcount = 0, 0, 0
-        if game0.limit_max_height==10:
-            reward += game0.score   
-            piececount += game0.piececount
-            agentcount += 1
-        if  game1.limit_max_height==10:
-            reward += game1.score  
-            piececount += game1.piececount
-            agentcount += 1
+        if game0.limit_max_height==10 and game1.limit_max_height==10:
+            reward = game0.score + game1.score  
+            piececount = game0.piececount + game1.piececount
+            agentcount = 2
         
         return reward, piececount, agentcount, zip(states, mcts_probs, winners_z, mask)
 
