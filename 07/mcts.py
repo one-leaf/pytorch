@@ -296,7 +296,7 @@ class MCTSPlayer(object):
                 
                 if state.piecesteps<4 or state.piececount<4:
                 # if act_probs[idx]<0.99:
-                    p = 0.8                 
+                    p = 0.75                 
                     dirichlet = np.random.dirichlet(0.03 * np.ones(len(act_probs)))
                     act = np.random.choice(acts, p=p * act_probs + (1.0-p) * dirichlet)
                
