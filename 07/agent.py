@@ -567,6 +567,10 @@ class Agent(object):
                 game0_win = -1
                 game1_win = -1
 
+        game0_loss, game1_loss = 1,1
+        if game0.score>1: game0_loss = -1
+        if game1.score>1: game1_loss = -1
+
         # if game0_win == -1 and game1_win==0:
         #     game1_win = 1
         # if game1_win == -1 and game0_win==0:
@@ -597,13 +601,13 @@ class Agent(object):
             if m==1:
                 winers.append(game0_win)
             else:
-                winers.append(game0_win*-1)
+                winers.append(game0_loss)
 
         for m in game1_mask:
             if m==1:
                 winers.append(game1_win)
             else:
-                winers.append(game1_win*-1)
+                winers.append(game1_loss)
 
         for o in game0_states: states.append(o)
         for o in game1_states: states.append(o)
