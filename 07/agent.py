@@ -568,8 +568,8 @@ class Agent(object):
                 game1_win = -1
 
         game0_loss, game1_loss = 1,1
-        if game0.score>1: game0_loss = -1
-        if game1.score>1: game1_loss = -1
+        if game0.score>0: game0_loss = -1
+        if game1.score>0: game1_loss = -1
 
         # if game0_win == -1 and game1_win==0:
         #     game1_win = 1
