@@ -444,10 +444,11 @@ class Agent(object):
         game0 = copy.deepcopy(self)
         game1 = copy.deepcopy(self)
 
-        if game0.limit_max_height == 5:
-            limit_max_height = 5
+        if self.limit_max_height > 0:
+            limit_max_height = self.limit_max_height
         else:
             limit_max_height = random.choice([5,10])
+            self.limit_max_height = limit_max_height
         
         game0.limit_max_height = 5
         game1.limit_max_height = 5
