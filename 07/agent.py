@@ -544,7 +544,7 @@ class Agent(object):
         p0, p1 = game0.piececount, game1.piececount
 
         # 低于消除1行的全部为输，至少要消除1行才做判定
-        if game0.score>=1 or game1.score>=1:
+        if game0.score>=2 or game1.score>=2:
             if game0.score>game1.score:
                 game0_win = 1
                 game1_win = -1
@@ -562,10 +562,10 @@ class Agent(object):
                     game0_win = 1
                     game1_win = 1
         elif limit_max_height == 5:
-            if p0>p1 and p0>7:
+            if p0>p1 and game0.score>0:
                 game0_win = 1
                 game1_win = -1
-            elif p0<p1 and p1>7:
+            elif p0<p1 and game1.score>0:
                 game0_win = -1
                 game1_win = 1
             else:
