@@ -146,33 +146,34 @@ class Train():
                 pickle.dump(obj, open(savefile, "wb"))
                 # self.dataset.save(obj)
             
-            jsonfile = os.path.join(data_dir, "result.json")
-            if os.path.exists(jsonfile):
-                result=json.load(open(jsonfile,"r"))
-            else:
-                result={"reward":0,"steps":0,"agent":0}
-            if "1k" not in result:
-                result["1k"]={"reward":0,"steps":0,"agent":0}
-            result["reward"] = result["reward"] + reward
-            result["steps"] = result["steps"] + piececount
-            result["agent"] = result["agent"] + agentcount
-            result["1k"]["reward"] = result["1k"]["reward"] + reward
-            result["1k"]["steps"] = result["1k"]["steps"] + piececount
-            result["1k"]["agent"] = result["1k"]["agent"] + agentcount
-           
-            if result["agent"]>0 and result["agent"]%1000==0:
-                for key in list(result.keys()):
-                    if key.isdigit():
-                        c = int(key)
-                        if c%1000>10:
-                            del result[key]
-                result["1k"]={"reward":0,"steps":0,"agent":0}
-
-            if result["agent"]>0 and result["agent"]%100<=1:
-                result[str(result["agent"])]={"reward":result["1k"]["reward"]/result["1k"]["agent"],
-                                                "steps":result["1k"]["steps"]/result["1k"]["agent"]}
+            if self.limit_max_height == 10:
+                jsonfile = os.path.join(data_dir, "result.json")
+                if os.path.exists(jsonfile):
+                    result=json.load(open(jsonfile,"r"))
+                else:
+                    result={"reward":0,"steps":0,"agent":0}
+                if "1k" not in result:
+                    result["1k"]={"reward":0,"steps":0,"agent":0}
+                result["reward"] = result["reward"] + reward
+                result["steps"] = result["steps"] + piececount
+                result["agent"] = result["agent"] + agentcount
+                result["1k"]["reward"] = result["1k"]["reward"] + reward
+                result["1k"]["steps"] = result["1k"]["steps"] + piececount
+                result["1k"]["agent"] = result["1k"]["agent"] + agentcount
             
-            json.dump(result, open(jsonfile,"w"), ensure_ascii=False)
+                if result["agent"]>0 and result["agent"]%1000==0:
+                    for key in list(result.keys()):
+                        if key.isdigit():
+                            c = int(key)
+                            if c%1000>10:
+                                del result[key]
+                    result["1k"]={"reward":0,"steps":0,"agent":0}
+
+                if result["agent"]>0 and result["agent"]%100<=1:
+                    result[str(result["agent"])]={"reward":result["1k"]["reward"]/result["1k"]["agent"],
+                                                    "steps":result["1k"]["steps"]/result["1k"]["agent"]}
+                                                                
+                json.dump(result, open(jsonfile,"w"), ensure_ascii=False)
 
             if reward>=1: break          
 
