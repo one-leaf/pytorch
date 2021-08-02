@@ -146,7 +146,7 @@ class Train():
                 pickle.dump(obj, open(savefile, "wb"))
                 # self.dataset.save(obj)
             
-            if self.limit_max_height == 10:
+            if agent.limit_max_height == 10:
                 jsonfile = os.path.join(data_dir, "result.json")
                 if os.path.exists(jsonfile):
                     result=json.load(open(jsonfile,"r"))
@@ -172,7 +172,7 @@ class Train():
                 if result["agent"]>0 and result["agent"]%100<=1:
                     result[str(result["agent"])]={"reward":result["1k"]["reward"]/result["1k"]["agent"],
                                                     "steps":result["1k"]["steps"]/result["1k"]["agent"]}
-                                                                
+
                 json.dump(result, open(jsonfile,"w"), ensure_ascii=False)
 
             if reward>=1: break          
