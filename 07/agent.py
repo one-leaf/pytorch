@@ -543,34 +543,42 @@ class Agent(object):
         # 检查谁下的好
         p0, p1 = game0.piececount, game1.piececount
 
+        if p0!=p1:
+            game0_win = 1 if p0>p1 else -1
+            game1_win = -1 * game0_win
+        else:
+            game0_win = 1 if game0.score>0 else -1 
+            game1_win = 1 if game1.score>0 else -1 
+
+
         # 低于消除1行的全部为输，至少要消除1行才做判定
-        if game0.score>=2 or game1.score>=2:
-            if game0.score>game1.score:
-                game0_win = 1
-                game1_win = -1
-            elif game0.score<game1.score:
-                game0_win = -1
-                game1_win = 1
-            else:
-                if p0>p1:
-                    game0_win = 1
-                    game1_win = -1
-                elif p0<p1:
-                    game0_win = -1
-                    game1_win = 1
-                else:
-                    game0_win = 1
-                    game1_win = 1
-        elif limit_max_height == 5:
-            if p0>p1 and game0.score>0:
-                game0_win = 1
-                game1_win = -1
-            elif p0<p1 and game1.score>0:
-                game0_win = -1
-                game1_win = 1
-            else:
-                game0_win = -1
-                game1_win = -1
+        # if game0.score>=2 or game1.score>=2:
+        #     if game0.score>game1.score:
+        #         game0_win = 1
+        #         game1_win = -1
+        #     elif game0.score<game1.score:
+        #         game0_win = -1
+        #         game1_win = 1
+        #     else:
+        #         if p0>p1:
+        #             game0_win = 1
+        #             game1_win = -1
+        #         elif p0<p1:
+        #             game0_win = -1
+        #             game1_win = 1
+        #         else:
+        #             game0_win = 1
+        #             game1_win = 1
+        # elif limit_max_height == 5:
+        #     if p0>p1 and game0.score>0:
+        #         game0_win = 1
+        #         game1_win = -1
+        #     elif p0<p1 and game1.score>0:
+        #         game0_win = -1
+        #         game1_win = 1
+        #     else:
+        #         game0_win = -1
+        #         game1_win = -1
 
         game0_loss, game1_loss = 1,1
         if game0.score>0: game0_loss = -1
