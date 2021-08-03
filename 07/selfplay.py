@@ -159,8 +159,12 @@ class Train():
                 result["agent"] = result["agent"] + agentcount
                 result["1k"]["reward"] = result["1k"]["reward"] + reward
                 result["1k"]["steps"] = result["1k"]["steps"] + piececount
-                result["1k"]["agent"] = result["1k"]["agent"] + agentcount
-            
+                result["1k"]["agent"] = result["1k"]["agent"] + agentcount           
+
+                if result["agent"]>0 and result["agent"]%100<=1:
+                    result[str(result["agent"])]={"reward":result["1k"]["reward"]/result["1k"]["agent"],
+                                                    "steps":result["1k"]["steps"]/result["1k"]["agent"]}
+
                 if result["agent"]>0 and result["agent"]%1000==0:
                     for key in list(result.keys()):
                         if key.isdigit():
@@ -168,10 +172,6 @@ class Train():
                             if c%1000>10:
                                 del result[key]
                     result["1k"]={"reward":0,"steps":0,"agent":0}
-
-                if result["agent"]>0 and result["agent"]%100<=1:
-                    result[str(result["agent"])]={"reward":result["1k"]["reward"]/result["1k"]["agent"],
-                                                    "steps":result["1k"]["steps"]/result["1k"]["agent"]}
 
                 json.dump(result, open(jsonfile,"w"), ensure_ascii=False)
 
