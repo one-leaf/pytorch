@@ -1,3 +1,6 @@
+# MLP-Mixer
+# 参考 https://github.com/jankrepl/mildlyoverfitted/blob/master/github_adventures/mixer/ours.py
+
 import torch
 import torchvision
 import torch.nn as nn
@@ -12,25 +15,92 @@ import matplotlib.ticker as ticker
 
 import os
 
-# 定义模型
-class Net(nn.Module):
-    """ConvNet -> Max_Pool -> RELU -> ConvNet -> Max_Pool -> RELU -> FC -> RELU -> FC -> SOFTMAX"""
-    def __init__(self):
-        super(Net, self).__init__()
-        self.conv1 = nn.Conv2d(1, 10, 5, 1)
-        self.conv2 = nn.Conv2d(10, 20, 5, 1)
-        self.fc1 = nn.Linear(4*4*20, 50)
-        self.fc2 = nn.Linear(50, 10)
+import torch.nn as nn
+import einops
 
-    def forward(self, x):
-        x = F.relu(self.conv1(x))
-        x = F.max_pool2d(x, 2, 2)
-        x = F.relu(self.conv2(x))
-        x = F.max_pool2d(x, 2, 2)
-        x = x.view(-1, 4*4*20)
-        x = F.relu(self.fc1(x))
-        x = self.fc2(x)
-        return F.log_softmax(x, dim=1)
+# 多层感知机，加了dropout
+# 输入 x: (n_samples, n_channels, n_patches) 或 (n_samples, n_patches, n_channels)
+# 输出：  和输入 x 的张量保存一致
+# 构造函数 mlp_dim = 等于 x 的最后一个维度
+class MLPBlock(nn.Module):
+    def __init__(self, mlp_dim:int, hidden_dim:int, dropout = 0.):
+        super(MLPBlock, self).__init__()
+        self.mlp_dim = mlp_dim
+        self.hidden_dim = hidden_dim
+        self.dropout = dropout
+        self.Linear1 = nn.Linear(mlp_dim, hidden_dim)
+        self.gelu = nn.GELU()
+        self.dropout = nn.Dropout(dropout)
+        self.Linear2 = nn.Linear(hidden_dim, mlp_dim)
+    def forward(self,x):
+        x = self.Linear1(x)
+        x = self.gelu(x)
+        x = self.dropout(x)
+        x = self.Linear2(x)
+        x = self.dropout(x)
+        return x
+
+# 混合感知机块
+# 输入 x： (n_samples, n_patches, hidden_dim)
+# 输出 ： 和输入 x 的张量保存一致
+class MixerBlock(nn.Module):
+    def __init__(self, n_patches: int , hidden_dim: int, token_dim: int, channel_dim: int, dropout = 0.):
+        super(MixerBlock, self).__init__()
+        self.n_patches = n_patches
+        self.channel_dim = channel_dim
+        self.token_dim = token_dim
+        self.dropout = dropout
+
+        self.MLP_block_token = MLPBlock(n_patches, token_dim, self.dropout)
+        self.MLP_block_chan = MLPBlock(hidden_dim, channel_dim, self.dropout)
+        self.LayerNorm = nn.LayerNorm(hidden_dim)
+
+    def forward(self,x):
+        # 针对 n_patches 做全连接(token)
+        out = self.LayerNorm(x)             # (n_samples, n_patches, hidden_dim)
+        out = out.permute(0, 2, 1)          # (n_samples, hidden_dim, n_patches)
+        out = self.MLP_block_token(out)     # (n_samples, hidden_dim, n_patches)
+        out = out.permute(0, 2, 1)          # (n_samples, n_patches, hidden_dim)
+        out = x + out   # (n_samples, n_patches, hidden_dim)
+        # 针对 hidden_dim 做全连接(channel)
+        out2 = self.LayerNorm(out)  # (n_samples, n_patches, hidden_dim)
+        out2 = self.MLP_block_chan(out2) # (n_samples, n_patches, hidden_dim)
+        res = out + out2
+        return res
+
+# 混合多层感知机网络
+# 输入 x (n_samples, n_channels, image_size, image_size)
+# 输出 逻辑分类张量 (n_samples, n_classes)
+# 构造函数：
+# image_size  : 输入图片的边长
+# n_channels  : 输入图片的层数
+# patch_size  : 图片分割边长，是 image_size 的约数， n_patches 为分割的块数 为（图片边长/分割边长）的平方
+# hidden_dim  : 每个图片块的最后维度
+# token_dim   : token 混合的维度
+# channel_dim : channel 混合的维度
+# n_classes   : 输出类别个数
+# n_blocks    : 多少个模型块相当于残差的层数
+class MLP_Mixer(nn.Module):
+    def __init__(self, image_size, n_channels, patch_size, hidden_dim, token_dim, channel_dim, n_classes, n_blocks):
+        super(MLP_Mixer, self).__init__()
+        n_patches =(image_size//patch_size) **2 # image_size 可以整除 patch_size
+        self.patch_size_embbeder = nn.Conv2d(kernel_size=patch_size, stride=patch_size, in_channels=n_channels, out_channels= hidden_dim)
+        self.blocks = nn.ModuleList([
+            MixerBlock(n_patches=n_patches, hidden_dim=hidden_dim, token_dim=token_dim, channel_dim=channel_dim) for i in range(n_blocks)
+        ])
+
+        self.Layernorm1 = nn.LayerNorm(hidden_dim)
+        self.classifier = nn.Linear(hidden_dim, n_classes)
+
+    def forward(self,x):
+        out = self.patch_size_embbeder(x) # (n_samples, hidden_dim, image_size//patch_size, image_size//patch_size)
+        out = einops.rearrange(out,"n c h w -> n (h w) c")  # (n_samples, n_patches, hidden_dim)
+        for block in self.blocks:
+            out = block(out)            # (n_samples, n_patches, hidden_dim)
+        out = self.Layernorm1(out)      # (n_samples, n_patches, hidden_dim)
+        out = out.mean(dim = 1)         # (n_sample, hidden_dim)
+        result = self.classifier(out)   # (n_samples, n_classes)
+        return result
 
 # 训练
 def train(train_loader, net, optimizer, ceriation, use_cuda, epoch):
@@ -120,9 +190,20 @@ def show(train_loader):
     plt.show()
 
 def main():
-    net = Net()
+    net = MLP_Mixer(
+        image_size=28, 
+        n_channels=1, 
+        patch_size=7, 
+        hidden_dim=64,
+        token_dim=32, 
+        channel_dim=128, 
+        n_classes=10, 
+        n_blocks=19
+        )
     print(net)
+    print("########### print net end ##############")
     print(summary(net,(1,28,28)))
+    print("########### print summary end ##############")
 
     # 是否采用GPU
     use_cuda = torch.cuda.is_available()
@@ -143,8 +224,10 @@ def main():
     trans = transforms.Compose([transforms.ToTensor(), transform])
     train_set = datasets.MNIST(root=root, train=True, transform=trans, download=True)
     test_set = datasets.MNIST(root=root, train=False, transform=trans)
+
     batch_size = 128
-    
+
+
     # 加载训练集和测试集
     train_loader = torch.utils.data.DataLoader(dataset=train_set, batch_size=batch_size, shuffle=True)
     test_loader = torch.utils.data.DataLoader(dataset=test_set,  batch_size=batch_size, shuffle=False)
@@ -156,19 +239,20 @@ def main():
     # 损失函数定义 交叉熵损失
     ceriation = nn.CrossEntropyLoss()
 
-    savefile="mnist_cnn.pt"
+    savefile="mnist_mlp_mixer.pt"
     if os.path.exists(savefile):
         net.load_state_dict(torch.load(savefile))  #读取网络参数
 
     # 训练
     # 动态调整学习率
     scheduler = StepLR(optimizer, step_size=1, gamma=0.9)
-    for epoch in range(1):
-        # train(train_loader, net, optimizer, ceriation, use_cuda, epoch)
-        test(test_loader, net, ceriation, use_cuda, epoch)
+    for epoch in range(10):
+        train(train_loader, net, optimizer, ceriation, use_cuda, epoch)
         scheduler.step()
+        torch.save(net.state_dict(), savefile)
 
-    torch.save(net.state_dict(), savefile)
+    test(test_loader, net, ceriation, use_cuda, epoch)
+
 
 if __name__ == "__main__":
     main()
