@@ -94,6 +94,17 @@ class MLP_Mixer(nn.Module):
         result = self.classifier(out)   # (n_samples, n_classes)
         return result
 
+class ResNet(nn.Module):
+    def __init__(self):
+        super(ResNet, self).__init__()
+        self.conv = nn.Conv2d(1, 3, kernel_size=1)
+        self.resnet = torchvision.models.resnet18(num_classes=10)
+ 
+    def forward(self, x):
+        x= self.conv(x)
+        x= self.resnet(x)
+        return x
+
 # 训练
 def train(train_loader, net, optimizer, ceriation, use_cuda, epoch):
     # 启用 BN 和 Dropout
@@ -181,25 +192,28 @@ def show(train_loader):
     plt.imshow(images_example, cmap="gray")
     plt.show()
 
+# n_blocks = 3,  dropout = 0   {test loss: 0.061474, acc: 9789.000}
 # n_blocks = 9,  dropout = 0   {test loss: 0.060575, acc: 9814.000}
 # n_blocks = 9,  dropout = 0.1 {test loss: 0.033129, acc: 9822.000}
+# n_blocks = 9,  dropout = 0.5 {test loss: 0.078637, acc: 9743.000}
 # n_blocks = 19, dropout = 0   {test loss: 0.060316, acc: 9831.000}
 # n_blocks = 19, dropout = 0.1 {test loss: 0.036490, acc: 9817.000}
 # n_blocks = 19, dropout = 0.5 {test loss: 0.047998, acc: 9762.000}
 
 def main():
-    net = MLP_Mixer(
-        image_size=28, 
-        n_channels=1, 
-        patch_size=7, 
-        hidden_dim=64,
-        token_dim=32, 
-        channel_dim=128, 
-        n_classes=10, 
-        n_blocks=9,
-        dropout=0.5    
-        )
-    print(net)
+    # net = MLP_Mixer(
+    #     image_size=28, 
+    #     n_channels=1, 
+    #     patch_size=7, 
+    #     hidden_dim=64,
+    #     token_dim=32, 
+    #     channel_dim=128, 
+    #     n_classes=10, 
+    #     n_blocks=3,
+    #     dropout=0    
+    #     )
+    # print(net)
+    net = ResNet()
     print("########### print net end ##############")
     print(summary(net,(1,28,28)))
     print("########### print summary end ##############")

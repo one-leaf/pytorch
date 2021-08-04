@@ -441,7 +441,7 @@ class Agent(object):
         # 这里下两局，按步数对比
         states, mcts_probs, winers = [], [], []
 
-        self.ig_action = random.choice([None,KEY_NONE,KEY_DOWN])
+        # self.ig_action = random.choice([None,KEY_NONE,KEY_DOWN])
 
         game0 = copy.deepcopy(self)
         game1 = copy.deepcopy(self)
