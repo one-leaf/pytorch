@@ -25,9 +25,6 @@ import einops
 class MLPBlock(nn.Module):
     def __init__(self, mlp_dim:int, hidden_dim:int, dropout = 0.):
         super(MLPBlock, self).__init__()
-        self.mlp_dim = mlp_dim
-        self.hidden_dim = hidden_dim
-        self.dropout = dropout
         self.Linear1 = nn.Linear(mlp_dim, hidden_dim)
         self.gelu = nn.GELU()
         self.dropout = nn.Dropout(dropout)
@@ -46,13 +43,8 @@ class MLPBlock(nn.Module):
 class MixerBlock(nn.Module):
     def __init__(self, n_patches: int , hidden_dim: int, token_dim: int, channel_dim: int, dropout = 0.):
         super(MixerBlock, self).__init__()
-        self.n_patches = n_patches
-        self.channel_dim = channel_dim
-        self.token_dim = token_dim
-        self.dropout = dropout
-
-        self.MLP_block_token = MLPBlock(n_patches, token_dim, self.dropout)
-        self.MLP_block_chan = MLPBlock(hidden_dim, channel_dim, self.dropout)
+        self.MLP_block_token = MLPBlock(n_patches, token_dim, dropout)
+        self.MLP_block_chan = MLPBlock(hidden_dim, channel_dim, dropout)
         self.LayerNorm = nn.LayerNorm(hidden_dim)
 
     def forward(self,x):
@@ -83,7 +75,7 @@ class MixerBlock(nn.Module):
 class MLP_Mixer(nn.Module):
     def __init__(self, image_size, n_channels, patch_size, hidden_dim, token_dim, channel_dim, n_classes, n_blocks, dropout = 0.):
         super(MLP_Mixer, self).__init__()
-        n_patches =(image_size//patch_size) **2 # image_size 可以整除 patch_size
+        n_patches =(image_size//patch_size) ** 2 # image_size 可以整除 patch_size
         self.patch_size_embbeder = nn.Conv2d(kernel_size=patch_size, stride=patch_size, in_channels=n_channels, out_channels= hidden_dim)
         self.blocks = nn.ModuleList([
             MixerBlock(n_patches=n_patches, hidden_dim=hidden_dim, token_dim=token_dim, channel_dim=channel_dim, dropout=dropout) for i in range(n_blocks)
