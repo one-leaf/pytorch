@@ -81,12 +81,12 @@ class MixerBlock(nn.Module):
 # n_classes   : 输出类别个数
 # n_blocks    : 多少个模型块相当于残差的层数
 class MLP_Mixer(nn.Module):
-    def __init__(self, image_size, n_channels, patch_size, hidden_dim, token_dim, channel_dim, n_classes, n_blocks):
+    def __init__(self, image_size, n_channels, patch_size, hidden_dim, token_dim, channel_dim, n_classes, n_blocks, dropout = 0.):
         super(MLP_Mixer, self).__init__()
         n_patches =(image_size//patch_size) **2 # image_size 可以整除 patch_size
         self.patch_size_embbeder = nn.Conv2d(kernel_size=patch_size, stride=patch_size, in_channels=n_channels, out_channels= hidden_dim)
         self.blocks = nn.ModuleList([
-            MixerBlock(n_patches=n_patches, hidden_dim=hidden_dim, token_dim=token_dim, channel_dim=channel_dim) for i in range(n_blocks)
+            MixerBlock(n_patches=n_patches, hidden_dim=hidden_dim, token_dim=token_dim, channel_dim=channel_dim, dropout=dropout) for i in range(n_blocks)
         ])
 
         self.Layernorm1 = nn.LayerNorm(hidden_dim)
@@ -189,6 +189,9 @@ def show(train_loader):
     plt.imshow(images_example, cmap="gray")
     plt.show()
 
+# n_blocks = 19, dropout = 0   {test loss: 0.060316, acc: 9831.000}
+# n_blocks = 19, dropout = 0.5 {test loss: 0.047998, acc: 9762.000}
+
 def main():
     net = MLP_Mixer(
         image_size=28, 
@@ -198,7 +201,8 @@ def main():
         token_dim=32, 
         channel_dim=128, 
         n_classes=10, 
-        n_blocks=19
+        n_blocks=19,
+        dropout=0.1    
         )
     print(net)
     print("########### print net end ##############")
@@ -208,7 +212,7 @@ def main():
     # 是否采用GPU
     use_cuda = torch.cuda.is_available()
     if use_cuda:
-        model = net.cuda()
+        net = net.cuda()
 
     # 下载MNIST数据并进行归一化处理
     root = "./data"
