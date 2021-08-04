@@ -85,7 +85,7 @@ class MLP_Mixer(nn.Module):
         self.classifier = nn.Linear(hidden_dim, n_classes)
 
     def forward(self,x):
-        out = self.patch_size_embbeder(x) # (n_samples, hidden_dim, image_size//patch_size, image_size//patch_size)
+        out = self.patch_size_embbeder(x) # (n_samples, hidden_dim, image_size/patch_size, image_size/patch_size)
         out = einops.rearrange(out,"n c h w -> n (h w) c")  # (n_samples, n_patches, hidden_dim)
         for block in self.blocks:
             out = block(out)            # (n_samples, n_patches, hidden_dim)
@@ -181,7 +181,10 @@ def show(train_loader):
     plt.imshow(images_example, cmap="gray")
     plt.show()
 
+# n_blocks = 9,  dropout = 0   {test loss: 0.060575, acc: 9814.000}
+# n_blocks = 9,  dropout = 0.1 {test loss: 0.033129, acc: 9822.000}
 # n_blocks = 19, dropout = 0   {test loss: 0.060316, acc: 9831.000}
+# n_blocks = 19, dropout = 0.1 {test loss: 0.036490, acc: 9817.000}
 # n_blocks = 19, dropout = 0.5 {test loss: 0.047998, acc: 9762.000}
 
 def main():
@@ -193,8 +196,8 @@ def main():
         token_dim=32, 
         channel_dim=128, 
         n_classes=10, 
-        n_blocks=19,
-        dropout=0.1    
+        n_blocks=9,
+        dropout=0.5    
         )
     print(net)
     print("########### print net end ##############")
