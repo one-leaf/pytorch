@@ -192,28 +192,32 @@ def show(train_loader):
     plt.imshow(images_example, cmap="gray")
     plt.show()
 
-# n_blocks = 3,  dropout = 0   {test loss: 0.061474, acc: 9789.000}
-# n_blocks = 9,  dropout = 0   {test loss: 0.060575, acc: 9814.000}
+# n_blocks = 3,  dropout = 0   {test loss: 0.061474, acc: 9789.000}     params: 57,690
+# n_blocks = 9,  dropout = 0   {test loss: 0.060575, acc: 9814.000}     params: 165,114
 # n_blocks = 9,  dropout = 0.1 {test loss: 0.033129, acc: 9822.000}
 # n_blocks = 9,  dropout = 0.5 {test loss: 0.078637, acc: 9743.000}
-# n_blocks = 19, dropout = 0   {test loss: 0.060316, acc: 9831.000}
+# n_blocks = 19, dropout = 0   {test loss: 0.060316, acc: 9831.000}     
 # n_blocks = 19, dropout = 0.1 {test loss: 0.036490, acc: 9817.000}
 # n_blocks = 19, dropout = 0.5 {test loss: 0.047998, acc: 9762.000}
+# n_blocks = 34, dropout = 0   {test loss: 0.047998, acc: 9762.000}     params: 612,714
+# vs
+# resnet 18                    {test loss: 0.013704, acc: 9905.000}     params: 11,181,648
+
 
 def main():
-    # net = MLP_Mixer(
-    #     image_size=28, 
-    #     n_channels=1, 
-    #     patch_size=7, 
-    #     hidden_dim=64,
-    #     token_dim=32, 
-    #     channel_dim=128, 
-    #     n_classes=10, 
-    #     n_blocks=3,
-    #     dropout=0    
-    #     )
+    net = MLP_Mixer(
+        image_size=28, 
+        n_channels=1, 
+        patch_size=7, 
+        hidden_dim=64,
+        token_dim=32, 
+        channel_dim=128, 
+        n_classes=10, 
+        n_blocks=34,
+        dropout=0    
+        )
+    # net = ResNet()
     # print(net)
-    net = ResNet()
     print("########### print net end ##############")
     print(summary(net,(1,28,28)))
     print("########### print summary end ##############")
