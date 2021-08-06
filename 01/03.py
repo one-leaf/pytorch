@@ -1,5 +1,5 @@
 # MLP-Mixer
-# 参考 https://github.com/jankrepl/mildlyoverfitted/blob/master/github_adventures/mixer/ours.py
+# 参考 https://arxiv.org/pdf/2105.01601.pdf
 
 import torch
 import torchvision
@@ -16,26 +16,25 @@ import matplotlib.ticker as ticker
 import os
 
 import torch.nn as nn
-import einops
 
 # 多层感知机，加了dropout
 # 输入 x: (n_samples, n_channels, n_patches) 或 (n_samples, n_patches, n_channels)
 # 输出：  和输入 x 的张量保存一致
 # 构造函数 mlp_dim = 等于 x 的最后一个维度
-class MLPBlock(nn.Module):
+class MlpBlock(nn.Module):
     def __init__(self, mlp_dim:int, hidden_dim:int, dropout = 0.):
-        super(MLPBlock, self).__init__()
+        super(MlpBlock, self).__init__()
         self.Linear1 = nn.Linear(mlp_dim, hidden_dim)
         self.gelu = nn.GELU()
         self.dropout = nn.Dropout(dropout)
         self.Linear2 = nn.Linear(hidden_dim, mlp_dim)
     def forward(self,x):
-        x = self.Linear1(x)
-        x = self.gelu(x)
-        x = self.dropout(x)
-        x = self.Linear2(x)
-        x = self.dropout(x)
-        return x
+        y = self.Linear1(x)
+        y = self.gelu(y)
+        y = self.dropout(y)
+        y = self.Linear2(y)
+        y = self.dropout(y)
+        return y
 
 # 混合感知机块
 # 输入 x： (n_samples, n_patches, hidden_dim)
@@ -43,22 +42,21 @@ class MLPBlock(nn.Module):
 class MixerBlock(nn.Module):
     def __init__(self, n_patches: int , hidden_dim: int, token_dim: int, channel_dim: int, dropout = 0.):
         super(MixerBlock, self).__init__()
-        self.MLP_block_token = MLPBlock(n_patches, token_dim, dropout)
-        self.MLP_block_chan = MLPBlock(hidden_dim, channel_dim, dropout)
+        self.MLP_block_token = MlpBlock(n_patches, token_dim, dropout)
+        self.MLP_block_chan = MlpBlock(hidden_dim, channel_dim, dropout)
         self.LayerNorm = nn.LayerNorm(hidden_dim)
 
     def forward(self,x):
         # 针对 n_patches 做全连接(token)
-        out = self.LayerNorm(x)             # (n_samples, n_patches, hidden_dim)
-        out = out.permute(0, 2, 1)          # (n_samples, hidden_dim, n_patches)
-        out = self.MLP_block_token(out)     # (n_samples, hidden_dim, n_patches)
-        out = out.permute(0, 2, 1)          # (n_samples, n_patches, hidden_dim)
-        out = x + out   # (n_samples, n_patches, hidden_dim)
+        y = self.LayerNorm(x)           # (n_samples, n_patches, hidden_dim)
+        y = y.permute(0, 2, 1)          # (n_samples, hidden_dim, n_patches)
+        y = self.MLP_block_token(y)     # (n_samples, hidden_dim, n_patches)
+        y = y.permute(0, 2, 1)          # (n_samples, n_patches, hidden_dim)
+        x = x + y   # (n_samples, n_patches, hidden_dim)
         # 针对 hidden_dim 做全连接(channel)
-        out2 = self.LayerNorm(out)  # (n_samples, n_patches, hidden_dim)
-        out2 = self.MLP_block_chan(out2) # (n_samples, n_patches, hidden_dim)
-        res = out + out2
-        return res
+        y = self.LayerNorm(x)  # (n_samples, n_patches, hidden_dim)
+        y = self.MLP_block_chan(y) # (n_samples, n_patches, hidden_dim)
+        return x + y
 
 # 混合多层感知机网络
 # 输入 x (n_samples, n_channels, image_size, image_size)
@@ -81,18 +79,21 @@ class MLP_Mixer(nn.Module):
             MixerBlock(n_patches=n_patches, hidden_dim=hidden_dim, token_dim=token_dim, channel_dim=channel_dim, dropout=dropout) for i in range(n_blocks)
         ])
 
+        self.flatten = nn.Flatten(start_dim=2)
         self.Layernorm1 = nn.LayerNorm(hidden_dim)
         self.classifier = nn.Linear(hidden_dim, n_classes)
+        self.classifier.weight.data.fill_(0)
+        self.classifier.bias.data.fill_(0)
 
     def forward(self,x):
-        out = self.patch_size_embbeder(x) # (n_samples, hidden_dim, image_size/patch_size, image_size/patch_size)
-        out = einops.rearrange(out,"n c h w -> n (h w) c")  # (n_samples, n_patches, hidden_dim)
+        x = self.patch_size_embbeder(x) # (n_samples, hidden_dim, image_size/patch_size, image_size/patch_size)
+        x = self.flatten(x)         # (n_samples, hidden_dim, n_patches)
+        x = x.permute(0, 2, 1)      # (n_samples, n_patches, hidden_dim)
         for block in self.blocks:
-            out = block(out)            # (n_samples, n_patches, hidden_dim)
-        out = self.Layernorm1(out)      # (n_samples, n_patches, hidden_dim)
-        out = out.mean(dim = 1)         # (n_sample, hidden_dim)
-        result = self.classifier(out)   # (n_samples, n_classes)
-        return result
+            x = block(x)            # (n_samples, n_patches, hidden_dim)
+        x = self.Layernorm1(x)      # (n_samples, n_patches, hidden_dim)
+        x = x.mean(dim = 1)         # (n_sample, hidden_dim)
+        return self.classifier(x)   # (n_samples, n_classes)
 
 class ResNet(nn.Module):
     def __init__(self):
@@ -192,16 +193,31 @@ def show(train_loader):
     plt.imshow(images_example, cmap="gray")
     plt.show()
 
+# resnet 18                    {test loss: 0.013704, acc: 9905.000}     params: 11,181,648
+# vs
+# patch_size=14,  hidden_dim=64,  token_dim=32, channel_dim=128 
+# n_blocks = 18, dropout = 0   {test loss: 0.085760, acc: 9806.000}     params: 321,618
+# vs
+# patch_size=7,  hidden_dim=64,  token_dim=32, channel_dim=128 
 # n_blocks = 3,  dropout = 0   {test loss: 0.061474, acc: 9789.000}     params: 57,690
 # n_blocks = 9,  dropout = 0   {test loss: 0.060575, acc: 9814.000}     params: 165,114
 # n_blocks = 9,  dropout = 0.1 {test loss: 0.033129, acc: 9822.000}
 # n_blocks = 9,  dropout = 0.5 {test loss: 0.078637, acc: 9743.000}
-# n_blocks = 19, dropout = 0   {test loss: 0.060316, acc: 9831.000}     
-# n_blocks = 19, dropout = 0.1 {test loss: 0.036490, acc: 9817.000}
-# n_blocks = 19, dropout = 0.5 {test loss: 0.047998, acc: 9762.000}
-# n_blocks = 34, dropout = 0   {test loss: 0.047998, acc: 9762.000}     params: 612,714
+# n_blocks = 18, dropout = 0   {test loss: 0.060316, acc: 9831.000}     params: 326,250
+# n_blocks = 18, dropout = 0.1 {test loss: 0.036490, acc: 9817.000}
+# n_blocks = 18, dropout = 0.5 {test loss: 0.047998, acc: 9762.000}
+# n_blocks = 34, dropout = 0   {test loss: 0.050164, acc: 9815.000}     params: 612,714
+# n_blocks = 50, dropout = 0   {test loss: 0.060606, acc: 9827.000}     params: 899,178
 # vs
-# resnet 18                    {test loss: 0.013704, acc: 9905.000}     params: 11,181,648
+# patch_size=4,  hidden_dim=64,  token_dim=64, channel_dim=128      
+# n_blocks = 3,  dropout = 0   {test loss: 0.043444, acc: 9802.000}     params: 71,517
+# n_blocks = 18, dropout = 0   {test loss: 0.047338, acc: 9813.000}     params: 419,772
+# vs
+# patch_size=2,  hidden_dim=64,  token_dim=32, channel_dim=128 
+# n_blocks = 18, dropout = 0   {test loss: 0.075071, acc: 9778.000}     params: 533,970
+# vs 
+# patch_size=7,  hidden_dim=64,  token_dim=64, channel_dim=128
+# n_blocks = 18, dropout = 0   {test loss: 0.060316, acc: 9831.000}     params: 326,250
 
 
 def main():
@@ -210,10 +226,10 @@ def main():
         n_channels=1, 
         patch_size=7, 
         hidden_dim=64,
-        token_dim=32, 
+        token_dim=64, 
         channel_dim=128, 
         n_classes=10, 
-        n_blocks=34,
+        n_blocks=18,
         dropout=0    
         )
     # net = ResNet()
@@ -257,8 +273,8 @@ def main():
     ceriation = nn.CrossEntropyLoss()
 
     savefile="mnist_mlp_mixer.pt"
-    if os.path.exists(savefile):
-        net.load_state_dict(torch.load(savefile))  #读取网络参数
+    # if os.path.exists(savefile):
+        # net.load_state_dict(torch.load(savefile))  #读取网络参数
 
     # 训练
     # 动态调整学习率
