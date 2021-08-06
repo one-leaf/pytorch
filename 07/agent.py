@@ -523,8 +523,8 @@ class Agent(object):
 
         print("add %s to dataset"%len(winers))
         reward, piececount, agentcount = 0, 0, 0
-        reward = sum(game.score)  
-        piececount = sum(game.piececount)
+        reward = sum(game_score)  
+        piececount = sum(game_piececount)
         agentcount = game_num
     
         return reward, piececount, agentcount, zip(states, mcts_probs, winners_z, masks)
