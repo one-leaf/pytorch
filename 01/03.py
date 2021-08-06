@@ -44,17 +44,18 @@ class MixerBlock(nn.Module):
         super(MixerBlock, self).__init__()
         self.MLP_block_token = MlpBlock(n_patches, token_dim, dropout)
         self.MLP_block_chan = MlpBlock(hidden_dim, channel_dim, dropout)
-        self.LayerNorm = nn.LayerNorm(hidden_dim)
+        self.LayerNorm_token = nn.LayerNorm(hidden_dim)
+        self.LayerNorm_chan = nn.LayerNorm(hidden_dim)
 
     def forward(self,x):
         # 针对 n_patches 做全连接(token)
-        y = self.LayerNorm(x)           # (n_samples, n_patches, hidden_dim)
+        y = self.LayerNorm_token(x)           # (n_samples, n_patches, hidden_dim)
         y = y.permute(0, 2, 1)          # (n_samples, hidden_dim, n_patches)
         y = self.MLP_block_token(y)     # (n_samples, hidden_dim, n_patches)
         y = y.permute(0, 2, 1)          # (n_samples, n_patches, hidden_dim)
         x = x + y   # (n_samples, n_patches, hidden_dim)
         # 针对 hidden_dim 做全连接(channel)
-        y = self.LayerNorm(x)  # (n_samples, n_patches, hidden_dim)
+        y = self.LayerNorm_chan(x)  # (n_samples, n_patches, hidden_dim)
         y = self.MLP_block_chan(y) # (n_samples, n_patches, hidden_dim)
         return x + y
 
@@ -223,7 +224,7 @@ def show(train_loader):
 # patch_size=7,  hidden_dim=64,  token_dim=128, channel_dim=256 
 # n_blocks = 18, dropout = 0   {test loss: 0.032596, acc: 9845.000}     params: 1,242,026
 # patch_size=7,  hidden_dim=64,  token_dim=128, channel_dim=512 
-# n_blocks = 18, dropout = 0   {}     params: 
+# n_blocks = 18, dropout = 0   {}     params: 2,426,282
 
 
 def main():
@@ -233,7 +234,7 @@ def main():
         patch_size=7, 
         hidden_dim=128,
         token_dim=64, 
-        channel_dim=256, 
+        channel_dim=512, 
         n_classes=10, 
         n_blocks=18,
         dropout=0    
