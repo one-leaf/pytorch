@@ -231,7 +231,7 @@ def main():
         image_size=28, 
         n_channels=1, 
         patch_size=7, 
-        hidden_dim=64,
+        hidden_dim=128,
         token_dim=64, 
         channel_dim=256, 
         n_classes=10, 
