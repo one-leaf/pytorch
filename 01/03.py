@@ -285,7 +285,7 @@ def main():
     # 训练
     # 动态调整学习率
     scheduler = StepLR(optimizer, step_size=1, gamma=0.9)
-    for epoch in range(10):
+    for epoch in range(20):
         train(train_loader, net, optimizer, ceriation, use_cuda, epoch)
         scheduler.step()
         torch.save(net.state_dict(), savefile)
