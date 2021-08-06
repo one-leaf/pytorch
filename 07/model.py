@@ -264,7 +264,7 @@ class PolicyValueNet():
             actions = game.availables
             act_probs = list(zip(actions, act_probs[actions]))
             value = value[0,0]
-            bvalue = bvalue[0,0]
+            bvalue = bvalue[0,0]*0.1
             self.cache[key] = (act_probs, value, bvalue) 
 
         if game.curr_player==1:
