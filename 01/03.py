@@ -201,9 +201,9 @@ def show(train_loader):
 # vs
 # patch_size=7,  hidden_dim=64,  token_dim=32, channel_dim=128 
 # n_blocks = 3,  dropout = 0   {test loss: 0.061474, acc: 9789.000}     params: 57,690
-# n_blocks = 9,  dropout = 0   {test loss: 0.060575, acc: 9814.000}     params: 165,114
-# n_blocks = 9,  dropout = 0.1 {test loss: 0.033129, acc: 9822.000}
-# n_blocks = 9,  dropout = 0.5 {test loss: 0.078637, acc: 9743.000}
+# n_blocks = 8,  dropout = 0   {test loss: 0.060575, acc: 9814.000}     params: 165,114
+# n_blocks = 8,  dropout = 0.1 {test loss: 0.033129, acc: 9822.000}
+# n_blocks = 8,  dropout = 0.5 {test loss: 0.078637, acc: 9743.000}
 # n_blocks = 18, dropout = 0   {test loss: 0.060316, acc: 9831.000}     params: 326,250
 # n_blocks = 18, dropout = 0.1 {test loss: 0.036490, acc: 9817.000}
 # n_blocks = 18, dropout = 0.5 {test loss: 0.047998, acc: 9762.000}
@@ -232,9 +232,9 @@ def main():
         image_size=28, 
         n_channels=1, 
         patch_size=7, 
-        hidden_dim=128,
-        token_dim=64, 
-        channel_dim=512, 
+        hidden_dim=64,
+        token_dim=32, 
+        channel_dim=128, 
         n_classes=10, 
         n_blocks=18,
         dropout=0    
