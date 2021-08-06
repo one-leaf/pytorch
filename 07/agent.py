@@ -451,8 +451,8 @@ class Agent(object):
 
         # 玩几局订胜负，如果最高为5，玩4局，否则玩2局
         game_num = 4 if limit_max_height == 5 else 2
-        # 当前平均奖励,需要不定期手工调整
-        game_score_avg = 1 if limit_max_height == 5 else 2
+        # 当前奖励阈值,需要不定期手工调整
+        game_score_avg = 2 if limit_max_height == 5 else 4
 
         game_states, game_mcts_probs, game_masks = [],[],[] 
         game_piececount, game_score = [],[]
