@@ -157,26 +157,26 @@ def test(test_loader, net, ceriation, use_cuda, epoch):
             if target[idx]!=pred[idx]:
                 confusion[target[idx]][pred[idx]] += 1
 
-    # 混淆矩阵数据归一化
-    for i in range(10):
-        confusion[i] = confusion[i] / confusion[i].sum()
+    # # 混淆矩阵数据归一化
+    # for i in range(10):
+    #     confusion[i] = confusion[i] / confusion[i].sum()
 
-    # 设置绘图
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-    cax = ax.matshow(confusion.numpy())
-    fig.colorbar(cax)
+    # # 设置绘图
+    # fig = plt.figure()
+    # ax = fig.add_subplot(111)
+    # cax = ax.matshow(confusion.numpy())
+    # fig.colorbar(cax)
 
-    # 设置轴
-    ax.set_xticklabels([''] + list(range(10)), rotation=90)
-    ax.set_yticklabels([''] + list(range(10)))
+    # # 设置轴
+    # ax.set_xticklabels([''] + list(range(10)), rotation=90)
+    # ax.set_yticklabels([''] + list(range(10)))
 
-    # 每个刻度线强制标签
-    ax.xaxis.set_major_locator(ticker.MultipleLocator(1))
-    ax.yaxis.set_major_locator(ticker.MultipleLocator(1))
+    # # 每个刻度线强制标签
+    # ax.xaxis.set_major_locator(ticker.MultipleLocator(1))
+    # ax.yaxis.set_major_locator(ticker.MultipleLocator(1))
 
-    # sphinx_gallery_thumbnail_number = 2
-    plt.show()
+    # # sphinx_gallery_thumbnail_number = 2
+    # plt.show()
 
 def show(train_loader):
     images, label = next(iter(train_loader))
@@ -272,7 +272,7 @@ def main():
     train_loader = torch.utils.data.DataLoader(dataset=train_set, batch_size=batch_size, shuffle=True)
     test_loader = torch.utils.data.DataLoader(dataset=test_set,  batch_size=batch_size, shuffle=False)
 
-    show(train_loader)
+    # show(train_loader)
 
     # 小批量梯度下降方法
     optimizer = optim.SGD(net.parameters(), lr=0.1, momentum=0.9)
