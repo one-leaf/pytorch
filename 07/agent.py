@@ -451,9 +451,7 @@ class Agent(object):
 
         # 玩几局订胜负，如果最高为5，玩4局，否则玩2局
         game_num = 4 if limit_max_height == 5 else 2
-        # 当前奖励阈值,需要不定期手工调整
-        game_score_avg = 2 if limit_max_height == 5 else 4
-
+        
         game_states, game_mcts_probs, game_masks = [],[],[] 
         game_piececount, game_score = [],[]
         print("limit_max_height", self.limit_max_height)
@@ -493,13 +491,14 @@ class Agent(object):
             game.print()
 
         max_piececount = max(game_piececount)
+        max_score = max(game_score)
 
         game_win = [-1 for _ in range(game_num)] 
         game_loss = [1 for _ in range(game_num)] 
         for j in range(game_num):
             if game_piececount[j]==max_piececount:
                 game_win[j] = 1
-            if game_score[j] > game_score_avg:
+            if game_score[j]>0 and game_score[j] == max_score:
                 game_loss[j] = -1
 
         print("win",game_win,"score",game_loss)

@@ -225,7 +225,7 @@ def show(train_loader):
 # patch_size=7,  hidden_dim=64,  token_dim=128, channel_dim=256 
 # n_blocks = 8, dropout = 0   {test loss: 0.053329, acc: 9790.000}     params: 304,650
 # patch_size=7,  hidden_dim=512,  token_dim=256, channel_dim=2048
-# n_blocks = 8, dropout = 0   {}     params: 
+# n_blocks = 8, dropout = 0   {}     params: 16,913,546
 
 def main():
     net = MLP_Mixer(
