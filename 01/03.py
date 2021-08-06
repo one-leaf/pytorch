@@ -223,19 +223,20 @@ def show(train_loader):
 # patch_size=7,  hidden_dim=128,  token_dim=64, channel_dim=256 
 # n_blocks = 8, dropout = 0   {test loss: 0.034863, acc: 9821.000}     params: 556,426
 # patch_size=7,  hidden_dim=64,  token_dim=128, channel_dim=256 
-# n_blocks = 8, dropout = 0   {}     params: 304,650
-
+# n_blocks = 8, dropout = 0   {test loss: 0.053329, acc: 9790.000}     params: 304,650
+# patch_size=49,  hidden_dim=512,  token_dim=256, channel_dim=2048
+#  
 
 def main():
     net = MLP_Mixer(
         image_size=28, 
         n_channels=1, 
         patch_size=7, 
-        hidden_dim=64,
-        token_dim=128, 
-        channel_dim=512, 
+        hidden_dim=512,
+        token_dim=256, 
+        channel_dim=2048, 
         n_classes=10, 
-        n_blocks=8,
+        n_blocks=49,
         dropout=0    
         )
    
