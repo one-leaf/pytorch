@@ -236,7 +236,7 @@ def main():
         token_dim=32, 
         channel_dim=128, 
         n_classes=10, 
-        n_blocks=18,
+        n_blocks=8,
         dropout=0    
         )
    
