@@ -197,7 +197,7 @@ def show(train_loader):
 # resnet 18                    {test loss: 0.013704, acc: 9905.000}     params: 11,181,648
 # vs
 # patch_size=14,  hidden_dim=64,  token_dim=32, channel_dim=128 
-# n_blocks = 18, dropout = 0   {test loss: 0.085760, acc: 9806.000}     params: 321,618
+# n_blocks = 8, dropout = 0   {test loss: 0.055842, acc: 9820.000}     params: 150,378
 # vs
 # patch_size=7,  hidden_dim=64,  token_dim=32, channel_dim=128 
 # n_blocks = 3,  dropout = 0   {test loss: 0.061474, acc: 9789.000}     params: 57,690
@@ -210,8 +210,8 @@ def show(train_loader):
 # n_blocks = 34, dropout = 0   {test loss: 0.050164, acc: 9815.000}     params: 612,714
 # n_blocks = 50, dropout = 0   {test loss: 0.060606, acc: 9827.000}     params: 899,178
 # vs
-# patch_size=4,  hidden_dim=64,  token_dim=64, channel_dim=128      
-# n_blocks = 3,  dropout = 0   {test loss: 0.043444, acc: 9802.000}     params: 71,517
+# patch_size=4,  hidden_dim=64,  token_dim=32, channel_dim=128      
+# n_blocks = 8,  dropout = 0   {test loss: 0.043444, acc: 9802.000}     params: 71,517
 # n_blocks = 18, dropout = 0   {test loss: 0.047338, acc: 9813.000}     params: 419,772
 # vs
 # patch_size=2,  hidden_dim=64,  token_dim=32, channel_dim=128 
@@ -231,7 +231,7 @@ def main():
     net = MLP_Mixer(
         image_size=28, 
         n_channels=1, 
-        patch_size=14, 
+        patch_size=4, 
         hidden_dim=64,
         token_dim=32, 
         channel_dim=128, 
