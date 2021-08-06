@@ -239,16 +239,17 @@ def main():
         n_blocks=18,
         dropout=0    
         )
-    # net = ResNet()
-    # print(net)
-    print("########### print net end ##############")
-    print(summary(net,(1,28,28)))
-    print("########### print summary end ##############")
-
+   
     # 是否采用GPU
     use_cuda = torch.cuda.is_available()
     if use_cuda:
         net = net.cuda()
+
+    # net = ResNet()
+    # print(net)
+    print("########### print net end ##############")
+    print(summary(net,(1,28,28)))
+    print("########### print summary end ##############")  
 
     # 下载MNIST数据并进行归一化处理
     root = "./data"
