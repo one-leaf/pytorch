@@ -219,7 +219,7 @@ def show(train_loader):
 # patch_size=7,  hidden_dim=64,  token_dim=64, channel_dim=128
 # n_blocks = 8,  dropout = 0   {test loss: 0.058035, acc: 9785.000}     params: 155,658
 # patch_size=7,  hidden_dim=64,  token_dim=64, channel_dim=256 
-# n_blocks = 18, dropout = 0   {test loss: 0.054196, acc: 9833.000}     params: 642,474
+# n_blocks = 18, dropout = 0   {test loss: 0.054196, acc: 9833.000}     params: 287,754
 # patch_size=7,  hidden_dim=64,  token_dim=128, channel_dim=256 
 # n_blocks = 18, dropout = 0   {test loss: 0.032596, acc: 9845.000}     params: 1,242,026
 # patch_size=7,  hidden_dim=64,  token_dim=128, channel_dim=512 
@@ -275,7 +275,7 @@ def main():
     # show(train_loader)
 
     # 小批量梯度下降方法
-    optimizer = optim.SGD(net.parameters(), lr=0.1, momentum=0.9)
+    optimizer = optim.SGD(net.parameters(), lr=0.1, momentum=0.9, weight_decay=1e-4)
     # 损失函数定义 交叉熵损失
     ceriation = nn.CrossEntropyLoss()
 
