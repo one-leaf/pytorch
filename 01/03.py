@@ -224,18 +224,20 @@ def show(train_loader):
 # n_blocks = 8, dropout = 0    {test loss: 0.053329, acc: 9790.000}     params: 304,650
 # patch_size=7,  hidden_dim=512,  token_dim=256, channel_dim=2048
 # n_blocks = 8, dropout = 0    {test loss: 0.042604, acc: 9832.000}     params: 16,913,546
+# patch_size=7,  hidden_dim=768,  token_dim=384, channel_dim=3072
+# n_blocks = 12, dropout = 0    {test loss: 0.042604, acc: 9832.000}     params: 16,913,546
 
 def main():
     net = MLP_Mixer(
         image_size=28, 
         n_channels=1, 
-        patch_size=7, 
-        hidden_dim=64,
-        token_dim=32, 
-        channel_dim=128, 
+        patch_size=12, 
+        hidden_dim=768,
+        token_dim=384, 
+        channel_dim=3072, 
         n_classes=10, 
         n_blocks=8,
-        dropout=0.5    
+        dropout=0    
         )
    
     # 是否采用GPU
@@ -285,7 +287,7 @@ def main():
     # 训练
     # 动态调整学习率
     scheduler = StepLR(optimizer, step_size=1, gamma=0.9)
-    for epoch in range(50):
+    for epoch in range(10):
         train(train_loader, net, optimizer, ceriation, use_cuda, epoch)
         scheduler.step()
         torch.save(net.state_dict(), savefile)
