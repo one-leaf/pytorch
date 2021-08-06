@@ -478,7 +478,7 @@ class Agent(object):
                 if game.state!=0:
                     game.limit_max_height = max(game.pieces_height)+3
                     if game.limit_max_height>limit_max_height: game.limit_max_height=limit_max_height
-                    print(game.pieces_height, 'len', len(game.pieces_height), "limit_max_height", game.limit_max_height, "next", game.fallpiece['shape'])
+                    print('reward:',game.reward, 'len:', len(game.pieces_height), "limit_max_height:", game.limit_max_height, "next:", game.fallpiece['shape'], game.pieces_height)
 
                 if game.terminal:
                     break

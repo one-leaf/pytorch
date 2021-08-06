@@ -221,7 +221,9 @@ def show(train_loader):
 # patch_size=7,  hidden_dim=64,  token_dim=64, channel_dim=256 
 # n_blocks = 18, dropout = 0   {test loss: 0.054196, acc: 9833.000}     params: 642,474
 # patch_size=7,  hidden_dim=64,  token_dim=128, channel_dim=256 
-# n_blocks = 18, dropout = 0   {}     params: 1,242,026
+# n_blocks = 18, dropout = 0   {test loss: 0.032596, acc: 9845.000}     params: 1,242,026
+# patch_size=7,  hidden_dim=64,  token_dim=128, channel_dim=512 
+# n_blocks = 18, dropout = 0   {}     params: 
 
 
 def main():
