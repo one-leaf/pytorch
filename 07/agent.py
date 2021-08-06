@@ -439,7 +439,7 @@ class Agent(object):
     # # 使用 mcts 训练，重用搜索树，并保存数据
     def start_self_play(self, player, temp=1e-3):
         # 这里下两局，按步数对比
-        states, mcts_probs, winers, masks = [], [], [], []
+
 
         # self.ig_action = random.choice([None,KEY_NONE,KEY_DOWN])
 
@@ -458,7 +458,7 @@ class Agent(object):
         game_piececount, game_score = [],[]
         print("limit_max_height", self.limit_max_height)
         for _ in range(game_num):
-            _states, _mcts_probs, _masks, _players=[],[],[],[]
+            _states, _mcts_probs, _masks=[],[],[]
             game = copy.deepcopy(self)
             game.limit_max_height = 5
             # ig_action=random.choice([None,KEY_NONE,KEY_DOWN])
@@ -467,7 +467,6 @@ class Agent(object):
             for i in count():                           
                 action, move_probs = player.get_action(game, temp=temp, return_prob=1) 
                 _states.append(game.current_state())
-                _players.append(game.curr_player)
                 if game.curr_player==0:
                     _mcts_probs.append(move_probs)
                     _masks.append(1)
@@ -504,8 +503,8 @@ class Agent(object):
                 game_loss[j] = -1
 
         print("win",game_win,"score",game_loss)
-        winers, mask = [],[]
-
+        
+        states, mcts_probs, winers, masks = [], [], [], []
         for j in range(game_num):
             for o in game_states[j]: states.append(o)
             for o in game_masks[j]:  masks.append(o)
@@ -520,7 +519,7 @@ class Agent(object):
 
         assert len(states)==len(mcts_probs)
         assert len(states)==len(winners_z)
-        assert len(states)==len(mask)
+        assert len(states)==len(masks)
 
         print("add %s to dataset"%len(winers))
         reward, piececount, agentcount = 0, 0, 0
@@ -528,6 +527,6 @@ class Agent(object):
         piececount = sum(game.piececount)
         agentcount = game_num
     
-        return reward, piececount, agentcount, zip(states, mcts_probs, winners_z, mask)
+        return reward, piececount, agentcount, zip(states, mcts_probs, winners_z, masks)
 
     
