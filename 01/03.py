@@ -138,7 +138,7 @@ def test(test_loader, net, ceriation, use_cuda, epoch):
     correct_cnt, ave_loss = 0, 0
     for batch_idx, (x, target) in enumerate(test_loader):
         if use_cuda:
-            x, targe = x.cuda(), target.cuda()
+            x, target = x.cuda(), target.cuda()
         out = net(x)
         loss = ceriation(out, target)
         pred = out.argmax(dim=1, keepdim=True)
