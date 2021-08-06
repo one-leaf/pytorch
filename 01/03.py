@@ -202,10 +202,8 @@ def show(train_loader):
 # patch_size=7,  hidden_dim=64,  token_dim=32, channel_dim=128 
 # n_blocks = 3,  dropout = 0   {test loss: 0.061474, acc: 9789.000}     params: 57,690
 # n_blocks = 8,  dropout = 0   {test loss: 0.040890, acc: 9834.000}     params: 147,210
-# n_blocks = 8,  dropout = 0.1 {test loss: 0.033129, acc: 9822.000}
 # n_blocks = 8,  dropout = 0.5 {test loss: 0.078637, acc: 9743.000}
 # n_blocks = 18, dropout = 0   {test loss: 0.060316, acc: 9831.000}     params: 326,250
-# n_blocks = 18, dropout = 0.1 {test loss: 0.036490, acc: 9817.000}
 # n_blocks = 18, dropout = 0.5 {test loss: 0.047998, acc: 9762.000}
 # n_blocks = 34, dropout = 0   {test loss: 0.050164, acc: 9815.000}     params: 612,714
 # n_blocks = 50, dropout = 0   {test loss: 0.060606, acc: 9827.000}     params: 899,178
@@ -225,19 +223,19 @@ def show(train_loader):
 # patch_size=7,  hidden_dim=64,  token_dim=128, channel_dim=256 
 # n_blocks = 8, dropout = 0   {test loss: 0.053329, acc: 9790.000}     params: 304,650
 # patch_size=7,  hidden_dim=512,  token_dim=256, channel_dim=2048
-# n_blocks = 8, dropout = 0   {}     params: 16,913,546
+# n_blocks = 8, dropout = 0   {test loss: 0.042604, acc: 9832.000}     params: 16,913,546
 
 def main():
     net = MLP_Mixer(
         image_size=28, 
         n_channels=1, 
         patch_size=7, 
-        hidden_dim=512,
-        token_dim=256, 
-        channel_dim=2048, 
+        hidden_dim=64,
+        token_dim=32, 
+        channel_dim=128, 
         n_classes=10, 
         n_blocks=8,
-        dropout=0    
+        dropout=0.5    
         )
    
     # 是否采用GPU
