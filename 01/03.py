@@ -237,12 +237,12 @@ def main():
     net = MLP_Mixer(
         image_size=28, 
         n_channels=1, 
-        patch_size=7, 
-        hidden_dim=64,
-        token_dim=32, 
-        channel_dim=128, 
+        patch_size=3, 
+        hidden_dim=128,
+        token_dim=64, 
+        channel_dim=256, 
         n_classes=10, 
-        n_blocks=18,
+        n_blocks=8,
         dropout=0.1    
         )
    
