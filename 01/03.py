@@ -204,6 +204,7 @@ def show(train_loader):
 # n_blocks = 8,  dropout = 0   {test loss: 0.040890, acc: 9834.000}     params: 147,210
 # n_blocks = 8,  dropout = 0.5 {test loss: 0.078637, acc: 9743.000}
 # n_blocks = 18, dropout = 0   {test loss: 0.060316, acc: 9831.000}     params: 326,250
+# n_blocks = 18, dropout = 0.1 {test loss: 0.034032, acc: 9854.000}     
 # n_blocks = 18, dropout = 0.5 {test loss: 0.047998, acc: 9762.000}
 # n_blocks = 34, dropout = 0   {test loss: 0.050164, acc: 9815.000}     params: 612,714
 # n_blocks = 50, dropout = 0   {test loss: 0.060606, acc: 9827.000}     params: 899,178

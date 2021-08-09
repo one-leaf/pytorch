@@ -166,6 +166,12 @@ class Train():
                                                     "steps":result["1k"]["steps"]/result["1k"]["agent"]}
 
                 if result["agent"]>0 and result["agent"]%1000==0:
+
+                    # 额外保存
+                    reward = result["1k"]["reward"]/result["1k"]["agent"]
+                    model_file = os.path.join(model_dir, 'model_%.2f.pth'%reward)
+                    self.policy_value_net.save_model(model_file)
+
                     for key in list(result.keys()):
                         if key.isdigit():
                             c = int(key)
