@@ -207,16 +207,18 @@ def show(train_loader):
 # n_blocks = 18, dropout = 0.5 {test loss: 0.047998, acc: 9762.000}
 # n_blocks = 34, dropout = 0   {test loss: 0.050164, acc: 9815.000}     params: 612,714
 # n_blocks = 50, dropout = 0   {test loss: 0.060606, acc: 9827.000}     params: 899,178
-# vs
+# 
 # patch_size=4,  hidden_dim=64,  token_dim=32, channel_dim=128      
 # n_blocks = 8,  dropout = 0   {test loss: 0.042324, acc: 9824.000}     params: 162,258
-# n_blocks = 8,  dropout = 0.1 {test loss: 0.041488, acc: 9818.000}     
+# n_blocks = 8,  dropout = 0.1 {test loss: 0.041488, acc: 9818.000}  
+# n_blocks = 8,  dropout = 0.1  epoch = 100 {test loss: 0.030247, acc: 9864.000}   
+#
 # patch_size=4,  hidden_dim=128,  token_dim=64, channel_dim=512      
 # n_blocks = 8,  dropout = 0   {test loss: 0.043148, acc: 9799.000}     params: 1,112,594
-# vs
+# 
 # patch_size=2,  hidden_dim=64,  token_dim=32, channel_dim=128 
 # n_blocks = 8 , dropout = 0   {test loss: 0.066434, acc: 9793.000}     params: 237,930
-# vs 
+#  
 # patch_size=7,  hidden_dim=64,  token_dim=64, channel_dim=128
 # n_blocks = 8,  dropout = 0   {test loss: 0.058035, acc: 9785.000}     params: 155,658
 # patch_size=7,  hidden_dim=64,  token_dim=64, channel_dim=256 
@@ -239,7 +241,7 @@ def main():
         token_dim=32, 
         channel_dim=128, 
         n_classes=10, 
-        n_blocks=8,
+        n_blocks=18,
         dropout=0.1    
         )
    
