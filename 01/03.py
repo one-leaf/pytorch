@@ -210,6 +210,8 @@ def show(train_loader):
 # vs
 # patch_size=4,  hidden_dim=64,  token_dim=32, channel_dim=128      
 # n_blocks = 8,  dropout = 0   {test loss: 0.042324, acc: 9824.000}     params: 162,258
+# patch_size=4,  hidden_dim=128,  token_dim=64, channel_dim=512      
+# n_blocks = 8,  dropout = 0   {test loss: 0.043148, acc: 9799.000}     params: 1,112,594
 # vs
 # patch_size=2,  hidden_dim=64,  token_dim=32, channel_dim=128 
 # n_blocks = 8 , dropout = 0   {test loss: 0.066434, acc: 9793.000}     params: 237,930
@@ -232,12 +234,12 @@ def main():
         image_size=28, 
         n_channels=1, 
         patch_size=4, 
-        hidden_dim=128,
-        token_dim=64, 
-        channel_dim=512, 
+        hidden_dim=64,
+        token_dim=32, 
+        channel_dim=128, 
         n_classes=10, 
         n_blocks=8,
-        dropout=0    
+        dropout=0.1    
         )
    
     # 是否采用GPU
