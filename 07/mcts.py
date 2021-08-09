@@ -109,13 +109,7 @@ class MCTS():
                 else:
                     v = -1 
                 # print("curr_player",state.curr_player,"winner",winner,"v",v,"reward",state.reward,"ph",state.pieces_height)
-            # v = 0
-            if state.state != 0 and state.reward>0:
-                winner = 0 if state.reward>0 else 1
-                if state.curr_player==winner:
-                    v = 1
-                else:
-                    v = -1
+            # v = 0            
             self.Es[s] = v
 
         # 如果得分不等于0，标志这局游戏结束
@@ -157,14 +151,15 @@ class MCTS():
         act = state.position_to_action(a)
         state.step(act)
 
-        # 计算下一步的 v 这个v 为正数，但下一个v为负数
-        # if state.state!=0 and state.reward>0:
-        #     if state.curr_player==0:
-        #         v = 1
-        #     else:
-        #         v = -1
-        # else:
         v = self.search(state)
+
+        if state.state != 0 and state.reward>0:
+            winner = 0 
+            if state.curr_player==winner:
+                v = min(1, v+1)
+            else:
+                v = max(-1, v-1)
+
 
         # 更新 Q 值 和 访问次数
         if (s, a) in self.Qsa:
