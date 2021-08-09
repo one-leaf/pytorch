@@ -296,9 +296,8 @@ def main():
     for epoch in range(100):
         train(train_loader, net, optimizer, ceriation, use_cuda, epoch)
         scheduler.step()
-        torch.save(net.state_dict(), savefile)
-
-    test(test_loader, net, ceriation, use_cuda, epoch)
+        test(test_loader, net, ceriation, use_cuda, epoch)
+    # torch.save(net.state_dict(), savefile)
 
 
 if __name__ == "__main__":
