@@ -243,7 +243,7 @@ def main():
         channel_dim=256, 
         n_classes=10, 
         n_blocks=8,
-        dropout=0.1    
+        dropout=0    
         )
    
     # 是否采用GPU
