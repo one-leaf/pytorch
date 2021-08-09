@@ -210,6 +210,7 @@ def show(train_loader):
 # vs
 # patch_size=4,  hidden_dim=64,  token_dim=32, channel_dim=128      
 # n_blocks = 8,  dropout = 0   {test loss: 0.042324, acc: 9824.000}     params: 162,258
+# n_blocks = 8,  dropout = 0.1 {test loss: 0.041488, acc: 9818.000}     
 # patch_size=4,  hidden_dim=128,  token_dim=64, channel_dim=512      
 # n_blocks = 8,  dropout = 0   {test loss: 0.043148, acc: 9799.000}     params: 1,112,594
 # vs
@@ -289,7 +290,7 @@ def main():
     # 训练
     # 动态调整学习率
     scheduler = StepLR(optimizer, step_size=1, gamma=0.9)
-    for epoch in range(10):
+    for epoch in range(100):
         train(train_loader, net, optimizer, ceriation, use_cuda, epoch)
         scheduler.step()
         torch.save(net.state_dict(), savefile)
