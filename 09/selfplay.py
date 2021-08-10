@@ -166,7 +166,7 @@ class Train():
             result["1k"]["steps"] = result["1k"]["steps"] + piececount
             result["1k"]["agent"] = result["1k"]["agent"] + agentcount           
 
-            if result["agent"]>0 and result["agent"]%100<=1:
+            if result["agent"]>0 and result["agent"]%100==0:
                 result[str(result["agent"])]={"reward":result["1k"]["reward"]/result["1k"]["agent"],
                                                 "steps":result["1k"]["steps"]/result["1k"]["agent"]}
 
