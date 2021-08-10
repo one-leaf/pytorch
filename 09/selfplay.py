@@ -131,11 +131,8 @@ class Train():
         # 创建使用策略价值网络来指导树搜索和评估叶节点的MCTS玩家
         mcts_player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout, is_selfplay=1)
         # 开始下棋
-        winer, play_data = agent.start_self_play(mcts_player, temp=self.temp)
-        if winer == -1:
-            logging.info("TRAIN Self Play end. but ig ...")
-            return
-
+        winner, play_data = agent.start_self_play(mcts_player, temp=self.temp)
+        
         play_data = list(play_data)[:]
         episode_len = len(play_data)
 
@@ -149,29 +146,45 @@ class Train():
             pickle.dump(obj, open(savefile, "wb"))
             # self.dataset.save(obj)
 
-        if agent.limit_max_height!=10: return
+        if agent.limit_max_height == 10:
+            jsonfile = os.path.join(data_dir, "result.json")
+            if os.path.exists(jsonfile):
+                result=json.load(open(jsonfile,"r"))
+            else:
+                result={"reward":0,"steps":0,"agent":0}
+            if "1k" not in result:
+                result["1k"]={"reward":0,"steps":0,"agent":0}
+            
+            reward = agent.score
+            piececount = agent.piececount
+            agentcount = 1
 
-        jsonfile = os.path.join(data_dir, "result.json")
-        if os.path.exists(jsonfile):
-            result=json.load(open(jsonfile,"r"))
-        else:
-            result={"reward":0,"steps":0,"agent":0}
-        if agent.score>0:
-            result["reward"] = result["reward"] + 1
-        result["steps"] = result["steps"] + agent.piececount
-        result["agent"] = result["agent"] + 1
-        if result["agent"]>0 and result["agent"]%1000==0:
-            for key in list(result.keys()):
-                if key.isdigit():
-                    c = int(key)
-                    if c%1000!=0:
-                        del result[key]
+            result["reward"] = result["reward"] + reward
+            result["steps"] = result["steps"] + piececount
+            result["agent"] = result["agent"] + agentcount
+            result["1k"]["reward"] = result["1k"]["reward"] + reward
+            result["1k"]["steps"] = result["1k"]["steps"] + piececount
+            result["1k"]["agent"] = result["1k"]["agent"] + agentcount           
 
-        if result["agent"]>0 and result["agent"]%100==0:
-            result[str(result["agent"])]={"reward":result["reward"]/result["agent"],
-                                            "steps":result["steps"]/result["agent"]}
-        
-        json.dump(result, open(jsonfile,"w"), ensure_ascii=False)
+            if result["agent"]>0 and result["agent"]%100<=1:
+                result[str(result["agent"])]={"reward":result["1k"]["reward"]/result["1k"]["agent"],
+                                                "steps":result["1k"]["steps"]/result["1k"]["agent"]}
+
+            if result["agent"]>0 and result["agent"]%1000==0:
+
+                # 额外保存
+                steps = round(result["1k"]["steps"]/result["1k"]["agent"])
+                model_file = os.path.join(model_dir, 'model_%s.pth'%steps)
+                self.policy_value_net.save_model(model_file)
+
+                for key in list(result.keys()):
+                    if key.isdigit():
+                        c = int(key)
+                        if c%1000>10:
+                            del result[key]
+                result["1k"]={"reward":0,"steps":0,"agent":0}
+
+            json.dump(result, open(jsonfile,"w"), ensure_ascii=False)
 
     def policy_update(self, sample_data, epochs=1):
         """更新策略价值网络policy-value"""
