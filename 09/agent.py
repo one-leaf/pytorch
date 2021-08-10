@@ -761,7 +761,7 @@ class Agent(object):
         self.limit_max_height=10
         
         if random.random()>0.5:
-            self.limit_max_height=random.randint(5,8)
+            self.limit_max_height=random.randint(5,12)
             self.ig_action=random.choice([None,KEY_NONE,KEY_DOWN])
 
         states, mcts_probs, current_players = [], [], []
