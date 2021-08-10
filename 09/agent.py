@@ -274,24 +274,24 @@ class Agent(object):
         return board
 
     # 获得当前的全部特征
-    # 背景 + 自己的步骤 + 自己上一次的步骤 + 对手的步骤 + 对手上一次的步骤 = 5
-    # 返回 [3, height, width]
+    # 背景 + 前4步走法 = 5
+    # 返回 [5, height, width]
     def current_state(self):
         board_background = self.getBoard()
-        board_fallpiece = self.fallpiece_status[-1]
-        board_fallpiece_p = np.zeros((self.height, self.width))  
-        board_fallpiece2 = np.zeros((self.height, self.width))
-        board_fallpiece2_p =  np.zeros((self.height, self.width))
+        fallpiece_1 =  self.fallpiece_status[-1]
+        fallpiece_2 = np.zeros((self.height, self.width))
+        fallpiece_3 = np.zeros((self.height, self.width))
+        fallpiece_4 = np.zeros((self.height, self.width))
 
-        if len(self.fallpiece_status)>1:
-            board_fallpiece2 = self.fallpiece_status[-2]
-        if len(self.fallpiece_status)>2:
-            board_fallpiece_p = self.fallpiece_status[-3]  
-        if len(self.fallpiece_status)>3:
-            board_fallpiece2_p = self.fallpiece_status[-4]  
+        if len(self.fallpiece_status)>1:           
+            fallpiece_2 = self.fallpiece_status[-2]  
+        if len(self.fallpiece_status)>2:           
+            fallpiece_3 = self.fallpiece_status[-3]  
+        if len(self.fallpiece_status)>3:           
+            fallpiece_4 = self.fallpiece_status[-4]  
 
-        state = np.stack([board_background, board_fallpiece_p, board_fallpiece, board_fallpiece2_p, board_fallpiece2])
-        return state        
+        state = np.stack([board_background, fallpiece_4, fallpiece_3, fallpiece_2, fallpiece_1])
+        return state          
 
     # 交替个数也就是从空到非空算一次，边界算非空 
     # 高度从底部 20 --> 0 上部
