@@ -758,10 +758,10 @@ class Agent(object):
         and store the self-play data: (state, mcts_probs, z) for training
         """
         self.reset()
-        self.limit_max_height=10
-        
+        self.limit_max_height=5
+        limit_max_height = 10
         if random.random()>0.5:
-            self.limit_max_height=random.randint(5,12)
+            limit_max_height = random.randint(5,12)
             # self.ig_action=random.choice([None,KEY_NONE,KEY_DOWN])
 
         print("limit_max_height:", self.limit_max_height, "ig_action:", self.ig_action)
@@ -792,24 +792,30 @@ class Agent(object):
             self.step(action)
 
             if self.state!=0:
-                print(self.pieces_height, "next", self.fallpiece['shape'])
+                self.limit_max_height = max(self.pieces_height)+3
+                if self.limit_max_height>limit_max_height: self.limit_max_height=limit_max_height
+                print('reward:',self.reward, 'len:', len(self.pieces_height), "limit_max_height:", self.limit_max_height, "next:", self.fallpiece['shape'], self.pieces_height)
 
             end, winner = self.game_end()
             if end:
-                if self.score > 0:
-                    winners_z = np.ones(len(current_players))
-                else:
-                    if self.piececount<=self.limit_max_height: winner = -1
+                winners_z = np.zeros(len(current_players))
+                winners_z[np.array(current_players) == winner] = 1.0
+                winners_z[np.array(current_players) != winner] = -1.0
 
-                    winners_z = np.zeros(len(current_players))
-                    if winner != -1:
-                        winners_z[np.array(current_players) == winner] = 1.0
-                        winners_z[np.array(current_players) != winner] = -1.0
-                        # print("Game end. Winner is player:", winner)
-                    else:
-                        winners_z[np.array(current_players) == winner] = -1.0
-                        winners_z[np.array(current_players) != winner] = -1.0
-                        # print("Game end. Tie")
+                # if self.score > 0:
+                #     winners_z = np.ones(len(current_players))
+                # else:
+                # if self.piececount<=self.limit_max_height: winner = -1
+
+                # winners_z = np.zeros(len(current_players))
+                # if winner != -1:
+                #     winners_z[np.array(current_players) == winner] = 1.0
+                #     winners_z[np.array(current_players) != winner] = -1.0
+                #     # print("Game end. Winner is player:", winner)
+                # else:
+                #     winners_z[np.array(current_players) == winner] = -1.0
+                #     winners_z[np.array(current_players) != winner] = -1.0
+                #     # print("Game end. Tie")
                     
                 self.print()
                 print("curr_player",self.curr_player,"winner",winner,"limit_height",self.limit_max_height,"pieces_y",self.pieces_height)
