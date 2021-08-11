@@ -816,11 +816,12 @@ class Agent(object):
 
         print("game_player_0",game_player_0,"game_player_1",game_player_1)
 
+        # 不要保存最后十步的内容
         states, mcts_probs, winers= [], [], []
         for j in range(game_num):
-            for o in game_states[j]: states.append(o)
-            for o in game_mcts_probs[j]: mcts_probs.append(o)
-            for p in game_current_players[j]:
+            for o in game_states[j][:-10]: states.append(o)
+            for o in game_mcts_probs[j][:-10]: mcts_probs.append(o)
+            for p in game_current_players[j][:-10]:
                 if p==0:
                     winers.append(game_player_0[j])
                 else:
