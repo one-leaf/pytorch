@@ -140,7 +140,8 @@ class Train():
         # play_data = self.get_equi_data(play_data)
         logging.info("TRAIN Self Play end. length:%s saving ..." % episode_len)
         # 保存对抗数据到data_buffer
-        for obj in play_data:
+        # 抛弃最后的十步，这个是没有意义的
+        for obj in play_data[:-10]:
             filename = "{}.pkl".format(uuid.uuid1())
             savefile = os.path.join(data_wait_dir, filename)
             pickle.dump(obj, open(savefile, "wb"))
