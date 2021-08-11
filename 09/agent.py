@@ -817,6 +817,7 @@ class Agent(object):
         print("game_player_0",game_player_0,"game_player_1",game_player_1)
 
         # 不要保存最后十步的内容
+        # 因为最后十步属于让对手最后一步的手段，不需要出现在训练样本中
         states, mcts_probs, winers= [], [], []
         for j in range(game_num):
             for o in game_states[j][:-10]: states.append(o)
