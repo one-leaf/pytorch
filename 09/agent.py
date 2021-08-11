@@ -368,11 +368,7 @@ class Agent(object):
     #     return transCount    
 
     def game_end(self):
-        if self.reward>0:
-            return self.terminal, (self.curr_player+1)%2 
-        if self.reward<0:
-            return self.terminal, self.curr_player 
-        return self.terminal, -1
+        return self.terminal, self.curr_player 
 
     # 这里假定第一个人选择下[左移，右移，翻转，下降，无动作]，第二个人只有[下降]
     # def start_self_play(self, player, temp=1e-3):       
@@ -757,67 +753,89 @@ class Agent(object):
         """ start a self-play game using a MCTS player, reuse the search tree,
         and store the self-play data: (state, mcts_probs, z) for training
         """
-        self.reset()
-        self.limit_max_height=5
-        limit_max_height = 10
-        if random.random()>0.5:
+        
+        if self.limit_max_height > 0:
+            limit_max_height = self.limit_max_height
+        else:
             limit_max_height = random.randint(5,12)
-            # self.ig_action=random.choice([None,KEY_NONE,KEY_DOWN])
+            self.limit_max_height = limit_max_height
 
         print("limit_max_height:", limit_max_height, "ig_action:", self.ig_action)
-        states, mcts_probs, current_players = [], [], []
 
-        # # 先随机走1~2步，增加样本的复杂度
-        # for i in range(random.randint(1,2)):
-        #     act = random.choice(self.availables)
-        #     self.step(act)
+        game_num = 2
+        
+        game_states, game_mcts_probs, game_current_players = [],[],[] 
+        game_piececount, game_score, game_winer = [],[]
+        print("limit_max_height", self.limit_max_height)
+        for _ in range(game_num):
+            _states, _mcts_probs, _current_players=[],[],[]
+            game = copy.deepcopy(self)
+            game.limit_max_height = 5
 
-        for i in count():
-            # max_height = self.getMaxHeight()
+            for i in count():
+                action, move_probs = player.get_action(game, temp=temp, return_prob=1) 
 
-            # if self.piecesteps < (10 - max_height)/2:
-            #     act = random.choice(self.availables)
-            #     self.step(act)
-            #     continue
+                _states.append(game.current_state())
+                _mcts_probs.append(move_probs)
+                _current_players.append(game.curr_player)
 
-            action, move_probs = player.get_action(self, temp=temp, return_prob=1) 
+                game.step(action)
 
-            # idx = np.argmax(move_probs)
-            # act = self.position_to_action(idx)
-            # if act==action:
-            states.append(self.current_state())
-            mcts_probs.append(move_probs)
-            current_players.append(self.curr_player)
+                if game.state!=0:
+                    game.limit_max_height = max(game.pieces_height)+3
+                    if game.limit_max_height>limit_max_height: game.limit_max_height=limit_max_height
+                    print('reward:',game.reward, 'len:', len(game.pieces_height), "limit_max_height:", game.limit_max_height, "next:", game.fallpiece['shape'], game.pieces_height)
 
-            self.step(action)
+                if game.terminal:
+                    break
+            
+            game_states.append(_states)
+            game_mcts_probs.append(_mcts_probs)
+            game_current_players.append(_current_players)
 
-            if self.state!=0:
-                self.limit_max_height = max(self.pieces_height)+3
-                if self.limit_max_height>limit_max_height: self.limit_max_height=limit_max_height
-                print('reward:',self.reward, 'len:', len(self.pieces_height), "limit_max_height:", self.limit_max_height, "next:", self.fallpiece['shape'], self.pieces_height)
+            game_piececount.append(game.piececount)
+            game_score.append(game.score)
+            game_winer.append(game.curr_player)
+            game.print()
 
-            end, winner = self.game_end()
-            if end:
-                winners_z = np.zeros(len(current_players))
-                winners_z[np.array(current_players) == winner] = 1.0
-                winners_z[np.array(current_players) != winner] = -1.0
+        max_piececount = max(game_piececount)
+        max_score = max(game_score)
+        game_player_0 = [-1 for _ in range(game_num)] 
+        game_player_1 = [-1 for _ in range(game_num)] 
 
-                # if self.score > 0:
-                #     winners_z = np.ones(len(current_players))
-                # else:
-                # if self.piececount<=self.limit_max_height: winner = -1
+        for j in range(game_num):
+            if game_piececount[j]==max_piececount:
+                game_player_0[j] = 1 if game_winer[j]==0 else -1
+                game_player_1[j] = -1 * game_player_0[j]
+            elif max_score>0 and game_score[j]==max_score:
+                game_player_0[j] = 1
+                game_player_1[j] = 1
+            else:
+                game_player_0[j] = -1
+                game_player_1[j] = -1
 
-                # winners_z = np.zeros(len(current_players))
-                # if winner != -1:
-                #     winners_z[np.array(current_players) == winner] = 1.0
-                #     winners_z[np.array(current_players) != winner] = -1.0
-                #     # print("Game end. Winner is player:", winner)
-                # else:
-                #     winners_z[np.array(current_players) == winner] = -1.0
-                #     winners_z[np.array(current_players) != winner] = -1.0
-                #     # print("Game end. Tie")
-                    
-                self.print()
-                print("curr_player",self.curr_player,"winner",winner,"limit_height",self.limit_max_height,"pieces_y",self.pieces_height)
+        print("game_player_0",game_player_0,"game_player_1",game_player_1)
 
-                return winner, zip(states, mcts_probs, winners_z)
+        states, mcts_probs, winers= [], [], []
+        for j in range(game_num):
+            for o in game_states[j]: states.append(o)
+            for o in game_mcts_probs[j]: mcts_probs.append(o)
+            for p in game_current_players[j]:
+                if p==0:
+                    winers.append(game_player_0[j])
+                else:
+                    winers.append(game_player_1[j])
+
+        winners_z = np.array(winers)
+
+        assert len(states)==len(mcts_probs)
+        assert len(states)==len(winners_z)
+
+        print("add %s to dataset"%len(winers))
+        reward, piececount, agentcount = 0, 0, 0
+        reward = sum(game_score)  
+        piececount = sum(game_piececount)
+        agentcount = game_num
+    
+        return reward, piececount, agentcount, zip(states, mcts_probs, winners_z)
+                
