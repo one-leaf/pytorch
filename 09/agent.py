@@ -765,7 +765,7 @@ class Agent(object):
         game_num = 2
         
         game_states, game_mcts_probs, game_current_players = [],[],[] 
-        game_piececount, game_score, game_winer = [],[]
+        game_piececount, game_score, game_winer = [],[],[]
         print("limit_max_height", self.limit_max_height)
         for _ in range(game_num):
             _states, _mcts_probs, _current_players=[],[],[]
