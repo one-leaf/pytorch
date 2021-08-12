@@ -59,6 +59,8 @@ class Agent(object):
         self.availables=self.get_availables()
         # 最大游戏高度
         self.limit_max_height = -1
+        # 游戏动作
+        self.actions=[]
 
     # 概率的索引位置转action
     def position_to_action(self, position):
@@ -118,6 +120,7 @@ class Agent(object):
         # self.curr_player = (self.curr_player+1)%2
         self.curr_player = 1 if self.curr_player==0 else 0
         self.level, self.fallfreq = self.tetromino.calculate(self.score)
+        self.actions.append(action)
 
         if action == KEY_LEFT and self.tetromino.validposition(self.board,self.fallpiece,ax = -1):
             self.fallpiece['x']-=1
@@ -167,7 +170,7 @@ class Agent(object):
                 self.terminal = True 
                 self.state = 1
                 self.reward = -1 
-                print(">>>>>", len(self.pieces_height), self.pieces_height)
+                print(">>>>>", len(self.pieces_height), self.pieces_height, self.actions[-10:])
                 return self.state, self.reward # 
 
             # if (not self.tetromino.validposition(self.board,self.fallpiece)): 
