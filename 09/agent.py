@@ -16,6 +16,7 @@ class Agent(object):
         self.width = 10
         self.height = 20
         self.actions_num = len(ACTIONS)    
+        self.lock = random.choice([0,1])     
         self.reset()        
 
     def reset(self):
@@ -56,8 +57,6 @@ class Agent(object):
         self.availables=self.get_availables()
         # 最大游戏高度
         self.limit_max_height = -1
-        # 随机锁
-        self.lock = random.choice([0,1])     
 
     # 概率的索引位置转action
     def position_to_action(self, position):
