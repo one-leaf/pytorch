@@ -323,7 +323,8 @@ class Agent(object):
         game_piececount, game_score, game_winer = [],[],[]
         for _ in range(game_num):
             self.lock = (self.lock + 1)%2 
-            self.get_availables()
+            self.availables = self.get_availables()
+            
             print("limit_max_height", self.limit_max_height, "lock", self.lock)
             _states, _mcts_probs, _current_players=[],[],[]
             game = copy.deepcopy(self)
