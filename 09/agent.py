@@ -177,7 +177,7 @@ class Agent(object):
                 self.state = 2
                 self.reward = -1      
                 self.availables = []
-                print(self.pieces_height)
+                print(">>>>>", len(self.pieces_height), self.pieces_height)
                 return self.state, self.reward 
             else: 
                 self.state = 1
