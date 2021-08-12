@@ -128,9 +128,9 @@ class Train():
         # 游戏代理
         agent = Agent()
 
+        # 创建使用策略价值网络来指导树搜索和评估叶节点的MCTS玩家
+        mcts_player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout, is_selfplay=1)
         for _ in range(3):
-            # 创建使用策略价值网络来指导树搜索和评估叶节点的MCTS玩家
-            mcts_player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout, is_selfplay=1)
             # 开始下棋
             reward, piececount, agentcount, play_data = agent.start_self_play(mcts_player, temp=self.temp)
             play_data = list(play_data)[:]
