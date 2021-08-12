@@ -18,7 +18,7 @@ class Agent(object):
         self.width = 10
         self.height = 20
         self.actions_num = len(ACTIONS)    
-        self.reset()        
+        self.reset()   
 
     def reset(self):
         # 下落的方块

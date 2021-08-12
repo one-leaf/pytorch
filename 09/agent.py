@@ -56,6 +56,8 @@ class Agent(object):
         self.availables=self.get_availables()
         # 最大游戏高度
         self.limit_max_height = -1
+        # 随机锁
+        self.lock = random.choice([0,1])     
 
     # 概率的索引位置转action
     def position_to_action(self, position):
@@ -78,6 +80,8 @@ class Agent(object):
     # 将单人游戏变为双人博弈，一个正常下，一个只下走，
     def get_availables(self):
         acts=[KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN, KEY_NONE]
+        if self.curr_player == self.lock:
+            return [KEY_NONE]
 
         if not self.tetromino.validposition(self.board,self.fallpiece,ax = -1):
             acts.remove(KEY_LEFT)
@@ -368,7 +372,7 @@ class Agent(object):
     #     return transCount    
 
     def game_end(self):
-        return self.terminal, self.curr_player 
+        return self.terminal, self.lock 
 
     # 这里假定第一个人选择下[左移，右移，翻转，下降，无动作]，第二个人只有[下降]
     # def start_self_play(self, player, temp=1e-3):       
