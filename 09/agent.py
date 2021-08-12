@@ -112,8 +112,8 @@ class Agent(object):
         return acts         
 
     def game_end(self):
-        return self.terminal, self.lock
-        # return self.terminal, self.curr_player
+        # return self.terminal, self.lock
+        return self.terminal, self.curr_player
 
     def step(self, action, env=None):
         # 状态 0 下落过程中 1 更换方块 2 结束一局
