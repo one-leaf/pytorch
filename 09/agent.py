@@ -16,7 +16,7 @@ class Agent(object):
         self.width = 10
         self.height = 20
         self.actions_num = len(ACTIONS)    
-        self.lock = random.choice([0,1])  
+        # self.lock = random.choice([0,1])  
         self.reset()        
 
     def reset(self):
@@ -79,8 +79,8 @@ class Agent(object):
     # 将单人游戏变为双人博弈，一个正常下，一个只下走，
     def get_availables(self):
         acts=[KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN]
-        if self.curr_player == self.lock:
-            return [KEY_NONE]
+        # if self.curr_player == self.lock:
+        #     return [KEY_NONE]
 
         if not self.tetromino.validposition(self.board,self.fallpiece,ax = -1):
             acts.remove(KEY_LEFT)
@@ -371,7 +371,7 @@ class Agent(object):
     #     return transCount    
 
     def game_end(self):
-        return self.terminal, (self.lock+1)%2 
+        return self.terminal, self.curr_player
 
     # 这里假定第一个人选择下[左移，右移，翻转，下降，无动作]，第二个人只有[下降]
     # def start_self_play(self, player, temp=1e-3):       
