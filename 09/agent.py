@@ -371,7 +371,7 @@ class Agent(object):
     #     return transCount    
 
     def game_end(self):
-        return self.terminal, self.lock 
+        return self.terminal, (self.lock+1)%2 
 
     # 这里假定第一个人选择下[左移，右移，翻转，下降，无动作]，第二个人只有[下降]
     # def start_self_play(self, player, temp=1e-3):       
