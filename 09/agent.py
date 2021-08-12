@@ -177,6 +177,7 @@ class Agent(object):
                 self.state = 2
                 self.reward = -1      
                 self.availables = []
+                print(self.pieces_height)
                 return self.state, self.reward 
             else: 
                 self.state = 1

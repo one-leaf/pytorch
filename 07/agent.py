@@ -167,6 +167,7 @@ class Agent(object):
                 self.terminal = True 
                 self.state = 1
                 self.reward = -1 
+                print(self.pieces_height)
                 return self.state, self.reward # 
 
             # if (not self.tetromino.validposition(self.board,self.fallpiece)): 
