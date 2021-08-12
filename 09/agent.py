@@ -16,7 +16,7 @@ class Agent(object):
         self.width = 10
         self.height = 20
         self.actions_num = len(ACTIONS)    
-        self.lock = random.choice([0,1])  
+        # self.lock = random.choice([0,1])  
         self.reset()        
 
     def reset(self):
@@ -79,10 +79,10 @@ class Agent(object):
     # 将单人游戏变为双人博弈，一个正常下，一个只下走，
     def get_availables(self):
         acts=[KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN, KEY_NONE]
-        if self.curr_player == self.lock:
-            return [KEY_DOWN, KEY_NONE]
-        else:
-            acts.remove(KEY_DOWN)
+        # if self.curr_player == self.lock:
+        #     return [KEY_DOWN, KEY_NONE]
+        # else:
+        #     acts.remove(KEY_DOWN)
 
         if not self.tetromino.validposition(self.board,self.fallpiece,ax = -1):
             acts.remove(KEY_LEFT)
@@ -322,10 +322,10 @@ class Agent(object):
         game_states, game_mcts_probs, game_current_players = [],[],[] 
         game_piececount, game_score, game_winer = [],[],[]
         for _ in range(game_num):
-            self.lock = (self.lock + 1)%2 
-            self.availables = self.get_availables()
-            
-            print("limit_max_height", self.limit_max_height, "lock", self.lock)
+            # self.lock = (self.lock + 1)%2 
+            # self.availables = self.get_availables()
+            # print("limit_max_height", self.limit_max_height, "lock", self.lock)
+
             _states, _mcts_probs, _current_players=[],[],[]
             game = copy.deepcopy(self)
             # game.limit_max_height = 5
