@@ -763,7 +763,7 @@ class Agent(object):
             limit_max_height = random.randint(5,12)
             self.limit_max_height = limit_max_height
 
-        print("limit_max_height:", limit_max_height, "ig_action:", self.ig_action)
+        print("limit_max_height:", limit_max_height, "ig_action:", self.ig_action, "lock:", self.lock)
 
         game_num = 2
         
