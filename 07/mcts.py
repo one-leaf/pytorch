@@ -290,7 +290,7 @@ class MCTSPlayer(object):
                 # 早期多随机
                 
                 # if state.curr_player==0 and (state.piecesteps<=10 or state.piececount<=10 or value<=-0.9) and act in [0,4]:
-                if state.curr_player==0 and act in [0,4] and random.random()>0.95:
+                if state.curr_player==0 and act in [0,4] and random.random()>0.5:
                 # if act_probs[idx]<0.99:
                     p = 0.75                 
                     dirichlet = np.random.dirichlet(0.03 * np.ones(len(act_probs)))
