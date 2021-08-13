@@ -123,7 +123,7 @@ class MCTS():
 
         # 如果得分不等于0，标志这局游戏结束
         if self.Es[s] != 0 or state.terminal:
-            print("v", self.Es[s], "reward", state.reward, "curr_player", state.curr_player, "ph", state.pieces_height)
+            # print("v", self.Es[s], "reward", state.reward, "curr_player", state.curr_player, "ph", state.pieces_height)
             return -self.Es[s]
 
         # 如果当前状态没有子节点，增加子节点
