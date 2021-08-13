@@ -80,7 +80,7 @@ class Agent(object):
     # 获取可用步骤, 保留一个旋转始终有用
     # 将单人游戏变为双人博弈，一个正常下，一个只下走，
     def get_availables(self):
-        acts=[KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN, KEY_NONE]
+        acts=[KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN]
         # if self.curr_player == self.lock:
         #     return [KEY_DOWN, KEY_NONE]
         # else:
