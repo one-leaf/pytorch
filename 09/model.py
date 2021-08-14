@@ -81,10 +81,10 @@ class MixerBlock(nn.Module):
 # n_classes   : 输出类别个数
 # n_blocks    : 多少个模型块相当于残差的层数
 class MLP_Mixer(nn.Module):
-    def __init__(self, image_size_h, image_size_w, n_channels, patch_size, hidden_dim, token_dim, channel_dim, n_action, n_blocks, dropout = 0.):
+    def __init__(self, image_size_h, image_size_w, n_channels, patch_size_h, patch_size_w, hidden_dim, token_dim, channel_dim, n_action, n_blocks, dropout = 0.):
         super(MLP_Mixer, self).__init__()
-        n_patches =(image_size_h//patch_size) * (image_size_w//patch_size) # image_size 可以整除 patch_size
-        self.patch_size_embbeder = nn.Conv2d(kernel_size=patch_size, stride=patch_size, in_channels=n_channels, out_channels= hidden_dim)
+        n_patches =(image_size_h//patch_size_h) * (image_size_w//patch_size_w) # image_size 可以整除 patch_size
+        self.patch_size_embbeder = nn.Conv2d(kernel_size=(patch_size_h,patch_size_w), stride=(patch_size_h,patch_size_w), in_channels=n_channels, out_channels= hidden_dim)
         self.blocks = nn.ModuleList([
             MixerBlock(n_patches=n_patches, hidden_dim=hidden_dim, token_dim=token_dim, channel_dim=channel_dim, dropout=dropout) for i in range(n_blocks)
         ])
@@ -195,7 +195,7 @@ class PolicyValueNet():
 
         self.l2_const = l2_const  
         # self.policy_value_net = Net(self.input_size, self.output_size).to(device)
-        self.policy_value_net = MLP_Mixer(20,10,5,5,128,64,512,5,8)
+        self.policy_value_net = MLP_Mixer(20,10,2,5,5,128,64,512,5,8)
         self.policy_value_net.to(device)
         self.print_netwark()
 
