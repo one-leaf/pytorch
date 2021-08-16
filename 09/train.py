@@ -46,6 +46,7 @@ class Dataset(torch.utils.data.Dataset):
         self.load_index()
         self.copy_wait_file()
         self.load_game_files()
+        self.sample=0
 
     def __len__(self):
         return len(self.file_list)
@@ -61,7 +62,12 @@ class Dataset(torch.utils.data.Dataset):
                 os.remove(filename)
                 filename = random.choice(self.file_list)
             else:
-                break
+                if abs(self.sample+winner)<1000:
+                    self.sample = self.sample + winner
+                    break
+                else:
+                    filename = random.choice(self.file_list) 
+
         state = torch.from_numpy(state).float()
         mcts_prob = torch.from_numpy(mcts_prob).float()
         winner = torch.as_tensor(winner).float()
