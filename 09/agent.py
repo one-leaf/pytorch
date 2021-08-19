@@ -366,23 +366,38 @@ class Agent(object):
         game_player_0 = [-1 for _ in range(game_num)] 
         game_player_1 = [-1 for _ in range(game_num)] 
 
-        for j in range(game_num):
-            if max_score>0 and game_score[j]==max_score:
-                game_player_0[j] = 1
-                game_player_1[j] = 1
-            else:
+        # 如果只有一个最大值
+        if game_piececount.count(max_piececount)==1:
+            for j in range(game_num):
+                if game_piececount[j]==max_piececount:
+                    game_player_0[j] = 1
+                    game_player_1[j] = 1
+                else:
+                    game_player_0[j] = -1
+                    game_player_1[j] = -1
+        else:
+            for j in range(game_num):
                 game_player_0[j] = 1 if game_winer[j]==0 else -1
                 game_player_1[j] = -1 * game_player_0[j]
 
-            # if game_piececount[j]==max_piececount:
-            #     game_player_0[j] = 1 if game_winer[j]==0 else -1
-            #     game_player_1[j] = -1 * game_player_0[j]
-            # elif max_score>0 and game_score[j]==max_score:
-            #     game_player_0[j] = 1
-            #     game_player_1[j] = 1
-            # else:
-            #     game_player_0[j] = -1
-            #     game_player_1[j] = -1
+        # for j in range(game_num):
+        #     # if max_score>0 and game_score[j]==max_score:
+        #     #     game_player_0[j] = 1
+        #     #     game_player_1[j] = 1
+        #     # else:
+        #     #     game_player_0[j] = 1 if game_winer[j]==0 else -1
+        #     #     game_player_1[j] = -1 * game_player_0[j]
+
+        #     if game_piececount[j]==max_piececount:
+        #         game_player_0[j] = 1
+        #         game_player_1[j] = 1
+
+        #     # elif max_score>0 and game_score[j]==max_score:
+        #     #     game_player_0[j] = 1
+        #     #     game_player_1[j] = 1
+        #     # else:
+        #     #     game_player_0[j] = -1
+        #     #     game_player_1[j] = -1
 
         print("game_player_0",game_player_0,"game_player_1",game_player_1)
 
