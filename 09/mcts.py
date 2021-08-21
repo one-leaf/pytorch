@@ -175,8 +175,8 @@ class MCTS():
         # else:       
         v = self.search(state)
 
-        if state.state != 0 and state.reward>0:
-            v = max(-1, v-1)
+        # if state.state != 0 and state.reward>0:
+        #     v = max(-1, v-1)
 
         # 更新 Q 值 和 访问次数
         if (s, a) in self.Qsa:
