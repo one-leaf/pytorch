@@ -361,14 +361,18 @@ class Agent(object):
             game_winer.append(winer)
             game.print()
 
-        # max_piececount = max(game_piececount)
+        min_piececount = min(game_piececount)
         # max_score = max(game_score)
         game_player_0 = [-1 for _ in range(game_num)] 
         game_player_1 = [-1 for _ in range(game_num)] 
 
         for j in range(game_num):
-            game_player_0[j] = 1 if game_winer[j]==0 else -1
-            game_player_1[j] = -1 * game_player_0[j]
+            if game_piececount[j]==min_piececount:
+                game_player_0[j] = -1
+                game_player_1[j] = -1
+            else:
+                game_player_0[j] = 1 if game_winer[j]==0 else -1
+                game_player_1[j] = -1 * game_player_0[j]
 
         # 如果只有一个最大值
         # if game_piececount.count(max_piececount)==1:
