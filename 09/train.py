@@ -62,7 +62,7 @@ class Dataset(torch.utils.data.Dataset):
                 os.remove(filename)
                 filename = random.choice(self.file_list)
             else:
-                if abs(self.sample+winner)<10000:
+                if abs(self.sample+winner)<50000:
                     self.sample = self.sample + winner
                     break
                 else:
