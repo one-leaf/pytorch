@@ -322,7 +322,7 @@ class Agent(object):
         # print("limit_max_height:", limit_max_height)
 
         game_num = 2
-        self.limit_max_height = 10
+        self.limit_max_height = 5
         game_states, game_mcts_probs, game_current_players = [],[],[] 
         game_piececount, game_score, game_winer = [],[],[]
         for _ in range(game_num):
@@ -361,24 +361,28 @@ class Agent(object):
             game_winer.append(winer)
             game.print()
 
-        max_piececount = max(game_piececount)
-        max_score = max(game_score)
+        # max_piececount = max(game_piececount)
+        # max_score = max(game_score)
         game_player_0 = [-1 for _ in range(game_num)] 
         game_player_1 = [-1 for _ in range(game_num)] 
 
+        for j in range(game_num):
+            game_player_0[j] = 1 if game_winer[j]==0 else -1
+            game_player_1[j] = -1 * game_player_0[j]
+
         # 如果只有一个最大值
-        if game_piececount.count(max_piececount)==1:
-            for j in range(game_num):
-                if game_piececount[j]==max_piececount:
-                    game_player_0[j] = 1
-                    game_player_1[j] = 1
-                else:
-                    game_player_0[j] = -1
-                    game_player_1[j] = -1
-        else:
-            for j in range(game_num):
-                game_player_0[j] = 1 if game_winer[j]==0 else -1
-                game_player_1[j] = -1 * game_player_0[j]
+        # if game_piececount.count(max_piececount)==1:
+        #     for j in range(game_num):
+        #         if game_piececount[j]==max_piececount:
+        #             game_player_0[j] = 1
+        #             game_player_1[j] = 1
+        #         else:
+        #             game_player_0[j] = -1
+        #             game_player_1[j] = -1
+        # else:
+        #     for j in range(game_num):
+        #         game_player_0[j] = 1 if game_winer[j]==0 else -1
+        #         game_player_1[j] = -1 * game_player_0[j]
 
         # for j in range(game_num):
         #     # if max_score>0 and game_score[j]==max_score:
@@ -405,9 +409,12 @@ class Agent(object):
         # 因为最后十步属于让对手最后一步的手段，不需要出现在训练样本中
         states, mcts_probs, winers= [], [], []
         for j in range(game_num):
-            for o in game_states[j][:-10]: states.append(o)
-            for o in game_mcts_probs[j][:-10]: mcts_probs.append(o)
-            for p in game_current_players[j][:-10]:
+            # for o in game_states[j][:-10]: states.append(o)
+            # for o in game_mcts_probs[j][:-10]: mcts_probs.append(o)
+            # for p in game_current_players[j][:-10]:
+            for o in game_states[j]: states.append(o)
+            for o in game_mcts_probs[j]: mcts_probs.append(o)
+            for p in game_current_players[j]:
                 if p==0:
                     winers.append(game_player_0[j])
                 else:
