@@ -366,10 +366,12 @@ class Agent(object):
         game_player_0 = [-1 for _ in range(game_num)] 
         game_player_1 = [-1 for _ in range(game_num)] 
 
+        loss_game=[]
         for j in range(game_num):
             if game_piececount[j]==min_piececount:
                 game_player_0[j] = -1
                 game_player_1[j] = -1
+                loss_game.append(j)
             else:
                 game_player_0[j] = 1 if game_winer[j]==0 else -1
                 game_player_1[j] = -1 * game_player_0[j]
@@ -409,20 +411,28 @@ class Agent(object):
 
         print("game_player_0",game_player_0,"game_player_1",game_player_1)
 
-        # 不要保存最后十步的内容
-        # 因为最后十步属于让对手最后一步的手段，不需要出现在训练样本中
+        # 如果是属于最差的访问，只取样本的最后15步
         states, mcts_probs, winers= [], [], []
         for j in range(game_num):
             # for o in game_states[j][:-10]: states.append(o)
             # for o in game_mcts_probs[j][:-10]: mcts_probs.append(o)
             # for p in game_current_players[j][:-10]:
-            for o in game_states[j]: states.append(o)
-            for o in game_mcts_probs[j]: mcts_probs.append(o)
-            for p in game_current_players[j]:
-                if p==0:
-                    winers.append(game_player_0[j])
-                else:
-                    winers.append(game_player_1[j])
+            if j in loss_game:
+                for o in game_states[j][-15:]: states.append(o)
+                for o in game_mcts_probs[j][-15:]: mcts_probs.append(o)
+                for p in game_current_players[j][-15:]:
+                    if p==0:
+                        winers.append(game_player_0[j])
+                    else:
+                        winers.append(game_player_1[j])
+            else:
+                for o in game_states[j]: states.append(o)
+                for o in game_mcts_probs[j]: mcts_probs.append(o)
+                for p in game_current_players[j]:
+                    if p==0:
+                        winers.append(game_player_0[j])
+                    else:
+                        winers.append(game_player_1[j])
 
         winners_z = np.array(winers)
 
