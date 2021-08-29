@@ -321,7 +321,7 @@ class Agent(object):
 
         # print("limit_max_height:", limit_max_height)
 
-        game_num = 10
+        game_num = 5
         self.limit_max_height = 5
         game_states, game_mcts_probs, game_current_players = [],[],[] 
         game_piececount, game_score, game_winer = [],[],[]
