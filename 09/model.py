@@ -111,75 +111,75 @@ class MLP_Mixer(nn.Module):
 
         return x_action, x_value
 
-# 定义残差块
-# class ResidualBlock(nn.Module):
-#     #实现子module: Residual    Block
-#     def __init__(self,inchannel,outchannel,stride=1,shortcut=None):
-#         super(ResidualBlock,self).__init__()
-#         self.left=nn.Sequential(
-#             nn.Conv2d(inchannel,outchannel,3,stride,1,bias=False),
-#             nn.BatchNorm2d(outchannel),
-#             nn.ReLU(inplace=True),
-#             nn.Conv2d(outchannel,outchannel,3,1,1,bias=False),
-#             nn.BatchNorm2d(outchannel)
-#         )
-#         self.right=shortcut
+定义残差块
+class ResidualBlock(nn.Module):
+    #实现子module: Residual    Block
+    def __init__(self,inchannel,outchannel,stride=1,shortcut=None):
+        super(ResidualBlock,self).__init__()
+        self.left=nn.Sequential(
+            nn.Conv2d(inchannel,outchannel,3,stride,1,bias=False),
+            nn.BatchNorm2d(outchannel),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(outchannel,outchannel,3,1,1,bias=False),
+            nn.BatchNorm2d(outchannel)
+        )
+        self.right=shortcut
         
-#     def forward(self,x):
-#         out=self.left(x)
-#         residual=x if self.right is None else self.right(x)
-#         out+=residual
-#         return F.relu(out)
+    def forward(self,x):
+        out=self.left(x)
+        residual=x if self.right is None else self.right(x)
+        out+=residual
+        return F.relu(out)
 
-# class Net(nn.Module):
-#     def __init__(self, image_size, action_size):
-#         super(Net, self).__init__()
+class Net(nn.Module):
+    def __init__(self, image_size, action_size):
+        super(Net, self).__init__()
 
-#         # 由于每个棋盘大小对最终对应一个动作，所以补齐的效果比较好
-#         # 直接来9层的残差网络
-#         self.conv=self._make_layer(5, 128, 9)
+        # 由于每个棋盘大小对最终对应一个动作，所以补齐的效果比较好
+        # 直接来9层的残差网络
+        self.conv=self._make_layer(5, 128, 9)
 
-#         # 动作预测
-#         self.act_conv1 = nn.Conv2d(128, 1, 1)
-#         self.act_conv1_bn = nn.BatchNorm2d(1)
-#         self.act_fc1 = nn.Linear(image_size, action_size)
-#         # 动作价值
-#         self.val_conv1 = nn.Conv2d(128, 1, 1)
-#         self.val_conv1_bn = nn.BatchNorm2d(1)
-#         self.val_fc1 = nn.Linear(image_size, 128)
-#         self.val_fc2 = nn.Linear(128, 1)
+        # 动作预测
+        self.act_conv1 = nn.Conv2d(128, 1, 1)
+        self.act_conv1_bn = nn.BatchNorm2d(1)
+        self.act_fc1 = nn.Linear(image_size, action_size)
+        # 动作价值
+        self.val_conv1 = nn.Conv2d(128, 1, 1)
+        self.val_conv1_bn = nn.BatchNorm2d(1)
+        self.val_fc1 = nn.Linear(image_size, 128)
+        self.val_fc2 = nn.Linear(128, 1)
 
-#     def _make_layer(self,inchannel,outchannel,block_num,stride=1):
-#         #构建layer,包含多个residual block
-#         shortcut=nn.Sequential(
-#             nn.Conv2d(inchannel,outchannel,1,stride,bias=False),
-#             nn.BatchNorm2d(outchannel)
-#         )
+    def _make_layer(self,inchannel,outchannel,block_num,stride=1):
+        #构建layer,包含多个residual block
+        shortcut=nn.Sequential(
+            nn.Conv2d(inchannel,outchannel,1,stride,bias=False),
+            nn.BatchNorm2d(outchannel)
+        )
  
-#         layers=[ ]
-#         layers.append(ResidualBlock(inchannel,outchannel,stride,shortcut))
+        layers=[ ]
+        layers.append(ResidualBlock(inchannel,outchannel,stride,shortcut))
         
-#         for i in range(1,block_num):
-#             layers.append(ResidualBlock(outchannel,outchannel))
-#         return nn.Sequential(*layers)
+        for i in range(1,block_num):
+            layers.append(ResidualBlock(outchannel,outchannel))
+        return nn.Sequential(*layers)
 
-#     def forward(self, x):
-#         x = self.conv(x)
+    def forward(self, x):
+        x = self.conv(x)
 
-#         # 动作
-#         x_act = self.act_conv1(x)
-#         x_act = self.act_conv1_bn(x_act)
-#         x_act = x_act.view(x_act.size(0), -1)
-#         x_act = F.log_softmax(self.act_fc1(x_act), dim=1)
+        # 动作
+        x_act = self.act_conv1(x)
+        x_act = self.act_conv1_bn(x_act)
+        x_act = x_act.view(x_act.size(0), -1)
+        x_act = F.log_softmax(self.act_fc1(x_act), dim=1)
 
-#         # 胜率 输出为 -1 ~ 1 之间的数字
-#         x_val = self.val_conv1(x)
-#         x_val = self.val_conv1_bn(x_val)
-#         x_val = F.relu(x_val)
-#         x_val = x_val.view(x_val.size(0), -1)
-#         x_val = F.relu(self.val_fc1(x_val))
-#         x_val = torch.tanh(self.val_fc2(x_val))
-#         return x_act, x_val
+        # 胜率 输出为 -1 ~ 1 之间的数字
+        x_val = self.val_conv1(x)
+        x_val = self.val_conv1_bn(x_val)
+        x_val = F.relu(x_val)
+        x_val = x_val.view(x_val.size(0), -1)
+        x_val = F.relu(self.val_fc1(x_val))
+        x_val = torch.tanh(self.val_fc2(x_val))
+        return x_act, x_val
 
 class PolicyValueNet():
     def __init__(self, input_width, input_height, output_size, model_file=None, device=None, l2_const=1e-4):
@@ -194,8 +194,8 @@ class PolicyValueNet():
         print("use", device)
 
         self.l2_const = l2_const  
-        # self.policy_value_net = Net(self.input_size, self.output_size).to(device)
-        self.policy_value_net = MLP_Mixer(20,10,5,2,5,128,64,512,5,8)
+        self.policy_value_net = Net(self.input_size, self.output_size)
+        # self.policy_value_net = MLP_Mixer(20,10,5,2,5,128,64,512,5,8)
         self.policy_value_net.to(device)
         self.print_netwark()
 
