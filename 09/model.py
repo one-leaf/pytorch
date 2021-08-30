@@ -111,7 +111,7 @@ class MLP_Mixer(nn.Module):
 
         return x_action, x_value
 
-定义残差块
+# 定义残差块
 class ResidualBlock(nn.Module):
     #实现子module: Residual    Block
     def __init__(self,inchannel,outchannel,stride=1,shortcut=None):
