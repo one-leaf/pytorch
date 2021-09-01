@@ -502,7 +502,7 @@ class Agent(object):
         for j in range(game_num):
             if game_piececount[j]==max_piececount:
                 game_win[j] = 1
-            if game_score[j]>0 and game_score[j] == max_score:
+            if game_score[j]>=limit_max_height//5 and game_score[j] == max_score:
                 game_loss[j] = -1
 
         print("win",game_win,"score",game_loss)
