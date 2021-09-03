@@ -194,8 +194,8 @@ class PolicyValueNet():
         print("use", device)
 
         self.l2_const = l2_const  
-        # self.policy_value_net = Net(self.input_size, self.output_size)
-        self.policy_value_net = MLP_Mixer(20,10,5,2,5,128,64,512,5,16)
+        self.policy_value_net = Net(self.input_size, self.output_size)
+        # self.policy_value_net = MLP_Mixer(20,10,5,2,5,128,64,512,5,16)
         self.policy_value_net.to(device)
         self.print_netwark()
 
