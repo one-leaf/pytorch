@@ -420,9 +420,9 @@ class Agent(object):
             # for o in game_mcts_probs[j][:-10]: mcts_probs.append(o)
             # for p in game_current_players[j][:-10]:
             if j in loss_game:
-                for o in game_states[j][:40]: states.append(o)
-                for o in game_mcts_probs[j][:40]: mcts_probs.append(o)
-                for p in game_current_players[j][:40]:
+                for o in game_states[j][:20]: states.append(o)
+                for o in game_mcts_probs[j][:20]: mcts_probs.append(o)
+                for p in game_current_players[j][:20]:
                     if p==0:
                         winers.append(game_player_0[j])
                     else:
