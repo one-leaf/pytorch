@@ -334,7 +334,7 @@ class Agent(object):
 
             _states, _mcts_probs, _current_players=[],[],[]
             game = copy.deepcopy(self)
-            game.limit_max_height = 5
+            # game.limit_max_height = 5
 
             for i in count():
                 action, move_probs = player.get_action(game, temp=temp, return_prob=1) 
