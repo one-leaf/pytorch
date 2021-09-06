@@ -97,7 +97,7 @@ class Dataset(torch.utils.data.Dataset):
         movefiles=os.listdir(data_wait_dir)
         # 等待5秒钟，防止有数据还在写入
         time.sleep(5)
-        i = 0
+        i = -1
         for i, fn in enumerate(movefiles):
             filename = "{}.pkl".format(self.index % self.max_keep_size,)
             savefile = os.path.join(self.data_dir, filename)
@@ -107,7 +107,7 @@ class Dataset(torch.utils.data.Dataset):
             self.save_index() 
             if i>=100 and i>len(movefiles)*0.2: break       
         print("mv %s/%s files to train"%(i,len(movefiles)))
-        if i==0:
+        if i==-1:
             print("SLEEP 60s for watting data")
             time.sleep(60)
             raise Exception("NEED SOME NEW DATA TO TRAIN")
