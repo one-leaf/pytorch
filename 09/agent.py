@@ -378,6 +378,10 @@ class Agent(object):
                 game_player_0[j] = 1 if game_winer[j]==0 else -1
                 game_player_1[j] = -1 * game_player_0[j]
 
+        # 只要一个最差的
+        if len(loss_game)>1:
+            loss_game=[]
+
         # 如果只有一个最大值
         # if game_piececount.count(max_piececount)==1:
         #     for j in range(game_num):
