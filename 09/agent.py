@@ -324,7 +324,7 @@ class Agent(object):
         # print("limit_max_height:", limit_max_height)
 
         game_num = 5
-        self.limit_max_height = 5
+        # self.limit_max_height = 5
         game_states, game_mcts_probs, game_current_players = [],[],[] 
         game_piececount, game_score, game_winer = [],[],[]
         for _ in range(game_num):
@@ -420,9 +420,9 @@ class Agent(object):
             # for o in game_mcts_probs[j][:-10]: mcts_probs.append(o)
             # for p in game_current_players[j][:-10]:
             if j in loss_game:
-                for o in game_states[j][:20]: states.append(o)
-                for o in game_mcts_probs[j][:20]: mcts_probs.append(o)
-                for p in game_current_players[j][:20]:
+                for o in game_states[j][:60]: states.append(o)
+                for o in game_mcts_probs[j][:60]: mcts_probs.append(o)
+                for p in game_current_players[j][:60]:
                     if p==0:
                         winers.append(game_player_0[j])
                     else:
