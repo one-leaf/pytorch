@@ -89,8 +89,11 @@ class MLP_Mixer(nn.Module):
             MixerBlock(n_patches=n_patches, hidden_dim=hidden_dim, token_dim=token_dim, channel_dim=channel_dim, dropout=dropout) for i in range(n_blocks)
         ])
         self.flatten = nn.Flatten(start_dim=2)
-        self.Layernorm1 = nn.LayerNorm(hidden_dim)  # (n_samples, n_patches, hidden_dim)
 
+        self.action_line = nn.Linear(hidden_dim, hidden_dim)
+        self.value_line = nn.Linear(hidden_dim, hidden_dim)
+        self.Layernorm1 = nn.LayerNorm(hidden_dim)  # (n_samples, n_patches, hidden_dim)
+        self.Layernorm2 = nn.LayerNorm(hidden_dim)  # (n_samples, n_patches, hidden_dim)
         self.action_fc = nn.Linear(hidden_dim, n_action)
         self.value_fc1 = nn.Linear(hidden_dim, hidden_dim)
         self.value_fc2 = nn.Linear(hidden_dim, 1)
@@ -101,13 +104,18 @@ class MLP_Mixer(nn.Module):
         x = x.permute(0, 2, 1)      # (n_samples, n_patches, hidden_dim)
         for block in self.blocks:
             x = block(x)            # (n_samples, n_patches, hidden_dim)
-        x = self.Layernorm1(x)      # (n_samples, n_patches, hidden_dim)
-        x = x.mean(dim = 1)         # (n_sample, hidden_dim)
 
-        x_action = F.log_softmax(self.action_fc(x), dim=1)  # (n_samples, n_action)
+        x_act = self.action_line(x)         # (n_samples, n_patches, hidden_dim)
+        x_act = self.Layernorm1(x_act)      # (n_samples, n_patches, hidden_dim)
+        x_act = x_act.mean(dim = 1)         # (n_sample, hidden_dim)
+        x_action = F.log_softmax(self.action_fc(x_act), dim=1)  # (n_samples, n_action)
 
-        x_value = F.gelu(self.value_fc1(x))
-        x_value = torch.tanh(self.value_fc2(x_value))
+        x_val = self.value_line(x)          # (n_samples, n_patches, hidden_dim)
+        x_val = self.Layernorm1(x_val)      # (n_samples, n_patches, hidden_dim)
+        x_val = x_val.mean(dim = 1)         # (n_sample, hidden_dim)
+        x_val = F.gelu(x_val)               # (n_samples, hidden_dim)
+        x_val = F.gelu(self.value_fc1(x_val))
+        x_value = torch.tanh(self.value_fc2(x_val))
 
         return x_action, x_value
 
