@@ -363,24 +363,26 @@ class Agent(object):
             game_winer.append(winer)
             game.print()
 
-        min_piececount = min(game_piececount)
         # max_score = max(game_score)
         game_player_0 = [-1 for _ in range(game_num)] 
         game_player_1 = [-1 for _ in range(game_num)] 
 
-        loss_game=[]
-        for j in range(game_num):
-            if game_piececount[j]==min_piececount:
-                game_player_0[j] = -1
-                game_player_1[j] = -1
-                loss_game.append(j)
-            else:
-                game_player_0[j] = 1 if game_winer[j]==0 else -1
-                game_player_1[j] = -1 * game_player_0[j]
+        min_game = -1
+        max_game = -1
 
-        # 只要一个最差的
-        if len(loss_game)>1:
-            loss_game=[]
+        min_piececount = min(game_piececount)
+        max_piececount = max(game_piececount)
+
+        if game_piececount.count(min_piececount)==1:
+            min_game = game_piececount.index(min_piececount)
+
+        if game_piececount.count(max_piececount)==1:
+            max_game = game_piececount.index(max_piececount)
+
+        for j in range(game_num):
+            game_player_0[j] = 1 if game_winer[j]==0 else -1
+            game_player_1[j] = -1 * game_player_0[j]
+
 
         # 如果只有一个最大值
         # if game_piececount.count(max_piececount)==1:
@@ -414,26 +416,20 @@ class Agent(object):
         #     # else:
         #     #     game_player_0[j] = -1
         #     #     game_player_1[j] = -1
-
+        print("game_piececount",game_piececount,"game_score",game_score)
         print("game_player_0",game_player_0,"game_player_1",game_player_1)
 
-        # 如果是属于最差的访问，只取样本的最后15步
         states, mcts_probs, winers= [], [], []
         for j in range(game_num):
-            # for o in game_states[j][:-10]: states.append(o)
-            # for o in game_mcts_probs[j][:-10]: mcts_probs.append(o)
-            # for p in game_current_players[j][:-10]:
-            if j in loss_game:
-                for o in game_states[j][:60]: states.append(o)
-                for o in game_mcts_probs[j][:60]: mcts_probs.append(o)
-                for p in game_current_players[j][:60]:
-                    if p==0:
-                        winers.append(game_player_0[j])
-                    else:
-                        winers.append(game_player_1[j])
+            for o in game_states[j]: states.append(o)
+            for o in game_mcts_probs[j]: mcts_probs.append(o)
+            if j == min_game:
+                for p in game_current_players[j]:
+                    winers.append(-1)
+            elif j == max_game:
+                for p in game_current_players[j]:
+                    winers.append(1)
             else:
-                for o in game_states[j]: states.append(o)
-                for o in game_mcts_probs[j]: mcts_probs.append(o)
                 for p in game_current_players[j]:
                     if p==0:
                         winers.append(game_player_0[j])
