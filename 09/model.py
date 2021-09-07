@@ -111,7 +111,7 @@ class MLP_Mixer(nn.Module):
         x_action = F.log_softmax(self.action_fc(x_act), dim=1)  # (n_samples, n_action)
 
         x_val = self.value_line(x)          # (n_samples, n_patches, hidden_dim)
-        x_val = self.Layernorm1(x_val)      # (n_samples, n_patches, hidden_dim)
+        x_val = self.Layernorm2(x_val)      # (n_samples, n_patches, hidden_dim)
         x_val = x_val.mean(dim = 1)         # (n_sample, hidden_dim)
         x_val = F.gelu(x_val)               # (n_samples, hidden_dim)
         x_val = F.gelu(self.value_fc1(x_val))
