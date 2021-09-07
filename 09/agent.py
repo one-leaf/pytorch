@@ -383,7 +383,7 @@ class Agent(object):
             game_player_0[j] = 1 if game_winer[j]==0 else -1
             game_player_1[j] = -1 * game_player_0[j]
 
-        print("game_piececount",game_piececount,"game_score",game_score)
+        print("game_piececount",game_piececount,"game_score",game_score,"max",max_game,"min",min_game)
         print("game_player_0",game_player_0,"game_player_1",game_player_1)
 
         states, mcts_probs, winers= [], [], []
