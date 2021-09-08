@@ -370,18 +370,18 @@ class Agent(object):
         min_game = -1
         max_game = -1
 
-        min_piececount = min(game_piececount)
-        max_piececount = max(game_piececount)
+        # min_piececount = min(game_piececount)
+        # max_piececount = max(game_piececount)
 
-        if game_piececount.count(min_piececount)==1:
-            min_game = game_piececount.index(min_piececount)
+        # if game_piececount.count(min_piececount)==1:
+        #     min_game = game_piececount.index(min_piececount)
 
-        if game_piececount.count(max_piececount)==1:
-            max_game = game_piececount.index(max_piececount)
+        # if game_piececount.count(max_piececount)==1:
+        #     max_game = game_piececount.index(max_piececount)
 
         for j in range(game_num):
             game_player_0[j] = 1 if game_winer[j]==0 else -1
-            game_player_1[j] = -1 * game_player_0[j]
+            game_player_1[j] = 1 if game_winer[j]==1 else -1
 
         print("game_piececount",game_piececount,"game_score",game_score,"max",max_game,"min",min_game)
         print("game_player_0",game_player_0,"game_player_1",game_player_1)
