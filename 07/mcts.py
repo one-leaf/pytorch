@@ -74,7 +74,7 @@ class MCTS():
         v = 0
         if s in self.Vs: v = self.Vs[s]
 
-        print(state.steps, state.piecesteps, state.piececount, state.curr_player, "n:", n, "depth:", self.max_depth, "value:", round(v,2), info,)
+        print(state.steps, state.curr_player, state.piecesteps, state.piececount, state.curr_player, "n:", n, "depth:", self.max_depth, "value:", round(v,2), info,)
                 #, \   "first:", state.positions_to_actions(list(self._first_act)[-3:]))
 
         if temp == 0:
