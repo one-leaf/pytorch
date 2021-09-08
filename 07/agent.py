@@ -454,7 +454,11 @@ class Agent(object):
             self.limit_max_height = limit_max_height
 
         # 玩几局订胜负，如果最高为5，玩4局，否则玩2局
-        game_num = 4 if limit_max_height != 10 else 2
+        if limit_max_height != 10:
+            game_num = 4
+            player.mcts._n_playout = 32
+        else:
+            game_num = 2
         
         game_states, game_mcts_probs, game_masks = [],[],[] 
         game_piececount, game_score = [],[]
