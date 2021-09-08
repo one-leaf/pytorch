@@ -309,7 +309,7 @@ class MCTSPlayer(object):
                 # if act_probs[idx]<0.99:
                 # if abs(value)>0.5 or random.random()>0.95:
                 if state.piececount < 3:
-                    p = 0.75                 
+                    p = 0.95                 
                     dirichlet = np.random.dirichlet(0.03 * np.ones(len(act_probs)))
                     act = np.random.choice(acts, p=p * act_probs + (1.0-p) * dirichlet)
                 action = state.position_to_action(act)
