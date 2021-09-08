@@ -27,6 +27,8 @@ class MCTS():
         self.Ns = {}  # 保存 遍历次数 key: s
         self.Ps = {}  # 保存 动作概率 key: s, a
         self.Es = {}  # 保存游戏最终得分 key: s
+        self.Vs = {}  # 保存游戏局面打分 key: s # 这个不需要，只是缓存
+
         print("create mcts, c_puct: {}, n_playout: {}".format(c_puct, n_playout))
 
     def reset(self):
@@ -35,6 +37,7 @@ class MCTS():
         self.Ns = {}  # 保存 遍历次数 key: s
         self.Ps = {}  # 保存 动作概率 key: s, a
         self.Es = {}  # 保存游戏最终得分 key: s
+        self.Vs = {}  # 保存游戏局面打分 key: s # 这个不需要，只是缓存
 
     def get_action_probs(self, state, temp=1):
         """
@@ -68,7 +71,10 @@ class MCTS():
             if (s, act) in self.Qsa: q = self.Qsa[(s, act)]
             if s in self.Ps: p = self.Ps[s][act]
             info.append([action, visit, round(q,2), round(p,2)]) 
-        print(state.steps, state.piecesteps, state.piececount, state.curr_player, "n:", n, "depth:" ,self.max_depth, info,)
+        v = 0
+        if s in self.Vs: v = self.Vs[s]
+
+        print(state.steps, state.piecesteps, state.piececount, state.curr_player, "n:", n, "depth:", self.max_depth, "value:", round(v,2), info,)
                 #, \   "first:", state.positions_to_actions(list(self._first_act)[-3:]))
 
         if temp == 0:
@@ -127,7 +133,7 @@ class MCTS():
             self.Ps[s] = probs 
 
             self.Ns[s] = 0
-
+            self.Vs[s] = v
             return -v
 
         # 当前最佳概率和最佳动作
