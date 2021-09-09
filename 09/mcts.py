@@ -308,7 +308,7 @@ class MCTSPlayer(object):
                 # if act in [0,4] and random.random()>0.5:
                 # if act_probs[idx]<0.99:
                 # if abs(value)>0.5 or random.random()>0.95:
-                if state.piececount < 3:
+                if state.piececount < 50:
                     p = 0.95                 
                     dirichlet = np.random.dirichlet(0.03 * np.ones(len(act_probs)))
                     act = np.random.choice(acts, p=p * act_probs + (1.0-p) * dirichlet)
