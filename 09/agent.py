@@ -386,17 +386,25 @@ class Agent(object):
             game_player_0[j] = 1 if game_winer[j]==0 else -1
             game_player_1[j] = 1 if game_winer[j]==1 else -1
 
+        sort_index = sorted(range(len(game_piececount)), key=lambda k: game_piececount[k]+game_score[k])
+        
+        split_index = -(game_num//2)
+        max_index = sort_index[split_index:]
+        min_index = sort_index[:split_index]
+
         print("game_piececount",game_piececount,"game_score",game_score,"max",max_game,"min",min_game)
+        print("sort_index", sort_index, "max_index", max_index, "min_index", min_index)
         print("game_player_0",game_player_0,"game_player_1",game_player_1)
+
 
         states, mcts_probs, winers= [], [], []
         for j in range(game_num):
             for o in game_states[j]: states.append(o)
             for o in game_mcts_probs[j]: mcts_probs.append(o)
-            if j == min_game:
+            if j in min_index:
                 for p in game_current_players[j]:
                     winers.append(-1)
-            elif j == max_game:
+            elif j in max_index:
                 for p in game_current_players[j]:
                     winers.append(1)
             else:
