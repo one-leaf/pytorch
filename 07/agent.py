@@ -510,12 +510,13 @@ class Agent(object):
                 if game_piececount.count(max_p)==1:
                     break
 
+        game_num = len(game_states)
         max_piececount = max(game_piececount)
         max_score = max(game_score)
 
         game_win = [-1 for _ in range(game_num)] 
         game_loss = [1 for _ in range(game_num)] 
-        for j in range(len(game_piececount)):
+        for j in range(game_num):
             if game_piececount[j]==max_piececount:
                 game_win[j] = 1
             if game_score[j]>=limit_max_height//5 and game_score[j] == max_score:
@@ -545,7 +546,7 @@ class Agent(object):
         reward, piececount, agentcount = 0, 0, 0
         reward = sum(game_score)  
         piececount = sum(game_piececount)
-        agentcount = len(game_piececount)
+        agentcount = game_num
     
         return reward, piececount, agentcount, zip(states, mcts_probs, winners_z, masks)
 
