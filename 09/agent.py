@@ -162,7 +162,8 @@ class Agent(object):
             self.score += self.reward          
             # self.level, self.fallfreq = self.tetromino.calculate(self.score)   
             # self.fallpiece_height = landingHeight(self.fallpiece)
-            self.pieces_height.append(20-fallpiece_y)
+            r = 0.5 if self.reward>0 else 0
+            self.pieces_height.append(20 - fallpiece_y - r)
             self.fallpiece = None
 
         if  env:
