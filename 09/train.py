@@ -226,7 +226,7 @@ class Train():
             print("end data loader")
 
             self.policy_value_net = PolicyValueNet(GAME_WIDTH, GAME_HEIGHT, GAME_ACTIONS_NUM, model_file=model_file)
-
+            self.policy_value_net.save_model(model_file+".bak")
             # step = 0
             # # 如果训练数据一半都不到，就先攒训练数据
             # if self.dataset.curr_game_batch_num/self.dataset.buffer_size<0.5:
