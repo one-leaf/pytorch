@@ -517,6 +517,7 @@ class Agent(object):
             if game_score[j]>=limit_max_height//5 and game_score[j] == max_score:
                 game_loss[j] = -1
 
+        print("game_piececount",game_piececount,"game_score",game_score)
         print("win",game_win,"score",game_loss)
         
         states, mcts_probs, winers, masks = [], [], [], []
