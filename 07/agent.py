@@ -472,7 +472,7 @@ class Agent(object):
         for j in range(game_num):
             _states, _mcts_probs, _masks=[],[],[]
             game = copy.deepcopy(self)
-            # game.limit_max_height = 5
+            game.limit_max_height = 5
             # ig_action=random.choice([None,KEY_NONE,KEY_DOWN])
             # game.ig_action = ig_action
 
@@ -488,8 +488,8 @@ class Agent(object):
 
                 game.step(action)
                 if game.state!=0:
-                    # game.limit_max_height = max(game.pieces_height)+3
-                    # if game.limit_max_height>limit_max_height: game.limit_max_height=limit_max_height
+                    game.limit_max_height = max(game.pieces_height)+3
+                    if game.limit_max_height>limit_max_height: game.limit_max_height=limit_max_height
                     print('reward:',game.reward, 'len:', len(game.pieces_height), "limit_max_height:", game.limit_max_height, "next:", game.fallpiece['shape'], game.pieces_height)
 
                 if game.terminal:

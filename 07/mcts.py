@@ -119,8 +119,8 @@ class MCTS():
             elif state.state == 1:
                 if  state.reward>0:
                     v = -1
-                elif random.random()>0.8:
-                    v = 1        
+                # elif random.random()>0.8:
+                #     v = 1        
             self.Es[s] = v
 
         # 如果得分不等于0，标志这局游戏结束
@@ -132,6 +132,7 @@ class MCTS():
         if s not in self.Ps:               
             # 获得当前局面的概率 和 局面的打分, 这个已经过滤掉了不可用走子
             act_probs, v = self._policy(state)
+            if v == -1: v = -0.99
             probs = np.zeros(state.actions_num)
             for act, prob in act_probs:
                 probs[act] = prob
@@ -301,7 +302,7 @@ class MCTSPlayer(object):
                 # 早期多随机
                 
                 # if state.curr_player==0 and (state.piecesteps<=10 or state.piececount<=10 or value<=-0.9) and act in [0,4]:
-                if state.curr_player==0 and state.piecesteps<5:
+                if state.curr_player==0 and state.piecesteps<5 or :
                 # if act_probs[idx]<0.99:
                     p = 0.75                 
                     dirichlet = np.random.dirichlet(0.03 * np.ones(len(act_probs)))
