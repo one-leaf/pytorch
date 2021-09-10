@@ -128,7 +128,7 @@ class MCTS():
                 if state.reward>0:
                     v = -1
                 elif random.random()>0.5:
-                    v = 1
+                    return -1 * 1
             self.Es[s] = v
 
         # 如果得分不等于0，标志这局游戏结束
