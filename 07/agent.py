@@ -463,7 +463,6 @@ class Agent(object):
         # 玩几局订胜负，如果最高为5，玩4局，否则玩2局
         if limit_max_height != 10:
             game_num = 5
-            player.mcts._n_playout = 32
         else:
             game_num = 2
         
