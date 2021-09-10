@@ -472,7 +472,7 @@ class Agent(object):
         for j in range(game_num):
             _states, _mcts_probs, _masks=[],[],[]
             game = copy.deepcopy(self)
-            game.limit_max_height = 5
+            # game.limit_max_height = 5
             # ig_action=random.choice([None,KEY_NONE,KEY_DOWN])
             # game.ig_action = ig_action
 
