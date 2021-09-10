@@ -126,7 +126,7 @@ class MCTS():
                 # v = 1
             elif state.state == 1:
                 if state.reward>0:
-                    v = -1
+                    return -1 * -1
                 elif random.random()>0.5:
                     return -1 * 1
             self.Es[s] = v
