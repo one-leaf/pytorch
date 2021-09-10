@@ -330,7 +330,7 @@ class Agent(object):
         if random.random()>0.8:
             self.limit_max_height = 10
         else:
-            self.limit_max_height = random.randint(4,9)
+            self.limit_max_height = random.randint(5,9)
         limit_max_height = self.limit_max_height
         game_states, game_mcts_probs, game_current_players = [],[],[] 
         game_piececount, game_score, game_winer = [],[],[]
