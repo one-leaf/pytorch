@@ -488,8 +488,8 @@ class Agent(object):
 
                 game.step(action)
                 if game.state!=0:
-                    game.limit_max_height = max(game.pieces_height)+3
-                    if game.limit_max_height>limit_max_height: game.limit_max_height=limit_max_height
+                    # game.limit_max_height = max(game.pieces_height)+3
+                    # if game.limit_max_height>limit_max_height: game.limit_max_height=limit_max_height
                     print('reward:',game.reward, 'len:', len(game.pieces_height), "limit_max_height:", game.limit_max_height, "next:", game.fallpiece['shape'], game.pieces_height)
 
                 if game.terminal:

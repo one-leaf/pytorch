@@ -116,8 +116,11 @@ class MCTS():
                     v = -1 
                 # print("curr_player",state.curr_player,"winner",winner,"v",v,"reward",state.reward,"ph",state.pieces_height)
             # v = 0  
-            elif state.state == 1 and state.reward>0:
-                v = -1          
+            elif state.state == 1:
+                if  state.reward>0:
+                    v = -1
+                elif random.random()>0.5:
+                    v = 1        
             self.Es[s] = v
 
         # 如果得分不等于0，标志这局游戏结束
@@ -298,9 +301,9 @@ class MCTSPlayer(object):
                 # 早期多随机
                 
                 # if state.curr_player==0 and (state.piecesteps<=10 or state.piececount<=10 or value<=-0.9) and act in [0,4]:
-                if state.curr_player==0 and state.piececount<50:
+                if state.curr_player==0 and state.piecesteps<3:
                 # if act_probs[idx]<0.99:
-                    p = 0.95                 
+                    p = 0.75                 
                     dirichlet = np.random.dirichlet(0.03 * np.ones(len(act_probs)))
                     act = np.random.choice(acts, p=p * act_probs + (1.0-p) * dirichlet)
                
