@@ -124,10 +124,10 @@ class MCTS():
                 else:
                     v = -1 
                 # v = 1
-            elif state.state == 1 and random.random()>0.5:
+            elif state.state == 1:
                 if state.reward>0:
                     v = -1
-                else:
+                elif random.random()>0.5:
                     v = 1
             self.Es[s] = v
 
