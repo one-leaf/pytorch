@@ -124,7 +124,7 @@ class MCTS():
                 else:
                     v = -1 
                 # v = 1
-            elif state.state == 1 and state.piececount%3==0:
+            elif state.state == 1 and random.random()>0.8:
                 if state.reward>0:
                     v = -1
                 else:
