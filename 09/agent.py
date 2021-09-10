@@ -337,7 +337,7 @@ class Agent(object):
         for _ in range(game_num):
             # self.lock = (self.lock + 1)%2 
             # self.availables = self.get_availables()
-            # print("limit_max_height", self.limit_max_height, "lock", self.lock)
+            print("limit_max_height", self.limit_max_height)
 
             _states, _mcts_probs, _current_players=[],[],[]
             game = copy.deepcopy(self)
