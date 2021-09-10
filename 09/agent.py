@@ -327,21 +327,21 @@ class Agent(object):
         # print("limit_max_height:", limit_max_height)
 
         game_num = 5
-        if random.random()>0.8:
+        if random.random()>0.7:
             self.limit_max_height = 10
         else:
-            self.limit_max_height = random.randint(5,9)
+            self.limit_max_height = random.randint(4,9)
         limit_max_height = self.limit_max_height
         game_states, game_mcts_probs, game_current_players = [],[],[] 
         game_piececount, game_score, game_winer = [],[],[]
         for _ in range(game_num):
             # self.lock = (self.lock + 1)%2 
             # self.availables = self.get_availables()
-            print("limit_max_height", self.limit_max_height)
+            # print("limit_max_height", self.limit_max_height)
 
             _states, _mcts_probs, _current_players=[],[],[]
             game = copy.deepcopy(self)
-            game.limit_max_height = 5
+            # game.limit_max_height = 5
 
             for i in count():
                 action, move_probs = player.get_action(game, temp=temp, return_prob=1) 
@@ -353,8 +353,8 @@ class Agent(object):
                 game.step(action)
 
                 if game.state!=0:
-                    game.limit_max_height = max(game.pieces_height)+3
-                    if game.limit_max_height>limit_max_height: game.limit_max_height=limit_max_height
+                    # game.limit_max_height = max(game.pieces_height)+3
+                    # if game.limit_max_height>limit_max_height: game.limit_max_height=limit_max_height
                     print('reward:',game.reward, 'len:', len(game.pieces_height), "limit_max_height:", game.limit_max_height, "next:", game.fallpiece['shape'], game.pieces_height)
 
                 if game.terminal:
