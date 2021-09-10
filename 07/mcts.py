@@ -119,7 +119,7 @@ class MCTS():
             elif state.state == 1:
                 if  state.reward>0:
                     v = -1
-                elif random.random()>0.5:
+                elif random.random()>0.8:
                     v = 1        
             self.Es[s] = v
 
@@ -301,7 +301,7 @@ class MCTSPlayer(object):
                 # 早期多随机
                 
                 # if state.curr_player==0 and (state.piecesteps<=10 or state.piececount<=10 or value<=-0.9) and act in [0,4]:
-                if state.curr_player==0 and state.piecesteps<3:
+                if state.curr_player==0 and state.piecesteps<5:
                 # if act_probs[idx]<0.99:
                     p = 0.75                 
                     dirichlet = np.random.dirichlet(0.03 * np.ones(len(act_probs)))
