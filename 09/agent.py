@@ -245,12 +245,11 @@ class Agent(object):
 
     # 统计当前最大高度
     def getMaxHeight(self):
-        c = self.height
+        c = 0
         for y in range(self.height):
             for x in range(self.width):
                 if self.board[x][y]!=blank:
                     c=y
-                    print("c",c)
                     break
             if c!=0:break            
         return self.height - c
@@ -344,7 +343,6 @@ class Agent(object):
                 if game.state!=0:
                     # game.limit_max_height = max(game.pieces_height)+3
                     # if game.limit_max_height>limit_max_height: game.limit_max_height=limit_max_height
-                    print(game.board)
                     print('reward:',game.reward, 'len:', len(game.pieces_height), "max_height:", game.getMaxHeight(), "next:", game.fallpiece['shape'], game.pieces_height)
                     temp_winer = []
                     winer = 1 if game.reward>0 else -1

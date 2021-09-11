@@ -225,7 +225,7 @@ class Agent(object):
 
     # 统计当前最大高度
     def getMaxHeight(self):
-        c = self.height
+        c = 0
         for y in range(self.height):
             for x in range(self.width):
                 if self.board[x][y]!=blank:
