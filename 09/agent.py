@@ -177,7 +177,7 @@ class Agent(object):
             self.piececount +=1 
 
             if (not self.tetromino.validposition(self.board,self.fallpiece)) or \
-                (self.limit_max_height>0 and (20-fallpiece_y)>self.limit_max_height):  
+                (self.limit_max_height>0 and self.getMaxHeight()>self.limit_max_height):  
                 
                 self.terminal = True 
                 self.state = 2
@@ -326,12 +326,9 @@ class Agent(object):
 
         # print("limit_max_height:", limit_max_height)
 
-        game_num = 5
-        if random.random()>0.7:
-            self.limit_max_height = 10
-        else:
-            self.limit_max_height = random.randint(4,9)
-        limit_max_height = self.limit_max_height
+        game_num = 2
+        self.limit_max_height = random.randint(1,20)
+        # limit_max_height = self.limit_max_height
         game_states, game_mcts_probs, game_current_players = [],[],[] 
         game_piececount, game_score, game_winer = [],[],[]
         for _ in range(game_num):
@@ -405,18 +402,18 @@ class Agent(object):
         for j in range(game_num):
             for o in game_states[j]: states.append(o)
             for o in game_mcts_probs[j]: mcts_probs.append(o)
-            if j in min_index:
-                for p in game_current_players[j]:
-                    winers.append(-1)
-            elif j in max_index:
-                for p in game_current_players[j]:
-                    winers.append(1)
-            else:
-                for p in game_current_players[j]:
-                    if p==0:
-                        winers.append(game_player_0[j])
-                    else:
-                        winers.append(game_player_1[j])
+            # if j in min_index:
+            #     for p in game_current_players[j]:
+            #         winers.append(-1)
+            # elif j in max_index:
+            #     for p in game_current_players[j]:
+            #         winers.append(1)
+            # else:
+            for p in game_current_players[j]:
+                if p==0:
+                    winers.append(game_player_0[j])
+                else:
+                    winers.append(game_player_1[j])
 
         winners_z = np.array(winers)
 
