@@ -225,7 +225,7 @@ class PolicyValueNet():
 
     # 打印当前网络
     def print_netwark(self):
-        x = torch.Tensor(1,5,20,10).to(self.device)
+        x = torch.Tensor(1,9,20,10).to(self.device)
         print(self.policy_value_net)
         v, p = self.policy_value_net(x)
         print("value:", v.size())
