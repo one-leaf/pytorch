@@ -292,23 +292,13 @@ class Agent(object):
         return board
 
     # 获得当前的全部特征
-    # 背景 + 前4步走法 = 5
-    # 返回 [5, height, width]
+    # 背景 + 前6步走法 = 9
+    # 返回 [9, height, width]
     def current_state(self):
-        board_background = self.getBoard()
-        fallpiece_1 =  self.fallpiece_status[-1]
-        fallpiece_2 = np.zeros((self.height, self.width))
-        fallpiece_3 = np.zeros((self.height, self.width))
-        fallpiece_4 = np.zeros((self.height, self.width))
-
-        if len(self.fallpiece_status)>1:           
-            fallpiece_2 = self.fallpiece_status[-2]  
-        if len(self.fallpiece_status)>2:           
-            fallpiece_3 = self.fallpiece_status[-3]  
-        if len(self.fallpiece_status)>3:           
-            fallpiece_4 = self.fallpiece_status[-4]  
-
-        state = np.stack([board_background, fallpiece_4, fallpiece_3, fallpiece_2, fallpiece_1])
+        state = np.zeros((9, self.height, self.width))
+        state[0] = self.getBoard()
+        for j, fallpices in enumerate(self.fallpiece_status[-8:]):
+            state[j+1]=fallpices
         return state          
 
 
@@ -339,13 +329,12 @@ class Agent(object):
             _states, _mcts_probs, _current_players=[],[],[]
             game = copy.deepcopy(self)
             # game.limit_max_height = 5
-
             for i in count():
                 action, move_probs = player.get_action(game, temp=temp, return_prob=1) 
 
                 _states.append(game.current_state())
                 _mcts_probs.append(move_probs)
-                _current_players.append(game.curr_player)
+                #_current_players.append(game.curr_player)
 
                 game.step(action)
 
@@ -353,6 +342,12 @@ class Agent(object):
                     # game.limit_max_height = max(game.pieces_height)+3
                     # if game.limit_max_height>limit_max_height: game.limit_max_height=limit_max_height
                     print('reward:',game.reward, 'len:', len(game.pieces_height), "limit_max_height:", game.limit_max_height, "next:", game.fallpiece['shape'], game.pieces_height)
+                    temp_winer = []
+                    winer = 1 if game.reward>0 else -1
+                    for _ in range(i):
+                        temp_winer.insert(0,winer)
+                        winer = -1 * winer
+                    _current_players.extend(temp_winer)
 
                 if game.terminal:
                     break
@@ -368,11 +363,11 @@ class Agent(object):
             game.print()
 
         # max_score = max(game_score)
-        game_player_0 = [-1 for _ in range(game_num)] 
-        game_player_1 = [-1 for _ in range(game_num)] 
+        # game_player_0 = [-1 for _ in range(game_num)] 
+        # game_player_1 = [-1 for _ in range(game_num)] 
 
-        min_game = -1
-        max_game = -1
+        # min_game = -1
+        # max_game = -1
 
         # min_piececount = min(game_piececount)
         # max_piececount = max(game_piececount)
@@ -383,25 +378,26 @@ class Agent(object):
         # if game_piececount.count(max_piececount)==1:
         #     max_game = game_piececount.index(max_piececount)
 
-        for j in range(game_num):
-            game_player_0[j] = 1 if game_winer[j]==0 else -1
-            game_player_1[j] = 1 if game_winer[j]==1 else -1
+        # for j in range(game_num):
+        #     game_player_0[j] = 1 if game_winer[j]==0 else -1
+        #     game_player_1[j] = 1 if game_winer[j]==1 else -1
 
-        sort_index = sorted(range(len(game_piececount)), key=lambda k: game_piececount[k]+game_score[k])
+        # sort_index = sorted(range(len(game_piececount)), key=lambda k: game_piececount[k]+game_score[k])
         
-        split_index = -(game_num//2)
-        max_index = sort_index[split_index:]
-        min_index = sort_index[:split_index]
+        # split_index = -(game_num//2)
+        # max_index = sort_index[split_index:]
+        # min_index = sort_index[:split_index]
 
-        print("game_piececount",game_piececount,"game_score",game_score,"max",max_game,"min",min_game)
-        print("sort_index", sort_index, "max_index", max_index, "min_index", min_index)
-        print("game_player_0",game_player_0,"game_player_1",game_player_1)
+        # print("game_piececount",game_piececount,"game_score",game_score,"max",max_game,"min",min_game)
+        # print("sort_index", sort_index, "max_index", max_index, "min_index", min_index)
+        # print("game_player_0",game_player_0,"game_player_1",game_player_1)
 
 
         states, mcts_probs, winers= [], [], []
         for j in range(game_num):
             for o in game_states[j]: states.append(o)
             for o in game_mcts_probs[j]: mcts_probs.append(o)
+            for o in game_current_players[j]: winers.append(o)
             # if j in min_index:
             #     for p in game_current_players[j]:
             #         winers.append(-1)
@@ -409,11 +405,11 @@ class Agent(object):
             #     for p in game_current_players[j]:
             #         winers.append(1)
             # else:
-            for p in game_current_players[j]:
-                if p==0:
-                    winers.append(game_player_0[j])
-                else:
-                    winers.append(game_player_1[j])
+            # for p in game_current_players[j]:
+            #     if p==0:
+            #         winers.append(game_player_0[j])
+            #     else:
+            #         winers.append(game_player_1[j])
 
         winners_z = np.array(winers)
 
