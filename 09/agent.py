@@ -250,6 +250,7 @@ class Agent(object):
             for x in range(self.width):
                 if self.board[x][y]!=blank:
                     c=y
+                    print("c",c)
                     break
             if c!=0:break            
         return self.height - c
