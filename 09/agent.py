@@ -324,7 +324,7 @@ class Agent(object):
         for _ in range(game_num):
             # self.lock = (self.lock + 1)%2 
             # self.availables = self.get_availables()
-            # print("limit_max_height", self.limit_max_height)
+            print("limit_max_height", self.limit_max_height)
 
             _states, _mcts_probs, _current_players=[],[],[]
             game = copy.deepcopy(self)
@@ -343,7 +343,7 @@ class Agent(object):
                 if game.state!=0:
                     # game.limit_max_height = max(game.pieces_height)+3
                     # if game.limit_max_height>limit_max_height: game.limit_max_height=limit_max_height
-                    print('reward:',game.reward, 'len:', len(game.pieces_height), "limit_max_height:", game.limit_max_height, "next:", game.fallpiece['shape'], game.pieces_height)
+                    print('reward:',game.reward, 'len:', len(game.pieces_height), "max_height:", game.getMaxHeight(), "next:", game.fallpiece['shape'], game.pieces_height)
                     temp_winer = []
                     winer = 1 if game.reward>0 else -1
                     for _ in range(_piecestep):
@@ -351,7 +351,7 @@ class Agent(object):
                         winer = -1 * winer
                     _current_players.extend(temp_winer)
                     _piecestep = 0
-                    
+
                 if game.terminal:
                     break
             
