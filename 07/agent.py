@@ -453,10 +453,10 @@ class Agent(object):
         if self.limit_max_height > 0:
             limit_max_height = self.limit_max_height
         else:
-            if random.random()<0.6:
+            if random.random()<0.2:
                 limit_max_height = 10
             else:
-                limit_max_height = 25
+                limit_max_height = random.randint(5,25)
 
             self.limit_max_height = limit_max_height
 
