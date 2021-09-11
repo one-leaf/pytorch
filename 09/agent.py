@@ -344,7 +344,7 @@ class Agent(object):
                     print('reward:',game.reward, 'len:', len(game.pieces_height), "limit_max_height:", game.limit_max_height, "next:", game.fallpiece['shape'], game.pieces_height)
                     temp_winer = []
                     winer = 1 if game.reward>0 else -1
-                    for _ in range(i):
+                    for _ in range(game.piecesteps):
                         temp_winer.insert(0,winer)
                         winer = -1 * winer
                     _current_players.extend(temp_winer)
