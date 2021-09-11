@@ -231,8 +231,9 @@ class Agent(object):
                 if self.board[x][y]!=blank:
                     c=y
                     break
-            if c!=0:break            
-        return self.height - c
+            if c!=0:break
+        h = 0 if c == 0 else self.height - c            
+        return h
 
     # 获得当前局面信息
     def getBoard(self):
