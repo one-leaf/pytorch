@@ -343,6 +343,7 @@ class Agent(object):
                 if game.state!=0:
                     # game.limit_max_height = max(game.pieces_height)+3
                     # if game.limit_max_height>limit_max_height: game.limit_max_height=limit_max_height
+                    print(game.board)
                     print('reward:',game.reward, 'len:', len(game.pieces_height), "max_height:", game.getMaxHeight(), "next:", game.fallpiece['shape'], game.pieces_height)
                     temp_winer = []
                     winer = 1 if game.reward>0 else -1
