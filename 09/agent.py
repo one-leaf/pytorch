@@ -329,6 +329,7 @@ class Agent(object):
             _states, _mcts_probs, _current_players=[],[],[]
             game = copy.deepcopy(self)
             # game.limit_max_height = 5
+            _piecestep=0
             for i in count():
                 action, move_probs = player.get_action(game, temp=temp, return_prob=1) 
 
@@ -337,6 +338,7 @@ class Agent(object):
                 #_current_players.append(game.curr_player)
 
                 game.step(action)
+                _piecestep+=1
 
                 if game.state!=0:
                     # game.limit_max_height = max(game.pieces_height)+3
@@ -344,11 +346,12 @@ class Agent(object):
                     print('reward:',game.reward, 'len:', len(game.pieces_height), "limit_max_height:", game.limit_max_height, "next:", game.fallpiece['shape'], game.pieces_height)
                     temp_winer = []
                     winer = 1 if game.reward>0 else -1
-                    for _ in range(game.piecesteps):
+                    for _ in range(_piecestep):
                         temp_winer.insert(0,winer)
                         winer = -1 * winer
                     _current_players.extend(temp_winer)
-
+                    _piecestep = 0
+                    
                 if game.terminal:
                     break
             
