@@ -239,7 +239,7 @@ class Train():
             #         logging.info("TRAIN Batch:{} end".format(self.dataset.curr_game_batch_num,))
             #         step += 1
             dataset_len = len(self.dataset)  
-            training_loader = torch.utils.data.DataLoader(self.dataset, batch_size=self.batch_size, shuffle=True, num_workers=2,)
+            training_loader = torch.utils.data.DataLoader(self.dataset, batch_size=self.batch_size, shuffle=True, num_workers=1,)
             old_probs = None
             test_batch = None
             totle = 0
