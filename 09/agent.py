@@ -420,7 +420,8 @@ class Agent(object):
         assert len(states)==len(mcts_probs)
         assert len(states)==len(winners_z)
 
-        print("add %s to dataset"%len(winers))
+        _len = len(winers)
+        print("add %s to dataset，winner: %s"%(_len,round(_len+sum(winers))/(2*_len),2))
         reward, piececount, agentcount = 0, 0, 0
         reward = sum(game_score)  
         piececount = sum(game_piececount)
