@@ -301,7 +301,7 @@ class Agent(object):
         fallpiece_status = self.fallpiece_status[-8:]
         fallpiece_status.reverse()
         fallpiece_len=len(fallpiece_status)
-        # 前4步是当前的，后4步是对手的
+        # 前4步是对手的，后4步是自己的
         for j in range(4):
             idx = 2*j
             if idx>=fallpiece_len: break
