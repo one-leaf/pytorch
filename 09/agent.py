@@ -293,13 +293,24 @@ class Agent(object):
         return board
 
     # 获得当前的全部特征
-    # 背景 + 前6步走法 = 9
+    # 背景 + 前8步走法 = 9
     # 返回 [9, height, width]
     def current_state(self):
         state = np.zeros((9, self.height, self.width))
         state[0] = self.getBoard()
-        for j, fallpices in enumerate(self.fallpiece_status[-8:]):
-            state[j+1]=fallpices
+        fallpiece_status = self.fallpiece_status[-8:]
+        fallpiece_status.reverse()
+        fallpiece_len=len(fallpiece_status)
+        # 前4步是当前的，后4步是对手的
+        for j in range(4):
+            idx = 2*j
+            if idx>=fallpiece_len: break
+            state(j+1)=fallpiece_status[idx]
+        for j in range(4):
+            idx = 2*j+1
+            if idx>=fallpiece_len: break
+            state(j+1+4)=fallpiece_status[idx]
+
         return state          
 
 
