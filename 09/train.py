@@ -245,8 +245,11 @@ class Train():
             totle = 0
             for i, data in enumerate(training_loader):  # 计划训练批次
                 if i==0:
-                    for obj in data:
-                        print(obj[0])
+                    _batch, _probs, _win = data
+                    print(np.sum(_batch[0], axis=2))
+                    print(_probs[0])
+                    print(_win[0])
+
                 # 使用对抗数据重新训练策略价值网络模型
                 totle_value, v_loss, p_loss, entropy = self.policy_update(data, self.epochs)
                 totle = totle + totle_value
