@@ -305,11 +305,11 @@ class Agent(object):
         for j in range(4):
             idx = 2*j
             if idx>=fallpiece_len: break
-            state(j+1)=fallpiece_status[idx]
+            state[j+1]=fallpiece_status[idx]
         for j in range(4):
             idx = 2*j+1
             if idx>=fallpiece_len: break
-            state(j+1+4)=fallpiece_status[idx]
+            state[j+5]=fallpiece_status[idx]
 
         return state          
 
