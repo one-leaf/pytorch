@@ -357,9 +357,14 @@ class Agent(object):
                     # if game.limit_max_height>limit_max_height: game.limit_max_height=limit_max_height
                     print('reward:',game.reward, 'len:', len(game.pieces_height), "max_height:", game.getMaxHeight(), "next:", game.fallpiece['shape'], game.pieces_height)
                     temp_winer = []
-                    winer = 1 if game.reward>0 else -1
-                    for _ in range(_piecestep):
-                        temp_winer.insert(0,winer)
+                    # 预测是针对上一步的，所以如果得分就是上一步正确，否则就是上一步错误
+                    # 最后一步应该为0，没有胜率
+                    winer = -1 if game.reward>0 else 1
+                    for j in range(_piecestep):
+                        if j==0:
+                            temp_winer=[0]
+                        else:
+                            temp_winer.insert(0,winer)
                         winer = -1 * winer
                     _current_players.extend(temp_winer)
                     _piecestep = 0
