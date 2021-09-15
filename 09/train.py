@@ -246,7 +246,7 @@ class Train():
             for i, data in enumerate(training_loader):  # 计划训练批次
                 if i==0:
                     _batch, _probs, _win = data
-                    print(np.sum(_batch[0], axis=2))
+                    print(np.sum(_batch[0], axis=1))
                     print(_probs[0])
                     print(_win[0])
 
