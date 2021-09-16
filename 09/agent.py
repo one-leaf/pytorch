@@ -7,6 +7,7 @@ from itertools import count
 import numpy as np
 import copy
 import random
+from collections import deque
 
 KEY_NONE, KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN = 0, 1, 2, 3, 4
 ACTIONS = [KEY_NONE, KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN]
@@ -50,7 +51,10 @@ class Agent(object):
         # 每个方块的高度
         self.pieces_height = []     
         # 下降的状态
-        self.fallpiece_status = [self.get_fallpiece_board()]
+        self.fallpiece_status = deque(maxlen=10)
+        for i in range(9):
+            self.fallpiece_status.append(np.zeros((self.height, self.width)))
+        self.fallpiece_status.append(self.get_fallpiece_board())
         # 忽略的步骤
         self.ig_action = None
         # 下一个可用步骤
@@ -188,7 +192,7 @@ class Agent(object):
             else: 
                 self.state = 1
 
-            self.fallpiece_status=[self.get_fallpiece_board()]          
+            # self.fallpiece_status=[self.get_fallpiece_board()]          
         else:
             self.state = 0
         
@@ -304,11 +308,11 @@ class Agent(object):
         # 前4步是对手的，后4步是自己的
         for j in range(4):
             idx = 2*j
-            if idx>=fallpiece_len: break
+            # if idx>=fallpiece_len: break
             state[j+1]=fallpiece_status[idx]
         for j in range(4):
             idx = 2*j+1
-            if idx>=fallpiece_len: break
+            # if idx>=fallpiece_len: break
             state[j+5]=fallpiece_status[idx]
 
         return state          
