@@ -304,14 +304,14 @@ class Agent(object):
         state[0] = self.getBoard()
         # fallpiece_status = self.fallpiece_status[-8:]
         # fallpiece_status.reverse()
-        fallpiece_len=len(self.fallpiece_status)
+        # fallpiece_len=len(self.fallpiece_status)
         # 前4步是对手的，后4步是自己的
         for j in range(4): 
-            idx = fallpiece_len-2*j-1  #(9,7,5,3)
+            idx = -2*j-1  #(-1,-3,-5,-7)
             # if idx>=fallpiece_len: break
             state[j+1]=self.fallpiece_status[idx]
         for j in range(4):
-            idx = fallpiece_len-(2*j+1)-1  #(8,6,4,2)
+            idx = -2*j-2  #(-2,-4,-6,-8)
             # if idx>=fallpiece_len: break
             state[j+5]=self.fallpiece_status[idx]
 
