@@ -31,28 +31,25 @@ class Cache(OrderedDict):
 
 
 class MlpBlock(nn.Module):
-    def __init__(self, mlp_dim:int, hidden_dim:int, dropout = 0.):
+    def __init__(self, mlp_dim:int, hidden_dim:int):
         super(MlpBlock, self).__init__()
         self.Linear1 = nn.Linear(mlp_dim, hidden_dim)
         self.gelu = nn.GELU()
-        self.dropout = nn.Dropout(dropout)
         self.Linear2 = nn.Linear(hidden_dim, mlp_dim)
     def forward(self,x):
         y = self.Linear1(x)
         y = self.gelu(y)
-        y = self.dropout(y)
         y = self.Linear2(y)
-        y = self.dropout(y)
         return y
 
 # 混合感知机块
 # 输入 x： (n_samples, n_patches, hidden_dim)
 # 输出 ： 和输入 x 的张量保存一致
 class MixerBlock(nn.Module):
-    def __init__(self, n_patches: int , hidden_dim: int, token_dim: int, channel_dim: int, dropout = 0.):
+    def __init__(self, n_patches: int , hidden_dim: int, token_dim: int, channel_dim: int):
         super(MixerBlock, self).__init__()
-        self.MLP_block_token = MlpBlock(n_patches, token_dim, dropout)
-        self.MLP_block_chan = MlpBlock(hidden_dim, channel_dim, dropout)
+        self.MLP_block_token = MlpBlock(n_patches, token_dim)
+        self.MLP_block_chan = MlpBlock(hidden_dim, channel_dim)
         self.LayerNorm_token = nn.LayerNorm(hidden_dim)
         self.LayerNorm_chan = nn.LayerNorm(hidden_dim)
 
@@ -86,9 +83,9 @@ class MLP_Mixer(nn.Module):
         n_patches =(image_size_h//patch_size_h) * (image_size_w//patch_size_w) # image_size 可以整除 patch_size
         self.patch_size_embbeder = nn.Conv2d(kernel_size=(patch_size_h,patch_size_w), stride=(patch_size_h,patch_size_w), in_channels=n_channels, out_channels= hidden_dim)
         self.blocks = nn.ModuleList([
-            MixerBlock(n_patches=n_patches, hidden_dim=hidden_dim, token_dim=token_dim, channel_dim=channel_dim, dropout=dropout) for i in range(n_blocks)
+            MixerBlock(n_patches=n_patches, hidden_dim=hidden_dim, token_dim=token_dim, channel_dim=channel_dim) for i in range(n_blocks)
         ])
-        # self.drop_layer = nn.Dropout(p=0.5)
+        self.drop_layer = nn.Dropout(p=dropout)
 
         self.flatten = nn.Flatten(start_dim=2)
         self.action_line = nn.Linear(hidden_dim, hidden_dim)
@@ -100,7 +97,7 @@ class MLP_Mixer(nn.Module):
         self.value_fc2 = nn.Linear(hidden_dim, 1)
 
     def forward(self,x):
-        # x = self.drop_layer(x)
+        x = self.drop_layer(x)
         x = self.patch_size_embbeder(x) # (n_samples, hidden_dim, image_size/patch_size, image_size/patch_size)
         x = self.flatten(x)         # (n_samples, hidden_dim, n_patches)
         x = x.permute(0, 2, 1)      # (n_samples, n_patches, hidden_dim)
@@ -205,7 +202,7 @@ class PolicyValueNet():
 
         self.l2_const = l2_const  
         # self.policy_value_net = Net(self.input_size, self.output_size)
-        self.policy_value_net = MLP_Mixer(20,10,9,2,5,128,64,512,5,8,dropout=0.5)
+        self.policy_value_net = MLP_Mixer(20,10,9,2,5,128,64,512,5,8,dropout=0.2)
         self.policy_value_net.to(device)
         self.print_netwark()
 
