@@ -88,7 +88,7 @@ class MLP_Mixer(nn.Module):
         self.blocks = nn.ModuleList([
             MixerBlock(n_patches=n_patches, hidden_dim=hidden_dim, token_dim=token_dim, channel_dim=channel_dim, dropout=dropout) for i in range(n_blocks)
         ])
-        self.drop_layer = nn.Dropout(p=0.5)
+        # self.drop_layer = nn.Dropout(p=0.5)
 
         self.flatten = nn.Flatten(start_dim=2)
         self.action_line = nn.Linear(hidden_dim, hidden_dim)
@@ -100,7 +100,7 @@ class MLP_Mixer(nn.Module):
         self.value_fc2 = nn.Linear(hidden_dim, 1)
 
     def forward(self,x):
-        x = self.drop_layer(x)
+        # x = self.drop_layer(x)
         x = self.patch_size_embbeder(x) # (n_samples, hidden_dim, image_size/patch_size, image_size/patch_size)
         x = self.flatten(x)         # (n_samples, hidden_dim, n_patches)
         x = x.permute(0, 2, 1)      # (n_samples, n_patches, hidden_dim)
@@ -205,7 +205,7 @@ class PolicyValueNet():
 
         self.l2_const = l2_const  
         # self.policy_value_net = Net(self.input_size, self.output_size)
-        self.policy_value_net = MLP_Mixer(20,10,9,2,5,128,64,512,5,8)
+        self.policy_value_net = MLP_Mixer(20,10,9,2,5,128,64,512,5,8,dropout=0.5)
         self.policy_value_net.to(device)
         self.print_netwark()
 
