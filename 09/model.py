@@ -88,8 +88,9 @@ class MLP_Mixer(nn.Module):
         self.blocks = nn.ModuleList([
             MixerBlock(n_patches=n_patches, hidden_dim=hidden_dim, token_dim=token_dim, channel_dim=channel_dim, dropout=dropout) for i in range(n_blocks)
         ])
-        self.flatten = nn.Flatten(start_dim=2)
+        self.drop_layer = nn.Dropout(p=0.5)
 
+        self.flatten = nn.Flatten(start_dim=2)
         self.action_line = nn.Linear(hidden_dim, hidden_dim)
         self.value_line = nn.Linear(hidden_dim, hidden_dim)
         self.Layernorm1 = nn.LayerNorm(hidden_dim)  # (n_samples, n_patches, hidden_dim)
@@ -99,6 +100,7 @@ class MLP_Mixer(nn.Module):
         self.value_fc2 = nn.Linear(hidden_dim, 1)
 
     def forward(self,x):
+        x = self.drop_layer(x)
         x = self.patch_size_embbeder(x) # (n_samples, hidden_dim, image_size/patch_size, image_size/patch_size)
         x = self.flatten(x)         # (n_samples, hidden_dim, n_patches)
         x = x.permute(0, 2, 1)      # (n_samples, n_patches, hidden_dim)
