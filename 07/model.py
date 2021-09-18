@@ -113,6 +113,8 @@ class Net(nn.Module):
     def __init__(self, image_size, action_size):
         super(Net, self).__init__()
 
+        self.drop_layer = nn.Dropout(p=0.5)
+
         # 由于每个棋盘大小对最终对应一个动作，所以补齐的效果比较好
         # 直接来9层的残差网络
         self.conv=self._make_layer(6, 128, 9)
@@ -150,6 +152,9 @@ class Net(nn.Module):
         return nn.Sequential(*layers)
 
     def forward(self, x):
+        
+        x = self.drop_layer(x)
+
         x = self.conv(x)
 
         # 动作
