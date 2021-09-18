@@ -20,7 +20,7 @@ class MCTS():
         self._max_var = 100                # 达到最大方差后停止探索
         self.lable = ""
         self._first_act = set()          # 优先考虑的走法,由于引入了防守奖励，所以不需要优先步骤
-        self._limit_max_var = False       # 是否限制最大方差
+        self._limit_max_var = True       # 是否限制最大方差
 
         self.Qsa = {}  # 保存 Q 值, key: s,a
         self.Nsa = {}  # 保存 遍历次数 key: s,a
@@ -56,6 +56,21 @@ class MCTS():
             self.search(state_copy)
             if self.depth>self.max_depth: self.max_depth = self.depth
 
+            if n >= len(state.availables):
+                # 取出当前所有的 visits
+                visits = [self.Nsa[(s, a)] if (s, a) in self.Nsa else 0 for a in available_acts]
+                values = [self.Qsa[(s, a)] if (s, a) in self.Qsa else 0 for a in available_acts]
+                if len(visits)==1: break
+                if sum(visits)==0: break
+
+                # 如果当前最大访问次数的值为负数或方差没有到最大值，继续                
+                idx = np.argmax(visits)
+                var = np.var(visits)
+                if values[idx]>0 and self._limit_max_var and var>self._max_var: break
+                # 如果判定必输或必赢，直接结束
+                if (values[idx]<=-0.99 or values[idx]>=0.99) and var>self._max_var: break
+
+
         act_visits = [(a, self.Nsa[(s, a)]) if (s, a) in self.Nsa else (a, 0) for a in available_acts]
         act_Qs = [(a, self.Qsa[(s, a)]) if (s, a) in self.Qsa else (a, 0) for a in available_acts]
         acts = [av[0] for av in act_visits]
@@ -71,6 +86,7 @@ class MCTS():
             if (s, act) in self.Qsa: q = self.Qsa[(s, act)]
             if s in self.Ps: p = self.Ps[s][act]
             info.append([action, visit, round(q,2), round(p,2)]) 
+
         v = 0
         if s in self.Vs: v = self.Vs[s]
 
