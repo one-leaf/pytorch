@@ -113,7 +113,7 @@ class Net(nn.Module):
     def __init__(self, image_size, action_size):
         super(Net, self).__init__()
 
-        self.drop_layer = nn.Dropout(p=0.5)
+        self.drop_layer = nn.Dropout(p=0.2)
 
         # 由于每个棋盘大小对最终对应一个动作，所以补齐的效果比较好
         # 直接来9层的残差网络
