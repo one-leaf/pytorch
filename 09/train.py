@@ -254,11 +254,11 @@ class Train():
                 # 使用对抗数据重新训练策略价值网络模型
                 totle_value, v_loss, p_loss, entropy = self.policy_update(data, self.epochs)
                 totle = totle + totle_value
-                logging.info(("TRAIN idx {} : {} / {} v_loss:{:.5f}, p_loss:{:.5f}, entropy:{:.5f}")\
-                    .format(i, i*self.batch_size, dataset_len, v_loss, p_loss, entropy))
+                if i%50 == 0:
+                    logging.info(("TRAIN idx {} : {} / {} v_loss:{:.5f}, p_loss:{:.5f}, entropy:{:.5f}")\
+                        .format(i, i*self.batch_size, dataset_len, v_loss, p_loss, entropy))
 
-                if (i+1) % 10 == 0:
-                    
+                if (i+1) % 500 == 0:
                     # 动态调整学习率
                     if old_probs is None:
                         test_batch, test_probs, test_win = data
