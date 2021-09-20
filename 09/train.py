@@ -127,7 +127,7 @@ class Dataset(torch.utils.data.Dataset):
 class Train():
     def __init__(self):
         self.game_batch_num = 2000000  # selfplay对战次数
-        self.batch_size = 64     # data_buffer中对战次数超过n次后开始启动模型训练
+        self.batch_size = 128     # data_buffer中对战次数超过n次后开始启动模型训练
 
         # training params
         self.learn_rate = 1e-3
