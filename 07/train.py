@@ -122,7 +122,7 @@ class Dataset(torch.utils.data.Dataset):
 class Train():
     def __init__(self):
         self.game_batch_num = 2000000  # selfplay对战次数
-        self.batch_size = 1024     # data_buffer中对战次数超过n次后开始启动模型训练
+        self.batch_size = 64     # data_buffer中对战次数超过n次后开始启动模型训练
 
         # training params
         self.learn_rate = 1e-4
@@ -246,11 +246,11 @@ class Train():
                 # 使用对抗数据重新训练策略价值网络模型
                 totle_value, b_loss, v_loss, p_loss, entropy = self.policy_update(data, self.epochs)
                 totle = totle + totle_value
-                logging.info(("TRAIN idx {} : {} / {} b_loss:{:.5f}, v_loss:{:.5f}, p_loss:{:.5f}, entropy:{:.5f}")\
-                    .format(i, i*self.batch_size, dataset_len, b_loss, v_loss, p_loss, entropy))
+                
+                if (i+1) % 100 == 0:
+                    logging.info(("TRAIN idx {} : {} / {} b_loss:{:.5f}, v_loss:{:.5f}, p_loss:{:.5f}, entropy:{:.5f}")\
+                        .format(i, i*self.batch_size, dataset_len, b_loss, v_loss, p_loss, entropy))
 
-                if (i+1) % 10 == 0:
-                    
                     # 动态调整学习率
                     if old_probs is None:
                         test_batch, _, _, _ = data
