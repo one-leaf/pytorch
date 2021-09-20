@@ -269,8 +269,9 @@ class Train():
                         
                         logging.info("probs[0] old:{}".format(old_probs[0]))   
                         logging.info("probs[0] new:{}".format(new_probs[0]))   
-                        logging.info("probs[0] tg: {}".format(test_probs[0]))  
-                        for j in range(10): 
+                        logging.info("probs[0] tg: {}".format(test_probs[0])) 
+                        maxlen = min(10, len(test_win)) 
+                        for j in range(maxlen): 
                             logging.info("value[0] old:{} new:{} tg:{}".format(old_value[j][0], new_value[j][0], test_win[j]))   
                         old_probs = None
                         
