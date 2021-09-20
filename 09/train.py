@@ -127,7 +127,7 @@ class Dataset(torch.utils.data.Dataset):
 class Train():
     def __init__(self):
         self.game_batch_num = 2000000  # selfplay对战次数
-        self.batch_size = 128     # data_buffer中对战次数超过n次后开始启动模型训练
+        self.batch_size = 64     # data_buffer中对战次数超过n次后开始启动模型训练
 
         # training params
         self.learn_rate = 1e-4
@@ -278,7 +278,7 @@ class Train():
                         
                         if kl > self.kl_targ * 2:
                             self.lr_multiplier /= 1.5
-                        elif kl < self.kl_targ / 2 and self.lr_multiplier < 100:
+                        elif kl < self.kl_targ / 2 and self.lr_multiplier < 10:
                             self.lr_multiplier *= 1.5
                         else:
                             continue
