@@ -124,9 +124,9 @@ class MCTS():
                 else:
                     v = -1 
                 # v = 1
-            elif state.state == 1:
-                if  state.reward>0:
-                    v = -1
+            # elif state.state == 1:
+            #     if  state.reward>0:
+            #         v = -1
                 # elif random.random()>0.5:
                 #     v = 1
             self.Es[s] = v
@@ -152,6 +152,13 @@ class MCTS():
 
             self.Ns[s] = 0
             self.Vs[s] = v
+
+            if state.state == 1:
+                if  state.reward>0:
+                    v += -0.5
+                else:
+                    v += 0.5
+                    
             return -v
 
         # 当前最佳概率和最佳动作
