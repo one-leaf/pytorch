@@ -362,11 +362,11 @@ class Agent(object):
                     print('reward:',game.reward, 'len:', len(game.pieces_height), "max_height:", game.getMaxHeight(), "next:", game.fallpiece['shape'], game.pieces_height)
                     temp_winer = []
                     # 预测是针对上一步的，所以如果得分就是上一步正确，否则就是上一步错误
-                    # 最后一步应该为0，没有胜率
+                    # 最后一步应该为-winer，不能为0，不方便训练
                     winer = -1 if game.reward>0 else 1
                     for j in range(_piecestep):
                         if j==0:
-                            temp_winer=[0]
+                            temp_winer=[-1*winer]
                         else:
                             temp_winer.insert(0,winer)
                         winer = -1 * winer
