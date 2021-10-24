@@ -42,7 +42,7 @@ class Dataset(torch.utils.data.Dataset):
         self.data_index_file = os.path.join(data_dir, 'index.txt')
         self.file_list = deque(maxlen=max_keep_size)    
         self._save_lock = Lock()
-
+        self.newsample = []
         self.load_index()
         self.copy_wait_file()
         self.load_game_files()
@@ -105,6 +105,7 @@ class Dataset(torch.utils.data.Dataset):
             os.rename(os.path.join(data_wait_dir,fn), savefile)
             self.index += 1
             self.save_index() 
+            self.newsample.append(savefile)
             if i>=100 and i>len(movefiles)*0.1: break       
         print("mv %s/%s files to train"%(i,len(movefiles)))
         if i==-1:
@@ -123,6 +124,19 @@ class Dataset(torch.utils.data.Dataset):
         
     def curr_size(self):
         return len(self.file_list)
+
+class TestDataset(Dataset):
+    def __init__(self, data_dir, max_keep_size, file_list):
+        # 训练数据存放路径
+        self.data_dir = data_dir                
+        # 训练数据最大保存个数
+        self.max_keep_size = max_keep_size
+        # 当前训练数据索引保存文件
+        self.data_index_file = os.path.join(data_dir, 'index.txt')
+        self.file_list = deque(maxlen=max_keep_size) 
+        for file in file_list:
+            self.file_list.append(file)   
+       
 
 class Train():
     def __init__(self):
@@ -223,6 +237,8 @@ class Train():
         try:
             print("start data loader")
             self.dataset = Dataset(data_dir, self.buffer_size)
+            newsample=self.dataset.newsample
+            self.testdataset = TestDataset(data_dir, 10, newsample)
             print("end data loader")
 
             self.policy_value_net = PolicyValueNet(GAME_WIDTH, GAME_HEIGHT, GAME_ACTIONS_NUM, model_file=model_file)
@@ -240,6 +256,7 @@ class Train():
             #         step += 1
             dataset_len = len(self.dataset)  
             training_loader = torch.utils.data.DataLoader(self.dataset, batch_size=self.batch_size, shuffle=True, num_workers=1,)
+            testing_loader = torch.utils.data.DataLoader(self.testdataset, batch_size=self.batch_size, shuffle=True, num_workers=1,)
             old_probs = None
             test_batch = None
             totle = 0
@@ -260,7 +277,7 @@ class Train():
 
                     # 动态调整学习率
                     if old_probs is None:
-                        test_batch, test_probs, test_win = data
+                        test_batch, test_probs, test_win = next(iter(testing_loader))
                         old_probs, old_value = self.policy_value_net.policy_value(test_batch) 
                     else:
                         new_probs, new_value = self.policy_value_net.policy_value(test_batch)
