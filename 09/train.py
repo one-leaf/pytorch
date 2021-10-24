@@ -135,7 +135,8 @@ class TestDataset(Dataset):
         self.data_index_file = os.path.join(data_dir, 'index.txt')
         self.file_list = deque(maxlen=max_keep_size) 
         for file in file_list:
-            self.file_list.append(file)   
+            self.file_list.append(file) 
+        self.sample=0  
        
 
 class Train():
