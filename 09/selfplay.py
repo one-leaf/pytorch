@@ -30,7 +30,7 @@ if not os.path.exists(data_wait_dir): os.makedirs(data_wait_dir)
 
 model_dir = os.path.join(curr_dir, './model/')
 if not os.path.exists(model_dir): os.makedirs(model_dir)
-model_file =  os.path.join(model_dir, 'model.pth')
+model_file =  os.path.join(model_dir, 'model-cnn.pth')
 
 class Dataset(torch.utils.data.Dataset):
     def __init__(self, data_dir, buffer_size):
@@ -169,7 +169,7 @@ class Train():
                 
                 # 额外保存
                 steps = round(result["1k"]["steps"]/result["1k"]["agent"])
-                model_file = os.path.join(model_dir, 'model_%s_%s.pth'%(result["agent"],steps))
+                model_file = os.path.join(model_dir, 'model_cnn_%s_%s.pth'%(result["agent"],steps))
                 self.policy_value_net.save_model(model_file)
 
             if result["agent"]>0 and result["agent"]%1000==0:
