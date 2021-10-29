@@ -272,7 +272,7 @@ class Train():
                 # 使用对抗数据重新训练策略价值网络模型
                 totle_value, v_loss, p_loss, entropy = self.policy_update(data, self.epochs)
                 totle = totle + totle_value
-                if i%100 == 0:
+                if i%10 == 0:
                     logging.info(("TRAIN idx {} : {} / {} v_loss:{:.5f}, p_loss:{:.5f}, entropy:{:.5f}")\
                         .format(i, i*self.batch_size, dataset_len, v_loss, p_loss, entropy))
 
@@ -284,7 +284,7 @@ class Train():
                         new_probs, new_value = self.policy_value_net.policy_value(test_batch)
                         kl = np.mean(np.sum(old_probs * (np.log(old_probs + 1e-10) - np.log(new_probs + 1e-10)), axis=1))
                         
-                        if i % 500 == 0:   
+                        if i % 50 == 0:   
                             logging.info("probs[0] old:{}".format(old_probs[0]))   
                             logging.info("probs[0] new:{}".format(new_probs[0]))   
                             logging.info("probs[0] tg: {}".format(test_probs[0])) 
