@@ -335,20 +335,21 @@ class Agent(object):
         game_num = 2
         self.limit_max_height = random.randint(1,20)
         # limit_max_height = self.limit_max_height
-        game_states, game_mcts_probs, game_current_players = [],[],[] 
+        game_keys, game_states, game_mcts_probs, game_current_players = [],[],[],[] 
         game_piececount, game_score, game_winer = [],[],[]
         for _ in range(game_num):
             # self.lock = (self.lock + 1)%2 
             # self.availables = self.get_availables()
             print("limit_max_height", self.limit_max_height)
 
-            _states, _mcts_probs, _current_players=[],[],[]
+            _states, _mcts_probs, _current_players, _keys=[],[],[],[]
             game = copy.deepcopy(self)
             # game.limit_max_height = 5
             _piecestep=0
             for i in count():
                 action, move_probs = player.get_action(game, temp=temp, return_prob=1) 
 
+                _keys.append(game.get_key())
                 _states.append(game.current_state())
                 _mcts_probs.append(move_probs)
                 #_current_players.append(game.curr_player)
@@ -376,6 +377,7 @@ class Agent(object):
                 if game.terminal:
                     break
             
+            game_keys.append(_keys)
             game_states.append(_states)
             game_mcts_probs.append(_mcts_probs)
             game_current_players.append(_current_players)
@@ -417,8 +419,9 @@ class Agent(object):
         # print("game_player_0",game_player_0,"game_player_1",game_player_1)
 
 
-        states, mcts_probs, winers= [], [], []
+        keys, states, mcts_probs, winers= [], [], [], []
         for j in range(game_num):
+            for o in game_keys[j]: keys.append(o)
             for o in game_states[j]: states.append(o)
             for o in game_mcts_probs[j]: mcts_probs.append(o)
             for o in game_current_players[j]: winers.append(o)
@@ -439,6 +442,7 @@ class Agent(object):
 
         assert len(states)==len(mcts_probs)
         assert len(states)==len(winners_z)
+        assert len(states)==len(keys)
 
         _len = len(winers)
         _win = (_len+sum(winners_z))/2
@@ -449,5 +453,5 @@ class Agent(object):
         piececount = sum(game_piececount)
         agentcount = game_num
     
-        return reward, piececount, agentcount, zip(states, mcts_probs, winners_z)
+        return reward, piececount, agentcount, keys, zip(states, mcts_probs, winners_z)
                 
