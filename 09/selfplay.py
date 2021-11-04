@@ -165,18 +165,19 @@ class Train():
             for i in range(1,21):
                 result[i]={"agent":0}
                 result[i]["curr"]={"reward":0,"pieces":0,"agent":0}
-                
-        result[agent.limit_max_height]["agent"] += agentcount        
-        result[agent.limit_max_height]["curr"]["reward"] += reward
-        result[agent.limit_max_height]["curr"]["pieces"] += piececount
-        result[agent.limit_max_height]["curr"]["agent"] += agentcount
 
-        agent = result[agent.limit_max_height]["agent"]
+        limit_max_height = str(agent.limit_max_height)        
+        result[limit_max_height]["agent"] += agentcount        
+        result[limit_max_height]["curr"]["reward"] += reward
+        result[limit_max_height]["curr"]["pieces"] += piececount
+        result[limit_max_height]["curr"]["agent"] += agentcount
+
+        agent = result[limit_max_height]["agent"]
         if agent%1000==0:
-            result[agent.limit_max_height][agent]={}
-            result[agent.limit_max_height][agent]["reward"]=result[agent.limit_max_height]["curr"]["reward"]
-            result[agent.limit_max_height][agent]["agent"]=result[agent.limit_max_height]["curr"]["agent"]
-            result[agent.limit_max_height]["curr"]={"reward":0,"pieces":0,"agent":0}
+            result[limit_max_height][agent]={}
+            result[limit_max_height][agent]["reward"]=result[limit_max_height]["curr"]["reward"]
+            result[limit_max_height][agent]["agent"]=result[limit_max_height]["curr"]["agent"]
+            result[limit_max_height]["curr"]={"reward":0,"pieces":0,"agent":0}
 
         json.dump(result, open(jsonfile,"w"), ensure_ascii=False)
 
