@@ -115,6 +115,7 @@ class Agent(object):
             if self.ig_action in acts:
                 acts.remove(self.ig_action)
 
+        if len(acts)==0: acts=[KEY_NONE]
         return acts         
 
     def game_end(self):
