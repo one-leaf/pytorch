@@ -147,7 +147,7 @@ class Train():
             if key in self.policy_value_net.cache:
                 _, v = self.policy_value_net.cache[key]
                 _, _, win = obj
-                if abs(v-win)<0.0001: 
+                if abs(v-win)<0.01: 
                     ig_count += 1
                     continue
 
