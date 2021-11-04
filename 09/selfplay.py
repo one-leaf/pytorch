@@ -156,40 +156,29 @@ class Train():
             pickle.dump(obj, open(savefile, "wb"))
         print("ig count:", ig_count)
 
-        if agent.limit_max_height == 10:
-            jsonfile = os.path.join(data_dir, "result.json")
-            if os.path.exists(jsonfile):
-                result=json.load(open(jsonfile,"r"))
-            else:
-                result={"reward":0,"steps":0,"agent":0}
-            if "1k" not in result:
-                result["1k"]={"reward":0,"steps":0,"agent":0}
 
-            result["reward"] = result["reward"] + reward
-            result["steps"] = result["steps"] + piececount
-            result["agent"] = result["agent"] + agentcount
-            result["1k"]["reward"] = result["1k"]["reward"] + reward
-            result["1k"]["steps"] = result["1k"]["steps"] + piececount
-            result["1k"]["agent"] = result["1k"]["agent"] + agentcount           
-
-            if result["agent"]>0 and result["agent"]%100==0:
-                result[str(result["agent"])]={"reward":result["1k"]["reward"]/result["1k"]["agent"],
-                                                "steps":result["1k"]["steps"]/result["1k"]["agent"]}
+        jsonfile = os.path.join(data_dir, "result.json")
+        if os.path.exists(jsonfile):
+            result=json.load(open(jsonfile,"r"))
+        else:
+            result={}
+            for i in range(1,21):
+                result[i]={"agent":0}
+                result[i]["curr"]={"reward":0,"pieces":0,"agent":0}
                 
-                # 额外保存
-                steps = round(result["1k"]["steps"]/result["1k"]["agent"])
-                model_file = os.path.join(model_dir, 'model_cnn_%s_%s.pth'%(result["agent"],steps))
-                self.policy_value_net.save_model(model_file)
+        result[agent.limit_max_height]["agent"] += agentcount        
+        result[agent.limit_max_height]["curr"]["reward"] += reward
+        result[agent.limit_max_height]["curr"]["pieces"] += piececount
+        result[agent.limit_max_height]["curr"]["agent"] += agentcount
 
-            if result["agent"]>0 and result["agent"]%1000==0:
-                for key in list(result.keys()):
-                    if key.isdigit():
-                        c = int(key)
-                        if c%1000>10:
-                            del result[key]
-                result["1k"]={"reward":0,"steps":0,"agent":0}
+        agent = result[agent.limit_max_height]["agent"]
+        if agent%1000==0:
+            result[agent.limit_max_height][agent]={}
+            result[agent.limit_max_height][agent]["reward"]=result[agent.limit_max_height]["curr"]["reward"]
+            result[agent.limit_max_height][agent]["agent"]=result[agent.limit_max_height]["curr"]["agent"]
+            result[agent.limit_max_height]["curr"]={"reward":0,"pieces":0,"agent":0}
 
-            json.dump(result, open(jsonfile,"w"), ensure_ascii=False)
+        json.dump(result, open(jsonfile,"w"), ensure_ascii=False)
 
     def policy_update(self, sample_data, epochs=1):
         """更新策略价值网络policy-value"""
