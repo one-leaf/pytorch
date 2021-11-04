@@ -163,8 +163,8 @@ class Train():
         else:
             result={}
             for i in range(1,21):
-                result[i]={"agent":0}
-                result[i]["curr"]={"reward":0,"pieces":0,"agent":0}
+                result[str(i)]={"agent":0}
+                result[str(i)]["curr"]={"reward":0,"pieces":0,"agent":0}
 
         limit_max_height = str(agent.limit_max_height)        
         result[limit_max_height]["agent"] += agentcount        
