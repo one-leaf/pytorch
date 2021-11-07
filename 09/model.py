@@ -6,6 +6,7 @@ import torch.nn.functional as F
 import os
 import numpy as np
 from collections import OrderedDict
+from torchvision.models import resnet18
 
 class Cache(OrderedDict):
     def __init__(self, maxsize=128, *args, **kwds):
@@ -188,6 +189,48 @@ class Net(nn.Module):
         x_val = torch.tanh(self.val_fc2(x_val))
         return x_act, x_val
 
+
+class ResNet(nn.Module):
+    def __init__(self, image_size, action_size):
+        super(ResNet, self).__init__()
+
+        resnet = resnet18()
+        resnet.conv1 = nn.Conv2d(9, 64, kernel_size=3, bias=False)
+        num_ftrs = resnet.fc.in_features
+        self.conv = nn.Sequential(*(list(resnet.children())[:-2]))
+
+        # 动作预测
+        self.act_conv1 = nn.Conv2d(num_ftrs, image_size, (2,1))
+        # self.act_conv1_bn = nn.BatchNorm2d(image_size)
+        self.act_fc1 = nn.Linear(image_size, action_size)
+        # 动作价值
+        self.val_conv1 = nn.Conv2d(num_ftrs, image_size, (2,1))
+        # self.val_conv1_bn = nn.BatchNorm2d(image_size)
+        self.val_fc1 = nn.Linear(image_size, image_size)
+        self.val_fc2 = nn.Linear(image_size, 1)
+
+
+    def forward(self, x):
+        x = self.conv(x)
+        #print(x.shape)
+        # 动作
+        x_act = self.act_conv1(x)
+        #print(x_act.shape)
+
+        # x_act = self.act_conv1_bn(x_act)
+        x_act = x_act.view(x_act.size(0), -1)
+        #print(x_act.shape)
+        x_act = F.log_softmax(self.act_fc1(x_act), dim=1)
+
+        # 胜率 输出为 -1 ~ 1 之间的数字
+        x_val = self.val_conv1(x)
+        # x_val = self.val_conv1_bn(x_val)
+        x_val = F.relu(x_val)
+        x_val = x_val.view(x_val.size(0), -1)
+        x_val = F.relu(self.val_fc1(x_val))
+        x_val = torch.tanh(self.val_fc2(x_val))
+        return x_act, x_val
+
 class PolicyValueNet():
     def __init__(self, input_width, input_height, output_size, model_file=None, device=None, l2_const=1e-4):
         self.input_width = input_width
@@ -201,7 +244,8 @@ class PolicyValueNet():
         print("use", device)
 
         self.l2_const = l2_const  
-        self.policy_value_net = Net(self.input_size, self.output_size)
+        self.policy_value_net = ResNet(self.input_size, self.output_size)
+        # self.policy_value_net = Net(self.input_size, self.output_size)
         # self.policy_value_net = MLP_Mixer(20,10,9,2,5,128,64,512,5,8,dropout=0.1)
         self.policy_value_net.to(device)
         self.print_netwark()

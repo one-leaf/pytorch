@@ -30,7 +30,7 @@ if not os.path.exists(data_wait_dir): os.makedirs(data_wait_dir)
 
 model_dir = os.path.join(curr_dir, './model/')
 if not os.path.exists(model_dir): os.makedirs(model_dir)
-model_file =  os.path.join(model_dir, 'model-cnn.pth')
+model_file =  os.path.join(model_dir, 'model-resnet.pth')
 
 class Dataset(torch.utils.data.Dataset):
     def __init__(self, data_dir, buffer_size):
