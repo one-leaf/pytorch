@@ -6,7 +6,7 @@ import torch.nn.functional as F
 import os
 import numpy as np
 from collections import OrderedDict
-from torchvision.models import resnet18
+from torchvision.models import resnet34
 
 class Cache(OrderedDict):
     def __init__(self, maxsize=128, *args, **kwds):
@@ -194,7 +194,7 @@ class ResNet(nn.Module):
     def __init__(self, image_size, action_size):
         super(ResNet, self).__init__()
 
-        resnet = resnet18()
+        resnet = resnet34()
         resnet.conv1 = nn.Conv2d(9, 64, kernel_size=3, bias=False)
         num_ftrs = resnet.fc.in_features
         self.conv = nn.Sequential(*(list(resnet.children())[:-2]))
