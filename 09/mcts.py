@@ -120,16 +120,16 @@ class MCTS():
             # 这里增加了最终的奖励，提升对步骤的优化
             if end:
                 if state.curr_player==winner: 
-                    v = 1/10
+                    v = 1/2
                 else:
-                    v = -1 
+                    v = -1/2 
                 # v = 1
             elif state.state == 1:
                 if state.reward>0:
                     v = -1
                 # elif random.random()>0.5:
                 else:
-                    v = 1/10
+                    v = 1/2
             self.Es[s] = v
 
         # 如果得分不等于0，标志这局游戏结束
