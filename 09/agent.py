@@ -131,7 +131,7 @@ class Agent(object):
 
     def step(self, action, env=None):
         # 状态 0 下落过程中 1 更换方块 2 结束一局
-        self.player_reward[self.curr_player] += 1
+        
         self.reward = 0
         self.steps += 1
         self.piecesteps += 1
@@ -157,6 +157,7 @@ class Agent(object):
             self.fallpiece['y'] +=1
 
         fallpiece_y = self.fallpiece['y']
+        self.player_reward[self.curr_player] = fallpiece_y
 
         self.fallpiece_status.append(self.get_fallpiece_board())
 
