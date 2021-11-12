@@ -376,6 +376,7 @@ class Agent(object):
                 #_current_players.append(game.curr_player)
 
                 game.step(action)
+                print(game.player_reward)
                 _piecestep+=1
 
                 if game.state!=0:
