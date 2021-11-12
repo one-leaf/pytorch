@@ -160,6 +160,11 @@ class Train():
         jsonfile = os.path.join(data_dir, "result.json")
         if os.path.exists(jsonfile):
             result=json.load(open(jsonfile,"r"))
+            for i in range(1,21):
+                for j in range(len(result[str(i)]["reward"])):
+                    result[str(i)]["reward"][j]=round(result[str(i)]["reward"][j],2)
+                for j in range(len(result[str(i)]["pieces"])):
+                    result[str(i)]["pieces"][j]=round(result[str(i)]["pieces"][j],2)
         else:
             result={}
             for i in range(1,21):
