@@ -376,13 +376,12 @@ class Agent(object):
                 #_current_players.append(game.curr_player)
 
                 game.step(action)
-                print(game.player_reward)
                 _piecestep+=1
 
                 if game.state!=0:
                     # game.limit_max_height = max(game.pieces_height)+3
                     # if game.limit_max_height>limit_max_height: game.limit_max_height=limit_max_height
-                    print('reward:',game.reward, 'len:', len(game.pieces_height), "max_height:", game.getMaxHeight(), "next:", game.fallpiece['shape'], game.pieces_height)
+                    print('reward:',game.reward, 'len:', len(game.pieces_height), "max_height:", game.getMaxHeight(), "next:", game.fallpiece['shape'], game.pieces_height,"rewards:", game.player_reward, "winner:", game.winner)
                     temp_winer = []
                     # 预测是针对上一步的，所以如果得分就是上一步正确，否则就是上一步错误
                     # 最后一步应该为-winer，不能为0，不方便训练
