@@ -197,8 +197,9 @@ class Agent(object):
                 self.winner = 0
             if self.player_reward[1]>self.player_reward[0]:
                 self.winner = 1
+            # 如果为平局的时候，其实就是输了
             if self.player_reward[1]==self.player_reward[0]:
-                self.winner = -1  
+                self.winner = self.curr_player  
             self.player_reward_prev = self.player_reward               
             self.player_reward=[0, 0]
 
