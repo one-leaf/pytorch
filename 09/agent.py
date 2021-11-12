@@ -153,15 +153,18 @@ class Agent(object):
             if not self.tetromino.validposition(self.board,self.fallpiece):
                 self.fallpiece['rotation'] = (self.fallpiece['rotation'] - 1) % len(pieces[self.fallpiece['shape']])
 
+        isFalling=True
         if self.tetromino.validposition(self.board,self.fallpiece,ay = 1):
             self.fallpiece['y'] +=1
+        else:
+            isFalling = False
 
         fallpiece_y = self.fallpiece['y']
         self.player_reward[self.curr_player] = fallpiece_y
 
         self.fallpiece_status.append(self.get_fallpiece_board())
 
-        if not self.tetromino.validposition(self.board,self.fallpiece,ay = 1):
+        if not isFalling:
             self.tetromino.addtoboard(self.board,self.fallpiece)
             self.reward = self.tetromino.removecompleteline(self.board) 
             
@@ -184,7 +187,7 @@ class Agent(object):
             env.checkforquit()
             env.render(self.board, self.score, self.level, self.fallpiece, self.nextpiece)
 
-        if self.fallpiece == None:
+        if not isFalling:
             self.fallpiece = self.nextpiece
             self.nextpiece = self.tetromino.getnewpiece()
             self.piecesteps = 0
