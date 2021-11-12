@@ -114,22 +114,26 @@ class MCTS():
         # print(self.depth, s)
         # 将所有状态的得分都 cache 起来
         if s not in self.Es:
-            end, winner = state.game_end()  
+            end, _ = state.game_end()  
             v = 0
             # 这里是对上一步的评价，如果游戏结束对我而言都是不利的，v为-1
             # 这里增加了最终的奖励，提升对步骤的优化
             if end:
-                if state.curr_player==winner: 
-                    v = 1/2
+                if state.curr_player==state.winner: 
+                    v = 1
                 else:
-                    v = -1/2 
+                    v = -1 
                 # v = 1
             elif state.state == 1:
-                if state.reward>0:
-                    v = -1
-                # elif random.random()>0.5:
+                # if state.reward>0:
+                #     v = -1
+                # # elif random.random()>0.5:
+                # else:
+                #     v = 1
+                if state.curr_player==state.winner: 
+                    v = 1
                 else:
-                    v = 1/2
+                    v = -1 
             self.Es[s] = v
 
         # 如果得分不等于0，标志这局游戏结束

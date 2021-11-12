@@ -61,8 +61,11 @@ class Agent(object):
         self.availables=self.get_availables()
         # 最大游戏高度
         self.limit_max_height = -1
-        # 游戏动作
-        # self.actions=[]
+        # 游戏的奖励
+        self.player_reward=[0, 0]
+        # 游戏的奖励
+        self.winner=-1
+
 
     # 概率的索引位置转action
     def position_to_action(self, position):
@@ -118,20 +121,22 @@ class Agent(object):
         if len(acts)==0: acts=[KEY_NONE]
         return acts         
 
+
     def game_end(self):
         # return self.terminal, self.lock
-        return self.terminal, self.curr_player
+        # winer = self.curr_player  
+        return self.terminal, self.winner
         # lastplayer = (self.curr_player+1) % 2
         # return self.terminal, lastplayer
 
     def step(self, action, env=None):
         # 状态 0 下落过程中 1 更换方块 2 结束一局
-        
+        self.player_reward[self.curr_player] += 1
         self.reward = 0
         self.steps += 1
         self.piecesteps += 1
         self.level, self.fallfreq = self.tetromino.calculate(self.score)
-        self.curr_player = self.steps%2
+        
         # self.actions.append(action)
 
         if action == KEY_LEFT and self.tetromino.validposition(self.board,self.fallpiece,ax = -1):
@@ -159,6 +164,7 @@ class Agent(object):
             self.tetromino.addtoboard(self.board,self.fallpiece)
             self.reward = self.tetromino.removecompleteline(self.board) 
             
+            self.player_reward[self.curr_player] += self.reward * 10
             # if self.reward >0:
             #     self.terminal = True 
             #     self.state = 2       
@@ -171,6 +177,8 @@ class Agent(object):
             self.pieces_height.append(20 - fallpiece_y - r)
             self.fallpiece = None
 
+        self.curr_player = self.steps%2
+
         if  env:
             env.checkforquit()
             env.render(self.board, self.score, self.level, self.fallpiece, self.nextpiece)
@@ -180,6 +188,14 @@ class Agent(object):
             self.nextpiece = self.tetromino.getnewpiece()
             self.piecesteps = 0
             self.piececount +=1 
+
+            if self.player_reward[0]>self.player_reward[1]:
+                self.winner = 0
+            if self.player_reward[1]>self.player_reward[0]:
+                self.winner = 1
+            if self.player_reward[1]==self.player_reward[0]:
+                self.winner = -1            
+            self.player_reward=[0, 0]
 
             if (not self.tetromino.validposition(self.board,self.fallpiece)) or \
                 (self.limit_max_height>0 and self.getMaxHeight()>self.limit_max_height):  
@@ -365,7 +381,7 @@ class Agent(object):
                     temp_winer = []
                     # 预测是针对上一步的，所以如果得分就是上一步正确，否则就是上一步错误
                     # 最后一步应该为-winer，不能为0，不方便训练
-                    winer = -1 if game.reward>0 else 1
+                    winer = 1 if game.curr_player == game.winner else -1
                     for j in range(_piecestep):
                         if j==0:
                             temp_winer=[-1*winer]
