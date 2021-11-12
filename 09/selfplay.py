@@ -173,7 +173,7 @@ class Train():
         result[limit_max_height]["curr"]["agent"] += agentcount
 
         agent = result[limit_max_height]["agent"]
-        if agent%100==0:
+        if agent%200==0:
             result[limit_max_height]["reward"].append(result[limit_max_height]["curr"]["reward"]/result[limit_max_height]["curr"]["agent"])
             result[limit_max_height]["pieces"].append(result[limit_max_height]["curr"]["pieces"]/result[limit_max_height]["curr"]["agent"])
         if agent%100==1000:
