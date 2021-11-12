@@ -198,7 +198,8 @@ class Agent(object):
             if self.player_reward[1]>self.player_reward[0]:
                 self.winner = 1
             if self.player_reward[1]==self.player_reward[0]:
-                self.winner = -1            
+                self.winner = -1  
+            self.player_reward_prev = self.player_reward               
             self.player_reward=[0, 0]
 
             if (not self.tetromino.validposition(self.board,self.fallpiece)) or \
@@ -381,7 +382,7 @@ class Agent(object):
                 if game.state!=0:
                     # game.limit_max_height = max(game.pieces_height)+3
                     # if game.limit_max_height>limit_max_height: game.limit_max_height=limit_max_height
-                    print('reward:',game.reward, 'len:', len(game.pieces_height), "max_height:", game.getMaxHeight(), "next:", game.fallpiece['shape'], game.pieces_height,"rewards:", game.player_reward, "winner:", game.winner)
+                    print('reward:',game.reward, 'len:', len(game.pieces_height), "max_height:", game.getMaxHeight(), "next:", game.fallpiece['shape'], game.pieces_height,"rewards:", game.player_reward_prev, "winner:", game.winner)
                     temp_winer = []
                     # 预测是针对上一步的，所以如果得分就是上一步正确，否则就是上一步错误
                     # 最后一步应该为-winer，不能为0，不方便训练
