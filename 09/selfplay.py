@@ -181,7 +181,7 @@ class Train():
         if agent%100==0:
             result[limit_max_height]["reward"].append(round(result[limit_max_height]["curr"]["reward"]/result[limit_max_height]["curr"]["agent"],2))
             result[limit_max_height]["pieces"].append(round(result[limit_max_height]["curr"]["pieces"]/result[limit_max_height]["curr"]["agent"],2))
-        if agent%100==1000:
+        if agent>1000:
             result[limit_max_height]["curr"]={"reward":0,"pieces":0,"agent":0}
 
         json.dump(result, open(jsonfile,"w"), ensure_ascii=False)
