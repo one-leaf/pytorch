@@ -147,9 +147,12 @@ class Train():
             if key in self.policy_value_net.cache:
                 _, v = self.policy_value_net.cache[key]
                 _, _, win = obj
-                if abs(v-win)<0.01: 
-                    ig_count += 1
-                    continue
+                c = abs(v-win) - 1 
+                while c > 0:
+                    filename = "{}.pkl".format(uuid.uuid1())
+                    savefile = os.path.join(data_wait_dir, filename)
+                    pickle.dump(obj, open(savefile, "wb"))
+                    c = c - 0.5
 
             filename = "{}.pkl".format(uuid.uuid1())
             savefile = os.path.join(data_wait_dir, filename)
