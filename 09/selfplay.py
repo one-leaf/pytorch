@@ -141,7 +141,7 @@ class Train():
         logging.info("TRAIN Self Play end. length:%s saving ..." % episode_len)
         # 保存对抗数据到data_buffer
         for i, obj in enumerate(play_data):
-            
+
             # 增加差异巨大的样本
             key = keys[i]
             if key in self.policy_value_net.cache:
@@ -183,6 +183,10 @@ class Train():
         if agent%100==0:
             result[limit_max_height]["reward"].append(round(result[limit_max_height]["curr"]["reward"]/result[limit_max_height]["curr"]["agent"],2))
             result[limit_max_height]["pieces"].append(round(result[limit_max_height]["curr"]["pieces"]/result[limit_max_height]["curr"]["agent"],2))
+            if len(result[limit_max_height]["reward"])>10:
+                result[limit_max_height]["reward"].remove(min(result[limit_max_height]["reward"]))
+            if len(result[limit_max_height]["pieces"])>10:
+                result[limit_max_height]["pieces"].remove(min(result[limit_max_height]["pieces"]))
         if result[limit_max_height]["curr"]["agent"]>1000:
             result[limit_max_height]["curr"]={"reward":0,"pieces":0,"agent":0}
 
