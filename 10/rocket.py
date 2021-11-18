@@ -2,7 +2,7 @@ import numpy as np
 import random
 import cv2
 import utils
-
+import os
 
 class Rocket(object):
     """
@@ -67,6 +67,8 @@ class Rocket(object):
 
         if path_to_bg_img is None:
             path_to_bg_img = task+'.jpg'
+            curr_dir = os.path.dirname(os.path.abspath(__file__))
+            path_to_bg_img = os.path.join(curr_dir, path_to_bg_img)
         self.bg_img = utils.load_bg_img(path_to_bg_img, w=self.viewport_w, h=self.viewport_h)
 
         self.state_buffer = []

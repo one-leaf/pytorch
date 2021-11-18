@@ -22,4 +22,5 @@ test/
 fonts/
 zh_fonts/
 model/
+hover_ckpt/
 .DS_Store

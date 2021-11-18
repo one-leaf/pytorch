@@ -11,7 +11,9 @@ if __name__ == '__main__':
 
     task = 'hover'  # 'hover' or 'landing'
     max_steps = 800
-    ckpt_dir = glob.glob(os.path.join(task+'_ckpt', '*.pt'))[-1]  # last ckpt
+    curr_dir = os.path.dirname(os.path.abspath(__file__))
+
+    ckpt_dir = glob.glob(os.path.join(curr_dir, task+'_ckpt', '*.pt'))[-1]  # last ckpt
 
     env = Rocket(task=task, max_steps=max_steps)
     net = ActorCritic(input_dim=env.state_dims, output_dim=env.action_dims).to(device)

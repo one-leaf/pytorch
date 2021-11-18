@@ -2,7 +2,8 @@ import numpy as np
 import torch
 from rocket import Rocket
 from policy import ActorCritic
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as pltsud
+from matplotlib import pyplot as plt
 import utils
 import os
 import glob
@@ -18,7 +19,8 @@ if __name__ == '__main__':
     max_steps = 800
 
     env = Rocket(task=task, max_steps=max_steps)
-    ckpt_folder = os.path.join('./', task + '_ckpt')
+    curr_dir = os.path.dirname(os.path.abspath(__file__))
+    ckpt_folder = os.path.join(curr_dir, task + '_ckpt')
     if not os.path.exists(ckpt_folder):
         os.mkdir(ckpt_folder)
 
