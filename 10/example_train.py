@@ -14,11 +14,14 @@ print(device)
 
 if __name__ == '__main__':
 
-    task = 'landing'  # 'hover' or 'landing'
+    task = 'landing'  # 悬停 'hover' 或 着陆 'landing'
 
+    # 最大局数
     max_m_episode = 800000
+    # 每局最大步数
     max_steps = 800
 
+    # 建立一个火箭对象
     env = Rocket(task=task, max_steps=max_steps)
     curr_dir = os.path.dirname(os.path.abspath(__file__))
     ckpt_folder = os.path.join(curr_dir, task + '_ckpt')
@@ -28,9 +31,10 @@ if __name__ == '__main__':
     last_episode_id = 0
     REWARDS = []
 
+    # 创建策略网络
     net = ActorCritic(input_dim=env.state_dims, output_dim=env.action_dims).to(device)
     if len(glob.glob(os.path.join(ckpt_folder, '*.pt'))) > 0:
-        # load the last ckpt
+        # 加载最后一个模型
         last_ckpt = sorted(glob.glob(os.path.join(ckpt_folder, '*.pt')))[-1]
         print("load checkpoint", last_ckpt)
         checkpoint = torch.load(last_ckpt)
@@ -40,16 +44,19 @@ if __name__ == '__main__':
 
     for episode_id in range(last_episode_id, max_m_episode):
 
-        # training loop
+        # 循环一局训练
         state = env.reset()
         rewards, log_probs, values, masks = [], [], [], []
         for step_id in range(max_steps):
+            # 根据策略网络计算动作和对数概率，并获取动作值 
             action, log_prob, value = net.get_action(state)
+            # 执行动作并获取下一个状态和奖励
             state, reward, done, _ = env.step(action)
             rewards.append(reward)
             log_probs.append(log_prob)
             values.append(value)
             masks.append(1-done)
+            
             if episode_id % 100 == 1:
                 env.render()
 
@@ -62,6 +69,7 @@ if __name__ == '__main__':
         print('episode id: %d, episode reward: %.3f'
               % (episode_id, np.sum(rewards)))
 
+        # 保存模型
         if episode_id % 1000 == 1:
             plt.figure()
             plt.plot(REWARDS), plt.plot(utils.moving_avg(REWARDS, N=50))

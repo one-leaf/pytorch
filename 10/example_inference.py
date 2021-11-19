@@ -10,11 +10,10 @@ print(device)
 
 if __name__ == '__main__':
 
-    task = 'hover'  # 'hover' or 'landing'
+    task = 'landing'  # 悬停 'hover' 或 着陆 'landing'
     max_steps = 800
     curr_dir = os.path.dirname(os.path.abspath(__file__))
-
-    ckpt_dir = sorted(glob.glob(os.path.join(curr_dir, task+'_ckpt', '*.pt')))[-1]  # last ckpt
+    ckpt_dir = sorted(glob.glob(os.path.join(curr_dir, task+'_ckpt', '*.pt')))[-1]  # 最新的模型
 
     env = Rocket(task=task, max_steps=max_steps)
     net = ActorCritic(input_dim=env.state_dims, output_dim=env.action_dims).to(device)
