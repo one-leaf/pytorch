@@ -156,11 +156,13 @@ class Agent(object):
         isFalling=True
         if self.tetromino.validposition(self.board,self.fallpiece,ay = 1):
             self.fallpiece['y'] +=1
+            self.player_reward[self.curr_player] += 1
         else:
             isFalling = False
+            self.player_reward[self.curr_player] -= 5
 
         fallpiece_y = self.fallpiece['y']
-        self.player_reward[self.curr_player] = fallpiece_y
+        # self.player_reward[self.curr_player] = fallpiece_y
 
         self.fallpiece_status.append(self.get_fallpiece_board())
 
@@ -198,8 +200,8 @@ class Agent(object):
             if self.player_reward[1]>self.player_reward[0]:
                 self.winner = 1
             # 如果为平局的时候，其实就是输了
-            if self.player_reward[1]==self.player_reward[0]:
-                self.winner = self.curr_player  
+            #if self.player_reward[1]==self.player_reward[0]:
+            #    self.winner = self.curr_player  
             self.player_reward_prev = self.player_reward               
             self.player_reward=[0, 0]
 
