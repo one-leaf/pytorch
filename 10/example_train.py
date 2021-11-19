@@ -59,7 +59,7 @@ if __name__ == '__main__':
         print('episode id: %d, episode reward: %.3f'
               % (episode_id, np.sum(rewards)))
 
-        if episode_id % 100 == 1:
+        if episode_id % 1000 == 1:
             plt.figure()
             plt.plot(REWARDS), plt.plot(utils.moving_avg(REWARDS, N=50))
             plt.legend(['episode reward', 'moving avg'], loc=2)

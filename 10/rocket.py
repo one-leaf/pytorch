@@ -4,26 +4,25 @@ import cv2
 import utils
 import os
 
+# 火箭
 class Rocket(object):
     """
-    Rocekt and environment.
-    The rocket is simplified into a rigid body model with a thin rod,
-    considering acceleration and angular acceleration and air resistance
-    proportional to velocity.
+    火箭简单的定义为一个带有细杆的刚体模型
+    考虑加速度、角加速度和空气助力对速度的影响
 
-    There are two tasks: hover and landing
-    Their reward functions are straight forward and simple.
+    有两个任务 悬停（hover）和着陆（）
+    
+    任务奖励为：
 
-    For the hover tasks: the step-reward is given based on two factors
-    1) the distance between the rocket and the predefined target point
-    2) the angle of the rocket body (the rocket should stay as upright as possible)
+    对于悬停（hover）: 
+    1) 火箭与预定义目标点之间的距离
+    2) 火箭的角度，应该尽可能保持垂直
 
-    For the landing task: the step-reward is given based on three factors:
-    1) the distance between the rocket and the predefined landing point.
-    2) the angle of the rocket body (the rocket should stay as upright as possible)
-    3) Speed and angle at the moment of contact with the ground, when the touching-speed
-    are smaller than a safe threshold and the angle is close to 90 degrees (upright),
-    we see it as a successful landing.
+    对于着陆（landing）:
+   
+    1) 火箭与预定义目标点之间的距离
+    2) 火箭的角度，应该尽可能保持垂直
+    3) 接触到地面时的速度和角度，如果接触速度小于安全阈值且角度接近90度，认为是一次成功的着陆
 
     """
 
@@ -31,46 +30,55 @@ class Rocket(object):
                  viewport_h=768, path_to_bg_img=None):
 
         self.task = task
-        self.rocket_type = rocket_type
+        self.rocket_type = rocket_type  # 火箭类型 falcon 猎鹰
 
-        self.g = 9.8
-        self.H = 50  # rocket height (meters)
-        self.I = 1/12*self.H*self.H  # Moment of inertia
-        self.dt = 0.05
+        self.g = 9.8 # 重力加速度
+        self.H = 50  # 火箭的高度50米
+        self.I = 1/12*self.H*self.H  # 转动惯量，对于细杆，I = 1/12 * m * L^2
+        self.dt = 0.05  # 最小作用时间
 
-        self.world_x_min = -300  # meters
+        self.world_x_min = -300  # X 轴 为 -300 ～ 300 米
         self.world_x_max = 300
-        self.world_y_min = -30
+        self.world_y_min = -30   # Y 轴 为 -30 ～ 570 米
         self.world_y_max = 570
 
-        # target point
+        # 任务的目标点
+        # 如果是悬停： x = 0， y = 200 米， r = 50米 半径
+        # 如果是着陆： x = 0， y = 25 米（火箭高度的一半）， r = 50 米 半径
         if self.task == 'hover':
             self.target_x, self.target_y, self.target_r = 0, 200, 50
         elif self.task == 'landing':
             self.target_x, self.target_y, self.target_r = 0, self.H/2.0, 50
 
+        # 已经着陆
         self.already_landing = False
+        # 已经失败
         self.already_crash = False
+        # 最大步数
         self.max_steps = max_steps
 
-        # viewport height x width (pixels)
+        # 图片显示的 高 x 宽 (像素) 768 x 600/600*768 = 768 x 768 
         self.viewport_h = int(viewport_h)
         self.viewport_w = int(viewport_h * (self.world_x_max-self.world_x_min) \
                           / (self.world_y_max - self.world_y_min))
         self.step_id = 0
 
+        # 初始随机状态
         self.state = self.create_random_state()
+        # 建立发动机动作表 推力大小 x 角度 一共9种行为 
         self.action_table = self.create_action_table()
 
         self.state_dims = 8
         self.action_dims = len(self.action_table)
 
+        # 发射背景
         if path_to_bg_img is None:
             path_to_bg_img = task+'.jpg'
             curr_dir = os.path.dirname(os.path.abspath(__file__))
             path_to_bg_img = os.path.join(curr_dir, path_to_bg_img)
         self.bg_img = utils.load_bg_img(path_to_bg_img, w=self.viewport_w, h=self.viewport_h)
 
+        # 状态缓存
         self.state_buffer = []
 
 
@@ -87,11 +95,12 @@ class Rocket(object):
         cv2.destroyAllWindows()
         return self.flatten(self.state)
 
+    # 发动机动作表
     def create_action_table(self):
-        f0 = 0.2 * self.g  # thrust
+        f0 = 0.2 * self.g  # 推力
         f1 = 1.0 * self.g
         f2 = 2 * self.g
-        vphi0 = 0  # Nozzle angular velocity
+        vphi0 = 0  # 喷嘴的角速度
         vphi1 = 30 / 180 * np.pi
         vphi2 = -30 / 180 * np.pi
 
@@ -101,30 +110,42 @@ class Rocket(object):
                         ]
         return action_table
 
+    # 随机选择一个动作
     def get_random_action(self):
         return random.randint(0, len(self.action_table)-1)
 
+    # 建立随机状态
     def create_random_state(self):
 
-        # predefined locations
-        x_range = self.world_x_max - self.world_x_min
-        y_range = self.world_y_max - self.world_y_min
-        xc = (self.world_x_max + self.world_x_min) / 2.0
-        yc = (self.world_y_max + self.world_y_min) / 2.0
+        # 预定义位置
+        x_range = self.world_x_max - self.world_x_min   # 600
+        y_range = self.world_y_max - self.world_y_min   # 600
+        xc = (self.world_x_max + self.world_x_min) / 2.0    # x中心 0
+        yc = (self.world_y_max + self.world_y_min) / 2.0    # y中心 270
 
+        # 如果任务为着陆
         if self.task == 'landing':
+            # x 的范围为 （-150， 150） 均匀分布
             x = random.uniform(xc - x_range / 4.0, xc + x_range / 4.0)
+            # y 固定为 510
             y = yc + 0.4*y_range
+            # 初始角速度 -85/85
             if x <= 0:
                 theta = -85 / 180 * np.pi
             else:
                 theta = 85 / 180 * np.pi
+            # 初始速度
             vy = -50
 
+        # 如果任务为悬停
         if self.task == 'hover':
+            # x = 0
             x = xc
+            # y = 390
             y = yc + 0.2 * y_range
+            # 角速度随机 （-45～45）
             theta = random.uniform(-45, 45) / 180 * np.pi
+            # 速度 -10
             vy = -10
 
         state = {
@@ -136,7 +157,11 @@ class Rocket(object):
 
         return state
 
+    # 检查是否失败
     def check_crash(self, state):
+        # 如果是悬停 失败：
+        #   y 小于 火箭长度/2 ； 
+        #   y 大于 最大高度 - 火箭长度/2
         if self.task == 'hover':
             x, y = state['x'], state['y']
             theta = state['theta']
@@ -146,6 +171,12 @@ class Rocket(object):
             if y >= self.world_y_max - self.H / 2.0:
                 crash = True
             return crash
+
+        # 如果着陆 失败：
+        #   y 大于 最大高度 - 火箭长度/2
+        #   y 小于 火箭长度/2 并且 速度 > 15
+        #   y 小于 火箭长度/2 并且 火箭角度 > +-10
+        #   y 小于 火箭长度/2 并且 运动角度 > +-10
 
         elif self.task == 'landing':
             x, y = state['x'], state['y']
@@ -167,6 +198,7 @@ class Rocket(object):
                 crash = True
             return crash
 
+    # 检查是否着陆成功
     def check_landing_success(self, state):
         if self.task == 'hover':
             return False
@@ -179,18 +211,22 @@ class Rocket(object):
             return True if y <= 0 + self.H / 2.0 and v < 15.0 and abs(x) < self.target_r \
                            and abs(theta) < 10/180*np.pi and abs(vtheta) < 10/180*np.pi else False
 
+    # 计算奖励
     def calculate_reward(self, state):
 
         x_range = self.world_x_max - self.world_x_min
         y_range = self.world_y_max - self.world_y_min
 
-        # dist between agent and target point
+        # 火箭和目标位置的距离
         dist_x = abs(state['x'] - self.target_x)
         dist_y = abs(state['y'] - self.target_y)
+        # 归一化
         dist_norm = dist_x / x_range + dist_y / y_range
-
+        # 位置差异越小越好，奖励值范围： -0.1 ～ 0.1
         dist_reward = 0.1*(1.0 - dist_norm)
 
+        # 角度奖励 -30 ～ 30 ，奖励为 0.1
+        # 超过着角度越大，得分越小，奖励值范围 0 ～ 0.1
         if abs(state['theta']) <= np.pi / 6.0:
             pose_reward = 0.1
         else:
@@ -199,6 +235,7 @@ class Rocket(object):
 
         reward = dist_reward + pose_reward
 
+        # 如果悬停，直接用半径确定奖励，半径越小越好，但如果火箭的角度大于+-90 则奖励直接为0
         if self.task == 'hover' and (dist_x**2 + dist_y**2)**0.5 <= 2*self.target_r:  # hit target
             reward = 0.25
         if self.task == 'hover' and (dist_x**2 + dist_y**2)**0.5 <= 1*self.target_r:  # hit target
@@ -206,6 +243,9 @@ class Rocket(object):
         if self.task == 'hover' and abs(state['theta']) > 90 / 180 * np.pi:
             reward = 0
 
+        # 如果是着陆，有速度奖励，
+        # 如果着陆失败，总奖励为 （-0.1～0.2 + 5 * e ^ (-1*v/10)） * 调整的次数，越小越好
+        # 如果着陆成功，总奖励为 （  1 + 5 * e ^ (-1*v/10)） * 调整的次数，越小越好
         v = (state['vx'] ** 2 + state['vy'] ** 2) ** 0.5
         if self.task == 'landing' and self.already_crash:
             reward = (reward + 5*np.exp(-1*v/10.)) * (self.max_steps - self.step_id)
@@ -214,29 +254,38 @@ class Rocket(object):
 
         return reward
 
+    # 执行动作
     def step(self, action):
-
+        # 当前火箭的位置和速度
         x, y, vx, vy = self.state['x'], self.state['y'], self.state['vx'], self.state['vy']
+        # 当前火箭的角度和运动角度
         theta, vtheta = self.state['theta'], self.state['vtheta']
+        # 角速度
         phi = self.state['phi']
 
+        # 喷嘴推力和喷嘴方向的角度
         f, vphi = self.action_table[action]
 
+        # 分解为力和角速度力
         ft, fr = -f*np.sin(phi), f*np.cos(phi)
         fx = ft*np.cos(theta) - fr*np.sin(theta)
         fy = ft*np.sin(theta) + fr*np.cos(theta)
 
-        rho = 1 / (125/(self.g/2.0))**0.5  # suppose after 125 m free fall, then air resistance = mg
+        # 计算空气阻力
+        rho = 1 / (125/(self.g/2.0))**0.5  # 假设125米的自由下落产生的空气阻力为 mg
         ax, ay = fx-rho*vx, fy-self.g-rho*vy
         atheta = ft*self.H/2 / self.I
 
-        # update agent
+        # 如果已经着陆，则全部为0
         if self.already_landing:
             vx, vy, ax, ay, theta, vtheta, atheta = 0, 0, 0, 0, 0, 0, 0
             phi, f = 0, 0
             action = 0
 
+        # 当前步数
         self.step_id += 1
+
+        # 计算新坐标、火箭的角度、运动的角度
         x_new = x + vx*self.dt + 0.5 * ax * (self.dt**2)
         y_new = y + vy*self.dt + 0.5 * ay * (self.dt**2)
         vx_new, vy_new = vx + ax * self.dt, vy + ay * self.dt
@@ -244,6 +293,7 @@ class Rocket(object):
         vtheta_new = vtheta + atheta * self.dt
         phi = phi + self.dt*vphi
 
+        # 控制下角速度，太大会直接旋转，现实不会有这种情况
         phi = max(phi, -20/180*3.1415926)
         phi = min(phi, 20/180*3.1415926)
 
@@ -259,6 +309,7 @@ class Rocket(object):
         self.already_crash = self.check_crash(self.state)
         reward = self.calculate_reward(self.state)
 
+        # 是否结束
         if self.already_crash or self.already_landing:
             done = True
         else:
@@ -266,12 +317,14 @@ class Rocket(object):
 
         return self.flatten(self.state), reward, done, None
 
+    # 直接小数化
     def flatten(self, state):
         x = [state['x'], state['y'], state['vx'], state['vy'],
              state['theta'], state['vtheta'], state['t'],
              state['phi']]
         return np.array(x, dtype=np.float32)/100.
 
+    # 显示
     def render(self, window_name='env', wait_time=1,
                with_trajectory=True, with_camera_tracking=True,
                crop_scale=0.4):
@@ -279,15 +332,15 @@ class Rocket(object):
         canvas = np.copy(self.bg_img)
         polys = self.create_polygons()
 
-        # draw target region
+        # 绘制目标区域
         for poly in polys['target_region']:
             self.draw_a_polygon(canvas, poly)
-        # draw rocket
+        # 绘制火箭
         for poly in polys['rocket']:
             self.draw_a_polygon(canvas, poly)
         frame_0 = canvas.copy()
 
-        # draw engine work
+        # 绘制引擎大小和方向
         for poly in polys['engine_work']:
             self.draw_a_polygon(canvas, poly)
         frame_1 = canvas.copy()
@@ -296,12 +349,12 @@ class Rocket(object):
             frame_0 = self.crop_alongwith_camera(frame_0, crop_scale=crop_scale)
             frame_1 = self.crop_alongwith_camera(frame_1, crop_scale=crop_scale)
 
-        # draw trajectory
+        # 绘制轨迹
         if with_trajectory:
             self.draw_trajectory(frame_0)
             self.draw_trajectory(frame_1)
 
-        # draw text
+        # 绘制提示文字
         self.draw_text(frame_0, color=(0, 0, 0))
         self.draw_text(frame_1, color=(0, 0, 0))
 
@@ -311,6 +364,7 @@ class Rocket(object):
         cv2.waitKey(wait_time)
         return frame_0, frame_1
 
+    # 建立画板
     def create_polygons(self):
 
         polys = {'rocket': [], 'engine_work': [], 'target_region': []}
