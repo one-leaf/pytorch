@@ -6,6 +6,7 @@ import glob
 
 # Decide which device we want to run on
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+print(device)
 
 if __name__ == '__main__':
 
