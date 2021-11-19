@@ -8,7 +8,7 @@ import utils
 import os
 import glob
 
-# Decide which device we want to run on
+# 如果有显卡就用显卡
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(device)
 
