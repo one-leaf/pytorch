@@ -14,7 +14,7 @@ print(device)
 
 if __name__ == '__main__':
 
-    task = 'hover'  # 'hover' or 'landing'
+    task = 'landing'  # 'hover' or 'landing'
 
     max_m_episode = 800000
     max_steps = 800
