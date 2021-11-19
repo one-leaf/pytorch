@@ -13,11 +13,12 @@ if __name__ == '__main__':
     max_steps = 800
     curr_dir = os.path.dirname(os.path.abspath(__file__))
 
-    ckpt_dir = glob.glob(os.path.join(curr_dir, task+'_ckpt', '*.pt'))[-1]  # last ckpt
+    ckpt_dir = sorted(glob.glob(os.path.join(curr_dir, task+'_ckpt', '*.pt')))[-1]  # last ckpt
 
     env = Rocket(task=task, max_steps=max_steps)
     net = ActorCritic(input_dim=env.state_dims, output_dim=env.action_dims).to(device)
     if os.path.exists(ckpt_dir):
+        print("load checkpoint", ckpt_dir)
         checkpoint = torch.load(ckpt_dir)
         net.load_state_dict(checkpoint['model_G_state_dict'])
 
