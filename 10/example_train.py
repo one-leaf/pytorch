@@ -14,7 +14,7 @@ print(device)
 
 if __name__ == '__main__':
 
-    task = 'landing'  # 悬停 'hover' 或 着陆 'landing'
+    task = 'hover'  # 悬停 'hover' 或 着陆 'landing'
 
     # 最大局数
     max_m_episode = 800000
