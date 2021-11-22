@@ -26,11 +26,13 @@ class Rocket(object):
 
     """
 
-    def __init__(self, max_steps, task='hover', rocket_type='falcon',
-                 viewport_h=768, path_to_bg_img=None):
+    def __init__(self, max_steps, task='hover', viewport_h=768, path_to_bg_img=None):
 
         self.task = task
-        self.rocket_type = rocket_type  # 火箭类型 falcon 猎鹰
+        if task=="hover":
+            self.rocket_type = 'starship'
+        else:
+            self.rocket_type = 'falcon'  # 火箭类型 falcon 猎鹰 starship 星舰
 
         self.g = 9.8 # 重力加速度
         self.H = 50  # 火箭的高度50米
@@ -236,12 +238,18 @@ class Rocket(object):
         reward = dist_reward + pose_reward
 
         # 如果悬停，直接用半径确定奖励，半径越小越好，但如果火箭的角度大于+-90 则奖励直接为0
-        if self.task == 'hover' and (dist_x**2 + dist_y**2)**0.5 <= 2*self.target_r:  # hit target
-            reward = 0.25
-        if self.task == 'hover' and (dist_x**2 + dist_y**2)**0.5 <= 1*self.target_r:  # hit target
-            reward = 0.5
-        if self.task == 'hover' and abs(state['theta']) > 90 / 180 * np.pi:
-            reward = 0
+        # if self.task == 'hover' and (dist_x**2 + dist_y**2)**0.5 <= 2*self.target_r:  # hit target
+        #     reward = 0.25
+        # if self.task == 'hover' and (dist_x**2 + dist_y**2)**0.5 <= 1*self.target_r:  # hit target
+        #     reward = 0.5
+        # if self.task == 'hover' and abs(state['theta']) > 90 / 180 * np.pi:
+        #     reward = 0
+        if self.task == 'hover':
+            reward = pose_reward
+            reward += self.target_r*0.5/(dist_x**2 + dist_y**2)**0.5
+            if abs(state['theta']) > 90 / 180 * np.pi:
+                reward = 0
+
 
         # 如果是着陆，有速度奖励，
         # 如果着陆失败，总奖励为 （-0.1～0.2 + 5 * e ^ (-1*v/10)） * 调整的次数，越小越好
