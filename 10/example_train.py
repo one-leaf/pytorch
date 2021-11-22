@@ -51,7 +51,7 @@ if __name__ == '__main__':
             # 根据策略网络计算动作和对数概率，并获取动作值 
             action, log_prob, value = net.get_action(state)
             # 执行动作并获取下一个状态和奖励
-            state, reward, done, _ = env.step(action)
+            state, reward, done = env.step(action)
             rewards.append(reward)
             log_probs.append(log_prob)
             values.append(value)

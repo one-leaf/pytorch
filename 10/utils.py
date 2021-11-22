@@ -1,8 +1,6 @@
 import numpy as np
 import cv2
 
-################ Some helper functions... ####################
-
 def moving_avg(x, N=500):
 
     if len(x) <= N:
@@ -45,8 +43,6 @@ def create_rectangle_poly(center, w, h):
     return pts
 
 
-################ Let's do some math... ####################
-
 def scale_matrix(sx=1.0, sy=1.0, sz=1.0):
 
     ScaleMatrix = np.eye(4)
@@ -58,7 +54,7 @@ def scale_matrix(sx=1.0, sy=1.0, sz=1.0):
 
 def rotation_matrix(rx=0., ry=0., rz=0.):
 
-    # input should be radians (e.g., 0, pi/2, pi)
+    # 输入的为弧度 (e.g., 0, pi/2, pi)
 
     Rx = np.eye(4)
     Rx[1, 1] = np.cos(rx)
@@ -99,16 +95,16 @@ def create_pose_matrix(tx=0., ty=0., tz=0.,
                        sx=1.0, sy=1.0, sz=1.0,
                        base_correction=np.eye(4)):
 
-    # Scale matrix
+    # 缩放矩阵
     ScaleMatrix = scale_matrix(sx, sy, sz)
 
-    # Rotation matrix
+    # 旋转矩阵
     RotationMatrix = rotation_matrix(rx, ry, rz)
 
-    # Translation matrix
+    # 变换矩阵
     TranslationMatrix = translation_matrix(tx, ty, tz)
 
-    # TranslationMatrix * RotationMatrix * ScaleMatrix
+    # 变换矩阵 * 旋转矩阵 * 缩放矩阵
     PoseMatrix = np.mat(TranslationMatrix) \
                  * np.mat(RotationMatrix) \
                  * np.mat(ScaleMatrix) \

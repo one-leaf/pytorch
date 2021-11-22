@@ -10,7 +10,7 @@ print(device)
 
 if __name__ == '__main__':
 
-    task = 'landing'  # 悬停 'hover' 或 着陆 'landing'
+    task = 'hover'  # 悬停 'hover' 或 着陆 'landing'
     max_steps = 800
     curr_dir = os.path.dirname(os.path.abspath(__file__))
     ckpt_dir = sorted(glob.glob(os.path.join(curr_dir, task+'_ckpt', '*.pt')))[-1]  # 最新的模型
@@ -25,7 +25,7 @@ if __name__ == '__main__':
     state = env.reset()
     for step_id in range(max_steps):
         action, log_prob, value = net.get_action(state)
-        state, reward, done, _ = env.step(action)
+        state, reward, done = env.step(action)
         env.render(window_name='test')
         if env.already_crash:
             break

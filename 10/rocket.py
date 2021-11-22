@@ -238,6 +238,7 @@ class Rocket(object):
         reward = dist_reward + pose_reward
 
         # 如果悬停，直接用半径确定奖励，半径越小越好，但如果火箭的角度大于+-90 则奖励直接为0
+        # 下面由于奖励直接分段，导致后期收敛差
         # if self.task == 'hover' and (dist_x**2 + dist_y**2)**0.5 <= 2*self.target_r:  # hit target
         #     reward = 0.25
         # if self.task == 'hover' and (dist_x**2 + dist_y**2)**0.5 <= 1*self.target_r:  # hit target
@@ -305,6 +306,7 @@ class Rocket(object):
         phi = max(phi, -20/180*3.1415926)
         phi = min(phi, 20/180*3.1415926)
 
+        # 当前状态
         self.state = {
             'x': x_new, 'y': y_new, 'vx': vx_new, 'vy': vy_new,
             'theta': theta_new, 'vtheta': vtheta_new,
@@ -323,7 +325,7 @@ class Rocket(object):
         else:
             done = False
 
-        return self.flatten(self.state), reward, done, None
+        return self.flatten(self.state), reward, done
 
     # 直接小数化
     def flatten(self, state):
@@ -377,31 +379,33 @@ class Rocket(object):
 
         polys = {'rocket': [], 'engine_work': [], 'target_region': []}
 
+        # 画猎鹰
         if self.rocket_type == 'falcon':
 
             H, W = self.H, self.H/10
             dl = self.H / 30
 
-            # rocket main body
+            # 火箭身体
             pts = [[-W/2, H/2], [W/2, H/2], [W/2, -H/2], [-W/2, -H/2]]
             polys['rocket'].append({'pts': pts, 'face_color': (242, 242, 242), 'edge_color': None})
-            # rocket paint
+            # 火箭底部
             pts = utils.create_rectangle_poly(center=(0, -0.35*H), w=W, h=0.1*H)
             polys['rocket'].append({'pts': pts, 'face_color': (42, 42, 42), 'edge_color': None})
             pts = utils.create_rectangle_poly(center=(0, -0.46*H), w=W, h=0.02*H)
             polys['rocket'].append({'pts': pts, 'face_color': (42, 42, 42), 'edge_color': None})
-            # rocket landing rack
+            # 火箭着陆架
             pts = [[-W/2, -H/2], [-W/2-H/10, -H/2-H/20], [-W/2, -H/2+H/20]]
             polys['rocket'].append({'pts': pts, 'face_color': None, 'edge_color': (0, 0, 0)})
             pts = [[W/2, -H/2], [W/2+H/10, -H/2-H/20], [W/2, -H/2+H/20]]
             polys['rocket'].append({'pts': pts, 'face_color': None, 'edge_color': (0, 0, 0)})
 
+        # 画星舰
         elif self.rocket_type == 'starship':
 
             H, W = self.H, self.H / 2.6
             dl = self.H / 30
 
-            # rocket main body (right half)
+            # 画火箭主体右半
             pts = np.array([[ 0.        ,  0.5006878 ],
                            [ 0.03125   ,  0.49243465],
                            [ 0.0625    ,  0.48143053],
@@ -414,7 +418,7 @@ class Rocket(object):
             pts[:, 1] = pts[:, 1] * H
             polys['rocket'].append({'pts': pts, 'face_color': (242, 242, 242), 'edge_color': None})
 
-            # rocket main body (left half)
+            # 画火箭主体左半
             pts = np.array([[-0.        ,  0.5006878 ],
                            [-0.03125   ,  0.49243465],
                            [-0.0625    ,  0.48143053],
@@ -427,7 +431,7 @@ class Rocket(object):
             pts[:, 1] = pts[:, 1] * H
             polys['rocket'].append({'pts': pts, 'face_color': (212, 212, 232), 'edge_color': None})
 
-            # upper wing (right)
+            # 右上翼
             pts = np.array([[0.15972222, 0.3933975 ],
                            [0.3784722 , 0.303989  ],
                            [0.3784722 , 0.2352132 ],
@@ -436,7 +440,7 @@ class Rocket(object):
             pts[:, 1] = pts[:, 1] * H
             polys['rocket'].append({'pts': pts, 'face_color': (42, 42, 42), 'edge_color': None})
 
-            # upper wing (left)
+            # 左上翼
             pts = np.array([[-0.15972222,  0.3933975 ],
                            [-0.3784722 ,  0.303989  ],
                            [-0.3784722 ,  0.2352132 ],
@@ -445,7 +449,7 @@ class Rocket(object):
             pts[:, 1] = pts[:, 1] * H
             polys['rocket'].append({'pts': pts, 'face_color': (42, 42, 42), 'edge_color': None})
 
-            # lower wing (right)
+            # 右下翼
             pts = np.array([[ 0.2326389 , -0.16368638],
                            [ 0.4548611 , -0.33562586],
                            [ 0.4548611 , -0.48555708],
@@ -454,7 +458,7 @@ class Rocket(object):
             pts[:, 1] = pts[:, 1] * H
             polys['rocket'].append({'pts': pts, 'face_color': (100, 100, 100), 'edge_color': None})
 
-            # lower wing (left)
+            # 左下翼
             pts = np.array([[-0.2326389 , -0.16368638],
                            [-0.4548611 , -0.33562586],
                            [-0.4548611 , -0.48555708],
@@ -467,7 +471,7 @@ class Rocket(object):
             raise NotImplementedError('rocket type [%s] is not found, please choose one '
                                       'from (falcon, starship)' % self.rocket_type)
 
-        # engine work
+        # 画引擎
         f, phi = self.state['f'], self.state['phi']
         c, s = np.cos(phi), np.sin(phi)
 
@@ -492,7 +496,7 @@ class Rocket(object):
             polys['engine_work'].append({'pts': pts2, 'face_color': (255, 255, 255), 'edge_color': None})
             polys['engine_work'].append({'pts': pts3, 'face_color': (255, 255, 255), 'edge_color': None})
             polys['engine_work'].append({'pts': pts4, 'face_color': (255, 255, 255), 'edge_color': None})
-        # target region
+        # 画目标区域
         if self.task == 'hover':
             pts1 = utils.create_rectangle_poly(center=(self.target_x, self.target_y), w=0, h=self.target_r/3.0)
             pts2 = utils.create_rectangle_poly(center=(self.target_x, self.target_y), w=self.target_r/3.0, h=0)
@@ -506,17 +510,17 @@ class Rocket(object):
             polys['target_region'].append({'pts': pts2, 'face_color': None, 'edge_color': (242, 242, 242)})
             polys['target_region'].append({'pts': pts3, 'face_color': None, 'edge_color': (242, 242, 242)})
 
-        # apply transformation
+        # 建立变换
         for poly in polys['rocket'] + polys['engine_work']:
             M = utils.create_pose_matrix(tx=self.state['x'], ty=self.state['y'], rz=self.state['theta'])
             pts = np.array(poly['pts'])
-            pts = np.concatenate([pts, np.ones_like(pts)], axis=-1)  # attach z=1, w=1
+            pts = np.concatenate([pts, np.ones_like(pts)], axis=-1)  # 附加 z=1, w=1
             pts = np.matmul(M, pts.T).T
             poly['pts'] = pts[:, 0:2]
 
         return polys
 
-
+    # 绘制
     def draw_a_polygon(self, canvas, poly):
 
         pts, face_color, edge_color = poly['pts'], poly['face_color'], poly['edge_color']
@@ -528,7 +532,7 @@ class Rocket(object):
 
         return canvas
 
-
+    # 变成像素坐标
     def wd2pxl(self, pts, to_int=True):
 
         pts_px = np.zeros_like(pts)
@@ -546,6 +550,7 @@ class Rocket(object):
         else:
             return pts_px
 
+    # 文本
     def draw_text(self, canvas, color=(255, 255, 0)):
 
         def put_text(vis, text, pt):
@@ -553,11 +558,11 @@ class Rocket(object):
                         fontScale=0.5, color=color, thickness=1, lineType=cv2.LINE_AA)
 
         pt = (10, 20)
-        text = "simulation time: %.2fs" % (self.step_id * self.dt)
+        text = "模拟时间: %.2fs" % (self.step_id * self.dt)
         put_text(canvas, text, pt)
 
         pt = (10, 40)
-        text = "simulation steps: %d" % (self.step_id)
+        text = "模拟步数: %d" % (self.step_id)
         put_text(canvas, text, pt)
 
         pt = (10, 60)
@@ -575,15 +580,15 @@ class Rocket(object):
                (self.state['theta'] * 180 / np.pi, self.state['vtheta'] * 180 / np.pi)
         put_text(canvas, text, pt)
 
-
+    # 画轨迹
     def draw_trajectory(self, canvas, color=(255, 0, 0)):
 
         pannel_w, pannel_h = 256, 256
         traj_pannel = 255 * np.ones([pannel_h, pannel_w, 3], dtype=np.uint8)
 
-        sw, sh = pannel_w/self.viewport_w, pannel_h/self.viewport_h  # scale factors
+        sw, sh = pannel_w/self.viewport_w, pannel_h/self.viewport_h  # 比例因子
 
-        # draw horizon line
+        # 画水平线
         range_x, range_y = self.world_x_max - self.world_x_min, self.world_y_max - self.world_y_min
         pts = [[self.world_x_min + range_x/3, self.H/2], [self.world_x_max - range_x/3, self.H/2]]
         pts_px = self.wd2pxl(pts)
@@ -592,7 +597,7 @@ class Rocket(object):
         cv2.line(traj_pannel, pt1=(x1, y1), pt2=(x2, y2),
                  color=(0, 0, 0), thickness=1, lineType=cv2.LINE_AA)
 
-        # draw vertical line
+        # 画垂直线 
         pts = [[0, self.H/2], [0, self.H/2+range_y/20]]
         pts_px = self.wd2pxl(pts)
         x1, y1 = int(pts_px[0][0]*sw), int(pts_px[0][1]*sh)
@@ -603,7 +608,7 @@ class Rocket(object):
         if len(self.state_buffer) < 2:
             return
 
-        # draw traj
+        # 画轨迹
         pts = []
         for state in self.state_buffer:
             pts.append([state['x'], state['y']])
@@ -622,12 +627,12 @@ class Rocket(object):
         canvas[roi_y1:roi_y2, roi_x1:roi_x2, :] = 0.6*canvas[roi_y1:roi_y2, roi_x1:roi_x2, :] + 0.4*traj_pannel
 
 
-
+    # 裁剪
     def crop_alongwith_camera(self, vis, crop_scale=0.4):
         x, y = self.state['x'], self.state['y']
         xp, yp = self.wd2pxl([[x, y]])[0]
         crop_w_half, crop_h_half = int(self.viewport_w*crop_scale), int(self.viewport_h*crop_scale)
-        # check boundary
+        # 边界检查
         if xp <= crop_w_half + 1:
             xp = crop_w_half + 1
         if xp >= self.viewport_w - crop_w_half - 1:

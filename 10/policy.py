@@ -128,7 +128,7 @@ class ActorCritic(nn.Module):
 
         return action_id, log_prob, value
 
-    # 方向传播
+    # 反向传播
     @staticmethod
     def update_ac(network, rewards, log_probs, values, masks, Qval, gamma=0.99):
 
