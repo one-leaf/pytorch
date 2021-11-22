@@ -19,7 +19,7 @@ if __name__ == '__main__':
     net = ActorCritic(input_dim=env.state_dims, output_dim=env.action_dims).to(device)
     if os.path.exists(ckpt_dir):
         print("load checkpoint", ckpt_dir)
-        checkpoint = torch.load(ckpt_dir)
+        checkpoint = torch.load(ckpt_dir,map_location=device)
         net.load_state_dict(checkpoint['model_G_state_dict'])
 
     state = env.reset()

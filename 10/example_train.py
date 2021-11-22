@@ -37,7 +37,7 @@ if __name__ == '__main__':
         # 加载最后一个模型
         last_ckpt = sorted(glob.glob(os.path.join(ckpt_folder, '*.pt')))[-1]
         print("load checkpoint", last_ckpt)
-        checkpoint = torch.load(last_ckpt)
+        checkpoint = torch.load(last_ckpt,map_location=device)
         net.load_state_dict(checkpoint['model_G_state_dict'])
         last_episode_id = checkpoint['episode_id']
         REWARDS = checkpoint['REWARDS']
