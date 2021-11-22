@@ -57,7 +57,7 @@ if __name__ == '__main__':
             values.append(value)
             masks.append(1-done)
             
-            if episode_id % 100 == 1:
+            if episode_id % 1000 == 1:
                 env.render()
 
             if done or step_id == max_steps-1:
