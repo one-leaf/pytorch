@@ -1,5 +1,6 @@
 import random
 import numpy as np
+from numpy.core.fromnumeric import mean
 import torch
 import utils
 import torch.optim as optim
@@ -84,14 +85,16 @@ class MLP(nn.Module):
 class ActorCritic(nn.Module):
     """
     火箭模型的策略和更新
-    两个模型，第一个输出动作的概率，第二个输出当前得分，模型并不共用
+    两个模型，第一个输出动作的概率，第二个输出当前得分，模型并不共用，稳定性更高
     """
 
     def __init__(self, input_dim, output_dim):
         super().__init__()
 
         self.output_dim = output_dim
+        # 动作执行
         self.actor = MLP(input_dim=input_dim, output_dim=output_dim)
+        # 状态打分
         self.critic = MLP(input_dim=input_dim, output_dim=1)
         self.softmax = nn.Softmax(dim=-1)
 
@@ -101,6 +104,7 @@ class ActorCritic(nn.Module):
     def forward(self, x):
         y = self.actor(x)
         probs = self.softmax(y)
+
         value = self.critic(x)
         return probs, value
 
@@ -132,9 +136,9 @@ class ActorCritic(nn.Module):
     @staticmethod
     def update_ac(network, rewards, log_probs, values, masks, Qval, gamma=0.99):
 
-        # 计算Q值, Qval: 本局最终的状态得分；
-        #         rewards：当前步的得分；
-        #         masks：最后一步是否结束
+        # 计算Q值, Qval: 本局实际最终的状态得分；
+        #         rewards：当前步的实际得分；
+        #         masks：是否是最后一步，如果是最后一步，则不需要计算Q值
         # 将 后一步的 reward 按照 0.99 的衰减，叠加到 上一步的 reward 上
         # 倒序循环
         # R = rewards[step] + gamma * R * masks[step]
@@ -142,20 +146,27 @@ class ActorCritic(nn.Module):
         # 注意:
         #       如果最后一步结束了，R的初始取值直接是 rewards[-1]
         #       如果到最后游戏还没有结束，最后的得分，就需要加上预测的Qval*0.99，作为巨大的奖励提升
-        Qvals = calculate_returns(Qval.detach(), rewards, masks, gamma=gamma)
+        Qvals = calculate_returns(Qval.detach(), rewards, masks, gamma=gamma)       
         Qvals = torch.tensor(Qvals, dtype=torch.float32).to(device).detach()
 
-        # 本局的所有步数的动作对数概率和打分
+        # 本局的所有步数的动作对数概率和打分  probs：[0～1] log_probs：[-20.7～0] -log_probs: [20.7～0]
+        # log_probs: 是当前所有选择动作的最大概率，也就是每一步的动作概率
         log_probs = torch.stack(log_probs)
         values = torch.stack(values)
 
         #当前实际的得分 - 上一步预测的值，
         advantage = Qvals - values
-        # 对数概率 与实际得分与预测得分 取负
+        # 对数概率 与实际得分与预测得分
+        #  
+        # advantage 的梯度已经锁定，
+        # 如果 如果实际比预测得分高，advantage 为负数，log_probs下降慢，则保留概率
+        # 如果 如果预测比实际得分高，advantage 为正数，log_probs下降快，概率得到提升
         actor_loss = (-log_probs * advantage.detach()).mean()
-        # 对得分差异取F2范数*0.5，强制降低差异
+        # 对得分差异取平方*0.5，这个对loss的影响很大，降低预测和实际打分的差异
         critic_loss = 0.5 * advantage.pow(2).mean()
+
         ac_loss = actor_loss + critic_loss
+        print('\tadvantage:', advantage.mean().item(), 'actor_loss:', actor_loss.item(),'critic_loss:', critic_loss.item(), 'totle:', ac_loss.item())
 
         # 梯度清零，反向更新梯度，更新参数
         network.optimizer.zero_grad()
