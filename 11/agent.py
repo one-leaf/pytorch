@@ -292,7 +292,7 @@ class Agent(object):
 
                 # 方块的高度越低越好
                 if game.terminal:
-                    _reward += game.piececount/100.0               
+                    _reward += game.piececount/1000.0               
 
                 _keys.append(game.get_key())
                 _log_probs.append(log_prob)
