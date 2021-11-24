@@ -259,6 +259,8 @@ class PolicyValueNet():
         else:
             av_act_probs = av_act_probs / np.sum(av_act_probs)
 
+        print(av_act_probs)
+
         if len(av_act) == 0:
             raise Exception("没有可用的动作")
 
