@@ -239,6 +239,7 @@ class PolicyValueNet():
                 current_state = game.current_state().reshape(1, -1, self.input_height, self.input_width)
                 act_probs, log_act_probs, value = self.policy_value(current_state)
                 act_probs = act_probs.flatten()
+                log_act_probs = log_act_probs.flatten()
             else:
                 act_len=game.actions_num
                 act_probs=np.ones([act_len])/act_len
@@ -253,16 +254,6 @@ class PolicyValueNet():
         act_probs, log_act_probs, value = self.policy_value_fn(game)
         av_act = game.availables
         av_act_probs = act_probs[av_act]
-        
-        print("av_act_probs:", av_act_probs)
-        print("av_act:", av_act)
-        
-        if np.sum(av_act_probs) == 0:
-            av_act_probs = np.ones(len(av_act_probs)) / len(av_act_probs)
-        else:
-            av_act_probs = av_act_probs / np.sum(av_act_probs)
-
-        print(av_act_probs)
 
         if len(av_act) == 0:
             raise Exception("没有可用的动作")
@@ -273,8 +264,10 @@ class PolicyValueNet():
         else:
             p = 0.75                 
             dirichlet = np.random.dirichlet(0.03 * np.ones(len(av_act)))
-            action_id = np.random.choice(av_act, p=p * av_act_probs + (1.0-p) * dirichlet)
-        print(action_id)
+            r = p * av_act_probs + (1.0-p) * dirichlet
+            r = r / np.sum(r)
+
+            action_id = np.random.choice(av_act, p=r)
 
         return action_id, log_act_probs[action_id], value
 
