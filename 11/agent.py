@@ -290,7 +290,7 @@ class Agent(object):
                 else:
                     _reward = 0
 
-                # 方块的高度越低越好
+                # 方块的个数越多越好
                 if game.terminal:
                     _reward += game.piececount/1000.0               
 
