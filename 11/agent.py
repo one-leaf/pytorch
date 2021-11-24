@@ -292,7 +292,7 @@ class Agent(object):
 
                 # 方块的个数越多越好
                 if game.terminal:
-                    _reward += game.piececount/1000.0               
+                    _reward += game.piececount               
 
                 _keys.append(game.get_key())
                 _log_probs.append(log_prob)
