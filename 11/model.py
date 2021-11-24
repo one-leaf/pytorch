@@ -251,11 +251,13 @@ class PolicyValueNet():
     # 根据当前状态得到，action的概率和概率
     def get_action(self, game, deterministic=False):
         act_probs, log_act_probs, value = self.policy_value_fn(game)
-
         av_act = game.availables
         av_act_probs = act_probs[av_act]
         range_act_probs = np.max(av_act_probs)-np.min(av_act_probs)
-        av_act_probs = (av_act_probs - np.min(av_act_probs))/range_act_probs
+        if range_act_probs == 0:
+            av_act_probs = np.ones(av_act_probs.shape)/len(av_act_probs)
+        else:
+            av_act_probs = (av_act_probs - np.min(av_act_probs))/range_act_probs
 
         if len(av_act) == 0:
             raise Exception("没有可用的动作")
