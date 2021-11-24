@@ -308,8 +308,6 @@ class Agent(object):
                         _qvals.insert(0, Qval)
 
                     print('reward:', game.score, "Qval:", Qval, 'len:', len(_qvals), "piececount:", game.piececount)
-                    print(_rewards[-20:])
-                    print(_qvals[-20:])
                 
                     agentcount += 1
                     reward += game.score
