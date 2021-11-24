@@ -202,10 +202,9 @@ class Train():
                         if i % 50 == 0:   
                             print("probs[0] old:{}".format(old_probs[0]))   
                             print("probs[0] new:{}".format(new_probs[0]))   
-                            print("probs[0] tg: {}".format(test_probs[0])) 
-                            maxlen = min(10, len(test_value)) 
+                            maxlen = min(10, len(test_qvals)) 
                             for j in range(maxlen): 
-                                print("value[0] old:{} new:{} tg:{}".format(old_value[j][0], new_value[j][0], test_value[j]))  
+                                print("value[0] old:{} new:{} tg:{}".format(old_value[j][0], new_value[j][0], test_qvals[j]))  
 
                         old_probs = None
                         
