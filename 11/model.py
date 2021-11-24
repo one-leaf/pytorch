@@ -254,7 +254,8 @@ class PolicyValueNet():
 
         av_act = game.availables
         av_act_probs = act_probs[av_act]
-        av_act_probs = av_act_probs / av_act_probs.sum()
+        range_act_probs = np.max(av_act_probs)-np.min(av_act_probs)
+        av_act_probs = (av_act_probs - np.min(av_act_probs))/range_act_probs
 
         if len(av_act) == 0:
             raise Exception("没有可用的动作")
