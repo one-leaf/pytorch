@@ -558,11 +558,11 @@ class Rocket(object):
                         fontScale=0.5, color=color, thickness=1, lineType=cv2.LINE_AA)
 
         pt = (10, 20)
-        text = "模拟时间: %.2fs" % (self.step_id * self.dt)
+        text = "times: %.2fs" % (self.step_id * self.dt)
         put_text(canvas, text, pt)
 
         pt = (10, 40)
-        text = "模拟步数: %d" % (self.step_id)
+        text = "steps: %d" % (self.step_id)
         put_text(canvas, text, pt)
 
         pt = (10, 60)

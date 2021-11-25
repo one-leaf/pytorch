@@ -10,7 +10,7 @@ print(device)
 
 if __name__ == '__main__':
 
-    task = 'hover'  # 悬停 'hover' 或 着陆 'landing'
+    task = 'landing'  # 悬停 'hover' 或 着陆 'landing'
     max_steps = 800
     curr_dir = os.path.dirname(os.path.abspath(__file__))
     ckpt_dir = sorted(glob.glob(os.path.join(curr_dir, task+'_ckpt', '*.pt')))[-1]  # 最新的模型
