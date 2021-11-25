@@ -312,8 +312,8 @@ class Agent(object):
                 _masks.append(1-game.terminal)
 
                 if game.terminal:
-                    _, _, Qval = net.get_action(game)
-
+                    #  _, _, Qval = net.get_action(game)
+                    Qval = value
                     for step in reversed(range(len(_states))):
                         Qval = _rewards[step] + 0.99 * Qval * _masks[step]
                         _qvals.insert(0, Qval)
