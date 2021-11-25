@@ -292,11 +292,12 @@ class PolicyValueNet():
         max_log_prob = torch.max(log_probs, 1)[0]
         advantage = Qvals - values.flatten()
         
-        # actor_loss = (-max_log_prob * advantage.detach()).mean()
+        actor_loss = (-max_log_prob * advantage.detach()).mean()
         # critic_loss = 0.5 * advantage.pow(2).mean()
-        actor_loss = (-max_log_prob * Qvals).mean()
-        critic_loss = advantage.pow(2).mean()
-
+        # actor_loss = (-max_log_prob * Qvals).mean()
+        # critic_loss = advantage.pow(2).mean()
+        critic_loss = F.smooth_l1_loss(values, Qvals)
+        
         loss = actor_loss + critic_loss
 
         # 反向传播并更新
