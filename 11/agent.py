@@ -269,13 +269,17 @@ class Agent(object):
     def current_state(self):
         state = np.zeros((9, self.height, self.width))
         state[0] = self.getBoard()
+
+        for i in range(8):
+            state[i+1]=self.fallpiece_status[-1*(i+1)]
+
         # 前4步是对手的，后4步是自己的
-        for j in range(4): 
-            idx = -2*j-1  #(-1,-3,-5,-7)
-            state[j+1]=self.fallpiece_status[idx]
-        for j in range(4):
-            idx = -2*j-2  #(-2,-4,-6,-8)
-            state[j+5]=self.fallpiece_status[idx]
+        # for j in range(4): 
+        #     idx = -2*j-1  #(-1,-3,-5,-7)
+        #     state[j+1]=self.fallpiece_status[idx]
+        # for j in range(4):
+        #     idx = -2*j-2  #(-2,-4,-6,-8)
+        #     state[j+5]=self.fallpiece_status[idx]
 
         return state          
 
