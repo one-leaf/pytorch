@@ -215,6 +215,16 @@ class Agent(object):
         h = 0 if c == 0 else self.height - c                          
         return h
 
+    # 统计占空的比例
+    def getEmptyRate(self):
+        c = 0
+        for y in range(self.height):
+            for x in range(self.width):
+                if self.board[x][y]==blank:
+                    c+=1
+        return c/(self.width*self.height)
+
+        
     # 获得当前局面信息
     def getBoard(self):
         board=np.zeros((self.height, self.width))
@@ -292,7 +302,7 @@ class Agent(object):
 
                 # 方块的个数越多越好
                 if game.terminal:
-                    _reward += game.piececount               
+                    _reward -= self.getEmptyRate()               
 
                 _keys.append(game.get_key())
                 _log_probs.append(log_prob)
