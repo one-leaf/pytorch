@@ -277,8 +277,7 @@ class PolicyValueNet():
         state_batch = torch.FloatTensor(state_batch).to(self.device)
         Qvals = torch.FloatTensor(Qvals).to(self.device)
 
-        # 参数梯度清零
-        self.optimizer.zero_grad()
+        
         # 设置学习率
         self.set_learning_rate(lr)
 
@@ -299,7 +298,9 @@ class PolicyValueNet():
         critic_loss = F.smooth_l1_loss(values.flatten(), Qvals)
 
         loss = actor_loss + critic_loss
-
+        
+        # 参数梯度清零
+        self.optimizer.zero_grad()
         # 反向传播并更新
         loss.backward()
         self.optimizer.step()
