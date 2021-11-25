@@ -260,7 +260,7 @@ class PolicyValueNet():
             action_idx = np.argmax(av_act_probs)
             action_id = av_act[action_idx]
         else:
-            p = 0.75                 
+            p = 0.5                 
             dirichlet = np.random.dirichlet(0.03 * np.ones(len(av_act)))
             r = p * av_act_probs + (1.0-p) * dirichlet
             r = r / np.sum(r)
