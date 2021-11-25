@@ -216,14 +216,14 @@ class Agent(object):
         h = 0 if c == 0 else self.height - c                          
         return h
 
-    # 统计占空的比例
-    def getEmptyRate(self):
+    # 统计非空的个数
+    def getNoEmptyCount(self):
         c = 0
         for y in range(self.height):
             for x in range(self.width):
-                if self.board[x][y]==blank:
+                if self.board[x][y]!=blank:
                     c+=1
-        return c/(self.width*self.height)
+        return c
 
         
     # 获得当前局面信息
@@ -297,13 +297,13 @@ class Agent(object):
                 _, reward = game.step(action)               
                 # 这里的奖励是消除的行数
                 if reward > 0:
-                    _reward = reward
+                    _reward = reward * 10
                 else:
                     _reward = 0
 
                 # 方块的个数越多越好
                 if game.terminal:
-                    _reward -= game.getEmptyRate()               
+                    _reward += game.getNoEmptyCount()               
 
                 _keys.append(game.get_key())
                 _log_probs.append(log_prob)
