@@ -8,6 +8,7 @@ import numpy as np
 import copy
 import random
 from collections import deque
+import json,os
 
 KEY_NONE, KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN = 0, 1, 2, 3, 4
 ACTIONS = [KEY_NONE, KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN]
@@ -302,7 +303,7 @@ class Agent(object):
 
                 # 方块的个数越多越好
                 if game.terminal:
-                    _reward -= self.getEmptyRate()               
+                    _reward -= self.getEmptyRate() / self.piececount()              
 
                 _keys.append(game.get_key())
                 _log_probs.append(log_prob)
