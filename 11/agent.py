@@ -282,7 +282,7 @@ class Agent(object):
 
     # 训练模型
     def start_self_play(self, net):
-        game_num = 5
+        game_num = 10
         agentcount, agentreward, piececount = 0, 0, 0
         game_keys, game_states, game_Qvals = [], [], [] 
         for _ in range(game_num):
