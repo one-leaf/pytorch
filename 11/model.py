@@ -296,8 +296,8 @@ class PolicyValueNet():
         # critic_loss = 0.5 * advantage.pow(2).mean()
         # actor_loss = (-max_log_prob * Qvals).mean()
         # critic_loss = advantage.pow(2).mean()
-        critic_loss = F.smooth_l1_loss(values, Qvals)
-        
+        critic_loss = F.smooth_l1_loss(values.flatten(), Qvals)
+
         loss = actor_loss + critic_loss
 
         # 反向传播并更新
