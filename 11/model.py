@@ -157,7 +157,7 @@ class ResNet(nn.Module):
         x_val = F.relu(x_val)
         x_val = x_val.view(x_val.size(0), -1)
         x_val = F.relu(self.val_fc1(x_val))
-        x_val = self.val_fc2(x_val)
+        x_val = torch.tanh(self.val_fc2(x_val))
         return x_act, x_val
 
 class PolicyValueNet():
