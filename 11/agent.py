@@ -285,14 +285,17 @@ class Agent(object):
         game_num = 10
         agentcount, agentreward, piececount = 0, 0, 0
         game_keys, game_states, game_Qvals = [], [], [] 
-        for _ in range(game_num):
+        for game_idx in range(game_num):
 
             _states, _log_probs, _values, _keys, _masks, _rewards, _qvals=[],[],[],[],[],[],[]
             game = copy.deepcopy(self)
             for i in count():
 
                 _states.append(game.current_state())
-                action, log_prob, value = net.get_action(game,  deterministic=False) 
+                if game_idx == game_num-1:
+                    action, log_prob, value = net.get_action(game,  deterministic=True)
+                else: 
+                    action, log_prob, value = net.get_action(game,  deterministic=False) 
 
                 _, reward = game.step(action)               
                 # 这里的奖励是消除的行数
