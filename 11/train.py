@@ -57,7 +57,7 @@ class Dataset(torch.utils.data.Dataset):
                 break
             except:
                 print("filename {} error can't load".format(filename))
-                os.remove(filename)
+                if os.path.exists(filename): os.remove(filename)
                 filename = random.choice(self.file_list)
            
         state = torch.from_numpy(state).float()
