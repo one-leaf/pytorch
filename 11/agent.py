@@ -324,13 +324,13 @@ class Agent(object):
                     #  _, _, Qval = net.get_action(game)
                     Qval = value
                     for step in reversed(range(len(_states))):
-                        Qval = _rewards[step] + 0.999 * Qval * _masks[step]
+                        # Qval = _rewards[step] + 0.999 * Qval * _masks[step]
+                        Qval = _rewards[step]
                         _qvals.insert(0, Qval)
 
                     print('reward:', game.score, "Qval:", Qval, 'len:', len(_qvals), "piececount:", game.piececount)
-                    print(*_qvals[:3], "...", *_qvals[-3:])
                     agentcount += 1
-                    agentreward += game.score
+                    agentreward += _reward
                     piececount += game.piececount
                     break
 
@@ -340,6 +340,15 @@ class Agent(object):
             game_actions.append(_actions)
 
             game.print()
+
+        avg_agentreward = agentreward / game_num
+
+        for game_idx in range(game_num):
+            game_Qvals[game_idx][-1] -= avg_agentreward
+            for i in reversed(range(len(game_keys[game_idx])-1)):
+                game_Qvals[game_idx][i] += game_Qvals[game_idx][i+1]*0.999  
+            print(*game_Qvals[game_idx][:3], "...", *game_Qvals[game_idx][-3:])
+
 
         keys, states, Qvals, actions= [], [], [], []
         for j in range(game_num):
