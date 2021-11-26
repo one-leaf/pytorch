@@ -106,7 +106,7 @@ class MLP_Mixer(nn.Module):
         x_act = self.action_line(x)         # (n_samples, n_patches, hidden_dim)
         x_act = self.Layernorm1(x_act)      # (n_samples, n_patches, hidden_dim)
         x_act = x_act.mean(dim = 1)         # (n_sample, hidden_dim)
-        x_action = F.log_softmax(self.action_fc(x_act), dim=1)  # (n_samples, n_action)
+        x_action = F.softmax(self.action_fc(x_act), dim=1)  # (n_samples, n_action)
 
         x_val = self.value_line(x)          # (n_samples, n_patches, hidden_dim)
         x_val = self.Layernorm2(x_val)      # (n_samples, n_patches, hidden_dim)
@@ -216,10 +216,11 @@ class PolicyValueNet():
         self.policy_value_net.eval()
 
         with torch.no_grad(): 
-            log_act_probs, value = self.policy_value_net.forward(state_batch_tensor)
+            act_probs, value = self.policy_value_net.forward(state_batch_tensor)
 
         # 还原成标准的概率
-        act_probs = np.exp(log_act_probs.data.cpu().numpy())
+        act_probs = act_probs.data.cpu().numpy()
+        log_act_probs = np.log(act_probs + 1e-10)
         value = value.data.cpu().numpy()
 
         return act_probs, log_act_probs, value
@@ -298,7 +299,7 @@ class PolicyValueNet():
         critic_loss = F.smooth_l1_loss(values.flatten(), Qvals)
 
         loss = actor_loss + critic_loss
-        
+
         # 参数梯度清零
         self.optimizer.zero_grad()
         # 反向传播并更新
