@@ -288,10 +288,10 @@ class Agent(object):
     def start_self_play(self, net):
         game_num = 10
         agentcount, agentreward, piececount = 0, 0, 0
-        game_keys, game_states, game_Qvals = [], [], [] 
+        game_keys, game_states, game_Qvals, game_actions = [], [], [], [] 
         for game_idx in range(game_num):
 
-            _states, _log_probs, _values, _keys, _masks, _rewards, _qvals=[],[],[],[],[],[],[]
+            _states, _log_probs, _values, _keys, _masks, _rewards, _qvals, _actions=[],[],[],[],[],[],[],[]
             game = copy.deepcopy(self)
             for i in count():
 
@@ -301,7 +301,8 @@ class Agent(object):
                 else: 
                     action, log_prob, value = net.get_action(game,  deterministic=False) 
 
-                _, reward = game.step(action)               
+                _, reward = game.step(action)
+
                 # 这里的奖励是消除的行数
                 if reward > 0:
                     _reward = reward * 10
@@ -317,6 +318,7 @@ class Agent(object):
                 _values.append(value)
                 _rewards.append(_reward)
                 _masks.append(1-game.terminal)
+                _actions.append(action)
 
                 if game.terminal:
                     #  _, _, Qval = net.get_action(game)
@@ -335,19 +337,22 @@ class Agent(object):
             game_keys.append(_keys)
             game_states.append(_states)
             game_Qvals.append(_qvals)
+            game_actions.append(_actions)
 
             game.print()
 
-        keys, states, Qvals= [], [], []
+        keys, states, Qvals, actions= [], [], [], []
         for j in range(game_num):
             for o in game_keys[j]: keys.append(o)
             for o in game_states[j]: states.append(o)
             for o in game_Qvals[j]: Qvals.append(o)
+            for o in game_actions[j]: actions.append(o)
 
         assert len(states)==len(Qvals)
         assert len(states)==len(keys)
+        assert len(states)==len(actions)
     
         print("add %s to dataset"% len(states) )
     
-        return agentcount, agentreward, piececount, keys, zip(states, Qvals)
+        return agentcount, agentreward, piececount, keys, zip(states, Qvals, actions)
                 

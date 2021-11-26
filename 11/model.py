@@ -217,10 +217,10 @@ class PolicyValueNet():
 
         with torch.no_grad(): 
             act_probs, value = self.policy_value_net.forward(state_batch_tensor)
+            log_act_probs = torch.log(act_probs + 1e-10)
 
         # 还原成标准的概率
         act_probs = act_probs.cpu().numpy()
-        log_act_probs = np.log(act_probs + 1e-10)
         value = value.cpu().numpy()
 
         return act_probs, log_act_probs, value
@@ -272,13 +272,13 @@ class PolicyValueNet():
         return action_id, log_act_probs[action_id], value
 
 
-    def train_step(self, state_batch, Qvals, lr):
+    def train_step(self, state_batch, Qvals, actions, lr):
         """训练一次"""
         # 输入赋值       
         state_batch = torch.FloatTensor(state_batch).to(self.device)
         Qvals = torch.FloatTensor(Qvals).to(self.device)
+        actions = torch.LongTensor(actions).to(self.device)
 
-        
         # 设置学习率
         self.set_learning_rate(lr)
 
@@ -289,10 +289,12 @@ class PolicyValueNet():
         # print(log_probs.size())
         # print(values.size())
         # print(Qvals.size())
-        max_log_prob = torch.max(log_probs, 1)[0]
+        # log_prob = torch.max(log_probs, 1)[0]
+        log_prob = torch.gather(log_probs, 1, actions.view(-1, 1)).view(-1)
+
         advantage = Qvals - values.flatten()
         
-        actor_loss = (-max_log_prob * advantage.detach()).mean()
+        actor_loss = (-log_prob * advantage.detach()).mean()
         # critic_loss = 0.5 * advantage.pow(2).mean()
         # actor_loss = (-max_log_prob * Qvals).mean()
         # critic_loss = advantage.pow(2).mean()

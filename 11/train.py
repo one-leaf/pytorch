@@ -53,7 +53,7 @@ class Dataset(torch.utils.data.Dataset):
         # 状态，步骤的概率，最终得分
         for i in range(5):
             try:
-                state, qvals = pickle.load(open(filename, "rb"))
+                state, qvals, actions = pickle.load(open(filename, "rb"))
                 break
             except:
                 print("filename {} error can't load".format(filename))
@@ -62,7 +62,9 @@ class Dataset(torch.utils.data.Dataset):
         if i==4: raise Exception("can't load file {}".format(filename))   
         state = torch.from_numpy(state).float()
         qvals = torch.as_tensor(qvals).float()
-        return state, qvals
+        actions = torch.as_tensor(actions).long()
+
+        return state, qvals, actions
 
     def load_game_files(self):
         files = glob.glob(os.path.join(self.data_dir, "*.pkl"))
@@ -153,10 +155,10 @@ class Train():
         """更新策略价值网络policy-value"""
         # 训练策略价值网络
         # 随机抽取data_buffer中的对抗数据
-        state_batch, qval_batch = sample_data
+        state_batch, qval_batch, actions = sample_data
         # 训练策略价值网络
         for i in range(epochs):
-            loss, v_loss, p_loss, entropy = self.policy_value_net.train_step(state_batch, qval_batch, self.learn_rate * self.lr_multiplier)
+            loss, v_loss, p_loss, entropy = self.policy_value_net.train_step(state_batch, qval_batch, actions, self.learn_rate * self.lr_multiplier)
          
         return loss, v_loss, p_loss, entropy
 
@@ -180,10 +182,11 @@ class Train():
             test_batch = None
             for i, data in enumerate(training_loader):  # 计划训练批次
                 if i==0:
-                    _batch, _qvals = data
+                    _batch, _qvals, _actions = data
                     print(_batch[0][0])
                     print(_batch[0][1])
                     print(_qvals[0])
+                    print(_actions[0])
 
                 # 使用对抗数据重新训练策略价值网络模型
                 _, v_loss, p_loss, entropy = self.policy_update(data, self.epochs)
@@ -193,7 +196,7 @@ class Train():
 
                     # 动态调整学习率
                     if old_probs is None:
-                        test_batch, test_qvals = next(iter(testing_loader))
+                        test_batch, test_qvals, test_actions = next(iter(testing_loader))
                         old_probs, _, old_value = self.policy_value_net.policy_value(test_batch) 
                     else:
                         new_probs, _, new_value = self.policy_value_net.policy_value(test_batch)
@@ -202,7 +205,7 @@ class Train():
                         if i % 50 == 0:   
                             print("probs[0] old:{}".format(old_probs[0]))   
                             print("probs[0] new:{}".format(new_probs[0]))   
-                            maxlen = min(10, len(test_qvals)) 
+                            maxlen = min(10, len(test_batch)) 
                             for j in range(maxlen): 
                                 print("value[0] old:{} new:{} tg:{}".format(old_value[j][0], new_value[j][0], test_qvals[j]))  
 
