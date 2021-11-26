@@ -97,7 +97,7 @@ class Dataset(torch.utils.data.Dataset):
             self.index += 1
             self.save_index() 
             self.newsample.append(savefile)
-            if i>=100 and i>len(movefiles)*0.5: break       
+            if (i>=100 and i>len(movefiles)*0.5) or i>10000: break       
         print("mv %s/%s files to train"%(i,len(movefiles)))
         if i==-1:
             print("SLEEP 60s for watting data")
