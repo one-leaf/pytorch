@@ -219,9 +219,9 @@ class PolicyValueNet():
             act_probs, value = self.policy_value_net.forward(state_batch_tensor)
 
         # 还原成标准的概率
-        act_probs = act_probs.data.cpu().numpy()
+        act_probs = act_probs.cpu().numpy()
         log_act_probs = np.log(act_probs + 1e-10)
-        value = value.data.cpu().numpy()
+        value = value.cpu().numpy()
 
         return act_probs, log_act_probs, value
 
