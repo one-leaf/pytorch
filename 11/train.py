@@ -51,7 +51,7 @@ class Dataset(torch.utils.data.Dataset):
     def __getitem__(self, index):
         filename = self.file_list[index]
         # 状态，步骤的概率，最终得分
-        while True:
+        for i in range(5):
             try:
                 state, qvals = pickle.load(open(filename, "rb"))
                 break
@@ -59,7 +59,7 @@ class Dataset(torch.utils.data.Dataset):
                 print("filename {} error can't load".format(filename))
                 if os.path.exists(filename): os.remove(filename)
                 filename = random.choice(self.file_list)
-           
+        if i==4: raise Exception("can't load file {}".format(filename))   
         state = torch.from_numpy(state).float()
         qvals = torch.as_tensor(qvals).float()
         return state, qvals
