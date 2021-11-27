@@ -4,7 +4,7 @@ from time import time
 from model import PolicyValueNet
 from agent import Agent, ACTIONS
 
-import sys, time, json
+import sys, time, json, datetime
 
 from itertools import count
 from collections import deque
@@ -141,6 +141,8 @@ class Train():
             print('quit')
 
 if __name__ == '__main__':
+    print('start training',datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+
     # train
     training = Train()
     training.run()
