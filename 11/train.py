@@ -135,7 +135,7 @@ class TestDataset(Dataset):
 class Train():
     def __init__(self):
         self.game_batch_num = 2000000  # selfplay对战次数
-        self.batch_size = 512     # data_buffer中对战次数超过n次后开始启动模型训练
+        self.batch_size = 256     # data_buffer中对战次数超过n次后开始启动模型训练
 
         # training params
         self.learn_rate = 5e-5
