@@ -231,4 +231,5 @@ if __name__ == '__main__':
     print('start training',datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
     training = Train()
     training.run()
+    print('end training',datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 
