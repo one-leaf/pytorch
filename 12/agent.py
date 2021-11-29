@@ -287,7 +287,7 @@ class Agent(object):
     # 训练模型
     def start_self_play(self, player, temp=1e-3):
         game_num = 10
-        agentcount, agentreward, piececount = 0, 0, 0
+        agentcount, agentreward, piececount, agentscore = 0, 0, 0, 0
         game_keys, game_states, game_vals, game_mcts_probs = [], [], [], [] 
         for game_idx in range(game_num):
 
@@ -326,6 +326,7 @@ class Agent(object):
 
                     print('reward:', game.score, "Qval:", Qval, 'len:', len(_qvals), "piececount:", game.piececount)
                     agentcount += 1
+                    agentscore += game.score
                     agentreward += _reward
                     piececount += game.piececount
                     break
@@ -359,5 +360,5 @@ class Agent(object):
     
         print("add %s to dataset"% len(states) )
     
-        return agentcount, agentreward, piececount, keys, zip(states, mcts_probs, values)
+        return agentcount, agentscore, piececount, keys, zip(states, mcts_probs, values)
                 
