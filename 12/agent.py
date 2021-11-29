@@ -324,7 +324,7 @@ class Agent(object):
                         Qval = _rewards[step]
                         _qvals.insert(0, Qval)
 
-                    print('reward:', game.score, "Qval:", Qval, 'len:', len(_qvals), "piececount:", game.piececount)
+                    print(game_idx, 'reward:', game.score, "Qval:", _rewards[-1], 'len:', len(_qvals), "piececount:", game.piececount)
                     agentcount += 1
                     agentscore += game.score
                     agentreward += _reward
