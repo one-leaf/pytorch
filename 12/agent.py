@@ -76,7 +76,7 @@ class Agent(object):
     # 获取可用步骤, 保留一个旋转始终有用
     # 将单人游戏变为双人博弈，一个正常下，一个只下走，
     def get_availables(self):
-        acts=[KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN]
+        acts=[KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN, KEY_NONE]
 
         if not self.tetromino.validposition(self.board,self.fallpiece,ax = -1):
             acts.remove(KEY_LEFT)
@@ -96,7 +96,7 @@ class Agent(object):
 
         random.shuffle(acts)
         
-        if len(acts)==0: acts=[KEY_NONE]
+        # if len(acts)==0: acts=[KEY_NONE]
         return acts         
 
 
