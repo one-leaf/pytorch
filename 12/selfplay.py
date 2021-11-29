@@ -57,7 +57,7 @@ class Train():
         agent = Agent()
 
         # 开始下棋
-        mcts_player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout, is_selfplay=1)
+        mcts_player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout)
 
         agentcount, reward, piececount, keys, play_data = agent.start_self_play(mcts_player)
         
