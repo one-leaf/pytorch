@@ -299,9 +299,9 @@ class Agent(object):
                 _states.append(game.current_state())
                                 
                 if game_idx == game_num-1:
-                    action, move_probs = player.get_action(game, temp=1, return_prob=1) 
+                    action, move_probs = player.get_action(game, temp=temp, return_prob=1, need_random=False) 
                 else: 
-                    action, move_probs = player.get_action(game, temp=temp, return_prob=1) 
+                    action, move_probs = player.get_action(game, temp=temp, return_prob=1, need_random=True) 
                
                 _, reward = game.step(action)
 

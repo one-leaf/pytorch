@@ -168,10 +168,9 @@ class MCTS():
 class MCTSPlayer(object):
     """基于模型指导概率的MCTS + AI player"""
 
-    def __init__(self, policy_value_function, c_puct=5, n_playout=2000, is_selfplay=0):
+    def __init__(self, policy_value_function, c_puct=5, n_playout=2000):
         """初始化参数"""
         self.mcts = MCTS(policy_value_function, c_puct, n_playout)
-        self._is_selfplay = is_selfplay
 
     def set_player_ind(self, p):
         """指定MCTS的playerid"""
@@ -181,7 +180,7 @@ class MCTSPlayer(object):
     def reset_player(self):
         self.mcts.reset()
 
-    def get_action(self, state, temp=0, return_prob=0, return_value=0):        
+    def get_action(self, state, temp=0, return_prob=0, return_value=0, need_random=True):        
         """计算下一步走子action"""
         move_probs = np.zeros(state.actions_num)
         value = 0
@@ -191,7 +190,7 @@ class MCTSPlayer(object):
             move_probs[acts] = act_probs
             idx = np.argmax(act_probs)    
 
-            if self._is_selfplay:  # 自我对抗
+            if need_random:  # 自我对抗
                 act = acts[idx]
                 value = act_qs[idx]
 
