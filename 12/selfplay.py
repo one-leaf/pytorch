@@ -57,7 +57,7 @@ class Train():
         # 游戏代理
         agent = Agent()
 
-        game_num = 10
+        game_num = 5
         agentcount, agentreward, piececount, agentscore = 0, 0, 0, 0
         game_states, game_vals, game_mcts_probs = [], [], [] 
 
