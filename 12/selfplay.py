@@ -14,6 +14,7 @@ import os, math, random, uuid
 
 import numpy as np
 import torch
+import copy
 
 # 定义游戏的动作
 GAME_ACTIONS_NUM = len(ACTIONS) 
@@ -56,17 +57,86 @@ class Train():
         # 游戏代理
         agent = Agent()
 
-        # 开始下棋
-        mcts_player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout)
+        game_num = 10
+        agentcount, agentreward, piececount, agentscore = 0, 0, 0, 0
+        game_states, game_vals, game_mcts_probs = [], [], [] 
 
-        agentcount, reward, piececount, keys, play_data = agent.start_self_play(mcts_player)
-        
-        play_data = list(play_data)[:]
-        episode_len = len(play_data)
+        for game_idx in range(game_num):
 
-        print("TRAIN Self Play end. length:%s saving ..." % episode_len)
+            player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout)
+
+            _states, _probs, _masks, _rewards, _qvals = [],[],[],[],[]
+            game = copy.deepcopy(agent)
+
+            if game_idx==0 or game_idx==game_num-1:
+                game.show_mcts_process=True
+            else:
+                game.show_mcts_process=False
+
+            for i in count():
+
+                _states.append(game.current_state())
+                                
+                if game_idx == game_num-1:
+                    action, move_probs = player.get_action(game, temp=self.temp, return_prob=1, need_random=False) 
+                else: 
+                    action, move_probs = player.get_action(game, temp=self.temp, return_prob=1, need_random=True) 
+               
+                _, reward = game.step(action)
+
+                # 这里的奖励是消除的行数
+                if reward > 0:
+                    _reward = reward * 10
+                else:
+                    _reward = 0
+
+                # 方块的个数越多越好
+                if game.terminal:
+                    _reward += game.getNoEmptyCount()               
+
+                _probs.append(move_probs)
+                _rewards.append(_reward)
+                _masks.append(1-game.terminal)
+
+                if game.terminal:
+                    for step in reversed(range(len(_states))):
+                        Qval = _rewards[step]
+                        _qvals.insert(0, Qval)
+
+                    print(game_idx, 'reward:', game.score, "Qval:", _rewards[-1], 'len:', len(_qvals), "piececount:", game.piececount)
+                    agentcount += 1
+                    agentscore += game.score
+                    agentreward += _reward
+                    piececount += game.piececount
+                    break
+
+            game_states.append(_states)
+            game_vals.append(_qvals)
+            game_mcts_probs.append(_probs)
+
+            game.print()
+
+        avg_agentreward = agentreward / game_num
+
+        for game_idx in range(game_num):
+            game_vals[game_idx][-1] -= avg_agentreward
+            for i in reversed(range(len(game_vals[game_idx])-1)):
+                game_vals[game_idx][i] += game_vals[game_idx][i+1]*0.999  
+            print(*game_vals[game_idx][:3], "...", *game_vals[game_idx][-3:])
+
+        states, values, mcts_probs= [], [], []
+        for j in range(game_num):
+            for o in game_states[j]: states.append(o)
+            for o in game_vals[j]: values.append(o)
+            for o in game_mcts_probs[j]: mcts_probs.append(o)
+
+        assert len(states)==len(values)
+        assert len(states)==len(mcts_probs)
+
+        print("TRAIN Self Play end. length:%s saving ..." % len(states))
+
         # 保存对抗数据到data_buffer
-        for i, obj in enumerate(play_data):
+        for obj in zip(states, mcts_probs, values):
             filename = "{}.pkl".format(uuid.uuid1())
             savefile = os.path.join(data_wait_dir, filename)
             pickle.dump(obj, open(savefile, "wb"))
