@@ -191,7 +191,7 @@ class MCTSPlayer(object):
 
             if need_random:  # 自我对抗
                 if np.random.random() < 0.01:
-                    idx = np.random.randint(0, len(acts)-1)
+                    idx = np.random.randint(len(acts))
                 else:
                     idx = np.random.choice(range(len(acts)), p=act_probs)
 
