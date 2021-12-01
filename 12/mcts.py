@@ -53,19 +53,18 @@ class MCTS():
         visits = [av[1] for av in act_visits]
         qs = [round(av[1],2) for av in act_Qs]
 
-        info=[]
-        for idx in sorted(range(len(visits)), key=visits.__getitem__)[::-1]:
-            act, visit = act_visits[idx]
-            action = state.position_to_action_name(act)
-            q, p = 0,0
-            if (s, act) in self.Qsa: q = self.Qsa[(s, act)]
-            if s in self.Ps: p = self.Ps[s][act]
-            info.append([action, visit, round(q,2), round(p,2)]) 
-       
-        v = 0
-        if s in self.Vs: v = self.Vs[s]
-        
-        print(state.steps, state.piecesteps, state.piececount, "n:", n, "depth:" ,self.max_depth, "value:", round(v,2), info)
+        if state.state != 0:
+            info=[]
+            for idx in sorted(range(len(visits)), key=visits.__getitem__)[::-1]:
+                act, visit = act_visits[idx]
+                action = state.position_to_action_name(act)
+                q, p = 0,0
+                if (s, act) in self.Qsa: q = self.Qsa[(s, act)]
+                if s in self.Ps: p = self.Ps[s][act]
+                info.append([action, visit, round(q,2), round(p,2)])        
+            v = 0
+            if s in self.Vs: v = self.Vs[s]
+            print(state.steps, state.piecesteps, state.piececount, "n:", n, "depth:" ,self.max_depth, "value:", round(v,2), info)
 
         if temp == 0:
             bestAs = np.array(np.argwhere(visits == np.max(visits))).flatten()
