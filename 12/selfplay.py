@@ -130,6 +130,10 @@ class Train():
             for o in game_vals[j]: values.append(o)
             for o in game_mcts_probs[j]: mcts_probs.append(o)
 
+        # 对中位数修正,保证样本的中心点为0
+        fix_value = sum(values) / len(values)
+        for o in values: o -= fix_value
+
         assert len(states)==len(values)
         assert len(states)==len(mcts_probs)
 
