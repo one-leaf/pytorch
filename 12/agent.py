@@ -55,6 +55,8 @@ class Agent(object):
         self.fallpiece_status.append(self.get_fallpiece_board())
         # 下一个可用步骤
         self.availables=self.get_availables()
+        # 显示mcts中间过程
+        self.show_mcts_process = False
 
     # 概率的索引位置转action
     def position_to_action(self, position):
@@ -294,6 +296,12 @@ class Agent(object):
 
             _states, _probs, _keys, _masks, _rewards, _qvals = [],[],[],[],[],[]
             game = copy.deepcopy(self)
+
+            if game_idx==0 or game_idx==game_num-1:
+                game.show_mcts_process=True
+            else:
+                game.show_mcts_process=False
+
             for i in count():
 
                 _keys.append(game.get_key())

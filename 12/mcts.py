@@ -53,7 +53,7 @@ class MCTS():
         visits = [av[1] for av in act_visits]
         qs = [round(av[1],2) for av in act_Qs]
 
-        if state.state != 0:
+        if state.show_mcts_process:
             info=[]
             for idx in sorted(range(len(visits)), key=visits.__getitem__)[::-1]:
                 act, visit = act_visits[idx]
@@ -202,9 +202,10 @@ class MCTSPlayer(object):
                 dirichlet = np.random.dirichlet(0.03 * np.ones(len(act_probs)))
                 act = np.random.choice(acts, p=p * act_probs + (1.0-p) * dirichlet)
                 action = state.position_to_action(act)
-
-                if act!=acts[idx]:
-                    print("    random:", state.position_to_action_name(acts[idx]), "==>", state.position_to_action_name(act))  
+                
+                if state.show_mcts_process:
+                    if act!=acts[idx]:
+                        print("    random:", state.position_to_action_name(acts[idx]), "==>", state.position_to_action_name(act))  
                                                                   
             else:  # 和人类对战
                 act = acts[idx]
