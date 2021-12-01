@@ -187,10 +187,15 @@ class MCTSPlayer(object):
             # 训练的时候 temp = 1
             acts, act_probs, act_qs = self.mcts.get_action_probs(state, temp)
             move_probs[acts] = act_probs
-            idx = np.argmax(act_probs)    
+            max_idx = np.argmax(act_probs)    
 
             if need_random:  # 自我对抗
-                act = acts[idx]
+                if np.random.random() < 0.01:
+                    idx = np.random.randint(0, len(acts)-1)
+                else:
+                    idx = np.random.choice(range(len(acts)), p=act_probs)
+
+                action = acts[idx]
                 value = act_qs[idx]
 
                 # 早期多随机
@@ -198,23 +203,25 @@ class MCTSPlayer(object):
                 # if act_probs[idx]<0.99:
                 # if abs(value)>0.5 or random.random()>0.95:
                 # if state.piececount < 50 and (state.piecesteps<3 or value<-0.9):
-                p = 0.75                 
-                dirichlet = np.random.dirichlet(0.03 * np.ones(len(act_probs)))
-                act = np.random.choice(acts, p=p * act_probs + (1.0-p) * dirichlet)
-                action = state.position_to_action(act)
-                
+                # if random.random()>0.99:
+                #     act = random.choice(acts)
+                # else:    
+                #     # p = 0.75                 
+                #     # dirichlet = np.random.dirichlet(0.03 * np.ones(len(act_probs)))
+                #     # act = np.random.choice(acts, p=p * act_probs + (1.0-p) * dirichlet)
+                #     act = np.random.choice(acts, p=act_probs)
+                # action = state.position_to_action(act)
                 if state.show_mcts_process:
-                    if act!=acts[idx]:
-                        print("    random:", state.position_to_action_name(acts[idx]), "==>", state.position_to_action_name(act))  
+                    if idx!=max_idx:
+                        print("    random:", state.position_to_action_name(acts[max_idx]), "==>", state.position_to_action_name(action))  
                                                                   
             else:  # 和人类对战
-                act = acts[idx]
-                action = state.position_to_action(act)
+                idx = max_idx
+                action = acts[idx]
                 value = act_qs[idx]
 
-                if act!=acts[idx]:
-                    print("    random:", state.position_to_action(acts[idx]), act_probs[idx], act_qs[idx], \
-                        "==>", action, act_probs[acts.index(act)], act_qs[acts.index(act)])  
+            # print(acts, act_probs, idx, action)
+
             if return_prob:
                 return action, move_probs
             elif return_value:
