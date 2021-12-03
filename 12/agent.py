@@ -8,7 +8,7 @@ import numpy as np
 import copy
 import random
 from collections import deque
-import json,os
+import json,os,math
 
 KEY_NONE, KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN = 0, 1, 2, 3, 4
 ACTIONS = [KEY_NONE, KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN]
@@ -57,6 +57,9 @@ class Agent(object):
         self.availables=self.get_availables()
         # 显示mcts中间过程
         self.show_mcts_process = False
+        # pos
+        self.pos_board = self.get_board_pos()
+
 
     # 概率的索引位置转action
     def position_to_action(self, position):
@@ -266,6 +269,18 @@ class Agent(object):
                         board[y][x]=1
         return board
 
+
+    # 得到面板的坐标信息
+    def get_board_pos(self):
+        pos=[]
+        for i in range(self.height*self.width):
+            if i%2==0:
+                pos.append(math.sin(i))
+            else:
+                pos.append(math.cos(i))
+        pos = np.array(pos).reshape((self.height, self.width))
+        return pos
+
     # 获得当前的全部特征
     # 背景 + 前8步走法 = 9
     # 返回 [9, height, width]
@@ -273,8 +288,10 @@ class Agent(object):
         state = np.zeros((9, self.height, self.width))
         state[0] = self.getBoard()
 
-        for i in range(8):
+        for i in range(7):
             state[i+1]=self.fallpiece_status[-1*(i+1)]
+
+        state[8] = self.pos_board
 
         # 前4步是对手的，后4步是自己的
         # for j in range(4): 
