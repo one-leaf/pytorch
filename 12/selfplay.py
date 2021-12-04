@@ -134,8 +134,9 @@ class Train():
         sort_tvalues = sorted(tvalues, reverse=True)
         idx = round(len(sort_tvalues)*0.2)
         fix_value = sort_tvalues[idx]
+        sum_value = sort_tvalues[0]-sort_tvalues[-1]
         for o in tvalues: 
-            values.append((o-fix_value)/sort_tvalues[0])
+            values.append((o-fix_value)/sum_value)
 
         assert len(states)==len(values)
         assert len(states)==len(mcts_probs)
