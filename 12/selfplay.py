@@ -140,6 +140,7 @@ class Train():
         assert len(states)==len(values)
         assert len(states)==len(mcts_probs)
 
+        print(*values[:3], "...", *values[-3:])
         print("TRAIN Self Play end. length:%s value sum:%s saving ..." % (len(states),sum(values)))
 
         # 保存对抗数据到data_buffer
