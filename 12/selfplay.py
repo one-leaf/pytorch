@@ -130,10 +130,12 @@ class Train():
             for o in game_vals[j]: tvalues.append(o)
             for o in game_mcts_probs[j]: mcts_probs.append(o)
 
-        # 对中位数修正,保证样本的中心点为0
-        fix_value = sum(tvalues) / len(tvalues)
+        # 希望正样本数20%
+        sort_tvalues = sorted(tvalues, reverse=True)
+        idx = round(len(sort_tvalues)*0.2)
+        fix_value = sort_tvalues[idx]
         for o in tvalues: 
-            values.append(o-fix_value)
+            values.append((o-fix_value)/sort_tvalues[0])
 
         assert len(states)==len(values)
         assert len(states)==len(mcts_probs)

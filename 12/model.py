@@ -114,7 +114,7 @@ class MLP_Mixer(nn.Module):
         x_val = F.gelu(x_val)               # (n_samples, hidden_dim)
         x_val = F.gelu(self.value_fc1(x_val))
         x_val = self.value_fc2(x_val)
-        # x_val = torch.tanh(x_val)
+        x_val = torch.tanh(x_val)
 
         return x_action, x_val
 
