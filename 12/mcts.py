@@ -99,7 +99,8 @@ class MCTS():
         if s not in self.Es:
             v = 0
             if state.terminal:
-               _, v = self._policy(state)
+                v = -1
+           #    _, v = self._policy(state)
             self.Es[s] = v
 
         # 如果得分不等于0，标志这局游戏结束
