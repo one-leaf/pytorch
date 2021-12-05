@@ -231,24 +231,24 @@ class PolicyValueNet():
         输入: 游戏
         输出: 一组（动作， 概率）和游戏当前状态的胜率
         """
-        key = game.get_key()
-        if key in self.cache:
-            act_probs, value = self.cache[key] 
+        # key = game.get_key()
+        # if key in self.cache:
+        #     act_probs, value = self.cache[key] 
+        # else:
+        if self.load_model_file:
+            current_state = game.current_state().reshape(1, -1, self.input_height, self.input_width)
+            act_probs, value = self.policy_value(current_state)
+            act_probs = act_probs.flatten()
         else:
-            if self.load_model_file:
-                current_state = game.current_state().reshape(1, -1, self.input_height, self.input_width)
-                act_probs, value = self.policy_value(current_state)
-                act_probs = act_probs.flatten()
-            else:
-                act_len=game.actions_num
-                act_probs=np.ones([act_len])/act_len
-                value = np.array([[0.]])
-            
-            actions = game.availables
-            act_probs = list(zip(actions, act_probs[actions]))
+            act_len=game.actions_num
+            act_probs=np.ones([act_len])/act_len
+            value = np.array([[0.]])
+        
+        actions = game.availables
+        act_probs = list(zip(actions, act_probs[actions]))
 
-            value = value[0,0]
-            self.cache[key] = (act_probs, value)
+        value = value[0,0]
+            # self.cache[key] = (act_probs, value)
         return act_probs, value
 
 
