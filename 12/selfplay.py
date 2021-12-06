@@ -92,7 +92,7 @@ class Train():
 
                 # 方块的个数越多越好
                 if game.terminal:
-                    _reward += game.getNoEmptyCount()               
+                    _reward = game.getNoEmptyCount() + game.score * 10               
 
                 _probs.append(move_probs)
                 _rewards.append(_reward)
@@ -131,12 +131,17 @@ class Train():
             for o in game_mcts_probs[j]: mcts_probs.append(o)
 
         # 希望正样本数20%
-        sort_tvalues = sorted(tvalues, reverse=True)
-        idx = round(len(sort_tvalues)*0.2)
-        fix_value = sort_tvalues[idx]
-        sum_value = sort_tvalues[0]-sort_tvalues[-1]
-        for o in tvalues: 
-            values.append((o-fix_value)/sum_value)
+        # sort_tvalues = sorted(tvalues, reverse=True)
+        # idx = round(len(sort_tvalues)*0.2)
+        # fix_value = sort_tvalues[idx]
+        # sum_value = sort_tvalues[0]-sort_tvalues[-1]
+        # for o in tvalues: 
+        #     values.append((o-fix_value)/sum_value)
+        max_value = max(tvalues)
+        min_value = min(tvalues)
+        avg_value = sum(tvalues)/len(tvalues)
+        for o in tvalues:
+            values.append((o-avg_value)/(max_value-min_value))
 
         assert len(states)==len(values)
         assert len(states)==len(mcts_probs)
