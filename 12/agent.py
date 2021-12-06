@@ -226,9 +226,12 @@ class Agent(object):
     def getNoEmptyCount(self):
         c = 0
         for y in range(self.height):
+            line_c= 0
             for x in range(self.width):
                 if self.board[x][y]!=blank:
-                    c+=1*(0.99**(self.height-y))
+                    c += 1*(0.99**(self.height-y))
+                    line_c += 1
+            if line_c == 9: c += 5
         return c
 
         
