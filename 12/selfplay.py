@@ -116,10 +116,7 @@ class Train():
 
             game.print()
 
-        avg_agentreward = agentreward / game_num
-
         for game_idx in range(game_num):
-            game_vals[game_idx][-1] -= avg_agentreward
             for i in reversed(range(len(game_vals[game_idx])-1)):
                 game_vals[game_idx][i] += game_vals[game_idx][i+1]*0.999  
             print(*game_vals[game_idx][:3], "...", *game_vals[game_idx][-3:])
