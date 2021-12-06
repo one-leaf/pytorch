@@ -136,7 +136,22 @@ class Train():
         #     values.append((o-fix_value)/sum_value)
         max_value = max(tvalues)
         min_value = min(tvalues)
-        avg_value = sum(tvalues)/len(tvalues)
+
+        jsonfile = os.path.join(data_dir, "result.json")
+        if os.path.exists(jsonfile):
+            result=json.load(open(jsonfile,"r"))
+        else:
+            result={}
+            result={"agent":0,"reward":[],"pieces":[]}
+            result["curr"]={"reward":0,"pieces":0,"agent":0}
+
+        if "QVal" not in result:
+            avg_value = sum(tvalues)/len(tvalues)            
+        else:
+            avg_value = result["QVal"]*0.999 + sum(tvalues)/len(tvalues)*0.001
+
+        result["QVal"] = avg_value
+
         for o in tvalues:
             values.append((o-avg_value)/(max_value-min_value))
 
@@ -152,13 +167,7 @@ class Train():
             savefile = os.path.join(data_wait_dir, filename)
             pickle.dump(obj, open(savefile, "wb"))
 
-        jsonfile = os.path.join(data_dir, "result.json")
-        if os.path.exists(jsonfile):
-            result=json.load(open(jsonfile,"r"))
-        else:
-            result={}
-            result={"agent":0,"reward":[],"pieces":[]}
-            result["curr"]={"reward":0,"pieces":0,"agent":0}
+
 
         result["agent"] += agentcount
         result["curr"]["reward"] += agentscore
