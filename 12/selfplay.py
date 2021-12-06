@@ -144,6 +144,8 @@ class Train():
             result={}
             result={"agent":0,"reward":[],"pieces":[]}
             result["curr"]={"reward":0,"pieces":0,"agent":0}
+        if  "qvals" not in result:
+            result["qvals"]=[]
 
         if "QVal" not in result:
             avg_value = sum(tvalues)/len(tvalues)            
