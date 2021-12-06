@@ -159,7 +159,7 @@ class Train():
             result["curr"]={"reward":0,"pieces":0,"agent":0}
 
         result["agent"] += agentcount
-        result["curr"]["reward"] += reward
+        result["curr"]["reward"] += agentscore
         result["curr"]["pieces"] += piececount
         result["curr"]["agent"] += agentcount
 
