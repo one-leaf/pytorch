@@ -231,7 +231,7 @@ class Agent(object):
                 if self.board[x][y]!=blank:
                     c += 1*(0.99**(self.height-y))
                     line_c += 1
-            if line_c == 9: c += 5
+            if line_c == 9: c += 1
         return c
 
         
