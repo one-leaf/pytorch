@@ -100,10 +100,12 @@ class MCTS():
             v = 0
             if state.terminal:
                 v = -1
+            if state.reward>0:
+                v = 1
            #    _, v = self._policy(state)
             self.Es[s] = v
 
-        # 如果得分不等于0，标志这局游戏结束
+        # 如果得分不等于0，标志探索结束
         if self.Es[s] != 0 or state.terminal:
             return self.Es[s]
 
