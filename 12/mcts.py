@@ -100,8 +100,6 @@ class MCTS():
             v = 0
             if state.terminal:
                 v = -1
-            if state.reward>0:
-                v = 1
            #    _, v = self._policy(state)
             self.Es[s] = v
 
@@ -120,6 +118,7 @@ class MCTS():
             self.Ps[s] = probs 
 
             self.Ns[s] = 0
+            if state.reward>0: v = 1
             self.Vs[s] = v
 
             return v
