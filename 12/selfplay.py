@@ -117,26 +117,14 @@ class Train():
 
             game.print()
 
+        avg_value = []
         for game_idx in range(game_num):
+            temp_values = []
             for i in reversed(range(len(game_vals[game_idx])-1)):
                 game_vals[game_idx][i] += game_vals[game_idx][i+1]*0.999  
+                temp_values.append(game_vals[game_idx][i])
+            avg_value.append(np.mean(temp_values))
             print(*game_vals[game_idx][:3], "...", *game_vals[game_idx][-3:])
-
-        states, values, tvalues, mcts_probs= [], [], [], []
-        for j in range(game_num):
-            for o in game_states[j]: states.append(o)
-            for o in game_vals[j]: tvalues.append(o)
-            for o in game_mcts_probs[j]: mcts_probs.append(o)
-
-        # 希望正样本数20%
-        # sort_tvalues = sorted(tvalues, reverse=True)
-        # idx = round(len(sort_tvalues)*0.2)
-        # fix_value = sort_tvalues[idx]
-        # sum_value = sort_tvalues[0]-sort_tvalues[-1]
-        # for o in tvalues: 
-        #     values.append((o-fix_value)/sum_value)
-        max_value = max(tvalues)
-        min_value = min(tvalues)
 
         jsonfile = os.path.join(data_dir, "result.json")
         if os.path.exists(jsonfile):
@@ -149,14 +137,22 @@ class Train():
             result["qvals"]=[]
 
         if "QVal" not in result:
-            avg_value = sum(tvalues)/len(tvalues)            
+            avg_value = sum(avg_value)/len(avg_value)            
         else:
-            avg_value = result["QVal"]*0.99 + sum(tvalues)/len(tvalues)*0.01
+            avg_value = result["QVal"]*0.99 + sum(avg_value)/len(avg_value)*0.01
 
         result["QVal"] = avg_value
 
-        for o in tvalues:
-            values.append((o-avg_value)/(max_value-min_value))
+        states, values, mcts_probs= [], [], []
+        for j in range(game_num):
+            for o in game_states[j]: states.append(o)
+            for o in game_mcts_probs[j]: mcts_probs.append(o)
+            mm_value = np.max(game_vals[j])-np.min(game_vals[j])
+            for o in game_vals[j]: 
+                v = (o-avg_value)/mm_value
+                if v>1: v=1
+                if v<-1: v=-1                
+                values.append(v)
 
         assert len(states)==len(values)
         assert len(states)==len(mcts_probs)
