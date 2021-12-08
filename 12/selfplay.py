@@ -123,7 +123,7 @@ class Train():
             for i in reversed(range(len(game_vals[game_idx])-1)):
                 game_vals[game_idx][i] += game_vals[game_idx][i+1]*0.999  
                 temp_values.append(game_vals[game_idx][i])
-            avg_value.append(np.mean(temp_values))
+            avg_value.append(game_vals[game_idx][-1])
             print(*game_vals[game_idx][:3], "...", *game_vals[game_idx][-3:])
 
         jsonfile = os.path.join(data_dir, "result.json")
