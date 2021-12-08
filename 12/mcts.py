@@ -118,7 +118,6 @@ class MCTS():
             self.Ps[s] = probs 
 
             self.Ns[s] = 0
-            if state.reward>0: v = 1
             self.Vs[s] = v
 
             return v
@@ -144,7 +143,10 @@ class MCTS():
         act = state.position_to_action(a)
         state.step(act)
         
-        v = self.search(state)
+        if state.reward>0: 
+            v = 1
+        else:
+            v = self.search(state)
 
         # 更新 Q 值 和 访问次数
         if (s, a) in self.Qsa:
