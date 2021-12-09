@@ -119,10 +119,8 @@ class Train():
 
         avg_value = []
         for game_idx in range(game_num):
-            temp_values = []
             for i in reversed(range(len(game_vals[game_idx])-1)):
                 game_vals[game_idx][i] += game_vals[game_idx][i+1]*0.999  
-                temp_values.append(game_vals[game_idx][i])
             avg_value.append(game_vals[game_idx][-1])
             print(*game_vals[game_idx][:3], "...", *game_vals[game_idx][-3:])
 
@@ -143,23 +141,14 @@ class Train():
 
         result["QVal"] = avg_value
 
-        if "MMVal" not in result:
-            mm_value = np.max(game_vals[-1])-np.min(game_vals[-1])            
-            result["MMVal"] = mm_value       
-
         states, values, mcts_probs= [], [], []
         for j in range(game_num):
             for o in game_states[j]: states.append(o)
             for o in game_mcts_probs[j]: mcts_probs.append(o)
             for o in game_vals[j]: 
-                v = (o-avg_value)/result["MMVal"]
-                if v>1: 
-                    v=1
-                    result["MMVal"] = o-avg_value
-                if v<-1: 
-                    v=-1
-                    result["MMVal"] = avg_value - o
-                                    
+                v = (o-avg_value)/result["QVal"]
+                if v>1: v=1
+                if v<-1: v=-1
                 values.append(v)
 
         assert len(states)==len(values)
