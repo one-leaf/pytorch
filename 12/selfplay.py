@@ -146,7 +146,7 @@ class Train():
             for o in game_states[j]: states.append(o)
             for o in game_mcts_probs[j]: mcts_probs.append(o)
             for o in game_vals[j]: 
-                v = (o-avg_value)/result["QVal"]
+                v = (o-avg_value)/avg_value
                 if v>1: v=1
                 if v<-1: v=-1
                 values.append(v)
