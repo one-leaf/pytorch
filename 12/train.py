@@ -176,8 +176,8 @@ class Train():
             
             
             dataset_len = len(self.dataset)  
-            training_loader = torch.utils.data.DataLoader(self.dataset, batch_size=self.batch_size, shuffle=True)
-            testing_loader = torch.utils.data.DataLoader(self.testdataset, batch_size=self.batch_size, shuffle=True)
+            training_loader = torch.utils.data.DataLoader(self.dataset, batch_size=self.batch_size, shuffle=True, num_workers=0)
+            testing_loader = torch.utils.data.DataLoader(self.testdataset, batch_size=self.batch_size, shuffle=True,num_workers=0)
             old_probs = None
             test_batch = None
             for i, data in enumerate(training_loader):  # 计划训练批次
