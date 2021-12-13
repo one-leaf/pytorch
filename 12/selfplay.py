@@ -175,14 +175,14 @@ class Train():
             result["reward"].append(round(result["curr"]["reward"]/result["curr"]["agent"],2))
             result["pieces"].append(round(result["curr"]["pieces"]/result["curr"]["agent"],2))
             result["qvals"].append(round(avg_value,2))
-            if len(result["reward"])>100:
+            if len(result["reward"])>200:
                 result["reward"].remove(min(result["reward"]))
-            if len(result["pieces"])>100:
+            if len(result["pieces"])>200:
                 result["pieces"].remove(min(result["pieces"]))
-            if len(result["qvals"])>100:
+            if len(result["qvals"])>200:
                 result["qvals"].remove(min(result["qvals"]))
 
-        if result["curr"]["agent"]>1000:
+        if agent%1000==0:
             result["curr"]={"reward":0,"pieces":0,"agent":0}
 
         json.dump(result, open(jsonfile,"w"), ensure_ascii=False)
