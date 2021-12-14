@@ -183,7 +183,7 @@ class Train():
         if agent%1000==0:
             result["curr"]={"reward":0,"pieces":0,"agent":0}
 
-            newmodelfile = model_file+"_"+str(round(result["reward"][-1]))
+            newmodelfile = model_file+"_"+str(agent)
             if not os.path.exists(newmodelfile):
                 self.policy_value_net.save_model(newmodelfile)
 
