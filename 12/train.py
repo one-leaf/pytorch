@@ -2,21 +2,20 @@ import os, glob, pickle
 
 from time import time
 from model import PolicyValueNet
-from agent import Agent, ACTIONS
 
-import sys, time, datetime
+import time, datetime
 
-from itertools import count
 from collections import deque
 from collections import namedtuple
-import os, math, random
-
-from threading import Thread, Lock
+import os, random
 
 import numpy as np
 import torch
 
 # 定义游戏的动作
+KEY_NONE, KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN = 0, 1, 2, 3, 4
+ACTIONS = [KEY_NONE, KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN]
+ACTIONS_NAME = ["N","O","L","R","D"]
 GAME_ACTIONS_NUM = len(ACTIONS) 
 GAME_WIDTH, GAME_HEIGHT = 10, 20
 
