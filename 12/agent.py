@@ -1,14 +1,9 @@
-from numpy.core.shape_base import stack
-from torch._C import Value
-from game import Tetromino, TetrominoEnv, pieces, templatenum, blank 
-from game import calcReward, rowTransitions, colTransitions, emptyHoles, wellNums, landingHeight 
-from pygame.locals import *
-from itertools import count
+from game import Tetromino, pieces, templatenum, blank 
+# from pygame.locals import *
 import numpy as np
-import copy
 import random
 from collections import deque
-import json,os,math
+import math
 
 KEY_NONE, KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN = 0, 1, 2, 3, 4
 ACTIONS = [KEY_NONE, KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN]
