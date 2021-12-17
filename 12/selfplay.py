@@ -137,7 +137,7 @@ class Train():
         if "QVal" not in result:
             avg_value = sum(avg_value)/len(avg_value)            
         else:
-            avg_value = result["QVal"]*0.99 + sum(avg_value)/len(avg_value)*0.01
+            avg_value = result["QVal"]*0.999 + sum(avg_value)/len(avg_value)*0.001
 
         result["QVal"] = avg_value
 
