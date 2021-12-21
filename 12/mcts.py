@@ -143,10 +143,12 @@ class MCTS():
         act = state.position_to_action(a)
         state.step(act)
         
-        if state.reward>0: 
-            v = 1
-        else:
-            v = self.search(state)
+        # 后期训练不需要，只是用于早起引导
+        # if state.reward>0: 
+        #     v = 1
+        # else:
+        #     v = self.search(state)
+        v = self.search(state)
 
         # 更新 Q 值 和 访问次数
         if (s, a) in self.Qsa:
