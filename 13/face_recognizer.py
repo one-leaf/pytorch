@@ -54,7 +54,7 @@ def detect_face(image, model, confidence_threshold=0.5, recognizer=None):
             # 转换为整数
             start_x, start_y, end_x, end_y = box.astype(np.int32)
 
-            face = cv2.resize(image[start_y:end_y, start_x:end_x], (300,300))
+            face = cv2.resize(image[start_y:end_y, start_x:end_x], (300, 300))
             face = cv2.cvtColor(face, cv2.COLOR_BGR2GRAY)
 
             if recognizer!=None:
