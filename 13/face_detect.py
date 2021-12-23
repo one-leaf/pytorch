@@ -16,7 +16,7 @@ model_path = os.path.join(curr_dir, "res10_300x300_ssd_iter_140000_fp16.caffemod
 model = cv2.dnn.readNetFromCaffe(prototxt_path, model_path)
 
 # 读取所需图像
-image = cv2.imread(os.path.join(curr_dir, "beauty2.png"))
+image = cv2.imread(os.path.join(curr_dir, "test.jpeg"))
 
 # 获取图像的宽度和高度
 h, w = image.shape[:2]
@@ -52,7 +52,7 @@ for i in range(0, output.shape[0]):
         # 绘制矩形
         cv2.rectangle(image, (start_x, start_y), (end_x, end_y), color=(255, 0, 0), thickness=2)
         # 添加文本
-        cv2.putText(image, f"{confidence*100:.2f}%", (start_x, start_y-5), cv2.FONT_HERSHEY_SIMPLEX, font_scale, (255, 0, 0), 2)
+        cv2.putText(image, f"{confidence*100:.2f}%", (start_x, start_y-5), cv2.FONT_HERSHEY_SIMPLEX, font_scale, (255, 255, 0), 2)
         
         face_list.append(face)
 
@@ -60,9 +60,6 @@ for i in range(0, output.shape[0]):
 print("检测到人脸数:", len(face_list))
 
 cv2.imshow("image", image)
-
-for face in face_list:
-    cv2.imshow("face", face)
 
 cv2.waitKey(0)
 cv2.destroyAllWindows()
