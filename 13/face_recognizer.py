@@ -65,7 +65,14 @@ def detect_face(image, model, confidence_threshold=0.5, recognizer=None):
                 # 绘制矩形
                 cv2.rectangle(image, (start_x, start_y), (end_x, end_y), color=(255, 0, 0), thickness=2)
                 # 添加文本
-                cv2.putText(image, str(label), (start_x, start_y-5), cv2.FONT_HERSHEY_SIMPLEX, font_scale, (255, 0, 0), 2)
+                if confidence <50:
+                    if label == 0:
+                        label_str = "zhangxueyou"
+                    elif label == 1:
+                        label_str = "liudehua"
+                else:
+                    label_str = "unknown"
+                cv2.putText(image, label_str, (start_x, start_y-5), cv2.FONT_HERSHEY_SIMPLEX, font_scale, (255, 255, 0), 2)
             
             face_list.append(face)
 
