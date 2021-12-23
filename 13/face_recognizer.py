@@ -75,13 +75,9 @@ def detect_face(image, model, confidence_threshold=0.5, recognizer=None):
 if __name__ == "__main__":
 
     # 创建一个简单的人脸识别模型
-    # LBPHFaceRecognizer 局部二值，0 完全匹配，50以下可以接受，80以上不行
+    # 局部二值，0 完全匹配，50以下可以接受，80以上不行
     recognizer = cv2.face.LBPHFaceRecognizer_create()
-    # PCA ，5000以下可以接受，5000以上不行
-    # recognizer = cv2.face.EigenFaceRecognizer_create()
-    # FisherFace ，5000以下可以接受，5000以上不行
-    # recognizer = cv2.face.FisherFaceRecognizer_create()
-
+    
     train_face_recognizer(recognizer)
     image, _ = detect_face(cv2.imread(os.path.join(curr_dir, "test.jpeg")), model, recognizer=recognizer)
 
