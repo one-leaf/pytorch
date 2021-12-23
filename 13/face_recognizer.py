@@ -31,9 +31,7 @@ def train_face_recognizer(recognizer):
 def detect_face(image, model, confidence_threshold=0.5, recognizer=None):
     # 获取图像的宽度和高度
     h, w = image.shape[:2]
-
-    print("图片高:", h, "图片宽:", w)
-
+  
     # 预处理图像：调整大小并执行平均减法。 104.0, 177.0, 123.0 表示b通道的值-104，g-177,r-123  
     # 在深度学习中通过减去数人脸据集的图像均值而不是当前图像均值来对图像进行归一化，因此这里写死了
     blob = cv2.dnn.blobFromImage(image, 1.0, (300, 300),(104.0, 177.0, 123.0))
@@ -44,8 +42,6 @@ def detect_face(image, model, confidence_threshold=0.5, recognizer=None):
     output = np.squeeze(model.forward())
 
     font_scale = 1.0
-
-    print("output shape:", output.shape)
 
     face_list = []
     for i in range(0, output.shape[0]):
@@ -58,7 +54,7 @@ def detect_face(image, model, confidence_threshold=0.5, recognizer=None):
             # 转换为整数
             start_x, start_y, end_x, end_y = box.astype(np.int32)
 
-            face = cv2.resize(image[start_y:end_y, start_x:end_x],(200,200))
+            face = cv2.resize(image[start_y:end_y, start_x:end_x], (200,200))
             face = cv2.cvtColor(face, cv2.COLOR_BGR2GRAY)
 
             if recognizer!=None:
