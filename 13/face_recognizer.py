@@ -82,7 +82,7 @@ def detect_face(image, model, confidence_threshold=0.5, recognizer=None):
 if __name__ == "__main__":
 
     # 创建一个简单的人脸识别模型
-    # 局部二值，0 完全匹配，50以下可以接受，80以上不行
+    # 局部二值，置信度 0 完全匹配，50以下可以接受，80以上不行
     recognizer = cv2.face.LBPHFaceRecognizer_create()
     
     train_face_recognizer(recognizer)
