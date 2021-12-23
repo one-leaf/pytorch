@@ -15,15 +15,15 @@ def train_face_recognizer(recognizer):
     labels = []
     images = []
     for label in os.listdir(image_path):
-        if not os.path.isdir(os.path.join(image_path, label)): continue
+        if os.path.isfile(os.path.join(image_path, label)): continue
         for image_name in os.listdir(os.path.join(image_path, label )):
-            if not image_name.endswith(".jpg"): continue
+            if not image_name.endswith(".jpeg"): continue
             print("reading image:", os.path.join(image_path, label, image_name))
             image = cv2.imread(os.path.join(image_path, label, image_name))
             _, faces = detect_face(image, model)
 
             for face in faces:
-                labels.append(label)
+                labels.append(int(label))
                 images.append(face)
 
     recognizer.train(np.array(images), np.array(labels))
@@ -59,14 +59,17 @@ def detect_face(image, model, confidence_threshold=0.5, recognizer=None):
             start_x, start_y, end_x, end_y = box.astype(np.int32)
 
             face = cv2.resize(image[start_y:end_y, start_x:end_x],(200,200))
+            face = cv2.cvtColor(face, cv2.COLOR_BGR2GRAY)
 
             if recognizer!=None:
-                label, confidence = recognizer.predict(face)                
+                
+                label, confidence = recognizer.predict(face)  
+                print(label, confidence)             
 
                 # 绘制矩形
                 cv2.rectangle(image, (start_x, start_y), (end_x, end_y), color=(255, 0, 0), thickness=2)
                 # 添加文本
-                cv2.putText(image, label, (start_x, start_y-5), cv2.FONT_HERSHEY_SIMPLEX, font_scale, (255, 0, 0), 2)
+                cv2.putText(image, str(label), (start_x, start_y-5), cv2.FONT_HERSHEY_SIMPLEX, font_scale, (255, 0, 0), 2)
             
             face_list.append(face)
 
@@ -79,9 +82,9 @@ if __name__ == "__main__":
     # LBPHFaceRecognizer 局部二值，0 完全匹配，50以下可以接受，80以上不行
     recognizer = cv2.face.LBPHFaceRecognizer_create()
     # PCA ，5000以下可以接受，5000以上不行
-    #recognizer = cv2.face.EigenFaceRecognizer_create()
+    # recognizer = cv2.face.EigenFaceRecognizer_create()
     # FisherFace ，5000以下可以接受，5000以上不行
-    #recognizer = cv2.face.FisherFaceRecognizer_create()
+    # recognizer = cv2.face.FisherFaceRecognizer_create()
 
     train_face_recognizer(recognizer)
     image, _ = detect_face(cv2.imread(os.path.join(curr_dir, "test.jpeg")), model, recognizer=recognizer)
