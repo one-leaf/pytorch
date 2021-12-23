@@ -59,8 +59,8 @@ for i in range(0, output.shape[0]):
 
 print("检测到人脸数:", len(face_list))
 
-
 cv2.imshow("image", image)
+
 for face in face_list:
     cv2.imshow("face", face)
 
