@@ -120,7 +120,7 @@ class Train():
         avg_value = []
         for game_idx in range(game_num):
             for i in reversed(range(len(game_vals[game_idx])-1)):
-                game_vals[game_idx][i] += game_vals[game_idx][i+1]*0.999  
+                game_vals[game_idx][i] += game_vals[game_idx][i+1]*0.99  
             avg_value.append(game_vals[game_idx][-1])
             print(*game_vals[game_idx][:3], "...", *game_vals[game_idx][-3:])
 
