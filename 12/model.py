@@ -247,7 +247,9 @@ class PolicyValueNet():
         act_probs = list(zip(actions, act_probs[actions]))
 
         value = value[0,0]
-            # self.cache[key] = (act_probs, value)
+        # 做一个侵入性的改变
+        if game.reward>0: value = 1.0
+        # self.cache[key] = (act_probs, value)
         return act_probs, value
 
 
