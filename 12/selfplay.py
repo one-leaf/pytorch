@@ -173,12 +173,12 @@ class Train():
             result["reward"].append(round(result["curr"]["reward"]/result["curr"]["agent"],2))
             result["pieces"].append(round(result["curr"]["pieces"]/result["curr"]["agent"],2))
             result["qvals"].append(round(avg_value,2))
-            if len(result["reward"])>200:
-                result["reward"].remove(min(result["reward"]))
-            if len(result["pieces"])>200:
-                result["pieces"].remove(min(result["pieces"]))
-            if len(result["qvals"])>200:
-                result["qvals"].remove(min(result["qvals"]))
+            if len(result["reward"])>250:
+                result["reward"].remove(result["reward"][0])
+            if len(result["pieces"])>250:
+                result["pieces"].remove(result["pieces"][0])
+            if len(result["qvals"])>250:
+                result["qvals"].remove(result["qvals"][0])
 
         if agent%1000==0:
             result["curr"]={"reward":0,"pieces":0,"agent":0}
