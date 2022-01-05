@@ -149,8 +149,7 @@ class MCTS():
         # else:
         #     v = self.search(state)
         v = self.search(state)
-        if state.reward>0: v = 1
-        
+
         # 更新 Q 值 和 访问次数
         if (s, a) in self.Qsa:
             self.Qsa[(s, a)] = (self.Nsa[(s, a)] * self.Qsa[(s, a)] + v) / (self.Nsa[(s, a)] + 1)
@@ -158,6 +157,10 @@ class MCTS():
         else:
             self.Qsa[(s, a)] = v
             self.Nsa[(s, a)] = 1
+
+        # 如果有中间奖励
+        if state.reward>0: 
+            self.Qsa[(s, a)] = 1
 
         self.Ns[s] += 1
         return v
