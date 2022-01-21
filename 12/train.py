@@ -91,29 +91,20 @@ class Dataset(torch.utils.data.Dataset):
         time.sleep(5)
         i = -1
         for i, fn in enumerate(movefiles):
-            filename = "{}.pkl".format(self.index % self.max_keep_size,)
+            filename = "{}.pkl".format(self.index)
             savefile = os.path.join(self.data_dir, filename)
             if os.path.exists(savefile): os.remove(savefile)
             os.rename(os.path.join(data_wait_dir,fn), savefile)
             self.index += 1
-            self.save_index() 
             self.newsample.append(savefile)
             if (i>=100 and i>len(movefiles)*0.5) or i>=self.max_keep_size//2: break       
+        self.save_index() 
         print("mv %s/%s files to train"%(i,len(movefiles)))
         if i==-1:
             print("SLEEP 60s for watting data")
             time.sleep(60)
             raise Exception("NEED SOME NEW DATA TO TRAIN")
-
-    # 保存新的训练样本，但不参与到本次训练，等下一次训练加载
-    def save(self, obj):
-        # 文件名为buffer取余，循环保存
-        filename = "{}.pkl".format(self.curr_game_batch_num % self.buffer_size,)
-        savefile = os.path.join(self.data_dir, filename)
-        pickle.dump(obj, open(savefile, "wb"))
-        self.curr_game_batch_num += 1
-        self.save_game_batch_num()
-        
+         
     def curr_size(self):
         return len(self.file_list)
 
