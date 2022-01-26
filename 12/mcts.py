@@ -160,7 +160,7 @@ class MCTS():
 
         # 如果有中间奖励
         if state.reward>0: 
-            self.Qsa[(s, a)] = 1
+            self.Qsa[(s, a)] = min(1, self.Qsa[(s, a)]+0.5)
 
         self.Ns[s] += 1
         return v
