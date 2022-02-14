@@ -159,8 +159,11 @@ class MCTS():
             self.Nsa[(s, a)] = 1
 
         # 如果有中间奖励
-        if state.reward>0: 
-            self.Qsa[(s, a)] = min(1, self.Qsa[(s, a)]+0.5)
+        if self.state == 1:
+            if state.reward>0: 
+                self.Qsa[(s, a)] = min(1, self.Qsa[(s, a)]+0.5)
+            else:
+                self.Qsa[(s, a)] = max(-1, self.Qsa[(s, a)]-0.5)
 
         self.Ns[s] += 1
         return v
