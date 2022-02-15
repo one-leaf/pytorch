@@ -135,6 +135,7 @@ class Train():
             result["qvals"]=[]
 
         curr_avg_value = sum(avg_value)/len(avg_value)
+        curr_std_value = np.std(avg_value)
         if "QVal" not in result:
             avg_value = curr_avg_value            
         else:
@@ -148,7 +149,7 @@ class Train():
             for o in game_mcts_probs[j]: mcts_probs.append(o)
             for o in game_vals[j]: 
                 # 这里考虑还是用两局的平均值作为衡量标准，而不是全部的平均值
-                v = (o-curr_avg_value)/50
+                v = (o-curr_avg_value)/curr_std_value
                 if v>1: v=1
                 if v<-1: v=-1
                 values.append(v)
