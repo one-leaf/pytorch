@@ -134,22 +134,21 @@ class Train():
         if  "qvals" not in result:
             result["qvals"]=[]
 
+        curr_avg_value = sum(avg_value)/len(avg_value)
         if "QVal" not in result:
-            avg_value = sum(avg_value)/len(avg_value)            
+            avg_value = curr_avg_value            
         else:
-            avg_value = result["QVal"]*0.999 + sum(avg_value)/len(avg_value)*0.001
+            avg_value = result["QVal"]*0.999 + curr_avg_value*0.001
 
         result["QVal"] = avg_value
-
-        # 这里考虑还是用两局的平均值作为衡量标准，而不是全部的平均值
-        avg_value = sum(avg_value)/len(avg_value)
-        
+               
         states, values, mcts_probs= [], [], []
         for j in range(game_num):
             for o in game_states[j]: states.append(o)
             for o in game_mcts_probs[j]: mcts_probs.append(o)
             for o in game_vals[j]: 
-                v = (o-avg_value)/50
+                # 这里考虑还是用两局的平均值作为衡量标准，而不是全部的平均值
+                v = (o-curr_avg_value)/50
                 if v>1: v=1
                 if v<-1: v=-1
                 values.append(v)
