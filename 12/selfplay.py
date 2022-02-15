@@ -136,6 +136,8 @@ class Train():
 
         curr_avg_value = sum(avg_value)/len(avg_value)
         curr_std_value = np.std(avg_value)
+        print("avg_value:", curr_avg_value, "std_value:", curr_std_value)
+        
         if "QVal" not in result:
             avg_value = curr_avg_value            
         else:
