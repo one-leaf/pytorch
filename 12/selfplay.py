@@ -141,6 +141,9 @@ class Train():
 
         result["QVal"] = avg_value
 
+        # 这里考虑还是用两局的平均值作为衡量标准，而不是全部的平均值
+        avg_value = sum(avg_value)/len(avg_value)
+        
         states, values, mcts_probs= [], [], []
         for j in range(game_num):
             for o in game_states[j]: states.append(o)
