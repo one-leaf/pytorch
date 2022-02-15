@@ -151,7 +151,8 @@ class Train():
             for o in game_mcts_probs[j]: mcts_probs.append(o)
             for o in game_vals[j]: 
                 # 这里考虑还是用两局的平均值作为衡量标准，而不是全部的平均值
-                v = (o-curr_avg_value)/curr_std_value
+                # 标准化的标准差为0.3
+                v = (o-curr_avg_value)/(curr_std_value*3)
                 if v>1: v=1
                 if v<-1: v=-1
                 values.append(v)
