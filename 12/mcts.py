@@ -144,8 +144,11 @@ class MCTS():
         state.step(act)
         
         # 后期训练不需要，只是用于早起引导
-        if state.reward>0: 
-            v = 1
+        if state.state == 1:
+            if state.reward>0: 
+                v = 1
+            else:
+                v = -1
         else:
             v = self.search(state)
         # v = self.search(state)
