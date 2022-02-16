@@ -144,11 +144,11 @@ class MCTS():
         state.step(act)
         
         # 后期训练不需要，只是用于早起引导
-        # if state.reward>0: 
-        #     v = 1
-        # else:
-        #     v = self.search(state)
-        v = self.search(state)
+        if state.reward>0: 
+            v = 1
+        else:
+            v = self.search(state)
+        # v = self.search(state)
 
         # 更新 Q 值 和 访问次数
         if (s, a) in self.Qsa:
@@ -159,11 +159,11 @@ class MCTS():
             self.Nsa[(s, a)] = 1
 
         # 如果有中间奖励
-        if state.state == 1:
-            if state.reward>0: 
-                self.Qsa[(s, a)] = min(1, self.Qsa[(s, a)]+0.5)
-            else:
-                self.Qsa[(s, a)] = max(-1, self.Qsa[(s, a)]-0.1*(self.Qsa[(s, a)]**2))
+        # if state.state == 1:
+        #     if state.reward>0: 
+        #         self.Qsa[(s, a)] = min(1, self.Qsa[(s, a)]+0.5)
+        #     else:
+        #         self.Qsa[(s, a)] = max(-1, self.Qsa[(s, a)]-0.1*(self.Qsa[(s, a)]**2))
 
         self.Ns[s] += 1
         return v
