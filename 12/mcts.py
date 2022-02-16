@@ -22,6 +22,8 @@ class MCTS():
         self.Vs = {}  # 保存游戏局面打分 key: s # 这个不需要，只是缓存
         print("create mcts, c_puct: {}, n_playout: {}".format(c_puct, n_playout))
 
+        self.state = None
+
     def reset(self):
         self.Qsa = {}  # 保存 Q 值, key: s,a
         self.Nsa = {}  # 保存 遍历次数 key: s,a
@@ -38,7 +40,7 @@ class MCTS():
                    proportional to Nsa[(s,a)]**(1./temp)
         """
         s = state.get_key()
-
+        self.state = state
         self.max_depth = 0
         available_acts = state.actions_to_positions(state.availables)
         for n in range(self._n_playout):
@@ -147,8 +149,10 @@ class MCTS():
         if state.state == 1:
             if state.reward>0: 
                 v = 1
+            elif state.piececount - self.state.piececount > 2:
+                v = -1
             else:
-                _, v = self._policy(state)
+                v = self.search(state)
         else:
             v = self.search(state)
         # v = self.search(state)
