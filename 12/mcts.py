@@ -148,7 +148,8 @@ class MCTS():
             if state.reward>0: 
                 v = 1
             else:
-                v = -0.01
+                act_probs, v = self._policy(state)
+                v = max(-1, v-0.1*(v**2))
         else:
             v = self.search(state)
         # v = self.search(state)
