@@ -13,7 +13,6 @@ from collections import namedtuple
 import os, math, random, uuid
 
 import numpy as np
-import torch
 import copy
 
 # 定义游戏的动作
@@ -61,6 +60,7 @@ class Train():
         agentcount, agentreward, piececount, agentscore = 0, 0, 0, 0
         game_states, game_vals, game_mcts_probs = [], [], [] 
 
+        borads = []
         for game_idx in range(game_num):
 
             player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout)
@@ -116,6 +116,21 @@ class Train():
             game_mcts_probs.append(_probs)
 
             game.print()
+            borads.append(game.board)
+
+        # 打印borad：
+        from game import blank 
+        for y in range(agent.height):
+            line=""
+            for b in borads:
+                line+="| "
+                for x in range(agent.width):
+                    if b[x][y]==blank:
+                        line+="  "
+                    else:
+                        line+="%s " % b[x][y]
+            print(line)
+        print((" "+" -"*agent.width+" ")*len(borads))
 
         avg_value = []
         for game_idx in range(game_num):
