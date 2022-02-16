@@ -203,7 +203,7 @@ class MCTSPlayer(object):
             max_idx = np.argmax(act_probs)    
 
             if need_random:  # 自我对抗
-                if state.state == 1:
+                if state.state == 1 or (state.piececount<3 and random.random() < 0.5):
                     idx = np.random.randint(len(acts))
                 else:
                     idx = np.random.choice(range(len(acts)), p=act_probs)
