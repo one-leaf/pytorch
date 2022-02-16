@@ -148,7 +148,7 @@ class MCTS():
             if state.reward>0: 
                 v = 1
             else:
-                v = -0.1
+                v = 0
         else:
             v = self.search(state)
         # v = self.search(state)
