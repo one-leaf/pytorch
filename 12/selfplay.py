@@ -164,20 +164,20 @@ class Train():
         for j in range(game_num):
             for o in game_states[j]: states.append(o)
             for o in game_mcts_probs[j]: mcts_probs.append(o)
+            normalize_vals = []
             for o in game_vals[j]: 
                 # 这里考虑还是用两局的平均值作为衡量标准，而不是全部的平均值
                 # 标准化的标准差为0.5
                 v = (o-curr_avg_value)/(curr_std_value*2)
                 if v>1: v=1
                 if v<-1: v=-1
-                values.append(v)
+                normalize_vals.append(v)            
+            values.extend(normalize_vals)
+            print(*normalize_vals[:5], "...", *normalize_vals[-5:])
 
         assert len(states)==len(values)
         assert len(states)==len(mcts_probs)
 
-        print(*values[:10])
-        print("...")
-        print(*values[-10:])
         print("TRAIN Self Play end. length:%s value sum:%s saving ..." % (len(states),sum(values)))
 
         # 保存对抗数据到data_buffer
