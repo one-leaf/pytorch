@@ -37,7 +37,7 @@ class Dataset(torch.utils.data.Dataset):
         self.max_keep_size = max_keep_size
         # 当前训练数据索引保存文件
         self.data_index_file = os.path.join(data_dir, 'index.txt')
-        self.file_list = deque(maxlen=max_keep_size)    
+        self.file_list = [] # deque(maxlen=max_keep_size)    
         self.newsample = []
         self.load_index()
         self.copy_wait_file()
@@ -75,6 +75,7 @@ class Dataset(torch.utils.data.Dataset):
                 delcount += 1
             else:
                 self.file_list.append(filename)
+        random.shuffle(self.file_list)
         print("delete", delcount, "files")
 
     def save_index(self):
@@ -118,10 +119,11 @@ class TestDataset(Dataset):
         self.max_keep_size = max_keep_size
         # 当前训练数据索引保存文件
         self.data_index_file = os.path.join(data_dir, 'index.txt')
-        self.file_list = deque(maxlen=max_keep_size) 
+        self.file_list = [] # deque(maxlen=max_keep_size) 
         for file in file_list:
             self.file_list.append(file) 
-        self.sample=0  
+        self.sample=0
+        random.shuffle(self.file_list)  
        
 
 class Train():
@@ -168,8 +170,8 @@ class Train():
             
             
             dataset_len = len(self.dataset)  
-            training_loader = torch.utils.data.DataLoader(self.dataset, batch_size=self.batch_size, shuffle=True, num_workers=0)
-            testing_loader = torch.utils.data.DataLoader(self.testdataset, batch_size=self.batch_size, shuffle=True,num_workers=0)
+            training_loader = torch.utils.data.DataLoader(self.dataset, batch_size=self.batch_size, shuffle=False, num_workers=0)
+            testing_loader = torch.utils.data.DataLoader(self.testdataset, batch_size=self.batch_size, shuffle=False,num_workers=0)
             old_probs = None
             test_batch = None
             for i, data in enumerate(training_loader):  # 计划训练批次
