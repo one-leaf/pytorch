@@ -229,7 +229,21 @@ class Agent(object):
             if line_c == 9: c += 1
         return c
 
-        
+    # 计算得分
+    def getScore(self):
+        empty_count = 0 
+        fill_count = 0
+        for y in range(self.height):
+            line_c= 0
+            for x in range(self.width):
+                if self.board[x][y]!=blank:
+                    line_c += 1
+            if line_c != 0:
+                empty_count += 10-line_c
+                fill_count += line_c
+        if fill_count==0: return 0
+        return -1 * (empty_count/fill_count)        
+
     # 获得当前局面信息
     def getBoard(self):
         board=np.zeros((self.height, self.width))
