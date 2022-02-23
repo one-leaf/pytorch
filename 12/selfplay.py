@@ -123,6 +123,13 @@ class Train():
                     agentscore += game.score
                     agentreward += _reward
                     piececount += game.piececount
+
+                    if _reward>result["best"]["reward"]:
+                        result["best"]["reward"] = _reward
+                        result["best"]["pieces"] = game.piececount
+                        result["best"]["score"] = game.score
+                        result["best"]["agent"] = result["agent"]+agentcount
+                        
                     break
 
             game_states.append(_states)
@@ -203,11 +210,6 @@ class Train():
         result["curr"]["reward"] += agentscore
         result["curr"]["pieces"] += piececount
         result["curr"]["agent"] += agentcount
-
-        if agentscore>result["best"]["reward"]:
-            result["best"]["reward"] = agentcount
-            result["best"]["pieces"] = piececount
-            result["best"]["agent"] = result["agent"]
 
         agent = result["agent"]
         if agent%100==0:
