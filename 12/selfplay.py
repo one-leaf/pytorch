@@ -53,28 +53,42 @@ class Train():
     def collect_selfplay_data(self):
         """收集自我对抗数据用于训练"""       
         print("TRAIN Self Play starting ...")
+
+        # 获取历史训练数据
+        jsonfile = os.path.join(data_dir, "result.json")
+        if os.path.exists(jsonfile):
+            result=json.load(open(jsonfile,"r"))
+        else:
+            result={}
+            result={"agent":0, "reward":[], "pieces":[], "qvals":[], "QVal":0}
+        if "curr" not in result:
+            result["curr"]={"reward":0,"pieces":0,"agent":0}
+        if "best" not in result:
+            result["best"]={"reward":0,"pieces":0,"agent":0}
+
+        hisQval=result["QVal"]
+        print("QVal:",hisQval)
+
         # 游戏代理
         agent = Agent()
 
-        game_num = 3
+        max_game_num = 2
         agentcount, agentreward, piececount, agentscore = 0, 0, 0, 0
         game_states, game_vals, game_mcts_probs = [], [], [] 
 
         borads = []
-        for game_idx in range(game_num):
-
+        game_num = 0
+        for game_idx in count():
+            game_num += 1
             player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout)
 
             _states, _probs, _masks, _rewards, _qvals = [],[],[],[],[]
             game = copy.deepcopy(agent)
 
-            if game_idx==0 or game_idx==game_num-1:
+            if game_idx==0:
                 game.show_mcts_process=True
-            else:
-                game.show_mcts_process=False
 
-            for i in count():
-
+            for i in count():               
                 _states.append(game.current_state())
                                 
                 if game_idx == game_num-1:
@@ -118,6 +132,15 @@ class Train():
             game.print()
             borads.append(game.board)
 
+            # 如果训练次数超过了最大次数，并且最大得分值超过了平均得分值，则停止训练
+            if game_num >= max_game_num and max(_qvals) > hisQval:
+                break
+
+            # 如果训练次数超过了最大次数的3倍，则直接终止训练
+            if game_num >= max_game_num*3:
+                break
+
+
         # 打印borad：
         from game import blank 
         for y in range(agent.height):
@@ -139,24 +162,14 @@ class Train():
             avg_value.extend(game_vals[game_idx])
             print(len(game_vals[game_idx]), ":", *game_vals[game_idx][:3], "...", *game_vals[game_idx][-3:])
 
-        jsonfile = os.path.join(data_dir, "result.json")
-        if os.path.exists(jsonfile):
-            result=json.load(open(jsonfile,"r"))
-        else:
-            result={}
-            result={"agent":0,"reward":[],"pieces":[]}
-            result["curr"]={"reward":0,"pieces":0,"agent":0}
-        if  "qvals" not in result:
-            result["qvals"]=[]
-
         curr_avg_value = sum(avg_value)/len(avg_value)
         curr_std_value = np.std(avg_value)
         print("avg_value:", curr_avg_value, "std_value:", curr_std_value)
 
-        if "QVal" not in result:
+        if hisQval==0:
             avg_value = curr_avg_value            
         else:
-            avg_value = result["QVal"]*0.999 + curr_avg_value*0.001
+            avg_value = hisQval*0.999 + curr_avg_value*0.001
 
         result["QVal"] = avg_value
                
@@ -166,7 +179,7 @@ class Train():
             for o in game_mcts_probs[j]: mcts_probs.append(o)
             normalize_vals = []
             for o in game_vals[j]: 
-                # 这里考虑还是用两局的平均值作为衡量标准，而不是全部的平均值
+                # 这里考虑还是用所有局的平均值作为衡量标准，而不是全部的平均值
                 # 标准化的标准差为0.5
                 v = (o-curr_avg_value)/(curr_std_value*2)
                 if v>1: v=1
@@ -190,6 +203,11 @@ class Train():
         result["curr"]["reward"] += agentscore
         result["curr"]["pieces"] += piececount
         result["curr"]["agent"] += agentcount
+
+        if agentscore>result["best"]["reward"]:
+            result["best"]["reward"] = agentcount
+            result["best"]["pieces"] = piececount
+            result["best"]["agent"] = result["agent"]
 
         agent = result["agent"]
         if agent%100==0:
