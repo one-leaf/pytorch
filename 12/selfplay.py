@@ -78,6 +78,7 @@ class Train():
 
         borads = []
         game_num = 0
+        can_exit_flag = False
         for game_idx in count():
             game_num += 1
             player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout)
@@ -107,7 +108,8 @@ class Train():
 
                 # 方块的个数越多越好
                 if game.terminal:
-                    _reward = game.getNoEmptyCount() + game.score * 10               
+                    _reward = game.getNoEmptyCount() + game.score * 10     
+                    if _reward > hisQval: can_exit_flag = True         
 
                 _probs.append(move_probs)
                 _rewards.append(_reward)
@@ -140,12 +142,10 @@ class Train():
             borads.append(game.board)
 
             # 如果训练次数超过了最大次数，并且最大得分值超过了平均得分值，则停止训练
-            if game_num >= max_game_num and _rewards[-1] > hisQval:
-                break
+            if game_num >= max_game_num and can_exit_flag: break
 
             # 如果训练次数超过了最大次数的3倍，则直接终止训练
-            if game_num >= max_game_num*3:
-                break
+            if game_num >= max_game_num*3: break
 
 
         # 打印borad：
