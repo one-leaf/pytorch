@@ -140,7 +140,7 @@ class Train():
             borads.append(game.board)
 
             # 如果训练次数超过了最大次数，并且最大得分值超过了平均得分值，则停止训练
-            if game_num >= max_game_num and max(_qvals) > hisQval:
+            if game_num >= max_game_num and _rewards[-1] > hisQval:
                 break
 
             # 如果训练次数超过了最大次数的3倍，则直接终止训练
