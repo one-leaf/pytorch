@@ -207,6 +207,8 @@ class Train():
             pickle.dump(obj, open(savefile, "wb"))
 
         result["agent"] += agentcount
+        if "agent100" not in result["curr"]:
+            result["curr"] = {"reward":0,"pieces":0,"agent1000":0,"agent100":0}
         result["curr"]["reward"] += agentscore
         result["curr"]["pieces"] += piececount
         result["curr"]["agent1000"] += agentcount
