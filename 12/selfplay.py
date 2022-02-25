@@ -209,13 +209,15 @@ class Train():
         result["agent"] += agentcount
         result["curr"]["reward"] += agentscore
         result["curr"]["pieces"] += piececount
-        result["curr"]["agent"] += agentcount
+        result["curr"]["agent1000"] += agentcount
+        result["curr"]["agent100"] += agentcount
 
         agent = result["agent"]
-        if agent%100==0:
+        if result["curr"]["agent100"]>100:
             result["reward"].append(round(result["curr"]["reward"]/result["curr"]["agent"],2))
             result["pieces"].append(round(result["curr"]["pieces"]/result["curr"]["agent"],2))
             result["qvals"].append(round(avg_value,2))
+            result["curr"]["agent100"] -= 100 
             if len(result["reward"])>250:
                 result["reward"].remove(result["reward"][0])
             if len(result["pieces"])>250:
@@ -223,8 +225,8 @@ class Train():
             if len(result["qvals"])>250:
                 result["qvals"].remove(result["qvals"][0])
 
-        if agent%1000==0:
-            result["curr"]={"reward":0,"pieces":0,"agent":0}
+        if result["curr"]["agent1000"]>1000:
+            result["curr"]={"reward":0,"pieces":0,"agent1000":0,"agent100":0}
 
             newmodelfile = model_file+"_"+str(agent)
             if not os.path.exists(newmodelfile):
