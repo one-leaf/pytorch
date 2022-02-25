@@ -216,8 +216,8 @@ class Train():
 
         agent = result["agent"]
         if result["curr"]["agent100"]>100:
-            result["reward"].append(round(result["curr"]["reward"]/result["curr"]["agent"],2))
-            result["pieces"].append(round(result["curr"]["pieces"]/result["curr"]["agent"],2))
+            result["reward"].append(round(result["curr"]["reward"]/result["curr"]["agent1000"],2))
+            result["pieces"].append(round(result["curr"]["pieces"]/result["curr"]["agent1000"],2))
             result["qvals"].append(round(avg_value,2))
             result["curr"]["agent100"] -= 100 
             if len(result["reward"])>250:
