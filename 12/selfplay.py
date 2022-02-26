@@ -1,6 +1,5 @@
 import os, glob, pickle
 
-from time import time
 from model import PolicyValueNet
 from agent import Agent, ACTIONS
 from mcts import MCTSPlayer
@@ -79,7 +78,7 @@ class Train():
         borads = []
         game_num = 0
         can_exit_flag = False
-        start_time = time()
+        start_time = time.time()
         for game_idx in count():
             game_num += 1
             player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout)
@@ -147,7 +146,7 @@ class Train():
 
             # 如果训练次数超过了最大次数的3倍，则直接终止训练
             if game_num >= max_game_num*3: break
-        end_time = time()
+        end_time = time.time()
 
         # 打印borad：
         from game import blank 
