@@ -79,6 +79,7 @@ class Train():
         borads = []
         game_num = 0
         can_exit_flag = False
+        start_time = time()
         for game_idx in count():
             game_num += 1
             player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout)
@@ -120,6 +121,7 @@ class Train():
                         Qval = _rewards[step]
                         _qvals.insert(0, Qval)
 
+                    game.print()
                     print(game_idx, 'reward:', game.score, "Qval:", _rewards[-1], 'len:', len(_qvals), "piececount:", game.piececount)
                     agentcount += 1
                     agentscore += game.score
@@ -138,7 +140,6 @@ class Train():
             game_vals.append(_qvals)
             game_mcts_probs.append(_probs)
 
-            game.print()
             borads.append(game.board)
 
             # 如果训练次数超过了最大次数，并且最大得分值超过了平均得分值，则停止训练
@@ -146,7 +147,7 @@ class Train():
 
             # 如果训练次数超过了最大次数的3倍，则直接终止训练
             if game_num >= max_game_num*3: break
-
+        end_time = time()
 
         # 打印borad：
         from game import blank 
@@ -171,7 +172,8 @@ class Train():
 
         curr_avg_value = sum(avg_value)/len(avg_value)
         curr_std_value = np.std(avg_value)
-        print("avg_value:", curr_avg_value, "std_value:", curr_std_value)
+        curr_avg_time = (end_time-start_time)/game_num
+        print("avg_value:", curr_avg_value, "std_value:", curr_std_value, "avg_time:", curr_avg_time)
 
         if hisQval==0:
             avg_value = curr_avg_value            
@@ -205,6 +207,11 @@ class Train():
             filename = "{}.pkl".format(uuid.uuid1())
             savefile = os.path.join(data_wait_dir, filename)
             pickle.dump(obj, open(savefile, "wb"))
+
+        if "avg_time" not in result:
+            result["avg_time"] = curr_avg_time
+        else:
+            result["avg_time"] = result["avg_time"]*0.999 + curr_avg_time*0.001
 
         result["agent"] += agentcount
         if "agent100" not in result["curr"]:
