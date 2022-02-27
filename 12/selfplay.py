@@ -75,12 +75,12 @@ class Train():
         if "cpuct" not in result:
             result["cpuct"]={}
             for p in cpuct_list:
-                result["cpuct"][p]=hisQval
+                result["cpuct"][str(p)]=hisQval
                 cpuct_p.append(hisQval)
         else:
             for p in cpuct_list:
-                if p in result["cpuct"]:
-                    cpuct_p.append(p)
+                if str(p) in result["cpuct"]:
+                    cpuct_p.append(result["cpuct"][str(p)])
                 else:
                     cpuct_p.append(hisQval)
         e_cpuct_p = np.exp(cpuct_p-np.max(cpuct_p))
@@ -131,7 +131,7 @@ class Train():
                 if game.terminal:
                     _reward = game.getNoEmptyCount() + game.score * 10     
                     if _reward > hisQval: can_exit_flag = True
-                    result["cpuct"][cpuct] = result["cpuct"][cpuct]*0.99 + _reward*0.01         
+                    result["cpuct"][str(cpuct)] = result["cpuct"][str(cpuct)]*0.99 + _reward*0.01         
 
                 _probs.append(move_probs)
                 _rewards.append(_reward)
