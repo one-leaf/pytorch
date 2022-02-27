@@ -68,6 +68,26 @@ class Train():
         hisQval=result["QVal"]
         print("QVal:",hisQval)
 
+
+        # c_puct 参数调节   
+        cpuct_list=[0.1,0.5,1.0,1.5,2.0,2.5,3.0,3.5,4.0,4.5,5.0]
+        cpuct_p=[]
+        if "cpuct" not in result:
+            result["cpuct"]={}
+            for p in cpuct_list:
+                result["cpuct"][p]=hisQval
+        else:
+            for p in cpuct_list:
+                if p in result["cpuct"]:
+                    cpuct_p.append(p)
+                else:
+                    cpuct_p.append(hisQval)
+        e_cpuct_p = np.exp(cpuct_p-np.max(cpuct_p))
+        cpuct_p = e_cpuct_p/np.sum(e_cpuct_p)
+        print("cpuct_p:",cpuct_p)
+
+        
+
         # 游戏代理
         agent = Agent()
 
@@ -81,7 +101,8 @@ class Train():
         start_time = time.time()
         for game_idx in count():
             game_num += 1
-            player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout)
+            cpuct = np.random.choice(cpuct_list, p=cpuct_p)
+            player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=cpuct, n_playout=self.n_playout)
 
             _states, _probs, _masks, _rewards, _qvals = [],[],[],[],[]
             game = copy.deepcopy(agent)
