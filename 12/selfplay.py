@@ -76,6 +76,7 @@ class Train():
             result["cpuct"]={}
             for p in cpuct_list:
                 result["cpuct"][p]=hisQval
+                cpuct_p.append(hisQval)
         else:
             for p in cpuct_list:
                 if p in result["cpuct"]:
@@ -85,8 +86,6 @@ class Train():
         e_cpuct_p = np.exp(cpuct_p-np.max(cpuct_p))
         cpuct_p = e_cpuct_p/np.sum(e_cpuct_p)
         print("cpuct_p:",cpuct_p)
-
-        
 
         # 游戏代理
         agent = Agent()
@@ -102,6 +101,7 @@ class Train():
         for game_idx in count():
             game_num += 1
             cpuct = np.random.choice(cpuct_list, p=cpuct_p)
+            print("game_num",game_num,"c_puct:",cpuct,"n_playout:",self.n_playout)
             player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=cpuct, n_playout=self.n_playout)
 
             _states, _probs, _masks, _rewards, _qvals = [],[],[],[],[]
@@ -130,7 +130,8 @@ class Train():
                 # 方块的个数越多越好
                 if game.terminal:
                     _reward = game.getNoEmptyCount() + game.score * 10     
-                    if _reward > hisQval: can_exit_flag = True         
+                    if _reward > hisQval: can_exit_flag = True
+                    result["cpuct"][cpuct] = result["cpuct"][cpuct]*0.99 + _reward*0.01         
 
                 _probs.append(move_probs)
                 _rewards.append(_reward)
