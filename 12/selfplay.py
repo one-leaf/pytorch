@@ -129,6 +129,8 @@ class Train():
                 if game.terminal:
                     _reward = game.getNoEmptyCount() + game.score * 10  
 
+                    result = self.read_status_file(jsonfile)
+                    
                     if result["QVal"]==0:
                         result["QVal"] = _reward
                         result["avg_time"]= time.time()-start_time
