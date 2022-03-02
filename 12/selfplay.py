@@ -96,6 +96,13 @@ class Train():
                 cpuct_list.append(cp)
                 if len(cpuct_list)==2:break
             cpuct_list.sort()
+
+            # fix error need remove
+            if abs(result["cpuct"][cpuct_list[0]]-result["cpuct"][cpuct_list[1]])>50:
+                result["cpuct"][cpuct_list[0]]=result["QVal"]
+                result["cpuct"][cpuct_list[1]]=result["QVal"]
+                json.dump(result, open(jsonfile,"w"), ensure_ascii=False)
+
             print("cpuct:",result["cpuct"])
 
             cpuct = float(np.random.choice(cpuct_list))
