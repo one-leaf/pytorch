@@ -69,23 +69,22 @@ class Train():
         print("QVal:",hisQval)
 
 
-        # c_puct 参数调节   
-        cpuct_list=[0.1,0.5,1.0]
-        cpuct_p=[]
+        # c_puct 参数自动调节，step=0.1 
+        cpuct_list = []  
         if "cpuct" not in result:
             result["cpuct"]={}
-            for p in cpuct_list:
-                result["cpuct"][str(p)]=hisQval
-                cpuct_p.append(hisQval)
+            for p in ["0.1","0.2"]:
+                result["cpuct"][p]=0
+                cpuct_list.append(p)
         else:
-            for p in cpuct_list:
-                if str(p) in result["cpuct"]:
-                    cpuct_p.append(result["cpuct"][str(p)])
-                else:
-                    cpuct_p.append(hisQval)
-        e_cpuct_p = np.exp(cpuct_p-np.max(cpuct_p))
-        cpuct_p = e_cpuct_p/np.sum(e_cpuct_p)
-        print("cpuct_p:",cpuct_p)
+            for cp in result["cpuct"]:
+                cpuct_list.append(cp)
+                if len(cpuct_list)==2:break
+        cpuct_list.sort()
+
+        # e_cpuct_p = np.exp(cpuct_p-np.max(cpuct_p))
+        # cpuct_p = e_cpuct_p/np.sum(e_cpuct_p)
+        print("cpuct:",result["cpuct"])
 
         # 游戏代理
         agent = Agent()
@@ -100,7 +99,7 @@ class Train():
         start_time = time.time()
         for game_idx in count():
             game_num += 1
-            cpuct = np.random.choice(cpuct_list, p=cpuct_p)
+            cpuct = float(np.random.choice(cpuct_list))
             print("game_num",game_num,"c_puct:",cpuct,"n_playout:",self.n_playout)
             player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=cpuct, n_playout=self.n_playout)
 
@@ -131,7 +130,11 @@ class Train():
                 if game.terminal:
                     _reward = game.getNoEmptyCount() + game.score * 10     
                     if _reward > hisQval: can_exit_flag = True
-                    result["cpuct"][str(cpuct)] = result["cpuct"][str(cpuct)]*0.99 + _reward*0.01         
+                    # 记录当前cpuct的统计结果
+                    if result["cpuct"][str(cpuct)]>0:
+                        result["cpuct"][str(cpuct)] = result["cpuct"][str(cpuct)]*0.99 + _reward*0.01         
+                    else:
+                        result["cpuct"][str(cpuct)] = _reward
 
                 _probs.append(move_probs)
                 _rewards.append(_reward)
@@ -261,6 +264,16 @@ class Train():
             newmodelfile = model_file+"_"+str(agent)
             if not os.path.exists(newmodelfile):
                 self.policy_value_net.save_model(newmodelfile)
+
+            if result["cpuct"][cpuct_list[0]]>result["cpuct"][cpuct_list[1]]:
+                cpuct = float(cpuct_list[0])-0.1
+                if cpuct<0.1:
+                    result["cpuct"] = {"0.1":0, "0.2":0}
+                else:
+                    result["cpuct"] = {str(cpuct):0, cpuct_list[0]:0}
+            else:
+                cpuct = float(cpuct_list[1])+0.1
+                result["cpuct"] = {cpuct_list[1]:0, str(cpuct):0}
 
         json.dump(result, open(jsonfile,"w"), ensure_ascii=False)
 
