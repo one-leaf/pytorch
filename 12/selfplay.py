@@ -119,7 +119,7 @@ class Train():
                 _states.append(game.current_state())
                                 
                 if game_idx == game_num-1:
-                    action, move_probs = player.get_action(game, temp=self.temp, return_prob=1, need_random=True) 
+                    action, move_probs = player.get_action(game, temp=self.temp, return_prob=1, need_random=False) 
                 else: 
                     action, move_probs = player.get_action(game, temp=self.temp, return_prob=1, need_random=True) 
                
