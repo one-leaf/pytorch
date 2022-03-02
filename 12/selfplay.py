@@ -112,7 +112,7 @@ class Train():
             _states, _probs, _masks, _rewards, _qvals = [],[],[],[],[]
             game = copy.deepcopy(agent)
 
-            if game_idx==0:
+            if game_idx<=1:
                 game.show_mcts_process=True
 
             for i in count():               
