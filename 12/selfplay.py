@@ -262,7 +262,7 @@ class Train():
             # 每100局更新一次cpuct参数
             qval = result["QVal"]
             if result["cpuct"][cpuct_list[0]]>result["cpuct"][cpuct_list[1]]:
-                cpuct = float(cpuct_list[0])-0.1
+                cpuct = round(float(cpuct_list[0])-0.1,1)
                 if cpuct<0.1:
                     result["cpuct"] = {"0.1":qval, "0.2":qval}
                 else:
