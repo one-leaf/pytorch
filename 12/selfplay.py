@@ -75,7 +75,8 @@ class Train():
         # 游戏代理
         agent = Agent()
 
-        max_game_num = 2
+        min_game_num = 2
+        max_game_num = 10
         agentcount, agentreward, piececount, agentscore = 0, 0, 0, 0
         game_states, game_vals, game_mcts_probs = [], [], [] 
 
@@ -83,7 +84,7 @@ class Train():
         game_num = 0
         can_exit_flag = False
         
-        for game_idx in count():
+        for _ in count():
             start_time = time.time()
             game_num += 1
 
@@ -112,13 +113,13 @@ class Train():
             _states, _probs, _masks, _rewards, _qvals = [],[],[],[],[]
             game = copy.deepcopy(agent)
 
-            if game_idx<=1:
+            if game_num==1 or game_num==max_game_num:
                 game.show_mcts_process=True
 
             for i in count():               
                 _states.append(game.current_state())
                                 
-                if game_idx == 0:
+                if game_num == max_game_num:
                     action, move_probs = player.get_action(game, temp=self.temp, return_prob=1, need_random=False) 
                 else: 
                     action, move_probs = player.get_action(game, temp=self.temp, return_prob=1, need_random=True) 
@@ -172,7 +173,7 @@ class Train():
                         _qvals.insert(0, Qval)
 
                     game.print()
-                    print(game_idx, 'reward:', game.score, "Qval:", _rewards[-1], 'len:', len(_qvals), "piececount:", game.piececount)
+                    print(game_num, 'reward:', game.score, "Qval:", _rewards[-1], 'len:', len(_qvals), "piececount:", game.piececount)
                     agentcount += 1
                     agentscore += game.score
                     agentreward += _reward
@@ -189,10 +190,10 @@ class Train():
             json.dump(result, open(jsonfile,"w"), ensure_ascii=False) 
 
             # 如果训练次数超过了最大次数，并且最大得分值超过了平均得分值，则停止训练
-            if game_num >= max_game_num and can_exit_flag: break
+            if game_num >= min_game_num and can_exit_flag: break
 
-            # 如果训练次数超过了最大次数的5倍，则直接终止训练
-            if game_num >= max_game_num*5: break
+            # 如果训练次数超过了最大次数，则直接终止训练
+            if game_num >= max_game_num: break
         end_time = time.time()
 
         # 打印borad：
