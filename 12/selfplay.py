@@ -141,10 +141,7 @@ class Train():
                    
                     # 记录当前cpuct的统计结果
                     if str(cpuct) in result["cpuct"]:
-                        if result["cpuct"][str(cpuct)]>0:
-                            result["cpuct"][str(cpuct)] += _reward         
-                        else:
-                            result["cpuct"][str(cpuct)] = _reward
+                        result["cpuct"][str(cpuct)] += result["cpuct"][str(cpuct)]*0.99 + _reward*0.01         
 
                     if _reward>result["best"]["reward"]:
                         result["best"]["reward"] = _reward
@@ -256,12 +253,13 @@ class Train():
                 result["qvals"].remove(result["qvals"][0])
 
             # 每100局更新一次cpuct参数
+            qval = result["QVal"]
             if result["cpuct"][cpuct_list[0]]>result["cpuct"][cpuct_list[1]]:
                 cpuct = float(cpuct_list[0])-0.1
                 if cpuct<0.1:
-                    result["cpuct"] = {"0.1":0, "0.2":0}
+                    result["cpuct"] = {"0.1":qval, "0.2":qval}
                 else:
-                    result["cpuct"] = {str(cpuct):0, cpuct_list[0]:0}
+                    result["cpuct"] = {str(cpuct):qval, cpuct_list[0]:qval}
             else:
                 cpuct = float(cpuct_list[1])+0.1
                 result["cpuct"] = {cpuct_list[1]:0, str(cpuct):0}
