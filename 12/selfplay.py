@@ -258,13 +258,7 @@ class Train():
             if len(result["qvals"])>250:
                 result["qvals"].remove(result["qvals"][0])
 
-        if result["curr"]["agent1000"]>1000:
-            result["curr"]={"reward":0,"pieces":0,"agent1000":0,"agent100":0}
-
-            newmodelfile = model_file+"_"+str(agent)
-            if not os.path.exists(newmodelfile):
-                self.policy_value_net.save_model(newmodelfile)
-
+            # 每100局更新一次cpuct参数
             if result["cpuct"][cpuct_list[0]]>result["cpuct"][cpuct_list[1]]:
                 cpuct = float(cpuct_list[0])-0.1
                 if cpuct<0.1:
@@ -274,6 +268,15 @@ class Train():
             else:
                 cpuct = float(cpuct_list[1])+0.1
                 result["cpuct"] = {cpuct_list[1]:0, str(cpuct):0}
+
+
+        if result["curr"]["agent1000"]>1000:
+            result["curr"]={"reward":0,"pieces":0,"agent1000":0,"agent100":0}
+
+            newmodelfile = model_file+"_"+str(agent)
+            if not os.path.exists(newmodelfile):
+                self.policy_value_net.save_model(newmodelfile)
+
 
         json.dump(result, open(jsonfile,"w"), ensure_ascii=False)
 
