@@ -49,14 +49,10 @@ class Train():
         self.c_puct = 1  # MCTS child权重， 用来调节MCTS中 探索/乐观 的程度 默认 5
         self.policy_value_net = PolicyValueNet(GAME_WIDTH, GAME_HEIGHT, GAME_ACTIONS_NUM, model_file=model_file)
 
-    def collect_selfplay_data(self):
-        """收集自我对抗数据用于训练"""       
-        print("TRAIN Self Play starting ...")
-
+    def read_status_file(self, status_file):
         # 获取历史训练数据
-        jsonfile = os.path.join(data_dir, "result.json")
-        if os.path.exists(jsonfile):
-            result=json.load(open(jsonfile,"r"))
+        if os.path.exists(status_file):
+            result=json.load(open(status_file,"r"))
         else:
             result={}
             result={"agent":0, "reward":[], "pieces":[], "qvals":[], "QVal":0}
@@ -64,27 +60,15 @@ class Train():
             result["curr"]={"reward":0,"pieces":0,"agent":0}
         if "best" not in result:
             result["best"]={"reward":0,"pieces":0,"agent":0}
-
-        hisQval=result["QVal"]
-        print("QVal:",hisQval)
-
-
-        # c_puct 参数自动调节，step=0.1 
-        cpuct_list = []  
         if "cpuct" not in result:
-            result["cpuct"]={}
-            for p in ["0.1","0.2"]:
-                result["cpuct"][p]=0
-                cpuct_list.append(p)
-        else:
-            for cp in result["cpuct"]:
-                cpuct_list.append(cp)
-                if len(cpuct_list)==2:break
-        cpuct_list.sort()
+            result["cpuct"]={"0.1":0,"0.2":0}
+        return result
 
-        # e_cpuct_p = np.exp(cpuct_p-np.max(cpuct_p))
-        # cpuct_p = e_cpuct_p/np.sum(e_cpuct_p)
-        print("cpuct:",result["cpuct"])
+    def collect_selfplay_data(self):
+        """收集自我对抗数据用于训练"""       
+        print("TRAIN Self Play starting ...")
+
+        jsonfile = os.path.join(data_dir, "result.json")
 
         # 游戏代理
         agent = Agent()
@@ -99,6 +83,18 @@ class Train():
         start_time = time.time()
         for game_idx in count():
             game_num += 1
+
+            result = self.read_status_file(jsonfile)
+            print("QVal:",result["QVal"])
+
+            # c_puct 参数自动调节，step=0.1 
+            cpuct_list = []  
+            for cp in result["cpuct"]:
+                cpuct_list.append(cp)
+                if len(cpuct_list)==2:break
+            cpuct_list.sort()
+            print("cpuct:",result["cpuct"])
+
             cpuct = float(np.random.choice(cpuct_list))
             print("game_num",game_num,"c_puct:",cpuct,"n_playout:",self.n_playout)
             player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=cpuct, n_playout=self.n_playout)
@@ -129,7 +125,7 @@ class Train():
                 # 方块的个数越多越好
                 if game.terminal:
                     _reward = game.getNoEmptyCount() + game.score * 10     
-                    if _reward > hisQval: can_exit_flag = True
+                    if _reward > result["QVal"]: can_exit_flag = True
                     # 记录当前cpuct的统计结果
                     if result["cpuct"][str(cpuct)]>0:
                         result["cpuct"][str(cpuct)] = result["cpuct"][str(cpuct)]*0.99 + _reward*0.01         
@@ -199,10 +195,10 @@ class Train():
         curr_avg_time = (end_time-start_time)/game_num
         print("avg_value:", curr_avg_value, "std_value:", curr_std_value, "avg_time:", curr_avg_time)
 
-        if hisQval==0:
+        if result["QVal"]==0:
             avg_value = curr_avg_value            
         else:
-            avg_value = hisQval*0.999 + curr_avg_value*0.001
+            avg_value = result["QVal"]*0.999 + curr_avg_value*0.001
 
         result["QVal"] = avg_value
                
