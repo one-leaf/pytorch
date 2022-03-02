@@ -191,8 +191,8 @@ class Train():
             # 如果训练次数超过了最大次数，并且最大得分值超过了平均得分值，则停止训练
             if game_num >= max_game_num and can_exit_flag: break
 
-            # 如果训练次数超过了最大次数的3倍，则直接终止训练
-            if game_num >= max_game_num*3: break
+            # 如果训练次数超过了最大次数的5倍，则直接终止训练
+            if game_num >= max_game_num*5: break
         end_time = time.time()
 
         # 打印borad：
