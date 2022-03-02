@@ -130,7 +130,7 @@ class Train():
                     _reward = game.getNoEmptyCount() + game.score * 10  
 
                     result = self.read_status_file(jsonfile)
-                    
+
                     if result["QVal"]==0:
                         result["QVal"] = _reward
                         result["avg_time"]= time.time()-start_time
@@ -138,11 +138,13 @@ class Train():
                         result["QVal"] = result["QVal"]*0.999 + _reward*0.001   
                         result["avg_time"]= result["avg_time"]*0.999 + (time.time()-start_time)*0.001 
                     if _reward > result["QVal"]: can_exit_flag = True
+                   
                     # 记录当前cpuct的统计结果
-                    if result["cpuct"][str(cpuct)]>0:
-                        result["cpuct"][str(cpuct)] = result["cpuct"][str(cpuct)]*0.99 + _reward*0.01         
-                    else:
-                        result["cpuct"][str(cpuct)] = _reward
+                    if str(cpuct) in result["cpuct"]:
+                        if result["cpuct"][str(cpuct)]>0:
+                            result["cpuct"][str(cpuct)] = result["cpuct"][str(cpuct)]*0.99 + _reward*0.01         
+                        else:
+                            result["cpuct"][str(cpuct)] = _reward
 
                     if _reward>result["best"]["reward"]:
                         result["best"]["reward"] = _reward
