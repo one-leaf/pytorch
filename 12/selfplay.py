@@ -262,7 +262,7 @@ class Train():
                     result["cpuct"] = {str(cpuct):qval, cpuct_list[0]:qval}
             else:
                 cpuct = float(cpuct_list[1])+0.1
-                result["cpuct"] = {cpuct_list[1]:0, str(cpuct):0}
+                result["cpuct"] = {cpuct_list[1]:qval, str(cpuct):qval}
 
 
         if result["curr"]["agent1000"]>1000:
