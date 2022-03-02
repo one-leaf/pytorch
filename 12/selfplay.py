@@ -57,11 +57,13 @@ class Train():
             result={}
             result={"agent":0, "reward":[], "pieces":[], "qvals":[], "QVal":0}
         if "curr" not in result:
-            result["curr"]={"reward":0,"pieces":0,"agent":0}
+            result["curr"]={"reward":0,"pieces":0,"agent1000":0,"agent100":0}
         if "best" not in result:
             result["best"]={"reward":0,"pieces":0,"agent":0}
         if "cpuct" not in result:
             result["cpuct"]={"0.1":0,"0.2":0}
+        if "avg_time" not in result:
+            result["avg_time"]=0
         return result
 
     def collect_selfplay_data(self):
@@ -80,8 +82,9 @@ class Train():
         borads = []
         game_num = 0
         can_exit_flag = False
-        start_time = time.time()
+        
         for game_idx in count():
+            start_time = time.time()
             game_num += 1
 
             result = self.read_status_file(jsonfile)
@@ -128,14 +131,28 @@ class Train():
 
                     if result["QVal"]==0:
                         result["QVal"] = _reward
+                        result["avg_time"]= time.time()-start_time
                     else:
-                        result["QVal"] = result["QVal"]*0.999+ _reward*0.001   
+                        result["QVal"] = result["QVal"]*0.999 + _reward*0.001   
+                        result["avg_time"]= result["avg_time"]*0.999 + (time.time()-start_time)*0.001 
                     if _reward > result["QVal"]: can_exit_flag = True
                     # 记录当前cpuct的统计结果
                     if result["cpuct"][str(cpuct)]>0:
                         result["cpuct"][str(cpuct)] = result["cpuct"][str(cpuct)]*0.99 + _reward*0.01         
                     else:
                         result["cpuct"][str(cpuct)] = _reward
+
+                    if _reward>result["best"]["reward"]:
+                        result["best"]["reward"] = _reward
+                        result["best"]["pieces"] = game.piececount
+                        result["best"]["score"] = game.score
+                        result["best"]["agent"] = result["agent"]+agentcount
+
+                    result["agent"] += 1
+                    result["curr"]["reward"] += game.score
+                    result["curr"]["pieces"] += game.piececount
+                    result["curr"]["agent1000"] += 1
+                    result["curr"]["agent100"] += 1
 
                 _probs.append(move_probs)
                 _rewards.append(_reward)
@@ -153,12 +170,6 @@ class Train():
                     agentreward += _reward
                     piececount += game.piececount
 
-                    if _reward>result["best"]["reward"]:
-                        result["best"]["reward"] = _reward
-                        result["best"]["pieces"] = game.piececount
-                        result["best"]["score"] = game.score
-                        result["best"]["agent"] = result["agent"]+agentcount
-                        
                     break          
 
             game_states.append(_states)
@@ -201,8 +212,6 @@ class Train():
         curr_std_value = np.std(avg_value)
         curr_avg_time = (end_time-start_time)/game_num
         print("avg_value:", curr_avg_value, "std_value:", curr_std_value, "avg_time:", curr_avg_time)
-
-        result = self.read_status_file(jsonfile)
                
         states, values, mcts_probs= [], [], []
         for j in range(game_num):
@@ -229,21 +238,7 @@ class Train():
             filename = "{}.pkl".format(uuid.uuid1())
             savefile = os.path.join(data_wait_dir, filename)
             pickle.dump(obj, open(savefile, "wb"))
-
-        if "avg_time" not in result:
-            result["avg_time"] = curr_avg_time
-        else:
-            result["avg_time"] = result["avg_time"]*0.999 + curr_avg_time*0.001
-
-        result["agent"] += agentcount
-        if "agent100" not in result["curr"]:
-            result["curr"] = {"reward":0,"pieces":0,"agent1000":0,"agent100":0}
-        result["curr"]["reward"] += agentscore
-        result["curr"]["pieces"] += piececount
-        result["curr"]["agent1000"] += agentcount
-        result["curr"]["agent100"] += agentcount
-
-        agent = result["agent"]
+       
         if result["curr"]["agent100"]>100:
             result["reward"].append(round(result["curr"]["reward"]/result["curr"]["agent1000"],2))
             result["pieces"].append(round(result["curr"]["pieces"]/result["curr"]["agent1000"],2))
@@ -271,10 +266,9 @@ class Train():
         if result["curr"]["agent1000"]>1000:
             result["curr"]={"reward":0,"pieces":0,"agent1000":0,"agent100":0}
 
-            newmodelfile = model_file+"_"+str(agent)
+            newmodelfile = model_file+"_"+str(result["agent"])
             if not os.path.exists(newmodelfile):
                 self.policy_value_net.save_model(newmodelfile)
-
 
         json.dump(result, open(jsonfile,"w"), ensure_ascii=False)
 
