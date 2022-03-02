@@ -142,7 +142,7 @@ class Train():
                     # 记录当前cpuct的统计结果
                     if str(cpuct) in result["cpuct"]:
                         if result["cpuct"][str(cpuct)]>0:
-                            result["cpuct"][str(cpuct)] = result["cpuct"][str(cpuct)]*0.99 + _reward*0.01         
+                            result["cpuct"][str(cpuct)] += _reward         
                         else:
                             result["cpuct"][str(cpuct)] = _reward
 
