@@ -124,7 +124,12 @@ class Train():
 
                 # 方块的个数越多越好
                 if game.terminal:
-                    _reward = game.getNoEmptyCount() + game.score * 10     
+                    _reward = game.getNoEmptyCount() + game.score * 10  
+
+                    if result["QVal"]==0:
+                        result["QVal"] = _reward
+                    else:
+                        result["QVal"] = result["QVal"]*0.999+ _reward*0.001   
                     if _reward > result["QVal"]: can_exit_flag = True
                     # 记录当前cpuct的统计结果
                     if result["cpuct"][str(cpuct)]>0:
@@ -154,13 +159,15 @@ class Train():
                         result["best"]["score"] = game.score
                         result["best"]["agent"] = result["agent"]+agentcount
                         
-                    break
+                    break          
 
             game_states.append(_states)
             game_vals.append(_qvals)
             game_mcts_probs.append(_probs)
 
             borads.append(game.board)
+
+            json.dump(result, open(jsonfile,"w"), ensure_ascii=False) 
 
             # 如果训练次数超过了最大次数，并且最大得分值超过了平均得分值，则停止训练
             if game_num >= max_game_num and can_exit_flag: break
@@ -195,12 +202,7 @@ class Train():
         curr_avg_time = (end_time-start_time)/game_num
         print("avg_value:", curr_avg_value, "std_value:", curr_std_value, "avg_time:", curr_avg_time)
 
-        if result["QVal"]==0:
-            avg_value = curr_avg_value            
-        else:
-            avg_value = result["QVal"]*0.999 + curr_avg_value*0.001
-
-        result["QVal"] = avg_value
+        result = self.read_status_file(jsonfile)
                
         states, values, mcts_probs= [], [], []
         for j in range(game_num):
@@ -245,7 +247,7 @@ class Train():
         if result["curr"]["agent100"]>100:
             result["reward"].append(round(result["curr"]["reward"]/result["curr"]["agent1000"],2))
             result["pieces"].append(round(result["curr"]["pieces"]/result["curr"]["agent1000"],2))
-            result["qvals"].append(round(avg_value,2))
+            result["qvals"].append(round(result["QVal"],2))
             result["curr"]["agent100"] -= 100 
             if len(result["reward"])>250:
                 result["reward"].remove(result["reward"][0])
