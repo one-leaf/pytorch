@@ -129,7 +129,7 @@ class Train():
                 # 这里的奖励是消除的行数
                 if reward > 0:
                     _reward = reward * 10
-                    print("#"*50, reward, "#"*50)
+                    print("#"*50, i, '-', reward, "#"*50)
                 else:
                     _reward = 0
 
