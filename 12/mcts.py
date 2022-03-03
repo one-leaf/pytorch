@@ -212,9 +212,11 @@ class MCTSPlayer(object):
             if need_random:  # 自我对抗
                 if state.state == 1 or (state.piececount<3 and random.random() < 0.5):
                     idx = np.random.randint(len(acts))
-                else:
+                elif random.random()>state.getMaxHeight()/20 :
                     idx = np.random.choice(range(len(acts)), p=act_probs)
-
+                else:
+                    idx = max_idx
+                    
                 action = acts[idx]
                 value = act_qs[idx]
 
