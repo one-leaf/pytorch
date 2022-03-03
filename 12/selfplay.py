@@ -78,7 +78,7 @@ class Train():
         min_game_num = 2
         max_game_num = 10
         agentcount, agentreward, piececount, agentscore = 0, 0, 0, 0
-        game_states, game_vals, game_mcts_probs = [], [], [] 
+        game_states, game_vals, game_mcts_probs, game_rewards = [], [], [], [] 
 
         borads = []
         game_num = 0
@@ -110,12 +110,13 @@ class Train():
             print("game_num",game_num,"c_puct:",cpuct,"n_playout:",self.n_playout)
             player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=cpuct, n_playout=self.n_playout)
 
-            _states, _probs, _masks, _rewards, _qvals = [],[],[],[],[]
+            _states, _probs, _masks, _rewards = [],[],[],[]
             game = copy.deepcopy(agent)
 
             if game_num==1 or game_num==max_game_num:
                 game.show_mcts_process=True
 
+            game_reward = 0
             for i in count():               
                 _states.append(game.current_state())
                                 
@@ -128,31 +129,35 @@ class Train():
 
                 # 这里的奖励是消除的行数
                 if reward > 0:
-                    _reward = reward * 10
+                    step_reward = reward * 10
                     print("#"*50, i, ':', reward, "#"*50)
                 else:
-                    _reward = 0
+                    step_reward = 0
+
+                _probs.append(move_probs)
+                _rewards.append(step_reward)
+                _masks.append(1-game.terminal)
 
                 # 方块的个数越多越好
                 if game.terminal:
-                    _reward = game.getNoEmptyCount() + game.score * 10  
+                    game_reward = game.getNoEmptyCount() + game.score * 10  
 
                     result = self.read_status_file(jsonfile)
 
                     if result["QVal"]==0:
-                        result["QVal"] = _reward
+                        result["QVal"] = game_reward
                         result["avg_time"]= time.time()-start_time
                     else:
-                        result["QVal"] = result["QVal"]*0.999 + _reward*0.001   
+                        result["QVal"] = result["QVal"]*0.999 + game_reward*0.001   
                         result["avg_time"]= result["avg_time"]*0.999 + (time.time()-start_time)*0.001 
-                    if _reward > result["QVal"]: can_exit_flag = True
+                    if game_reward > result["QVal"]: can_exit_flag = True
                    
                     # 记录当前cpuct的统计结果
                     if str(cpuct) in result["cpuct"]:
-                        result["cpuct"][str(cpuct)] = result["cpuct"][str(cpuct)]*0.99 + _reward*0.01         
+                        result["cpuct"][str(cpuct)] = result["cpuct"][str(cpuct)]*0.99 + game_reward*0.01         
 
-                    if _reward>result["best"]["reward"]:
-                        result["best"]["reward"] = _reward
+                    if game_reward>result["best"]["reward"]:
+                        result["best"]["reward"] = game_reward
                         result["best"]["pieces"] = game.piececount
                         result["best"]["score"] = game.score
                         result["best"]["agent"] = result["agent"]+agentcount
@@ -163,26 +168,18 @@ class Train():
                     result["curr"]["agent1000"] += 1
                     result["curr"]["agent100"] += 1
 
-                _probs.append(move_probs)
-                _rewards.append(_reward)
-                _masks.append(1-game.terminal)
-
-                if game.terminal:
-                    for step in reversed(range(len(_states))):
-                        Qval = _rewards[step]
-                        _qvals.insert(0, Qval)
-
                     game.print()
-                    print(game_num, 'reward:', game.score, "Qval:", _rewards[-1], 'len:', len(_qvals), "piececount:", game.piececount)
+                    print(game_num, 'reward:', game.score, "Qval:", game_reward, 'len:', len(_rewards), "piececount:", game.piececount)
                     agentcount += 1
                     agentscore += game.score
-                    agentreward += _reward
+                    agentreward += game_reward
                     piececount += game.piececount
 
                     break          
 
+            game_rewards.append(game_reward)
             game_states.append(_states)
-            game_vals.append(_qvals)
+            game_vals.append(_rewards)
             game_mcts_probs.append(_probs)
 
             borads.append(game.board)
@@ -212,8 +209,11 @@ class Train():
 
         avg_value = []
         for game_idx in range(game_num):
-            for i in reversed(range(len(game_vals[game_idx])-1)):
-                game_vals[game_idx][i] += game_vals[game_idx][i+1]*1 # 0.999  
+            for i in range(len(game_vals[game_idx])):
+                if i==0:
+                    game_vals[game_idx][i] = game_rewards[game_idx]
+                else:
+                    game_vals[game_idx][i] = game_vals[game_idx][i-1] - game_vals[game_idx][i]  
             avg_value.extend(game_vals[game_idx])
             print(len(game_vals[game_idx]), ":", *game_vals[game_idx][:3], "...", *game_vals[game_idx][-3:])
 
