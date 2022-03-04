@@ -269,7 +269,7 @@ class Train():
                 else:
                     result["cpuct"] = {str(cpuct):qval, cpuct_list[0]:qval}
             else:
-                cpuct = float(cpuct_list[1])+0.1
+                cpuct = round(float(cpuct_list[1])+0.1,1)
                 result["cpuct"] = {cpuct_list[1]:qval, str(cpuct):qval}
 
 
