@@ -85,7 +85,7 @@ class MLP_Mixer(nn.Module):
         self.blocks = nn.ModuleList([
             MixerBlock(n_patches=n_patches, hidden_dim=hidden_dim, token_dim=token_dim, channel_dim=channel_dim) for i in range(n_blocks)
         ])
-
+        self.drop_layer = nn.Dropout(p=0.5)
         self.flatten = nn.Flatten(start_dim=2)
         self.action_line = nn.Linear(hidden_dim, hidden_dim)
         self.value_line = nn.Linear(hidden_dim, hidden_dim)
@@ -105,14 +105,26 @@ class MLP_Mixer(nn.Module):
         x_act = self.action_line(x)         # (n_samples, n_patches, hidden_dim)
         x_act = self.Layernorm1(x_act)      # (n_samples, n_patches, hidden_dim)
         x_act = x_act.mean(dim = 1)         # (n_sample, hidden_dim)
-        x_action = F.softmax(self.action_fc(x_act), dim=1)  # (n_samples, n_action)
+        x_act = F.gelu(x_act)
+        if self.training:
+            x_act = self.drop_layer(x_act)
+        x_act = self.action_fc(x_act)
+        if self.training:
+            x_act = self.drop_layer(x_act)
+        x_action = F.softmax(x_act, dim=1)  # (n_samples, n_action)
 
         x_val = self.value_line(x)          # (n_samples, n_patches, hidden_dim)
         x_val = self.Layernorm2(x_val)      # (n_samples, n_patches, hidden_dim)
         x_val = x_val.mean(dim = 1)         # (n_sample, hidden_dim)
         x_val = F.gelu(x_val)               # (n_samples, hidden_dim)
+        if self.training:
+            x_val = self.drop_layer(x_val)
         x_val = F.gelu(self.value_fc1(x_val))
+        if self.training:
+            x_val = self.drop_layer(x_val)
         x_val = self.value_fc2(x_val)
+        if self.training:
+            x_val = self.drop_layer(x_val)
         x_val = torch.tanh(x_val)
 
         return x_action, x_val
