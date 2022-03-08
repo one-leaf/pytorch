@@ -108,9 +108,9 @@ class Train():
             print("cpuct:",result["cpuct"])
 
             if cpuct_first_flag:
-                cpuct = float([cpuct_list[0]])
+                cpuct = float(cpuct_list[0])
             else:
-                cpuct = float([cpuct_list[1]])
+                cpuct = float(cpuct_list[1])
             cpuct_first_flag = not cpuct_first_flag
 
             print("game_num",game_num,"c_puct:",cpuct,"n_playout:",self.n_playout)
