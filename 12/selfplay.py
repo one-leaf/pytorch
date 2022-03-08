@@ -84,6 +84,7 @@ class Train():
         game_num = 0
         can_exit_flag = False
         
+        cpuct_first_flag = random.choice([False,True])
         for _ in count():
             start_time = time.time()
             game_num += 1
@@ -106,7 +107,12 @@ class Train():
 
             print("cpuct:",result["cpuct"])
 
-            cpuct = float(np.random.choice(cpuct_list))
+            if cpuct_first_flag:
+                cpuct = float([cpuct_list[0]])
+            else:
+                cpuct = float([cpuct_list[1]])
+            cpuct_first_flag = not cpuct_first_flag
+            
             print("game_num",game_num,"c_puct:",cpuct,"n_playout:",self.n_playout)
             player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=cpuct, n_playout=self.n_playout)
 
