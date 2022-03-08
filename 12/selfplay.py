@@ -136,7 +136,7 @@ class Train():
                 # 这里的奖励是消除的行数
                 if reward > 0:
                     step_reward = reward * 10
-                    print("#"*50, i, '/', game.piececount, ':', reward, "#"*50)
+                    print("#"*40, 'step:', i, 'piece:', game.piececount, 'height:', game.getMaxHeight() ,'reward:', reward, "#"*40)
                 else:
                     step_reward = 0
 
