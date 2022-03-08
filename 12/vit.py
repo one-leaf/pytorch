@@ -95,6 +95,7 @@ class Mlp(nn.Module):
         x = self.drop(x)
         return x
 
+# 注意这里的drop的算法，保持了总体合计值
 def drop_path(x, drop_prob: float = 0., training: bool = False):
     """
     Drop paths (Stochastic Depth) per sample (when applied in main path of residual blocks).
