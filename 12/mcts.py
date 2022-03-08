@@ -66,7 +66,7 @@ class MCTS():
                 info.append([action, visit, round(q,2), round(p,2)])        
             v = 0
             if s in self.Vs: v = self.Vs[s]
-            print(state.steps, state.piecesteps, state.piececount,  state.fallpiece["shape"], "n:", n, "depth:" ,self.max_depth, "value:", round(v,2), info)
+            print(state.steps, state.piececount, state.fallpiece["shape"], state.piecesteps, "n:", n, "depth:" ,self.max_depth, "value:", round(v,2), info)
 
         if temp == 0:
             bestAs = np.array(np.argwhere(visits == np.max(visits))).flatten()
