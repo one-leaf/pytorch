@@ -101,7 +101,8 @@ class MCTS():
         if s not in self.Es:
             v = 0
             if state.terminal:
-                v = state.getScore()
+                v = -1
+                # v = state.getScore()
            #    _, v = self._policy(state)
             self.Es[s] = v
 
