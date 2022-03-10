@@ -149,7 +149,7 @@ class MCTS():
         if state.state == 1:
             if state.reward>0: 
                 v = 1
-            elif state.piececount - self.state.piececount > 3:
+            elif state.piececount - self.state.piececount > 5:
                 v = state.getScore()
             else:
                 v = self.search(state)
