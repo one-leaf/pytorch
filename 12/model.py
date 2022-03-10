@@ -6,7 +6,7 @@ import os
 import numpy as np
 from collections import OrderedDict
 from torchvision.models import resnet34
-
+from vit import VitNet
 class Cache(OrderedDict):
     def __init__(self, maxsize=128, *args, **kwds):
         self.maxsize = maxsize
@@ -177,7 +177,8 @@ class PolicyValueNet():
 
         self.l2_const = l2_const  
         # self.policy_value_net = ResNet(self.input_size, self.output_size)
-        self.policy_value_net = MLP_Mixer(20,10,9,2,5,128,64,512,5,8)
+        # self.policy_value_net = MLP_Mixer(20,10,9,2,5,128,64,512,5,8)
+        self.policy_value_net = VitNet(embed_dim=128,num_heads=16,num_classes=5)
         self.policy_value_net.to(device)
         self.print_netwark()
 

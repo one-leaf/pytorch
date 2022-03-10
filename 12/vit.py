@@ -207,20 +207,23 @@ class VisionTransformer(nn.Module):
         # 图片转换为 patch embedding [B, C, H, W] ==> [B, num_patches, embed_dim] 
         self.patch_embed = embed_layer(img_size=img_size, patch_size=patch_size, in_c=in_c, embed_dim=embed_dim)
         # 图片分割后的块数
-        num_patches = self.patch_embed.num_patches
+        num_patches = self.patch_embed.num_patches                      # 196
 
         # 分类层
-        self.cls_token = nn.Parameter(torch.zeros(1, 1, embed_dim))
+        self.cls_token = nn.Parameter(torch.zeros(1, 1, embed_dim))     # [1, 1, 768]
         # 蒸馏层
-        self.dist_token = nn.Parameter(torch.zeros(1, 1, embed_dim)) if distilled else None
+        self.dist_token = nn.Parameter(torch.zeros(1, 1, embed_dim)) if distilled else None # [1, 1, 768]
         # 位置层
-        self.pos_embed = nn.Parameter(torch.zeros(1, num_patches + self.num_tokens, embed_dim))
+        self.pos_embed = nn.Parameter(torch.zeros(1, num_patches + self.num_tokens, embed_dim)) # [1, 196+(1|2), 768]
         # 位置层的损失函数
         self.pos_drop = nn.Dropout(p=drop_ratio)
 
-        # 随机深度衰减规则
+        # 深度 Dropout 衰减规则
+        # 从0到最高drop比例，按深度递增，跨度是均分，得到一个深度衰减比例
+        # 这样前面层的衰减低，后面层的衰减高
         dpr = [x.item() for x in torch.linspace(0, drop_path_ratio, depth)]  
 
+        # 按照深度创建每一层的模块
         self.blocks = nn.Sequential(*[
             Block(dim=embed_dim, num_heads=num_heads, mlp_ratio=mlp_ratio, qkv_bias=qkv_bias, qk_scale=qk_scale,
                   drop_ratio=drop_ratio, attn_drop_ratio=attn_drop_ratio, drop_path_ratio=dpr[i],
@@ -229,7 +232,7 @@ class VisionTransformer(nn.Module):
         ])
         self.norm = norm_layer(embed_dim)
 
-        # Representation layer
+        # 表现层，如果定义了表现层尺寸且没有定义蒸馏层
         if representation_size and not distilled:
             self.has_logits = True
             self.num_features = representation_size
@@ -241,13 +244,13 @@ class VisionTransformer(nn.Module):
             self.has_logits = False
             self.pre_logits = nn.Identity()
 
-        # Classifier head(s)
-        self.head = nn.Linear(self.num_features, num_classes) if num_classes > 0 else nn.Identity()
+        # 分类头、蒸馏头
+        self.head = nn.Linear(self.num_features, num_classes) if num_classes > 0 else nn.Identity()     # [B, 768] => [B, 1000]
         self.head_dist = None
         if distilled:
-            self.head_dist = nn.Linear(self.embed_dim, self.num_classes) if num_classes > 0 else nn.Identity()
+            self.head_dist = nn.Linear(self.embed_dim, self.num_classes) if num_classes > 0 else nn.Identity()  # [B, 768] => [B, 1000]
 
-        # Weight init
+        # 参数初始化
         nn.init.trunc_normal_(self.pos_embed, std=0.02)
         if self.dist_token is not None:
             nn.init.trunc_normal_(self.dist_token, std=0.02)
@@ -258,31 +261,115 @@ class VisionTransformer(nn.Module):
     def forward_features(self, x):
         # [B, C, H, W] -> [B, num_patches, embed_dim]
         x = self.patch_embed(x)  # [B, 196, 768]
-        # [1, 1, 768] -> [B, 1, 768]
+        # [1, 1, 768] -> [B, 1, 768] 这里每一个B的 cls_token 都是一样的，并没有复制 cls_token 到每一个B
         cls_token = self.cls_token.expand(x.shape[0], -1, -1)
+        # 如果有至少蒸馏层也加上 
         if self.dist_token is None:
             x = torch.cat((cls_token, x), dim=1)  # [B, 197, 768]
         else:
-            x = torch.cat((cls_token, self.dist_token.expand(x.shape[0], -1, -1), x), dim=1)
+            x = torch.cat((cls_token, self.dist_token.expand(x.shape[0], -1, -1), x), dim=1)    # [B, 198, 768]
 
-        x = self.pos_drop(x + self.pos_embed)
-        x = self.blocks(x)
+        # x 加上位置层，并且Dropout
+        x = self.pos_drop(x + self.pos_embed)       # [B, 198, 768]
+
+        # x 到达每一层的模块，包含了按照深度，由小到大的Dropout
+        x = self.blocks(x)                    # [B, 198, 768]
+
+        # 归一化
         x = self.norm(x)
+
+        # 如果没有蒸馏层，则返回第一层分类层（加了fc+tanh），否则返回第一层和第二层蒸馏层的输出
         if self.dist_token is None:
-            return self.pre_logits(x[:, 0])
+            return self.pre_logits(x[:, 0])         # [B, 768]
         else:
-            return x[:, 0], x[:, 1]
+            return x[:, 0], x[:, 1]                 # [B, 768], [B, 768]         
 
     def forward(self, x):
+        # 特征提取
         x = self.forward_features(x)
+        # 分类头
         if self.head_dist is not None:
-            x, x_dist = self.head(x[0]), self.head_dist(x[1])
+            x, x_dist = self.head(x[0]), self.head_dist(x[1])       # [B, 1000], [B, 1000]
             if self.training and not torch.jit.is_scripting():
                 # during inference, return the average of both classifier predictions
                 return x, x_dist
             else:
-                return (x + x_dist) / 2
+                return (x + x_dist) / 2             # [B, 1000]
         else:
-            x = self.head(x)
+            x = self.head(x)                         # [B, 1000]
         return x
 
+
+class VitNet(nn.Module):
+    def __init__(self,  embed_dim=768, drop_ratio=0.25, drop_path_ratio=0.5, depth=12, num_heads=12, 
+                        mlp_ratio=4.0, qkv_bias=True, qk_scale=None, attn_drop_ratio=0., num_classes=1000):
+        super(VitNet, self).__init__()
+
+        assert embed_dim % num_heads==0, "embed_dim must be divisible by num_heads"
+
+        norm_layer = partial(nn.LayerNorm, eps=1e-6)
+        act_layer =  nn.GELU
+        # 图片转换为 patch embedding [B, C, H, W] ==> [B, num_patches, embed_dim] 
+        self.patch_embed = PatchEmbed(img_size=(20,10), patch_size=(2,2), in_c=9, embed_dim=embed_dim)
+        # 图片分割后的块数
+        num_patches = self.patch_embed.num_patches                      # 50
+
+        # 动作
+        self.act_token = nn.Parameter(torch.zeros(1, 1, embed_dim))     # [1, 1, 768]
+        # 价值
+        self.val_token = nn.Parameter(torch.zeros(1, 1, embed_dim))    # [1, 1, 768]
+        # 位置层
+        self.pos_embed = nn.Parameter(torch.zeros(1, num_patches + 2, embed_dim)) # [1, 52, 768]
+        # 位置层的损失函数
+        self.pos_drop = nn.Dropout(p=drop_ratio)
+
+        # 深度 Dropout 衰减规则
+        # 从0到最高drop比例，按深度递增，跨度是均分，得到一个深度衰减比例
+        # 这样前面层的衰减低，后面层的衰减高
+        dpr = [x.item() for x in torch.linspace(0, drop_path_ratio, depth)]  
+
+        # 按照深度创建每一层的模块
+        self.blocks = nn.Sequential(*[
+            Block(dim=embed_dim, num_heads=num_heads, mlp_ratio=mlp_ratio, qkv_bias=qkv_bias, qk_scale=qk_scale,
+                  drop_ratio=drop_ratio, attn_drop_ratio=attn_drop_ratio, drop_path_ratio=dpr[i],
+                  norm_layer=norm_layer, act_layer=act_layer)
+            for i in range(depth)
+        ])
+        self.norm = norm_layer(embed_dim)
+
+        # 分类头、蒸馏头
+        self.act_dist = nn.Linear(embed_dim, num_classes)  # [B, 768] => [B, 5]
+        self.val_dist = nn.Linear(embed_dim, 1)   # [B, 768] => [B, 1]
+
+        # 参数初始化
+        nn.init.trunc_normal_(self.pos_embed, std=0.02)
+        nn.init.trunc_normal_(self.act_token, std=0.02)
+        nn.init.trunc_normal_(self.val_token, std=0.02)
+        self.apply(_init_vit_weights)
+
+    def forward(self, x):
+        # 特征提取
+        # [B, C, H, W] -> [B, num_patches, embed_dim]
+        x = self.patch_embed(x)  # [B, 50, 768]
+        # [1, 1, 768] -> [B, 1, 768] 这里每一个B的 cls_token 都是一样的，并没有复制 cls_token 到每一个B
+        act_token = self.act_token.expand(x.shape[0], -1, -1)
+        val_token = self.val_token.expand(x.shape[0], -1, -1)
+        x = torch.cat((act_token, val_token, x), dim=1)    # [B, 52, 768]
+
+        # x 加上位置层，并且Dropout
+        x = self.pos_drop(x + self.pos_embed)       # [B, 52, 768]
+
+        # x 到达每一层的模块，包含了按照深度，由小到大的Dropout
+        x = self.blocks(x)                    # [B, 52, 768]
+
+        # 归一化
+        x = self.norm(x)
+
+        act, val = x[:, 0], x[:, 1]                 # [B, 768], [B, 768]
+        
+        act = self.act_dist(act)
+        act = nn.Softmax(dim=1)(act)
+        val = self.val_dist(val)
+        val = nn.Tanh()(val)
+
+        return act, val        

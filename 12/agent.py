@@ -242,7 +242,7 @@ class Agent(object):
                 empty_count += 10-line_c
                 fill_count += line_c
         if fill_count==0: return 0
-        return -1 * (empty_count/fill_count)        
+        return max(-1, -1 * (empty_count/fill_count))        
 
     # 获得当前局面信息
     def getBoard(self):
