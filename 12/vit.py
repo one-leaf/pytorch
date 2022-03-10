@@ -159,7 +159,8 @@ def _init_vit_weights(m):
     :param m: module
     """
     if isinstance(m, nn.Linear):
-        nn.init.trunc_normal_(m.weight, std=.01)
+        # nn.init.trunc_normal_(m.weight, std=.01)
+        nn.init.normal_(m.weight, std=.01)
         if m.bias is not None:
             nn.init.zeros_(m.bias)
     elif isinstance(m, nn.Conv2d):
@@ -251,11 +252,14 @@ class VisionTransformer(nn.Module):
             self.head_dist = nn.Linear(self.embed_dim, self.num_classes) if num_classes > 0 else nn.Identity()  # [B, 768] => [B, 1000]
 
         # 参数初始化
-        nn.init.trunc_normal_(self.pos_embed, std=0.02)
+        # nn.init.trunc_normal_(self.pos_embed, std=0.02)
+        nn.init.normal_(self.pos_embed, std=0.02)
         if self.dist_token is not None:
-            nn.init.trunc_normal_(self.dist_token, std=0.02)
+            # nn.init.trunc_normal_(self.dist_token, std=0.02)
+            nn.init.normal_(self.dist_token, std=0.02)
 
-        nn.init.trunc_normal_(self.cls_token, std=0.02)
+        # nn.init.trunc_normal_(self.cls_token, std=0.02)
+        nn.init.normal_(self.cls_token, std=0.02)
         self.apply(_init_vit_weights)
 
     def forward_features(self, x):
