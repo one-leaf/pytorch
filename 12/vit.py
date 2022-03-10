@@ -342,9 +342,12 @@ class VitNet(nn.Module):
         self.val_dist = nn.Linear(embed_dim, 1)   # [B, 768] => [B, 1]
 
         # 参数初始化
-        nn.init.trunc_normal_(self.pos_embed, std=0.02)
-        nn.init.trunc_normal_(self.act_token, std=0.02)
-        nn.init.trunc_normal_(self.val_token, std=0.02)
+        # nn.init.trunc_normal_(self.pos_embed, std=0.02)
+        # nn.init.trunc_normal_(self.act_token, std=0.02)
+        # nn.init.trunc_normal_(self.val_token, std=0.02)
+        nn.init.normal_(self.pos_embed, std=0.02)
+        nn.init.normal_(self.act_token, std=0.02)
+        nn.init.normal_(self.val_token, std=0.02)
         self.apply(_init_vit_weights)
 
     def forward(self, x):
