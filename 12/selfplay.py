@@ -259,11 +259,11 @@ class Train():
             result["pieces"].append(round(result["curr"]["pieces"]/result["curr"]["agent1000"],2))
             result["qvals"].append(round(result["QVal"],2))
             result["curr"]["agent100"] -= 100 
-            if len(result["reward"])>250:
+            while len(result["reward"])>200:
                 result["reward"].remove(result["reward"][0])
-            if len(result["pieces"])>250:
+            while len(result["pieces"])>200:
                 result["pieces"].remove(result["pieces"][0])
-            if len(result["qvals"])>250:
+            while len(result["qvals"])>200:
                 result["qvals"].remove(result["qvals"][0])
 
             # 每100局更新一次cpuct参数
