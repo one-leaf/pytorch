@@ -229,18 +229,21 @@ class Agent(object):
             if line_c == 9: c += 1
         return c
 
-    # 计算得分
+    # 计算得分,只计算被挡住的
     def getScore(self):
         empty_count = 0 
         fill_count = 0
-        for y in range(self.height):
-            line_c= 0
-            for x in range(self.width):
-                if self.board[x][y]!=blank:
-                    line_c += 1
-            if line_c != 0:
-                empty_count += 10-line_c
-                fill_count += line_c
+        for x in range(self.width):
+            line_f, line_e = 0, -1
+            for y in range(self.height):
+                if self.board[x][y] != blank:
+                    line_f += 1
+                    if line_e == -1: line_e = 0
+                else:
+                    if line_e !=-1: line_e += 1
+            empty_count += line_e
+            fill_count += line_f
+
         if fill_count==0: return 0
         return max(-1, -1 * (empty_count/fill_count))        
 
