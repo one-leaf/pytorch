@@ -341,7 +341,7 @@ class VitNet(nn.Module):
         self.act_dist = nn.Linear(embed_dim, num_classes)  # [B, 768] => [B, 5]
         self.val_dist = nn.Linear(embed_dim, 1)   # [B, 768] => [B, 1]
 
-        # 参数初始化
+        # 参数初始化, 这里需要pytorch 1.6以上版本
         # nn.init.trunc_normal_(self.pos_embed, std=0.02)
         # nn.init.trunc_normal_(self.act_token, std=0.02)
         # nn.init.trunc_normal_(self.val_token, std=0.02)
