@@ -15,6 +15,7 @@ outputs/
 summaries/
 logs/
 data/
+vit-data/
 dataset/
 data64/
 data128/
