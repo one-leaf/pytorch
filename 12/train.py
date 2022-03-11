@@ -89,15 +89,16 @@ class Dataset(torch.utils.data.Dataset):
             self.index = 0
 
     def copy_wait_file(self):
-        movefiles=os.listdir(data_wait_dir)
-        # 等待5秒钟，防止有数据还在写入
-        time.sleep(5)
+        files = glob.glob(os.path.join(data_wait_dir, "*.pkl"))
+        movefiles = sorted(files, key=lambda x: os.path.getmtime(x))
+        # 等待1秒钟，防止有数据还在写入
+        time.sleep(1)
         i = -1
         for i, fn in enumerate(movefiles):
             filename = "{}.pkl".format(self.index)
             savefile = os.path.join(self.data_dir, filename)
             if os.path.exists(savefile): os.remove(savefile)
-            os.rename(os.path.join(data_wait_dir,fn), savefile)
+            os.rename(fn, savefile)
             self.index += 1
             self.newsample.append(savefile)
             if (i>=100 and i>len(movefiles)*0.1) or i>=self.max_keep_size//2: break       
@@ -119,9 +120,7 @@ class TestDataset(Dataset):
         self.max_keep_size = max_keep_size
         # 当前训练数据索引保存文件
         self.data_index_file = os.path.join(data_dir, 'index.txt')
-        self.file_list = [] # deque(maxlen=max_keep_size) 
-        for file in file_list:
-            self.file_list.append(file) 
+        self.file_list = file_list # deque(maxlen=max_keep_size) 
         self.sample=0
         random.shuffle(self.file_list)  
        
