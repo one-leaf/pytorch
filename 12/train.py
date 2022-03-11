@@ -54,7 +54,8 @@ class Dataset(torch.utils.data.Dataset):
             try:
                 states, mcts_probs, values = pickle.load(open(filename, "rb"))
                 break
-            except:
+            except Exception as e:
+                print(e)
                 print("filename {} error can't load".format(filename))
                 if os.path.exists(filename): os.remove(filename)
                 self.file_list.remove(filename)
