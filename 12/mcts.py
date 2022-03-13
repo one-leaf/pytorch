@@ -47,7 +47,13 @@ class MCTS():
             self.depth = 0
             state_copy = copy.deepcopy(state)
             self.search(state_copy)
-            if self.depth>self.max_depth: self.max_depth = self.depth           
+            if self.depth>self.max_depth: self.max_depth = self.depth
+            # 计算方差，如果方差大于1，不往下走，这里可以控制梯度消失
+            if len(available_acts)==1: break
+            if n>16:
+                act_visits = [(a, self.Nsa[(s, a)]) if (s, a) in self.Nsa else (a, 0) for a in available_acts]          
+                if np.var(act_visits)>1: break
+
 
         act_visits = [(a, self.Nsa[(s, a)]) if (s, a) in self.Nsa else (a, 0) for a in available_acts]
         act_Qs = [(a, self.Qsa[(s, a)]) if (s, a) in self.Qsa else (a, 0) for a in available_acts]
