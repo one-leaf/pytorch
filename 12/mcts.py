@@ -51,8 +51,8 @@ class MCTS():
             # 计算方差，如果方差大于100，不往下走
             if len(available_acts)==1: break
             if n>=31:
-                act_visits = [self.Nsa[(s, a)] if (s, a) in self.Nsa else 0 for a in available_acts]          
-                if np.var(act_visits)>10000: break
+                visits_sum = sum([self.Nsa[(s, a)] if (s, a) in self.Nsa else 0 for a in available_acts])          
+                if visits_sum>200: break
 
 
         act_visits = [(a, self.Nsa[(s, a)]) if (s, a) in self.Nsa else (a, 0) for a in available_acts]
