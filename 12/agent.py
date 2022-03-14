@@ -130,7 +130,7 @@ class Agent(object):
                 self.fallpiece['rotation'] = (self.fallpiece['rotation'] - 1) % len(pieces[self.fallpiece['shape']])
 
         isFalling=True
-        if self.tetromino.validposition(self.board,self.fallpiece,ay = 1):
+        if self.tetromino.validposition(self.board,self.fallpiece, ay=1):
             self.fallpiece['y'] +=1
         else:
             isFalling = False
@@ -158,7 +158,7 @@ class Agent(object):
             self.piecesteps = 0
             self.piececount +=1 
 
-            if (not self.tetromino.validposition(self.board,self.fallpiece)):                  
+            if (not self.tetromino.validposition(self.board,self.fallpiece, ay=1)):                  
                 self.terminal = True 
                 self.state = 2
                 self.availables = [KEY_NONE]

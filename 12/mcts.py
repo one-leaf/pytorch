@@ -107,12 +107,10 @@ class MCTS():
             v = 0
             if state.terminal:
                 v = -1
-                # v = state.getScore()
-           #    _, v = self._policy(state)
             self.Es[s] = v
 
         # 如果得分不等于0，标志探索结束
-        if self.Es[s] != 0 or state.terminal:
+        if self.Es[s] != 0:
             return self.Es[s]
 
         # 如果当前状态没有子节点，增加子节点
@@ -151,13 +149,11 @@ class MCTS():
         act = state.position_to_action(a)
         state.step(act)
         
-        # 后期训练不需要，只是用于早起引导
+        # 后期训练不需要，只是用于前期引导
         if state.state == 1:
             if state.reward>0: 
                 v = 1+self.search(state)
                 if v>1: v=1
-            # elif state.piececount - self.state.piececount > 5:
-            #     v = state.getScore()
             else:
                 v = self.search(state)
         else:
