@@ -36,7 +36,7 @@ class MlpBlock(nn.Module):
         self.Linear1 = nn.Linear(mlp_dim, hidden_dim)
         self.gelu = nn.GELU()
         self.Linear2 = nn.Linear(hidden_dim, mlp_dim)
-        self.drop_layer = nn.Dropout(p=0.25)
+        self.drop_layer = nn.Dropout(p=0.5)
     def forward(self,x):
         y = self.Linear1(x)
         y = self.gelu(y)
