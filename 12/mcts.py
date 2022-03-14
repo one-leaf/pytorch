@@ -52,7 +52,7 @@ class MCTS():
             if len(available_acts)==1: break
             if n>=31:
                 visits_sum = sum([self.Nsa[(s, a)] if (s, a) in self.Nsa else 0 for a in available_acts])          
-                if visits_sum>200: break
+                if visits_sum>=self._n_playout: break
 
 
         act_visits = [(a, self.Nsa[(s, a)]) if (s, a) in self.Nsa else (a, 0) for a in available_acts]
