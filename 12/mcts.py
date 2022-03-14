@@ -155,7 +155,7 @@ class MCTS():
         # 后期训练不需要，只是用于早起引导
         if state.state == 1:
             if state.reward>0: 
-                v = 1 + self.search(state)
+                v = min(1, self.search(state))
             # elif state.piececount - self.state.piececount > 5:
             #     v = state.getScore()
             else:
