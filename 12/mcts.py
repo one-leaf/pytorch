@@ -50,7 +50,7 @@ class MCTS():
             if self.depth>self.max_depth: self.max_depth = self.depth
             # 计算方差，如果方差大于1，不往下走，这里可以控制梯度消失
             if len(available_acts)==1: break
-            if n>=31:
+            if n>=15:
                 act_visits = [self.Nsa[(s, a)] if (s, a) in self.Nsa else 0 for a in available_acts]          
                 if np.var(act_visits)>1: break
 
