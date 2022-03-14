@@ -218,7 +218,7 @@ class MCTSPlayer(object):
 
             if need_random:  # 自我对抗
                 max_height = state.getMaxHeight()
-                if (state.state == 1 and max_height<10) or (max_height<8 and random.random() < 0.25):
+                if (state.state == 1 and max_height<5) or (max_height<5 and random.random() < 0.25):
                     idx = np.random.randint(len(acts))
                 elif random.random()>max_height/15 :
                     idx = np.random.choice(range(len(acts)), p=act_probs)
