@@ -117,7 +117,8 @@ class Train():
             player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=cpuct, n_playout=self.n_playout)
 
             _states, _probs, _masks, _rewards = [],[],[],[]
-            game = copy.deepcopy(agent)
+            # game = copy.deepcopy(agent)
+            game = Agent()
 
             if game_num==1 or game_num==max_game_num:
                 game.show_mcts_process=True
