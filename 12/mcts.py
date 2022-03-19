@@ -152,7 +152,7 @@ class MCTS():
         # 后期训练不需要，只是用于前期引导
         if state.state == 1:
             if state.reward>0: 
-                v = self.search(state)+0.01
+                v = self.search(state)+0.1
                 if v>1: v=1
             else:
                 v = self.search(state)-0.01
