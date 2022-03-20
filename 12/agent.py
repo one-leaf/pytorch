@@ -158,7 +158,7 @@ class Agent(object):
             self.piecesteps = 0
             self.piececount +=1 
 
-            if (not self.tetromino.validposition(self.board,self.fallpiece, ay=1)):                  
+            if self.getMaxHeight()>=18 or (not self.tetromino.validposition(self.board,self.fallpiece, ay=1)):                  
                 self.terminal = True 
                 self.state = 2
                 self.availables = [KEY_NONE]
@@ -207,14 +207,14 @@ class Agent(object):
 
     # 统计当前最大高度
     def getMaxHeight(self):
-        c = 0
+        c = -1
         for y in range(self.height):
             for x in range(self.width):
                 if self.board[x][y]!=blank:
                     c=y
                     break
             if c!=0:break  
-        h = 0 if c == 0 else self.height - c                          
+        h = 0 if c == -1 else self.height - c                          
         return h
 
     # 统计非空的个数
