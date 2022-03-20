@@ -213,7 +213,7 @@ class Agent(object):
                 if self.board[x][y]!=blank:
                     c=y
                     break
-            if c!=0:break  
+            if c!=-1:break  
         h = 0 if c == -1 else self.height - c                          
         return h
 
