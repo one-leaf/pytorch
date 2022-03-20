@@ -214,7 +214,7 @@ class MCTSPlayer(object):
             max_idx = np.argmax(act_probs)    
 
             if need_random:  # 自我对抗
-                # max_height = state.getMaxHeight()
+                # max_height = state.pieceheight
                 # if (state.state == 1 and max_height<5) or (max_height<4 and random.random() < 0.25):
                 #     idx = np.random.randint(len(acts))
                 # elif random.random()>max_height/10 :

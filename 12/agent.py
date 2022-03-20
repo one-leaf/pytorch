@@ -35,6 +35,8 @@ class Agent(object):
         self.piecesteps = 0
         # 方块的数量
         self.piececount = 0
+        # 方块的最高高度
+        self.pieceheight = 0
         # 面板
         self.board = self.tetromino.getblankboard()
         # 状态： 0 下落过程中 1 更换方块 2 结束一局
@@ -143,9 +145,9 @@ class Agent(object):
             self.tetromino.addtoboard(self.board,self.fallpiece)
             self.reward = self.tetromino.removecompleteline(self.board) 
             
-            self.score += self.reward          
-            r = 0.5 if self.reward>0 else 0
-            self.pieces_height.append(20 - fallpiece_y - r)
+            self.score += self.reward
+            self.pieceheight = self.getMaxHeight()          
+            self.pieces_height.append(20 - fallpiece_y - self.reward)
             self.fallpiece = None
 
         if  env:
@@ -158,7 +160,7 @@ class Agent(object):
             self.piecesteps = 0
             self.piececount +=1 
 
-            if self.getMaxHeight()>=18 or (not self.tetromino.validposition(self.board,self.fallpiece, ay=1)):                  
+            if self.pieceheight>=18 or (not self.tetromino.validposition(self.board,self.fallpiece, ay=1)):                  
                 self.terminal = True 
                 self.state = 2
                 self.availables = [KEY_NONE]
