@@ -251,7 +251,7 @@ class Train():
                 if v<-1: v=-1
                 normalize_vals.append(v)            
             values.extend(normalize_vals)
-            print(min(normalize_vals),'-',max(normalize_vals), *normalize_vals[:3], "...", *normalize_vals[-3:])
+            print(min(normalize_vals),'~',max(normalize_vals), ":" , *normalize_vals[:3], "...", *normalize_vals[-3:])
 
         assert len(states)==len(values)
         assert len(states)==len(mcts_probs)
