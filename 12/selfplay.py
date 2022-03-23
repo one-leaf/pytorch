@@ -124,6 +124,7 @@ class Train():
                 game.show_mcts_process=True
 
             game_reward = 0
+            _game_last_status = 0
             for i in count():               
                 _states.append(game.current_state())
                                 
@@ -137,17 +138,23 @@ class Train():
                 # 这里的奖励是消除的行数
                 if reward > 0:
                     step_reward = reward * 10
+                    _rewards.append(step_reward)
+                    for k in range(len(_rewards)-1, 0, -1):
+                        step_reward = step_reward*0.99 
+                        _rewards[k] += step_reward
+                        
                     print("#"*40, 'score:', game.score, 'height:', game.pieceheight, 'piece:', game.piececount, 'step:', i, "#"*40)
                 else:
                     step_reward = 0
+                    _rewards.append(step_reward)
 
                 _probs.append(move_probs)
-                _rewards.append(step_reward)
                 _masks.append(1-game.terminal)
 
                 # 方块的个数越多越好
                 if game.terminal:
-                    game_reward = game.getNoEmptyCount() + game.score * 10  
+                    _game_last_status = game.getNoEmptyCount()
+                    game_reward =  _game_last_status + game.score * 10  
 
                     result = self.read_status_file(jsonfile)
 
@@ -184,7 +191,7 @@ class Train():
 
                     break          
 
-            game_rewards.append(game_reward)
+            game_rewards.append(_game_last_status)
             game_states.append(_states)
             game_vals.append(_rewards)
             game_mcts_probs.append(_probs)
@@ -214,13 +221,15 @@ class Train():
             print(line)
         print((" "+" -"*agent.width+" ")*len(borads))
 
+        # 重新计算得分
         avg_value = []
         for game_idx in range(game_num):
             for i in range(len(game_vals[game_idx])):
-                if i==0:
-                    game_vals[game_idx][i] = game_rewards[game_idx]
-                else:
-                    game_vals[game_idx][i] = game_vals[game_idx][i-1] - game_vals[game_idx][i]  
+                game_vals[game_idx][i] += game_rewards[game_idx]
+                # if i==0:
+                #     game_vals[game_idx][i] = game_rewards[game_idx]
+                # else:
+                #     game_vals[game_idx][i] = game_vals[game_idx][i-1] - game_vals[game_idx][i]  
             avg_value.extend(game_vals[game_idx])
             print(len(game_vals[game_idx]), ":", *game_vals[game_idx][:3], "...", *game_vals[game_idx][-3:])
 
