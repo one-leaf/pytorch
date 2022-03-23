@@ -156,6 +156,7 @@ class MCTS():
                 v = self.search(state) + 1.0/state.pieceheight
                 if v>1: v=1
             else:
+                # 未消除行的损失
                 v = self.search(state)-0.01*state.pieceheight
                 if v<-1: v=-1
         else:
