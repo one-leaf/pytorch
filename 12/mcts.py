@@ -153,7 +153,7 @@ class MCTS():
         if state.state == 1:
             if state.reward>0: 
                 # 出现消除行的收益
-                v = self.search(state) + 1.0/state.pieceheight
+                v = self.search(state) + 2.0/state.pieceheight
                 if v>1: v=1
             else:
                 # 未消除行的损失
