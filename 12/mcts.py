@@ -71,7 +71,7 @@ class MCTS():
                 info.append([action, visit, round(q,2), round(p,2)])        
             v = 0
             if s in self.Vs: v = self.Vs[s]
-            print(state.steps, state.piececount, state.fallpiece["shape"], state.piecesteps, "n:", n, "depth:" ,self.max_depth, "value:", round(v,2), info)
+            print(state.steps, state.piececount, state.fallpiece["shape"], state.piecesteps, "n:", n, "depth:" ,self.max_depth,"height:", state.pieceheight, "value:", round(v,2), info)
 
         if temp == 0:
             bestAs = np.array(np.argwhere(visits == np.max(visits))).flatten()
@@ -152,10 +152,11 @@ class MCTS():
         # 后期训练不需要，只是用于前期引导
         if state.state == 1:
             if state.reward>0: 
-                v = self.search(state)+0.1
+                # 出现消除行的收益
+                v = self.search(state) + 1.0/state.pieceheight
                 if v>1: v=1
             else:
-                v = self.search(state)-0.01
+                v = self.search(state)-0.01*state.pieceheight
                 if v<-1: v=-1
         else:
             v = self.search(state)
