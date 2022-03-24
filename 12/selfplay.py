@@ -139,7 +139,7 @@ class Train():
                 if reward > 0:
                     step_reward = reward * 10
                     _rewards.append(step_reward)
-                    for k in range(len(_rewards)-1, 0, -1):
+                    for k in range(len(_rewards)-2, -1, -1):
                         step_reward = step_reward*0.99 
                         _rewards[k] += step_reward
                         
