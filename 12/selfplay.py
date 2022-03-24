@@ -224,6 +224,7 @@ class Train():
         # 重新计算得分
         avg_value = []
         for game_idx in range(game_num):
+            print(len(game_vals[game_idx]), ":", *game_vals[game_idx][:3], "...", *game_vals[game_idx][-3:])
             for i in range(len(game_vals[game_idx])):
                 game_vals[game_idx][i] += game_rewards[game_idx]
                 # if i==0:
