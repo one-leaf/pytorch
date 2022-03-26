@@ -226,9 +226,10 @@ class Agent(object):
             line_c= 0
             for x in range(self.width):
                 if self.board[x][y]!=blank:
-                    c += 1*(0.99**(self.height-y))
                     line_c += 1
-            if line_c == 9: c += 1
+            c += line_c*(0.9**(self.height-y-1))
+
+            # if line_c == 9: c += 1
         return c
 
     # 计算得分,只计算被挡住的
