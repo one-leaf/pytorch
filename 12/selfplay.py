@@ -284,13 +284,13 @@ class Train():
                 if cpuct<=0.01:
                     result["cpuct"] = {"0.01":qval, "0.11":qval}
                 else:
-                    result["cpuct"] = {str(cpuct):qval, str(cpuct+0.1):qval}
+                    result["cpuct"] = {str(cpuct):qval, str(round(cpuct+0.1,2)):qval}
             else:
                 cpuct = round(float(cpuct_list[1])+0.01,2)
                 if cpuct<=0.11:
                     result["cpuct"] = {"0.01":qval, "0.11":qval}
                 else:
-                    result["cpuct"] = {str(cpuct-0.1):qval, str(cpuct):qval}
+                    result["cpuct"] = {str(round(cpuct-0.1,2)):qval, str(cpuct):qval}
 
 
         if result["curr"]["agent1000"]>1000:
