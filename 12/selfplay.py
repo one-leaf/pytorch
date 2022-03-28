@@ -292,6 +292,10 @@ class Train():
                 else:
                     result["cpuct"] = {str(round(cpuct-0.1,2)):qval, str(cpuct):qval}
 
+            if max(result["reward"])==result["reward"][-1]:
+                newmodelfile = model_file+"_reward_"+str(result["reward"][-1])
+                if not os.path.exists(newmodelfile):
+                    self.policy_value_net.save_model(newmodelfile)
 
         if result["curr"]["agent1000"]>1000:
             result["curr"]={"reward":0,"pieces":0,"agent1000":0,"agent100":0}
