@@ -191,7 +191,7 @@ class Train():
 
                     break          
 
-            game_rewards.append(game_reward)
+            game_rewards.append(game.score)
             game_states.append(_states)
             game_vals.append(_rewards)
             game_mcts_probs.append(_probs)
