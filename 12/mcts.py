@@ -157,7 +157,7 @@ class MCTS():
                 if v>1: v=1
             else:
                 # 未消除行的损失,推荐早点结束
-                v = self.search(state) + 0.001*(10-state.pieceheight)
+                v = self.search(state) + 0.01*(0.5-state.pieceheight%2)
                 if v<-1: v=-1
         else:
             v = self.search(state)
