@@ -64,7 +64,7 @@ class Train():
         agent = Agent()
 
         min_game_num = 2
-        max_game_num = 4
+        max_game_num = 3
         agentcount, agentreward, piececount, agentscore = 0, 0, 0, 0
         game_states, game_vals, game_mcts_probs, game_rewards = [], [], [], [] 
 
