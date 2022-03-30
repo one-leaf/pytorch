@@ -1,7 +1,7 @@
 import os, glob, pickle
 
 from time import time
-from model import PolicyValueNet
+from model import PolicyValueNet, data_dir, data_wait_dir, model_file
 
 import time, datetime
 
@@ -19,15 +19,7 @@ ACTIONS_NAME = ["N","O","L","R","D"]
 GAME_ACTIONS_NUM = len(ACTIONS) 
 GAME_WIDTH, GAME_HEIGHT = 10, 20
 
-# 定义游戏的保存文件名和路径
-curr_dir = os.path.dirname(os.path.abspath(__file__))
-data_dir = os.path.join(curr_dir, './data/mlp/')
-if not os.path.exists(data_dir): os.makedirs(data_dir)
-data_wait_dir = os.path.join(curr_dir, './data/mlp/wait/')
-if not os.path.exists(data_wait_dir): os.makedirs(data_wait_dir)
-model_dir = os.path.join(curr_dir, './model/')
-if not os.path.exists(model_dir): os.makedirs(model_dir)
-model_file =  os.path.join(model_dir, 'model-mlp.pth')
+
 
 class Dataset(torch.utils.data.Dataset):
     def __init__(self, data_dir, max_keep_size):
