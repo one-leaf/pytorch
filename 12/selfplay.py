@@ -178,10 +178,7 @@ class Train():
                     piececount += game.piececount
 
                     break          
-            if game.reward>0:
-                game_rewards.append(0)
-            else:
-                game_rewards.append(_game_last_status/200)
+            game_rewards.append(_game_last_status/200)
             game_states.append(_states)
             game_vals.append(_rewards)
             game_mcts_probs.append(_probs)
