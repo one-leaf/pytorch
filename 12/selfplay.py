@@ -125,7 +125,7 @@ class Train():
 
                 # 这里的奖励是消除的行数
                 if reward > 0:
-                    step_reward = reward * 10
+                    step_reward = reward 
                     _rewards.append(step_reward)
                     for k in range(len(_rewards)-2, -1, -1):
                         step_reward = step_reward*0.98 
