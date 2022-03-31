@@ -233,8 +233,8 @@ class Train():
             normalize_vals = []
             for o in game_vals[j]: 
                 # 这里考虑还是用所有局的平均值作为衡量标准，而不是全部的平均值
-                # 标准化的标准差为0.1
-                v = (o-curr_avg_value)/(curr_std_value*10)
+                # 标准化的标准差为1
+                v = (o-curr_avg_value)/curr_std_value
                 if v>1: v=1
                 if v<-1: v=-1
                 normalize_vals.append(v)            
