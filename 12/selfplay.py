@@ -178,7 +178,7 @@ class Train():
                     piececount += game.piececount
 
                     break          
-            game_rewards.append(_game_last_status/200)
+            game_rewards.append(_game_last_status/200.)
             game_states.append(_states)
             game_vals.append(_rewards)
             game_mcts_probs.append(_probs)
@@ -235,7 +235,6 @@ class Train():
                 # 这里考虑还是用所有局的平均值作为衡量标准，而不是全部的平均值
                 # 标准化的标准差为 (x-μ)/(σ*sqrt(2)) 
                 v = (o-curr_avg_value)/(curr_std_value*(2**0.5))
-                normalize_vals.append(v)
                 if v>1: v=1
                 if v<-1: v=-1
                 normalize_vals.append(v)            
