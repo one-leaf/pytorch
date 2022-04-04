@@ -130,7 +130,8 @@ class Train():
                     for k in range(len(_rewards)-2, -1, -1):
                         step_reward = step_reward*0.98 
                         _rewards[k] += step_reward
-                        
+                        if _rewards[k]>1: _rewards[k]=1
+
                     print("#"*40, 'score:', game.score, 'height:', game.pieceheight, 'piece:', game.piececount, 'step:', i, "#"*40)
                 else:
                     step_reward = 0
