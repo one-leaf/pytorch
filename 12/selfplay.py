@@ -221,6 +221,7 @@ class Train():
                 #     game_vals[game_idx][i] = game_vals[game_idx][i-1] - game_vals[game_idx][i]  
             avg_value.extend(game_vals[game_idx])
             print(len(game_vals[game_idx]), ":", *game_vals[game_idx][:3], "...", *game_vals[game_idx][-3:])
+            print(*game_vals[game_idx])
 
         curr_avg_value = sum(avg_value)/len(avg_value)
         curr_std_value = np.std(avg_value)
