@@ -158,7 +158,7 @@ class MCTS():
             else:
                 # 未消除行的损失,推荐早点结束
                 if state.pieceheight<=10:
-                    off = 1#0.01*(10-state.pieceheight)
+                    off = 0.1
                 else:
                     off = 0.001
                 v = self.search(state) - off
@@ -224,7 +224,13 @@ class MCTSPlayer(object):
                 # if (state.state == 1 and max_height<5) or (max_height<4 and random.random() < 0.25):
                 #     idx = np.random.randint(len(acts))
                 # elif random.random()>max_height/10 :
-                idx = np.random.choice(range(len(acts)), p=act_probs)
+                if state.pieceheight>=10:
+                    idx = np.random.choice(range(len(acts)), p=act_probs)
+                else:
+                    p = 0.75
+                    dirichlet = np.random.dirichlet(0.03 * np.ones(len(act_probs)))
+                    idx = np.random.choice(range(len(acts)), p=p*act_probs + (1.0-p) * dirichlet)
+
                 # else:
                     # idx = max_idx
                     
