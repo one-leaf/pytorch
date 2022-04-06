@@ -128,7 +128,7 @@ class Train():
                     step_reward = reward 
                     _rewards.append(step_reward)
                     for k in range(len(_rewards)-2, -1, -1):
-                        step_reward = step_reward*0.99 
+                        step_reward = step_reward*0.95 
                         _rewards[k] += step_reward
 
                     print("#"*40, 'score:', game.score, 'height:', game.pieceheight, 'piece:', game.piececount, 'step:', i, "#"*40)
@@ -242,6 +242,7 @@ class Train():
                 normalize_vals.append(v)            
             values.extend(normalize_vals)
             print(min(normalize_vals),'~',max(normalize_vals), ":" , *normalize_vals[:3], "...", *normalize_vals[-3:])
+            print(*normalize_vals)
 
         assert len(states)==len(values)
         assert len(states)==len(mcts_probs)
