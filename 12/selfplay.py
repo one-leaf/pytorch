@@ -125,7 +125,7 @@ class Train():
 
                 # 这里的奖励是消除的行数
                 if reward > 0:
-                    step_reward = reward 
+                    step_reward = reward * 10
                     _rewards.append(step_reward)
                     for k in range(len(_rewards)-2, -1, -1):
                         step_reward = step_reward*0.95 
@@ -178,7 +178,7 @@ class Train():
                     piececount += game.piececount
 
                     break          
-            game_rewards.append(_game_last_status/200.)
+            game_rewards.append(_game_last_status)
             game_states.append(_states)
             game_vals.append(_rewards)
             game_mcts_probs.append(_probs)
