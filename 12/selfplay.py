@@ -125,7 +125,7 @@ class Train():
 
                 # 这里的奖励是消除的行数
                 if reward > 0:
-                    step_reward = reward * 10
+                    step_reward = reward #* 10
                     _rewards.append(step_reward)
                     for k in range(len(_rewards)-2, -1, -1):
                         step_reward = step_reward*0.95 
@@ -142,7 +142,7 @@ class Train():
                 # 方块的个数越多越好
                 if game.terminal:
                     _game_last_status = game.getNoEmptyCount()
-                    game_reward =  _game_last_status + game.score * 10  
+                    game_reward =  _game_last_status + game.score # * 10  
 
                     result = self.read_status_file(jsonfile)
 
