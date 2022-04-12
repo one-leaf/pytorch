@@ -152,7 +152,7 @@ class Train():
                     else:
                         result["QVal"] = result["QVal"]*0.999 + game_reward*0.001   
                         result["avg_time"]= result["avg_time"]*0.999 + (time.time()-start_time)*0.001 
-                    if game_reward > result["QVal"]: can_exit_flag = True
+                    if game_reward > result["QVal"] and game.score>0: can_exit_flag = True
                    
                     # 记录当前cpuct的统计结果
                     if str(cpuct) in result["cpuct"]:
