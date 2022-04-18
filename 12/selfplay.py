@@ -292,7 +292,7 @@ class Train():
             newmodelfile = model_file+"_"+str(result["agent"])
             if not os.path.exists(newmodelfile):
                 self.policy_value_net.save_model(newmodelfile)
-
+        result["lastupdate"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         json.dump(result, open(jsonfile,"w"), ensure_ascii=False)
 
     def policy_update(self, sample_data, epochs=1):
