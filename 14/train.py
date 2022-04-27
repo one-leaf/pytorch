@@ -1,4 +1,3 @@
-from sklearn.model_selection import PredefinedSplit
 import torch
 import os,json
 from model import Model, Label
