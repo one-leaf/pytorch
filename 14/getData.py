@@ -23,7 +23,7 @@ curr_dir = os.path.dirname(os.path.abspath(__file__))
 data_dir = os.path.join(curr_dir, 'data')
 
 
-curr_data_type = 'pager'  # rock 石头, scissors 剪刀, pager 布
+curr_data_type = '石头'  #  石头,  剪刀,  布
 
 no = 0
 while cap.isOpened():

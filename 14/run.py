@@ -33,7 +33,7 @@ rnn_model_file = os.path.join(model_dir, 'rnn_model.pth')
 rnn = RNN(3, 128, 2, 3)
 if os.path.exists(rnn_model_file):
     rnn.load_state_dict(torch.load(rnn_model_file))
-optimizer = torch.optim.Adam(rnn.parameters(), lr=0.001)
+optimizer = torch.optim.Adam(rnn.parameters(), lr=0.01)
 criterion = torch.nn.CrossEntropyLoss()
 rnn_next_pred = None
 train_queue = deque(maxlen=64)
@@ -95,19 +95,23 @@ while True:
 
                 # 反向传播更新网络参数
                 if rnn_next_pred!=None:
-                    if len(train_queue)>=2:
+                    if len(train_queue)>=2:                        
                         time_len = len(train_queue)-1 
                         x = torch.zeros((1, time_len ,3))
-                        for i in range(0, time_len):
+                        for i in range(time_len):
                             x[0][i][train_queue[i]] = 1
 
-                        y = torch.tensor([train_queue[-1]])
-                        train_pre_y = rnn(x)
+                        y = torch.zeros((time_len), dtype=torch.long)
+                        for i in range(time_len):
+                            y[i] = train_queue[i+1]
+
+                        train_pre_y = rnn(x).view((-1, 3))
                         optimizer.zero_grad()
                         loss =criterion(train_pre_y, y)
                         loss.backward()
                         optimizer.step()
-                        print(loss.item())
+
+                        print("loss:", loss.item())
                         torch.save(rnn.state_dict(), rnn_model_file)
 
                 # 获取下次的出拳

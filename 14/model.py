@@ -2,7 +2,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch
 
-Label = {"rock": 0, "scissors": 1, "pager": 2}
+Label = {"石头": 0, "剪刀": 1, "布": 2}
 
 def getLable(name):
     return Label[name]
@@ -55,5 +55,13 @@ class RNN(nn.Module):
         h0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size)
         c0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size)
         out, (hn, cn) = self.lstm(x, (h0, c0))
-        out = self.fc(out[:, -1, :])
-        return out 
+        
+        # 只输出最后一步的结果，不好训练，需要大量的采样
+        # out = self.fc(out[:, -1, :])
+        # return out 
+
+        # 输出所有时刻的结果，方便训练
+        outs = [] 
+        for time_step in range(out.size(1)): 
+            outs.append(self.fc(out[:, time_step, :]))
+        return torch.stack(outs, dim=1)
