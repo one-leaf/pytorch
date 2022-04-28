@@ -30,10 +30,9 @@ model = Model()
 model.load_state_dict(torch.load(model_file))
 
 rnn_model_file = os.path.join(model_dir, 'rnn_model.pth')
-rnn = RNN()
+rnn = RNN(3, 128, 2, 3)
 if os.path.exists(rnn_model_file):
     rnn.load_state_dict(torch.load(rnn_model_file))
-h_state = None
 optimizer = torch.optim.Adam(rnn.parameters(), lr=0.001)
 criterion = torch.nn.CrossEntropyLoss()
 rnn_next_pred = None
@@ -96,19 +95,15 @@ while True:
 
                 # 反向传播更新网络参数
                 if rnn_next_pred!=None:
-                    
                     if len(train_queue)>=2:
                         time_len = len(train_queue)-1 
                         x = torch.zeros((1, time_len ,3))
                         for i in range(0, time_len):
                             x[0][i][train_queue[i]] = 1
 
-                        y = torch.zeros((time_len), dtype=torch.long)
-                        for i in range(0, time_len):
-                            y[i] = train_queue[i+1]
-                        train_pre_y, h_state = rnn(x, h_state)
+                        y = torch.tensor([train_queue[-1]])
+                        train_pre_y = rnn(x)
                         optimizer.zero_grad()
-                        train_pre_y = train_pre_y.view((time_len,3))
                         loss =criterion(train_pre_y, y)
                         loss.backward()
                         optimizer.step()
@@ -121,7 +116,7 @@ while True:
                 for i in range(0, time_len):
                     x[0][i][train_queue[i]]=1
                 with torch.no_grad():
-                    rnn_next_pred, h_state = rnn(x, h_state)
+                    rnn_next_pred = rnn(x)
                 rnn_next_pred = rnn_next_pred.view((-1,3))[-1]
                 rnn_next_pred_idx = rnn_next_pred.argmax(dim=0).item()
 

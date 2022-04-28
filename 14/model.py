@@ -45,18 +45,15 @@ class Model(nn.Module):
         return x
 
 class RNN(nn.Module):
-    def __init__(self):
+    def __init__(self, input_size, hidden_size, num_layers, num_classes):
         super(RNN, self).__init__()
-        self.rnn = nn.RNN(
-            input_size=3,
-            hidden_size=128, 
-            num_layers=2, 
-            batch_first=True,
-        )
-        self.out = nn.Linear(128, 3)
-    def forward(self, x, h_state):
-        r_out, h_state = self.rnn(x, h_state)
-        outs = [] 
-        for time_step in range(r_out.size(1)): # 计算每一步长的预测值
-            outs.append(self.out(r_out[:, time_step, :]))
-        return torch.stack(outs, dim=1), h_state
+        self.hidden_size = hidden_size
+        self.num_layers = num_layers
+        self.lstm = nn.LSTM(input_size, hidden_size, num_layers, batch_first=True)
+        self.fc = nn.Linear(hidden_size, num_classes)
+    def forward(self, x):
+        h0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size)
+        c0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size)
+        out, (hn, cn) = self.lstm(x, (h0, c0))
+        out = self.fc(out[:, -1, :])
+        return out 
