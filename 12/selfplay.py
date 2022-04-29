@@ -126,6 +126,8 @@ class Train():
                 # 这里的奖励是消除的行数
                 if reward > 0:
                     step_reward = reward #* 10
+
+                    # 奖励做前面步数的衰减
                     _rewards.append(step_reward)
                     for k in range(len(_rewards)-2, -1, -1):
                         step_reward = step_reward*0.999 
@@ -141,7 +143,7 @@ class Train():
 
                 # 方块的个数越多越好
                 if game.terminal:
-                    _game_last_status = game.getNoEmptyCount()
+                    _game_last_status = game.getNoEmptyCount()/200.
                     game_reward =  _game_last_status + game.score # * 10  
 
                     result = self.read_status_file(jsonfile)
@@ -177,8 +179,9 @@ class Train():
                     agentreward += game_reward
                     piececount += game.piececount
 
-                    break          
-            game_rewards.append(_game_last_status)
+                    break
+                          
+            game_rewards.append(game_reward)
             game_states.append(_states)
             game_vals.append(_rewards)
             game_mcts_probs.append(_probs)
