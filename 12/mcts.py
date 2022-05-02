@@ -226,7 +226,7 @@ class MCTSPlayer(object):
                 # elif random.random()>max_height/10 :
                 if state.get_key() in game_keys:
                     idx = np.random.randint(len(acts))
-                    print("    key: %s"%state.get_key())
+                    print("    key: %s, len: %s"%(state.get_key(), len(game_keys)))
                     #idx = np.random.choice(range(len(acts)), p=act_probs)
                 else:
                     idx = np.random.choice(range(len(acts)), p=act_probs)
