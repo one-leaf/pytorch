@@ -73,6 +73,9 @@ class Train():
         can_exit_flag = False
         
         cpuct_first_flag = random.random() > 0.5
+
+        # 尽量不要出现一样的局面
+        game_keys = []
         for _ in count():
             start_time = time.time()
             game_num += 1
@@ -119,9 +122,13 @@ class Train():
                 if game_num == max_game_num:
                     action, move_probs = player.get_action(game, temp=self.temp, return_prob=1, need_random=False) 
                 else: 
-                    action, move_probs = player.get_action(game, temp=self.temp, return_prob=1, need_random=True) 
+                    action, move_probs = player.get_action(game, temp=self.temp, return_prob=1, need_random=True, game_keys=game_keys) 
                
                 _, reward = game.step(action)
+
+                key = game.get_key()
+                if not key in game_keys:
+                    game_keys.append(key)
 
                 # 这里的奖励是消除的行数
                 if reward > 0:

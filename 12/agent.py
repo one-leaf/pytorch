@@ -56,6 +56,8 @@ class Agent(object):
         self.show_mcts_process = False
         # pos
         self.pos_board = self.get_board_pos()
+        # key
+        self.key="null"
 
 
     # 概率的索引位置转action
@@ -140,6 +142,7 @@ class Agent(object):
         fallpiece_y = self.fallpiece['y']
 
         self.fallpiece_status.append(self.get_fallpiece_board())
+        self.set_key()
 
         if not isFalling:
             self.tetromino.addtoboard(self.board,self.fallpiece)
@@ -174,10 +177,12 @@ class Agent(object):
 
         return self.state, self.reward
 
-    def get_key(self):
+    def set_key(self):
         info = self.getBoard() + self.fallpiece_status[-1]
-        return hash(info.data.tobytes())        
+        self.key = hash(info.data.tobytes())
 
+    def get_key(self):
+        return self.key
 
     # 打印
     def print2(self, add_fallpiece=False):
