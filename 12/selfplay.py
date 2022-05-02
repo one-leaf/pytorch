@@ -116,6 +116,7 @@ class Train():
 
             game_reward = 0
             _game_last_status = 0
+            _keys = []
             for i in count():               
                 _states.append(game.current_state())
                                 
@@ -127,8 +128,7 @@ class Train():
                 _, reward = game.step(action)
 
                 key = game.get_key()
-                if not key in game_keys:
-                    game_keys.append(key)
+                _keys.append(key)
 
                 # 这里的奖励是消除的行数
                 if reward > 0:
@@ -187,6 +187,10 @@ class Train():
                     piececount += game.piececount
 
                     break
+
+            for key in _keys:
+                if not key in game_keys:                            
+                    game_keys.append(key)
 
             game_rewards.append(game_reward)
             game_states.append(_states)
