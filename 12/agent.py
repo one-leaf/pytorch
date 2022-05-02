@@ -57,7 +57,7 @@ class Agent(object):
         # pos
         self.pos_board = self.get_board_pos()
         # key
-        self.key="null"
+        self.key=0
 
 
     # 概率的索引位置转action
