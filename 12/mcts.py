@@ -228,9 +228,10 @@ class MCTSPlayer(object):
                     idx = np.random.randint(len(acts))
                     #idx = np.random.choice(range(len(acts)), p=act_probs)
                 else:
-                    p = 0.75
-                    dirichlet = np.random.dirichlet(0.03 * np.ones(len(act_probs)))
-                    idx = np.random.choice(range(len(acts)), p=p*act_probs + (1.0-p) * dirichlet)
+                    idx = np.random.choice(range(len(acts)), p=act_probs)
+                    # p = 0.75
+                    # dirichlet = np.random.dirichlet(0.03 * np.ones(len(act_probs)))
+                    # idx = np.random.choice(range(len(acts)), p=p*act_probs + (1.0-p) * dirichlet)
 
                 # else:
                     # idx = max_idx
