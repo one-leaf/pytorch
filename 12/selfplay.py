@@ -137,7 +137,7 @@ class Train():
                     # 奖励做前面步数的衰减
                     _rewards.append(step_reward)
                     for k in range(len(_rewards)-2, -1, -1):
-                        step_reward = step_reward*0.999 
+                        step_reward = step_reward*0.99 
                         _rewards[k] += step_reward
 
                     print("#"*40, 'score:', game.score, 'height:', game.pieceheight, 'piece:', game.piececount, 'step:', i, "#"*40)
