@@ -312,10 +312,10 @@ class Agent(object):
         state = np.zeros((9, self.height, self.width))
         state[0] = self.getBoard()
 
-        for i in range(7):
+        for i in range(8):
             state[i+1]=self.fallpiece_status[-1*(i+1)]
 
-        state[8] = self.pos_board
+        # state[8] = self.pos_board
 
         # 前4步是对手的，后4步是自己的
         # for j in range(4): 
