@@ -155,6 +155,7 @@ class MCTS():
                 # 出现消除行的收益
                 v = self.search(state) + state.reward - state.pieceheight/20
                 if v>1: v=1
+                print("v:",v, "reward",state.reward, "height",state.pieceheight, "pieccount",state.piececount)
             else:
                 # 未消除行的损失,推荐早点结束
                 v = self.search(state) - state.pieceheight/20
