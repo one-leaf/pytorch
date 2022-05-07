@@ -159,8 +159,8 @@ class MCTS():
                 print("v:", v, "off", off, "height", state.pieceheight, "pieccount", state.piececount)
             else:
                 # 未消除行的损失,推荐早点结束
-                off = state.pieceheight/20
-                v = self.search(state) - off
+                off = 0 - state.pieceheight/20
+                v = off + self.search(state) 
                 if v<-1: v=-1
         else:
             v = self.search(state)
