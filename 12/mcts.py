@@ -155,13 +155,13 @@ class MCTS():
                 off = state.reward - state.pieceheight/20
                 # 出现消除行的收益
                 v = off + self.search(state) 
-                if v>1: v=1
+                # if v>1: v=1
                 # print("v:", v, "off", off, "height", state.pieceheight, "pieccount", state.piececount)
             else:
                 # 未消除行的损失,推荐早点结束
                 off = 0 - state.pieceheight/20
                 v = off + self.search(state) 
-                if v<-1: v=-1
+                # if v<-1: v=-1
         else:
             v = self.search(state)
         # v = self.search(state)
