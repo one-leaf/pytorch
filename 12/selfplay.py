@@ -66,7 +66,6 @@ class Train():
         min_game_num = 5
         max_game_num = 7
         agentcount, agentreward, piececount, agentscore = 0, 0, 0, 0
-        game_states, game_vals, game_mcts_probs, game_rewards = [], [], [], [] 
 
         borads = []
         game_num = 0
@@ -76,6 +75,8 @@ class Train():
 
         # 尽量不要出现一样的局面
         game_keys = []
+        game_datas = []
+        # 开始一局游戏
         for _ in count():
             start_time = time.time()
             game_num += 1
@@ -107,18 +108,17 @@ class Train():
             print("game_num",game_num,"c_puct:",cpuct,"n_playout:",self.n_playout)
             player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=cpuct, n_playout=self.n_playout)
 
-            _states, _probs, _masks, _rewards = [],[],[],[]
+            _data = {"steps":[],"last_state":0,"score":0,"piece_count":0}
             game = copy.deepcopy(agent)
             # game = Agent()
 
             if game_num==1 or game_num==max_game_num:
                 game.show_mcts_process=True
 
-            game_reward = 0
-            _game_last_status = 0
-            _keys = []
-            for i in count():               
-                _states.append(game.current_state())
+            for i in count():
+                _step={"step":i}
+                _step["state"] = game.current_state()               
+                _step["piece_count"] = game.piececount               
                                 
                 if game_num == max_game_num:
                     action, move_probs = player.get_action(game, temp=self.temp, return_prob=1, need_random=False) 
@@ -127,32 +127,26 @@ class Train():
                
                 _, reward = game.step(action)
 
-                key = game.get_key()
-                _keys.append(key)
+                _step["key"] = game.get_key()
+                _step["reward"] = reward
+                _step["action"] = action                
+                _step["move_probs"] = move_probs
+
+                _data["steps"].append(_step)
 
                 # 这里的奖励是消除的行数
                 if reward > 0:
-                    step_reward = reward #* 10
-
-                    # 奖励做前面步数的衰减
-                    _rewards.append(step_reward)
-                    for k in range(len(_rewards)-2, -1, -1):
-                        step_reward = step_reward*0.98 
-                        _rewards[k] += step_reward
-
                     print("#"*40, 'score:', game.score, 'height:', game.pieceheight, 'piece:', game.piececount, 'step:', i, "#"*40)
-                else:
-                    step_reward = 0
-                    _rewards.append(step_reward)
-
-                _probs.append(move_probs)
-                _masks.append(1-game.terminal)
 
                 # 方块的个数越多越好
                 if game.terminal:
-                    _game_last_status = game.getNoEmptyCount()/200.
-                    game_reward =  _game_last_status #+ game.score # * 10  
+                    _game_last_reward = game.getNoEmptyCount()/200.
+                    _data["reward"] = _game_last_reward
+                    _data["score"] = game.score
+                    _data["piece_count"] = game.piececount
 
+                    # 更新状态
+                    game_reward =  _game_last_reward + game.score   
                     result = self.read_status_file(jsonfile)
 
                     if result["QVal"]==0:
@@ -180,7 +174,7 @@ class Train():
                     result["curr"]["agent100"] += 1
 
                     game.print()
-                    print(game_num, 'reward:', game.score, "Qval:", game_reward, 'len:', len(_rewards), "piececount:", game.piececount)
+                    print(game_num, 'reward:', game.score, "Qval:", game_reward, 'len:', i, "piececount:", game.piececount, "time:", time.time()-start_time)
                     agentcount += 1
                     agentscore += game.score
                     agentreward += game_reward
@@ -188,14 +182,11 @@ class Train():
 
                     break
 
-            for key in _keys:
-                if not key in game_keys:                            
-                    game_keys.append(key)
+            for step in _data["steps"]:
+                if not step["key"] in game_keys:                            
+                    game_keys.append(step["key"])
 
-            game_rewards.append(game_reward)
-            game_states.append(_states)
-            game_vals.append(_rewards)
-            game_mcts_probs.append(_probs)
+            game_datas.append(_data)
 
             borads.append(game.board)
 
@@ -206,7 +197,6 @@ class Train():
 
             # 如果训练次数超过了最大次数，则直接终止训练
             if game_num >= max_game_num: break
-        end_time = time.time()
 
         # 打印borad：
         from game import blank 
@@ -223,40 +213,48 @@ class Train():
         print((" "+" -"*agent.width+" ")*len(borads))
 
         # 重新计算得分
-        avg_value = []
-        for game_idx in range(game_num):
-            print(len(game_vals[game_idx]), ":", *game_vals[game_idx][:3], "...", *game_vals[game_idx][-3:])
-            for i in range(len(game_vals[game_idx])):
-                game_vals[game_idx][i] += game_rewards[game_idx]
-                # if game_vals[game_idx][i]>1: game_vals[game_idx][i]=1
-                # if i==0:
-                #     game_vals[game_idx][i] = game_rewards[game_idx]
-                # else:
-                #     game_vals[game_idx][i] = game_vals[game_idx][i-1] - game_vals[game_idx][i]  
-            avg_value.extend(game_vals[game_idx])
-            print(len(game_vals[game_idx]), ":", *game_vals[game_idx][:3], "...", *game_vals[game_idx][-3:])
-            # print(*game_vals[game_idx])
+        # 按0.98的衰减更新reward
+        for data in game_datas:
+            step_count = len(data["steps"])
+            for i in range(step_count-2,-1,-1):
+                data["steps"][i]["reward"] += data["steps"][i+1]["reward"]*0.98
 
-        curr_avg_value = sum(avg_value)/len(avg_value)
-        curr_std_value = np.std(avg_value)
-        curr_avg_time = (end_time-start_time)/game_num
-        print("avg_value:", curr_avg_value, "std_value:", curr_std_value, "avg_time:", curr_avg_time)
-               
-        states, values, mcts_probs= [], [], []
-        for j in range(game_num):
-            for o in game_states[j]: states.append(o)
-            for o in game_mcts_probs[j]: mcts_probs.append(o)
-            normalize_vals = []
-            for o in game_vals[j]: 
-                # 这里考虑还是用所有局的平均值作为衡量标准，而不是全部的平均值
-                # 标准化的标准差为 (x-μ)/(σ*sqrt(2)) 
-                v = (o-curr_avg_value)/(curr_std_value*(2**0.5))
-                if v>1: v=1
-                if v<-1: v=-1
-                normalize_vals.append(v)            
-            values.extend(normalize_vals)
-            print(min(normalize_vals),'~' ,sum(normalize_vals)/len(normalize_vals), '~',max(normalize_vals), ":" , *normalize_vals[:3], "...", *normalize_vals[-3:])
+        # 将所有的reward加上每一局的最后基础得分
+        for data in game_datas:
+            step_count = len(data["steps"])
+            for i in range(step_count-1,-1,-1):
+                data["steps"][i]["reward"] += data["reward"]
+        
+        states, mcts_probs, values= [], [], []
 
+        # 分离每一步的全部步骤做同比
+        max_piece_count = 0
+        for data in game_datas:
+            if data["piece_count"]>max_piece_count:
+                max_piece_count = data["piece_count"]
+
+        for p in range(max_piece_count):
+            _states, _mcts_probs, _normalize_vals, _values = [], [], [], []
+            for data in game_datas:
+                for step in data["steps"]:
+                    if step["piece_count"]!=p: continue
+                    _states.append(step["state"])
+                    _mcts_probs.append(step["move_probs"])
+                    _values.append(step["reward"])
+            if len(_states)==0: break
+                
+            # 重新计算
+            curr_avg_value = sum(_values)/len(_values)
+            curr_std_value = np.std(_values)*(2**0.5)
+            for v in _values:
+                #标准化的标准差为 (x-μ)/(σ*sqrt(2))
+                _normalize_vals.append((v-curr_avg_value)/curr_std_value)
+            if len(_states)>0:
+                states.extend(_states)
+                mcts_probs.extend(_mcts_probs)
+                values.extend(_normalize_vals)
+
+        assert len(states)>0
         assert len(states)==len(values)
         assert len(states)==len(mcts_probs)
 
