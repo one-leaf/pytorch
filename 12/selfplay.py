@@ -151,7 +151,7 @@ class Train():
                 # 方块的个数越多越好
                 if game.terminal:
                     _game_last_status = game.getNoEmptyCount()/200.
-                    game_reward =  _game_last_status + game.score # * 10  
+                    game_reward =  _game_last_status #+ game.score # * 10  
 
                     result = self.read_status_file(jsonfile)
 
