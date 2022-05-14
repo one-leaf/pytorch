@@ -124,7 +124,7 @@ class Train():
                     action, move_probs = player.get_action(game, temp=self.temp, return_prob=1, need_random=False) 
                 else: 
                     action, move_probs = player.get_action(game, temp=self.temp, return_prob=1, need_random=True, game_keys=game_keys) 
-               
+
                 _, reward = game.step(action)
 
                 _step["key"] = game.get_key()
