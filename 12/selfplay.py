@@ -247,13 +247,15 @@ class Train():
             curr_avg_value = sum(_values)/len(_values)
             curr_std_value = np.std(_values)
             # 数据的标准差太小，则放弃这批数据
-            if curr_std_value<=0.1:
+            if curr_std_value<=0.01:
                 print(p, "std too small:", curr_std_value, _values ) 
                 break
-            curr_std_value = curr_std_value *(2**0.5)
+            curr_std_value = curr_std_value * (2**0.5)
             for v in _values:
                 #标准化的标准差为 (x-μ)/(σ*sqrt(2))
-                _normalize_vals.append((v-curr_avg_value)/curr_std_value)
+                _nv = (v-curr_avg_value)/curr_std_value 
+                if _nv == 0: _nv = 1e-8
+                _normalize_vals.append(_nv)
             if len(_states)>0:
                 states.extend(_states)
                 mcts_probs.extend(_mcts_probs)
