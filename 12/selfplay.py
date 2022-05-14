@@ -245,8 +245,12 @@ class Train():
                 
             # 重新计算
             curr_avg_value = sum(_values)/len(_values)
-            curr_std_value = np.std(_values)*(2**0.5)
-            if curr_std_value==0: curr_std_value=1
+            curr_std_value = np.std(_values)
+            # 数据的方差太小，则放弃这批数据
+            if curr_std_value<=0.1:
+                print(p, "std too small:", curr_std_value, _values ) 
+                break
+            curr_std_value = curr_std_value *(2**0.5)
             for v in _values:
                 #标准化的标准差为 (x-μ)/(σ*sqrt(2))
                 _normalize_vals.append((v-curr_avg_value)/curr_std_value)
