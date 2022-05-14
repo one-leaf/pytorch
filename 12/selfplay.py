@@ -246,6 +246,7 @@ class Train():
             # 重新计算
             curr_avg_value = sum(_values)/len(_values)
             curr_std_value = np.std(_values)*(2**0.5)
+            if curr_std_value==0: curr_std_value=1
             for v in _values:
                 #标准化的标准差为 (x-μ)/(σ*sqrt(2))
                 _normalize_vals.append((v-curr_avg_value)/curr_std_value)
@@ -253,7 +254,7 @@ class Train():
                 states.extend(_states)
                 mcts_probs.extend(_mcts_probs)
                 values.extend(_normalize_vals)
-
+            print(_normalize_vals)
         assert len(states)>0
         assert len(states)==len(values)
         assert len(states)==len(mcts_probs)
