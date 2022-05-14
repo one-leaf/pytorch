@@ -246,7 +246,7 @@ class Train():
             # 重新计算
             curr_avg_value = sum(_values)/len(_values)
             curr_std_value = np.std(_values)
-            # 数据的方差太小，则放弃这批数据
+            # 数据的标准差太小，则放弃这批数据
             if curr_std_value<=0.1:
                 print(p, "std too small:", curr_std_value, _values ) 
                 break
