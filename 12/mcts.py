@@ -84,8 +84,8 @@ class MCTS():
         # m = np.power(np.array(visits), 1./temp)
         m = np.array(visits)
         m_sum = np.sum(m)
-        if m_sum<=1:
-            v_len = len(acts)
+        v_len = len(acts)
+        if m_sum<=v_len:
             probs = np.ones(v_len)/v_len
         else:
             probs = m/m_sum
