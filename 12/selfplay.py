@@ -254,7 +254,7 @@ class Train():
                 states.extend(_states)
                 mcts_probs.extend(_mcts_probs)
                 values.extend(_normalize_vals)
-            print(_normalize_vals)
+            print(p, _normalize_vals[:3], "..." ,_normalize_vals[-3:])
         assert len(states)>0
         assert len(states)==len(values)
         assert len(states)==len(mcts_probs)
