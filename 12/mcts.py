@@ -82,12 +82,12 @@ class MCTS():
 
         # print(visits, temp)
         # m = np.power(np.array(visits), 1./temp)
-        m = np.array(visits)
-        m_sum = np.sum(m)
+        m_sum = sum(visits)
         v_len = len(acts)
         if m_sum<=v_len:
             probs = np.ones(v_len)/v_len
         else:
+            m = np.array(visits)
             probs = m/m_sum
         return acts, probs, qs
 
