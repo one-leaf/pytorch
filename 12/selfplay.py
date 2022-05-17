@@ -45,13 +45,17 @@ class Train():
             result={}
             result={"agent":0, "reward":[], "pieces":[], "qvals":[], "QVal":0}
         if "curr" not in result:
-            result["curr"]={"reward":0,"pieces":0,"agent1000":0,"agent100":0}
+            result["curr"]={"reward":0, "pieces":0, "agent1000":0, "agent100":0, "height":0}
         if "best" not in result:
             result["best"]={"reward":0,"pieces":0,"agent":0}
         if "cpuct" not in result:
             result["cpuct"]={"0.1":0,"0.2":0}
         if "avg_time" not in result:
             result["avg_time"]=0
+        if "height" not in result:
+            result["height"]=[]
+        if "height" not in result["curr"]:
+            result["curr"]["height"]=0
         return result
 
     def collect_selfplay_data(self):
@@ -136,6 +140,10 @@ class Train():
 
                 # 这里的奖励是消除的行数
                 if reward > 0:
+                    if result["curr"]["height"]==0:
+                        result["curr"]["height"]=game.pieceheight
+                    else:
+                        result["curr"]["height"] = result["curr"]["height"]*0.99 + game.pieceheight *0.01
                     print("#"*40, 'score:', game.score, 'height:', game.pieceheight, 'piece:', game.piececount, 'step:', i, "#"*40)
 
                 # 方块的个数越多越好
@@ -277,6 +285,7 @@ class Train():
             result["reward"].append(round(result["curr"]["reward"]/result["curr"]["agent1000"],2))
             result["pieces"].append(round(result["curr"]["pieces"]/result["curr"]["agent1000"],2))
             result["qvals"].append(round(result["QVal"],2))
+            result["height"].append(result["curr"]["height"])
             result["curr"]["agent100"] -= 100 
             while len(result["reward"])>200:
                 result["reward"].remove(result["reward"][0])
@@ -284,6 +293,8 @@ class Train():
                 result["pieces"].remove(result["pieces"][0])
             while len(result["qvals"])>200:
                 result["qvals"].remove(result["qvals"][0])
+            while len(result["height"])>200:    
+                result["height"].remove(result["height"][0])
 
             # 每100局更新一次cpuct参数
             qval = result["QVal"]
@@ -306,7 +317,7 @@ class Train():
                     self.policy_value_net.save_model(newmodelfile)
 
         if result["curr"]["agent1000"]>1000:
-            result["curr"]={"reward":0,"pieces":0,"agent1000":0,"agent100":0}
+            result["curr"]={"reward":0,"pieces":0,"agent1000":0,"agent100":0,"height":0}
 
             newmodelfile = model_file+"_"+str(result["agent"])
             if not os.path.exists(newmodelfile):
