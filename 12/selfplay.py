@@ -143,7 +143,7 @@ class Train():
                     if result["curr"]["height"]==0:
                         result["curr"]["height"]=game.pieceheight
                     else:
-                        result["curr"]["height"] = result["curr"]["height"]*0.99 + game.pieceheight *0.01
+                        result["curr"]["height"] = round(result["curr"]["height"]*0.99 + game.pieceheight*0.01, 2)
                     json.dump(result, open(jsonfile,"w"), ensure_ascii=False)
                     print("#"*40, 'score:', game.score, 'height:', game.pieceheight, 'piece:', game.piececount, 'step:', i, "#"*40)
 
