@@ -120,6 +120,7 @@ class Train():
                 game.show_mcts_process=True
 
             for i in count():
+                if i%10==9: result = self.read_status_file(jsonfile)
                 _step={"step":i}
                 _step["state"] = game.current_state()               
                 _step["piece_count"] = game.piececount               
