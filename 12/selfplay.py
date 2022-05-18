@@ -120,7 +120,6 @@ class Train():
                 game.show_mcts_process=True
 
             for i in count():
-                if i%10==9: result = self.read_status_file(jsonfile)
                 _step={"step":i}
                 _step["state"] = game.current_state()               
                 _step["piece_count"] = game.piececount               
@@ -141,6 +140,7 @@ class Train():
 
                 # 这里的奖励是消除的行数
                 if reward > 0:
+                    result = self.read_status_file(jsonfile)
                     if result["curr"]["height"]==0:
                         result["curr"]["height"]=game.pieceheight
                     else:
@@ -157,8 +157,8 @@ class Train():
 
                     # 更新状态
                     game_reward =  _game_last_reward + game.score   
-                    result = self.read_status_file(jsonfile)
 
+                    result = self.read_status_file(jsonfile)
                     if result["QVal"]==0:
                         result["QVal"] = game_reward
                         result["avg_time"]= time.time()-start_time
@@ -182,6 +182,7 @@ class Train():
                     result["curr"]["pieces"] += game.piececount
                     result["curr"]["agent1000"] += 1
                     result["curr"]["agent100"] += 1
+                    json.dump(result, open(jsonfile,"w"), ensure_ascii=False) 
 
                     game.print()
                     print(game_num, 'reward:', game.score, "Qval:", game_reward, 'len:', i, "piececount:", game.piececount, "time:", time.time()-start_time)
@@ -199,8 +200,6 @@ class Train():
             game_datas.append(_data)
 
             borads.append(game.board)
-
-            json.dump(result, open(jsonfile,"w"), ensure_ascii=False) 
 
             # 如果训练次数超过了最大次数，并且最大得分值超过了平均得分值，则停止训练
             if game_num >= min_game_num and can_exit_flag: break
@@ -283,6 +282,7 @@ class Train():
             savefile = os.path.join(data_wait_dir, filename)
             pickle.dump(obj, open(savefile, "wb"))
        
+        result = self.read_status_file(jsonfile)
         if result["curr"]["agent100"]>100:
             result["reward"].append(round(result["curr"]["reward"]/result["curr"]["agent1000"],2))
             result["pieces"].append(round(result["curr"]["pieces"]/result["curr"]["agent1000"],2))
