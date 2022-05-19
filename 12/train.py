@@ -180,7 +180,7 @@ class Train():
                 # 使用对抗数据重新训练策略价值网络模型
                 _, v_loss, p_loss, entropy = self.policy_update(data, self.epochs)
                 if i%10 == 0:
-                    print(("TRAIN idx {} : {} / {} actor_loss:{:.5f}, critic_loss:{:.5f}, entropy:{:.5f}")\
+                    print(("TRAIN idx {} : {} / {} v_loss:{:.5f}, p_loss:{:.5f}, entropy:{:.5f}")\
                         .format(i, i*self.batch_size, dataset_len, v_loss, p_loss, entropy))
 
                     if need_print_test:
