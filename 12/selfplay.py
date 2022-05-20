@@ -283,9 +283,9 @@ class Train():
             result["vars"]["min"] = result["vars"]["min"]*0.999 + min(_normalize_vals)*0.001
 
         if result["vars"]["max"]>1 or result["vars"]["min"]<-1:
-            result["vars"]["std"] = result["vars"]["std"]+0.01
-        else:
             result["vars"]["std"] = result["vars"]["std"]-0.01
+        else:
+            result["vars"]["std"] = result["vars"]["std"]+0.01
 
         json.dump(result, open(jsonfile,"w"), ensure_ascii=False)
 
