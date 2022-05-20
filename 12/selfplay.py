@@ -57,6 +57,7 @@ class Train():
         if "height" not in result["curr"]:
             result["curr"]["height"]=0
         if "vars" not in result or "std" not in result["vars"]:
+            # 缺省std = sqrt(2)
             result["vars"]={"max":1,"min":-1,"std":0.7}
         return result
 
@@ -271,7 +272,7 @@ class Train():
                 continue
             curr_std_value = curr_std_value / result["vars"]["std"] 
             for v in _values:
-                #标准化的标准差为 (x-μ)/(σ*sqrt(2))
+                #标准化的标准差为 (x-μ)/(σ/avg_std)
                 _nv = (v-curr_avg_value)/curr_std_value 
                 if _nv == 0: _nv = 1e-8
                 _normalize_vals.append(_nv)
