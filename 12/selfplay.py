@@ -272,7 +272,7 @@ class Train():
                 continue
             curr_std_value = curr_std_value / result["vars"]["std"] 
             for v in _values:
-                #标准化的标准差为 (x-μ)/(σ/avg_std)
+                #标准化的标准差为 (x-μ)/(σ/avg_std), avg_std 调整的规则是平均最大值和平均最小值都在 [-1 ~ 1] 的范围内
                 _nv = (v-curr_avg_value)/curr_std_value 
                 if _nv == 0: _nv = 1e-8
                 _normalize_vals.append(_nv)
