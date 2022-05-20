@@ -56,6 +56,8 @@ class Train():
             result["height"]=[]
         if "height" not in result["curr"]:
             result["curr"]["height"]=0
+        if "var" not in result:
+            result["vars"]={"max":1,"min":-1,"var":2**0.5}
         return result
 
     def collect_selfplay_data(self):
@@ -226,7 +228,7 @@ class Train():
             step_count = len(data["steps"])
             for i in range(step_count-1):
                 data["steps"][i]["reward"] = data["steps"][i+1]["reward"] 
-                       
+
         # 按0.98的衰减更新reward
         for data in game_datas:
             step_count = len(data["steps"])
@@ -264,7 +266,7 @@ class Train():
             if curr_std_value<=0.01:
                 print(p, "std too small:", curr_std_value, _values ) 
                 break
-            curr_std_value = curr_std_value * (2**0.5)
+            curr_std_value = curr_std_value * result["vars"]["var"] 
             for v in _values:
                 #标准化的标准差为 (x-μ)/(σ*sqrt(2))
                 _nv = (v-curr_avg_value)/curr_std_value 
@@ -275,6 +277,16 @@ class Train():
                 mcts_probs.extend(_mcts_probs)
                 values.extend(_normalize_vals)
             print(p, len(_states), _normalize_vals[:3], "..." ,_normalize_vals[-3:])
+            result["vars"]["max"] = result["vars"]["max"]*0.999 + max(_normalize_vals)*0.001
+            result["vars"]["min"] = result["vars"]["min"]*0.999 + max(_normalize_vals)*0.001
+
+        if result["vars"]["max"]>1 or result["vars"]["min"]<-1:
+            result["vars"]["var"] = result["vars"]["var"]+0.01
+        else:
+            result["vars"]["var"] = result["vars"]["var"]-0.01
+
+        json.dump(result, open(jsonfile,"w"), ensure_ascii=False)
+
         assert len(states)>0
         assert len(states)==len(values)
         assert len(states)==len(mcts_probs)
