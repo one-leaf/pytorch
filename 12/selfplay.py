@@ -266,9 +266,9 @@ class Train():
             curr_avg_value = sum(_values)/len(_values)
             curr_std_value = np.std(_values)
             # 数据的标准差太小，则放弃这批数据
-            if c<2 or curr_std_value<=0.01:
+            if c<2 or curr_std_value<=0.1:
                 print(p, "std too small:", curr_std_value, _values ) 
-                break
+                continue
             curr_std_value = curr_std_value / result["vars"]["std"] 
             for v in _values:
                 #标准化的标准差为 (x-μ)/(σ*sqrt(2))
