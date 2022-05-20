@@ -224,11 +224,11 @@ class Train():
             print(line)
         print((" "+" -"*agent.width+" ")*len(borads))
 
-        # 重新计算得分,需要错位，因为得分的那一步不是得分最高
-        for data in game_datas:
-            step_count = len(data["steps"])
-            for i in range(step_count-1):
-                data["steps"][i]["reward"] = data["steps"][i+1]["reward"] 
+        # # 重新计算得分,需要错位，因为得分的那一步不是得分最高
+        # for data in game_datas:
+        #     step_count = len(data["steps"])
+        #     for i in range(step_count-1):
+        #         data["steps"][i]["reward"] = data["steps"][i+1]["reward"] 
 
         # 按0.98的衰减更新reward
         for data in game_datas:
