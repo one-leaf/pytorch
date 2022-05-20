@@ -164,8 +164,10 @@ class Agent(object):
             self.piececount +=1 
 
             # 如果不在下落过程中，则插入一个空白状态，表示更换了方块
-            self.fallpiece_status.append(np.zeros((self.height, self.width)))
-            self.fallpiece_status.append(self.get_fallpiece_board())
+            if self.reward>0:
+                self.fallpiece_status.append(np.ones((self.height, self.width)))    
+            else:
+                self.fallpiece_status.append(np.zeros((self.height, self.width)))
 
             if self.pieceheight>=16 or (not self.tetromino.validposition(self.board,self.fallpiece, ay=1)):                  
                 self.terminal = True 
