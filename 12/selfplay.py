@@ -280,8 +280,8 @@ class Train():
                 mcts_probs.extend(_mcts_probs)
                 values.extend(_normalize_vals)
             print(p, len(_states), _normalize_vals[:3], "..." ,_normalize_vals[-3:])
-            result["vars"]["max"] = result["vars"]["max"]*0.999 + max(_normalize_vals)*0.001
-            result["vars"]["min"] = result["vars"]["min"]*0.999 + min(_normalize_vals)*0.001
+            result["vars"]["max"] = result["vars"]["max"]*0.9999 + max(_normalize_vals)*0.0001
+            result["vars"]["min"] = result["vars"]["min"]*0.9999 + min(_normalize_vals)*0.0001
 
         if result["vars"]["max"]>1 or result["vars"]["min"]<-1:
             result["vars"]["std"] = round(result["vars"]["std"]-0.01,2)
