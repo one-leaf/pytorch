@@ -56,8 +56,8 @@ class Train():
             result["height"]=[]
         if "height" not in result["curr"]:
             result["curr"]["height"]=0
-        if "var" not in result:
-            result["vars"]={"max":1,"min":-1,"var":2**0.5}
+        if "vars" not in result or "std" not in result["vars"]:
+            result["vars"]={"max":1,"min":-1,"std":0.7}
         return result
 
     def collect_selfplay_data(self):
@@ -251,7 +251,9 @@ class Train():
 
         for p in range(max_piece_count):
             _states, _mcts_probs, _normalize_vals, _values = [], [], [], []
+            c = 0
             for data in game_datas:
+                c = c + 1
                 for step in data["steps"]:
                     if step["piece_count"]!=p: continue
                     _states.append(step["state"])
@@ -263,10 +265,10 @@ class Train():
             curr_avg_value = sum(_values)/len(_values)
             curr_std_value = np.std(_values)
             # 数据的标准差太小，则放弃这批数据
-            if curr_std_value<=0.01:
+            if c<2 or curr_std_value<=0.01:
                 print(p, "std too small:", curr_std_value, _values ) 
                 break
-            curr_std_value = curr_std_value * result["vars"]["var"] 
+            curr_std_value = curr_std_value / result["vars"]["std"] 
             for v in _values:
                 #标准化的标准差为 (x-μ)/(σ*sqrt(2))
                 _nv = (v-curr_avg_value)/curr_std_value 
