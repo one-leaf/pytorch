@@ -40,7 +40,7 @@ class Agent(object):
         # 面板
         self.board = self.tetromino.getblankboard()
         # 状态： 0 下落过程中 1 更换方块 2 结束一局
-        self.state =0
+        self.state = 0
         # 上一个下落方块的截图
         self.prev_fallpiece_boards=None
         # 每个方块的高度
@@ -162,6 +162,10 @@ class Agent(object):
             self.nextpiece = self.tetromino.getnewpiece()
             self.piecesteps = 0
             self.piececount +=1 
+
+            # 如果不在下落过程中，则插入一个空白状态，表示更换了方块
+            self.fallpiece_status.append(np.zeros((self.height, self.width)))
+            self.fallpiece_status.append(self.get_fallpiece_board())
 
             if self.pieceheight>=16 or (not self.tetromino.validposition(self.board,self.fallpiece, ay=1)):                  
                 self.terminal = True 
@@ -306,7 +310,7 @@ class Agent(object):
         return pos
 
     # 获得当前的全部特征
-    # 背景 + 前8步走法 = 9
+    # 背景 + 前7步走法 + 当前状态 = 9
     # 返回 [9, height, width]
     def current_state(self):
         state = np.zeros((9, self.height, self.width))
