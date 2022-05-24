@@ -261,19 +261,19 @@ class Train():
             curr_std_value = np.std(_values)
             # 数据的标准差太小，则放弃这批数据
             if c<2 or curr_std_value<=0.1:
-                print(p, "std too small:", curr_std_value, _values ) 
+                print(p, "std too small:", len(_states), "std:", curr_std_value, _values[:3], "...", _values[-3:])  
                 continue
-            curr_std_value = curr_std_value / result["vars"]["std"] 
+            curr_std_value_fix = curr_std_value / result["vars"]["std"] 
             for v in _values:
                 #标准化的标准差为 (x-μ)/(σ/std), std 调整的规则是平均最大值和平均最小值都在 [-1 ~ 1] 的范围内
-                _nv = (v-curr_avg_value)/curr_std_value 
+                _nv = (v-curr_avg_value)/curr_std_value_fix 
                 if _nv == 0: _nv = 1e-8
                 _normalize_vals.append(_nv)
             if len(_states)>0:
                 states.extend(_states)
                 mcts_probs.extend(_mcts_probs)
                 values.extend(_normalize_vals)
-            print(p, len(_states), _normalize_vals[:3], "..." ,_normalize_vals[-3:])
+            print(p, len(_states),"std:", curr_std_value,  _normalize_vals[:3], "..." ,_normalize_vals[-3:])
             result["vars"]["max"] = result["vars"]["max"]*0.999 + max(_normalize_vals)*0.001
             result["vars"]["min"] = result["vars"]["min"]*0.999 + min(_normalize_vals)*0.001
 
