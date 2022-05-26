@@ -244,7 +244,7 @@ class Train():
             if data["piece_count"]>max_piece_count:
                 max_piece_count = data["piece_count"]
 
-        _states, _mcts_probs, _normalize_vals, _values = [], [], [], []
+        _states, _mcts_probs, _values = [], [], []
         for p in range(max_piece_count):
             for data in game_datas:
                 for step in data["steps"]:
@@ -263,6 +263,7 @@ class Train():
                 print(p, "std too small:", len(_states), "std:", curr_std_value, _values[:3], "...", _values[-3:])  
                 continue
 
+            _normalize_vals = []
             curr_std_value_fix = curr_std_value / result["vars"]["std"] 
             for v in _values:
                 #标准化的标准差为 (x-μ)/(σ/std), std 调整的规则是平均最大值和平均最小值都在 [-1 ~ 1] 的范围内
@@ -277,7 +278,7 @@ class Train():
             result["vars"]["max"] = result["vars"]["max"]*0.999 + max(_normalize_vals)*0.001
             result["vars"]["min"] = result["vars"]["min"]*0.999 + min(_normalize_vals)*0.001
 
-            _states, _mcts_probs, _normalize_vals, _values = [], [], [], []
+            _states, _mcts_probs, _values = [], [], []
 
         if result["vars"]["max"]>1 or result["vars"]["min"]<-1:
             result["vars"]["std"] = round(result["vars"]["std"]-0.0001,4)
