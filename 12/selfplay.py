@@ -244,38 +244,40 @@ class Train():
             if data["piece_count"]>max_piece_count:
                 max_piece_count = data["piece_count"]
 
+        _states, _mcts_probs, _normalize_vals, _values = [], [], [], []
         for p in range(max_piece_count):
-            _states, _mcts_probs, _normalize_vals, _values = [], [], [], []
-            c = 0
             for data in game_datas:
-                c = c + 1
                 for step in data["steps"]:
                     if step["piece_count"]!=p: continue
                     _states.append(step["state"])
                     _mcts_probs.append(step["move_probs"])
                     _values.append(step["reward"])
-            if len(_states)==0: break
+
+            if len(_states)==0: continue
                 
             # 重新计算
             curr_avg_value = sum(_values)/len(_values)
             curr_std_value = np.std(_values)
-            # 数据的标准差太小，则放弃这批数据
-            if c<2 or curr_std_value<=0.1:
+            # 数据的标准差太小，则继续增加样本数量
+            if curr_std_value<=0.1:
                 print(p, "std too small:", len(_states), "std:", curr_std_value, _values[:3], "...", _values[-3:])  
                 continue
+
             curr_std_value_fix = curr_std_value / result["vars"]["std"] 
             for v in _values:
                 #标准化的标准差为 (x-μ)/(σ/std), std 调整的规则是平均最大值和平均最小值都在 [-1 ~ 1] 的范围内
                 _nv = (v-curr_avg_value)/curr_std_value_fix 
                 if _nv == 0: _nv = 1e-8
                 _normalize_vals.append(_nv)
-            if len(_states)>0:
-                states.extend(_states)
-                mcts_probs.extend(_mcts_probs)
-                values.extend(_normalize_vals)
+
+            states.extend(_states)
+            mcts_probs.extend(_mcts_probs)
+            values.extend(_normalize_vals)
             print(p, len(_states),"std:", curr_std_value,  _normalize_vals[:3], "..." ,_normalize_vals[-3:])
             result["vars"]["max"] = result["vars"]["max"]*0.999 + max(_normalize_vals)*0.001
             result["vars"]["min"] = result["vars"]["min"]*0.999 + min(_normalize_vals)*0.001
+
+            _states, _mcts_probs, _normalize_vals, _values = [], [], [], []
 
         if result["vars"]["max"]>1 or result["vars"]["min"]<-1:
             result["vars"]["std"] = round(result["vars"]["std"]-0.0001,4)
