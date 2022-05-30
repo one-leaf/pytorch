@@ -224,11 +224,16 @@ class Train():
             print(line)
         print((" "+" -"*agent.width+" ")*len(borads))
 
-        # 按0.90的衰减更新reward
+        # 按0.50的衰减更新reward
         for data in game_datas:
             step_count = len(data["steps"])
-            for i in range(step_count-2,-1,-1):
-                data["steps"][i]["reward"] += data["steps"][i+1]["reward"]*0.90
+            piece_count = -1
+            v = 0
+            for i in range(step_count-1,-1,-1):
+                if piece_count!=data["steps"][i]["piece_count"]:
+                    piece_count = data["steps"][i]["piece_count"]
+                    v = 0.5*v+data["steps"][i]["reward"]
+                data["steps"][i]["reward"] = v
 
         # 将所有的reward加上每一局的最后基础得分
         for data in game_datas:
