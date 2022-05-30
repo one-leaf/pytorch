@@ -244,8 +244,8 @@ class Train():
             if data["piece_count"]>max_piece_count:
                 max_piece_count = data["piece_count"]
 
-        _states, _mcts_probs, _values = [], [], []
         for p in range(max_piece_count):
+            _states, _mcts_probs, _values = [], [], []
             for data in game_datas:
                 for step in data["steps"]:
                     if step["piece_count"]!=p: continue
@@ -278,7 +278,7 @@ class Train():
             result["vars"]["max"] = result["vars"]["max"]*0.999 + max(_normalize_vals)*0.001
             result["vars"]["min"] = result["vars"]["min"]*0.999 + min(_normalize_vals)*0.001
 
-            _states, _mcts_probs, _values = [], [], []
+            # _states, _mcts_probs, _values = [], [], []
 
         if result["vars"]["max"]>1 or result["vars"]["min"]<-1:
             result["vars"]["std"] = round(result["vars"]["std"]-0.0001,4)
