@@ -250,7 +250,7 @@ class Train():
                 max_piece_count = data["piece_count"]
 
         for p in range(max_piece_count):
-            _info = []
+            _info,_info_idx = [],[]
             _states, _mcts_probs, _values = [], [], []
             for data in game_datas:
                 for step in data["steps"]:
@@ -262,6 +262,7 @@ class Train():
                     _info.append(-1)
                 else:      
                     _info.append(_values[-1])
+                    _info_idx.append(len(_values)-1)
             print(p, _info)
 
             if len(_states)==0: continue
@@ -274,6 +275,7 @@ class Train():
                 print(p, "std too small:", len(_states), "std:", curr_std_value, _values[:3], "...", _values[-3:])  
                 continue
 
+            _info = []
             _normalize_vals = []
             curr_std_value_fix = curr_std_value / result["vars"]["std"] 
             for v in _values:
@@ -282,10 +284,13 @@ class Train():
                 if _nv == 0: _nv = 1e-8
                 _normalize_vals.append(_nv)
 
+            for i in range(_info_idx):
+                _info.append(_normalize_vals[i])
+            print(p, len(_normalize_vals), "std:", curr_std_value,  _info)
+
             states.extend(_states)
             mcts_probs.extend(_mcts_probs)
             values.extend(_normalize_vals)
-            print(p, len(_states),"std:", curr_std_value,  _normalize_vals[:3], "..." ,_normalize_vals[-3:])
             result["vars"]["max"] = result["vars"]["max"]*0.999 + max(_normalize_vals)*0.001
             result["vars"]["min"] = result["vars"]["min"]*0.999 + min(_normalize_vals)*0.001
 
