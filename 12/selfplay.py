@@ -250,6 +250,7 @@ class Train():
                 max_piece_count = data["piece_count"]
 
         for p in range(max_piece_count):
+            _info = []
             _states, _mcts_probs, _values = [], [], []
             for data in game_datas:
                 for step in data["steps"]:
@@ -257,6 +258,11 @@ class Train():
                     _states.append(step["state"])
                     _mcts_probs.append(step["move_probs"])
                     _values.append(step["reward"])
+                if len(_values)==0:
+                    _info.append(-1)
+                else:      
+                    _info.append(_values[-1])
+            print(p, _info)
 
             if len(_states)==0: continue
                 
