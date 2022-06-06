@@ -284,7 +284,7 @@ class Train():
                 if _nv == 0: _nv = 1e-8
                 _normalize_vals.append(_nv)
 
-            for i in range(_info_idx):
+            for i in _info_idx:
                 _info.append(_normalize_vals[i])
             print(p, len(_normalize_vals), "std:", curr_std_value,  _info)
 
