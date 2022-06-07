@@ -172,9 +172,8 @@ class Train():
             for i, data in enumerate(training_loader):  # 计划训练批次
                 if i==0:
                     _batch, _qvals, _actions = data
-                    print(_batch[0][0])
-                    print(_batch[0][1])
-                    print(_batch[0][2])
+                    for j in range(len(_batch[0])):
+                        print(_batch[0][j])
                     print(_qvals[0])
                     print(_actions[0])
 
