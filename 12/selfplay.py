@@ -298,13 +298,13 @@ class Train():
             values.extend(_normalize_vals)
             result["vars"]["max"] = result["vars"]["max"]*0.999 + max(_normalize_vals)*0.001
             result["vars"]["min"] = result["vars"]["min"]*0.999 + min(_normalize_vals)*0.001
-
+            result["vars"]["std"] = result["vars"]["std"]*0.999 + np.std(_normalize_vals)*0.001
             # _states, _mcts_probs, _values = [], [], []
 
-        if result["vars"]["max"]>1 or result["vars"]["min"]<-1:
-            result["vars"]["std"] = round(result["vars"]["std"]-0.0001,4)
-        else:
-            result["vars"]["std"] = round(result["vars"]["std"]+0.0001,4)
+        # if result["vars"]["max"]>1 or result["vars"]["min"]<-1:
+        #     result["vars"]["std"] = round(result["vars"]["std"]-0.0001,4)
+        # else:
+        #     result["vars"]["std"] = round(result["vars"]["std"]+0.0001,4)
 
         json.dump(result, open(jsonfile,"w"), ensure_ascii=False)
 
