@@ -312,13 +312,13 @@ class Agent(object):
         return pos
 
     # 获得当前的全部特征
-    # 背景 + 前7步走法 + 当前状态 = 9
-    # 返回 [9, height, width]
+    # 背景 + 前2步走法 + 当前状态 = 3
+    # 返回 [3, height, width]
     def current_state(self):
-        state = np.zeros((9, self.height, self.width))
+        state = np.zeros((3, self.height, self.width))
         state[0] = self.getBoard()
 
-        for i in range(8):
+        for i in range(2):
             state[i+1]=self.fallpiece_status[-1*(i+1)]
 
         # state[8] = self.pos_board
