@@ -175,12 +175,6 @@ class Train():
                     print(_batch[0][0])
                     print(_batch[0][1])
                     print(_batch[0][2])
-                    print(_batch[0][3])
-                    print(_batch[0][4])
-                    print(_batch[0][5])
-                    print(_batch[0][6])
-                    print(_batch[0][7])
-                    print(_batch[0][8])
                     print(_qvals[0])
                     print(_actions[0])
 
