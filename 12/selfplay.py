@@ -284,6 +284,11 @@ class Train():
                 if _nv == 0: _nv = 1e-8
                 _normalize_vals.append(_nv)
 
+            max_normalize_val = max(_normalize_vals)-1
+            if max_normalize_val>0:
+                for i in range(len(_normalize_vals)):
+                    _normalize_vals[i] -= max_normalize_val
+
             for i in _info_idx:
                 _info.append(_normalize_vals[i])
             print(p, len(_normalize_vals), "std:", curr_std_value,  _info)
