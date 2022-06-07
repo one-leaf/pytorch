@@ -272,7 +272,7 @@ class Train():
             curr_std_value = np.std(_values)
             # 数据的标准差太小，则继续增加样本数量
             if curr_std_value<=0.1:
-                print(p, "std too small:", len(_states), "std:", curr_std_value, _values[:3], "...", _values[-3:])  
+                print(p, "std too small:", len(_states), "std:", curr_std_value, _info)  
                 continue
 
             _info = []
