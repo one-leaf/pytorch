@@ -285,9 +285,8 @@ class Train():
                 _normalize_vals.append(_nv)
 
             max_normalize_val = max(_normalize_vals)-1
-            if max_normalize_val>0:
-                for i in range(len(_normalize_vals)):
-                    _normalize_vals[i] -= max_normalize_val
+            for i in range(len(_normalize_vals)):
+                _normalize_vals[i] -= max_normalize_val
 
             for i in _info_idx:
                 _info.append(_normalize_vals[i])
