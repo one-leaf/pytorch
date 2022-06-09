@@ -284,6 +284,7 @@ class Train():
                 if _nv == 0: _nv = 1e-8
                 _normalize_vals.append(_nv)
 
+            # 将最好的一步的值设置为1
             max_normalize_val = max(_normalize_vals)-1
             for i in range(len(_normalize_vals)):
                 _normalize_vals[i] -= max_normalize_val
