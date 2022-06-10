@@ -45,11 +45,11 @@ class Agent(object):
         self.prev_fallpiece_boards=None
         # 每个方块的高度
         self.pieces_height = []     
-        # 下降的状态
-        self.fallpiece_status = deque(maxlen=10)
+        # 盘面的状态
+        self.status = deque(maxlen=10)
         for i in range(9):
-            self.fallpiece_status.append(np.zeros((self.height, self.width)))
-        self.fallpiece_status.append(self.get_fallpiece_board())
+            self.status.append(np.zeros((self.height, self.width)))
+        self.status.append(self.get_fallpiece_board())
         # 下一个可用步骤
         self.availables=self.get_availables()
         # 显示mcts中间过程
@@ -141,7 +141,7 @@ class Agent(object):
 
         fallpiece_y = self.fallpiece['y']
 
-        self.fallpiece_status.append(self.get_fallpiece_board())
+        self.status.append(self.get_fallpiece_board() + self.getBoard())
         self.set_key()
 
         if not isFalling:
@@ -163,12 +163,6 @@ class Agent(object):
             self.piecesteps = 0
             self.piececount +=1 
 
-            # # 如果不在下落过程中，则插入一个空白状态，表示更换了方块
-            # if self.reward>0:
-            #     self.fallpiece_status.append(np.ones((self.height, self.width)))    
-            # else:
-            #     self.fallpiece_status.append(np.zeros((self.height, self.width)))
-
             if self.pieceheight>=16 or (not self.tetromino.validposition(self.board,self.fallpiece, ay=1)):                  
                 self.terminal = True 
                 self.state = 2
@@ -184,17 +178,15 @@ class Agent(object):
         return self.state, self.reward
 
     def set_key(self):
-        info = self.getBoard() + self.fallpiece_status[-1]
+        info = self.status[-1]
         self.key = hash(info.data.tobytes())
 
     def get_key(self):
         return self.key
 
     # 打印
-    def print2(self, add_fallpiece=False):
-        info = self.getBoard()
-        if add_fallpiece:
-            info += self.fallpiece_status[-1]
+    def print2(self):
+        info = self.status[-1]
         for y in range(self.height):
             line=str(y%10)+" "
             for x in range(self.width):
@@ -312,24 +304,12 @@ class Agent(object):
         return pos
 
     # 获得当前的全部特征
-    # 背景 + 前1步走法 + 当前状态 = 3
+    # 背景 + 前2步走法 = 3
     # 返回 [3, height, width]
     def current_state(self):
         state = np.zeros((3, self.height, self.width))
-        state[0] = self.getBoard()
-
-        for i in range(2):
-            state[i+1]=self.fallpiece_status[-1*(i+1)]
-
-        # state[8] = self.pos_board
-
-        # 前4步是对手的，后4步是自己的
-        # for j in range(4): 
-        #     idx = -2*j-1  #(-1,-3,-5,-7)
-        #     state[j+1]=self.fallpiece_status[idx]
-        # for j in range(4):
-        #     idx = -2*j-2  #(-2,-4,-6,-8)
-        #     state[j+5]=self.fallpiece_status[idx]
+        for i in range(3):
+            state[i]=self.status[-1*(i+1)]
 
         return state          
 
