@@ -312,7 +312,7 @@ class Agent(object):
         return pos
 
     # 获得当前的全部特征
-    # 背景 + 前2步走法 + 当前状态 = 3
+    # 背景 + 前1步走法 + 当前状态 = 3
     # 返回 [3, height, width]
     def current_state(self):
         state = np.zeros((3, self.height, self.width))
