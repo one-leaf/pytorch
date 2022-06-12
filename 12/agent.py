@@ -309,7 +309,7 @@ class Agent(object):
     def current_state(self):
         state = np.zeros((3, self.height, self.width))
         for i in range(3):
-            state[i]=self.status[-1*(i+1)]
+            state[-1*(i+1)]=self.status[-1*(i+1)]
 
         return state          
 
