@@ -1,5 +1,7 @@
 import os, glob, pickle
 
+from regex import P
+
 from model import PolicyValueNet, data_dir, data_wait_dir, model_file
 from agent import Agent, ACTIONS
 from mcts import MCTSPlayer
@@ -60,6 +62,26 @@ class Train():
             # 缺省std = sqrt(2)
             result["vars"]={"max":1,"min":-1,"std":0.7}
         return result
+
+    def get_equi_data(self, states, mcts_probs, values):
+        """
+        通过翻转增加数据集
+        play_data: [(state, mcts_prob, values), ..., ...]
+        """
+        extend_data = []
+        for i in range(len(states)):
+            state, mcts_prob, value=states[i], mcts_probs[i], values[i]
+            extend_data.append((state, mcts_prob, value))
+            equi_state = np.array([np.fliplr(s) for s in state])
+            equi_mcts_prob = mcts_prob[[0,1,3,2,4]]
+            extend_data.append((equi_state, equi_mcts_prob, value))
+            if i==0:
+                print("state:",state)
+                print("mcts_prob:",mcts_prob)
+                print("equi_state:",equi_state)
+                print("equi_mcts_prob:",equi_mcts_prob)
+                print("value:",value)
+        return extend_data
 
     def collect_selfplay_data(self):
         """收集自我对抗数据用于训练"""       
@@ -315,7 +337,7 @@ class Train():
         print("TRAIN Self Play end. length:%s value sum:%s saving ..." % (len(states),sum(values)))
 
         # 保存对抗数据到data_buffer
-        for obj in zip(states, mcts_probs, values):
+        for obj in self.get_equi_data(states, mcts_probs, values):
             filename = "{}.pkl".format(uuid.uuid1())
             savefile = os.path.join(data_wait_dir, filename)
             pickle.dump(obj, open(savefile, "wb"))
