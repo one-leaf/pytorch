@@ -1,7 +1,5 @@
 import os, glob, pickle
 
-from regex import P
-
 from model import PolicyValueNet, data_dir, data_wait_dir, model_file
 from agent import Agent, ACTIONS
 from mcts import MCTSPlayer
