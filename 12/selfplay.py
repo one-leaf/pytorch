@@ -133,9 +133,9 @@ class Train():
             print("game_num",game_num,"c_puct:",cpuct,"n_playout:",self.n_playout)
             player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=cpuct, n_playout=self.n_playout)
 
-            _data = {"steps":[],"last_state":0,"score":0,"piece_count":0}
-            game = copy.deepcopy(agent)
-            # game = Agent()
+            _data = {"steps":[],"shapes":[],"last_state":0,"score":0,"piece_count":0}
+            # game = copy.deepcopy(agent)
+            game = Agent()
 
             if game_num==1 or game_num==max_game_num:
                 game.show_mcts_process=True
@@ -144,7 +144,8 @@ class Train():
                 _step={"step":i}
                 _step["state"] = game.current_state()               
                 _step["piece_count"] = game.piececount               
-                                
+                _step["shape"] = game.fallpiece["shape"]
+
                 if game_num == 1:
                     action, move_probs = player.get_action(game, temp=self.temp, return_prob=1, need_random=False) 
                 else: 
@@ -161,6 +162,7 @@ class Train():
                 _step["action"] = action                
                 _step["move_probs"] = move_probs
 
+                _data["shapes"].append(_step["shape"])
                 _data["steps"].append(_step)
 
                 # 这里的奖励是消除的行数
@@ -266,26 +268,23 @@ class Train():
         states, mcts_probs, values= [], [], []
 
         # 分离每一步的全部步骤做同比
-        max_piece_count = 0
+        # max_piece_count = 0
+        # for data in game_datas:
+        #     if data["piece_count"]>max_piece_count:
+        #         max_piece_count = data["piece_count"]
+        shapes = set()
         for data in game_datas:
-            if data["piece_count"]>max_piece_count:
-                max_piece_count = data["piece_count"]
+            for shape in set(data["shapes"]):
+                shapes.add(shape)
 
-        for p in range(max_piece_count):
-            _info,_info_idx = [],[]
+        for shape in shapes:
             _states, _mcts_probs, _values = [], [], []
             for data in game_datas:
                 for step in data["steps"]:
-                    if step["piece_count"]!=p: continue
+                    if step["shape"]!=shape: continue
                     _states.append(step["state"])
                     _mcts_probs.append(step["move_probs"])
                     _values.append(step["reward"])
-                if len(_values)==0:
-                    _info.append(-1)
-                else:      
-                    _info.append(_values[-1])
-                    _info_idx.append(len(_values)-1)
-            print(p, _info)
 
             if len(_states)==0: continue
                 
@@ -297,7 +296,6 @@ class Train():
                 print(p, "std too small:", len(_states), "std:", curr_std_value)  
                 continue
 
-            _info = []
             _normalize_vals = []
             # 用正态分布的方式重新计算
             curr_std_value_fix = curr_std_value # * (2.0**0.5) # curr_std_value / result["vars"]["std"] 
@@ -314,9 +312,7 @@ class Train():
             # for i in range(len(_normalize_vals)):
             #     _normalize_vals[i] -= max_normalize_val
 
-            for i in _info_idx:
-                _info.append(_normalize_vals[i])
-            print(p, len(_normalize_vals), "std:", curr_std_value,  _info)
+            print(shape, len(_normalize_vals), "std:", curr_std_value,  "max:", max(_normalize_vals), "min:", min(_normalize_vals))
 
             states.extend(_states)
             mcts_probs.extend(_mcts_probs)
