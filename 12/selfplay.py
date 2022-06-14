@@ -7,8 +7,6 @@ from mcts import MCTSPlayer
 import sys, time, json, datetime
 
 from itertools import count
-from collections import deque
-from collections import namedtuple
 import os, math, random, uuid
 
 import numpy as np
@@ -150,12 +148,12 @@ class Train():
                 if game_num == 1:
                     action, move_probs = player.get_action(game, temp=self.temp, return_prob=1, need_random=False) 
                 else: 
-                    action, move_probs = player.get_action(game, temp=self.temp, return_prob=1, need_random=False) 
+                    action, move_probs = player.get_action(game, temp=self.temp, return_prob=1, need_random=True) 
 
                     if game.get_key() in game_keys:
                         print("game_num",game_num,"game_key",game.get_key(),"already exist")
                         print(game.steps, game.piececount, game.fallpiece["shape"], game.piecesteps, "key:", game.get_key(), "key_len:" ,len(game_keys))
-                        action = random.randchoice(game.get_availables())
+                        action = random.choice(game.get_availables())
 
                 _, reward = game.step(action)
 

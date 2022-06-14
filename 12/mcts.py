@@ -223,7 +223,10 @@ class MCTSPlayer(object):
                 # if (state.state == 1 and max_height<5) or (max_height<4 and random.random() < 0.25):
                 #     idx = np.random.randint(len(acts))
                 # elif random.random()>max_height/10 :
-                idx = np.random.choice(range(len(acts)), p=act_probs)
+                if act_qs[max_idx]<-0.5:
+                    idx = np.random.choice(range(len(acts)), p=act_probs)
+                else:
+                    idx = max_idx
                     # p = 0.75
                     # dirichlet = np.random.dirichlet(0.03 * np.ones(len(act_probs)))
                     # idx = np.random.choice(range(len(acts)), p=p*act_probs + (1.0-p) * dirichlet)
