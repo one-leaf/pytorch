@@ -151,7 +151,6 @@ class Train():
                     action, move_probs = player.get_action(game, temp=self.temp, return_prob=1, need_random=True) 
 
                     if game.get_key() in game_keys:
-                        print("game_num",game_num,"game_key",game.get_key(),"already exist")
                         print(game.steps, game.piececount, game.fallpiece["shape"], game.piecesteps, "key:", game.get_key(), "key_len:" ,len(game_keys))
                         action = random.choice(game.get_availables())
 
