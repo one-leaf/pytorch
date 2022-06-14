@@ -147,10 +147,10 @@ class Train():
                 _step["state"] = game.current_state()               
                 _step["piece_count"] = game.piececount               
                                 
-                if game_num == max_game_num:
-                    action, move_probs = player.get_action(game, temp=self.temp, return_prob=1, need_random=False) 
+                if game_num == 0:
+                    action, move_probs = player.get_action(game, temp=self.temp, return_prob=1, need_random=True) 
                 else: 
-                    action, move_probs = player.get_action(game, temp=self.temp, return_prob=1, need_random=True, game_keys=game_keys) 
+                    action, move_probs = player.get_action(game, temp=self.temp, return_prob=1, need_random=False, game_keys=game_keys) 
 
                 _, reward = game.step(action)
 

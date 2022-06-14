@@ -50,7 +50,7 @@ class MCTS():
             if self.depth>self.max_depth: self.max_depth = self.depth
             # 计算所有动作的探索次数，如果大于2000，则中断
             visits_sum = sum([self.Nsa[(s, a)] if (s, a) in self.Nsa else 0 for a in available_acts])          
-            if visits_sum > 1000: break
+            if visits_sum > 2000: break
             if n>=128 and visits_sum>=self._n_playout: break
 
 
