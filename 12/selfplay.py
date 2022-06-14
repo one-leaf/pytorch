@@ -56,9 +56,9 @@ class Train():
             result["height"]=[]
         if "height" not in result["curr"]:
             result["curr"]["height"]=0
-        if "vars" not in result or "std" not in result["vars"]:
+        if "vars" not in result or "avg" not in result["vars"]:
             # 缺省std = sqrt(2)
-            result["vars"]={"max":1,"min":-1,"std":0.7}
+            result["vars"]={"max":1, "min":-1, "std":1, "avg":0}
         return result
 
     def get_equi_data(self, states, mcts_probs, values):
@@ -297,17 +297,20 @@ class Train():
 
             _info = []
             _normalize_vals = []
-            curr_std_value_fix = curr_std_value * (2.0**0.5) # curr_std_value / result["vars"]["std"] 
+            # 用正态分布的方式重新计算
+            curr_std_value_fix = curr_std_value # * (2.0**0.5) # curr_std_value / result["vars"]["std"] 
             for v in _values:
-                #标准化的标准差为 (x-μ)/(σ/std), std 为 1/sqrt(2)
+                #标准化的标准差为 (x-μ)/(σ/std), std 为 1 # 1/sqrt(2)
                 _nv = (v-curr_avg_value)/curr_std_value_fix 
+                if _nv <-1 : _nv = -1
+                if _nv >1  : _nv = 1
                 if _nv == 0: _nv = 1e-8
                 _normalize_vals.append(_nv)
 
             # 将最好的一步的值设置为1
-            max_normalize_val = max(_normalize_vals)-1
-            for i in range(len(_normalize_vals)):
-                _normalize_vals[i] -= max_normalize_val
+            # max_normalize_val = max(_normalize_vals)-1
+            # for i in range(len(_normalize_vals)):
+            #     _normalize_vals[i] -= max_normalize_val
 
             for i in _info_idx:
                 _info.append(_normalize_vals[i])
@@ -318,6 +321,7 @@ class Train():
             values.extend(_normalize_vals)
             result["vars"]["max"] = result["vars"]["max"]*0.999 + max(_normalize_vals)*0.001
             result["vars"]["min"] = result["vars"]["min"]*0.999 + min(_normalize_vals)*0.001
+            result["vars"]["avg"] = result["vars"]["avg"]*0.999 + np.average(_normalize_vals)*0.001
             result["vars"]["std"] = result["vars"]["std"]*0.999 + np.std(_normalize_vals)*0.001
             # _states, _mcts_probs, _values = [], [], []
 
