@@ -171,7 +171,7 @@ class Train():
                     else:
                         result["curr"]["height"] = round(result["curr"]["height"]*0.99 + game.pieceheight*0.01, 2)
                     json.dump(result, open(jsonfile,"w"), ensure_ascii=False)
-                    print("#"*40, 'score:', game.score, 'height:', game.pieceheight, 'piece:', game.piececount, 'step:', i, "#"*40)
+                    print("#"*40, 'score:', game.score, 'height:', game.pieceheight, 'piece:', game.piececount, game.fallpiece["shape"], 'step:', i, "#"*40)
 
                 # 方块的个数越多越好
                 if game.terminal:
