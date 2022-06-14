@@ -147,8 +147,8 @@ class Train():
                 _step["state"] = game.current_state()               
                 _step["piece_count"] = game.piececount               
                                 
-                if game_num == 0:
-                    action, move_probs = player.get_action(game, temp=self.temp, return_prob=1, need_random=True) 
+                if game_num == 1:
+                    action, move_probs = player.get_action(game, temp=self.temp, return_prob=1, need_random=False) 
                 else: 
                     action, move_probs = player.get_action(game, temp=self.temp, return_prob=1, need_random=False, game_keys=game_keys) 
 
