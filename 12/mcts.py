@@ -208,7 +208,7 @@ class MCTSPlayer(object):
     def reset_player(self):
         self.mcts.reset()
 
-    def get_action(self, state, temp=0, return_prob=0, return_value=0, need_random=True, game_keys=[]):        
+    def get_action(self, state, temp=0, return_prob=0, return_value=0, need_random=True):        
         """计算下一步走子action"""
         move_probs = np.zeros(state.actions_num)
         value = 0
@@ -223,12 +223,7 @@ class MCTSPlayer(object):
                 # if (state.state == 1 and max_height<5) or (max_height<4 and random.random() < 0.25):
                 #     idx = np.random.randint(len(acts))
                 # elif random.random()>max_height/10 :
-                if state.get_key() in game_keys:
-                    idx = np.random.randint(len(acts))
-                    print(state.steps, state.piececount, state.fallpiece["shape"], state.piecesteps, "key:", state.get_key(), "key_len:" ,len(game_keys))
-                    #idx = np.random.choice(range(len(acts)), p=act_probs)
-                else:
-                    idx = np.random.choice(range(len(acts)), p=act_probs)
+                idx = np.random.choice(range(len(acts)), p=act_probs)
                     # p = 0.75
                     # dirichlet = np.random.dirichlet(0.03 * np.ones(len(act_probs)))
                     # idx = np.random.choice(range(len(acts)), p=p*act_probs + (1.0-p) * dirichlet)
