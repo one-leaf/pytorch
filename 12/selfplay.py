@@ -57,6 +57,8 @@ class Train():
         if "vars" not in result or "avg" not in result["vars"]:
             # 缺省std = sqrt(2)
             result["vars"]={"max":1, "min":-1, "std":1, "avg":0}
+        if "shapes" not in result:
+            result["shapes"]={"t":0, "i":0, "j":0, "l":0, "s":0, "z":0, "o":0}
         return result
 
     def get_equi_data(self, states, mcts_probs, values):
@@ -172,6 +174,7 @@ class Train():
                         result["curr"]["height"]=game.pieceheight
                     else:
                         result["curr"]["height"] = round(result["curr"]["height"]*0.99 + game.pieceheight*0.01, 2)
+                    result["shapes"][_step["shape"]] += reward
                     json.dump(result, open(jsonfile,"w"), ensure_ascii=False)
                     print("#"*40, 'score:', game.score, 'height:', game.pieceheight, 'piece:', game.piececount, game.fallpiece["shape"], 'step:', i, "#"*40)
 
