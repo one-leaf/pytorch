@@ -163,7 +163,7 @@ class Agent(object):
             self.piecesteps = 0
             self.piececount +=1 
 
-            if self.pieceheight>=16 or (not self.tetromino.validposition(self.board,self.fallpiece, ay=1)):                  
+            if not self.tetromino.validposition(self.board,self.fallpiece, ay=1):                  
                 self.terminal = True 
                 self.state = 2
                 self.availables = [KEY_NONE]
