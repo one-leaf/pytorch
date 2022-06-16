@@ -1,3 +1,4 @@
+from itertools import count
 import logging
 import math
 import copy
@@ -43,16 +44,16 @@ class MCTS():
         self.state = state
         self.max_depth = 0
         available_acts = state.actions_to_positions(state.availables)
-        for n in range(self._n_playout):
+        # for n in range(self._n_playout):
+        for n in count():
             self.depth = 0
             state_copy = copy.deepcopy(state)
             self.search(state_copy)
             if self.depth>self.max_depth: self.max_depth = self.depth
             # 计算所有动作的探索次数，如果大于2000，则中断
             visits_sum = sum([self.Nsa[(s, a)] if (s, a) in self.Nsa else 0 for a in available_acts])          
-            if visits_sum > 2000: break
-            if n>=128 and visits_sum>=self._n_playout: break
-
+            if n >= self._n_playout*2 or visits_sum > 2000: break
+            if n >= self._n_playout and visits_sum >= 1000: break
 
         act_visits = [(a, self.Nsa[(s, a)]) if (s, a) in self.Nsa else (a, 0) for a in available_acts]
         act_Qs = [(a, self.Qsa[(s, a)]) if (s, a) in self.Qsa else (a, 0) for a in available_acts]
@@ -71,7 +72,7 @@ class MCTS():
                 info.append([action, visit, round(q,2), round(p,2)])        
             v = 0
             if s in self.Vs: v = self.Vs[s]
-            print(state.steps, state.piececount, state.fallpiece["shape"], state.piecesteps, "n:", n, "depth:" ,self.max_depth,"height:", state.pieceheight, "value:", round(v,2), "std:", np.std(visits), info)
+            print(state.steps, state.piececount, state.fallpiece["shape"], state.piecesteps, "n:", n, "depth:" ,self.max_depth,"height:", state.pieceheight, "value:", round(v,2), "std:", round(np.std(visits),2) , info)
 
         if temp == 0:
             bestAs = np.array(np.argwhere(visits == np.max(visits))).flatten()
