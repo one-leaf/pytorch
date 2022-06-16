@@ -216,6 +216,7 @@ class Train():
 
                     game.print()
                     print(game_num, 'reward:', game.score, "Qval:", game_reward, 'len:', i, "piececount:", game.piececount, "time:", time.time()-start_time)
+                    print()
                     agentcount += 1
                     agentscore += game.score
                     agentreward += game_reward
