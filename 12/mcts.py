@@ -108,7 +108,7 @@ class MCTS():
         if s not in self.Es:
             v = 0
             if state.terminal:
-                v = -1
+                v = -2
             self.Es[s] = v
 
         # 如果得分不等于0，标志探索结束
