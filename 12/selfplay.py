@@ -105,6 +105,7 @@ class Train():
         game_datas = []
         # 开始一局游戏
         for _ in count():
+            print('start game:',datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
             start_time = time.time()
             game_num += 1
 
@@ -216,7 +217,7 @@ class Train():
 
                     game.print()
                     print(game_num, 'reward:', game.score, "Qval:", game_reward, 'len:', i, "piececount:", game.piececount, "time:", time.time()-start_time)
-                    print()
+                    print("pay:", time.time() - start_time , "s\n" )
                     agentcount += 1
                     agentscore += game.score
                     agentreward += game_reward
