@@ -90,8 +90,8 @@ class Train():
         # 游戏代理
         agent = Agent()
 
-        min_game_num = 5
-        max_game_num = 7
+        min_game_num = 4
+        max_game_num = 6
         agentcount, agentreward, piececount, agentscore = 0, 0, 0, 0
 
         borads = []
