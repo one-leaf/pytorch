@@ -31,7 +31,7 @@ def run():
             os.system("cls")
             print(act_probs, v)
             agent.print2()
-            time.sleep(0.01)
+            time.sleep(0.1)
     except KeyboardInterrupt:
         print('quit')
 

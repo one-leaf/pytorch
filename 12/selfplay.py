@@ -48,8 +48,8 @@ class Train():
             result["best"]={"reward":0,"pieces":0,"agent":0}
         if "cpuct" not in result:
             result["cpuct"]={"0.1":0,"0.2":0}
-        if "avg_time" not in result:
-            result["avg_time"]=0
+        if "time" not in result:
+            result["time"]={"agent_time":0,"step_time":0,"step_times":[]}
         if "height" not in result:
             result["height"]=[]
         if "height" not in result["curr"]:
@@ -192,10 +192,17 @@ class Train():
                     result = self.read_status_file(jsonfile)
                     if result["QVal"]==0:
                         result["QVal"] = game_reward
-                        result["avg_time"]= time.time()-start_time
                     else:
                         result["QVal"] = result["QVal"]*0.999 + game_reward*0.001   
-                        result["avg_time"]= result["avg_time"]*0.999 + (time.time()-start_time)*0.001 
+                    paytime = time.time()-start_time
+                    steptime = paytime/game.steps
+                    if result["time"]["agent_time"]==0:
+                        result["time"]["agent_time"] = paytime
+                        result["time"]["step_time"] = steptime
+                    else:
+                        result["time"]["agent_time"] = round(result["time"]["agent_time"]*0.99+paytime*0.01, 1)
+                        result["time"]["step_time"] = round(result["time"]["step_time"]*0.99+steptime, 1)
+
                     if game_reward > result["QVal"] and game.score>0: can_exit_flag = True
                    
                     # 记录当前cpuct的统计结果
@@ -353,6 +360,7 @@ class Train():
             result["pieces"].append(round(result["curr"]["pieces"]/result["curr"]["agent1000"],2))
             result["qvals"].append(round(result["QVal"],2))
             result["height"].append(result["curr"]["height"])
+            result["time"]["step_times"].append(result["time"]["step_time"])
             result["curr"]["agent100"] -= 100 
             while len(result["reward"])>200:
                 result["reward"].remove(result["reward"][0])
@@ -362,6 +370,8 @@ class Train():
                 result["qvals"].remove(result["qvals"][0])
             while len(result["height"])>200:    
                 result["height"].remove(result["height"][0])
+            while len(result["time"]["step_times"])>200:    
+                result["time"]["step_times"].remove(result["time"]["step_times"][0])
 
             # 每100局更新一次cpuct参数
             qval = result["QVal"]
