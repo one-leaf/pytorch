@@ -33,7 +33,6 @@ class Train():
         self.best_win_ratio = 0.0
         
         self.c_puct = 1  # MCTS child权重， 用来调节MCTS中 探索/乐观 的程度 默认 5
-        self.policy_value_net = PolicyValueNet(GAME_WIDTH, GAME_HEIGHT, GAME_ACTIONS_NUM, model_file=model_file)
 
     def read_status_file(self, status_file):
         # 获取历史训练数据
@@ -119,12 +118,6 @@ class Train():
                 if len(cpuct_list)==2:break
             cpuct_list.sort()
 
-            # fix error need remove
-            if abs(result["cpuct"][cpuct_list[0]]-result["cpuct"][cpuct_list[1]])>50:
-                result["cpuct"][cpuct_list[0]]=result["QVal"]
-                result["cpuct"][cpuct_list[1]]=result["QVal"]
-                json.dump(result, open(jsonfile,"w"), ensure_ascii=False)
-
             print("cpuct:",result["cpuct"])
 
             if cpuct_first_flag:
@@ -134,7 +127,8 @@ class Train():
             cpuct_first_flag = not cpuct_first_flag
 
             print("game_num",game_num,"c_puct:",cpuct,"n_playout:",self.n_playout)
-            player = MCTSPlayer(self.policy_value_net.policy_value_fn, c_puct=cpuct, n_playout=self.n_playout)
+            policy_value_net = PolicyValueNet(GAME_WIDTH, GAME_HEIGHT, GAME_ACTIONS_NUM, model_file=model_file)
+            player = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=cpuct, n_playout=self.n_playout)
 
             _data = {"steps":[],"shapes":[],"last_state":0,"score":0,"piece_count":0}
             # game = copy.deepcopy(agent)
@@ -303,11 +297,7 @@ class Train():
             # 重新计算
             curr_avg_value = sum(_values)/len(_values)
             curr_std_value = np.std(_values)
-            # 数据的标准差太小，则继续增加样本数量
-            if curr_std_value<=0.1:
-                print(p, "std too small:", len(_states), "std:", curr_std_value)  
-                continue
-
+ 
             _normalize_vals = []
             # 用正态分布的方式重新计算
             curr_std_value_fix = curr_std_value # * (2.0**0.5) # curr_std_value / result["vars"]["std"] 
@@ -391,55 +381,17 @@ class Train():
             if max(result["reward"])==result["reward"][-1]:
                 newmodelfile = model_file+"_reward_"+str(result["reward"][-1])
                 if not os.path.exists(newmodelfile):
-                    self.policy_value_net.save_model(newmodelfile)
+                    policy_value_net.save_model(newmodelfile)
 
         if result["curr"]["agent1000"]>1000:
             result["curr"]={"reward":0,"pieces":0,"agent1000":0,"agent100":0,"height":0}
 
             newmodelfile = model_file+"_"+str(result["agent"])
             if not os.path.exists(newmodelfile):
-                self.policy_value_net.save_model(newmodelfile)
+                policy_value_net.save_model(newmodelfile)
         result["lastupdate"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         json.dump(result, open(jsonfile,"w"), ensure_ascii=False)
-
-    def policy_update(self, sample_data, epochs=1):
-        """更新策略价值网络policy-value"""
-        # 训练策略价值网络
-        # 随机抽取data_buffer中的对抗数据
-        # mini_batch = self.dataset.loadData(sample_data)
-        state_batch, mcts_probs_batch, winner_batch = sample_data
-        # # for x in mini_batch:
-        # #     print("-----------------")
-        # #     print(x)
-        # # state_batch = [data[0] for data in mini_batch]
-        # # mcts_probs_batch = [data[1] for data in mini_batch]
-        # # winner_batch = [data[2] for data in mini_batch]
-
-        # print(state_batch)
-
-        old_probs, old_v = self.policy_value_net.policy_value(state_batch)  
-        for i in range(epochs):
-            loss, v_loss, p_loss, entropy = self.policy_value_net.train_step(state_batch, mcts_probs_batch, winner_batch, self.learn_rate * self.lr_multiplier)
-            new_probs, new_v = self.policy_value_net.policy_value(state_batch)
-
-            # 散度计算：
-            # D(P||Q) = sum( pi * log( pi / qi) ) = sum( pi * (log(pi) - log(qi)) )
-            kl = np.mean(np.sum(old_probs * (np.log(old_probs + 1e-10) - np.log(new_probs + 1e-10)), axis=1))
-            if kl > self.kl_targ * 4:  # 如果D_KL跑偏则尽早停止
-                break
-
-        # 自动调整学习率
-        if kl > self.kl_targ * 2 and self.lr_multiplier > 0.1:
-            self.lr_multiplier /= 1.5
-        elif kl < self.kl_targ / 2 and self.lr_multiplier < 10:
-            self.lr_multiplier *= 1.5
-        # 如果学习到了，explained_var 应该趋近于 1，如果没有学习到也就是胜率都为很小值时，则为 0
-        explained_var_old = (1 - np.var(np.array(winner_batch) - old_v.flatten()) / np.var(np.array(winner_batch)))
-        explained_var_new = (1 - np.var(np.array(winner_batch) - new_v.flatten()) / np.var(np.array(winner_batch)))
-        # entropy 信息熵，越小越好
-        print(("TRAIN kl:{:.5f},lr_multiplier:{:.3f},v_loss:{:.5f},p_loss:{:.5f},entropy:{:.5f},var_old:{:.5f},var_new:{:.5f}"
-                      ).format(kl, self.lr_multiplier, v_loss, p_loss, entropy, explained_var_old, explained_var_new))
-        return loss, entropy  
+   
 
     def run(self):
         """启动训练"""
