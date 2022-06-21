@@ -174,8 +174,8 @@ class Train():
                     print("#"*40, 'score:', game.score, 'height:', game.pieceheight, 'piece:', game.piececount, game.fallpiece["shape"], 'step:', i, "#"*40)
 
                 # 方块的个数越多越好
-                if game.terminal or (reward>0 and game.pieceheight>8) or game.pieceheight>10:
-                    _game_last_reward = game.getNoEmptyCount()/200.
+                if game.terminal or (reward>0 and game.pieceheight>8) :
+                    _game_last_reward = 0 # game.getNoEmptyCount()/200.
                     _data["reward"] = _game_last_reward
                     _data["score"] = game.score
                     _data["piece_count"] = game.piececount
