@@ -190,13 +190,13 @@ class Train():
                     else:
                         result["QVal"] = result["QVal"]*0.999 + game_reward*0.001   
                     paytime = time.time()-start_time
-                    steptime = paytime*1000.0/game.steps
+                    steptime = paytime/game.steps
                     if result["time"]["agent_time"]==0:
                         result["time"]["agent_time"] = paytime
                         result["time"]["step_time"] = steptime
                     else:
                         result["time"]["agent_time"] = round(result["time"]["agent_time"]*0.99+paytime*0.01, 3)
-                        d = game.steps*0.01/1000.0
+                        d = game.steps/10000.0
                         if d>1 : d = 0.99
                         result["time"]["step_time"] = round(result["time"]["step_time"]*(1-d)+steptime*d, 3)
 
