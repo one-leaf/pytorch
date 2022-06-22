@@ -205,11 +205,15 @@ class PolicyValueNet():
             self.load_model_file = True
 
         self.cache = Cache(maxsize=500000)
+        self.lr = 0
 
     # 设置学习率
     def set_learning_rate(self, lr):
-        for param_group in self.optimizer.param_groups:
-            param_group['lr'] = lr
+        if self.lr != lr:
+            for param_group in self.optimizer.param_groups:
+                param_group['lr'] = lr
+            self.lr = lr
+            print("Set modle learn rate to:", lr)
 
     # 打印当前网络
     def print_netwark(self):

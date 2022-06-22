@@ -159,9 +159,8 @@ class Train():
             print("end data loader")
 
             self.policy_value_net = PolicyValueNet(GAME_WIDTH, GAME_HEIGHT, GAME_ACTIONS_NUM, model_file=model_file)
-            self.policy_value_net.save_model(model_file+".bak")
-            
-            
+            self.policy_value_net.save_model(model_file+".bak")           
+
             dataset_len = len(self.dataset)  
             training_loader = torch.utils.data.DataLoader(self.dataset, batch_size=self.batch_size, shuffle=False, num_workers=0)
             testing_loader = torch.utils.data.DataLoader(self.testdataset, batch_size=self.batch_size, shuffle=False,num_workers=0)
