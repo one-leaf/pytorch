@@ -194,8 +194,8 @@ class Train():
                         result["time"]["agent_time"] = paytime
                         result["time"]["step_time"] = steptime
                     else:
-                        result["time"]["agent_time"] = round(result["time"]["agent_time"]*0.99+paytime*0.01, 1)
-                        result["time"]["step_time"] = round(result["time"]["step_time"]*0.99+steptime*0.01, 1)
+                        result["time"]["agent_time"] = round(result["time"]["agent_time"]*0.99+paytime*0.01, 3)
+                        result["time"]["step_time"] = round(result["time"]["step_time"]*0.99+steptime*0.01, 3)
 
                     if game_reward > result["QVal"] and game.score>0: can_exit_flag = True
                    
