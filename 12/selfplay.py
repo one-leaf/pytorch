@@ -155,7 +155,7 @@ class Train():
                 _, reward = game.step(action)
 
                 _step["key"] = game.get_key()
-                _step["reward"] = reward
+                _step["reward"] = 1 if reward>0 else 0
                 _step["action"] = action                
                 _step["move_probs"] = move_probs
 
