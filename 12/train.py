@@ -166,7 +166,6 @@ class Train():
             testing_loader = torch.utils.data.DataLoader(self.testdataset, batch_size=self.batch_size, shuffle=False,num_workers=0)
             old_probs = None
             test_batch = None
-            need_print_test = random.random() > 0.5
 
             for i, data in enumerate(training_loader):  # 计划训练批次
                 if i==0:
@@ -182,33 +181,31 @@ class Train():
                     print(("TRAIN idx {} : {} / {} v_loss:{:.5f}, p_loss:{:.5f}, entropy:{:.5f}")\
                         .format(i, i*self.batch_size, dataset_len, v_loss, p_loss, entropy))
 
-                    if need_print_test:
+                    # 动态调整学习率
+                    if old_probs is None:
+                        test_batch, test_probs, test_valus = next(iter(testing_loader))
+                        old_probs, old_value = self.policy_value_net.policy_value(test_batch) 
+                    else:
+                        new_probs, new_value = self.policy_value_net.policy_value(test_batch)
+                        kl = np.mean(np.sum(old_probs * (np.log(old_probs + 1e-10) - np.log(new_probs + 1e-10)), axis=1))
+                        
+                        if i % 50 == 0:   
+                            print("probs[0] old:{}".format(old_probs[0]))   
+                            print("probs[0] new:{}".format(new_probs[0]))
+                            print("probs[0] dst:{}".format(test_probs[0]))   
+                            maxlen = min(10, len(test_batch)) 
+                            for j in range(maxlen): 
+                                print("value[0] old:{} new:{} tg:{}".format(old_value[j][0], new_value[j][0], test_valus[j]))  
 
-                        # 动态调整学习率
-                        if old_probs is None:
-                            test_batch, test_probs, test_valus = next(iter(testing_loader))
-                            old_probs, old_value = self.policy_value_net.policy_value(test_batch) 
+                        old_probs = None
+                        
+                        if kl > self.kl_targ * 2:
+                            self.lr_multiplier /= 1.5
+                        elif kl < self.kl_targ / 2 and self.lr_multiplier < 10:
+                            self.lr_multiplier *= 1.5
                         else:
-                            new_probs, new_value = self.policy_value_net.policy_value(test_batch)
-                            kl = np.mean(np.sum(old_probs * (np.log(old_probs + 1e-10) - np.log(new_probs + 1e-10)), axis=1))
-                            
-                            if i % 50 == 0:   
-                                print("probs[0] old:{}".format(old_probs[0]))   
-                                print("probs[0] new:{}".format(new_probs[0]))
-                                print("probs[0] dst:{}".format(test_probs[0]))   
-                                maxlen = min(10, len(test_batch)) 
-                                for j in range(maxlen): 
-                                    print("value[0] old:{} new:{} tg:{}".format(old_value[j][0], new_value[j][0], test_valus[j]))  
-
-                            old_probs = None
-                            
-                            if kl > self.kl_targ * 2:
-                                self.lr_multiplier /= 1.5
-                            elif kl < self.kl_targ / 2 and self.lr_multiplier < 10:
-                                self.lr_multiplier *= 1.5
-                            else:
-                                continue
-                            print("kl:{} lr_multiplier:{} lr:{}".format(kl, self.lr_multiplier, self.learn_rate*self.lr_multiplier))
+                            continue
+                        print("kl:{} lr_multiplier:{} lr:{}".format(kl, self.lr_multiplier, self.learn_rate*self.lr_multiplier))
 
             self.policy_value_net.save_model(model_file)
    
