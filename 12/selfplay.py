@@ -303,7 +303,7 @@ class Train():
  
             _normalize_vals = []
             # 用正态分布的方式重新计算
-            curr_std_value_fix = curr_std_value # * (2.0**0.5) # curr_std_value / result["vars"]["std"] 
+            curr_std_value_fix = curr_std_value + 1e-8 # * (2.0**0.5) # curr_std_value / result["vars"]["std"] 
             for v in _values:
                 #标准化的标准差为 (x-μ)/(σ/std), std 为 1 # 1/sqrt(2)
                 _nv = (v-curr_avg_value)/curr_std_value_fix 
