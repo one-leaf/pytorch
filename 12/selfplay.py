@@ -288,6 +288,10 @@ class Train():
             for shape in set(data["shapes"]):
                 shapes.add(shape)
 
+        pieces_idx=[]
+        for p in range(10):
+            pieces_idx[p]=[]
+
         for shape in shapes:
             _states, _mcts_probs, _values = [], [], []
             for data in game_datas:
@@ -296,6 +300,8 @@ class Train():
                     _states.append(step["state"])
                     _mcts_probs.append(step["move_probs"])
                     _values.append(step["reward"])
+                    if step["piece_count"]<10:
+                        pieces_idx[step["piece_count"]].append(len(values)+len(_values)-1)
 
             if len(_states)==0: continue
                 
@@ -354,12 +360,8 @@ class Train():
         # 打印前十个方块的同比
         for p in range(10):
             test_data=[]
-            for data in game_datas:
-                step_count = len(data["steps"])
-                for i in range(step_count):
-                    if data["steps"][i]["piece_count"]>p: break
-                    if data["steps"][i]["piece_count"]<p: continue
-                    test_data.append(data["steps"][i]["reward"])
+            for i in pieces_idx[p]:
+                test_data.append(values[i])
             print(p, "len:", len(test_data), "max:", max(test_data), "min:", min(test_data), "std:", np.std(test_data))
 
 
