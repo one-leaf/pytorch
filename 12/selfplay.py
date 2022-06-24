@@ -282,11 +282,6 @@ class Train():
         
         states, mcts_probs, values= [], [], []
 
-        # 分离每一步的全部步骤做同比
-        # max_piece_count = 0
-        # for data in game_datas:
-        #     if data["piece_count"]>max_piece_count:
-        #         max_piece_count = data["piece_count"]
         shapes = set()
         for data in game_datas:
             for shape in set(data["shapes"]):
@@ -323,7 +318,7 @@ class Train():
             # for i in range(len(_normalize_vals)):
             #     _normalize_vals[i] -= max_normalize_val
 
-            print(shape, len(_normalize_vals), "std:", curr_std_value,  "max:", max(_normalize_vals), "min:", min(_normalize_vals))
+            print(shape, len(_normalize_vals), "max:", max(_normalize_vals), "min:", min(_normalize_vals), "std:", curr_std_value)
 
             states.extend(_states)
             mcts_probs.extend(_mcts_probs)
@@ -352,7 +347,20 @@ class Train():
             filename = "{}.pkl".format(uuid.uuid1())
             savefile = os.path.join(data_wait_dir, filename)
             pickle.dump(obj, open(savefile, "wb"))
-       
+
+
+        # 打印前十个方块的同比
+        for p in [0,1,2,4,5,6,7,8,9]:
+            test_data=[]
+            for data in game_datas:
+                step_count = len(data["steps"])
+                for i in range(step_count):
+                    if data["steps"][i]["piece_count"]>p: break
+                    if data["steps"][i]["piece_count"]<p: continue
+                    test_data.append(data["steps"][i]["reward"])
+            print(p, "len:", len(test_data), "max:", max(test_data), "min:", min(test_data), "std:", np.std(test_data))
+
+
         result = self.read_status_file(jsonfile)
         if result["curr"]["agent100"]>100:
             result["reward"].append(round(result["curr"]["reward"]/result["curr"]["agent1000"],2))
