@@ -398,7 +398,9 @@ class Train():
                 policy_value_net.save_model(newmodelfile)
         result["lastupdate"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         json.dump(result, open(jsonfile,"w"), ensure_ascii=False)
-   
+        print("end:", result["lastupdate"])
+        print("")
+        
 
     def run(self):
         """启动训练"""
