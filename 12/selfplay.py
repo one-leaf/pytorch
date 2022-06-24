@@ -104,9 +104,9 @@ class Train():
         game_datas = []
         # 开始一局游戏
         for _ in count():
-            print('start game:',datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
             start_time = time.time()
             game_num += 1
+            print('start game :', game_num, 'time:', datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 
             result = self.read_status_file(jsonfile)
             print("QVal:",result["QVal"])
@@ -126,7 +126,7 @@ class Train():
                 cpuct = float(cpuct_list[1])
             cpuct_first_flag = not cpuct_first_flag
 
-            print("game_num",game_num,"c_puct:",cpuct,"n_playout:",self.n_playout)
+            print("c_puct:",cpuct,"n_playout:",self.n_playout)
             policy_value_net = PolicyValueNet(GAME_WIDTH, GAME_HEIGHT, GAME_ACTIONS_NUM, model_file=model_file)
             player = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=cpuct, n_playout=self.n_playout)
 
