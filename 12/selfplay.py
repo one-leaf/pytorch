@@ -269,10 +269,16 @@ class Train():
                 data["steps"][i]["reward"] = v
 
         # 将所有的reward加上每一局的最后基础得分
+        # 统计所有的score
+        sum_score = 0
+        for data in game_datas:
+            sum_score += data["score"]
+        if sum_score==0: sum_score = 1
+
         for data in game_datas:
             step_count = len(data["steps"])
             for i in range(step_count):
-                data["steps"][i]["reward"] += data["reward"]
+                data["steps"][i]["reward"] += data["score"]/sum_score
         
         states, mcts_probs, values= [], [], []
 
