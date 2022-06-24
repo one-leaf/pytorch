@@ -104,9 +104,9 @@ class Train():
         game_datas = []
         # 开始一局游戏
         for _ in count():
-            print('start game :', game_num, 'time:', datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
             start_time = time.time()
             game_num += 1
+            print('start game :', game_num, 'time:', datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 
             result = self.read_status_file(jsonfile)
             print("QVal:",result["QVal"])
