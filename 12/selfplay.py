@@ -351,7 +351,7 @@ class Train():
 
 
         # 打印前十个方块的同比
-        for p in [0,1,2,4,5,6,7,8,9]:
+        for p in range(10):
             test_data=[]
             for data in game_datas:
                 step_count = len(data["steps"])
