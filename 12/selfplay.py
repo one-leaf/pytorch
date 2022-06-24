@@ -200,8 +200,6 @@ class Train():
                         d = game.steps/10000.0
                         if d>1 : d = 0.99
                         result["time"]["step_time"] = round(result["time"]["step_time"]*(1-d)+steptime*d, 3)
-
-                    if game_reward > result["QVal"] and game.score>0: can_exit_flag = True
                    
                     # 记录当前cpuct的统计结果
                     if str(cpuct) in result["cpuct"]:
@@ -238,8 +236,8 @@ class Train():
 
             borads.append(game.board)
 
-            # 如果训练次数超过了最大次数，并且最大得分值超过了平均得分值，则停止训练
-            if (game_num >= min_game_num and can_exit_flag) or len(game_keys)> 10000: break
+            # 如果训练样本超过10000，则停止训练
+            if len(game_keys)> 10000: break
 
             # 如果训练次数超过了最大次数，则直接终止训练
             if game_num >= max_game_num: break
@@ -269,15 +267,10 @@ class Train():
                     v = 0.5*v+data["steps"][i]["reward"]
                 data["steps"][i]["reward"] = v
 
-        # 统计所有的score
-        sum_score = 0
-        for data in game_datas:
-            sum_score += data["score"]
-
         # 将所有的 reward * 当前局的得分占比
         for data in game_datas:
             step_count = len(data["steps"])
-            weight = data["score"]/sum_score
+            weight = data["score"]/result["QVal"]
             for i in range(step_count):
                 data["steps"][i]["reward"] = data["steps"][i]["reward"] * weight
         
