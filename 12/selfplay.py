@@ -72,12 +72,12 @@ class Train():
             equi_state = np.array([np.fliplr(s) for s in state])
             equi_mcts_prob = mcts_prob[[0,1,3,2,4]]
             extend_data.append((equi_state, equi_mcts_prob, value))
-            if i==0:
-                print("state:",state)
-                print("mcts_prob:",mcts_prob)
-                print("equi_state:",equi_state)
-                print("equi_mcts_prob:",equi_mcts_prob)
-                print("value:",value)
+            # if i==0:
+            #     print("state:",state)
+            #     print("mcts_prob:",mcts_prob)
+            #     print("equi_state:",equi_state)
+            #     print("equi_mcts_prob:",equi_mcts_prob)
+            #     print("value:",value)
         return extend_data
 
     def collect_selfplay_data(self):
@@ -398,9 +398,7 @@ class Train():
                 policy_value_net.save_model(newmodelfile)
         result["lastupdate"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         json.dump(result, open(jsonfile,"w"), ensure_ascii=False)
-        print("end:", result["lastupdate"])
-        print("")
-        
+
 
     def run(self):
         """启动训练"""
@@ -414,4 +412,5 @@ if __name__ == '__main__':
     training = Train()
     training.run()
     print('end training',datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+    print("")
 
