@@ -162,6 +162,7 @@ class Train():
 
                 _data["shapes"].append(_step["shape"])
                 _data["steps"].append(_step)
+                _data["height"] = game.pieceheight
 
                 # 这里的奖励是消除的行数
                 if reward > 0:
@@ -283,16 +284,12 @@ class Train():
         
         states, mcts_probs, values= [], [], []
 
-        shapes = set()
-        for data in game_datas:
-            for shape in set(data["shapes"]):
-                shapes.add(shape)
-
-        for shape in shapes:
+        # 按方块的高度重新统计分布，这样可以让低奖励的高度也可以有正常分布，而不是完全靠奖励
+        for height in range(20):
             _states, _mcts_probs, _values = [], [], []
             for data in game_datas:
                 for step in data["steps"]:
-                    if step["shape"]!=shape: continue
+                    if step["height"]!=height: continue
                     _states.append(step["state"])
                     _mcts_probs.append(step["move_probs"])
                     _values.append(step["reward"])
@@ -303,6 +300,8 @@ class Train():
             curr_avg_value = sum(_values)/len(_values)
             curr_std_value = np.std(_values)
  
+            if curr_std_value<0.01: continue
+
             _normalize_vals = []
             # 用正态分布的方式重新计算
             curr_std_value_fix = curr_std_value + 1e-8 # * (2.0**0.5) # curr_std_value / result["vars"]["std"] 
@@ -319,7 +318,7 @@ class Train():
             # for i in range(len(_normalize_vals)):
             #     _normalize_vals[i] -= max_normalize_val
 
-            print(shape, len(_normalize_vals), "max:", max(_normalize_vals), "min:", min(_normalize_vals), "std:", curr_std_value)
+            print(height, len(_normalize_vals), "max:", max(_normalize_vals), "min:", min(_normalize_vals), "std:", curr_std_value)
 
             states.extend(_states)
             mcts_probs.extend(_mcts_probs)
