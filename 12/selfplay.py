@@ -274,12 +274,12 @@ class Train():
         sum_score = 0
         for data in game_datas:
             sum_score += data["score"]
-        if sum_score==0: sum_score = 1
 
         for data in game_datas:
             step_count = len(data["steps"])
+            weight = data["score"]/sum_score
             for i in range(step_count):
-                data["steps"][i]["reward"] += data["score"]/sum_score
+                data["steps"][i]["reward"] = data["steps"][i]["reward"] * weight
         
         states, mcts_probs, values= [], [], []
 
