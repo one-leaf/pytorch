@@ -104,9 +104,9 @@ class Train():
         game_datas = []
         # 开始一局游戏
         for _ in count():
+            print('start game :', game_num, 'time:', datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
             start_time = time.time()
             game_num += 1
-            print('start game :', game_num, 'time:', datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 
             result = self.read_status_file(jsonfile)
             print("QVal:",result["QVal"])
@@ -162,7 +162,6 @@ class Train():
 
                 _data["shapes"].append(_step["shape"])
                 _data["steps"].append(_step)
-                _data["height"] = game.pieceheight
 
                 # 这里的奖励是消除的行数
                 if reward > 0:
@@ -284,12 +283,16 @@ class Train():
         
         states, mcts_probs, values= [], [], []
 
-        # 按方块的高度重新统计分布，这样可以让低奖励的高度也可以有正常分布，而不是完全靠奖励
-        for height in range(20):
+        shapes = set()
+        for data in game_datas:
+            for shape in set(data["shapes"]):
+                shapes.add(shape)
+
+        for shape in shapes:
             _states, _mcts_probs, _values = [], [], []
             for data in game_datas:
                 for step in data["steps"]:
-                    if step["height"]!=height: continue
+                    if step["shape"]!=shape: continue
                     _states.append(step["state"])
                     _mcts_probs.append(step["move_probs"])
                     _values.append(step["reward"])
@@ -299,7 +302,6 @@ class Train():
             # 重新计算
             curr_avg_value = sum(_values)/len(_values)
             curr_std_value = np.std(_values)
- 
             if curr_std_value<0.01: continue
 
             _normalize_vals = []
@@ -318,7 +320,7 @@ class Train():
             # for i in range(len(_normalize_vals)):
             #     _normalize_vals[i] -= max_normalize_val
 
-            print(height, len(_normalize_vals), "max:", max(_normalize_vals), "min:", min(_normalize_vals), "std:", curr_std_value)
+            print(shape, len(_normalize_vals), "max:", max(_normalize_vals), "min:", min(_normalize_vals), "std:", curr_std_value)
 
             states.extend(_states)
             mcts_probs.extend(_mcts_probs)
