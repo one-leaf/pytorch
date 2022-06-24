@@ -290,7 +290,7 @@ class Train():
 
         pieces_idx=[]
         for p in range(10):
-            pieces_idx[p]=[]
+            pieces_idx.append([])
 
         for shape in shapes:
             _states, _mcts_probs, _values = [], [], []
