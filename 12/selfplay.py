@@ -173,7 +173,7 @@ class Train():
                     result["shapes"][_step["shape"]] += reward
                     json.dump(result, open(jsonfile,"w"), ensure_ascii=False)
                     print("#"*40, 'score:', game.score, 'height:', game.pieceheight, 'piece:', game.piececount, "shape:", game.fallpiece["shape"], \
-                        'step:', i, "time:", round(time.time()-start_time, 2), "#"*40)
+                        'step:', i, "time:", time.time()-start_time, "#"*40)
 
                 # 方块的个数越多越好
                 if game.terminal or (reward>0 and game.pieceheight>8) :
