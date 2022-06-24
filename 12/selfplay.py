@@ -269,12 +269,12 @@ class Train():
                     v = 0.5*v+data["steps"][i]["reward"]
                 data["steps"][i]["reward"] = v
 
-        # 将所有的reward加上每一局的最后基础得分
         # 统计所有的score
         sum_score = 0
         for data in game_datas:
             sum_score += data["score"]
 
+        # 将所有的 reward * 当前局的得分占比
         for data in game_datas:
             step_count = len(data["steps"])
             weight = data["score"]/sum_score
