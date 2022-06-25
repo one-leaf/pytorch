@@ -139,6 +139,8 @@ class Train():
             if game_num==1 or game_num==max_game_num:
                 game.show_mcts_process=True
 
+            piece_idx = []
+
             for i in count():
                 _step={"step":i}
                 _step["state"] = game.current_state()               
@@ -182,9 +184,18 @@ class Train():
                         else:
                             result["first_reward"]=result["first_reward"]*0.99 + game.piececount*0.01
 
+                        # 如果第一次奖励低于平均数，则将前面的几个方块也进行奖励
+                        if game.piececount < result["first_reward"]:
+                            for idx in piece_idx:
+                                _data["steps"][idx]["reward"]=1
+
                     json.dump(result, open(jsonfile,"w"), ensure_ascii=False)
                     print("#"*40, 'score:', game.score, 'height:', game.pieceheight, 'piece:', game.piececount, "shape:", game.fallpiece["shape"], \
                         'step:', i, "step time:", round((time.time()-start_time)/i,3), "#"*40)
+
+                # 记录当前的方块放置的 idx
+                if game.state != 0:
+                    piece_idx.append(i)
 
                 # 方块的个数越多越好
                 if game.terminal or (reward>0 and game.pieceheight>8) :
