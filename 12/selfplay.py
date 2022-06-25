@@ -377,6 +377,7 @@ class Train():
             test_data=[]
             for i in pieces_idx[p]:
                 test_data.append(values[i])
+            if len(test_data)==0: continue
             print(p, "len:", len(test_data), "max:", max(test_data), "min:", min(test_data), "std:", np.std(test_data))
 
 
