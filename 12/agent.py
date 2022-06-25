@@ -98,7 +98,7 @@ class Agent(object):
                 acts.remove(KEY_ROTATION)
             self.fallpiece['rotation'] = r
 
-        if not KEY_DOWN in acts: acts.append(KEY_NONE)
+        if not KEY_DOWN in acts or self.piecesteps == 0: acts.append(KEY_NONE)
 
         random.shuffle(acts)
         
