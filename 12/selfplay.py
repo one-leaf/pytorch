@@ -58,6 +58,8 @@ class Train():
             result["vars"]={"max":1, "min":-1, "std":1, "avg":0}
         if "shapes" not in result:
             result["shapes"]={"t":0, "i":0, "j":0, "l":0, "s":0, "z":0, "o":0}
+        if "first_reward" not in result:
+            result["first_reward"]=0
         return result
 
     def get_equi_data(self, states, mcts_probs, values):
@@ -172,6 +174,14 @@ class Train():
                     else:
                         result["curr"]["height"] = round(result["curr"]["height"]*0.99 + game.pieceheight*0.01, 2)
                     result["shapes"][_step["shape"]] += reward
+
+                    # 如果是第一次奖励，记录当前的是第几个方块
+                    if game.score==reward:
+                        if result["first_reward"]==0:
+                            result["first_reward"]=game.piececount
+                        else:
+                            result["first_reward"]=result["first_reward"]*0.99 + game.piececount*0.01
+
                     json.dump(result, open(jsonfile,"w"), ensure_ascii=False)
                     print("#"*40, 'score:', game.score, 'height:', game.pieceheight, 'piece:', game.piececount, "shape:", game.fallpiece["shape"], \
                         'step:', i, "step time:", round((time.time()-start_time)/i,3), "#"*40)
