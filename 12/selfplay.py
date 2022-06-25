@@ -142,6 +142,7 @@ class Train():
                 _step["state"] = game.current_state()               
                 _step["piece_count"] = game.piececount               
                 _step["shape"] = game.fallpiece["shape"]
+                _step["piece_height"] = game.pieceheight
 
                 if game_num == 1:
                     action, move_probs = player.get_action(game, temp=self.temp, return_prob=1, need_random=False) 
@@ -282,7 +283,7 @@ class Train():
                 shapes.add(shape)
 
         pieces_idx=[]
-        for p in range(10):
+        for p in range(3):
             pieces_idx.append([])
 
         for shape in shapes:
@@ -293,8 +294,8 @@ class Train():
                     _states.append(step["state"])
                     _mcts_probs.append(step["move_probs"])
                     _values.append(step["reward"])
-                    if step["piece_count"]<10:
-                        pieces_idx[step["piece_count"]].append(len(values)+len(_values)-1)
+                    if step["piece_height"]<len(pieces_idx):
+                        pieces_idx[step["piece_height"]].append(len(values)+len(_values)-1)
 
             if len(_states)==0: continue
                 
@@ -351,7 +352,7 @@ class Train():
 
 
         # 打印前十个方块的同比
-        for p in range(10):
+        for p in range(len(pieces_idx)):
             test_data=[]
             for i in pieces_idx[p]:
                 test_data.append(values[i])
