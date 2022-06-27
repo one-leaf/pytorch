@@ -91,13 +91,11 @@ class Train():
         # 游戏代理
         agent = Agent()
 
-        min_game_num = 4
         max_game_num = 6
         agentcount, agentreward, piececount, agentscore = 0, 0, 0, 0
 
         borads = []
         game_num = 0
-        can_exit_flag = False
         
         cpuct_first_flag = random.random() > 0.5
 
@@ -184,7 +182,7 @@ class Train():
                         else:
                             result["first_reward"]=result["first_reward"]*0.99 + game.piececount*0.01
 
-                        # 如果第一次奖励低于平均数，则将前面的几个方块也进行奖励
+                        # 如果第一次的奖励低于平均数，则将前面的几个方块也进行奖励
                         if game.piececount < result["first_reward"]:
                             for idx in piece_idx:
                                 _data["steps"][idx]["reward"]=1
@@ -298,27 +296,33 @@ class Train():
         
         states, mcts_probs, values= [], [], []
 
-        shapes = set()
-        for data in game_datas:
-            for shape in set(data["shapes"]):
-                shapes.add(shape)
-
         pieces_idx=[]
         for p in range(3):
             pieces_idx.append([])
 
-        for shape in shapes:
+        var_keys = set()
+
+        # for data in game_datas:
+        #     for shape in set(data["shapes"]):
+        #         var_keys.add(shape)
+        # step_key_name = "shape"
+
+        for h in range(20):
+            var_keys.add(h)
+        step_key_name = "piece_height"
+
+        for key in var_keys:
             _states, _mcts_probs, _values = [], [], []
             for data in game_datas:
                 for step in data["steps"]:
-                    if step["shape"]!=shape: continue
+                    if step[step_key_name]!=key: continue
                     _states.append(step["state"])
                     _mcts_probs.append(step["move_probs"])
                     _values.append(step["reward"])
                     if step["piece_height"]<len(pieces_idx):
                         pieces_idx[step["piece_height"]].append(len(values)+len(_values)-1)
 
-            if len(_states)==0: continue
+            if len(_values)==0: continue
                 
             # 重新计算
             curr_avg_value = sum(_values)/len(_values)
@@ -341,7 +345,7 @@ class Train():
             # for i in range(len(_normalize_vals)):
             #     _normalize_vals[i] -= max_normalize_val
 
-            print(shape, len(_normalize_vals), "max:", max(_normalize_vals), "min:", min(_normalize_vals), "std:", curr_std_value)
+            print(key, len(_normalize_vals), "max:", max(_normalize_vals), "min:", min(_normalize_vals), "std:", curr_std_value)
 
             states.extend(_states)
             mcts_probs.extend(_mcts_probs)
