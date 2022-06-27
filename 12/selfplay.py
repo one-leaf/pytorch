@@ -277,15 +277,19 @@ class Train():
         print((" "+" -"*agent.width+" ")*len(borads))
 
         # 按0.50的衰减更新reward
+        print("fixed reward")
         for data in game_datas:
             step_count = len(data["steps"])
             piece_count = -1
             v = 0
+            vlist=[]
             for i in range(step_count-1,-1,-1):
                 if piece_count!=data["steps"][i]["piece_count"]:
                     piece_count = data["steps"][i]["piece_count"]
                     v = 0.5*v+data["steps"][i]["reward"]
+                    vlist.insert(0,v)
                 data["steps"][i]["reward"] = v
+            print(vlist)
 
         # 将所有的 reward * 当前局的得分占比
         for data in game_datas:
