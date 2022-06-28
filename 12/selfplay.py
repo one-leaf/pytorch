@@ -301,9 +301,8 @@ class Train():
         
         states, mcts_probs, values= [], [], []
 
-        pieces_idx=[]
-        for p in range(3):
-            pieces_idx.append([])
+        # 用于统计shape的std
+        pieces_idx={"t":[], "i":[], "j":[], "l":[], "s":[], "z":[], "o":[]}
 
         var_keys = set()
 
@@ -324,8 +323,7 @@ class Train():
                     _states.append(step["state"])
                     _mcts_probs.append(step["move_probs"])
                     _values.append(step["reward"])
-                    if step["piece_height"]<len(pieces_idx):
-                        pieces_idx[step["piece_height"]].append(len(values)+len(_values)-1)
+                    pieces_idx[step["shape"]].append(len(values)+len(_values)-1)
 
             if len(_values)==0: continue
                 
@@ -381,13 +379,13 @@ class Train():
             pickle.dump(obj, open(savefile, "wb"))
 
 
-        # 打印前十个方块的同比
-        for p in range(len(pieces_idx)):
+        # 打印shape的标准差
+        for shape in pieces_idx:
             test_data=[]
-            for i in pieces_idx[p]:
+            for i in pieces_idx[shape]:
                 test_data.append(values[i])
             if len(test_data)==0: continue
-            print(p, "len:", len(test_data), "max:", max(test_data), "min:", min(test_data), "std:", np.std(test_data))
+            print(shape, "len:", len(test_data), "max:", max(test_data), "min:", min(test_data), "std:", np.std(test_data))
 
 
         result = self.read_status_file(jsonfile)
