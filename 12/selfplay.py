@@ -287,6 +287,7 @@ class Train():
                 if piece_count!=data["steps"][i]["piece_count"]:
                     piece_count = data["steps"][i]["piece_count"]
                     v = 0.5*v+data["steps"][i]["reward"]
+                    if v>1: v=1
                     vlist.insert(0,v)
                 data["steps"][i]["reward"] = v
             print(vlist)
