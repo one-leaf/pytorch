@@ -185,7 +185,7 @@ class Train():
                         # 如果第一次的奖励低于平均数，则将前面的几个方块也进行奖励
                         if game.piececount < result["first_reward"]:
                             for idx in piece_idx:
-                                _data["steps"][idx]["reward"]=1
+                                _data["steps"][idx]["reward"]=0.5
 
                     json.dump(result, open(jsonfile,"w"), ensure_ascii=False)
                     print("#"*40, 'score:', game.score, 'height:', game.pieceheight, 'piece:', game.piececount, "shape:", game.fallpiece["shape"], \
