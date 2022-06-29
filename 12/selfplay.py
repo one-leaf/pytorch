@@ -1,16 +1,15 @@
-import os, glob, pickle
+import os, pickle
 
 from model import PolicyValueNet, data_dir, data_wait_dir, model_file
 from agent import Agent, ACTIONS
 from mcts import MCTSPlayer
 
-import sys, time, json, datetime
+import time, json, datetime
 
 from itertools import count
-import os, math, random, uuid
+import os, random, uuid
 
 import numpy as np
-import copy
 
 # 定义游戏的动作
 GAME_ACTIONS_NUM = len(ACTIONS) 
@@ -281,7 +280,6 @@ class Train():
         print((" "+" -"*agent.width+" ")*len(borads))
 
         # 按0.50的衰减更新reward
-        print("fixed reward")
         for data in game_datas:
             step_count = len(data["steps"])
             piece_count = -1
@@ -303,6 +301,18 @@ class Train():
             for i in range(step_count):
                 data["steps"][i]["reward"] = data["steps"][i]["reward"] * weight
         
+        print("fixed reward")
+        for data in game_datas:
+            step_count = len(data["steps"])
+            piece_count = -1
+            vlist=[]
+            for i in range(step_count):
+                if piece_count!=data["steps"][i]["piece_count"]:
+                    piece_count = data["steps"][i]["piece_count"]
+                    vlist.append(data["steps"][i]["reward"])
+            print(len(vlist), vlist)
+
+
         states, mcts_probs, values= [], [], []
 
         # 用于统计shape的std
