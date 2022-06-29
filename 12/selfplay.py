@@ -37,7 +37,11 @@ class Train():
     def read_status_file(self, status_file):
         # 获取历史训练数据
         if os.path.exists(status_file):
-            result=json.load(open(status_file,"r"))
+            try:
+                result=json.load(open(status_file,"r"))
+            except:
+                time.sleep(10)
+                return self.read_status_file(status_file)
         else:
             result={}
             result={"agent":0, "reward":[], "pieces":[], "qvals":[], "QVal":0}
