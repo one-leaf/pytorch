@@ -317,13 +317,14 @@ class Train():
 
         for key in var_keys:
             _states, _mcts_probs, _values = [], [], []
+            _pieces_idx={"t":[], "i":[], "j":[], "l":[], "s":[], "z":[], "o":[]}
             for data in game_datas:
                 for step in data["steps"]:
                     if step[step_key_name]!=key: continue
                     _states.append(step["state"])
                     _mcts_probs.append(step["move_probs"])
                     _values.append(step["reward"])
-                    pieces_idx[step["shape"]].append(len(values)+len(_values)-1)
+                    _pieces_idx[step["shape"]].append(len(values)+len(_values)-1)
 
             if len(_values)==0: continue
                 
@@ -331,6 +332,9 @@ class Train():
             curr_avg_value = sum(_values)/len(_values)
             curr_std_value = np.std(_values)
             if curr_std_value<0.01: continue
+
+            for shape in _pieces_idx:
+                pieces_idx[shape].extend(_pieces_idx[shape])
 
             _normalize_vals = []
             # 用正态分布的方式重新计算
@@ -383,6 +387,7 @@ class Train():
         for shape in pieces_idx:
             test_data=[]
             for i in pieces_idx[shape]:
+                if i>=(len(values)): break
                 test_data.append(values[i])
             if len(test_data)==0: continue
             print(shape, "len:", len(test_data), "max:", max(test_data), "min:", min(test_data), "std:", np.std(test_data))
