@@ -312,7 +312,6 @@ class Train():
                     vlist.append(data["steps"][i]["reward"])
             print(len(vlist), vlist)
 
-
         states, mcts_probs, values= [], [], []
 
         # 用于统计shape的std
