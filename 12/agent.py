@@ -16,7 +16,7 @@ class Agent(object):
         self.reset()        
 
     def reset(self):
-        isRandomNextPiece = False # random.random() > 0.5
+        isRandomNextPiece = True # random.random() > 0.5
         self.tetromino = Tetromino(isRandomNextPiece=isRandomNextPiece)
         # 下落的方块
         self.fallpiece = self.tetromino.getnewpiece()
