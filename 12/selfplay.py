@@ -294,12 +294,12 @@ class Train():
                 data["steps"][i]["reward"] = v
             print(vlist)
 
-        # 将所有的 reward * 当前局的得分占比
+        # 总得分为 局部奖励 * 0.5 + (总奖励/平均奖励 * 0.5)
         for data in game_datas:
             step_count = len(data["steps"])
             weight = data["score"]/result["QVal"]
             for i in range(step_count):
-                data["steps"][i]["reward"] = data["steps"][i]["reward"] * weight
+                data["steps"][i]["reward"] = data["steps"][i]["reward"] * 0.5  + weight * 0.5
         
         print("fixed reward")
         for data in game_datas:
