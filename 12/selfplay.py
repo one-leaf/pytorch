@@ -279,7 +279,8 @@ class Train():
             print(line)
         print((" "+" -"*agent.width+" ")*len(borads))
 
-        # 按0.50的衰减更新reward
+        ## 按0.50的衰减更新reward
+        # 放弃，只关注当前方块
         for data in game_datas:
             step_count = len(data["steps"])
             piece_count = -1
@@ -288,18 +289,20 @@ class Train():
             for i in range(step_count-1,-1,-1):
                 if piece_count!=data["steps"][i]["piece_count"]:
                     piece_count = data["steps"][i]["piece_count"]
-                    v = 0.5*v+data["steps"][i]["reward"]
+                    v = data["steps"][i]["reward"]# 0.5*v+data["steps"][i]["reward"]
                     if v>1: v=1
                     vlist.insert(0,v)
                 data["steps"][i]["reward"] = v
             print(vlist)
 
-        # 总得分为 局部奖励 * 0.5 + (总奖励/平均奖励 * 0.5)
+        # 总得分为 局部奖励  + (总奖励-平均奖励/平均奖励)
         for data in game_datas:
             step_count = len(data["steps"])
-            weight = data["score"]/result["QVal"]
+            weight = (data["score"]-result["QVal"])/result["QVal"]
             for i in range(step_count):
-                data["steps"][i]["reward"] = data["steps"][i]["reward"] * 0.5  + weight * 0.5
+                v = data["steps"][i]["reward"] + weight 
+                if v>1: v=1
+                data["steps"][i]["reward"] = v
         
         print("fixed reward")
         for data in game_datas:
