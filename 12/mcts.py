@@ -51,7 +51,7 @@ class MCTS():
             self.search(state_copy)
             if self.depth>self.max_depth: self.max_depth = self.depth
             visits_sum = sum([self.Nsa[(s, a)] if (s, a) in self.Nsa else 0 for a in available_acts])          
-            if visits_sum >= self._n_playout : break
+            if visits_sum >= self._n_playout or n > 2000: break
             # 计算所有动作的探索次数，如果大于2000，则中断
             # if n >= self._n_playout*5 or visits_sum > 2000: break
             # if n >= self._n_playout and visits_sum >= 1000: break
@@ -102,6 +102,8 @@ class MCTS():
         """
         s = state.get_key()
         self.depth = self.depth +1
+
+        if self.depth>1000: return 0
 
         # 将所有状态的得分都 cache 起来
         # 由于不确定最后结果，所以按预测的为准
