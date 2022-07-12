@@ -323,14 +323,14 @@ class Train():
 
         var_keys = set()
 
-        # for data in game_datas:
-        #     for shape in set(data["shapes"]):
-        #         var_keys.add(shape)
-        # step_key_name = "shape"
+        for data in game_datas:
+            for shape in set(data["shapes"]):
+                var_keys.add(shape)
+        step_key_name = "shape"
 
-        for h in range(20):
-            var_keys.add(h)
-        step_key_name = "piece_height"
+        # for h in range(20):
+        #     var_keys.add(h)
+        # step_key_name = "piece_height"
 
         for key in var_keys:
             _states, _mcts_probs, _values = [], [], []
