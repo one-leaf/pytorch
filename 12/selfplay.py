@@ -300,10 +300,10 @@ class Train():
             step_count = len(data["steps"])
             weight = (data["score"]-result["QVal"])/result["QVal"]
             for i in range(step_count):
-                if data["steps"][i]["reward"] < 1:
-                    v = data["steps"][i]["reward"] + weight 
+                # if data["steps"][i]["reward"] < 1:
+                v = data["steps"][i]["reward"] + weight 
                     # if v>1: v=1
-                    data["steps"][i]["reward"] = v
+                data["steps"][i]["reward"] = v
         
         print("fixed reward")
         for data in game_datas:
