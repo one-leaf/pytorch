@@ -279,8 +279,8 @@ class Train():
             print(line)
         print((" "+" -"*agent.width+" ")*len(borads))
 
-        ## 按0.50的衰减更新reward
-        # 放弃，只关注当前方块
+        ## 放弃 按0.50的衰减更新reward
+        # 只关注最后一次得分方块的所有步骤
         for data in game_datas:
             step_count = len(data["steps"])
             piece_count = -1
@@ -295,16 +295,15 @@ class Train():
                 data["steps"][i]["reward"] = v
             print(vlist)
 
-        # 未来的变数太多，所以下面只能放弃
-        # 总得分为 局部奖励  + (总奖励-平均奖励/平均奖励)
-        # for data in game_datas:
-        #     step_count = len(data["steps"])
-        #     weight = (data["score"]-result["QVal"])/result["QVal"]
-        #     for i in range(step_count):
-        #         if data["steps"][i]["reward"] < 1:
-        #             v = data["steps"][i]["reward"] + weight 
-        #             if v>1: v=1
-        #             data["steps"][i]["reward"] = v
+        # 总得分为 消行奖励  + (本局消行奖励-平均每局消行奖励/平均每局消行奖励)
+        for data in game_datas:
+            step_count = len(data["steps"])
+            weight = (data["score"]-result["QVal"])/result["QVal"]
+            for i in range(step_count):
+                if data["steps"][i]["reward"] < 1:
+                    v = data["steps"][i]["reward"] + weight 
+                    # if v>1: v=1
+                    data["steps"][i]["reward"] = v
         
         print("fixed reward")
         for data in game_datas:
