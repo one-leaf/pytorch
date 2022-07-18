@@ -9,15 +9,15 @@ KEY_NONE, KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN = 0, 1, 2, 3, 4
 ACTIONS = [KEY_NONE, KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN]
 ACTIONS_NAME = ["N","O","L","R","D"]
 class Agent(object):
-    def __init__(self):
+    def __init__(self, randomNextPiece=False):
         self.width = 10
         self.height = 20
         self.actions_num = len(ACTIONS)    
-        self.reset()        
+        self.reset()
+        self.randomNextPiece = randomNextPiece       
 
     def reset(self):
-        isRandomNextPiece = True # random.random() > 0.5
-        self.tetromino = Tetromino(isRandomNextPiece=isRandomNextPiece)
+        self.tetromino = Tetromino(isRandomNextPiece=self.randomNextPiece)
         # 下落的方块
         self.fallpiece = self.tetromino.getnewpiece()
         # 下一个待下落的方块

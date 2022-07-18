@@ -261,8 +261,9 @@ def calcReward(board, piece):
 class Tetromino(object):  
     def __init__(self, isRandomNextPiece=True):
         self.nextpiece=[]
-        if not isRandomNextPiece:
-            for i in range(250):
+        self.isRandomNextPiece=isRandomNextPiece
+        if not self.isRandomNextPiece:
+            for i in range(199):
                 self.nextpiece.insert(0, self.getrandompiece(i%10))
 
     def getrandompiece(self,color=None):
@@ -282,9 +283,13 @@ class Tetromino(object):
         return level,fallfreq
         
     def getnewpiece(self):
-        if len(self.nextpiece)>0:
+        if not self.isRandomNextPiece:
+            if len(self.nextpiece)<100:
+                for i in range(99):
+                    self.nextpiece.insert(0, self.getrandompiece(i%10))                    
             return self.nextpiece.pop()
-        return self.getrandompiece()    
+        else:
+            return self.getrandompiece()    
     
     def getblankboard(self):
         board = []
