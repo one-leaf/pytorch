@@ -13,8 +13,8 @@ class Agent(object):
         self.width = 10
         self.height = 20
         self.actions_num = len(ACTIONS)    
-        self.reset()
         self.isRandomNextPiece = isRandomNextPiece       
+        self.reset()
 
     def reset(self):
         self.tetromino = Tetromino(isRandomNextPiece=self.isRandomNextPiece)
