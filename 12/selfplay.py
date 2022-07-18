@@ -135,7 +135,7 @@ class Train():
 
             _data = {"steps":[],"shapes":[],"last_state":0,"score":0,"piece_count":0}
             # game = copy.deepcopy(agent)
-            game = Agent()
+            game = Agent(isRandomNextPiece=False)
 
             if game_num==1 or game_num==max_game_num:
                 game.show_mcts_process=True
