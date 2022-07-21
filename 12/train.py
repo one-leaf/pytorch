@@ -8,6 +8,7 @@ import time, datetime
 from collections import deque
 from collections import namedtuple
 import os, random
+import copy
 
 import numpy as np
 import torch
@@ -32,13 +33,21 @@ class Dataset(torch.utils.data.Dataset):
         self.copy_wait_file()
         self.load_game_files()
         self.calc_data()
-        self.sample=0
+        self.test=False
+
 
     def __len__(self):
-        return len(self.data)
+        if self.test:
+            return len(self.newsample)
+        else:
+            return len(self.file_list)
 
     def __getitem__(self, index):
-        fn = self.file_list[index]
+        if self.test:
+            fn = self.newsample[index]
+        else:
+            fn = self.file_list[index]
+
         data = self.data[fn]
         # 状态，步骤的概率，最终得分
         state = torch.from_numpy(data["state"]).float()
@@ -88,7 +97,6 @@ class Dataset(torch.utils.data.Dataset):
 
         print("calc scores end, size: %s, score: %s, avg_value: %s, std_value: %s"%(len(scores), round(avg_score,2), round(curr_avg_value,2), round(curr_std_value,2)))
 
-
     def copy_wait_file(self):
         files = glob.glob(os.path.join(data_wait_dir, "*.pkl"))
         movefiles = sorted(files, key=lambda x: os.path.getmtime(x))
@@ -109,22 +117,7 @@ class Dataset(torch.utils.data.Dataset):
             raise Exception("NEED SOME NEW DATA TO TRAIN")
          
     def curr_size(self):
-        return len(self.file_list)
-
-class TestDataset(Dataset):
-    def __init__(self, data_dir, max_keep_size, file_list):
-        # 训练数据存放路径
-        self.data_dir = data_dir                
-        # 训练数据最大保存个数
-        self.max_keep_size = max_keep_size
-        # 当前训练数据索引保存文件
-        self.file_list = file_list # deque(maxlen=max_keep_size) 
-        self.sample=0
-        random.shuffle(self.file_list)  
-        self.data={}
-        self.calc_data()
-        self.sample=0        
-       
+        return len(self.file_list)      
 
 class Train():
     def __init__(self):
@@ -161,8 +154,8 @@ class Train():
         try:
             print("start data loader")
             self.dataset = Dataset(data_dir, self.buffer_size)
-            newsample=self.dataset.newsample
-            self.testdataset = TestDataset(data_dir, 10, newsample)
+            self.testdataset = copy.copy(self.dataset)
+            self.testdataset.test=True
             print("end data loader")
 
             self.policy_value_net = PolicyValueNet(GAME_WIDTH, GAME_HEIGHT, GAME_ACTIONS_NUM, model_file=model_file)
