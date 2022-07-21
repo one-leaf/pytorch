@@ -86,6 +86,9 @@ class Dataset(torch.utils.data.Dataset):
             if value==0: value=1e-8
             self.data[fn]["value"]=value
 
+        print("calc scores end, size: %s, score: %s, avg_value: %s, std_value: %s"%(len(scores), round(avg_score,2), round(curr_avg_value,2), round(curr_std_value,2)))
+
+
     def copy_wait_file(self):
         files = glob.glob(os.path.join(data_wait_dir, "*.pkl"))
         movefiles = sorted(files, key=lambda x: os.path.getmtime(x))
