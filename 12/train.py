@@ -20,67 +20,71 @@ GAME_ACTIONS_NUM = len(ACTIONS)
 GAME_WIDTH, GAME_HEIGHT = 10, 20
 
 
-
 class Dataset(torch.utils.data.Dataset):
     def __init__(self, data_dir, max_keep_size):
         # 训练数据存放路径
         self.data_dir = data_dir                
         # 训练数据最大保存个数
         self.max_keep_size = max_keep_size
-        # 当前训练数据索引保存文件
-        self.data_index_file = os.path.join(data_dir, 'index.txt')
         self.file_list = [] # deque(maxlen=max_keep_size)    
         self.newsample = []
-        self.load_index()
+        self.data={}
         self.copy_wait_file()
         self.load_game_files()
+        self.calc_data()
         self.sample=0
 
     def __len__(self):
-        return len(self.file_list)
+        return len(self.data)
 
     def __getitem__(self, index):
-        filename = self.file_list[index]
+        fn = self.file_list[index]
+        data = self.data[fn]
         # 状态，步骤的概率，最终得分
-        for i in range(5):
-            try:
-                states, mcts_probs, values = pickle.load(open(filename, "rb"))
-                break
-            except Exception as e:
-                print(e)
-                print("filename {} error can't load".format(filename))
-                if os.path.exists(filename): os.remove(filename)
-                self.file_list.remove(filename)
-                filename = random.choice(self.file_list)
-        if i==4: raise Exception("can't load file {}".format(filename))   
-        states = torch.from_numpy(states).float()
-        mcts_probs = torch.from_numpy(mcts_probs).float()
-        values = torch.as_tensor(values).float()
-
-        return states, mcts_probs, values
+        state = torch.from_numpy(data["state"]).float()
+        mcts_prob = torch.from_numpy(data["mcts_prob"]).float()
+        value = torch.as_tensor(data["value"]).float()
+        return state, mcts_prob, value
 
     def load_game_files(self):
         files = glob.glob(os.path.join(self.data_dir, "*.pkl"))
         files = sorted(files, key=lambda x: os.path.getmtime(x), reverse=True)
         delcount = 0
-        for i,filename in enumerate(files):
+        for i, filename in enumerate(files):
             if i >= self.max_keep_size:
                 os.remove(filename)
                 delcount += 1
             else:
                 self.file_list.append(filename)
         random.shuffle(self.file_list)
-        print("delete", delcount, "files")
+        print("totle:",len(self.file_list),"delete:", delcount)
 
-    def save_index(self):
-        with open(self.data_index_file, "w") as f:
-            f.write(str(self.index))
+    def calc_data(self):
+        scores=[]
+        for fn in self.file_list:
+            try:
+                state, mcts_prob, value, score = pickle.load(open(fn, "rb"))
+            except:
+                print("filename {} error can't load".format(fn))
+                if os.path.exists(fn): os.remove(fn)
+                self.file_list.remove(fn)
+                continue
+            self.data[fn]={"value":value, "score":score, "state":state, "mcts_prob": mcts_prob}
+            scores.append(score) 
 
-    def load_index(self):
-        if os.path.exists(self.data_index_file):
-            self.index = int(open(self.data_index_file, 'r').read().strip())
-        else:
-            self.index = 0
+        avg_score = sum(scores)/len(scores)
+        values = [] 
+        for fn in self.data:
+            self.data[fn]["value"] = self.data[fn]["value"] + (self.data[fn]["score"]-avg_score)/avg_score
+            values.append(self.data[fn]["value"])
+        curr_avg_value = sum(values)/len(values)
+        curr_std_value = np.std(values)+1e-8
+        for fn in self.data:
+            value = (self.data[fn]["value"]-curr_avg_value)/curr_std_value
+            if value>1: value=1
+            if value<-1: value=-1
+            if value==0: value=1e-8
+            self.data[fn]["value"]=value
 
     def copy_wait_file(self):
         files = glob.glob(os.path.join(data_wait_dir, "*.pkl"))
@@ -89,14 +93,12 @@ class Dataset(torch.utils.data.Dataset):
         time.sleep(1)
         i = -1
         for i, fn in enumerate(movefiles):
-            filename = "{}.pkl".format(self.index)
+            filename = os.path.basename(fn)
             savefile = os.path.join(self.data_dir, filename)
             if os.path.exists(savefile): os.remove(savefile)
             os.rename(fn, savefile)
-            self.index += 1
             self.newsample.append(savefile)
             if (i>=100 and i>len(movefiles)*0.1) or i>=self.max_keep_size//2: break       
-        self.save_index() 
         print("mv %s/%s files to train"%(i+1,len(movefiles)))
         if i==-1:
             print("SLEEP 60s for watting data")
@@ -113,10 +115,12 @@ class TestDataset(Dataset):
         # 训练数据最大保存个数
         self.max_keep_size = max_keep_size
         # 当前训练数据索引保存文件
-        self.data_index_file = os.path.join(data_dir, 'index.txt')
         self.file_list = file_list # deque(maxlen=max_keep_size) 
         self.sample=0
         random.shuffle(self.file_list)  
+        self.data={}
+        self.calc_data()
+        self.sample=0        
        
 
 class Train():

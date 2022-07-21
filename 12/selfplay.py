@@ -65,18 +65,18 @@ class Train():
             result["first_reward"]=0
         return result
 
-    def get_equi_data(self, states, mcts_probs, values):
+    def get_equi_data(self, states, mcts_probs, values, scores):
         """
         通过翻转增加数据集
-        play_data: [(state, mcts_prob, values), ..., ...]
+        play_data: [(state, mcts_prob, values, score), ..., ...]
         """
         extend_data = []
         for i in range(len(states)):
-            state, mcts_prob, value=states[i], mcts_probs[i], values[i]
-            extend_data.append((state, mcts_prob, value))
+            state, mcts_prob, value, score=states[i], mcts_probs[i], values[i], scores[i]
+            extend_data.append((state, mcts_prob, value, score))
             equi_state = np.array([np.fliplr(s) for s in state])
             equi_mcts_prob = mcts_prob[[0,1,3,2,4]]
-            extend_data.append((equi_state, equi_mcts_prob, value))
+            extend_data.append((equi_state, equi_mcts_prob, value, score))
             # if i==0:
             #     print("state:",state)
             #     print("mcts_prob:",mcts_prob)
@@ -94,7 +94,7 @@ class Train():
         # 游戏代理
         agent = Agent()
 
-        max_game_num = 6
+        max_game_num = 1
         agentcount, agentreward, piececount, agentscore = 0, 0, 0, 0
 
         borads = []
@@ -280,7 +280,7 @@ class Train():
         print((" "+" -"*agent.width+" ")*len(borads))
 
         ## 放弃 按0.50的衰减更新reward
-        # 只关注最后一次得分方块的所有步骤
+        # 只关注最后一次得分方块的所有步骤,将消行方块的所有步骤的得分都设置为1
         for data in game_datas:
             step_count = len(data["steps"])
             piece_count = -1
@@ -296,96 +296,100 @@ class Train():
             print(vlist)
 
         # 总得分为 消行奖励  + (本局消行奖励-平均每局消行奖励/平均每局消行奖励)
-        for data in game_datas:
-            step_count = len(data["steps"])
-            weight = (data["score"]-result["QVal"])/result["QVal"]
-            for i in range(step_count):
-                # if data["steps"][i]["reward"] < 1:
-                v = data["steps"][i]["reward"] + weight 
-                    # if v>1: v=1
-                data["steps"][i]["reward"] = v
+        # for data in game_datas:
+        #     step_count = len(data["steps"])
+        #     weight = (data["score"]-result["QVal"])/result["QVal"]
+        #     for i in range(step_count):
+        #         # if data["steps"][i]["reward"] < 1:
+        #         v = data["steps"][i]["reward"] + weight 
+        #             # if v>1: v=1
+        #         data["steps"][i]["reward"] = v
         
-        print("fixed reward")
-        for data in game_datas:
-            step_count = len(data["steps"])
-            piece_count = -1
-            vlist=[]
-            for i in range(step_count):
-                if piece_count!=data["steps"][i]["piece_count"]:
-                    piece_count = data["steps"][i]["piece_count"]
-                    vlist.append(data["steps"][i]["reward"])
-            print("score:", data["score"], "piece_count:", data["piece_count"],  [round(num, 2) for num in vlist])
+        # print("fixed reward")
+        # for data in game_datas:
+        #     step_count = len(data["steps"])
+        #     piece_count = -1
+        #     vlist=[]
+        #     for i in range(step_count):
+        #         if piece_count!=data["steps"][i]["piece_count"]:
+        #             piece_count = data["steps"][i]["piece_count"]
+        #             vlist.append(data["steps"][i]["reward"])
+        #     print("score:", data["score"], "piece_count:", data["piece_count"],  [round(num, 2) for num in vlist])
 
-        states, mcts_probs, values= [], [], []
-
-        # 用于统计shape的std
-        pieces_idx={"t":[], "i":[], "j":[], "l":[], "s":[], "z":[], "o":[]}
-
-        var_keys = set()
+        # 状态    概率      本步表现 本局奖励
+        states, mcts_probs, values, score= [], [], [], []
 
         for data in game_datas:
-            for shape in set(data["shapes"]):
-                var_keys.add(shape)
-        step_key_name = "shape"
+            for step in data["steps"]:
+                states.append(step["state"])
+                mcts_probs.append(step["move_probs"])
+                values.append(step["reward"])
+                score.append(data["score"])
 
-        # for h in range(20):
-        #     var_keys.add(h)
-        # step_key_name = "piece_height"
+        # # 用于统计shape的std
+        # pieces_idx={"t":[], "i":[], "j":[], "l":[], "s":[], "z":[], "o":[]}
 
-        for key in var_keys:
-            _states, _mcts_probs, _values = [], [], []
-            # _pieces_idx={"t":[], "i":[], "j":[], "l":[], "s":[], "z":[], "o":[]}
-            for data in game_datas:
-                for step in data["steps"]:
-                    if step[step_key_name]!=key: continue
-                    _states.append(step["state"])
-                    _mcts_probs.append(step["move_probs"])
-                    _values.append(step["reward"])
-                    # _pieces_idx[step["shape"]].append(len(values)+len(_values)-1)
+        # var_keys = set()
 
-            if len(_values)==0: continue
+        # for data in game_datas:
+        #     for shape in set(data["shapes"]):
+        #         var_keys.add(shape)
+        # step_key_name = "shape"
+
+        # for key in var_keys:
+        #     _states, _mcts_probs, _values = [], [], []
+        #     # _pieces_idx={"t":[], "i":[], "j":[], "l":[], "s":[], "z":[], "o":[]}
+        #     for data in game_datas:
+        #         for step in data["steps"]:
+        #             if step[step_key_name]!=key: continue
+        #             _states.append(step["state"])
+        #             _mcts_probs.append(step["move_probs"])
+        #             _values.append(step["reward"])
+        #             # _pieces_idx[step["shape"]].append(len(values)+len(_values)-1)
+
+        #     if len(_values)==0: continue
                 
-            # 重新计算
-            curr_avg_value = sum(_values)/len(_values)
-            curr_std_value = np.std(_values)
-            if curr_std_value<0.01: continue
+        #     # 重新计算
+        #     curr_avg_value = sum(_values)/len(_values)
+        #     curr_std_value = np.std(_values)
+        #     if curr_std_value<0.01: continue
 
-            # for shape in _pieces_idx:
-            #     pieces_idx[shape].extend(_pieces_idx[shape])
+        #     # for shape in _pieces_idx:
+        #     #     pieces_idx[shape].extend(_pieces_idx[shape])
 
-            _normalize_vals = []
-            # 用正态分布的方式重新计算
-            curr_std_value_fix = curr_std_value + 1e-8 # * (2.0**0.5) # curr_std_value / result["vars"]["std"] 
-            for v in _values:
-                #标准化的标准差为 (x-μ)/(σ/std), std 为 1 # 1/sqrt(2)
-                _nv = (v-curr_avg_value)/curr_std_value_fix 
-                if _nv <-1 : _nv = -1
-                if _nv >1  : _nv = 1
-                if _nv == 0: _nv = 1e-8
-                _normalize_vals.append(_nv)
+        #     _normalize_vals = []
+        #     # 用正态分布的方式重新计算
+        #     curr_std_value_fix = curr_std_value + 1e-8 # * (2.0**0.5) # curr_std_value / result["vars"]["std"] 
+        #     for v in _values:
+        #         #标准化的标准差为 (x-μ)/(σ/std), std 为 1 # 1/sqrt(2)
+        #         _nv = (v-curr_avg_value)/curr_std_value_fix 
+        #         if _nv <-1 : _nv = -1
+        #         if _nv >1  : _nv = 1
+        #         if _nv == 0: _nv = 1e-8
+        #         _normalize_vals.append(_nv)
 
-            # 将最好的一步的值设置为1
-            # max_normalize_val = max(_normalize_vals)-1
-            # for i in range(len(_normalize_vals)):
-            #     _normalize_vals[i] -= max_normalize_val
+        #     # 将最好的一步的值设置为1
+        #     # max_normalize_val = max(_normalize_vals)-1
+        #     # for i in range(len(_normalize_vals)):
+        #     #     _normalize_vals[i] -= max_normalize_val
 
-            print(key, len(_normalize_vals), "max:", max(_normalize_vals), "min:", min(_normalize_vals), "std:", curr_std_value)
+        #     print(key, len(_normalize_vals), "max:", max(_normalize_vals), "min:", min(_normalize_vals), "std:", curr_std_value)
 
-            states.extend(_states)
-            mcts_probs.extend(_mcts_probs)
-            values.extend(_normalize_vals)
-            result["vars"]["max"] = result["vars"]["max"]*0.999 + max(_normalize_vals)*0.001
-            result["vars"]["min"] = result["vars"]["min"]*0.999 + min(_normalize_vals)*0.001
-            result["vars"]["avg"] = result["vars"]["avg"]*0.999 + np.average(_normalize_vals)*0.001
-            result["vars"]["std"] = result["vars"]["std"]*0.999 + np.std(_normalize_vals)*0.001
-            # _states, _mcts_probs, _values = [], [], []
+        #     states.extend(_states)
+        #     mcts_probs.extend(_mcts_probs)
+        #     values.extend(_normalize_vals)
+        #     result["vars"]["max"] = result["vars"]["max"]*0.999 + max(_normalize_vals)*0.001
+        #     result["vars"]["min"] = result["vars"]["min"]*0.999 + min(_normalize_vals)*0.001
+        #     result["vars"]["avg"] = result["vars"]["avg"]*0.999 + np.average(_normalize_vals)*0.001
+        #     result["vars"]["std"] = result["vars"]["std"]*0.999 + np.std(_normalize_vals)*0.001
+        #     # _states, _mcts_probs, _values = [], [], []
 
-        # if result["vars"]["max"]>1 or result["vars"]["min"]<-1:
-        #     result["vars"]["std"] = round(result["vars"]["std"]-0.0001,4)
-        # else:
-        #     result["vars"]["std"] = round(result["vars"]["std"]+0.0001,4)
+        # # if result["vars"]["max"]>1 or result["vars"]["min"]<-1:
+        # #     result["vars"]["std"] = round(result["vars"]["std"]-0.0001,4)
+        # # else:
+        # #     result["vars"]["std"] = round(result["vars"]["std"]+0.0001,4)
 
-        json.dump(result, open(jsonfile,"w"), ensure_ascii=False)
+        # json.dump(result, open(jsonfile,"w"), ensure_ascii=False)
 
         assert len(states)>0
         assert len(states)==len(values)
@@ -394,7 +398,7 @@ class Train():
         print("TRAIN Self Play end. length:%s value sum:%s saving ..." % (len(states),sum(values)))
 
         # 保存对抗数据到data_buffer
-        for obj in self.get_equi_data(states, mcts_probs, values):
+        for obj in self.get_equi_data(states, mcts_probs, values, score):
             filename = "{}.pkl".format(uuid.uuid1())
             savefile = os.path.join(data_wait_dir, filename)
             pickle.dump(obj, open(savefile, "wb"))
