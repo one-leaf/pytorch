@@ -320,11 +320,12 @@ class Train():
         states, mcts_probs, values, score= [], [], [], []
 
         for data in game_datas:
-            for step in data["steps"]:
+            step_len=len(data["steps"])
+            for i, step in enumerate(data["steps"]):
                 states.append(step["state"])
                 mcts_probs.append(step["move_probs"])
                 values.append(step["reward"])
-                score.append(data["score"])
+                score.append(data["score"]*i/step_len)
 
         # # 用于统计shape的std
         # pieces_idx={"t":[], "i":[], "j":[], "l":[], "s":[], "z":[], "o":[]}
