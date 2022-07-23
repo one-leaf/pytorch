@@ -7,7 +7,7 @@ from mcts import MCTSPlayer
 import time, json, datetime
 
 from itertools import count
-import os, random, uuid
+import os, random, uuid, math
 
 import numpy as np
 
@@ -279,7 +279,7 @@ class Train():
             print(line)
         print((" "+" -"*agent.width+" ")*len(borads))
 
-        ## 放弃 按0.50的衰减更新reward
+        ## 放弃 按0.9的衰减更新reward
         # 只关注最后一次得分方块的所有步骤,将消行方块的所有步骤的得分都设置为1
         for data in game_datas:
             step_count = len(data["steps"])
@@ -289,8 +289,9 @@ class Train():
             for i in range(step_count-1,-1,-1):
                 if piece_count!=data["steps"][i]["piece_count"]:
                     piece_count = data["steps"][i]["piece_count"]
-                    v = data["steps"][i]["reward"]# 0.5*v+data["steps"][i]["reward"]
-                    if v>1: v=1
+                    #v = data["steps"][i]["reward"]
+                    v = 0.9*v+data["steps"][i]["reward"]
+                    v = math.tanh(v)
                     vlist.insert(0,v)
                 data["steps"][i]["reward"] = v
             print(vlist)
