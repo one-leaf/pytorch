@@ -8,7 +8,7 @@ import time, datetime
 from collections import deque
 from collections import namedtuple
 import os, random
-import copy
+import copy, math
 
 import numpy as np
 import torch
@@ -84,7 +84,7 @@ class Dataset(torch.utils.data.Dataset):
         avg_score = sum(scores)/len(scores)
         values = [] 
         for fn in self.data:
-            self.data[fn]["value"] = self.data[fn]["value"]*0.5 + (self.data[fn]["score"]/avg_score)*0.5
+            self.data[fn]["value"] = self.data[fn]["value"]*0.5 + math.tanh(self.data[fn]["score"]/avg_score)*0.5
             values.append(self.data[fn]["value"])
         curr_avg_value = sum(values)/len(values)
         curr_std_value = np.std(values)+1e-8
