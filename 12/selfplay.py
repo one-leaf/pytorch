@@ -326,7 +326,7 @@ class Train():
                 states.append(step["state"])
                 mcts_probs.append(step["move_probs"])
                 values.append(step["reward"])
-                score.append(data["score"]*i/step_len)
+                score.append(data["score"])
 
         # # 用于统计shape的std
         # pieces_idx={"t":[], "i":[], "j":[], "l":[], "s":[], "z":[], "o":[]}
