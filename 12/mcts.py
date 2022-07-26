@@ -61,6 +61,7 @@ class MCTS():
         acts = [av[0] for av in act_visits]
         visits = [av[1] for av in act_visits]
         qs = [round(av[1],2) for av in act_Qs]
+        v = 0 if s not in self.Vs else self.Vs[s]
 
         if state.show_mcts_process:
             info=[]
@@ -71,16 +72,15 @@ class MCTS():
                 if (s, act) in self.Qsa: q = self.Qsa[(s, act)]
                 if s in self.Ps: p = self.Ps[s][act]
                 info.append([action, visit, round(q,2), round(p,2)])        
-            v = 0
-            if s in self.Vs: v = self.Vs[s]
             print(state.steps, state.piececount, state.fallpiece["shape"], state.piecesteps, "n:", n, "depth:" ,self.max_depth,"height:", state.pieceheight, "value:", round(v,2), info, "std:", round(np.std(visits),2))
+
 
         if temp == 0:
             bestAs = np.array(np.argwhere(visits == np.max(visits))).flatten()
             bestA = np.random.choice(bestAs)
             probs = [0] * len(visits)
             probs[bestA] = 1
-            return acts, np.array(probs), qs
+            return acts, np.array(probs), qs, v
 
         # print(visits, temp)
         # m = np.power(np.array(visits), 1./temp)
@@ -91,7 +91,7 @@ class MCTS():
         else:
             m = np.array(visits)
             probs = m/m_sum
-        return acts, probs, qs
+        return acts, probs, qs, v
 
     def search(self, state):
         """
@@ -221,7 +221,7 @@ class MCTSPlayer(object):
         value = 0
         if not state.terminal:  # 如果游戏没有结束
             # 训练的时候 temp = 1
-            acts, act_probs, act_qs = self.mcts.get_action_probs(state, temp)
+            acts, act_probs, act_qs, state_v = self.mcts.get_action_probs(state, temp)
             move_probs[acts] = act_probs
             max_idx = np.argmax(act_probs)    
 
@@ -263,7 +263,7 @@ class MCTSPlayer(object):
                 value = act_qs[idx]
 
             # 状态差，随机
-            if value < 0:
+            if state_v < 0:
                 idx = np.random.choice(range(len(acts)), p=act_probs) 
                 action = acts[idx]
                 value = act_qs[idx]
