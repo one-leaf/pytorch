@@ -159,9 +159,8 @@ class Train():
                         action = random.choice(game.get_availables())
 
                 # 如果当前选择的啥也不做 KEY_NONE， 不过 KEY_DOWN 也可以用时，有一半几率直接用 KEY_DOWN
-                if action == ACTIONS[0] and ACTIONS[-1] in game.get_availables():
-                    if random.random()>0.5:
-                        action = ACTIONS[-1]
+                if action == ACTIONS[0] and random.random()>0.5 and ACTIONS[-1] in game.get_availables():
+                    action = ACTIONS[-1]
 
                 _, reward = game.step(action)
 
