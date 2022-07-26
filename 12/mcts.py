@@ -153,25 +153,25 @@ class MCTS():
         act = state.position_to_action(a)
         state.step(act)
         
-        # 后期训练不需要，只是用于前期引导
-        if state.state == 1:
-            if state.reward>0: 
-                off = state.reward #- state.pieceheight/20
-                # 出现消除行的收益
-                v = off + self.search(state) 
-                # if v>1: v=1
-                # print("v:", v, "off", off, "height", state.pieceheight, "pieccount", state.piececount)
-            else:
-                # 未消除行的损失,推荐早点结束
-                if state.pieceheight>2:
-                    off = 0 - state.pieceheight/20
-                else:
-                    off = 0
-                v = off + self.search(state) 
-                # if v<-1: v=-1
-        else:
-            v = self.search(state)
-        # v = self.search(state)
+        # # 后期训练不需要，只是用于前期引导
+        # if state.state == 1:
+        #     if state.reward>0: 
+        #         off = state.reward #- state.pieceheight/20
+        #         # 出现消除行的收益
+        #         v = off + self.search(state) 
+        #         # if v>1: v=1
+        #         # print("v:", v, "off", off, "height", state.pieceheight, "pieccount", state.piececount)
+        #     else:
+        #         # 未消除行的损失,推荐早点结束
+        #         if state.pieceheight>2:
+        #             off = 0 - state.pieceheight/10
+        #         else:
+        #             off = 0
+        #         v = off + self.search(state) 
+        #         # if v<-1: v=-1
+        # else:
+        #     v = self.search(state)
+        v = self.search(state)-0.01
 
         # 更新 Q 值 和 访问次数
         if (s, a) in self.Qsa:
