@@ -266,6 +266,12 @@ class MCTSPlayer(object):
                 action = acts[idx]
                 value = act_qs[idx]
 
+            # 状态最差了，直接随机好了
+            if value < -0.99:
+                idx = np.random.choice(range(len(acts)), p=act_probs) 
+                action = acts[idx]
+                value = act_qs[idx]
+
             # print(acts, act_probs, idx, action)
 
             if return_prob:
