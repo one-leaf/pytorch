@@ -267,7 +267,7 @@ class MCTSPlayer(object):
                 value = act_qs[idx]
 
             # 状态差，随机
-            if value < 0:
+            if value < -0.9:
                 idx = np.random.choice(range(len(acts)), p=act_probs) 
                 action = acts[idx]
                 value = act_qs[idx]
