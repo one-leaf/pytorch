@@ -256,21 +256,22 @@ class MCTSPlayer(object):
                 #     # dirichlet = np.random.dirichlet(0.03 * np.ones(len(act_probs)))
                 #     # act = np.random.choice(acts, p=p * act_probs + (1.0-p) * dirichlet)
                 #     act = np.random.choice(acts, p=act_probs)
-                # action = state.position_to_action(act)
-                if state.show_mcts_process:
-                    if idx!=max_idx:
-                        print("    random:", state.position_to_action_name(acts[max_idx]), "==>", state.position_to_action_name(action))  
-                                                                  
+                # action = state.position_to_action(act)                                                                  
             else:  # 和人类对战
                 idx = max_idx
                 action = acts[idx]
                 value = act_qs[idx]
 
-            # 状态最差了，直接随机好了
-            if value < -0.99:
+            # 状态差，随机
+            if value < 0:
                 idx = np.random.choice(range(len(acts)), p=act_probs) 
                 action = acts[idx]
                 value = act_qs[idx]
+
+            if state.show_mcts_process:
+                if idx!=max_idx:
+                    print("    random:", state.position_to_action_name(acts[max_idx]), "==>", state.position_to_action_name(action))  
+
 
             # print(acts, act_probs, idx, action)
 
