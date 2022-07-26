@@ -273,7 +273,7 @@ class Tetromino(object):
         newpiece = {'shape':shape,
                     'rotation': random.randint(0,len(pieces[shape])-1),
                     'x': int(boardwidth)//2-int(templatenum//2),
-                    'y': -2,
+                    'y': 0,
                     'color': color}
         return newpiece
 
