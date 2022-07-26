@@ -158,6 +158,11 @@ class Train():
                         print(game.steps, game.piececount, game.fallpiece["shape"], game.piecesteps, "key:", game.get_key(), "key_len:" ,len(game_keys))
                         action = random.choice(game.get_availables())
 
+                # 如果当前选择的啥也不做 KEY_NONE， 不过 KEY_DOWN 也可以用时，有一半几率直接用 KEY_DOWN
+                if action == ACTIONS[0] and ACTIONS[-1] in game.get_availables():
+                    if random.random()>0.5:
+                        action = ACTIONS[-1]
+
                 _, reward = game.step(action)
 
                 _step["key"] = game.get_key()
