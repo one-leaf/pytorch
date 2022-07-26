@@ -276,7 +276,9 @@ class Agent(object):
                     if shapedraw[y][x]!=blank:
                         px, py = x+piece['x'], y+piece['y']
                         if px>=0 and py>=0:
-                            board[y+piece['y']][x+piece['x']]=-1
+                            board[py][px]=-1
+        else:
+            print("fallpiece is None")
         return board
 
     # 获得待下落方块的信息

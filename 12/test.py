@@ -28,10 +28,12 @@ def run():
             
             agent.step(act)
             # print(agent.get_availables())
-            os.system("cls")
-            print(act_probs, v)
-            agent.print2()
+            # os.system("cls")
+            print(act_probs, v, agent.position_to_action_name(act))
+            # agent.print2()
             time.sleep(0.1)
+            print(agent.current_state())
+            input()
     except KeyboardInterrupt:
         print('quit')
 
