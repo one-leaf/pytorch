@@ -38,7 +38,8 @@ class Train():
         if os.path.exists(status_file):
             try:
                 result=json.load(open(status_file,"r"))
-            except:
+            except Exception as e: 
+                print(e)
                 time.sleep(10)
                 return self.read_status_file(status_file)
         else:
