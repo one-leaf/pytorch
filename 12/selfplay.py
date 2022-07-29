@@ -444,13 +444,13 @@ class Train():
             qval = result["QVal"]
             # cpuct表示概率的可信度
             if result["cpuct"][cpuct_list[0]]>result["cpuct"][cpuct_list[1]]:
-                cpuct = round(float(cpuct_list[0])-0.01,2)
-                if cpuct<=0.01:
-                    result["cpuct"] = {"0.01":qval, "1.01":qval}
+                cpuct = round(float(cpuct_list[0])-0.1,1)
+                if cpuct<=0.1:
+                    result["cpuct"] = {"0.1":qval, "1.1":qval}
                 else:
                     result["cpuct"] = {str(cpuct):qval, str(round(cpuct+1,2)):qval}
             else:
-                cpuct = round(float(cpuct_list[0])+0.01,2)
+                cpuct = round(float(cpuct_list[0])+0.1,1)
                 result["cpuct"] = {str(cpuct):qval, str(round(cpuct+1,2)):qval}
 
             if max(result["reward"])==result["reward"][-1]:
