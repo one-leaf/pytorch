@@ -148,7 +148,7 @@ class Train():
                 _step["state"] = game.current_state()               
                 _step["piece_count"] = game.piececount               
                 _step["shape"] = game.fallpiece["shape"]
-                _step["piece_height"] = game.pieceheight
+                _step["pre_piece_height"] = game.pieceheight
 
                 if game_num == 1:
                     action, move_probs = player.get_action(game, temp=self.temp, return_prob=1, need_random=False) 
@@ -164,6 +164,8 @@ class Train():
                 #     action = ACTIONS[-1]
 
                 _, reward = game.step(action)
+
+                _step["piece_height"] = game.pieceheight
 
                 _step["key"] = game.get_key()
                 # 这里不鼓励多行消除
@@ -292,7 +294,7 @@ class Train():
             v = 0
             vlist=[]
             for i in range(step_count-1,-1,-1):
-                v = 0.95*v+data["steps"][i]["reward"]
+                v = 0.95*v+data["steps"][i]["pre_piece_height"]-data["steps"][i]["piece_height"]
                 v = math.tanh(v)
                 if piece_count!=data["steps"][i]["piece_count"]:
                     piece_count = data["steps"][i]["piece_count"]
