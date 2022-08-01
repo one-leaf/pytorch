@@ -38,12 +38,10 @@ class Train():
         if os.path.exists(status_file):
             try:
                 result=json.load(open(status_file,"r"))
-            except Exception as e: 
-                print(e)
-                time.sleep(10)
-                return self.read_status_file(status_file)
+            except Exception as e:
+                os.replace(status_file, status_file+".bak") 
+                result= {"agent":0, "reward":[], "pieces":[], "qvals":[], "QVal":0}
         else:
-            result={}
             result={"agent":0, "reward":[], "pieces":[], "qvals":[], "QVal":0}
         if "curr" not in result:
             result["curr"]={"reward":0, "pieces":0, "agent1000":0, "agent100":0, "height":0}
