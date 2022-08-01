@@ -103,7 +103,7 @@ class MCTS():
         s = state.get_key()
         self.depth = self.depth +1
 
-        if self.depth>200: return 0
+        if self.depth>1000: return 0
 
         # 将所有状态的得分都 cache 起来
         # 由于不确定最后结果，所以按预测的为准
