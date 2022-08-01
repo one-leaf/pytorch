@@ -39,7 +39,8 @@ class Train():
             try:
                 result=json.load(open(status_file,"r"))
             except Exception as e:
-                os.replace(status_file, status_file+".bak") 
+                ext = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+                os.replace(status_file, status_file+"_"+ext) 
                 result= {"agent":0, "reward":[], "pieces":[], "qvals":[], "QVal":0}
         else:
             result={"agent":0, "reward":[], "pieces":[], "qvals":[], "QVal":0}
