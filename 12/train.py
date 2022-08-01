@@ -56,6 +56,7 @@ class Dataset(torch.utils.data.Dataset):
         return state, mcts_prob, value
 
     def load_game_files(self):
+        start_time = time.time()
         files = glob.glob(os.path.join(self.data_dir, "*.pkl"))
         files = sorted(files, key=lambda x: os.path.getmtime(x), reverse=True)
         delcount = 0
@@ -66,7 +67,8 @@ class Dataset(torch.utils.data.Dataset):
             else:
                 self.file_list.append(filename)
         random.shuffle(self.file_list)
-        print("totle:",len(self.file_list),"delete:", delcount)
+        pay_time = round(time.time()-start_time, 2)
+        print("loaded data, totle:",len(self.file_list),"delete:", delcount,"paid time:", pay_time)
 
     def calc_data(self):
         scores=[]
