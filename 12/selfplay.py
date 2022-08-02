@@ -116,9 +116,9 @@ class Train():
             print("QVal:",result["QVal"])
 
             # c_puct 参数自动调节，step=0.1 
-            print("cpuct:",result["cpuct"])
-            cpuct_list = result["cpuct"]
-            cpuct_list = sorted(cpuct_list, key=lambda x : cpuct_list[x]["count"])[0]
+            cpuct_result = result["cpuct"]
+            cpuct_list = sorted(cpuct_result, key=lambda x : cpuct_result[x]["count"])
+            print("cpuct:",cpuct_result, "-->", cpuct_list)
             cpuct = float(cpuct_list[0])
 
             print("c_puct:",cpuct, "n_playout:",self.n_playout)
