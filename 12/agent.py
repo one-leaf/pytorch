@@ -101,7 +101,7 @@ class Agent(object):
 
        # if not KEY_DOWN in acts : acts.append(KEY_NONE)
 
-        random.shuffle(acts)
+        # random.shuffle(acts)
         
         return acts         
 
