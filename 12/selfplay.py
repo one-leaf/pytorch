@@ -49,7 +49,10 @@ class Train():
         if "best" not in result:
             result["best"]={"reward":0,"pieces":0,"agent":0}
         if "cpuct" not in result:
-            result["cpuct"]={"0.1":0,"0.2":0}
+            result["cpuct"]={"0.1":{"count":0,"value":0},"1.1":{"count":0,"value":0}}    
+        for key in result["cpuct"]:
+            if not isinstance(result["cpuct"][key], dict):
+                result["cpuct"][key] = {"count":0,"value":result["cpuct"][key]}
         if "time" not in result:
             result["time"]={"agent_time":0,"step_time":0,"step_times":[]}
         if "height" not in result:
@@ -98,9 +101,7 @@ class Train():
         agentcount, agentreward, piececount, agentscore = 0, 0, 0, 0
 
         borads = []
-        game_num = 0
-        
-        cpuct_first_flag = random.random() > 0.5
+        game_num = 0       
 
         # 尽量不要出现一样的局面
         game_keys = []
@@ -115,21 +116,13 @@ class Train():
             print("QVal:",result["QVal"])
 
             # c_puct 参数自动调节，step=0.1 
-            cpuct_list = []  
-            for cp in result["cpuct"]:
-                cpuct_list.append(cp)
-                if len(cpuct_list)==2:break
-            cpuct_list.sort()
-
             print("cpuct:",result["cpuct"])
+            cpuct_list = result["cpuct"]
+            cpuct_list = sorted(cpuct_list, key=lambda x : cpuct_list[x]["count"])[0]
+            cpuct = float(cpuct_list[0])
 
-            if cpuct_first_flag:
-                cpuct = float(cpuct_list[0])
-            else:
-                cpuct = float(cpuct_list[1])
-            cpuct_first_flag = not cpuct_first_flag
+            print("c_puct:",cpuct, "n_playout:",self.n_playout)
 
-            print("c_puct:",cpuct,"n_playout:",self.n_playout)
             policy_value_net = PolicyValueNet(GAME_WIDTH, GAME_HEIGHT, GAME_ACTIONS_NUM, model_file=model_file)
             player = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=cpuct, n_playout=self.n_playout)
 
@@ -231,8 +224,10 @@ class Train():
                         result["time"]["step_time"] = round(result["time"]["step_time"]*(1-d)+steptime*d, 3)
                    
                     # 记录当前cpuct的统计结果
-                    if str(cpuct) in result["cpuct"]:
-                        result["cpuct"][str(cpuct)] = result["cpuct"][str(cpuct)]*0.99 + game_reward*0.01         
+                    cpuct_str = str(cpuct)
+                    if cpuct_str in result["cpuct"]:
+                        result["cpuct"][cpuct_str]["value"] = result["cpuct"][cpuct_str]["value"]*0.99 + game_reward*0.01         
+                        result["cpuct"][cpuct_str]["count"] = result["cpuct"][cpuct_str]["count"]+1         
 
                     if game_reward>result["best"]["reward"]:
                         result["best"]["reward"] = game_reward
@@ -444,15 +439,15 @@ class Train():
             # 每100局更新一次cpuct参数
             qval = result["QVal"]
             # cpuct表示概率的可信度
-            if result["cpuct"][cpuct_list[0]]>result["cpuct"][cpuct_list[1]]:
+            if result["cpuct"][cpuct_list[0]]["value"]>result["cpuct"][cpuct_list[1]]["value"]:
                 cpuct = round(float(cpuct_list[0])-0.1,1)
                 if cpuct<=0.1:
-                    result["cpuct"] = {"0.1":qval, "1.1":qval}
+                    result["cpuct"] = {"0.1":{"count":0,"value":qval}, "1.1":{"count":0,"value":qval}}
                 else:
-                    result["cpuct"] = {str(cpuct):qval, str(round(cpuct+1,2)):qval}
+                    result["cpuct"] = {str(cpuct):{"count":0,"value":qval}, str(round(cpuct+1,2)):{"count":0,"value":qval}}
             else:
                 cpuct = round(float(cpuct_list[0])+0.1,1)
-                result["cpuct"] = {str(cpuct):qval, str(round(cpuct+1,2)):qval}
+                result["cpuct"] = {str(cpuct):{"count":0,"value":qval}, str(round(cpuct+1,2)):{"count":0,"value":qval}}
 
             if max(result["reward"])==result["reward"][-1]:
                 newmodelfile = model_file+"_reward_"+str(result["reward"][-1])
