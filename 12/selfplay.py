@@ -226,7 +226,7 @@ class Train():
                     # 记录当前cpuct的统计结果
                     cpuct_str = str(cpuct)
                     if cpuct_str in result["cpuct"]:
-                        result["cpuct"][cpuct_str]["value"] = result["cpuct"][cpuct_str]["value"]*0.99 + game_reward*0.01         
+                        result["cpuct"][cpuct_str]["value"] = result["cpuct"][cpuct_str]["value"]+game_reward         
                         result["cpuct"][cpuct_str]["count"] = result["cpuct"][cpuct_str]["count"]+1         
 
                     if game_reward>result["best"]["reward"]:
@@ -439,7 +439,9 @@ class Train():
             # 每100局更新一次cpuct参数
             qval = result["QVal"]
             # cpuct表示概率的可信度
-            if result["cpuct"][cpuct_list[0]]["value"]>result["cpuct"][cpuct_list[1]]["value"]:
+            v0 = result["cpuct"][cpuct_list[0]]["value"]/result["cpuct"][cpuct_list[0]]["count"]
+            v1 = result["cpuct"][cpuct_list[1]]["value"]/result["cpuct"][cpuct_list[1]]["count"]
+            if v0 > v1:
                 cpuct = round(float(cpuct_list[0])-0.1,1)
                 if cpuct<=0.1:
                     result["cpuct"] = {"0.1":{"count":0,"value":qval}, "1.1":{"count":0,"value":qval}}
