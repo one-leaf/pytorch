@@ -157,7 +157,7 @@ class MCTS():
         
         # 后期训练不需要，只是用于前期引导
         if state.state == 1:
-            off = prev_pieceheight - state.pieceheight
+            off = prev_pieceheight - state.pieceheight - state.pieceheight/20 
             v  = off + self.search(state)
             # if state.reward>0: 
             #     off = state.reward #- state.pieceheight/20
