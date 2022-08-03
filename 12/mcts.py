@@ -54,7 +54,8 @@ class MCTS():
             if visits_sum >= self._n_playout*50: break
             # 计算所有动作的探索次数，如果大于2000，则中断
             # if n >= self._n_playout*40 : break
-            if n >= self._n_playout and self.Vs[s] >= -0.5: break
+            act_Qs = [self.Qsa[(s, a)] if (s, a) in self.Qsa else 0 for a in available_acts]
+            if len(available_acts)>1 or (n >= self._n_playout and max(act_Qs) >= -0.5): break
 
         act_visits = [(a, self.Nsa[(s, a)]) if (s, a) in self.Nsa else (a, 0) for a in available_acts]
         act_Qs = [(a, self.Qsa[(s, a)]) if (s, a) in self.Qsa else (a, 0) for a in available_acts]
