@@ -179,8 +179,25 @@ class Agent(object):
         return self.state, self.reward
 
     def set_key(self):
-        info = self.status[-1]
-        self.key = hash(info.data.tobytes())
+        #info = self.status[-1]
+        #self.key = hash(info.data.tobytes())
+        chars="abcdefghijklmnopqrstuvwxyz" 
+        key = ""
+        for x in range(self.width):
+            h = "a"
+            for y in range(self.height):
+                if self.board[x][y]!=blank:
+                    h = chars[y]
+                    break
+            key = key + h
+        r = self.fallpiece['rotation']
+        key = key + chars[r]
+        x = self.fallpiece['x']
+        key = key + chars[x]
+        y = self.fallpiece['y']
+        key = key + chars[y]
+        key = key + self.fallpiece['shape']
+        self.key = key
 
     def get_key(self):
         return self.key
