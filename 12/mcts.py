@@ -48,13 +48,13 @@ class MCTS():
         for n in count():
             self.depth = 0
             state_copy = copy.deepcopy(state)
-            v = self.search(state_copy)
+            self.search(state_copy)
             if self.depth>self.max_depth: self.max_depth = self.depth
             # visits_sum = sum([self.Nsa[(s, a)] if (s, a) in self.Nsa else 0 for a in available_acts])          
             # if visits_sum >= self._n_playout or n > 2000: break
             # 计算所有动作的探索次数，如果大于2000，则中断
             if n >= self._n_playout*40 : break
-            if n >= self._n_playout and v >= -0.5: break
+            if n >= self._n_playout and self.Vs[s] >= -0.5: break
 
         act_visits = [(a, self.Nsa[(s, a)]) if (s, a) in self.Nsa else (a, 0) for a in available_acts]
         act_Qs = [(a, self.Qsa[(s, a)]) if (s, a) in self.Qsa else (a, 0) for a in available_acts]
