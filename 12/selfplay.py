@@ -49,7 +49,7 @@ class Train():
         if "best" not in result:
             result["best"]={"reward":0,"pieces":0,"agent":0}
         if "cpuct" not in result:
-            result["cpuct"]={"0.1":{"count":0,"value":0},"1.1":{"count":0,"value":0}}    
+            result["cpuct"]={"3.1":{"count":0,"value":0},"4.1":{"count":0,"value":0}}    
         for key in result["cpuct"]:
             if not isinstance(result["cpuct"][key], dict):
                 result["cpuct"][key] = {"count":0,"value":result["cpuct"][key]}
