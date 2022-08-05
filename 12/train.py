@@ -86,7 +86,7 @@ class Dataset(torch.utils.data.Dataset):
         avg_score = sum(scores)/len(scores)
         values = [] 
         for fn in self.data:
-            self.data[fn]["value"] = 0.2*self.data[fn]["value"] + 0.8*math.tanh(self.data[fn]["score"]/avg_score)
+            self.data[fn]["value"] = 0.1*self.data[fn]["value"] + 0.9*math.tanh(self.data[fn]["score"]/avg_score)
             values.append(self.data[fn]["value"])
         curr_avg_value = sum(values)/len(values)
         curr_std_value = np.std(values)+1e-8
