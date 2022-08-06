@@ -35,14 +35,19 @@ class Train():
 
     def read_status_file(self, status_file):
         # 获取历史训练数据
+        result=None
         if os.path.exists(status_file):
-            try:
-                result=json.load(open(status_file,"r"))
-            except Exception as e:
+            for i in range(5):
+                try:
+                    result=json.load(open(status_file,"r"))
+                    break
+                except Exception as e:
+                    print(e)
+                    time.sleep(10)
+            if result==None:
                 ext = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
                 os.replace(status_file, status_file+"_"+ext) 
-                result= {"agent":0, "reward":[], "pieces":[], "qvals":[], "QVal":0}
-        else:
+        if result==None:
             result={"agent":0, "reward":[], "pieces":[], "qvals":[], "QVal":0}
         if "curr" not in result:
             result["curr"]={"reward":0, "pieces":0, "agent1000":0, "agent100":0, "height":0}
@@ -418,13 +423,13 @@ class Train():
 
 
         result = self.read_status_file(jsonfile)
-        if result["curr"]["agent100"]>100:
+        if result["curr"]["agent100"]>50:
             result["reward"].append(round(result["curr"]["reward"]/result["curr"]["agent1000"],2))
             result["pieces"].append(round(result["curr"]["pieces"]/result["curr"]["agent1000"],2))
             result["qvals"].append(round(result["QVal"],2))
             result["height"].append(result["curr"]["height"])
             result["time"]["step_times"].append(result["time"]["step_time"])
-            result["curr"]["agent100"] -= 100 
+            result["curr"]["agent100"] -= 50 
             while len(result["reward"])>200:
                 result["reward"].remove(result["reward"][0])
             while len(result["pieces"])>200:
