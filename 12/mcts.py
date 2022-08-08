@@ -58,7 +58,7 @@ class MCTS():
             act_Qs = [self.Qsa[(s, a)] if (s, a) in self.Qsa else 0 for a in available_acts]
 
             if state.pieceheight<3 and n >= self._n_playout: break
-            if len(available_acts)==1 or (n >= self._n_playout and max(act_Qs) >= 0): break
+            if len(available_acts)==1 or (n >= self._n_playout and max(act_Qs) > 0): break
 
         act_visits = [(a, self.Nsa[(s, a)]) if (s, a) in self.Nsa else (a, 0) for a in available_acts]
         act_Qs = [(a, self.Qsa[(s, a)]) if (s, a) in self.Qsa else (a, 0) for a in available_acts]
