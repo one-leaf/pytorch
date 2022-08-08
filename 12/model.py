@@ -290,10 +290,10 @@ class PolicyValueNet():
 
         value_loss = F.mse_loss(values.view(-1), value_batch)
 
-        policy_loss = F.cross_entropy(probs, mcts_probs, label_smoothing=0.1)
+        # policy_loss = F.cross_entropy(probs, mcts_probs, label_smoothing=0.1)
 
         log_probs = torch.log(probs + 1e-8)
-        # policy_loss = -torch.mean(torch.sum(mcts_probs * log_probs, 1))
+        policy_loss = -torch.mean(torch.sum(mcts_probs * log_probs, 1))
 
         loss = value_loss + policy_loss
 
