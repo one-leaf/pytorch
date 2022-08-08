@@ -1,16 +1,24 @@
 FROM nvidia/cuda:10.2-runtime-ubuntu18.04
 
-RUN \
+RUN rm /etc/apt/sources.list.d/* && \
+    sed -i s@/archive.ubuntu.com/@/mirrors.163.com/@g /etc/apt/sources.list && \
     apt update -y && \
-    apt install software-properties-common -y && \
-    apt-add-repository -y ppa:deadsnakes/ppa && \
+    apt install -y software-properties-common curl
+
+RUN DEBIAN_FRONTEND=noninteractive TZ=Asia/Shanghai apt-get -y install tzdata
+
+RUN  apt-add-repository -y ppa:deadsnakes/ppa && \
     apt update -y && \
-    apt install python3.10 python3.10-pip && \
-    update-alternatives --remove-all python && \
-    update-alternatives --install /usr/bin/python python /usr/bin/python3.10 10 && \
-    update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 10 && \
-    pip config set global.index-url https://pypi.douban.com/simple/ && \
-    pip install torch torchvision torchaudio && \
-    pip install opencv-python opencv-contrib-python && \
-    pip install Pillow && \
-    rm -rf /root/.cache/pip
+    apt install -y python3.10 python3.10-distutils && \
+    update-alternatives --install /usr/bin/python python /usr/bin/python3.10 10 
+
+RUN curl -sS https://bootstrap.pypa.io/get-pip.py | python && \
+    pip config set global.index-url https://pypi.douban.com/simple/
+
+RUN pip install torch torchvision torchaudio 
+
+RUN pip install Pillow opencv-python opencv-contrib-python 
+
+RUN pip install pygame 
+
+RUN rm -rf /root/.cache/pip
