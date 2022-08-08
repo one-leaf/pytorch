@@ -6,18 +6,23 @@ import torch.nn as nn
 from functools import partial
 from collections import OrderedDict
 
+def pair(t):
+    return t if isinstance(t, tuple) else (t, t)
 class PatchEmbed(nn.Module):
     """
     图片转嵌入数据，由 [B, C, H, W] -> [B, HW, C]
     """
     def __init__(self, img_size=(224,244), patch_size=(16,16), in_c=3, embed_dim=768, norm_layer=None):
         super().__init__()
-        self.img_size = img_size
-        self.patch_size = patch_size
-        self.grid_size = (img_size[0] // patch_size[0], img_size[1] // patch_size[1])
-        self.num_patches = self.grid_size[0] * self.grid_size[1]
+        image_height, image_width = pair(img_size)
+        patch_height, patch_width = pair(patch_size)
+        assert image_height % patch_height == 0 and image_width % patch_width == 0, 'Image dimensions must be divisible by the patch size.'
 
-        self.proj = nn.Conv2d(in_c, embed_dim, kernel_size=patch_size, stride=patch_size)
+        self.img_size = (image_height, image_width)
+        self.patch_size = (patch_height, patch_width)
+        self.num_patches =  (image_height // patch_height) * (image_width // patch_width)
+
+        self.proj = nn.Conv2d(in_c, embed_dim, kernel_size=self.patch_size, stride=self.patch_size)
         self.norm = norm_layer(embed_dim) if norm_layer else nn.Identity()
 
     def forward(self, x):

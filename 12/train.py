@@ -5,8 +5,6 @@ from model import PolicyValueNet, data_dir, data_wait_dir, model_file
 
 import time, datetime
 
-from collections import deque
-from collections import namedtuple
 import os, random
 import copy, math
 
