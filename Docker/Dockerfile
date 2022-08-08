@@ -1,7 +1,5 @@
 FROM nvidia/cuda:10.2-runtime-ubuntu18.04
 
-COPY get-pip.py get-pip.py
-
 RUN \
     mv /etc/apt/sources.list.d /etc/apt/sources.list.d.bak && \
     apt-get update -y && \
