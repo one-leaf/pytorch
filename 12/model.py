@@ -288,7 +288,7 @@ class PolicyValueNet():
         self.policy_value_net.train()
         probs, values = self.policy_value_net(state_batch)
 
-        value_loss = F.mse_loss(values.view(-1), value_batch)
+        value_loss = F.mse_loss(values, value_batch.unsqueeze(-1))
 
         policy_loss = F.cross_entropy(probs, mcts_probs, label_smoothing=0.1)
 
