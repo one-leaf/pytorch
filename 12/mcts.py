@@ -56,7 +56,7 @@ class MCTS():
             # 计算所有动作的探索次数，如果大于2000，则中断
             # if n >= self._n_playout*40 : break
             act_Qs = [self.Qsa[(s, a)] if (s, a) in self.Qsa else 0 for a in available_acts]
-            
+
             if state.pieceheight<3 and n >= self._n_playout: break
             if len(available_acts)==1 or (n >= self._n_playout and max(act_Qs) >= 0): break
 
@@ -275,7 +275,7 @@ class MCTSPlayer(object):
                 value = act_qs[idx]
 
             # 状态差，随机
-            if value < -0.5:
+            if value < -0.5 and state.pieceheight<3:
                 idx =  np.argmax(act_qs)
                 action = acts[idx]
                 value = act_qs[idx]
