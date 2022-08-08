@@ -166,7 +166,7 @@ class Train():
 
                 _step["key"] = game.get_key()
                 # 这里不鼓励多行消除
-                _step["reward"] = 1 if reward>0 else 0
+                _step["reward"] = reward if reward>0 else 0
                 _step["action"] = action                
                 _step["move_probs"] = move_probs
 
@@ -291,15 +291,17 @@ class Train():
             step_count = len(data["steps"])
             piece_count = -1
             v = 0
+            score = 0
             vlist=[]
             for i in range(step_count-1,-1,-1):
                 v = 0.99*v+data["steps"][i]["pre_piece_height"]-data["steps"][i]["piece_height"]
                 v = math.tanh(v)
                 if piece_count!=data["steps"][i]["piece_count"]:
                     piece_count = data["steps"][i]["piece_count"]
-                    #v = data["steps"][i]["reward"]
+                    score += data["steps"][i]["reward"]
                     vlist.insert(0,v)
                 data["steps"][i]["reward"] = v
+                data["steps"][i]["score"] = score
             print(vlist)
 
         # 总得分为 消行奖励  + (本局消行奖励-平均每局消行奖励/平均每局消行奖励)
@@ -332,7 +334,7 @@ class Train():
                 states.append(step["state"])
                 mcts_probs.append(step["move_probs"])
                 values.append(step["reward"])
-                score.append(data["score"])
+                score.append(step["score"])
 
         # # 用于统计shape的std
         # pieces_idx={"t":[], "i":[], "j":[], "l":[], "s":[], "z":[], "o":[]}
