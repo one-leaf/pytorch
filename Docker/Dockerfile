@@ -1,7 +1,6 @@
 FROM nvidia/cuda:10.2-runtime-ubuntu18.04
 
 RUN \
-    mv /etc/apt/sources.list.d /etc/apt/sources.list.d.bak && \
     apt update -y && \
     apt install software-properties-common -y && \
     apt-add-repository -y ppa:deadsnakes/ppa && \
