@@ -109,11 +109,10 @@ class MCTS():
 
         if self.depth>1000: return 0
 
-        # 将所有状态的得分都 cache 起来
-        # 由于不确定最后结果，所以按预测的为准
         if s not in self.Es:
             v = 0
-            if state.terminal:
+            # 如果游戏结束或高度超过10
+            if state.terminal or state.pieceheight>=10:
                 v = -1
             self.Es[s] = v
 
