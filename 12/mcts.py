@@ -117,18 +117,11 @@ class MCTS():
 
         if self.depth>1000: return 0
 
-        if s not in self.Es:
-            v = 0
-            # 如果游戏结束或高度超过10
-            if state.terminal or state.pieceheight>=10:
-                v = -1
-                self.Es[s] = v
-                return v      
-                                          
-            self.Es[s] = v
+        if state.terminal or state.pieceheight>=10:
+            self.Es[s] = -1
 
         # 如果得分不等于0，标志探索结束
-        if self.Es[s] != 0:
+        if s in self.ES:
             return self.Es[s]
 
         # 如果当前状态没有子节点，增加子节点
