@@ -298,7 +298,7 @@ class Train():
             s_sum = 0
             for i in range(step_count-1,-1,-1):
                 v = 0.99*v+data["steps"][i]["pre_piece_height"]-data["steps"][i]["piece_height"]
-                v = math.tanh(v)
+                # v = math.tanh(v)
                 if piece_count!=data["steps"][i]["piece_count"]:
                     piece_count = data["steps"][i]["piece_count"]
                     score += data["steps"][i]["reward"]
