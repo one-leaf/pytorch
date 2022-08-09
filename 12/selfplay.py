@@ -294,6 +294,8 @@ class Train():
             score = 0
             vlist=[]
             slist=[]
+            v_sum = 0
+            s_sum = 0
             for i in range(step_count-1,-1,-1):
                 v = 0.99*v+data["steps"][i]["pre_piece_height"]-data["steps"][i]["piece_height"]
                 v = math.tanh(v)
@@ -304,8 +306,11 @@ class Train():
                     slist.insert(0, score)
                 data["steps"][i]["reward"] = v
                 data["steps"][i]["score"] = score
-            print(slist)
-            print(vlist)
+                v_sum += v
+                s_sum += score
+
+            print("score:","avg",s_sum/step_count, slist)
+            print("value:","avg",v_sum/step_count, vlist)
         # 总得分为 消行奖励  + (本局消行奖励-平均每局消行奖励/平均每局消行奖励)
         # for data in game_datas:
         #     step_count = len(data["steps"])
