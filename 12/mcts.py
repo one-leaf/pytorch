@@ -114,7 +114,7 @@ class MCTS():
         if s not in self.Es:
             v = 0
             if state.terminal:
-                v = -2
+                v = -1
             self.Es[s] = v
 
         # 如果得分不等于0，标志探索结束
@@ -159,31 +159,12 @@ class MCTS():
 
         state.step(act)
         
-        # 后期训练不需要，只是用于前期引导
+        # 用于前期引导
         if state.state == 1:
-            off = prev_pieceheight - state.pieceheight 
+            off = (prev_pieceheight - state.pieceheight)*0.5 
             v  = off + self.search(state)
-            # if state.reward>0: 
-            #     off = state.reward #- state.pieceheight/20
-            #     # 出现消除行的收益
-            #     v = off + self.search(state) 
-            #     # if v>1: v=1
-            #     # print("v:", v, "off", off, "height", state.pieceheight, "pieccount", state.piececount)
-            # else:
-            #     # 未消除行的损失,推荐早点结束
-            #     # if state.pieceheight>1:
-            #     off = 0 - state.pieceheight/10
-            #     # else:
-            #     #     off = 0
-            #     v = off + self.search(state) 
-            #     # if v<-1: v=-1
         else:
             v = self.search(state)
-        
-        # if state.reward>0:
-        #     v = self.search(state)+state.reward
-        # else:
-        #     v = self.search(state)-0.01
 
         # 更新 Q 值 和 访问次数
         if (s, a) in self.Qsa:
@@ -192,13 +173,6 @@ class MCTS():
         else:
             self.Qsa[(s, a)] = v
             self.Nsa[(s, a)] = 1
-
-        # 如果有中间奖励
-        # if state.state == 1:
-        #     if state.reward>0: 
-        #         self.Qsa[(s, a)] = min(1, self.Qsa[(s, a)]+0.5)
-        #     else:
-        #         self.Qsa[(s, a)] = max(-1, self.Qsa[(s, a)]-0.1*(self.Qsa[(s, a)]**2))
 
         self.Ns[s] += 1
         return v
