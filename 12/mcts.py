@@ -121,7 +121,7 @@ class MCTS():
             self.Es[s] = -1
 
         # 如果得分不等于0，标志探索结束
-        if s in self.ES:
+        if s in self.Es:
             return self.Es[s]
 
         # 如果当前状态没有子节点，增加子节点
