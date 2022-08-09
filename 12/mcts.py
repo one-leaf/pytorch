@@ -52,7 +52,15 @@ class MCTS():
             if self.depth>self.max_depth: self.max_depth = self.depth
 
             visits_sum = sum([self.Nsa[(s, a)] if (s, a) in self.Nsa else 0 for a in available_acts])          
-            if visits_sum >= self._n_playout*50 or n>=self._n_playout*100: break
+            if visits_sum >= self._n_playout*50 :break
+            if n>=self._n_playout*100: 
+                print(s)
+                print(available_acts)
+                if s in self.Vs:
+                    print("vs:", self.Vs[s])
+                if s in self.Es:
+                    print("es", self.Es[s])
+                break
             # 计算所有动作的探索次数，如果大于2000，则中断
             # if n >= self._n_playout*40 : break
             act_Qs = [self.Qsa[(s, a)] if (s, a) in self.Qsa else 0 for a in available_acts]
@@ -114,6 +122,9 @@ class MCTS():
             # 如果游戏结束或高度超过10
             if state.terminal or state.pieceheight>=10:
                 v = -1
+                self.Es[s] = v
+                return v      
+                                          
             self.Es[s] = v
 
         # 如果得分不等于0，标志探索结束
