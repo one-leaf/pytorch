@@ -53,14 +53,7 @@ class MCTS():
 
             visits_sum = sum([self.Nsa[(s, a)] if (s, a) in self.Nsa else 0 for a in available_acts])          
             if visits_sum >= self._n_playout*50 :break
-            if n>=self._n_playout*100: 
-                print(s)
-                print(available_acts)
-                if s in self.Vs:
-                    print("vs:", self.Vs[s])
-                if s in self.Es:
-                    print("es", self.Es[s])
-                break
+            if n>=self._n_playout*100 or state_copy.terminal or state.terminal: break
             # 计算所有动作的探索次数，如果大于2000，则中断
             # if n >= self._n_playout*40 : break
             act_Qs = [self.Qsa[(s, a)] if (s, a) in self.Qsa else 0 for a in available_acts]
@@ -85,7 +78,6 @@ class MCTS():
                 if s in self.Ps: p = self.Ps[s][act]
                 info.append([action, visit, round(q,2), round(p,2)])        
             print(state.steps, state.piececount, state.fallpiece["shape"], state.piecesteps, "n:", n, "depth:" ,self.max_depth,"height:", state.pieceheight, "value:", round(v,2), info, "std:", round(np.std(visits),2))
-
 
         if temp == 0:
             bestAs = np.array(np.argwhere(visits == np.max(visits))).flatten()
@@ -117,12 +109,10 @@ class MCTS():
 
         if self.depth>1000: return 0
 
-        if state.terminal or state.pieceheight>=10:
-            self.Es[s] = -1
+        if state.terminal: self.Es[s] = -1
 
         # 如果得分不等于0，标志探索结束
-        if s in self.Es:
-            return self.Es[s]
+        if s in self.Es: return self.Es[s]
 
         # 如果当前状态没有子节点，增加子节点
         # 增加 Ps[s] Vs[s] Ns[s]
