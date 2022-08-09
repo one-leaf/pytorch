@@ -58,7 +58,7 @@ class MCTS():
             # if n >= self._n_playout*40 : break
             act_Qs = [self.Qsa[(s, a)] if (s, a) in self.Qsa else 0 for a in available_acts]
 
-            if state.pieceheight<3 and visits_sum >= self._n_playout*10: break
+            # if state.pieceheight<3 and visits_sum >= self._n_playout*10: break
             if len(available_acts)==1 or (n >= self._n_playout and max(act_Qs) > 0 and visits_sum >= self._n_playout*10): break
 
         act_visits = [(a, self.Nsa[(s, a)]) if (s, a) in self.Nsa else (a, 0) for a in available_acts]
@@ -154,7 +154,7 @@ class MCTS():
         
         # 用于前期引导
         if state.state == 1:
-            off = (prev_pieceheight - state.pieceheight)*0.5 
+            off = (prev_pieceheight - state.pieceheight) 
             v  = off + self.search(state)
         else:
             v = self.search(state)
