@@ -122,6 +122,7 @@ class Train():
 
             # c_puct 参数自动调节，step=0.1 
             cpuct_result = result["cpuct"]
+
             cpuct_list = sorted(cpuct_result, key=lambda x : cpuct_result[x]["count"])
             print("cpuct:",cpuct_result, "-->", cpuct_list)
             cpuct = float(cpuct_list[0])
@@ -453,6 +454,7 @@ class Train():
             # 每100局更新一次cpuct参数
             # qval = result["QVal"]
             # cpuct表示概率的可信度
+            cpuct_list.sort()
             v0 = result["cpuct"][cpuct_list[0]]["value"]/result["cpuct"][cpuct_list[0]]["count"]
             v1 = result["cpuct"][cpuct_list[1]]["value"]/result["cpuct"][cpuct_list[1]]["count"]
             if v0 > v1:
