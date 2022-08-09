@@ -254,6 +254,9 @@ class MCTSPlayer(object):
                 action = acts[idx]
                 value = act_qs[idx]
 
+            if idx!=max_idx:
+                move_probs[idx], move_probs[max_idx] = move_probs[max_idx], move_probs[idx]
+
             if state.show_mcts_process:
                 if idx!=max_idx:
                     print("    random:", state.position_to_action_name(acts[max_idx]), act_probs[max_idx], "==>", state.position_to_action_name(acts[idx]), act_probs[idx])  
