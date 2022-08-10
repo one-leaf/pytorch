@@ -47,12 +47,18 @@ class Train():
         if os.path.exists(status_file):
             for i in range(5):
                 try:
+                    with open(status_file, "rb") as fn:
+                        result = json.load(fn)
+                    break
+                except Exception as e:
+                    time.sleep(10)
+                try:
                     with open(status_file+".pkl", "rb") as fn:
                         result = pickle.load(fn)
                     break
                 except Exception as e:
-                    print(e)
                     time.sleep(10)
+
             if result==None:
                 ext = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
                 os.replace(status_file, status_file+"_"+ext) 
