@@ -33,13 +33,20 @@ class Train():
         
         self.c_puct = 1  # MCTS child权重， 用来调节MCTS中 探索/乐观 的程度 默认 5
 
+
+    def save_status_file(self, result, status_file):
+        with open(status_file, 'w') as f:
+            json.dump(result, f, ensure_ascii=False)
+
+
     def read_status_file(self, status_file):
         # 获取历史训练数据
         result=None
         if os.path.exists(status_file):
             for i in range(5):
                 try:
-                    result=json.load(open(status_file,"r"))
+                    with open(status_file,"r") as f:
+                        result=json.load(f)
                     break
                 except Exception as e:
                     print(e)
@@ -195,7 +202,7 @@ class Train():
                         #     for idx in piece_idx:
                         #         _data["steps"][idx]["reward"]=0.5
 
-                    json.dump(result, open(jsonfile,"w"), ensure_ascii=False)
+                    self.save_status_file(result, jsonfile)
                     print("#"*40, 'score:', game.score, 'height:', game.pieceheight, 'piece:', game.piececount, "shape:", game.fallpiece["shape"], \
                         'step:', i, "step time:", round((time.time()-start_time)/i,3), "#"*40)
 
@@ -246,7 +253,8 @@ class Train():
                     result["curr"]["pieces"] += game.piececount
                     result["curr"]["agent1000"] += 1
                     result["curr"]["agent100"] += 1
-                    json.dump(result, open(jsonfile,"w"), ensure_ascii=False) 
+                    self.save_status_file(result, jsonfile)
+ 
 
                     game.print()
                     print(game_num, 'reward:', game.score, "Qval:", game_reward, 'len:', i, "piececount:", game.piececount, "time:", time.time()-start_time)
@@ -479,8 +487,7 @@ class Train():
             if not os.path.exists(newmodelfile):
                 policy_value_net.save_model(newmodelfile)
         result["lastupdate"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        json.dump(result, open(jsonfile,"w"), ensure_ascii=False)
-
+        self.save_status_file(result, jsonfile)
 
     def run(self):
         """启动训练"""
