@@ -241,9 +241,9 @@ class MCTSPlayer(object):
                 action = acts[idx]
                 value = act_qs[idx]
 
-            # 状态差，随机
-            if value < -0.5 and state.pieceheight>=3 and act_probs[np.argmax(act_qs)]>0.1:
-                idx =  np.argmax(act_qs)
+            qs_idx = np.argmax(act_qs)
+            if idx!=qs_idx and act_probs[qs_idx]>0.2:
+                idx =  qs_idx
                 action = acts[idx]
                 value = act_qs[idx]
 
