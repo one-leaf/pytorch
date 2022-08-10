@@ -35,6 +35,8 @@ class Train():
 
 
     def save_status_file(self, result, status_file):
+        with open(status_file+".pkl", 'wb') as fn:
+            pickle.dump(result, fn)
         with open(status_file, 'w') as f:
             json.dump(result, f, ensure_ascii=False)
 
@@ -45,8 +47,8 @@ class Train():
         if os.path.exists(status_file):
             for i in range(5):
                 try:
-                    with open(status_file,"r") as f:
-                        result=json.load(f)
+                    with open(status_file+".pkl", "rb") as fn:
+                        result = pickle.load(fn)
                     break
                 except Exception as e:
                     print(e)
