@@ -429,7 +429,8 @@ class Train():
         for obj in self.get_equi_data(states, mcts_probs, values, score):
             filename = "{}.pkl".format(uuid.uuid1())
             savefile = os.path.join(data_wait_dir, filename)
-            pickle.dump(obj, open(savefile, "wb"))
+            with open(savefile, "wb") as fn:
+                pickle.dump(obj, fn)
 
 
         # 打印shape的标准差
