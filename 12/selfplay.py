@@ -345,8 +345,7 @@ class Train():
         states, mcts_probs, values, score= [], [], [], []
 
         for data in game_datas:
-            step_len=len(data["steps"])
-            for i, step in enumerate(data["steps"]):
+            for step in data["steps"]:
                 states.append(step["state"])
                 mcts_probs.append(step["move_probs"])
                 values.append(step["reward"])
@@ -420,6 +419,7 @@ class Train():
         assert len(states)>0
         assert len(states)==len(values)
         assert len(states)==len(mcts_probs)
+        assert len(states)==len(score)
 
         print("TRAIN Self Play end. length:%s value sum:%s saving ..." % (len(states),sum(values)))
 
