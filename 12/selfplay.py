@@ -35,7 +35,7 @@ class Train():
 
 
     def save_status_file(self, result, status_file):
-        with open(status_file+".pkl", 'wb') as fn:
+        with open(status_file+"_pkl", 'wb') as fn:
             pickle.dump(result, fn)
         with open(status_file, 'w') as f:
             json.dump(result, f, ensure_ascii=False)
@@ -53,7 +53,7 @@ class Train():
                 except Exception as e:
                     time.sleep(10)
                 try:
-                    with open(status_file+".pkl", "rb") as fn:
+                    with open(status_file+"_pkl", "rb") as fn:
                         result = pickle.load(fn)
                     break
                 except Exception as e:
