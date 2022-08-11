@@ -50,7 +50,7 @@ class Agent(object):
         self.status = deque(maxlen=10)
         for i in range(9):
             self.status.append(np.zeros((self.height, self.width)))
-        self.status.append(self.get_fallpiece_board())
+        self.status.append(self.get_fallpiece_board()+self.get_nextpiece_borad())
         # 下一个可用步骤
         self.availables=self.get_availables()
         # 显示mcts中间过程
@@ -142,7 +142,7 @@ class Agent(object):
 
         fallpiece_y = self.fallpiece['y']
 
-        self.status.append(self.get_fallpiece_board() + self.getBoard())
+        self.status.append(self.get_fallpiece_board() + self.getBoard() + self.get_nextpiece_borad())
         self.set_key()
 
         if not isFalling:
@@ -298,17 +298,25 @@ class Agent(object):
             print("fallpiece is None")
         return board
 
-    # 获得待下落方块的信息
+    # 获得nextboard
     def get_nextpiece_borad(self):
         board=np.zeros((self.height, self.width))
-        if self.nextpiece != None:
-            piece = self.nextpiece  
-            shapedraw = pieces[piece['shape']][piece['rotation']]
-            for x in range(templatenum):
-                for y in range(templatenum):
-                    if shapedraw[y][x]!=blank:
-                        board[y][x]=-1
+        shape = self.nextpiece['shape']
+        idx = list(pieces.keys()).index(shape)
+        board[0][idx]=1
         return board
+
+    # # 获得待下落方块的信息
+    # def get_nextpiece_borad(self):
+    #     board=np.zeros((self.height, self.width))
+    #     if self.nextpiece != None:
+    #         piece = self.nextpiece  
+    #         shapedraw = pieces[piece['shape']][piece['rotation']]
+    #         for x in range(templatenum):
+    #             for y in range(templatenum):
+    #                 if shapedraw[y][x]!=blank:
+    #                     board[y][x]=-1
+    #     return board
 
 
     # 得到面板的坐标信息
