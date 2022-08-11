@@ -83,11 +83,11 @@ class Agent(object):
     def get_availables(self):
         acts=[KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN, KEY_NONE]
 
-        if not self.tetromino.validposition(self.board,self.fallpiece,ax = -1):
+        if not self.tetromino.validposition(self.board, self.fallpiece, ax = -1):
             acts.remove(KEY_LEFT)
-        if not self.tetromino.validposition(self.board,self.fallpiece,ax = 1):
+        if not self.tetromino.validposition(self.board, self.fallpiece, ax = 1):
             acts.remove(KEY_RIGHT)   
-        if not self.tetromino.validposition(self.board,self.fallpiece,ay = 1):
+        if not self.tetromino.validposition(self.board, self.fallpiece, ay = 1):
             acts.remove(KEY_DOWN)
 
         if self.fallpiece['shape']=="o":
@@ -120,14 +120,14 @@ class Agent(object):
         
         # self.actions.append(action)
 
-        if action == KEY_LEFT and self.tetromino.validposition(self.board,self.fallpiece,ax = -1):
-            self.fallpiece['x']-=1
+        if action == KEY_LEFT and self.tetromino.validposition(self.board, self.fallpiece, ax=-1):
+            self.fallpiece['x'] -= 1
 
-        if action == KEY_RIGHT and self.tetromino.validposition(self.board,self.fallpiece,ax = 1):
-            self.fallpiece['x']+=1  
+        if action == KEY_RIGHT and self.tetromino.validposition(self.board, self.fallpiece, ax=1):
+            self.fallpiece['x'] += 1  
 
-        if (action == KEY_DOWN) and self.tetromino.validposition(self.board,self.fallpiece,ay = 1):
-            self.fallpiece['y']+=1  
+        if (action == KEY_DOWN) and self.tetromino.validposition(self.board, self.fallpiece, ay=1):
+            self.fallpiece['y'] += 1  
 
         if action == KEY_ROTATION:
             self.fallpiece['rotation'] =  (self.fallpiece['rotation'] + 1) % len(pieces[self.fallpiece['shape']])
@@ -135,9 +135,12 @@ class Agent(object):
                 self.fallpiece['rotation'] = (self.fallpiece['rotation'] - 1) % len(pieces[self.fallpiece['shape']])
 
         isFalling=True
-        if self.tetromino.validposition(self.board,self.fallpiece, ay=1):
-            self.fallpiece['y'] +=1
+        if self.tetromino.validposition(self.board, self.fallpiece, ay=1):
+            self.fallpiece['y'] += 1
         else:
+            isFalling = False
+
+        if not self.tetromino.validposition(self.board, self.fallpiece, ay=1):
             isFalling = False
 
         fallpiece_y = self.fallpiece['y']
@@ -162,19 +165,18 @@ class Agent(object):
             self.fallpiece = self.nextpiece
             self.nextpiece = self.tetromino.getnewpiece()
             self.piecesteps = 0
-            self.piececount +=1 
-
-            if not self.tetromino.validposition(self.board,self.fallpiece, ay=1) or self.pieceheight>=10:                  
+            self.piececount += 1 
+            self.availables = [KEY_NONE]
+            if not self.tetromino.validposition(self.board, self.fallpiece, ay=1) or self.pieceheight>=10:                  
                 self.terminal = True 
                 self.state = 2
-                self.availables = [KEY_NONE]
                 return self.state, self.reward 
             else: 
                 self.state = 1
         else:
             self.state = 0
         
-        self.availables = self.get_availables()
+        self.availables = self.get_availables()    
 
         return self.state, self.reward
 
