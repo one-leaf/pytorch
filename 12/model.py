@@ -309,7 +309,7 @@ class PolicyValueNet():
                 torch.sum(probs * log_probs, 1)
                 )
                 
-        return loss.item(), policy_loss.item(), value_loss.item(), entropy.item()
+        return loss.item(), value_loss.item(), policy_loss.item(), entropy.item()
 
     # 保存模型
     def save_model(self, model_file):
