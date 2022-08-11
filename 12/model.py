@@ -1,3 +1,4 @@
+from cProfile import label
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -291,8 +292,11 @@ class PolicyValueNet():
         # value_loss = F.l1_loss(values, value_batch.unsqueeze(-1))            
         value_loss = F.mse_loss(values, value_batch.unsqueeze(-1))
 
+        # 这些都不适用，因为第二个参数Target，需要是idx，而不是另外一个概率
         # policy_loss = F.cross_entropy(probs, mcts_probs, label_smoothing=0.1)
         # policy_loss = F.cross_entropy(probs, mcts_probs)    
+        # policy_loss = F.nll_loss(log_probs, mcts_probs, label_smoothing=0.1)
+
         log_probs = torch.log(probs + 1e-8)
         policy_loss = -torch.mean(torch.sum(mcts_probs * log_probs, 1))
 
