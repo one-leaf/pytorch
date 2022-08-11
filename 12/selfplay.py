@@ -219,7 +219,7 @@ class Train():
                     piece_idx.append(i)
 
                 # 方块的个数越多越好
-                if game.terminal or (reward>0 and game.pieceheight>8) :
+                if game.terminal :
                     _game_last_reward = 0 # game.getNoEmptyCount()/200.
                     _data["reward"] = _game_last_reward
                     _data["score"] = game.score
