@@ -53,7 +53,7 @@ class MCTS():
 
             visits_sum = sum([self.Nsa[(s, a)] if (s, a) in self.Nsa else 0 for a in available_acts])          
             if visits_sum >= self._n_playout*50 :break
-            if n>=self._n_playout*100 or state_copy.terminal or state.terminal: break
+            if n>=self._n_playout*100  or state.terminal: break
             # 计算所有动作的探索次数，如果大于2000，则中断
             # if n >= self._n_playout*40 : break
             act_Qs = [self.Qsa[(s, a)] if (s, a) in self.Qsa else 0 for a in available_acts]
