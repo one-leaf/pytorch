@@ -88,8 +88,9 @@ class Dataset(torch.utils.data.Dataset):
         for fn in self.data:
             # self.data[fn]["value"] = 0.2*self.data[fn]["value"] + 0.8*math.tanh((self.data[fn]["score"]-avg_score)/avg_score)
             # self.data[fn]["value"] = 0.1*self.data[fn]["value"] + 0.9*(self.data[fn]["score"]-min_score)/(max_score-min_score)
-            self.data[fn]["value"] = (self.data[fn]["score"]-min_score)/(max_score-min_score)
             # self.data[fn]["value"] = math.tanh((self.data[fn]["score"]-avg_score)/avg_score)
+            # self.data[fn]["value"] = (self.data[fn]["score"]-min_score)/(max_score-min_score)
+            self.data[fn]["value"] = self.data[fn]["score"]
             values.append(self.data[fn]["value"])
         curr_avg_value = sum(values)/len(values)
         curr_std_value = np.std(values)+1e-8
@@ -114,7 +115,7 @@ class Dataset(torch.utils.data.Dataset):
             if os.path.exists(savefile): os.remove(savefile)
             os.rename(fn, savefile)
             self.newsample.append(savefile)
-            if (i>=100 and i>len(movefiles)*0.1) or i>=self.max_keep_size//2: break       
+            if (i>=100 and i>len(movefiles)*0.2) or i>=self.max_keep_size//2: break       
         print("mv %s/%s files to train"%(i+1,len(movefiles)))
         if i==-1:
             print("SLEEP 60s for watting data")
