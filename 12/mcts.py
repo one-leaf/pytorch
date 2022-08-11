@@ -152,12 +152,12 @@ class MCTS():
 
         state.step(act)
         
-        # 用于前期引导
-        # if state.state == 1:
-        #     off = (prev_pieceheight - state.pieceheight) * 0.1
-        #     v  = off + self.search(state)
-        # else:
-        v = self.search(state)
+        # 局部小奖励
+        if state.state == 1:
+            off = (prev_pieceheight - state.pieceheight) * 0.1
+            v  = off + self.search(state)
+        else:
+            v = self.search(state)
 
         # 更新 Q 值 和 访问次数
         if (s, a) in self.Qsa:
