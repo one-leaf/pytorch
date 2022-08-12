@@ -51,15 +51,23 @@ class MCTS():
             self.search(state_copy)
             if self.depth>self.max_depth: self.max_depth = self.depth
 
-            visits_sum = sum([self.Nsa[(s, a)] if (s, a) in self.Nsa else 0 for a in available_acts])          
-            if visits_sum >= self._n_playout*50 :break
-            if n>=self._n_playout*100  or state.terminal: break
-            # 计算所有动作的探索次数，如果大于2000，则中断
-            # if n >= self._n_playout*40 : break
-            act_Qs = [self.Qsa[(s, a)] if (s, a) in self.Qsa else 0 for a in available_acts]
+            # 如果只有一种走法，只探测一次
+            if len(available_acts)==1 : break
 
-            if state.pieceheight<3 and visits_sum >= self._n_playout*20: break
-            if len(available_acts)==1 or (n >= self._n_playout and max(act_Qs) > 0 and visits_sum >= self._n_playout*10): break
+            # 当前状态
+            v = self.Vs[s] if s in self.Vs else 0
+            visits_sum = sum([self.Nsa[(s, a)] if (s, a) in self.Nsa else 0 for a in available_acts])          
+            # 如果当前状态不错，总次数 200
+            if v>0 and visits_sum >= 200 :break
+
+            # 如果当前状态不佳，总次数 1600
+            if visits_sum>=self._n_playout*100 or state.terminal: break
+
+            # 保底，防止莫名其妙的问题
+            if n >= 2000 : break
+
+            # if state.pieceheight<3 and visits_sum >= self._n_playout*20: break
+            # if n >= self._n_playout and v > 0 and visits_sum >= self._n_playout*10: break
 
         act_visits = [(a, self.Nsa[(s, a)]) if (s, a) in self.Nsa else (a, 0) for a in available_acts]
         act_Qs = [(a, self.Qsa[(s, a)]) if (s, a) in self.Qsa else (a, 0) for a in available_acts]
