@@ -161,7 +161,7 @@ class MCTS():
         state.step(act)
         
         # 局部奖励
-        off = max(prev_pieceheight - state.pieceheight, 0) 
+        off = prev_pieceheight - state.pieceheight 
         v  = off + self.search(state)
         # v = self.search(state)
 
