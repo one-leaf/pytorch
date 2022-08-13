@@ -94,15 +94,14 @@ class MCTS():
             probs[bestA] = 1
             return acts, np.array(probs), qs, v
 
-        # print(visits, temp)
-        # m = np.power(np.array(visits), 1./temp)
-        m_sum = sum(visits)
-        v_len = len(acts)
-        if m_sum<=v_len:
+        m = np.power(np.array(visits), 1./temp)
+        m_sum = np.sum(m)
+        if m_sum<=0:
+            v_len = len(acts)
             probs = np.ones(v_len)/v_len
         else:
-            m = np.array(visits)
             probs = m/m_sum
+
         return acts, probs, qs, v
 
     def search(self, state):
@@ -200,7 +199,7 @@ class MCTSPlayer(object):
     def reset_player(self):
         self.mcts.reset()
 
-    def get_action(self, state, temp=0, return_prob=0, return_value=0, need_random=True):        
+    def get_action(self, state, temp=0, return_prob=0, return_value=0):        
         """计算下一步走子action"""
         move_probs = np.zeros(state.actions_num)
         value = 0
@@ -209,54 +208,24 @@ class MCTSPlayer(object):
             acts, act_probs, act_qs, state_v = self.mcts.get_action_probs(state, temp)
             move_probs[acts] = act_probs
             max_idx = np.argmax(act_probs)    
-
-            if need_random:  # 自我对抗
-                # max_height = state.pieceheight
-                # if (state.state == 1 and max_height<5) or (max_height<4 and random.random() < 0.25):
-                #     idx = np.random.randint(len(acts))
-                # elif random.random()>max_height/10 :
-                if act_qs[max_idx]<=-1:
-                    idx = np.random.choice(range(len(acts)), p=act_probs)
-                else:
-                    idx = max_idx
-                    # p = 0.75
-                    # dirichlet = np.random.dirichlet(0.03 * np.ones(len(act_probs)))
-                    # idx = np.random.choice(range(len(acts)), p=p*act_probs + (1.0-p) * dirichlet)
-
-                # else:
-                    # idx = max_idx
-                    
-
-                # 早期多随机
-                # if act in [0,4] and random.random()>0.5:
-                # if act_probs[idx]<0.99:
-                # if abs(value)>0.5 or random.random()>0.95:
-                # if state.piececount < 50 and (state.piecesteps<3 or value<-0.9):
-                # if random.random()>0.99:
-                #     act = random.choice(acts)
-                # else:    
-                #     # p = 0.75                 
-                #     # dirichlet = np.random.dirichlet(0.03 * np.ones(len(act_probs)))
-                #     # act = np.random.choice(acts, p=p * act_probs + (1.0-p) * dirichlet)
-                #     act = np.random.choice(acts, p=act_probs)
-                # action = state.position_to_action(act)                                                                  
-            else:  # 和人类对战
+            
+            if temp==0:
                 idx = max_idx
-
-            if state.pieceheight<4:
+            else:
                 p = 0.95                 
                 dirichlet = np.random.dirichlet(0.03 * np.ones(len(act_probs)))
-                idx = np.random.choice(range(len(acts)), p=p * act_probs + (1.0-p) * dirichlet)
-            else:
-                qs_idx = np.argmax(act_qs)
-                if idx!=qs_idx and act_probs[qs_idx]>0.2:
-                    idx =  qs_idx
+                idx = np.random.choice(range(len(acts)), p=p * act_probs + (1.0-p) * dirichlet)                                                                     
+
+            # if state.pieceheight>=4:
+            #     qs_idx = np.argmax(act_qs)
+            #     if idx!=qs_idx and act_probs[qs_idx]>0.2:
+            #         idx =  qs_idx
 
             action = acts[idx]
             value = act_qs[idx]
 
-            if idx!=max_idx:
-                move_probs[idx], move_probs[max_idx] = move_probs[max_idx], move_probs[idx]
+            # if idx!=max_idx:
+            #     move_probs[idx], move_probs[max_idx] = move_probs[max_idx], move_probs[idx]
 
             if state.show_mcts_process:
                 if idx!=max_idx:
