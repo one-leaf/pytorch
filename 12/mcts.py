@@ -8,7 +8,7 @@ import numpy as np
 EPS = 1e-8
 
 class MCTS():
-    def __init__(self, policy_value_fn, c_puct=5, n_playout=10000):
+    def __init__(self, policy_value_fn, c_puct=5, n_playout=10000, flip_v=False):
         self._policy = policy_value_fn      # 概率估算函数
         self._c_puct = c_puct               # 参数
         self._n_playout = n_playout         # 做几次探索
@@ -24,6 +24,7 @@ class MCTS():
         print("create mcts, c_puct: {}, n_playout: {}".format(c_puct, n_playout))
 
         self.state = None
+        self.flip_v = flip_v
 
     def reset(self):
         self.Qsa = {}  # 保存 Q 值, key: s,a
@@ -126,6 +127,7 @@ class MCTS():
         if s not in self.Ps:                          
             # 获得当前局面的概率 和 局面的打分, 这个已经过滤掉了不可用走法
             act_probs, v = self._policy(state)
+            if self.flip_v: v = -1.*v
             probs = np.zeros(state.actions_num)
             for act, prob in act_probs:
                 probs[act] = prob
@@ -187,9 +189,9 @@ class MCTS():
 class MCTSPlayer(object):
     """基于模型指导概率的MCTS + AI player"""
 
-    def __init__(self, policy_value_function, c_puct=5, n_playout=2000):
+    def __init__(self, policy_value_function, c_puct=5, n_playout=2000, flip_v=False):
         """初始化参数"""
-        self.mcts = MCTS(policy_value_function, c_puct, n_playout)
+        self.mcts = MCTS(policy_value_function, c_puct, n_playout, flip_v)
 
     def set_player_ind(self, p):
         """指定MCTS的playerid"""
@@ -208,7 +210,7 @@ class MCTSPlayer(object):
             acts, act_probs, act_qs, state_v = self.mcts.get_action_probs(state, temp)
             move_probs[acts] = act_probs
             max_idx = np.argmax(act_probs)    
-            
+
             if temp==0:
                 idx = max_idx
             else:

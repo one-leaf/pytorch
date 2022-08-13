@@ -117,7 +117,7 @@ class Train():
         # 游戏代理
         agent = Agent()
 
-        max_game_num = 1
+        max_game_num = 2
         agentcount, agentreward, piececount, agentscore = 0, 0, 0, 0
 
         borads = []
@@ -145,7 +145,7 @@ class Train():
             print("c_puct:",cpuct, "n_playout:",self.n_playout)
 
             policy_value_net = PolicyValueNet(GAME_WIDTH, GAME_HEIGHT, GAME_ACTIONS_NUM, model_file=model_file)
-            player = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=cpuct, n_playout=self.n_playout)
+            player = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=cpuct, n_playout=self.n_playout, flip_v=game_num%2==0)
 
             _data = {"steps":[],"shapes":[],"last_state":0,"score":0,"piece_count":0}
             # game = copy.deepcopy(agent)
