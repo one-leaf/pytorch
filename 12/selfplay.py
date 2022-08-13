@@ -164,9 +164,9 @@ class Train():
                 _step["pre_piece_height"] = game.pieceheight
 
                 if game_num == 1:
-                    action, move_probs = player.get_action(game, temp=2/(game.pieceheight+1), return_prob=1) 
+                    action, move_probs = player.get_action(game, temp=1/(game.pieceheight+1), return_prob=1) 
                 else: 
-                    action, move_probs = player.get_action(game, temp=2/(game.pieceheight+1), return_prob=1) 
+                    action, move_probs = player.get_action(game, temp=1/(game.pieceheight+1), return_prob=1) 
 
                     if game.get_key() in game_keys:
                         print(game.steps, game.piececount, game.fallpiece["shape"], game.piecesteps, "key:", game.get_key(), "key_len:" ,len(game_keys))
