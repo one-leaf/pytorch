@@ -226,8 +226,6 @@ class MCTSPlayer(object):
                 # else:
                     # idx = max_idx
                     
-                action = acts[idx]
-                value = act_qs[idx]
 
                 # 早期多随机
                 # if act in [0,4] and random.random()>0.5:
@@ -244,14 +242,18 @@ class MCTSPlayer(object):
                 # action = state.position_to_action(act)                                                                  
             else:  # 和人类对战
                 idx = max_idx
-                action = acts[idx]
-                value = act_qs[idx]
 
-            qs_idx = np.argmax(act_qs)
-            if idx!=qs_idx and act_probs[qs_idx]>0.2:
-                idx =  qs_idx
-                action = acts[idx]
-                value = act_qs[idx]
+            if state.pieceheight<4:
+                p = 0.95                 
+                dirichlet = np.random.dirichlet(0.03 * np.ones(len(act_probs)))
+                idx = np.random.choice(range(len(acts)), p=p * act_probs + (1.0-p) * dirichlet)
+            else:
+                qs_idx = np.argmax(act_qs)
+                if idx!=qs_idx and act_probs[qs_idx]>0.2:
+                    idx =  qs_idx
+
+            action = acts[idx]
+            value = act_qs[idx]
 
             if idx!=max_idx:
                 move_probs[idx], move_probs[max_idx] = move_probs[max_idx], move_probs[idx]
@@ -259,7 +261,6 @@ class MCTSPlayer(object):
             if state.show_mcts_process:
                 if idx!=max_idx:
                     print("    random:", state.position_to_action_name(acts[max_idx]), act_probs[max_idx], "==>", state.position_to_action_name(acts[idx]), act_probs[idx])  
-
 
             # print(acts, act_probs, idx, action)
 
