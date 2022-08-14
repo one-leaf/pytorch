@@ -62,7 +62,7 @@ class MCTS():
             # if v>0 and visits_sum >= 200 :break
 
             # 如果当前状态不佳，总次数 1600
-            if visits_sum>=self._n_playout*100 or state.terminal: break
+            if visits_sum>=1000 or state.terminal: break
 
             # 保底，防止莫名其妙的问题
             if n >= self._n_playout : break
