@@ -59,13 +59,13 @@ class MCTS():
             v = self.Vs[s] if s in self.Vs else 0
             visits_sum = sum([self.Nsa[(s, a)] if (s, a) in self.Nsa else 0 for a in available_acts])          
             # 如果当前状态不错，总次数 200
-            if v>0 and visits_sum >= 200 :break
+            # if v>0 and visits_sum >= 200 :break
 
             # 如果当前状态不佳，总次数 1600
             if visits_sum>=self._n_playout*100 or state.terminal: break
 
             # 保底，防止莫名其妙的问题
-            if n >= 2000 : break
+            if n >= self._n_playout : break
 
             # if state.pieceheight<3 and visits_sum >= self._n_playout*20: break
             # if n >= self._n_playout and v > 0 and visits_sum >= self._n_playout*10: break
