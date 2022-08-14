@@ -145,7 +145,8 @@ class Train():
             print("c_puct:",cpuct, "n_playout:",self.n_playout)
 
             policy_value_net = PolicyValueNet(GAME_WIDTH, GAME_HEIGHT, GAME_ACTIONS_NUM, model_file=model_file)
-            player = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=cpuct, n_playout=self.n_playout, flip_v=game_num%2==0)
+            game_flip_v = game_num%2==0
+            player = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=cpuct, n_playout=self.n_playout, flip_v=game_flip_v)
 
             _data = {"steps":[],"shapes":[],"last_state":0,"score":0,"piece_count":0}
             # game = copy.deepcopy(agent)
@@ -228,40 +229,41 @@ class Train():
                     # 更新状态
                     game_reward =  _game_last_reward + game.score   
 
-                    result = self.read_status_file(jsonfile)
-                    if result["QVal"]==0:
-                        result["QVal"] = game_reward
-                    else:
-                        result["QVal"] = result["QVal"]*0.999 + game_reward*0.001   
-                    paytime = time.time()-start_time
-                    steptime = paytime/game.steps
-                    if result["time"]["agent_time"]==0:
-                        result["time"]["agent_time"] = paytime
-                        result["time"]["step_time"] = steptime
-                    else:
-                        result["time"]["agent_time"] = round(result["time"]["agent_time"]*0.99+paytime*0.01, 3)
-                        d = game.steps/10000.0
-                        if d>1 : d = 0.99
-                        result["time"]["step_time"] = round(result["time"]["step_time"]*(1-d)+steptime*d, 3)
-                   
-                    # 记录当前cpuct的统计结果
-                    cpuct_str = str(cpuct)
-                    if cpuct_str in result["cpuct"]:
-                        result["cpuct"][cpuct_str]["value"] = result["cpuct"][cpuct_str]["value"]+game_reward         
-                        result["cpuct"][cpuct_str]["count"] = result["cpuct"][cpuct_str]["count"]+1         
+                    if not game_flip_v:
+                        result = self.read_status_file(jsonfile)
+                        if result["QVal"]==0:
+                            result["QVal"] = game_reward
+                        else:
+                            result["QVal"] = result["QVal"]*0.999 + game_reward*0.001   
+                        paytime = time.time()-start_time
+                        steptime = paytime/game.steps
+                        if result["time"]["agent_time"]==0:
+                            result["time"]["agent_time"] = paytime
+                            result["time"]["step_time"] = steptime
+                        else:
+                            result["time"]["agent_time"] = round(result["time"]["agent_time"]*0.99+paytime*0.01, 3)
+                            d = game.steps/10000.0
+                            if d>1 : d = 0.99
+                            result["time"]["step_time"] = round(result["time"]["step_time"]*(1-d)+steptime*d, 3)
+                    
+                        # 记录当前cpuct的统计结果
+                        cpuct_str = str(cpuct)
+                        if cpuct_str in result["cpuct"]:
+                            result["cpuct"][cpuct_str]["value"] = result["cpuct"][cpuct_str]["value"]+game_reward         
+                            result["cpuct"][cpuct_str]["count"] = result["cpuct"][cpuct_str]["count"]+1         
 
-                    if game_reward>result["best"]["reward"]:
-                        result["best"]["reward"] = game_reward
-                        result["best"]["pieces"] = game.piececount
-                        result["best"]["score"] = game.score
-                        result["best"]["agent"] = result["agent"]+agentcount
+                        if game_reward>result["best"]["reward"]:
+                            result["best"]["reward"] = game_reward
+                            result["best"]["pieces"] = game.piececount
+                            result["best"]["score"] = game.score
+                            result["best"]["agent"] = result["agent"]+agentcount
 
-                    result["agent"] += 1
-                    result["curr"]["reward"] += game.score
-                    result["curr"]["pieces"] += game.piececount
-                    result["curr"]["agent1000"] += 1
-                    result["curr"]["agent100"] += 1
-                    self.save_status_file(result, jsonfile)
+                        result["agent"] += 1
+                        result["curr"]["reward"] += game.score
+                        result["curr"]["pieces"] += game.piececount
+                        result["curr"]["agent1000"] += 1
+                        result["curr"]["agent100"] += 1
+                        self.save_status_file(result, jsonfile)
  
 
                     game.print()
