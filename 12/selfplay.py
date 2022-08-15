@@ -127,6 +127,7 @@ class Train():
         game_keys = []
         game_datas = []
         # 开始一局游戏
+        policy_value_net = PolicyValueNet(GAME_WIDTH, GAME_HEIGHT, GAME_ACTIONS_NUM, model_file=model_file)
         for _ in count():
             start_time = time.time()
             game_num += 1
@@ -144,7 +145,6 @@ class Train():
 
             print("c_puct:",cpuct, "n_playout:",self.n_playout)
 
-            policy_value_net = PolicyValueNet(GAME_WIDTH, GAME_HEIGHT, GAME_ACTIONS_NUM, model_file=model_file)
             game_flip_v = game_num%2==0
             player = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=cpuct, n_playout=self.n_playout, flip_v=game_flip_v)
 
