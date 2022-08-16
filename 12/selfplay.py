@@ -219,7 +219,7 @@ class Train():
 
                     self.save_status_file(result, jsonfile)
                     print("#"*40, 'score:', game.score, 'height:', game.pieceheight, 'piece:', game.piececount, "shape:", game.fallpiece["shape"], \
-                        'step:', i, "step time:", round((time.time()-start_time)/i,3), "#"*40)
+                        'step:', i, "step time:", round((time.time()-start_time)/i,3),'flip:', game_flip_v, "#"*40)
 
                 # 记录当前的方块放置的 idx
                 if game.state != 0:
