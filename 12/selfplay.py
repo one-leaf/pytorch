@@ -266,8 +266,54 @@ class Train():
                     result["curr"]["pieces"] += game.piececount
                     result["curr"]["agent1000"] += 1
                     result["curr"]["agent100"] += 1
-                    self.save_status_file(result, jsonfile)
- 
+
+                    if result["curr"]["agent100"]>50:
+                        result["reward"].append(round(result["curr"]["reward"]/result["curr"]["agent1000"],2))
+                        result["pieces"].append(round(result["curr"]["pieces"]/result["curr"]["agent1000"],2))
+                        result["qvals"].append(round(result["QVal"],2))
+                        result["height"].append(result["curr"]["height"])
+                        result["time"]["step_times"].append(result["time"]["step_time"])
+                        result["curr"]["agent100"] -= 50 
+                        while len(result["reward"])>200:
+                            result["reward"].remove(result["reward"][0])
+                        while len(result["pieces"])>200:
+                            result["pieces"].remove(result["pieces"][0])
+                        while len(result["qvals"])>200:
+                            result["qvals"].remove(result["qvals"][0])
+                        while len(result["height"])>200:    
+                            result["height"].remove(result["height"][0])
+                        while len(result["time"]["step_times"])>200:    
+                            result["time"]["step_times"].remove(result["time"]["step_times"][0])
+
+                        # 每100局更新一次cpuct参数
+                        # qval = result["QVal"]
+                        # cpuct表示概率的可信度
+                        cpuct_list.sort()
+                        v0 = result["cpuct"][cpuct_list[0]]["value"]/result["cpuct"][cpuct_list[0]]["count"]
+                        v1 = result["cpuct"][cpuct_list[1]]["value"]/result["cpuct"][cpuct_list[1]]["count"]
+                        if v0 > v1:
+                            cpuct = round(float(cpuct_list[0])-0.1,1)
+                            if cpuct<=0.1:
+                                result["cpuct"] = {"0.1":{"count":0,"value":0}, "1.1":{"count":0,"value":0}}
+                            else:
+                                result["cpuct"] = {str(cpuct):{"count":0,"value":0}, str(round(cpuct+1,2)):{"count":0,"value":0}}
+                        else:
+                            cpuct = round(float(cpuct_list[0])+0.1,1)
+                            result["cpuct"] = {str(cpuct):{"count":0,"value":0}, str(round(cpuct+1,2)):{"count":0,"value":0}}
+
+                        if max(result["reward"])==result["reward"][-1]:
+                            newmodelfile = model_file+"_reward_"+str(result["reward"][-1])
+                            if not os.path.exists(newmodelfile):
+                                policy_value_net.save_model(newmodelfile)
+
+                    if result["curr"]["agent1000"]>1000:
+                        result["curr"]={"reward":0,"pieces":0,"agent1000":0,"agent100":0,"height":0}
+
+                        newmodelfile = model_file+"_"+str(result["agent"])
+                        if not os.path.exists(newmodelfile):
+                            policy_value_net.save_model(newmodelfile)
+                    result["lastupdate"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                    self.save_status_file(result, jsonfile) 
 
                     game.print()
                     print(game_num, 'reward:', game.score, "Qval:", game_reward, 'len:', i, "piececount:", game.piececount, "time:", time.time()-start_time)
@@ -276,6 +322,8 @@ class Train():
                     agentscore += game.score
                     agentreward += game_reward
                     piececount += game.piececount
+
+
 
                     break
 
@@ -459,54 +507,7 @@ class Train():
         #     print(shape, "len:", len(test_data), "max:", max(test_data), "min:", min(test_data), "std:", np.std(test_data))
 
 
-        result = self.read_status_file(jsonfile)
-        if result["curr"]["agent100"]>50:
-            result["reward"].append(round(result["curr"]["reward"]/result["curr"]["agent1000"],2))
-            result["pieces"].append(round(result["curr"]["pieces"]/result["curr"]["agent1000"],2))
-            result["qvals"].append(round(result["QVal"],2))
-            result["height"].append(result["curr"]["height"])
-            result["time"]["step_times"].append(result["time"]["step_time"])
-            result["curr"]["agent100"] -= 50 
-            while len(result["reward"])>200:
-                result["reward"].remove(result["reward"][0])
-            while len(result["pieces"])>200:
-                result["pieces"].remove(result["pieces"][0])
-            while len(result["qvals"])>200:
-                result["qvals"].remove(result["qvals"][0])
-            while len(result["height"])>200:    
-                result["height"].remove(result["height"][0])
-            while len(result["time"]["step_times"])>200:    
-                result["time"]["step_times"].remove(result["time"]["step_times"][0])
-
-            # 每100局更新一次cpuct参数
-            # qval = result["QVal"]
-            # cpuct表示概率的可信度
-            cpuct_list.sort()
-            v0 = result["cpuct"][cpuct_list[0]]["value"]/result["cpuct"][cpuct_list[0]]["count"]
-            v1 = result["cpuct"][cpuct_list[1]]["value"]/result["cpuct"][cpuct_list[1]]["count"]
-            if v0 > v1:
-                cpuct = round(float(cpuct_list[0])-0.1,1)
-                if cpuct<=0.1:
-                    result["cpuct"] = {"0.1":{"count":0,"value":0}, "1.1":{"count":0,"value":0}}
-                else:
-                    result["cpuct"] = {str(cpuct):{"count":0,"value":0}, str(round(cpuct+1,2)):{"count":0,"value":0}}
-            else:
-                cpuct = round(float(cpuct_list[0])+0.1,1)
-                result["cpuct"] = {str(cpuct):{"count":0,"value":0}, str(round(cpuct+1,2)):{"count":0,"value":0}}
-
-            if max(result["reward"])==result["reward"][-1]:
-                newmodelfile = model_file+"_reward_"+str(result["reward"][-1])
-                if not os.path.exists(newmodelfile):
-                    policy_value_net.save_model(newmodelfile)
-
-        if result["curr"]["agent1000"]>1000:
-            result["curr"]={"reward":0,"pieces":0,"agent1000":0,"agent100":0,"height":0}
-
-            newmodelfile = model_file+"_"+str(result["agent"])
-            if not os.path.exists(newmodelfile):
-                policy_value_net.save_model(newmodelfile)
-        result["lastupdate"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        self.save_status_file(result, jsonfile)
+ 
 
     def run(self):
         """启动训练"""
