@@ -201,7 +201,7 @@ class MCTSPlayer(object):
     def reset_player(self):
         self.mcts.reset()
 
-    def get_action(self, state, temp=0, return_prob=0, return_value=0):        
+    def get_action(self, state, temp=0):        
         """计算下一步走子action"""
         move_probs = np.zeros(state.actions_num)
         value = 0
@@ -235,12 +235,7 @@ class MCTSPlayer(object):
 
             # print(acts, act_probs, idx, action)
 
-            if return_prob:
-                return action, move_probs
-            elif return_value:
-                return action, value        
-            else:
-                return action
+            return action, move_probs, state_v
         else:
             print("WARNING: game is terminal")
 

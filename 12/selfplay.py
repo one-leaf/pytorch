@@ -10,6 +10,7 @@ from itertools import count
 import os, random, uuid, math
 
 import numpy as np
+import copy
 
 # 定义游戏的动作
 GAME_ACTIONS_NUM = len(ACTIONS) 
@@ -68,8 +69,6 @@ class Train():
             result["curr"]={"reward":0, "pieces":0, "agent1000":0, "agent100":0, "height":0}
         if "best" not in result:
             result["best"]={"reward":0,"pieces":0,"agent":0}
-        if "flip" not in result:
-            result["flip"]={}
         if "cpuct" not in result:
             result["cpuct"]={"2.1":{"count":0,"value":0},"3.1":{"count":0,"value":0}}    
         for key in result["cpuct"]:
@@ -156,8 +155,8 @@ class Train():
             player = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=cpuct, n_playout=self.n_playout, flip_v=game_flip_v)
   
             _data = {"steps":[],"shapes":[],"last_state":0,"score":0,"piece_count":0}
-            # game = copy.deepcopy(agent)
-            game = Agent(isRandomNextPiece=False)
+            game = copy.deepcopy(agent)
+            # game = Agent(isRandomNextPiece=False)
 
             if game_num==1 or game_num==max_game_num:
                 game.show_mcts_process=True
@@ -172,9 +171,9 @@ class Train():
                 _step["pre_piece_height"] = game.pieceheight
 
                 if game_num == 1:
-                    action, move_probs = player.get_action(game, temp=1/(game.pieceheight+1), return_prob=1) 
+                    action, move_probs, state_value = player.get_action(game, temp=1/(game.pieceheight+1)) 
                 else: 
-                    action, move_probs = player.get_action(game, temp=1/(game.pieceheight+1), return_prob=1) 
+                    action, move_probs, state_value = player.get_action(game, temp=1/(game.pieceheight+1)) 
 
                     if game.get_key() in game_keys:
                         print(game.steps, game.piececount, game.fallpiece["shape"], game.piecesteps, "key:", game.get_key(), "key_len:" ,len(game_keys))
@@ -193,7 +192,7 @@ class Train():
                 _step["reward"] = reward if reward>0 else 0
                 _step["action"] = action                
                 _step["move_probs"] = move_probs
-
+                _step["state_value"] = state_value
                 _data["shapes"].append(_step["shape"])
                 _data["steps"].append(_step)
 
@@ -228,13 +227,11 @@ class Train():
 
                 # 方块的个数越多越好
                 if game.terminal :
-                    _game_last_reward = 0 # game.getNoEmptyCount()/200.
-                    _data["reward"] = _game_last_reward
                     _data["score"] = game.score
                     _data["piece_count"] = game.piececount
 
                     # 更新状态
-                    game_reward =  _game_last_reward + game.score   
+                    game_reward =  game.score   
 
                     result = self.read_status_file(jsonfile)
                     if result["QVal"]==0:
@@ -310,6 +307,9 @@ class Train():
             print(line)
         print((" "+" -"*agent.width+" ")*len(borads))
 
+        scores = [data["score"] for data in game_datas]
+        max_score = max(scores)
+
         ## 放弃 按0.99的衰减更新reward
         # 只关注最后一次得分方块的所有步骤,将消行方块的所有步骤的得分都设置为1
         for data in game_datas:
@@ -322,8 +322,10 @@ class Train():
             v_sum = 0
             s_sum = 0
             for i in range(step_count-1,-1,-1):
-                v = 0.99*v+data["steps"][i]["pre_piece_height"]-data["steps"][i]["piece_height"]
+                # v = 0.99*v+data["steps"][i]["pre_piece_height"]-data["steps"][i]["piece_height"]
                 # v = math.tanh(v)
+                v =  data["steps"][i]['state_value']
+                if data["score"]<max_score: v = v * -1.
                 if piece_count!=data["steps"][i]["piece_count"]:
                     piece_count = data["steps"][i]["piece_count"]
                     score += data["steps"][i]["reward"]
