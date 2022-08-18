@@ -113,8 +113,6 @@ class Train():
         """收集自我对抗数据用于训练"""       
         print("TRAIN Self Play starting ...")
 
-        jsonfile = os.path.join(data_dir, "result.json")
-
         # 游戏代理
         agent = Agent()
 
