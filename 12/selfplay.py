@@ -199,7 +199,7 @@ class Train():
 
                     data["score"] = game.score
                     data["piece_count"] = game.piececount
-
+                    data["block_count"]=game.getNoEmptyCount()
                     # 更新状态
                     game_reward =  game.score   
 
@@ -310,12 +310,12 @@ class Train():
         ## 放弃 按0.99的衰减更新reward
         # 只关注最后一次得分方块的所有步骤,将消行方块的所有步骤的得分都设置为1
         winner = [0, 0] 
-        if game_datas[0]["score"]>game_datas[1]["score"]:
-            winner[0] = 1
-            winner[1] = -1
-        elif game_datas[0]["score"]<game_datas[1]["score"]:
+        if game_datas[0]["block_count"]>game_datas[1]["block_count"]:
             winner[0] = -1
             winner[1] = 1
+        elif game_datas[0]["block_count"]<game_datas[1]["block_count"]:
+            winner[0] = 1
+            winner[1] = -1
 
         for i, data in enumerate(game_datas):
             step_count = len(data["steps"])
