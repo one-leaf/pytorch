@@ -96,7 +96,8 @@ class Dataset(torch.utils.data.Dataset):
         curr_avg_value = sum(values)/len(values)
         curr_std_value = np.std(values)+1e-8
         for fn in self.data:
-            value = (self.data[fn]["value"]-curr_avg_value)/curr_std_value
+            value = self.data[fn]["value"]
+            # value = (self.data[fn]["value"]-curr_avg_value)/curr_std_value
             if value>1: value=1
             if value<-1: value=-1
             if value==0: value=1e-8
