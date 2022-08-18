@@ -54,6 +54,7 @@ class Dataset(torch.utils.data.Dataset):
         return state, mcts_prob, value
 
     def load_game_files(self):
+        print("start load files name ... ")
         start_time = time.time()
         files = glob.glob(os.path.join(self.data_dir, "*.pkl"))
         files = sorted(files, key=lambda x: os.path.getmtime(x), reverse=True)
@@ -69,7 +70,8 @@ class Dataset(torch.utils.data.Dataset):
         print("loaded data, totle:",len(self.file_list),"delete:", delcount,"paid time:", pay_time)
 
     def calc_data(self):
-        scores=[]
+        # scores=[]
+        print("start load data to memery ...")
         for fn in self.file_list:
             try:
                 state, mcts_prob, value, score = pickle.load(open(fn, "rb"))
@@ -79,33 +81,34 @@ class Dataset(torch.utils.data.Dataset):
                 self.file_list.remove(fn)
                 continue
             self.data[fn]={"value":value, "score":score, "state":state, "mcts_prob": mcts_prob}
-            scores.append(score) 
+            # scores.append(score) 
+        print("load data end")
+        # avg_score = sum(scores)/len(scores)
+        # max_score = max(scores)
+        # min_score = min(scores)
+        # values = [] 
+        # for fn in self.data:
+        #     # self.data[fn]["value"] = 0.2*self.data[fn]["value"] + 0.8*math.tanh((self.data[fn]["score"]-avg_score)/avg_score)
+        #     # self.data[fn]["value"] = 0.8*self.data[fn]["value"] + 0.2*(self.data[fn]["score"]-min_score)/(max_score-min_score)
+        #     # self.data[fn]["value"] = 0.1*self.data[fn]["value"] + 0.9*(self.data[fn]["score"]-min_score)/(max_score-min_score)
+        #     # self.data[fn]["value"] = math.tanh((self.data[fn]["score"]-avg_score)/avg_score)
+        #     # self.data[fn]["value"] = (self.data[fn]["score"]-min_score)/(max_score-min_score)
+        #     # self.data[fn]["value"] = self.data[fn]["score"]
+        #     values.append(self.data[fn]["value"])
+        # curr_avg_value = sum(values)/len(values)
+        # curr_std_value = np.std(values)+1e-8
+        # for fn in self.data:
+        #     value = self.data[fn]["value"]
+        #     # value = (self.data[fn]["value"]-curr_avg_value)/curr_std_value
+        #     if value>1: value=1
+        #     if value<-1: value=-1
+        #     if value==0: value=1e-8
+        #     self.data[fn]["value"]=value
 
-        avg_score = sum(scores)/len(scores)
-        max_score = max(scores)
-        min_score = min(scores)
-        values = [] 
-        for fn in self.data:
-            # self.data[fn]["value"] = 0.2*self.data[fn]["value"] + 0.8*math.tanh((self.data[fn]["score"]-avg_score)/avg_score)
-            # self.data[fn]["value"] = 0.8*self.data[fn]["value"] + 0.2*(self.data[fn]["score"]-min_score)/(max_score-min_score)
-            # self.data[fn]["value"] = 0.1*self.data[fn]["value"] + 0.9*(self.data[fn]["score"]-min_score)/(max_score-min_score)
-            # self.data[fn]["value"] = math.tanh((self.data[fn]["score"]-avg_score)/avg_score)
-            # self.data[fn]["value"] = (self.data[fn]["score"]-min_score)/(max_score-min_score)
-            # self.data[fn]["value"] = self.data[fn]["score"]
-            values.append(self.data[fn]["value"])
-        curr_avg_value = sum(values)/len(values)
-        curr_std_value = np.std(values)+1e-8
-        for fn in self.data:
-            value = self.data[fn]["value"]
-            # value = (self.data[fn]["value"]-curr_avg_value)/curr_std_value
-            if value>1: value=1
-            if value<-1: value=-1
-            if value==0: value=1e-8
-            self.data[fn]["value"]=value
-
-        print("calc scores end, size: %s, avg_score: %s, max_score: %s, avg_value: %s, std_value: %s"%(len(scores), round(avg_score,2), max_score, round(curr_avg_value,2), round(curr_std_value,2)))
+        # print("calc scores end, size: %s, avg_score: %s, max_score: %s, avg_value: %s, std_value: %s"%(len(scores), round(avg_score,2), max_score, round(curr_avg_value,2), round(curr_std_value,2)))
 
     def copy_wait_file(self):
+        print("start copy wait file to train ...")
         files = glob.glob(os.path.join(data_wait_dir, "*.pkl"))
         movefiles = sorted(files, key=lambda x: os.path.getmtime(x))
         # 等待1秒钟，防止有数据还在写入
