@@ -163,7 +163,7 @@ class MCTS():
         
         # 局部奖励
         off = prev_pieceheight - state.pieceheight 
-        v  = off + self.search(state)
+        v  = off*0.2 + self.search(state)
         # v = self.search(state)
 
         # 更新 Q 值 和 访问次数
