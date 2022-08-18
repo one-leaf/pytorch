@@ -281,9 +281,9 @@ class Train():
                     result["lastupdate"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                     self.save_status_file(result, jsonfile) 
 
-                    game.print()
-                    print('reward:', game.score, "Qval:", game_reward, 'len:', i, "piececount:", game.piececount, "time:", time.time()-start_time)
-                    print("pay:", time.time() - start_time , "s\n" )
+                    # game.print()
+                    # print('reward:', game.score, "Qval:", game_reward, 'len:', i, "piececount:", game.piececount, "time:", time.time()-start_time)
+                    # print("pay:", time.time() - start_time , "s\n" )
 
                     game_datas.append(data)
                     borads.append(game.board)
