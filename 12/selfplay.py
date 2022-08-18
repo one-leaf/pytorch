@@ -274,7 +274,7 @@ class Train():
                             if not os.path.exists(newmodelfile):
                                 policy_value_net.save_model(newmodelfile)
 
-                    if result["curr"]["agent1000"]>1000:
+                    if result["curr"]["agent1000"]>500:
                         result["curr"]={"reward":0,"pieces":0,"agent1000":0,"agent100":0,"height":0}
 
                         newmodelfile = model_file+"_"+str(result["agent"])
