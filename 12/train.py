@@ -71,16 +71,20 @@ class Dataset(torch.utils.data.Dataset):
 
     def calc_data(self):
         # scores=[]
-        print("start load data to memery ...")
-        for fn in self.file_list:
+        print("start load data to memory ...")
+        start_time = time.time()
+        for i, fn in enumerate(self.file_list):
             try:
-                state, mcts_prob, value, score = pickle.load(open(fn, "rb"))
+                with open(fn, "rb") as f:
+                    state, mcts_prob, value, score = pickle.load(f)
             except:
                 print("filename {} error can't load".format(fn))
                 if os.path.exists(fn): os.remove(fn)
                 self.file_list.remove(fn)
                 continue
             self.data[fn]={"value":value, "score":score, "state":state, "mcts_prob": mcts_prob}
+        pay_time = round(time.time()-start_time, 2)
+        print("loaded to memory, paid time:", pay_time)
             # scores.append(score) 
         print("load data end")
         # avg_score = sum(scores)/len(scores)
