@@ -193,7 +193,7 @@ class Train():
                     self.save_status_file(result, jsonfile)
                     repeat_count = 20 if game==game2 else 40
                     print("#"*repeat_count, 'score:', game.score, 'height:', game.pieceheight, 'piece:', game.piececount, "shape:", game.fallpiece["shape"], \
-                        'step:', i, "step time:", round((time.time()-start_time)/(i*2.),3),'flip:', game==game2, "#"*repeat_count)
+                        'step:', i, "step time:", round((time.time()-start_time)/(i*2.),3),'flip:', game==game2)
 
             if game1.terminal or game2.terminal or game_stop: 
                 for game, player, data, jsonfile, cpuct_list in [(game1,player1,data1,game1_json,cpuct1_list), (game2,player2,data2,game2_json,cpuct2_list)]:
