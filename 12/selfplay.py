@@ -337,7 +337,7 @@ class Train():
                 v_sum += v
                 s_sum += score
             print("score","steps len:",step_count,"avg:",s_sum/step_count, slist)
-            print("value","price len:",len(vlist),"avg:",v_sum/step_count, vlist)
+            print("value","piece len:",len(vlist),"avg:",v_sum/step_count, vlist)
        
         states, mcts_probs, values, score= [], [], [], []
 
