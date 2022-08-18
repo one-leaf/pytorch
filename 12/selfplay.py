@@ -356,8 +356,10 @@ class Train():
         print("TRAIN Self Play end. length:%s value sum:%s saving ..." % (len(states),sum(values)))
 
         # 保存对抗数据到data_buffer
-        for obj in self.get_equi_data(states, mcts_probs, values, score):
-            filename = "{}.pkl".format(uuid.uuid1())
+        filetime = datetime.datetime.now().isoformat()
+        print("save file basename:", filetime)
+        for i, obj in enumerate(self.get_equi_data(states, mcts_probs, values, score)):
+            filename = "{}-{}.pkl".format(filetime, i)
             savefile = os.path.join(data_wait_dir, filename)
             with open(savefile, "wb") as fn:
                 pickle.dump(obj, fn)
