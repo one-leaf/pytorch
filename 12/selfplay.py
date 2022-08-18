@@ -291,7 +291,7 @@ class Train():
                 break
 
             # 如果训练次数超过了最大次数，则直接终止训练
-            if i >= 1000: game_stop=True
+            if i >= 10000: game_stop=True
 
         # 打印borad：
         from game import blank 
