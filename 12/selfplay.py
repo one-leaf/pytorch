@@ -256,9 +256,11 @@ class Train():
                             result["time"]["step_times"].remove(result["time"]["step_times"][0])
 
                         # 每50局更新一次cpuct参数
-                        if result["cpuct"][cpuct_list[0]]["count"]>10 and result["cpuct"][cpuct_list[1]]["count"]>10:
-                            v0 = result["cpuct"][cpuct_list[0]]["value"]/result["cpuct"][cpuct_list[0]]["count"]
-                            v1 = result["cpuct"][cpuct_list[1]]["value"]/result["cpuct"][cpuct_list[1]]["count"]
+                        count0=result["cpuct"][cpuct_list[0]]["count"]
+                        count1=result["cpuct"][cpuct_list[1]]["count"]
+                        if count0>10 and count1>10:
+                            v0 = result["cpuct"][cpuct_list[0]]["value"]/count0
+                            v1 = result["cpuct"][cpuct_list[1]]["value"]/count1
                             if v0 > v1:
                                 cpuct = round(float(cpuct_list[0])-0.1,1)
                                 if cpuct<=0.1:
