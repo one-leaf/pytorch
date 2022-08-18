@@ -123,7 +123,7 @@ class Train():
 
         # 开始游戏
         policy_value_net = PolicyValueNet(GAME_WIDTH, GAME_HEIGHT, GAME_ACTIONS_NUM, model_file=model_file)
-
+        # agent.show_mcts_process= True
         # 同时开两个游戏
         game1 = copy.deepcopy(agent)
         game2 = copy.deepcopy(agent)
@@ -191,8 +191,9 @@ class Train():
                             result["first_reward"]=result["first_reward"]*0.99 + game.piececount*0.01
 
                     self.save_status_file(result, jsonfile)
-                    print("#"*40, 'score:', game.score, 'height:', game.pieceheight, 'piece:', game.piececount, "shape:", game.fallpiece["shape"], \
-                        'step:', i, "step time:", round((time.time()-start_time)/(i*2.),3),'flip:', game==game2, "#"*40)
+                    repeat_count = 20 if game==game2 else 40
+                    print("#"*repeat_count, 'score:', game.score, 'height:', game.pieceheight, 'piece:', game.piececount, "shape:", game.fallpiece["shape"], \
+                        'step:', i, "step time:", round((time.time()-start_time)/(i*2.),3),'flip:', game==game2, "#"*repeat_count)
 
             if game1.terminal or game2.terminal or game_stop: 
                 for game, player, data, jsonfile, cpuct_list in [(game1,player1,data1,game1_json,cpuct1_list), (game2,player2,data2,game2_json,cpuct2_list)]:
