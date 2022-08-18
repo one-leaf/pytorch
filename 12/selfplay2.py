@@ -118,61 +118,83 @@ class Train():
         # 游戏代理
         agent = Agent()
 
+        max_game_num = 2
+        agentcount, agentreward, piececount, agentscore = 0, 0, 0, 0
+
         borads = []
+        game_num = 0       
+
+        # 尽量不要出现一样的局面
+        game_keys = []
         game_datas = []
-
-        # 开始游戏
+        # 开始一局游戏
         policy_value_net = PolicyValueNet(GAME_WIDTH, GAME_HEIGHT, GAME_ACTIONS_NUM, model_file=model_file)
+        for _ in count():
+            start_time = time.time()
+            game_num += 1
+            print('start game :', game_num, 'time:', datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 
-        # 同时开两个游戏
-        game1 = copy.deepcopy(agent)
-        game2 = copy.deepcopy(agent)
-        game1_json = os.path.join(data_dir, "result_flip_v.json")
-        game2_json = os.path.join(data_dir, "result.json")
-        game1_result = self.read_status_file(game1_json)
-        game2_result = self.read_status_file(game2_json)
-        
-        # 读取各自的动态cpuct
-        cpuct1_result = game1_result["cpuct"]
-        cpuct1_list = sorted(cpuct1_result, key=lambda x : cpuct1_result[x]["count"])
-        cpuct1 = float(cpuct1_list[0])
-        print("cpuct1:", cpuct1_result, "-->", cpuct1_list, "cpuct1:", cpuct1, "n_playout:", self.n_playout)
-        cpuct1_list.sort()
+            game_flip_v = game_num%2==0
+            if game_flip_v:
+                jsonfile = os.path.join(data_dir, "result_flip_v.json")
+            else:
+                jsonfile = os.path.join(data_dir, "result.json")
 
-        cpuct2_result = game2_result["cpuct"]
-        cpuct2_list = sorted(cpuct2_result, key=lambda x : cpuct2_result[x]["count"])
-        cpuct2 = float(cpuct2_list[0])
-        print("cpuct2:",cpuct2_result, "-->", cpuct2_list, "cpuct2:", cpuct2, "n_playout:", self.n_playout)
-        cpuct2_list.sort()
-        player1 = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=cpuct1, n_playout=self.n_playout, flip_v=False)
-        player2 = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=cpuct2, n_playout=self.n_playout, flip_v=True)
+            result = self.read_status_file(jsonfile)
+            print("QVal:",result["QVal"])
 
-        data1 = {"steps":[],"shapes":[],"last_state":0,"score":0,"piece_count":0}
-        data2 = {"steps":[],"shapes":[],"last_state":0,"score":0,"piece_count":0}
+            # c_puct 参数自动调节，step=0.1 
+            cpuct_result = result["cpuct"]
 
-        start_time = time.time()
-        print('start game time:', datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+            cpuct_list = sorted(cpuct_result, key=lambda x : cpuct_result[x]["count"])
+            print("cpuct:",cpuct_result, "-->", cpuct_list)
+            cpuct = float(cpuct_list[0])
 
-        game_stop= False
-        for i in count():
-            for game, player, data, jsonfile, cpuct, cpuct_list in [(game1,player1,data1,game1_json,cpuct1,cpuct1_list), (game2,player2,data2,game2_json,cpuct2,cpuct2_list)]:
+            print("c_puct:",cpuct, "n_playout:",self.n_playout)
+
+            player = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=cpuct, n_playout=self.n_playout, flip_v=game_flip_v)
+  
+            _data = {"steps":[],"shapes":[],"last_state":0,"score":0,"piece_count":0}
+            game = copy.deepcopy(agent)
+            # game = Agent(isRandomNextPiece=False)
+
+            if game_num==1 or game_num==max_game_num:
+                game.show_mcts_process=True
+
+            piece_idx = []
+
+            for i in count():
                 _step={"step":i}
                 _step["state"] = game.current_state()               
                 _step["piece_count"] = game.piececount               
                 _step["shape"] = game.fallpiece["shape"]
                 _step["pre_piece_height"] = game.pieceheight
 
-                action, move_probs, state_value = player.get_action(game, temp=1/(game.pieceheight+1)) 
+                if game_num == 1:
+                    action, move_probs, state_value = player.get_action(game, temp=1/(game.pieceheight+1)) 
+                else: 
+                    action, move_probs, state_value = player.get_action(game, temp=1/(game.pieceheight+1)) 
+
+                    if game.get_key() in game_keys:
+                        print(game.steps, game.piececount, game.fallpiece["shape"], game.piecesteps, "key:", game.get_key(), "key_len:" ,len(game_keys))
+                        action = random.choice(game.get_availables())
+
+                # 如果当前选择的啥也不做 KEY_NONE， 不过 KEY_DOWN 也可以用时，有一半几率直接用 KEY_DOWN
+                # if action == ACTIONS[0] and random.random()>0.5 and ACTIONS[-1] in game.get_availables():
+                #     action = ACTIONS[-1]
+
                 _, reward = game.step(action)
 
                 _step["piece_height"] = game.pieceheight
+
                 _step["key"] = game.get_key()
+                # 这里不鼓励多行消除
                 _step["reward"] = reward if reward>0 else 0
                 _step["action"] = action                
                 _step["move_probs"] = move_probs
                 _step["state_value"] = state_value
-
-                data["steps"].append(_step)
+                _data["shapes"].append(_step["shape"])
+                _data["steps"].append(_step)
 
                 # 这里的奖励是消除的行数
                 if reward > 0:
@@ -190,15 +212,23 @@ class Train():
                         else:
                             result["first_reward"]=result["first_reward"]*0.99 + game.piececount*0.01
 
+                        # 如果第一次的奖励低于平均数，则将前面的几个方块也进行奖励
+                        # if game.piececount < result["first_reward"]:
+                        #     for idx in piece_idx:
+                        #         _data["steps"][idx]["reward"]=0.5
+
                     self.save_status_file(result, jsonfile)
                     print("#"*40, 'score:', game.score, 'height:', game.pieceheight, 'piece:', game.piececount, "shape:", game.fallpiece["shape"], \
-                        'step:', i, "step time:", round((time.time()-start_time)/i,3),'flip:', game==game2, "#"*40)
+                        'step:', i, "step time:", round((time.time()-start_time)/i,3),'flip:', game_flip_v, "#"*40)
 
-            if game1.terminal or game2.terminal or game_stop: 
-                for game, player, data, jsonfile, cpuct_list in [(game1,player1,data1,game1_json,cpuct1_list), (game2,player2,data2,game2_json,cpuct2_list)]:
+                # 记录当前的方块放置的 idx
+                if game.state != 0:
+                    piece_idx.append(i)
 
-                    data["score"] = game.score
-                    data["piece_count"] = game.piececount
+                # 方块的个数越多越好
+                if game.terminal :
+                    _data["score"] = game.score
+                    _data["piece_count"] = game.piececount
 
                     # 更新状态
                     game_reward =  game.score   
@@ -229,7 +259,7 @@ class Train():
                         result["best"]["reward"] = game_reward
                         result["best"]["pieces"] = game.piececount
                         result["best"]["score"] = game.score
-                        result["best"]["agent"] = result["agent"]+1
+                        result["best"]["agent"] = result["agent"]+agentcount
 
                     result["agent"] += 1
                     result["curr"]["reward"] += game.score
@@ -255,7 +285,10 @@ class Train():
                         while len(result["time"]["step_times"])>200:    
                             result["time"]["step_times"].remove(result["time"]["step_times"][0])
 
-                        # 每50局更新一次cpuct参数
+                        # 每100局更新一次cpuct参数
+                        # qval = result["QVal"]
+                        # cpuct表示概率的可信度
+                        cpuct_list.sort()
                         v0 = result["cpuct"][cpuct_list[0]]["value"]/result["cpuct"][cpuct_list[0]]["count"]
                         v1 = result["cpuct"][cpuct_list[1]]["value"]/result["cpuct"][cpuct_list[1]]["count"]
                         if v0 > v1:
@@ -283,15 +316,30 @@ class Train():
                     self.save_status_file(result, jsonfile) 
 
                     game.print()
-                    print('reward:', game.score, "Qval:", game_reward, 'len:', i, "piececount:", game.piececount, "time:", time.time()-start_time)
+                    print(game_num, 'reward:', game.score, "Qval:", game_reward, 'len:', i, "piececount:", game.piececount, "time:", time.time()-start_time)
                     print("pay:", time.time() - start_time , "s\n" )
+                    agentcount += 1
+                    agentscore += game.score
+                    agentreward += game_reward
+                    piececount += game.piececount
 
-                    game_datas.append(data)
-                    borads.append(game.board)
-                break
+
+
+                    break
+
+            for step in _data["steps"]:
+                if not step["key"] in game_keys:                            
+                    game_keys.append(step["key"])
+
+            game_datas.append(_data)
+
+            borads.append(game.board)
+
+            # 如果训练样本超过10000，则停止训练
+            if len(game_keys)> 10000: break
 
             # 如果训练次数超过了最大次数，则直接终止训练
-            if i >= 1000: game_stop=True
+            if game_num >= max_game_num: break
 
         # 打印borad：
         from game import blank 
@@ -307,26 +355,25 @@ class Train():
             print(line)
         print((" "+" -"*agent.width+" ")*len(borads))
 
+        scores = [data["score"] for data in game_datas]
+        max_score = max(scores)
+
         ## 放弃 按0.99的衰减更新reward
         # 只关注最后一次得分方块的所有步骤,将消行方块的所有步骤的得分都设置为1
-        winner = [0, 0] 
-        if game_datas[0]["score"]>game_datas[1]["score"]:
-            winner[0] = 1
-            winner[1] = -1
-        elif game_datas[0]["score"]<game_datas[1]["score"]:
-            winner[0] = -1
-            winner[1] = 1
-
-        for i, data in enumerate(game_datas):
+        for data in game_datas:
             step_count = len(data["steps"])
             piece_count = -1
-            v = winner[i]
+            v = 0
             score = 0
             vlist=[]
             slist=[]
             v_sum = 0
             s_sum = 0
             for i in range(step_count-1,-1,-1):
+                # v = 0.99*v+data["steps"][i]["pre_piece_height"]-data["steps"][i]["piece_height"]
+                # v = math.tanh(v)
+                v =  data["steps"][i]['state_value']
+                if data["score"]<max_score: v = v * -1.
                 if piece_count!=data["steps"][i]["piece_count"]:
                     piece_count = data["steps"][i]["piece_count"]
                     score += data["steps"][i]["reward"]
@@ -336,9 +383,31 @@ class Train():
                 data["steps"][i]["score"] = score
                 v_sum += v
                 s_sum += score
-            print("score","steps len:",step_count,"avg:",s_sum/step_count, slist)
-            print("value","price len:",len(vlist),"avg:",v_sum/step_count, vlist)
-       
+
+            print("score:","avg",s_sum/step_count, slist)
+            print("value:","avg",v_sum/step_count, vlist)
+        # 总得分为 消行奖励  + (本局消行奖励-平均每局消行奖励/平均每局消行奖励)
+        # for data in game_datas:
+        #     step_count = len(data["steps"])
+        #     weight = (data["score"]-result["QVal"])/result["QVal"]
+        #     for i in range(step_count):
+        #         # if data["steps"][i]["reward"] < 1:
+        #         v = data["steps"][i]["reward"] + weight 
+        #             # if v>1: v=1
+        #         data["steps"][i]["reward"] = v
+        
+        # print("fixed reward")
+        # for data in game_datas:
+        #     step_count = len(data["steps"])
+        #     piece_count = -1
+        #     vlist=[]
+        #     for i in range(step_count):
+        #         if piece_count!=data["steps"][i]["piece_count"]:
+        #             piece_count = data["steps"][i]["piece_count"]
+        #             vlist.append(data["steps"][i]["reward"])
+        #     print("score:", data["score"], "piece_count:", data["piece_count"],  [round(num, 2) for num in vlist])
+
+        # 状态    概率      本步表现 本局奖励
         states, mcts_probs, values, score= [], [], [], []
 
         for data in game_datas:
@@ -347,6 +416,71 @@ class Train():
                 mcts_probs.append(step["move_probs"])
                 values.append(step["reward"])
                 score.append(step["score"])
+
+        # # 用于统计shape的std
+        # pieces_idx={"t":[], "i":[], "j":[], "l":[], "s":[], "z":[], "o":[]}
+
+        # var_keys = set()
+
+        # for data in game_datas:
+        #     for shape in set(data["shapes"]):
+        #         var_keys.add(shape)
+        # step_key_name = "shape"
+
+        # for key in var_keys:
+        #     _states, _mcts_probs, _values = [], [], []
+        #     # _pieces_idx={"t":[], "i":[], "j":[], "l":[], "s":[], "z":[], "o":[]}
+        #     for data in game_datas:
+        #         for step in data["steps"]:
+        #             if step[step_key_name]!=key: continue
+        #             _states.append(step["state"])
+        #             _mcts_probs.append(step["move_probs"])
+        #             _values.append(step["reward"])
+        #             # _pieces_idx[step["shape"]].append(len(values)+len(_values)-1)
+
+        #     if len(_values)==0: continue
+                
+        #     # 重新计算
+        #     curr_avg_value = sum(_values)/len(_values)
+        #     curr_std_value = np.std(_values)
+        #     if curr_std_value<0.01: continue
+
+        #     # for shape in _pieces_idx:
+        #     #     pieces_idx[shape].extend(_pieces_idx[shape])
+
+        #     _normalize_vals = []
+        #     # 用正态分布的方式重新计算
+        #     curr_std_value_fix = curr_std_value + 1e-8 # * (2.0**0.5) # curr_std_value / result["vars"]["std"] 
+        #     for v in _values:
+        #         #标准化的标准差为 (x-μ)/(σ/std), std 为 1 # 1/sqrt(2)
+        #         _nv = (v-curr_avg_value)/curr_std_value_fix 
+        #         if _nv <-1 : _nv = -1
+        #         if _nv >1  : _nv = 1
+        #         if _nv == 0: _nv = 1e-8
+        #         _normalize_vals.append(_nv)
+
+        #     # 将最好的一步的值设置为1
+        #     # max_normalize_val = max(_normalize_vals)-1
+        #     # for i in range(len(_normalize_vals)):
+        #     #     _normalize_vals[i] -= max_normalize_val
+
+        #     print(key, len(_normalize_vals), "max:", max(_normalize_vals), "min:", min(_normalize_vals), "std:", curr_std_value)
+
+        #     states.extend(_states)
+        #     mcts_probs.extend(_mcts_probs)
+        #     values.extend(_normalize_vals)
+        #     result["vars"]["max"] = result["vars"]["max"]*0.999 + max(_normalize_vals)*0.001
+        #     result["vars"]["min"] = result["vars"]["min"]*0.999 + min(_normalize_vals)*0.001
+        #     result["vars"]["avg"] = result["vars"]["avg"]*0.999 + np.average(_normalize_vals)*0.001
+        #     result["vars"]["std"] = result["vars"]["std"]*0.999 + np.std(_normalize_vals)*0.001
+        #     # _states, _mcts_probs, _values = [], [], []
+
+        # # if result["vars"]["max"]>1 or result["vars"]["min"]<-1:
+        # #     result["vars"]["std"] = round(result["vars"]["std"]-0.0001,4)
+        # # else:
+        # #     result["vars"]["std"] = round(result["vars"]["std"]+0.0001,4)
+
+        # json.dump(result, open(jsonfile,"w"), ensure_ascii=False)
 
         assert len(states)>0
         assert len(states)==len(values)
@@ -361,6 +495,19 @@ class Train():
             savefile = os.path.join(data_wait_dir, filename)
             with open(savefile, "wb") as fn:
                 pickle.dump(obj, fn)
+
+
+        # 打印shape的标准差
+        # for shape in pieces_idx:
+        #     test_data=[]
+        #     for i in pieces_idx[shape]:
+        #         if i>=(len(values)): break
+        #         test_data.append(values[i])
+        #     if len(test_data)==0: continue
+        #     print(shape, "len:", len(test_data), "max:", max(test_data), "min:", min(test_data), "std:", np.std(test_data))
+
+
+ 
 
     def run(self):
         """启动训练"""

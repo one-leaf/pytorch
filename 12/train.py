@@ -87,7 +87,7 @@ class Dataset(torch.utils.data.Dataset):
         values = [] 
         for fn in self.data:
             # self.data[fn]["value"] = 0.2*self.data[fn]["value"] + 0.8*math.tanh((self.data[fn]["score"]-avg_score)/avg_score)
-            self.data[fn]["value"] = 0.2*1.01*self.data[fn]["value"] + 0.8*(self.data[fn]["score"]-min_score)/(max_score-min_score)
+            # self.data[fn]["value"] = 0.8*self.data[fn]["value"] + 0.2*(self.data[fn]["score"]-min_score)/(max_score-min_score)
             # self.data[fn]["value"] = 0.1*self.data[fn]["value"] + 0.9*(self.data[fn]["score"]-min_score)/(max_score-min_score)
             # self.data[fn]["value"] = math.tanh((self.data[fn]["score"]-avg_score)/avg_score)
             # self.data[fn]["value"] = (self.data[fn]["score"]-min_score)/(max_score-min_score)

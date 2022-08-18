@@ -21,7 +21,7 @@ class MCTS():
         self.Ps = {}  # 保存 动作概率 key: s, a
         self.Es = {}  # 保存游戏最终得分 key: s
         self.Vs = {}  # 保存游戏局面打分 key: s # 这个不需要，只是缓存
-        print("create mcts, c_puct: {}, n_playout: {}".format(c_puct, n_playout))
+        print("create mcts, c_puct: {}, n_playout: {}, flip_v: {}".format(c_puct, n_playout, flip_v))
 
         self.state = None
         self.flip_v = flip_v
