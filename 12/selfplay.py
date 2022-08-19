@@ -234,6 +234,11 @@ class Train():
                     result["curr"]["pieces"] += game.piececount
                     result["curr"]["agent1000"] += 1
                     result["curr"]["agent100"] += 1
+                    if not game.terminal:
+                        if "win" in result["curr"]:
+                            result["curr"]["win"] += 1
+                        else:
+                            result["curr"]["win"] = 1
 
                     if result["curr"]["agent100"]>50:
                         result["reward"].append(round(result["curr"]["reward"]/result["curr"]["agent1000"],2))
