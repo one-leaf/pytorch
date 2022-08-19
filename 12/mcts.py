@@ -77,7 +77,7 @@ class MCTS():
         qs = [round(av[1],2) for av in act_Qs]
         v = 0 if s not in self.Vs else self.Vs[s]
 
-        if state.show_mcts_process or state.pieceheight in [0,9] :
+        if state.show_mcts_process or state.pieceheight in [0, state.max_height] :
             info=[]
             for idx in sorted(range(len(visits)), key=visits.__getitem__)[::-1]:
                 act, visit = act_visits[idx]
