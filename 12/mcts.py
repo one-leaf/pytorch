@@ -79,7 +79,6 @@ class MCTS():
         v = 0 if s not in self.Vs else self.Vs[s]
 
         if state.show_mcts_process or self.prev_height in [0,9] :
-            self.prev_height = state.pieceheight
             info=[]
             for idx in sorted(range(len(visits)), key=visits.__getitem__)[::-1]:
                 act, visit = act_visits[idx]
@@ -89,6 +88,7 @@ class MCTS():
                 if s in self.Ps: p = self.Ps[s][act]
                 info.append([action, visit, round(q,2), round(p,2)])        
             print(state.steps, state.piececount, state.fallpiece["shape"], state.piecesteps, "n:", n, "depth:" ,self.max_depth,"height:", state.pieceheight, "value:", round(v,2), info, "std:", round(np.std(visits),2))
+        self.prev_height = state.pieceheight
 
         if temp == 0:
             bestAs = np.array(np.argwhere(visits == np.max(visits))).flatten()
