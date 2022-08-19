@@ -86,7 +86,7 @@ class MCTS():
                 if (s, act) in self.Qsa: q = self.Qsa[(s, act)]
                 if s in self.Ps: p = self.Ps[s][act]
                 info.append([action, visit, round(q,2), round(p,2)])        
-            print(state.steps, state.piececount, state.fallpiece["shape"], state.piecesteps, "n:", n, "depth:" ,self.max_depth,"height:", state.pieceheight, "value:", round(v,2), info, "std:", round(np.std(visits),2))
+            print(state.steps, state.piececount, state.fallpiece["shape"], state.piecesteps, "n:", n, "depth:" ,self.max_depth,"height:", state.pieceheight, "value:", round(v,2), info, "flip_v:", self.flip_v)
 
         if temp == 0:
             bestAs = np.array(np.argwhere(visits == np.max(visits))).flatten()
