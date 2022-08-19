@@ -231,7 +231,7 @@ class MCTSPlayer(object):
 
             # if state.show_mcts_process:
             if idx!=max_idx:
-                print("    random","v:", state_v, state.position_to_action_name(acts[max_idx]), "p:", act_probs[max_idx], "q:", act_qs[max_idx], \
+                print("    random", "h:",state.pieceheight, "v:", state_v, state.position_to_action_name(acts[max_idx]), "p:", act_probs[max_idx], "q:", act_qs[max_idx], \
                             "==>", state.position_to_action_name(acts[idx]), "p:", act_probs[idx], "q:", act_qs[idx])  
 
             # print(acts, act_probs, idx, action)
