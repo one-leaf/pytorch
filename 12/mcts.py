@@ -25,6 +25,7 @@ class MCTS():
 
         self.state = None
         self.flip_v = flip_v
+        self.prev_height = 0        
 
     def reset(self):
         self.Qsa = {}  # 保存 Q 值, key: s,a
@@ -77,7 +78,8 @@ class MCTS():
         qs = [round(av[1],2) for av in act_Qs]
         v = 0 if s not in self.Vs else self.Vs[s]
 
-        if state.show_mcts_process:
+        if state.show_mcts_process or self.prev_height in [0,9] :
+            self.prev_height = state.pieceheight
             info=[]
             for idx in sorted(range(len(visits)), key=visits.__getitem__)[::-1]:
                 act, visit = act_visits[idx]
