@@ -211,10 +211,10 @@ class MCTSPlayer(object):
             move_probs[acts] = act_probs
             max_idx = np.argmax(act_probs)    
 
-            if temp==0 or act_qs[max_idx]>0:
+            if temp==0:
                 idx = max_idx
             else:
-                p = 0.95                 
+                p = 0.75                 
                 dirichlet = np.random.dirichlet(0.03 * np.ones(len(act_probs)))
                 idx = np.random.choice(range(len(acts)), p=p * act_probs + (1.0-p) * dirichlet)                                                                     
 
