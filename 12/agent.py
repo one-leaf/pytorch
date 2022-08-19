@@ -9,11 +9,12 @@ KEY_NONE, KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN = 0, 1, 2, 3, 4
 ACTIONS = [KEY_NONE, KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN]
 ACTIONS_NAME = ["N","O","L","R","D"]
 class Agent(object):
-    def __init__(self, isRandomNextPiece=False):
+    def __init__(self, isRandomNextPiece=False, max_height=20):
         self.width = 10
         self.height = 20
         self.actions_num = len(ACTIONS)    
         self.isRandomNextPiece = isRandomNextPiece       
+        self.max_height = max_height
         self.reset()
 
     def reset(self):
@@ -167,7 +168,7 @@ class Agent(object):
             self.piecesteps = 0
             self.piececount += 1 
             self.availables = [KEY_NONE]
-            if not self.tetromino.validposition(self.board, self.fallpiece, ay=1) or self.pieceheight>=10:                  
+            if not self.tetromino.validposition(self.board, self.fallpiece, ay=1) or self.pieceheight>self.max_height:                  
                 self.terminal = True 
                 self.state = 2
                 return self.state, self.reward 
