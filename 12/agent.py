@@ -153,7 +153,7 @@ class Agent(object):
             self.score += self.reward
             self.pieceheight = self.getMaxHeight()          
             self.pieces_height.append(20 - fallpiece_y - self.reward)
-            self.fallpiece = None
+            self.fallpiece = self.nextpiece
 
         self.status.append(self.get_fallpiece_board() + self.getBoard() + self.get_nextpiece_borad())
         self.set_key()
@@ -163,7 +163,6 @@ class Agent(object):
             env.render(self.board, self.score, self.level, self.fallpiece, self.nextpiece)
 
         if not isFalling:
-            self.fallpiece = self.nextpiece
             self.nextpiece = self.tetromino.getnewpiece()
             self.piecesteps = 0
             self.piececount += 1 
