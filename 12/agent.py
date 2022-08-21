@@ -146,9 +146,6 @@ class Agent(object):
 
         fallpiece_y = self.fallpiece['y']
 
-        self.status.append(self.get_fallpiece_board() + self.getBoard() + self.get_nextpiece_borad())
-        self.set_key()
-
         if not isFalling:
             self.tetromino.addtoboard(self.board,self.fallpiece)            
             self.reward = self.tetromino.removecompleteline(self.board) 
@@ -157,6 +154,9 @@ class Agent(object):
             self.pieceheight = self.getMaxHeight()          
             self.pieces_height.append(20 - fallpiece_y - self.reward)
             self.fallpiece = None
+
+        self.status.append(self.get_fallpiece_board() + self.getBoard() + self.get_nextpiece_borad())
+        self.set_key()
 
         if  env:
             env.checkforquit()
