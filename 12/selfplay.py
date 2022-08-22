@@ -125,8 +125,8 @@ class Train():
         # 同时开两个游戏
         game1 = copy.deepcopy(agent)
         game2 = copy.deepcopy(agent)
-        game1_json = os.path.join(data_dir, "result_flip_v.json")
-        game2_json = os.path.join(data_dir, "result.json")
+        game1_json = os.path.join(data_dir, "result.json")
+        game2_json = os.path.join(data_dir, "result_flip_v.json")
         game1_result = self.read_status_file(game1_json)
         game2_result = self.read_status_file(game2_json)
         
