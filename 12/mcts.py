@@ -191,6 +191,7 @@ class MCTSPlayer(object):
     def __init__(self, policy_value_function, c_puct=5, n_playout=2000, player_id=0):
         """初始化参数"""
         self.mcts = MCTS(policy_value_function, c_puct, n_playout, player_id)
+        self.player_id = player_id
 
     def set_player_ind(self, p):
         """指定MCTS的playerid"""
