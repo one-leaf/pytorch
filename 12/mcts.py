@@ -8,7 +8,7 @@ import numpy as np
 EPS = 1e-8
 
 class MCTS():
-    def __init__(self, policy_value_fn, c_puct=5, n_playout=10000, flip_v=False):
+    def __init__(self, policy_value_fn, c_puct=5, n_playout=10000, player_id=0):
         self._policy = policy_value_fn      # 概率估算函数
         self._c_puct = c_puct               # 参数
         self._n_playout = n_playout         # 做几次探索
@@ -21,10 +21,10 @@ class MCTS():
         self.Ps = {}  # 保存 动作概率 key: s, a
         self.Es = {}  # 保存游戏最终得分 key: s
         self.Vs = {}  # 保存游戏局面打分 key: s # 这个不需要，只是缓存
-        print("create mcts, c_puct: {}, n_playout: {}, flip_v: {}".format(c_puct, n_playout, flip_v))
+        print("create mcts, c_puct: {}, n_playout: {}, player_id: {}".format(c_puct, n_playout, player_id))
 
         self.state = None
-        self.flip_v = flip_v
+        self.player_id = player_id
 
     def reset(self):
         self.Qsa = {}  # 保存 Q 值, key: s,a
@@ -86,7 +86,7 @@ class MCTS():
                 if (s, act) in self.Qsa: q = self.Qsa[(s, act)]
                 if s in self.Ps: p = self.Ps[s][act]
                 info.append([action, visit, round(q,2), round(p,2)])        
-            print(state.steps, state.piececount, state.fallpiece["shape"], state.piecesteps, "n:", n, "depth:" ,self.max_depth,"height:", state.pieceheight, "value:", round(v,2), info, "flip_v:", self.flip_v)
+            print(state.steps, state.piececount, state.fallpiece["shape"], state.piecesteps, "n:", n, "depth:" ,self.max_depth,"height:", state.pieceheight, "value:", round(v,2), info, "player_id:", self.player_id)
 
         if temp == 0:
             bestAs = np.array(np.argwhere(visits == np.max(visits))).flatten()
@@ -126,8 +126,7 @@ class MCTS():
         # 增加 Ps[s] Vs[s] Ns[s]
         if s not in self.Ps:                          
             # 获得当前局面的概率 和 局面的打分, 这个已经过滤掉了不可用走法
-            act_probs, v = self._policy(state)
-            if self.flip_v: v = -v
+            act_probs, v = self._policy(state, self.player_id)
             probs = np.zeros(state.actions_num)
             for act, prob in act_probs:
                 probs[act] = prob
@@ -189,9 +188,9 @@ class MCTS():
 class MCTSPlayer(object):
     """基于模型指导概率的MCTS + AI player"""
 
-    def __init__(self, policy_value_function, c_puct=5, n_playout=2000, flip_v=False):
+    def __init__(self, policy_value_function, c_puct=5, n_playout=2000, player_id=0):
         """初始化参数"""
-        self.mcts = MCTS(policy_value_function, c_puct, n_playout, flip_v)
+        self.mcts = MCTS(policy_value_function, c_puct, n_playout, player_id)
 
     def set_player_ind(self, p):
         """指定MCTS的playerid"""

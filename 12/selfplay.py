@@ -142,8 +142,8 @@ class Train():
         cpuct2 = float(cpuct2_list[0])
         print("cpuct2:",cpuct2_result, "-->", cpuct2_list, "cpuct2:", cpuct2, "n_playout:", self.n_playout)
         cpuct2_list.sort()
-        player1 = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=cpuct1, n_playout=self.n_playout, flip_v=False)
-        player2 = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=cpuct2, n_playout=self.n_playout, flip_v=True)
+        player1 = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=cpuct1, n_playout=self.n_playout, player_id=0)
+        player2 = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=cpuct2, n_playout=self.n_playout, player_id=1)
 
         data1 = {"steps":[],"shapes":[],"last_state":0,"score":0,"piece_count":0}
         data2 = {"steps":[],"shapes":[],"last_state":0,"score":0,"piece_count":0}
@@ -191,7 +191,7 @@ class Train():
                     self.save_status_file(result, jsonfile)
                     repeat_count = 20 if game==game2 else 40
                     print("#"*repeat_count, 'score:', game.score, 'height:', game.pieceheight, 'piece:', game.piececount, "shape:", game.fallpiece["shape"], \
-                        'step:', i, "step time:", round((time.time()-start_time)/(i*2.),3),'flip:', game==game2)
+                        'step:', i, "step time:", round((time.time()-start_time)/(i*2.),3),'player:', player.player_id)
 
             if game1.terminal or game2.terminal or game_stop: 
                 for game, player, data, jsonfile, cpuct, cpuct_list in [(game1,player1,data1,game1_json,cpuct1,cpuct1_list), (game2,player2,data2,game2_json,cpuct2,cpuct2_list)]:
