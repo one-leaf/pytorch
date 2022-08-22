@@ -247,7 +247,7 @@ class PolicyValueNet():
         return act_probs, value
 
     # 从当前游戏获得 ((action, act_probs),...) 的可用动作+概率和当前游戏胜率
-    def policy_value_fn(self, game, player_id):
+    def policy_value_fn(self, game, player_id=0):
         """
         输入: 游戏
         输出: 一组（动作， 概率）和游戏当前状态的胜率
