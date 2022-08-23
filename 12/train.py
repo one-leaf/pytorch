@@ -147,7 +147,7 @@ class Train():
         self.learn_rate = 1e-5
         self.lr_multiplier = 1.0  # 基于KL的自适应学习率
         self.temp = 1  # MCTS的概率参数，越大越不肯定，训练时1，预测时1e-3
-        self.n_playout = 64  # 每个动作的模拟战记录个数
+        self.n_playout = 128  # 每个动作的模拟战记录个数
         self.play_batch_size = 1 # 每次自学习次数
         self.buffer_size = 200000  # cache对次数
         self.epochs = 1  # 每次更新策略价值网络的训练步骤数, 推荐是5
@@ -236,6 +236,15 @@ class Train():
             #             .format(i, i*self.batch_size, v_loss, p_loss, entropy))
                 
             # self.policy_value_net.save_model(model_file)
+
+
+            for i, data in enumerate(testing_loader):
+                _batch, _qvals, _actions = data
+                _probs, _value = self.policy_value_net.policy_value(test_batch)
+                if i%10 == 0:
+                    print(("TRAIN idx {} : {}  v_loss:{:.5f}, p_loss:{:.5f}, entropy:{:.5f}")\
+                        .format(i, i*self.batch_size, v_loss, p_loss, entropy))
+
 
         except KeyboardInterrupt:
             print('quit')
