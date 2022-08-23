@@ -65,8 +65,7 @@ class Agent(object):
 
     def add_status(self, status):
         self.status.add(status)
-        if len(self.status)>3:
-            self.status=self.status[-3:]
+        self.status.pop(0)
 
     # 概率的索引位置转action
     def position_to_action(self, position):
