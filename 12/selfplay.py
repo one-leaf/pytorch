@@ -153,9 +153,9 @@ class Train():
 
         game_stop= False
         for i in count():
-            steps=[]
+
+            # 每个都走一步
             for game, player, data, jsonfile, cpuct, cpuct_list in [(game1,player1,data1,game1_json,cpuct1,cpuct1_list), (game2,player2,data2,game2_json,cpuct2,cpuct2_list)]:
-                
                 _step={"step":i}
                 _step["state"] = game.current_state()               
                 _step["piece_count"] = game.piececount               
@@ -172,7 +172,7 @@ class Train():
                 _step["move_probs"] = move_probs
                 _step["state_value"] = state_value
 
-                steps.append(_step)
+                data["steps"].append(_step)
 
                 # 这里的奖励是消除的行数
                 if reward > 0:
@@ -195,14 +195,16 @@ class Train():
                     print("#"*repeat_count, 'score:', game.score, 'height:', game.pieceheight, 'piece:', game.piececount, "shape:", game.fallpiece["shape"], \
                         'step:', i, "step time:", round((time.time()-start_time)/(i*2.),3),'player:', player.player_id)
 
-            if not game1.terminal and not game2.terminal and not game_stop:
-                data1["steps"].append(steps[0])
-                data2["steps"].append(steps[1])
-            else:
+
+            if game1.terminal or game2.terminal or game_stop:
                 for game, player, data, jsonfile, cpuct, cpuct_list in [(game1,player1,data1,game1_json,cpuct1,cpuct1_list), (game2,player2,data2,game2_json,cpuct2,cpuct2_list)]:
 
                     data["score"] = game.score
                     data["piece_count"] = game.piececount
+
+                    game_datas.append(data)
+                    borads.append(game.board)
+
                     # 更新状态
                     game_reward =  game.score   
 
@@ -297,8 +299,6 @@ class Train():
                     # print('reward:', game.score, "Qval:", game_reward, 'len:', i, "piececount:", game.piececount, "time:", time.time()-start_time)
                     # print("pay:", time.time() - start_time , "s\n" )
 
-                    game_datas.append(data)
-                    borads.append(game.board)
                 break
 
             # 如果训练次数超过了最大次数，则直接终止训练
