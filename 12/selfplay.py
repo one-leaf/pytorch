@@ -331,20 +331,25 @@ class Train():
             score = 0
             vlist=[]
             slist=[]
+            acclist=[]
             v_sum = 0
             s_sum = 0
+            acc_sum = 0
             for j in range(step_count-1,-1,-1):
                 if piece_count!=data["steps"][j]["piece_count"]:
                     piece_count = data["steps"][j]["piece_count"]
                     score += data["steps"][j]["reward"]
                     vlist.insert(0,v)
                     slist.insert(0, score)
+                    acclist.insert(0, data["steps"][j]["state_value"])
                 data["steps"][j]["reward"] = v
                 data["steps"][j]["score"] = score
                 v_sum += v
                 s_sum += score
+                acc_sum += abs(data["steps"][j]["state_value"]-v)
             print("score","steps len:",step_count,"avg:",s_sum/step_count, slist)
             print("value","piece len:",len(vlist),"avg:",v_sum/step_count, vlist)
+            print("acc","steps len:",len(acclist),"avg:",acc_sum/step_count, acclist)
        
         states, mcts_probs, values, score= [], [], [], []
 
