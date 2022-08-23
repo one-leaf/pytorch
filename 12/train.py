@@ -73,7 +73,8 @@ class Dataset(torch.utils.data.Dataset):
         # scores=[]
         print("start load data to memory ...")
         start_time = time.time()
-        for i, fn in enumerate(self.file_list):
+        sum_v=0
+        for fn in self.file_list:
             try:
                 with open(fn, "rb") as f:
                     state, mcts_prob, value, score = pickle.load(f)
@@ -83,8 +84,11 @@ class Dataset(torch.utils.data.Dataset):
                 self.file_list.remove(fn)
                 continue
             self.data[fn]={"value":value, "score":score, "state":state, "mcts_prob": mcts_prob}
+            sum_v+=value
+
         pay_time = round(time.time()-start_time, 2)
         print("loaded to memory, paid time:", pay_time)
+        print("value sum:", sum_v, "avg:", sum_v/len(self.data))
             # scores.append(score) 
         print("load data end")
         # avg_score = sum(scores)/len(scores)
