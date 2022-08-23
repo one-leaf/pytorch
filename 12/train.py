@@ -228,7 +228,15 @@ class Train():
 
             self.policy_value_net.save_model(model_file)
    
-    
+            for i, data in enumerate(testing_loader):
+                _batch, _qvals, _actions = data
+                _, v_loss, p_loss, entropy = self.policy_update(data, self.epochs)
+                if i%10 == 0:
+                    print(("TRAIN idx {} : {}  v_loss:{:.5f}, p_loss:{:.5f}, entropy:{:.5f}")\
+                        .format(i, i*self.batch_size, v_loss, p_loss, entropy))
+                
+            self.policy_value_net.save_model(model_file)
+            
         except KeyboardInterrupt:
             print('quit')
 
