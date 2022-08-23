@@ -201,6 +201,7 @@ class Train():
 
                     data["score"] = game.score
                     data["piece_count"] = game.piececount
+                    data["piece_height"] = game.pieceheight
 
                     game_datas.append(data)
                     borads.append(game.board)
@@ -352,9 +353,9 @@ class Train():
                 v_sum += v
                 s_sum += score
                 acc_sum += abs(data["steps"][j]["state_value"]-v)
-            print("score","steps len:",step_count,"avg:",s_sum/step_count, slist)
+            print("score","max height:",data["piece_height"],"avg:",s_sum/step_count, slist)
             print("value","piece len:",len(vlist),"avg:",v_sum/step_count, vlist)
-            print("acc","steps len:",len(acclist),"avg:",acc_sum/step_count, acclist)
+            print("acc","steps len:",step_count,"avg:",acc_sum/step_count, acclist)
        
         states, mcts_probs, values, score= [], [], [], []
 
