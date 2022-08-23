@@ -1,9 +1,8 @@
-from tkinter import W
 from game import Tetromino, pieces, templatenum, blank 
 # from pygame.locals import *
 import numpy as np
-import random
-from collections import deque
+# import random
+# from collections import deque
 import math
 
 KEY_NONE, KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN = 0, 1, 2, 3, 4
