@@ -323,6 +323,7 @@ class Train():
             winner[0] = 1
             winner[1] = -1
 
+        # 更新reward和score，reward为胜负，[1|-1|0]；score 为本步骤以后一共消除的行数
         for i, data in enumerate(game_datas):
             step_count = len(data["steps"])
             piece_count = -1
@@ -332,14 +333,14 @@ class Train():
             slist=[]
             v_sum = 0
             s_sum = 0
-            for i in range(step_count-1,-1,-1):
-                if piece_count!=data["steps"][i]["piece_count"]:
-                    piece_count = data["steps"][i]["piece_count"]
-                    score += data["steps"][i]["reward"]
+            for j in range(step_count-1,-1,-1):
+                if piece_count!=data["steps"][j]["piece_count"]:
+                    piece_count = data["steps"][j]["piece_count"]
+                    score += data["steps"][j]["reward"]
                     vlist.insert(0,v)
                     slist.insert(0, score)
-                data["steps"][i]["reward"] = v
-                data["steps"][i]["score"] = score
+                data["steps"][j]["reward"] = v
+                data["steps"][j]["score"] = score
                 v_sum += v
                 s_sum += score
             print("score","steps len:",step_count,"avg:",s_sum/step_count, slist)
