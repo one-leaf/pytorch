@@ -153,7 +153,9 @@ class Train():
 
         game_stop= False
         for i in count():
+            steps=[]
             for game, player, data, jsonfile, cpuct, cpuct_list in [(game1,player1,data1,game1_json,cpuct1,cpuct1_list), (game2,player2,data2,game2_json,cpuct2,cpuct2_list)]:
+                
                 _step={"step":i}
                 _step["state"] = game.current_state()               
                 _step["piece_count"] = game.piececount               
@@ -170,7 +172,7 @@ class Train():
                 _step["move_probs"] = move_probs
                 _step["state_value"] = state_value
 
-                data["steps"].append(_step)
+                steps.append(_step)
 
                 # 这里的奖励是消除的行数
                 if reward > 0:
@@ -193,7 +195,10 @@ class Train():
                     print("#"*repeat_count, 'score:', game.score, 'height:', game.pieceheight, 'piece:', game.piececount, "shape:", game.fallpiece["shape"], \
                         'step:', i, "step time:", round((time.time()-start_time)/(i*2.),3),'player:', player.player_id)
 
-            if game1.terminal or game2.terminal or game_stop: 
+            if not game1.terminal and not game2.terminal and not game_stop:
+                data1["steps"].append(steps[0])
+                data2["steps"].append(steps[1])
+            else:
                 for game, player, data, jsonfile, cpuct, cpuct_list in [(game1,player1,data1,game1_json,cpuct1,cpuct1_list), (game2,player2,data2,game2_json,cpuct2,cpuct2_list)]:
 
                     data["score"] = game.score
