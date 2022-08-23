@@ -128,7 +128,7 @@ class Dataset(torch.utils.data.Dataset):
             if os.path.exists(savefile): os.remove(savefile)
             os.rename(fn, savefile)
             self.newsample.append(savefile)
-            if (i>=100 and i>len(movefiles)*0.2) or i>=self.max_keep_size//2: break       
+            if (i>=100 and i>len(movefiles)*0.5) or i>=self.max_keep_size//2: break       
         print("mv %s/%s files to train"%(i+1,len(movefiles)))
         if i==-1:
             print("SLEEP 60s for watting data")
@@ -228,15 +228,15 @@ class Train():
 
             self.policy_value_net.save_model(model_file)
    
-            for i, data in enumerate(testing_loader):
-                _batch, _qvals, _actions = data
-                _, v_loss, p_loss, entropy = self.policy_update(data, self.epochs)
-                if i%10 == 0:
-                    print(("TRAIN idx {} : {}  v_loss:{:.5f}, p_loss:{:.5f}, entropy:{:.5f}")\
-                        .format(i, i*self.batch_size, v_loss, p_loss, entropy))
+            # for i, data in enumerate(testing_loader):
+            #     _batch, _qvals, _actions = data
+            #     _, v_loss, p_loss, entropy = self.policy_update(data, self.epochs)
+            #     if i%10 == 0:
+            #         print(("TRAIN idx {} : {}  v_loss:{:.5f}, p_loss:{:.5f}, entropy:{:.5f}")\
+            #             .format(i, i*self.batch_size, v_loss, p_loss, entropy))
                 
-            self.policy_value_net.save_model(model_file)
-            
+            # self.policy_value_net.save_model(model_file)
+
         except KeyboardInterrupt:
             print('quit')
 
