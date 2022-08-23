@@ -64,7 +64,7 @@ class Agent(object):
         self.key=0
 
     def add_status(self, status):
-        self.status.add(status)
+        self.status.append(status)
         self.status.pop(0)
 
     # 概率的索引位置转action
