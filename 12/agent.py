@@ -1,3 +1,4 @@
+from tkinter import W
 from game import Tetromino, pieces, templatenum, blank 
 # from pygame.locals import *
 import numpy as np
@@ -16,6 +17,7 @@ class Agent(object):
         self.isRandomNextPiece = isRandomNextPiece       
         self.max_height = max_height
         self.reset()
+
 
     def reset(self):
         self.tetromino = Tetromino(isRandomNextPiece=self.isRandomNextPiece)
@@ -48,10 +50,10 @@ class Agent(object):
         # 每个方块的高度
         self.pieces_height = []     
         # 盘面的状态
-        self.status = deque(maxlen=10)
-        for i in range(9):
+        self.status = [] #deque(maxlen=10)
+        for i in range(3):
             self.status.append(np.zeros((self.height, self.width)))
-        self.status.append(self.get_fallpiece_board()+self.get_nextpiece_borad())
+        self.status.append(self.get_fallpiece_board()+self.getBoard())
         # 下一个可用步骤
         self.availables=self.get_availables()
         # 显示mcts中间过程
@@ -61,6 +63,10 @@ class Agent(object):
         # key
         self.key=0
 
+    def add_status(self, status):
+        self.status.add(status)
+        if len(self.status)>3:
+            self.status=self.status[-3:]
 
     # 概率的索引位置转action
     def position_to_action(self, position):
@@ -156,7 +162,7 @@ class Agent(object):
             self.fallpiece = self.nextpiece
 
         # self.status.append(self.get_fallpiece_board() + self.getBoard() + self.get_nextpiece_borad())
-        self.status.append(self.get_fallpiece_board() + self.getBoard())
+        self.add_status(self.get_fallpiece_board() + self.getBoard())
         self.set_key()
 
         if  env:
@@ -338,7 +344,7 @@ class Agent(object):
     # 背景 + 前2步走法 = 3
     # 返回 [3, height, width]
     def current_state(self):
-        return np.array(self.status[-3:])
+        return np.array(self.status)
 
         # state = np.zeros((3, self.height, self.width))
         # for i in range(3):
