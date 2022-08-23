@@ -203,9 +203,9 @@ class Train():
 
                     result = self.read_status_file(jsonfile)
                     if result["QVal"]==0:
-                        result["QVal"] = game.piececount
+                        result["QVal"] = game.getNoEmptyCount()
                     else:
-                        result["QVal"] = result["QVal"]*0.99 + game.piececount*0.01   
+                        result["QVal"] = result["QVal"]*0.99 + game.getNoEmptyCount()*0.01   
                     paytime = time.time()-start_time
                     steptime = paytime/game.steps
                     if result["time"]["agent_time"]==0:
