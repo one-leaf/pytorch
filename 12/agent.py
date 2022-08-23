@@ -52,7 +52,7 @@ class Agent(object):
         self.status = [] #deque(maxlen=10)
         for i in range(3):
             self.status.append(np.zeros((self.height, self.width)))
-        self.status.append(self.get_fallpiece_board()+self.getBoard())
+        # self.status.append(self.get_fallpiece_board()+self.getBoard())
         # 下一个可用步骤
         self.availables=self.get_availables()
         # 显示mcts中间过程
