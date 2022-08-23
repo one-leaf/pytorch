@@ -166,9 +166,7 @@ class Train():
                 _, reward = game.step(action)
 
                 _step["piece_height"] = game.pieceheight
-                _step["key"] = game.get_key()
                 _step["reward"] = reward if reward>0 else 0
-                _step["action"] = action                
                 _step["move_probs"] = move_probs
                 _step["state_value"] = state_value
 
@@ -376,8 +374,8 @@ class Train():
         # 保存对抗数据到data_buffer
         filetime = datetime.datetime.now().isoformat()
         print("save file basename:", filetime)
-        # for i, obj in enumerate(self.get_equi_data(states, mcts_probs, values, score)):
-        for i, obj in enumerate(zip(states, mcts_probs, values, score)):
+        for i, obj in enumerate(self.get_equi_data(states, mcts_probs, values, score)):
+        # for i, obj in enumerate(zip(states, mcts_probs, values, score)):
             filename = "{}-{}.pkl".format(filetime, i)
             savefile = os.path.join(data_wait_dir, filename)
             with open(savefile, "wb") as fn:

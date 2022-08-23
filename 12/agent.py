@@ -155,7 +155,8 @@ class Agent(object):
             self.pieces_height.append(20 - fallpiece_y - self.reward)
             self.fallpiece = self.nextpiece
 
-        self.status.append(self.get_fallpiece_board() + self.getBoard() + self.get_nextpiece_borad())
+        # self.status.append(self.get_fallpiece_board() + self.getBoard() + self.get_nextpiece_borad())
+        self.status.append(self.get_fallpiece_board() + self.getBoard())
         self.set_key()
 
         if  env:
@@ -337,11 +338,13 @@ class Agent(object):
     # 背景 + 前2步走法 = 3
     # 返回 [3, height, width]
     def current_state(self):
-        state = np.zeros((3, self.height, self.width))
-        for i in range(3):
-            state[-1*(i+1)]=self.status[-1*(i+1)]
+        return np.array(self.status[-3:])
 
-        return state          
+        # state = np.zeros((3, self.height, self.width))
+        # for i in range(3):
+        #     state[-1*(i+1)]=self.status[-1*(i+1)]
+
+        # return state          
 
 
     
