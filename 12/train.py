@@ -242,7 +242,6 @@ class Train():
             for i, data in enumerate(testing_loader):
                 test_batch, test_probs, test_values = data
                 _probs, _value = self.policy_value_net.policy_value_net(test_batch)
-                test_values.to(self.policy_value_net.device)
                 loss = loss_fn(_value, test_values.unsqueeze(-1))
                 print("test loss", loss)
 
