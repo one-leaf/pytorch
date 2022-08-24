@@ -238,13 +238,12 @@ class Train():
             # self.policy_value_net.save_model(model_file)
 
 
+            loss_fn = torch.nn.MSELoss()
             for i, data in enumerate(testing_loader):
                 _batch, _qvals, _actions = data
                 _probs, _value = self.policy_value_net.policy_value(test_batch)
-                if i%10 == 0:
-                    print(("TRAIN idx {} : {}  v_loss:{:.5f}, p_loss:{:.5f}, entropy:{:.5f}")\
-                        .format(i, i*self.batch_size, v_loss, p_loss, entropy))
-
+                loss = loss_fn(_value, _qvals)
+                print("test loss", loss)
 
         except KeyboardInterrupt:
             print('quit')
