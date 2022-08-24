@@ -244,15 +244,16 @@ class Train():
             for i, data in enumerate(testing_loader):
                 test_batch, test_probs, test_values = data
                 test_batch = test_batch.to(self.policy_value_net.device)
+                test_values = test_values.to(self.policy_value_net.device)
                 with torch.no_grad(): 
-                    act_probs, value = net.forward(test_batch)                
-                    test_values = test_values.to(self.policy_value_net.device)
-                    loss = loss_fn(value.view(-1), test_values)
+                    act_probs, values = net.forward(test_batch) 
+                    values = values.view(-1)              
+                    loss = loss_fn(values, test_values)
                     losslist.append(loss.item())      
-                    value = value.cpu().numpy()
+                    values = values.cpu().numpy()
                     test_value = test_valus.cpu().numpy()
-                    mse = ((value-test_value)**2).mean(axis=0)
-                    print(value)
+                    mse = ((values-test_value)**2).mean(axis=0)
+                    print(values)
                     print(test_value)
                     print(mse)
             print("test value loss:", sum(losslist)/len(losslist))
