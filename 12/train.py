@@ -247,7 +247,7 @@ class Train():
                 with torch.no_grad(): 
                     act_probs, value = net.forward(test_batch)                
                     test_values = test_values.to(self.policy_value_net.device)
-                    loss = loss_fn(value, test_values.unsqueeze(-1))
+                    loss = loss_fn(value.view(-1), test_values)
                     losslist.append(loss.item())                    
             print("test value loss:", sum(losslist)/len(losslist))
 
