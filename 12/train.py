@@ -242,18 +242,20 @@ class Train():
             net = self.policy_value_net.policy_value_net
             for i, data in enumerate(testing_loader):
                 test_batch, test_probs, test_values = data
-                test_batch = test_batch.to(self.policy_value_net.device)
-                test_values = test_values.to(self.policy_value_net.device)
-                with torch.no_grad(): 
-                    act_probs, values = net.forward(test_batch) 
-                    values = values.view(-1)              
-                    loss = loss_fn(values, test_values)
-                    values = values.cpu().numpy()
-                    test_value = test_valus.cpu().numpy()
-                    print(values)
-                    print(test_value)
-                    mse = ((values-test_value)**2).mean(axis=0)
-                    print(mse, loss.item())
+                print(test_probs)
+                print(test_values)
+                # test_batch = test_batch.to(self.policy_value_net.device)
+                # test_values = test_values.to(self.policy_value_net.device)
+                # with torch.no_grad(): 
+                #     act_probs, values = net.forward(test_batch) 
+                #     values = values.view(-1)              
+                #     loss = loss_fn(values, test_values)
+                #     values = values.cpu().numpy()
+                #     test_value = test_valus.cpu().numpy()
+                #     print(values)
+                #     print(test_value)
+                #     mse = ((values-test_value)**2).mean(axis=0)
+                #     print(mse, loss.item())
 
         except KeyboardInterrupt:
             print('quit')
