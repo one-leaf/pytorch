@@ -241,10 +241,10 @@ class Train():
             loss_fn = torch.nn.MSELoss()
             for i, data in enumerate(testing_loader):
                 test_batch, test_probs, test_values = data
-                test_batch.to(self.policy_value_net.device)
+                test_batch.to(self.policy_value_net.policy_value_net.device)
                 with torch.no_grad(): 
                     act_probs, value = self.policy_value_net.policy_value_net.forward(test_batch)                
-                    test_values.to(self.policy_value_net.device)
+                    test_values.to(self.policy_value_net.policy_value_net.device)
                     loss = loss_fn(value, test_values.unsqueeze(-1))
                     print("test value loss", loss)
 
