@@ -240,6 +240,7 @@ class Train():
 
             loss_fn = torch.nn.MSELoss()
             net = self.policy_value_net.policy_value_net
+            losslist=[]
             for i, data in enumerate(testing_loader):
                 test_batch, test_probs, test_values = data
                 test_batch = test_batch.to(self.policy_value_net.device)
@@ -247,7 +248,8 @@ class Train():
                     act_probs, value = net.forward(test_batch)                
                     test_values = test_values.to(self.policy_value_net.device)
                     loss = loss_fn(value, test_values.unsqueeze(-1))
-                    print("test value loss", loss)
+                    losslist.append(loss.item())                    
+            print("test value loss:", sum(losslist)/len(losslist))
 
         except KeyboardInterrupt:
             print('quit')
