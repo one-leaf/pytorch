@@ -237,26 +237,20 @@ class Train():
                 
             # self.policy_value_net.save_model(model_file)
 
-
-            loss_fn = torch.nn.MSELoss()
-            net = self.policy_value_net.policy_value_net
-            for i, data in enumerate(testing_loader):
-                test_batch, test_probs, test_values = data
-                # print(len(test_batch))
-                # print(test_probs)
-                # print(test_values)
-                test_batch = test_batch.to(self.policy_value_net.device)
-                test_values = test_values.to(self.policy_value_net.device)
-                with torch.no_grad(): 
-                    act_probs, values = net.forward(test_batch) 
-                    values = values.view(-1)              
-                    loss = loss_fn(values, test_values)
-                    values = values.cpu().numpy()
-                    test_values = test_values.cpu().numpy()
-                    print(values)
-                    print(test_values)
-                    mse = ((values-test_values)**2).mean(axis=0)
-                    print(mse, loss.item())
+            # loss_fn = torch.nn.MSELoss()
+            # net = self.policy_value_net.policy_value_net
+            # for i, data in enumerate(testing_loader):
+            #     test_batch, test_probs, test_values = data
+            #     test_batch = test_batch.to(self.policy_value_net.device)
+            #     test_values = test_values.to(self.policy_value_net.device)
+            #     with torch.no_grad(): 
+            #         act_probs, values = net.forward(test_batch) 
+            #         values = values.view(-1)              
+            #         loss = loss_fn(values, test_values)
+            #         values = values.cpu().numpy()
+            #         test_values = test_values.cpu().numpy()
+            #         mse = ((values-test_values)**2).mean(axis=0)
+            #         print(mse, loss.item())
 
         except KeyboardInterrupt:
             print('quit')
