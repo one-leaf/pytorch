@@ -242,6 +242,7 @@ class Train():
             net = self.policy_value_net.policy_value_net
             for i, data in enumerate(testing_loader):
                 test_batch, test_probs, test_values = data
+                print(len(test_batch))
                 print(test_probs)
                 print(test_values)
                 # test_batch = test_batch.to(self.policy_value_net.device)
