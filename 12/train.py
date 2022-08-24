@@ -242,7 +242,7 @@ class Train():
             for i, data in enumerate(testing_loader):
                 _batch, _qvals, _actions = data
                 _probs, _value = self.policy_value_net.policy_value(test_batch)
-                loss = loss_fn(_value, _qvals)
+                loss = loss_fn(_value, _qvals.unsqueeze(-1))
                 print("test loss", loss)
 
         except KeyboardInterrupt:
