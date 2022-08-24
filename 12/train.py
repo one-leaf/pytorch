@@ -186,13 +186,25 @@ class Train():
             old_probs = None
             test_batch = None
 
+            loss_fn = torch.nn.MSELoss()
+            net = self.policy_value_net.policy_value_net
+            for i, data in enumerate(testing_loader):
+                test_batch, test_probs, test_values = data
+                test_batch = test_batch.to(self.policy_value_net.device)
+                test_values = test_values.to(self.policy_value_net.device)
+                with torch.no_grad(): 
+                    act_probs, values = net(test_batch) 
+                    values = values.view(-1)              
+                    loss = loss_fn(values, test_values)
+                    print(loss.item())
+
             for i, data in enumerate(training_loader):  # 计划训练批次
-                if i==0:
-                    _batch, _qvals, _actions = data
-                    for j in range(len(_batch[0])):
-                        print(_batch[0][j])
-                    print(_qvals[0])
-                    print(_actions[0])
+                # if i==0:
+                #     state, mcts_prob, value = data
+                #     for j in range(len(state[0])):
+                #         print(state[0][j])
+                #     print(mcts_prob[0])
+                #     print(value[0])
 
                 # 使用对抗数据重新训练策略价值网络模型
                 _, v_loss, p_loss, entropy = self.policy_update(data, self.epochs)
@@ -202,7 +214,7 @@ class Train():
 
                     # 动态调整学习率
                     if old_probs is None:
-                        test_batch, test_probs, test_valus = next(iter(testing_loader))
+                        test_batch, test_probs, test_values = state, mcts_prob, value
                         old_probs, old_value = self.policy_value_net.policy_value(test_batch) 
                     else:
                         new_probs, new_value = self.policy_value_net.policy_value(test_batch)
@@ -214,7 +226,7 @@ class Train():
                             print("probs[0] dst:{}".format(test_probs[0]))   
                             maxlen = min(10, len(test_batch)) 
                             for j in range(maxlen): 
-                                print("value[0] old:{} new:{} tg:{}".format(old_value[j][0], new_value[j][0], test_valus[j]))  
+                                print("value[0] old:{} new:{} tg:{}".format(old_value[j][0], new_value[j][0], test_values[j]))  
 
                         old_probs = None
                         
@@ -228,29 +240,18 @@ class Train():
 
             self.policy_value_net.save_model(model_file)
    
-            # for i, data in enumerate(testing_loader):
-            #     _batch, _qvals, _actions = data
-            #     _, v_loss, p_loss, entropy = self.policy_update(data, self.epochs)
-            #     if i%10 == 0:
-            #         print(("TRAIN idx {} : {}  v_loss:{:.5f}, p_loss:{:.5f}, entropy:{:.5f}")\
-            #             .format(i, i*self.batch_size, v_loss, p_loss, entropy))
-                
-            # self.policy_value_net.save_model(model_file)
 
-            # loss_fn = torch.nn.MSELoss()
-            # net = self.policy_value_net.policy_value_net
-            # for i, data in enumerate(testing_loader):
-            #     test_batch, test_probs, test_values = data
-            #     test_batch = test_batch.to(self.policy_value_net.device)
-            #     test_values = test_values.to(self.policy_value_net.device)
-            #     with torch.no_grad(): 
-            #         act_probs, values = net.forward(test_batch) 
-            #         values = values.view(-1)              
-            #         loss = loss_fn(values, test_values)
-            #         values = values.cpu().numpy()
-            #         test_values = test_values.cpu().numpy()
-            #         mse = ((values-test_values)**2).mean(axis=0)
-            #         print(mse, loss.item())
+            loss_fn = torch.nn.MSELoss()
+            net = self.policy_value_net.policy_value_net
+            for i, data in enumerate(testing_loader):
+                test_batch, test_probs, test_values = data
+                test_batch = test_batch.to(self.policy_value_net.device)
+                test_values = test_values.to(self.policy_value_net.device)
+                with torch.no_grad(): 
+                    act_probs, values = net(test_batch) 
+                    values = values.view(-1)              
+                    loss = loss_fn(values, test_values)
+                    print(loss.item())
 
         except KeyboardInterrupt:
             print('quit')
