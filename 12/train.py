@@ -248,7 +248,13 @@ class Train():
                     act_probs, value = net.forward(test_batch)                
                     test_values = test_values.to(self.policy_value_net.device)
                     loss = loss_fn(value.view(-1), test_values)
-                    losslist.append(loss.item())                    
+                    losslist.append(loss.item())      
+                    value = value.cpu().numpy()
+                    test_value = test_valus.cpu().numpy()
+                    mse = ((value-test_value)**2).mean(axis=0)
+                    print(value)
+                    print(test_value)
+                    print(mse)
             print("test value loss:", sum(losslist)/len(losslist))
 
         except KeyboardInterrupt:
