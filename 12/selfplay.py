@@ -286,7 +286,7 @@ class Train():
                             v1 = result["cpuct"][cpuct_list[1]]["value"]/count1
                             if v0 > v1:
                                 cpuct = round(float(cpuct_list[0])-0.1,1)
-                                if cpuct<=0.1:
+                                if cpuct<0.1:
                                     result["cpuct"] = {"0.1":{"count":0,"value":0}, "0.2":{"count":0,"value":0}}
                                 else:
                                     result["cpuct"] = {str(cpuct):{"count":0,"value":0}, str(round(cpuct+0.1,1)):{"count":0,"value":0}}
