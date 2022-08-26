@@ -334,7 +334,8 @@ class VitNet(nn.Module):
         self.val_token = nn.Parameter(torch.zeros(1, 1, embed_dim))    # [1, 1, 768]
         # 位置层
         self.pos_embed = nn.Parameter(torch.zeros(1, num_patches + 2, embed_dim)) # [1, 52, 768]
-        # 位置层的损失函数
+        
+        # 输入损失
         self.pos_drop = nn.Dropout(p=drop_ratio)
 
         # 深度 Dropout 衰减规则
