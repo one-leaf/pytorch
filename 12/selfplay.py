@@ -258,7 +258,7 @@ class Train():
                     if result["QVal"]==0:
                         result["QVal"] = acc
                     else:
-                        result["QVal"] = result["QVal"]*0.99 + acc*0.01   
+                        result["QVal"] = round(result["QVal"]*0.99 + acc*0.01,2)   
 
                     if result["curr"]["agent100"]>50:
                         result["reward"].append(round(result["curr"]["reward"]/result["curr"]["agent1000"],2))
