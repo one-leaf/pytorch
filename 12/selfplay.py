@@ -287,12 +287,12 @@ class Train():
                             if v0 > v1:
                                 cpuct = round(float(cpuct_list[0])-0.1,1)
                                 if cpuct<=0.1:
-                                    result["cpuct"] = {"0.1":{"count":0,"value":0}, "1.1":{"count":0,"value":0}}
+                                    result["cpuct"] = {"0.1":{"count":0,"value":0}, "0.5":{"count":0,"value":0}}
                                 else:
-                                    result["cpuct"] = {str(cpuct):{"count":0,"value":0}, str(round(cpuct+1,2)):{"count":0,"value":0}}
+                                    result["cpuct"] = {str(cpuct):{"count":0,"value":0}, str(round(cpuct+0.5,1)):{"count":0,"value":0}}
                             else:
                                 cpuct = round(float(cpuct_list[0])+0.1,1)
-                                result["cpuct"] = {str(cpuct):{"count":0,"value":0}, str(round(cpuct+1,2)):{"count":0,"value":0}}
+                                result["cpuct"] = {str(cpuct):{"count":0,"value":0}, str(round(cpuct+0.5,1)):{"count":0,"value":0}}
 
                         if max(result["reward"])==result["reward"][-1]:
                             newmodelfile = model_file+"_reward_"+str(result["reward"][-1])
