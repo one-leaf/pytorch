@@ -315,7 +315,7 @@ class VisionTransformer(nn.Module):
 
 
 class VitNet(nn.Module):
-    def __init__(self,  embed_dim=768, drop_ratio=0.2, drop_path_ratio=0.2, depth=12, num_heads=12, 
+    def __init__(self,  embed_dim=768, drop_ratio=0.3, drop_path_ratio=0.3, depth=12, num_heads=12, 
                         mlp_ratio=4.0, qkv_bias=True, qk_scale=None, attn_drop_ratio=0., num_classes=1000):
         super(VitNet, self).__init__()
 
