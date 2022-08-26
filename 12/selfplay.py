@@ -253,7 +253,7 @@ class Train():
                     acc = 0
                     for step in data["steps"]:
                         acc += (step["state_value"]-v)**2
-                    acc = acc/game.piececount
+                    acc = acc/len(data["steps"])
 
                     if result["QVal"]==0:
                         result["QVal"] = acc
