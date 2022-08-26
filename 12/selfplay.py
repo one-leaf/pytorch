@@ -208,10 +208,7 @@ class Train():
                     game_reward =  game.score   
 
                     result = self.read_status_file(jsonfile)
-                    if result["QVal"]==0:
-                        result["QVal"] = game.getNoEmptyCount()
-                    else:
-                        result["QVal"] = result["QVal"]*0.99 + game.getNoEmptyCount()*0.01   
+
                     paytime = time.time()-start_time
                     steptime = paytime/game.steps
                     if result["time"]["agent_time"]==0:
@@ -240,11 +237,28 @@ class Train():
                     result["curr"]["pieces"] += game.piececount
                     result["curr"]["agent1000"] += 1
                     result["curr"]["agent100"] += 1
+
                     if not game.terminal:
                         if "win" in result["curr"]:
                             result["curr"]["win"] += 1
                         else:
                             result["curr"]["win"] = 1
+
+                    # 计算 acc 看有没有收敛
+                    v = -1
+                    if not game.terminal:
+                        v = 1
+                    elif game1.terminal and game2.terminal:
+                        v = 0
+                    acc = 0
+                    for steps in data["steps"]:
+                        acc += (steps["state_value"]-v)**2
+                    acc = acc/game.piececount
+
+                    if result["QVal"]==0:
+                        result["QVal"] = acc
+                    else:
+                        result["QVal"] = result["QVal"]*0.99 + acc*0.01   
 
                     if result["curr"]["agent100"]>50:
                         result["reward"].append(round(result["curr"]["reward"]/result["curr"]["agent1000"],2))
