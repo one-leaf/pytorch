@@ -177,7 +177,7 @@ class ResNet(nn.Module):
         return x_act, x_val
 
 class PolicyValueNet():
-    def __init__(self, input_width, input_height, output_size, model_file=None, device=None, l2_const=1e-4):
+    def __init__(self, input_width, input_height, output_size, model_file=None, device=None, l2_const=1e-3):
         self.input_width = input_width
         self.input_height = input_height
         self.input_size = input_width * input_height
