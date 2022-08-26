@@ -251,8 +251,8 @@ class Train():
                     elif game1.terminal and game2.terminal:
                         v = 0
                     acc = 0
-                    for steps in data["steps"]:
-                        acc += (steps["state_value"]-v)**2
+                    for step in data["steps"]:
+                        acc += (step["state_value"]-v)**2
                     acc = acc/game.piececount
 
                     if result["QVal"]==0:
