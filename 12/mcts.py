@@ -131,7 +131,7 @@ class MCTS():
                 act_probs, v, player_id = self.cache[s]
                 if player_id!=self.player_id:
                     v = -v
-                    print(self.player_id,-v,"->",v)
+                    print("*", end="")
             else:
                 act_probs, v = self._policy(state)
                 self.cache[s] = (act_probs, v, self.player_id)
