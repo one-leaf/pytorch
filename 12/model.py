@@ -205,7 +205,7 @@ class PolicyValueNet():
             self.policy_value_net.load_state_dict(net_sd)
             self.load_model_file = True
 
-        self.cache = Cache(maxsize=500000)
+        # self.cache = Cache(maxsize=500000)
         self.lr = 0
 
     # 设置学习率
@@ -247,31 +247,24 @@ class PolicyValueNet():
         return act_probs, value
 
     # 从当前游戏获得 ((action, act_probs),...) 的可用动作+概率和当前游戏胜率
-    def policy_value_fn(self, game, player_id=0):
+    def policy_value_fn(self, game):
         """
         输入: 游戏
         输出: 一组（动作， 概率）和游戏当前状态的胜率
-        """
-        key = game.get_key()
-        if key in self.cache:
-            act_probs, value, _player_id = self.cache[key] 
-            if _player_id!=player_id:
-                value = -value
+        """       
+        if self.load_model_file:
+            current_state = game.current_state().reshape(1, -1, self.input_height, self.input_width)
+            act_probs, value = self.policy_value(current_state)
+            act_probs = act_probs.flatten()
         else:
-            if self.load_model_file:
-                current_state = game.current_state().reshape(1, -1, self.input_height, self.input_width)
-                act_probs, value = self.policy_value(current_state)
-                act_probs = act_probs.flatten()
-            else:
-                act_len=game.actions_num
-                act_probs=np.ones([act_len])/act_len
-                value = np.array([[0.]])
-            
-            actions = game.availables
-            act_probs = list(zip(actions, act_probs[actions]))
+            act_len=game.actions_num
+            act_probs=np.ones([act_len])/act_len
+            value = np.array([[0.]])
+        
+        actions = game.availables
+        act_probs = list(zip(actions, act_probs[actions]))
 
-            value = value[0,0]
-            self.cache[key] = (act_probs, value, player_id)
+        value = value[0,0]
         return act_probs, value
 
 
