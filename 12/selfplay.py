@@ -142,8 +142,9 @@ class Train():
         cpuct2 = float(cpuct2_list[0])
         print("cpuct2:",cpuct2_result, "-->", cpuct2_list, "cpuct2:", cpuct2, "n_playout:", self.n_playout)
         cpuct2_list.sort()
-        player1 = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=cpuct1, n_playout=self.n_playout, player_id=0)
-        player2 = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=cpuct2, n_playout=self.n_playout, player_id=1)
+        cache = {}
+        player1 = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=cpuct1, n_playout=self.n_playout, player_id=0, cache=cache)
+        player2 = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=cpuct2, n_playout=self.n_playout, player_id=1, cache=cache)
 
         data1 = {"steps":[],"shapes":[],"last_state":0,"score":0,"piece_count":0}
         data2 = {"steps":[],"shapes":[],"last_state":0,"score":0,"piece_count":0}

@@ -8,7 +8,7 @@ import numpy as np
 EPS = 1e-8
 
 class MCTS():
-    def __init__(self, policy_value_fn, c_puct=5, n_playout=10000, player_id=0):
+    def __init__(self, policy_value_fn, c_puct=5, n_playout=10000, player_id=0, cache={}):
         self._policy = policy_value_fn      # 概率估算函数
         self._c_puct = c_puct               # 参数
         self._n_playout = n_playout         # 做几次探索
@@ -25,7 +25,7 @@ class MCTS():
 
         self.state = None
         self.player_id = player_id
-        self.cache = {}
+        self.cache = cache
 
     def reset(self):
         self.Qsa = {}  # 保存 Q 值, key: s,a
@@ -197,9 +197,9 @@ class MCTS():
 class MCTSPlayer(object):
     """基于模型指导概率的MCTS + AI player"""
 
-    def __init__(self, policy_value_function, c_puct=5, n_playout=2000, player_id=0):
+    def __init__(self, policy_value_function, c_puct=5, n_playout=2000, player_id=0, cache={}):
         """初始化参数"""
-        self.mcts = MCTS(policy_value_function, c_puct, n_playout, player_id)
+        self.mcts = MCTS(policy_value_function, c_puct, n_playout, player_id, cache)
         self.player_id = player_id
 
     def set_player_ind(self, p):
