@@ -225,7 +225,7 @@ class MCTSPlayer(object):
             else:
                 p = 0.9                 
                 dirichlet = np.random.dirichlet(0.03 * np.ones(len(act_probs)))
-                idx = np.random.choice(range(len(acts)), p=p * act_probs + (1.0-p) * dirichlet)                                                                     
+                idx = np.random.choice(range(len(acts)), p=p*act_probs + (1.0-p)*dirichlet)                                                                     
 
             # if state.pieceheight>=4:
             #     qs_idx = np.argmax(act_qs)
