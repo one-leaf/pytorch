@@ -168,7 +168,7 @@ class Train():
             if reward > 0:
                 repeat_count = 40
                 print("#"*repeat_count, 'score:', game.score, 'height:', game.pieceheight, 'piece:', game.piececount, "shape:", game.fallpiece["shape"], \
-                    'step:', game.steps, "step time:", round((time.time()-start_time)/(i*2.),3),'player:', player.player_id)
+                    'step:', game.steps, "step time:", round((time.time()-start_time)/(i*2.),3),'player:', curr_player)
 
             if game.terminal or game_stop:
                 for _game, _data in zip(games, game_datas):
