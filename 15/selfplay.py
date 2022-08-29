@@ -64,7 +64,7 @@ class Train():
                 ext = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
                 os.replace(status_file, status_file+"_"+ext) 
         if result==None:
-            result={"agent":0, "reward":[], "qvals":[], "QVal":0}
+            result={"agent":0, "reward":[], "accs":[], "acc":0}
         if "curr" not in result:
             result["curr"]={"reward":0, "agent500":0, "agent50":0}
         if "best" not in result:
@@ -218,21 +218,21 @@ class Train():
                         acc.append((step["state_value"]-v)**2)
                 acc = np.average(acc)
 
-                if result["QVal"]==0:
-                    result["QVal"] = round(acc,2)
+                if result["acc"]==0:
+                    result["acc"] = round(acc,2)
                 else:
-                    result["QVal"] = round(result["QVal"]*0.99 + acc*0.01,2)   
+                    result["acc"] = round(result["acc"]*0.99 + acc*0.01,2)   
 
                 if result["curr"]["agent50"]>50:
                     result["reward"].append(round(result["curr"]["reward"]/result["curr"]["agent500"],2))
-                    result["qvals"].append(round(result["QVal"],2))
+                    result["accs"].append(round(result["acc"],2))
                     result["height"].append(result["curr"]["height"])
                     result["time"]["step_times"].append(result["time"]["step_time"])
                     result["curr"]["agent50"] -= 50 
                     while len(result["reward"])>200:
                         result["reward"].remove(result["reward"][0])
-                    while len(result["qvals"])>200:
-                        result["qvals"].remove(result["qvals"][0])
+                    while len(result["accs"])>200:
+                        result["accs"].remove(result["accs"][0])
                     while len(result["height"])>200:    
                         result["height"].remove(result["height"][0])
                     while len(result["time"]["step_times"])>200:    
