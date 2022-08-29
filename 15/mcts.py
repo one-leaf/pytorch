@@ -8,7 +8,7 @@ import numpy as np
 EPS = 1e-8
 
 class MCTS():
-    def __init__(self, policy_value_fn, c_puct=5, n_playout=10000, player_id=0, cache={}):
+    def __init__(self, policy_value_fn, c_puct=5, n_playout=10000, cache={}):
         self._policy = policy_value_fn      # 概率估算函数
         self._c_puct = c_puct               # 参数
         self._n_playout = n_playout         # 做几次探索
@@ -21,10 +21,9 @@ class MCTS():
         self.Ps = {}  # 保存 动作概率 key: s, a
         self.Es = {}  # 保存游戏最终得分 key: s
         self.Vs = {}  # 保存游戏局面打分 key: s # 这个不需要，只是缓存
-        print("create mcts, c_puct: {}, n_playout: {}, player_id: {}".format(c_puct, n_playout, player_id))
+        print("create mcts, c_puct: {}, n_playout: {}".format(c_puct, n_playout))
 
         self.state = None
-        self.player_id = player_id
         self.cache = cache
 
     def reset(self):
@@ -89,7 +88,7 @@ class MCTS():
                 if (s, act) in self.Qsa: q = self.Qsa[(s, act)]
                 if s in self.Ps: p = self.Ps[s][act]
                 info.append([act, visit, round(q,2), round(p,2)])        
-            print(game.steps, game.piececount, game.fallpiece["shape"], game.piecesteps, "n:", n, "depth:" ,self.max_depth,"height:", game.pieceheight, "value:", round(v,2), info, "player_id:", self.curr_player)
+            print(game.steps, game.piececount, game.fallpiece["shape"], game.piecesteps, "n:", n, "depth:" ,self.max_depth,"height:", game.pieceheight, "value:", round(v,2), info, "player:", self.curr_player)
 
         if temp == 0:
             bestAs = np.array(np.argwhere(visits == np.max(visits))).flatten()
@@ -195,10 +194,9 @@ class MCTS():
 class MCTSPlayer(object):
     """基于模型指导概率的MCTS + AI player"""
 
-    def __init__(self, policy_value_function, c_puct=5, n_playout=2000, player_id=0, cache={}):
+    def __init__(self, policy_value_function, c_puct=5, n_playout=2000, cache={}):
         """初始化参数"""
-        self.mcts = MCTS(policy_value_function, c_puct, n_playout, player_id, cache)
-        self.player_id = player_id
+        self.mcts = MCTS(policy_value_function, c_puct, n_playout, cache)
 
     def set_player_ind(self, p):
         """指定MCTS的playerid"""

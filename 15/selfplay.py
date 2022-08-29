@@ -133,7 +133,7 @@ class Train():
         cpuct_list.sort()
 
         cache = {}
-        player = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=cpuct, n_playout=self.n_playout, player_id=0, cache=cache)
+        player = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=cpuct, n_playout=self.n_playout, cache=cache)
 
         data0 = {"steps":[],"shapes":[],"last_state":0,"score":0,"piece_count":0}
         data1 = {"steps":[],"shapes":[],"last_state":0,"score":0,"piece_count":0}
