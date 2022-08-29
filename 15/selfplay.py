@@ -76,10 +76,6 @@ class Train():
                 result["cpuct"][key] = {"count":0,"value":result["cpuct"][key]}
         if "time" not in result:
             result["time"]={"agent_time":0,"step_time":0,"step_times":[]}
-        if "height" not in result:
-            result["height"]=[]
-        if "height" not in result["curr"]:
-            result["curr"]["height"]=0
         if "vars" not in result or "avg" not in result["vars"]:
             # 缺省std = sqrt(2)
             result["vars"]={"max":1, "min":-1, "std":1, "avg":0}
@@ -226,15 +222,12 @@ class Train():
                 if result["curr"]["agent50"]>50:
                     result["reward"].append(round(result["curr"]["reward"]/result["curr"]["agent500"],2))
                     result["accs"].append(round(result["acc"],2))
-                    result["height"].append(result["curr"]["height"])
                     result["time"]["step_times"].append(result["time"]["step_time"])
                     result["curr"]["agent50"] -= 50 
                     while len(result["reward"])>200:
                         result["reward"].remove(result["reward"][0])
                     while len(result["accs"])>200:
                         result["accs"].remove(result["accs"][0])
-                    while len(result["height"])>200:    
-                        result["height"].remove(result["height"][0])
                     while len(result["time"]["step_times"])>200:    
                         result["time"]["step_times"].remove(result["time"]["step_times"][0])
 
