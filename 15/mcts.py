@@ -87,7 +87,7 @@ class MCTS():
                 q, p = 0,0
                 if (s, act) in self.Qsa: q = self.Qsa[(s, act)]
                 if s in self.Ps: p = self.Ps[s][act]
-                info.append([act, visit, round(q,2), round(p,2)])        
+                info.append([game.position_to_action_name(act), visit, round(q,2), round(p,2)])        
             print(game.steps, game.piececount, game.fallpiece["shape"], game.piecesteps, "n:", n, "depth:" ,self.max_depth,"height:", game.pieceheight, "value:", round(v,2), info, "player:", self.curr_player)
 
         if temp == 0:
