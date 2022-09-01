@@ -181,8 +181,8 @@ class Train():
             self.policy_value_net.save_model(model_file+".bak")           
 
             dataset_len = len(self.dataset)  
-            training_loader = torch.utils.data.DataLoader(self.dataset, batch_size=self.batch_size, shuffle=False, num_workers=0)
-            testing_loader = torch.utils.data.DataLoader(self.testdataset, batch_size=self.batch_size, shuffle=True,num_workers=0)
+            training_loader = torch.utils.data.DataLoader(self.dataset, batch_size=self.batch_size, shuffle=True, num_workers=0)
+            testing_loader = torch.utils.data.DataLoader(self.testdataset, batch_size=self.batch_size, shuffle=False,num_workers=0)
             old_probs = None
             test_batch = None
 
