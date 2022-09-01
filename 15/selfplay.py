@@ -64,9 +64,9 @@ class Train():
                 ext = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
                 os.replace(status_file, status_file+"_"+ext) 
         if result==None:
-            result={"agent":0, "reward":[], "accs":[], "acc":0}
+            result={"agent":0, "reward":[], "steps":[], "accs":[], "acc":0}
         if "curr" not in result:
-            result["curr"]={"reward":0, "agent500":0, "agent50":0}
+            result["curr"]={"reward":0, "step":0, "agent500":0, "agent50":0}
         if "best" not in result:
             result["best"]={"reward":0, "agent":0}
         if "cpuct" not in result:
@@ -174,6 +174,7 @@ class Train():
                     borads.append(_game.board)                    
 
                 game_reward =  sum([_game.score for _game in games])/2
+                game_step =  sum([_game.steps for _game in games])/2
 
                 result = self.read_status_file(game_json)
 
@@ -202,9 +203,10 @@ class Train():
 
                 result["agent"] += 1
                 result["curr"]["reward"] += game_reward
+                result["curr"]["step"] += game_step
                 result["curr"]["agent500"] += 1
                 result["curr"]["agent50"] += 1
-                
+
                 # 计算 acc 看有没有收敛
 
                 acc = []
@@ -253,7 +255,7 @@ class Train():
                             policy_value_net.save_model(newmodelfile)
 
                 if result["curr"]["agent500"]>500:
-                    result["curr"]={"reward":0,"agent500":0,"agent50":0}
+                    result["curr"]={"reward":0,"step":0,"agent500":0,"agent50":0}
 
                     newmodelfile = model_file+"_"+str(result["agent"])
                     if not os.path.exists(newmodelfile):
@@ -327,8 +329,8 @@ class Train():
         # 保存对抗数据到data_buffer
         filetime = datetime.datetime.now().isoformat()
         print("save file basename:", filetime)
-        for i, obj in enumerate(self.get_equi_data(states, mcts_probs, values, score)):
-        # for i, obj in enumerate(zip(states, mcts_probs, values, score)):
+        # for i, obj in enumerate(self.get_equi_data(states, mcts_probs, values, score)):
+        for i, obj in enumerate(zip(states, mcts_probs, values, score)):
             filename = "{}-{}.pkl".format(filetime, i)
             savefile = os.path.join(data_wait_dir, filename)
             with open(savefile, "wb") as fn:
