@@ -188,6 +188,7 @@ class Train():
 
             loss_fn = torch.nn.MSELoss()
             net = self.policy_value_net.policy_value_net
+            losses=[]
             for i, data in enumerate(testing_loader):
                 test_batch, test_probs, test_values = data
                 test_batch = test_batch.to(self.policy_value_net.device)
@@ -195,8 +196,10 @@ class Train():
                 with torch.no_grad(): 
                     act_probs, values = net(test_batch) 
                     values = values.view(-1)              
+                    if i<5: print("value[0] old:{} to:{}".format(values[0], test_values[0]))  
                     loss = loss_fn(values, test_values)
-                    print(loss.item())
+                    losses.append(loss.item())
+            print("loss:",losses)
 
             for i, data in enumerate(training_loader):  # 计划训练批次
                 # if i==0:
@@ -220,9 +223,9 @@ class Train():
                         new_probs, new_value = self.policy_value_net.policy_value(test_batch)
                         kl = np.mean(np.sum(old_probs * (np.log(old_probs + 1e-10) - np.log(new_probs + 1e-10)), axis=1))
                         
-                        if i % 50 == 0:   
-                            print("probs[0] old:{} new:{} to:{}".format(old_probs[0], new_probs[0], test_probs[0]))   
-                            print("value[0] old:{} new:{} to:{}".format(old_value[0][0], new_value[0][0], test_values[0]))  
+                        # if i % 50 == 0:   
+                        #     print("probs[0] old:{} new:{} to:{}".format(old_probs[0], new_probs[0], test_probs[0]))   
+                        #     print("value[0] old:{} new:{} to:{}".format(old_value[0][0], new_value[0][0], test_values[0]))  
                         old_probs = None
                         
                         if kl > self.kl_targ * 2:
@@ -238,15 +241,18 @@ class Train():
 
             loss_fn = torch.nn.MSELoss()
             net = self.policy_value_net.policy_value_net
+            losses=[]
             for i, data in enumerate(testing_loader):
                 test_batch, test_probs, test_values = data
                 test_batch = test_batch.to(self.policy_value_net.device)
                 test_values = test_values.to(self.policy_value_net.device)
                 with torch.no_grad(): 
                     act_probs, values = net(test_batch) 
-                    values = values.view(-1)              
+                    values = values.view(-1) 
+                    if i<5: print("value[0] new:{} to:{}".format(values[0], test_values[0]))  
                     loss = loss_fn(values, test_values)
-                    print(loss.item())
+                    losses.append(loss.item())
+            print("loss:",losses)
 
         except KeyboardInterrupt:
             print('quit')
