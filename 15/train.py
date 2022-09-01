@@ -65,7 +65,7 @@ class Dataset(torch.utils.data.Dataset):
                 delcount += 1
             else:
                 self.file_list.append(filename)
-        random.shuffle(self.file_list)
+        # random.shuffle(self.file_list)
         pay_time = round(time.time()-start_time, 2)
         print("loaded data, totle:",len(self.file_list),"delete:", delcount,"paid time:", pay_time)
 
