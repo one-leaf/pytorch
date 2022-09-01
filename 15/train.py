@@ -196,7 +196,7 @@ class Train():
                 with torch.no_grad(): 
                     act_probs, values = net(test_batch) 
                     values = values.view(-1)              
-                    if i<5: print("value[0] old:{} to:{}".format(values[0], test_values[0]))  
+                    if i<5: print("value[0] old:{} to:{}".format(values[:5], test_values[:5]))  
                     loss = loss_fn(values, test_values)
                     losses.append(loss.item())
             print("loss:",losses)
@@ -249,7 +249,7 @@ class Train():
                 with torch.no_grad(): 
                     act_probs, values = net(test_batch) 
                     values = values.view(-1) 
-                    if i<5: print("value[0] new:{} to:{}".format(values[0], test_values[0]))  
+                    if i<5: print("value[0] new:{} to:{}".format(values[:5], test_values[:5]))  
                     loss = loss_fn(values, test_values)
                     losses.append(loss.item())
             print("loss:",losses)
