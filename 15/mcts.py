@@ -61,17 +61,12 @@ class MCTS():
             # 当前状态
             v = self.Vs[s] if s in self.Vs else 0
             visits_sum = sum([self.Nsa[(s, a)] if (s, a) in self.Nsa else 0 for a in available_acts])          
-            # 如果当前状态不错，总次数 200
-            # if v>0 and visits_sum >= 200 :break
 
-            # 如果当前状态不佳，总次数 2000
-            if visits_sum>=2000 or game.terminal: break
+            # 如果探索总次数大于1000次就别探索了。
+            if visits_sum>=1000 or game.terminal: break
 
-            # 保底，防止莫名其妙的问题
+            # 如果达到最大探索次数，结束探索
             if n >= self._n_playout : break
-
-            # if state.pieceheight<3 and visits_sum >= self._n_playout*20: break
-            # if n >= self._n_playout and v > 0 and visits_sum >= self._n_playout*10: break
 
         act_visits = [(a, self.Nsa[(s, a)]) if (s, a) in self.Nsa else (a, 0) for a in available_acts]
         act_Qs = [(a, self.Qsa[(s, a)]) if (s, a) in self.Qsa else (a, 0) for a in available_acts]
