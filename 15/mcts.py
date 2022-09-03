@@ -62,8 +62,8 @@ class MCTS():
             v = self.Vs[s] if s in self.Vs else 0
             visits_sum = sum([self.Nsa[(s, a)] if (s, a) in self.Nsa else 0 for a in available_acts])          
 
-            # 如果探索总次数大于1024次就别探索了。
-            if visits_sum>=1024 or game.terminal: break
+            # 如果探索总次数大于2048次就别探索了。
+            if visits_sum>=2048 or game.terminal: break
 
             # 如果达到最大探索次数，结束探索
             if n >= self._n_playout : break
