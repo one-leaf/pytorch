@@ -193,7 +193,7 @@ class Train():
                 # 记录当前cpuct的统计结果
                 cpuct_str = str(cpuct)
                 if cpuct_str in result["cpuct"]:
-                    result["cpuct"][cpuct_str]["value"] = result["cpuct"][cpuct_str]["value"]+game_reward
+                    result["cpuct"][cpuct_str]["value"] = result["cpuct"][cpuct_str]["value"]+game_step
                     result["cpuct"][cpuct_str]["count"] = result["cpuct"][cpuct_str]["count"]+1         
 
                 if game_reward>result["best"]["reward"]:
