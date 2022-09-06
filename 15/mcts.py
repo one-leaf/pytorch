@@ -223,7 +223,7 @@ class MCTSPlayer(object):
             value = act_qs[idx]
 
             if idx!=max_idx:
-                print("    random", "h:",game.pieceheight, "v:", state_v, game.position_to_action_name(acts[max_idx]), "p:", act_probs[max_idx], "q:", act_qs[max_idx], \
+                print("    random","player:", curr_player, "h:",game.pieceheight, "v:", state_v, game.position_to_action_name(acts[max_idx]), "p:", act_probs[max_idx], "q:", act_qs[max_idx], \
                             "==>", game.position_to_action_name(acts[idx]), "p:", act_probs[idx], "q:", act_qs[idx], "std:", np.std(act_probs))  
 
             return action, move_probs, state_v
