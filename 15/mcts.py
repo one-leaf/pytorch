@@ -212,7 +212,7 @@ class MCTSPlayer(object):
             move_probs[acts] = act_probs
             max_idx = np.argmax(act_probs)    
 
-            if temp==0 or len(acts)==1 or np.std(act_probs)>0.35 or state_v<0.1:
+            if temp==0 or len(acts)==1 or np.std(act_probs)>0.35 or abs(state_v)<0.1:
                 idx = max_idx
             else:
                 p = 0.9                 
