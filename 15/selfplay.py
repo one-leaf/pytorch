@@ -115,8 +115,11 @@ class Train():
         policy_value_net = PolicyValueNet(GAME_WIDTH, GAME_HEIGHT, GAME_ACTIONS_NUM, model_file=model_file)
         # agent.show_mcts_process= True
         # 同时开两个游戏
-        game_copy = copy.deepcopy(agent)
-        games = (agent, game_copy)
+        if random.random()>0.5:
+            agent2 = copy.deepcopy(agent)
+        else:
+            agent2 = Agent(max_height=5)
+        games = (agent, agent2)
 
         game_json = os.path.join(data_dir, "result.json")
         game_result = self.read_status_file(game_json)
