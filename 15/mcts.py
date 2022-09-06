@@ -116,7 +116,7 @@ class MCTS():
 
         if self.depth>1000: return 0
 
-        if game.terminal: self.Es[s] = 1*game.pieceheight
+        if game.terminal: self.Es[s] = 1*(game.pieceheight-5)
 
         # 如果得分不等于0，标志探索结束
         if s in self.Es: return self.Es[s]
