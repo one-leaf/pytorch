@@ -340,7 +340,7 @@ class Train():
             savefile = os.path.join(data_wait_dir, filename)
             with open(savefile, "wb") as fn:
                 pickle.dump(obj, fn)
-        print("save file basename:", filetime, "length:", i)
+        print("save file basename:", filetime, "length:", i+1)
 
     def run(self):
         """启动训练"""
