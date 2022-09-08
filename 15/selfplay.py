@@ -115,7 +115,7 @@ class Train():
         policy_value_net = PolicyValueNet(GAME_WIDTH, GAME_HEIGHT, GAME_ACTIONS_NUM, model_file=model_file)
         # agent.show_mcts_process= True
         # 同时开两个游戏
-        if random.random()>0.5:
+        if random.random()>0.8:
             agent2 = copy.deepcopy(agent)
         else:
             agent2 = Agent(max_height=5)
@@ -333,8 +333,8 @@ class Train():
         # 保存对抗数据到data_buffer
         filetime = datetime.datetime.now().isoformat()
         print("save file basename:", filetime)
-        # for i, obj in enumerate(self.get_equi_data(states, mcts_probs, values, score)):
-        for i, obj in enumerate(zip(states, mcts_probs, values, score)):
+        for i, obj in enumerate(self.get_equi_data(states, mcts_probs, values, score)):
+        # for i, obj in enumerate(zip(states, mcts_probs, values, score)):
             filename = "{}-{}.pkl".format(filetime, i)
             savefile = os.path.join(data_wait_dir, filename)
             with open(savefile, "wb") as fn:
