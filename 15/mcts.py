@@ -132,7 +132,10 @@ class MCTS():
                 self.cacheCount += 1
                 # print("*", end="")
             else:
-                act_probs, v = self._policy(game)
+                if isinstance(self._policy, tuple):
+                    act_probs, v = self._policy[player](game)    
+                else:
+                    act_probs, v = self._policy(game)
                 self.cache[s] = (act_probs, v)
 
             probs = np.zeros(game.actions_num)

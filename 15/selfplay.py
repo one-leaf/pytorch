@@ -136,15 +136,13 @@ class Train():
         print("cpuct1:", cpuct_result, "-->", cpuct_list, "cpuct1:", cpuct, "n_playout:", self.n_playout)
         cpuct_list.sort()
 
-        player = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=cpuct, n_playout=self.n_playout)
 
         if random.random()>0.5 and os.path.exists(bestmodelfile):
             policy_value_net_best = PolicyValueNet(GAME_WIDTH, GAME_HEIGHT, GAME_ACTIONS_NUM, model_file=bestmodelfile)
-            player2 = MCTSPlayer(policy_value_net_best.policy_value_fn, c_puct=cpuct, n_playout=self.n_playout)
-            players = (player, player2)
+            player = MCTSPlayer((policy_value_net.policy_value_fn,policy_value_net_best.policy_value_fn), c_puct=cpuct, n_playout=self.n_playout)
         else:
-            players = (player, player)
-
+            player = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=cpuct, n_playout=self.n_playout)
+    
         data0 = {"steps":[],"shapes":[],"last_state":0,"score":0,"piece_count":0}
         data1 = {"steps":[],"shapes":[],"last_state":0,"score":0,"piece_count":0}
         game_datas = (data0, data1)
@@ -164,7 +162,7 @@ class Train():
             _step["shape"] = game.fallpiece["shape"]
             _step["pre_piece_height"] = game.pieceheight
 
-            action, move_probs, state_value = players[curr_player].get_action(games, curr_player, temp=1/(1+game.pieceheight)) 
+            action, move_probs, state_value = player.get_action(games, curr_player, temp=1/(1+game.pieceheight)) 
             _, reward = game.step(action)
 
             _step["piece_height"] = game.pieceheight
