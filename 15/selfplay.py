@@ -257,9 +257,12 @@ class Train():
 
                     if max(result["steps"])==result["steps"][-1]:
                         newmodelfile = model_file+"_steps_"+str(result["steps"][-1])
+                        bestmodelfile = model_file+"_best"
                         if not os.path.exists(newmodelfile):
                             policy_value_net.save_model(newmodelfile)
-
+                            if os.path.exists(bestmodelfile): os.remove(bestmodelfile)
+                            policy_value_net.save_model(bestmodelfile)
+                        
                 if result["curr"]["agent500"]>500:
                     result["curr"]={"reward":0,"step":0,"agent500":0,"agent50":0}
 
