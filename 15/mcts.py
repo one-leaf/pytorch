@@ -25,6 +25,7 @@ class MCTS():
 
         self.state = None
         self.cache = cache
+        self.cacheCount = 0
 
     def reset(self):
         self.Qsa = {}  # 保存 Q 值, key: s,a
@@ -33,6 +34,7 @@ class MCTS():
         self.Ps = {}  # 保存 动作概率 key: s, a
         self.Es = {}  # 保存游戏最终得分 key: s
         self.Vs = {}  # 保存游戏局面打分 key: s # 这个不需要，只是缓存
+        self.cacheCount = 0
 
     def get_action_probs(self, games, curr_player, temp=1):
         """
@@ -83,7 +85,7 @@ class MCTS():
                 if (s, act) in self.Qsa: q = self.Qsa[(s, act)]
                 if s in self.Ps: p = self.Ps[s][act]
                 info.append([game.position_to_action_name(act), visit, round(q,2), round(p,2)])        
-            print(game.steps, game.piececount, game.fallpiece["shape"], game.piecesteps, "n:", n, "depth:" ,self.max_depth,"height:", game.pieceheight, "value:", round(v,2), info, "player:", self.curr_player)
+            print(game.steps, game.piececount, game.fallpiece["shape"], game.piecesteps, "cache:", self.cacheCount, "search:", n, "depth:" ,self.max_depth,"height:", game.pieceheight, "value:", round(v,2), info, "player:", self.curr_player)
 
         if temp == 0:
             bestAs = np.array(np.argwhere(visits == np.max(visits))).flatten()
@@ -127,6 +129,7 @@ class MCTS():
             # 获得当前局面的概率 和 局面的打分, 这个已经过滤掉了不可用走法
             if s in self.cache:
                 act_probs, v = self.cache[s]
+                self.cacheCount += 1
                 # print("*", end="")
             else:
                 act_probs, v = self._policy(game)
