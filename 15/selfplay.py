@@ -84,7 +84,7 @@ class Train():
 
     def get_equi_data(self, states, mcts_probs, values, scores):
         """
-        通过翻转增加数据集
+        通过翻转增加数据集, 这里有问题，翻转不是对称的
         play_data: [(state, mcts_prob, values, score), ..., ...]
         """
         extend_data = []
@@ -333,8 +333,8 @@ class Train():
         # 保存对抗数据到data_buffer
         filetime = datetime.datetime.now().isoformat()
         print("save file basename:", filetime)
-        for i, obj in enumerate(self.get_equi_data(states, mcts_probs, values, score)):
-        # for i, obj in enumerate(zip(states, mcts_probs, values, score)):
+        # for i, obj in enumerate(self.get_equi_data(states, mcts_probs, values, score)):
+        for i, obj in enumerate(zip(states, mcts_probs, values, score)):
             filename = "{}-{}.pkl".format(filetime, i)
             savefile = os.path.join(data_wait_dir, filename)
             with open(savefile, "wb") as fn:
