@@ -255,8 +255,8 @@ class Train():
                             cpuct = round(float(cpuct_list[0])+0.1,1)
                             result["cpuct"] = {str(cpuct):{"count":0,"value":0}, str(round(cpuct+0.1,1)):{"count":0,"value":0}}
 
-                    if max(result["reward"])==result["reward"][-1]:
-                        newmodelfile = model_file+"_reward_"+str(result["reward"][-1])
+                    if max(result["steps"])==result["steps"][-1]:
+                        newmodelfile = model_file+"_steps_"+str(result["steps"][-1])
                         if not os.path.exists(newmodelfile):
                             policy_value_net.save_model(newmodelfile)
 
