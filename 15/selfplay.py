@@ -117,8 +117,7 @@ class Train():
         policy_value_net = PolicyValueNet(GAME_WIDTH, GAME_HEIGHT, GAME_ACTIONS_NUM, model_file=model_file)
         bestmodelfile = model_file+"_best"
 
-
-        # agent.show_mcts_process= True
+        agent.show_mcts_process= True
         # 同时开两个游戏
         if random.random()>0.8:
             agent2 = copy.deepcopy(agent)
