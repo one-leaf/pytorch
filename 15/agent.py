@@ -61,7 +61,7 @@ class Agent(object):
         # pos
         self.pos_board = self.get_board_pos()
         # key
-        self.key=0
+        self.set_key()
 
     def add_status(self, status):
         self.status.append(status)
