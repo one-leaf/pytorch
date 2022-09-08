@@ -115,6 +115,9 @@ class Train():
 
         # 开始游戏
         policy_value_net = PolicyValueNet(GAME_WIDTH, GAME_HEIGHT, GAME_ACTIONS_NUM, model_file=model_file)
+        bestmodelfile = model_file+"_best"
+
+
         # agent.show_mcts_process= True
         # 同时开两个游戏
         if random.random()>0.8:
@@ -133,8 +136,14 @@ class Train():
         print("cpuct1:", cpuct_result, "-->", cpuct_list, "cpuct1:", cpuct, "n_playout:", self.n_playout)
         cpuct_list.sort()
 
-        cache = {}
-        player = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=cpuct, n_playout=self.n_playout, cache=cache)
+        player = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=cpuct, n_playout=self.n_playout)
+
+        if random.random()>0.5 and os.path.exists(bestmodelfile):
+            policy_value_net_best = PolicyValueNet(GAME_WIDTH, GAME_HEIGHT, GAME_ACTIONS_NUM, model_file=bestmodelfile)
+            player2 = MCTSPlayer(policy_value_net_best.policy_value_fn, c_puct=cpuct, n_playout=self.n_playout)
+            players = (player, player2)
+        else:
+            players = (player, player)
 
         data0 = {"steps":[],"shapes":[],"last_state":0,"score":0,"piece_count":0}
         data1 = {"steps":[],"shapes":[],"last_state":0,"score":0,"piece_count":0}
@@ -155,7 +164,7 @@ class Train():
             _step["shape"] = game.fallpiece["shape"]
             _step["pre_piece_height"] = game.pieceheight
 
-            action, move_probs, state_value = player.get_action(games, curr_player, temp=1/(1+game.pieceheight)) 
+            action, move_probs, state_value = players[curr_player].get_action(games, curr_player, temp=1/(1+game.pieceheight)) 
             _, reward = game.step(action)
 
             _step["piece_height"] = game.pieceheight
@@ -257,7 +266,6 @@ class Train():
 
                     if max(result["steps"])==result["steps"][-1]:
                         newmodelfile = model_file+"_steps_"+str(result["steps"][-1])
-                        bestmodelfile = model_file+"_best"
                         if not os.path.exists(newmodelfile):
                             policy_value_net.save_model(newmodelfile)
                             if os.path.exists(bestmodelfile): os.remove(bestmodelfile)
