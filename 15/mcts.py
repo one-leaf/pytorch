@@ -51,6 +51,8 @@ class MCTS():
         for n in count():
             self.depth = 0
             game_dict = copy.deepcopy(games_dict)
+            # for i, g in enumerate(games_dict["games"]):
+            #     print(i, [a['shape'] for a in g.tetromino.nextpiece[-20:]])
             self.search(game_dict)
             if self.depth>self.max_depth: self.max_depth = self.depth
 
