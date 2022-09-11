@@ -119,7 +119,7 @@ class Train():
 
         agent.show_mcts_process= True
         # 同时开两个游戏
-        if random.random()>0.8:
+        if random.random()>0.9:
             agent2 = copy.deepcopy(agent)
         else:
             agent2 = Agent(max_height=5)
