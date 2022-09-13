@@ -186,7 +186,7 @@ class Agent(object):
         return self.state, self.reward
 
     def set_key(self):
-        info = self.status[-1]
+        info = self.current_state()
         self.key = hash(info.data.tobytes())
         # chars="abcdefghijklmnopqrstuvwxyz" 
         # key = ""

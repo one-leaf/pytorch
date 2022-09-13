@@ -156,8 +156,8 @@ class Train():
         for i in count():
             curr_player = i%2
             game = games[curr_player]
-            data = game_datas[curr_player]
-
+            data = game_datas[curr_player]            
+            
             _step={"step":i, "curr_player":curr_player}
             _step["state"] = game.current_state()               
             _step["piece_count"] = game.piececount               
