@@ -58,7 +58,7 @@ class Dataset(torch.utils.data.Dataset):
         start_time = time.time()
         files = glob.glob(os.path.join(self.data_dir, "*.pkl"))
         files = sorted(files, key=lambda x: os.path.getmtime(x), reverse=True)
-        
+
         modified_time = os.path.getmtime(files[0])
         convert_time = time.localtime(modified_time)
         print("first time:",time.strftime('%Y-%m-%d %H:%M:%S', convert_time))
@@ -157,7 +157,7 @@ class Train():
         self.temp = 1  # MCTS的概率参数，越大越不肯定，训练时1，预测时1e-3
         self.n_playout = 128  # 每个动作的模拟战记录个数
         self.play_batch_size = 1 # 每次自学习次数
-        self.buffer_size = 500000  # cache对次数
+        self.buffer_size = 200000  # cache对次数
         self.epochs = 1  # 每次更新策略价值网络的训练步骤数, 推荐是5
         self.kl_targ = 0.02  # 策略价值网络KL值目标
         self.best_win_ratio = 0.0
