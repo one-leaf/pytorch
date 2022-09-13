@@ -157,7 +157,7 @@ class Train():
             curr_player = i%2
             game = games[curr_player]
             data = game_datas[curr_player]            
-            
+
             _step={"step":i, "curr_player":curr_player}
             _step["state"] = game.current_state()               
             _step["piece_count"] = game.piececount               
@@ -177,6 +177,7 @@ class Train():
             # 这里的奖励是消除的行数
             if reward > 0:
                 repeat_count = 40
+                print(_step["state"])
                 print("#"*repeat_count, 'score:', game.score, 'height:', game.pieceheight, 'piece:', game.piececount, "shape:", game.fallpiece["shape"], \
                     'step:', game.steps, "step time:", round((time.time()-start_time)/i,3),'player:', curr_player)
 
