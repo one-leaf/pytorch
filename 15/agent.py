@@ -50,21 +50,20 @@ class Agent(object):
         self.pieces_height = []     
         # 盘面的状态
         self.status = [] #deque(maxlen=10)
+        _board = np.zeros((self.height, self.width))
         for i in range(3):
-            self.status.append(np.zeros((self.height, self.width)))
-        self.add_status(self.get_fallpiece_board()+self.getBoard())
+            self.status.append(( _board, _board, _board))
+        self.add_status()
         # self.status.append(self.get_fallpiece_board()+self.getBoard())
         # 下一个可用步骤
         self.availables=self.get_availables()
         # 显示mcts中间过程
         self.show_mcts_process = False
-        # pos
-        self.pos_board = self.get_board_pos()
         # key
         self.set_key()
 
-    def add_status(self, status):
-        self.status.append(status)
+    def add_status(self):
+        self.status.append((self.get_nextpiece_borad(), self.get_fallpiece_board(), self.getBoard()))
         self.status.pop(0)
 
     # 概率的索引位置转action
@@ -161,7 +160,7 @@ class Agent(object):
             self.fallpiece = self.nextpiece
 
         # self.status.append(self.get_fallpiece_board() + self.getBoard() + self.get_nextpiece_borad())
-        self.add_status(self.get_fallpiece_board() + self.getBoard())
+        self.add_status()
         self.set_key()
 
         if  env:
@@ -307,49 +306,40 @@ class Agent(object):
         return board
 
     # 获得nextboard
-    def get_nextpiece_borad(self):
-        board=np.zeros((self.height, self.width))
-        shape = self.nextpiece['shape']
-        idx = list(pieces.keys()).index(shape)
-        board[0][idx]=1
-        return board
-
-    # # 获得待下落方块的信息
     # def get_nextpiece_borad(self):
     #     board=np.zeros((self.height, self.width))
-    #     if self.nextpiece != None:
-    #         piece = self.nextpiece  
-    #         shapedraw = pieces[piece['shape']][piece['rotation']]
-    #         for x in range(templatenum):
-    #             for y in range(templatenum):
-    #                 if shapedraw[y][x]!=blank:
-    #                     board[y][x]=-1
+    #     shape = self.nextpiece['shape']
+    #     idx = list(pieces.keys()).index(shape)
+    #     board[0][idx]=1
     #     return board
 
+    # # 获得待下落方块的信息
+    def get_nextpiece_borad(self):
+        board=np.zeros((self.height, self.width))
+        if self.nextpiece != None:
+            piece = self.nextpiece  
+            shapedraw = pieces[piece['shape']][piece['rotation']]
+            for x in range(templatenum):
+                for y in range(templatenum):
+                    if shapedraw[y][x]!=blank:
+                        board[y][x]=-1
+        return board
 
-    # 得到面板的坐标信息
-    def get_board_pos(self):
-        pos=[]
-        size =  self.width * self.height
-        for i in range(size):
-            if i%2==0:
-                pos.append(math.sin(i/size))
-            else:
-                pos.append(math.cos(i/size))
-        pos = np.array(pos).reshape((self.height, self.width))
-        return pos
 
     # 获得当前的全部特征
     # 背景 + 前2步走法 = 3
     # 返回 [3, height, width]
     def current_state(self):
-        return np.array(self.status)
+        # return np.array(self.status)
 
-        # state = np.zeros((3, self.height, self.width))
+        state = np.zeros((3, self.height, self.width))
+        state[0] = self.status[-1][0]
+        state[1] = self.status[-1][1]
+        state[2] = self.status[-1][2]
         # for i in range(3):
         #     state[-1*(i+1)]=self.status[-1*(i+1)]
 
-        # return state          
+        return state          
 
 
     
