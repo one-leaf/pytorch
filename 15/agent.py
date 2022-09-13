@@ -333,7 +333,7 @@ class Agent(object):
         # return np.array(self.status)
 
         state = np.zeros((3, self.height, self.width))
-        state[0] = self.status[-1][0]
+        state[0] = self.status[-2][1]
         state[1] = self.status[-1][1]
         state[2] = self.status[-1][2]
         # for i in range(3):
