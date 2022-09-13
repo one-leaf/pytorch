@@ -152,18 +152,17 @@ class ActorCritic(nn.Module):
         log_probs = torch.stack(log_probs)
         values = torch.stack(values)
 
-        #计算优势函数：当前实际的得分 - 上一步预测的值 A(s,a)=Q(s,a) - V(s)
+        #计算优势函数：最终的打分（平滑到当前的打分）- 当前预测的值 A(s,a)=Q(s) - V(s)
         #优势函数本质是动作值函数相对于值函数的优势，即：
         #若动作值函数比值函数大，那么优势函数为正；若动作值函数比值函数小，那么优势函数为负。
         advantage = Qvals - values
+
         # 策略梯度：GAE
-        #  
         # 更新Actor网络：
-        # 优势函数为正时，其幅值为正，则参数沿着使得该轨迹概率增大的方向更新，概率提升；
-        # 优势函数为负时，策略梯度的幅值为负，则参数沿着使得该轨迹减小的方向更新，概率下降。
-        # 因此，采用优势函数时，算法的收敛速度更快。
+        # 最大化当前动作的概率和Q打分乘积，也就是最小化负对数概率和Q的成绩打分
         actor_loss = (-log_probs * advantage.detach()).mean()
-        # 更新critic网络：
+
+        # 按DQN的TD算法更新critic网络：
         # 直接用优势函数的平方数作为损失函数
         critic_loss = 0.5 * advantage.pow(2).mean()
 
