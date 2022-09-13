@@ -58,6 +58,14 @@ class Dataset(torch.utils.data.Dataset):
         start_time = time.time()
         files = glob.glob(os.path.join(self.data_dir, "*.pkl"))
         files = sorted(files, key=lambda x: os.path.getmtime(x), reverse=True)
+        
+        modified_time = os.path.getmtime(files[0])
+        convert_time = time.localtime(modified_time)
+        print("first time:",time.strftime('%Y-%m-%d %H:%M:%S', convert_time))
+        modified_time = os.path.getmtime(files[-1])
+        convert_time = time.localtime(modified_time)
+        print("last time:",time.strftime('%Y-%m-%d %H:%M:%S', convert_time))
+        
         delcount = 0
         for i, filename in enumerate(files):
             if i >= self.max_keep_size:
