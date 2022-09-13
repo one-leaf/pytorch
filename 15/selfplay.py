@@ -118,10 +118,10 @@ class Train():
         bestmodelfile = model_file+"_best"
 
         # 同时开两个游戏
-        if random.random()>0.9:
-            agent2 = copy.deepcopy(agent)
-        else:
-            agent2 = Agent(max_height=5)
+        # if random.random()>0.9:
+        #     agent2 = copy.deepcopy(agent)
+        # else:
+        agent2 = Agent(max_height=5)
         games = (agent, agent2)
 
         agent.show_mcts_process= True
