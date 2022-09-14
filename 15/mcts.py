@@ -74,8 +74,25 @@ class MCTS():
         act_Qs = [(a, self.Qsa[(s, a)]) if (s, a) in self.Qsa else (a, 0) for a in available_acts]
         acts = [av[0] for av in act_visits]
         visits = [av[1] for av in act_visits]
-        qs = [round(av[1],2) for av in act_Qs]
+        qs = [av[1] for av in act_Qs]
         v = 0 if s not in self.Vs else self.Vs[s]
+
+        if temp == 0:
+            bestAs = np.array(np.argwhere(visits == np.max(visits))).flatten()
+            bestA = np.random.choice(bestAs)
+            probs = [0] * len(visits)
+            probs[bestA] = 1
+            probs = np.array(probs)
+        else:
+            m = np.power(np.array(visits), 1./temp)
+            m_sum = np.sum(m)
+            if m_sum<=0:
+                v_len = len(acts)
+                probs = np.ones(v_len)/v_len
+            else:
+                probs = m/m_sum
+
+        qval = np.matmul(qs, probs)
 
         if game.show_mcts_process or game.pieceheight in [0, game.max_height] :
             info=[]
@@ -85,22 +102,7 @@ class MCTS():
                 if (s, act) in self.Qsa: q = self.Qsa[(s, act)]
                 if s in self.Ps: p = self.Ps[s][act]
                 info.append([game.position_to_action_name(act), visit, round(q,2), round(p,2)])        
-            print(game.steps, game.piececount, game.fallpiece["shape"], game.piecesteps, "search:", n+1, "depth:" ,self.max_depth,"height:", game.pieceheight, "value:", round(v,2), info, "player:", self.curr_player)
-
-        if temp == 0:
-            bestAs = np.array(np.argwhere(visits == np.max(visits))).flatten()
-            bestA = np.random.choice(bestAs)
-            probs = [0] * len(visits)
-            probs[bestA] = 1
-            return acts, np.array(probs), qs, v
-
-        m = np.power(np.array(visits), 1./temp)
-        m_sum = np.sum(m)
-        if m_sum<=0:
-            v_len = len(acts)
-            probs = np.ones(v_len)/v_len
-        else:
-            probs = m/m_sum
+            print(game.steps, game.piececount, game.fallpiece["shape"], game.piecesteps, "search:", n+1, "depth:" ,self.max_depth,"height:", game.pieceheight, "value:", round(v,2), "qval:", round(qval,2), info, "player:", self.curr_player)
 
         return acts, probs, qs, v
 
@@ -222,11 +224,13 @@ class MCTSPlayer(object):
             action = acts[idx]
             value = act_qs[idx]
 
+            qval = np.matmul(act_qs, act_probs)
+
             if idx!=max_idx:
                 print("    random","player:", curr_player, "h:",game.pieceheight, "v:", state_v, game.position_to_action_name(acts[max_idx]), "p:", act_probs[max_idx], "q:", act_qs[max_idx], \
                             "==>", game.position_to_action_name(acts[idx]), "p:", act_probs[idx], "q:", act_qs[idx], "std:", np.std(act_probs))  
 
-            return action, move_probs, state_v
+            return action, move_probs, state_v, qval
         else:
             print("WARNING: game is terminal")
 
