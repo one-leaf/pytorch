@@ -92,7 +92,7 @@ class MCTS():
             else:
                 probs = m/m_sum
 
-        qval = np.matmul(qs, probs)
+        qval = qs[np.argmax(probs)]
 
         if game.show_mcts_process or game.pieceheight in [0, game.max_height] :
             info=[]
@@ -224,7 +224,7 @@ class MCTSPlayer(object):
             action = acts[idx]
             value = act_qs[idx]
 
-            qval = np.matmul(act_qs, act_probs)
+            qval = act_qs[max_idx]
 
             if idx!=max_idx:
                 print("    random","player:", curr_player, "h:",game.pieceheight, "v:", state_v, game.position_to_action_name(acts[max_idx]), "p:", act_probs[max_idx], "q:", act_qs[max_idx], \
