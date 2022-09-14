@@ -306,7 +306,7 @@ class Train():
         for i, data in enumerate(game_datas):
             step_count = len(data["steps"])
             piece_count = -1
-            v = -1 if games[i].terminal else 1 
+            # v = -1 if games[i].terminal else 1 
             score = 0
             vlist=[]
             slist=[]
@@ -321,9 +321,10 @@ class Train():
                     vlist.insert(0,v)
                     slist.insert(0, score)
                     acclist.insert(0, data["steps"][j]["state_value"])
+                v = data["steps"][j]["qval"] 
                 data["steps"][j]["reward"] = v
                 data["steps"][j]["score"] = score
-                v_sum += data["steps"][j]["qval"]
+                v_sum += v
                 s_sum += score
                 acc_sum += (data["steps"][j]["state_value"]-v)**2
             print("score","max height:",data["piece_height"],"avg:",s_sum/step_count, slist)
