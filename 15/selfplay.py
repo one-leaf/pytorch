@@ -323,11 +323,11 @@ class Train():
                     acclist.insert(0, data["steps"][j]["state_value"])
                 data["steps"][j]["reward"] = v
                 data["steps"][j]["score"] = score
-                v_sum += v
+                v_sum += data["steps"][j]["qval"]
                 s_sum += score
                 acc_sum += (data["steps"][j]["state_value"]-v)**2
             print("score","max height:",data["piece_height"],"avg:",s_sum/step_count, slist)
-            print("value","piece len:",len(vlist),"avg:",v_sum/step_count, vlist)
+            print("qval","piece len:",len(vlist),"avg:",v_sum/step_count, vlist)
             print("acc","steps len:",step_count,"avg:",acc_sum/step_count, acclist)
        
         states, mcts_probs, values, score= [], [], [], []
