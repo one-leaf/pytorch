@@ -68,7 +68,7 @@ class MCTS():
             if game.terminal: break
 
             # 如果达到最大探索次数，结束探索
-            if n >= self._n_playout : break
+            if n >= self._n_playout -1 : break
 
         act_visits = [(a, self.Nsa[(s, a)]) if (s, a) in self.Nsa else (a, 0) for a in available_acts]
         act_Qs = [(a, self.Qsa[(s, a)]) if (s, a) in self.Qsa else (a, 0) for a in available_acts]
