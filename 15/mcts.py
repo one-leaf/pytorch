@@ -116,7 +116,6 @@ class MCTS():
         player = games["curr_player"]
         game = games["games"][player]
         s = game.get_key()
-        self.depth = self.depth +1
 
         if self.depth>1000: return 0
 
@@ -166,6 +165,7 @@ class MCTS():
         prev_pieceheight = game.pieceheight
         game.step(act)
         games["curr_player"] = 1 if games["curr_player"]==0 else 0
+        self.depth = self.depth +1
 
         sv = (prev_pieceheight - game.pieceheight)/10
         v = sv + self.search(games)
