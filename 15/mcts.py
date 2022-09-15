@@ -163,10 +163,12 @@ class MCTS():
         a = best_act
         act = game.position_to_action(a)
 
+        prev_pieceheight = game.pieceheight
         game.step(act)
         games["curr_player"] = 1 if games["curr_player"]==0 else 0
 
-        v = self.search(games)
+        sv = (prev_pieceheight - game.pieceheight)/10
+        v = sv + self.search(games)
 
         # 更新 Q 值 和 访问次数
         if (s, a) in self.Qsa:
