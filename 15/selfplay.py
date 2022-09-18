@@ -165,7 +165,8 @@ class Train():
             _step["shape"] = game.fallpiece["shape"]
             _step["pre_piece_height"] = game.pieceheight
 
-            action, move_probs, state_value, qval = player.get_action(games, curr_player, temp=1/(1+game.pieceheight)) 
+            # action, move_probs, state_value, qval = player.get_action(games, curr_player, temp=1/(1+game.pieceheight)) 
+            action, move_probs, state_value, qval = player.get_action(games, curr_player, temp=1) 
             _, reward = game.step(action)
 
             _step["piece_height"] = game.pieceheight
