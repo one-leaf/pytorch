@@ -219,7 +219,7 @@ class MCTSPlayer(object):
             if temp==0 or len(acts)==1 or np.std(act_probs)>0.35 :
                 idx = max_idx
             else:
-                p = 0.95                 
+                p = 0.99                 
                 dirichlet = np.random.dirichlet(0.03 * np.ones(len(act_probs)))
                 idx = np.random.choice(range(len(acts)), p=p*act_probs + (1.0-p)*dirichlet)                                                                     
 
