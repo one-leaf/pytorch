@@ -327,7 +327,7 @@ class Train():
                 data["steps"][j]["score"] = q
                 v_sum += v
                 s_sum += score
-                acc_sum += (data["steps"][j]["state_value"]-v)**2
+                acc_sum += abs(data["steps"][j]["state_value"]-data["steps"][j]["qval"])
             print("score","max height:",data["piece_height"],"avg:",s_sum/step_count, slist)
             print("qval","piece len:",len(vlist),"avg:",v_sum/step_count, vlist)
             print("acc","steps len:",step_count,"avg:",acc_sum/step_count, acclist)
