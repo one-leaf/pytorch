@@ -229,9 +229,9 @@ class Train():
 
                 acc = []
                 for _game, _data in zip(games, game_datas):
-                    v = -1 if _game.terminal else 1
+                    # v = -1 if _game.terminal else 1
                     for step in _data["steps"]:
-                        acc.append((step["state_value"]-v)**2)
+                        acc.append(abs((step["state_value"]-step["qval"])))
                 acc = np.average(acc)
 
                 if result["acc"]==0:
