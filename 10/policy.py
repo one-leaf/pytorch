@@ -152,10 +152,13 @@ class ActorCritic(nn.Module):
         log_probs = torch.stack(log_probs)
         values = torch.stack(values)
 
-        #计算优势函数：最终的打分（平滑到当前的打分）- 当前预测的值 A(s,a)=Q(s) - V(s)
+        #计算优势函数：最终的打分（平滑到当前的打分）- 当前预测的值 A(s,a)= Q(s,a) - V(s)
         #优势函数本质是动作值函数相对于值函数的优势，即：
-        #若动作值函数比值函数大，那么优势函数为正；若动作值函数比值函数小，那么优势函数为负。
+        #当前动作在当前局面下的优势情况。
         advantage = Qvals - values
+        # Dueling 网络加了均值或max值
+        advantage = advantage + torch.mean(advantage)
+
 
         # 策略梯度：GAE
         # 更新Actor网络：

@@ -45,8 +45,13 @@ class Dataset(torch.utils.data.Dataset):
             fn = self.newsample[index]
         else:
             fn = self.file_list[index]
+            qval = self.data[fn]["qval"]
+            # 这里改了采样分布，优先了 qval
+            if random.random()>abs(qval):
+                fn = random.choice(self.file_list) 
 
         data = self.data[fn]
+            
         # 状态，步骤的概率，最终得分
         state = torch.from_numpy(data["state"]).float()
         mcts_prob = torch.from_numpy(data["mcts_prob"]).float()
@@ -73,6 +78,7 @@ class Dataset(torch.utils.data.Dataset):
                 delcount += 1
             else:
                 self.file_list.append(filename)
+
         # random.shuffle(self.file_list)
         pay_time = round(time.time()-start_time, 2)
         print("loaded data, totle:",len(self.file_list),"delete:", delcount,"paid time:", pay_time)
@@ -85,43 +91,19 @@ class Dataset(torch.utils.data.Dataset):
         for fn in self.file_list:
             try:
                 with open(fn, "rb") as f:
-                    state, mcts_prob, value, score = pickle.load(f)
+                    state, mcts_prob, value, qval = pickle.load(f)                        
             except:
                 print("filename {} error can't load".format(fn))
                 if os.path.exists(fn): os.remove(fn)
                 self.file_list.remove(fn)
                 continue
-            self.data[fn]={"value":value, "score":score, "state":state, "mcts_prob": mcts_prob}
+            self.data[fn]={"value":value, "qval":qval, "state":state, "mcts_prob": mcts_prob}
             sum_v+=value
 
         pay_time = round(time.time()-start_time, 2)
         print("loaded to memory, paid time:", pay_time)
         print("value sum:", sum_v, "avg:", sum_v/len(self.data))
-            # scores.append(score) 
         print("load data end")
-        # avg_score = sum(scores)/len(scores)
-        # max_score = max(scores)
-        # min_score = min(scores)
-        # values = [] 
-        # for fn in self.data:
-        #     # self.data[fn]["value"] = 0.2*self.data[fn]["value"] + 0.8*math.tanh((self.data[fn]["score"]-avg_score)/avg_score)
-        #     # self.data[fn]["value"] = 0.8*self.data[fn]["value"] + 0.2*(self.data[fn]["score"]-min_score)/(max_score-min_score)
-        #     # self.data[fn]["value"] = 0.1*self.data[fn]["value"] + 0.9*(self.data[fn]["score"]-min_score)/(max_score-min_score)
-        #     # self.data[fn]["value"] = math.tanh((self.data[fn]["score"]-avg_score)/avg_score)
-        #     # self.data[fn]["value"] = (self.data[fn]["score"]-min_score)/(max_score-min_score)
-        #     # self.data[fn]["value"] = self.data[fn]["score"]
-        #     values.append(self.data[fn]["value"])
-        # curr_avg_value = sum(values)/len(values)
-        # curr_std_value = np.std(values)+1e-8
-        # for fn in self.data:
-        #     value = self.data[fn]["value"]
-        #     # value = (self.data[fn]["value"]-curr_avg_value)/curr_std_value
-        #     if value>1: value=1
-        #     if value<-1: value=-1
-        #     if value==0: value=1e-8
-        #     self.data[fn]["value"]=value
-
-        # print("calc scores end, size: %s, avg_score: %s, max_score: %s, avg_value: %s, std_value: %s"%(len(scores), round(avg_score,2), max_score, round(curr_avg_value,2), round(curr_std_value,2)))
 
     def copy_wait_file(self):
         print("start copy wait file to train ...")

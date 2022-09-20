@@ -307,7 +307,7 @@ class Train():
         for i, data in enumerate(game_datas):
             step_count = len(data["steps"])
             piece_count = -1
-            # v = -1 if games[i].terminal else 1 
+            v = -1 if games[i].terminal else 1 
             score = 0
             vlist=[]
             slist=[]
@@ -322,9 +322,9 @@ class Train():
                     vlist.insert(0,v)
                     slist.insert(0, score)
                     acclist.insert(0, data["steps"][j]["state_value"])
-                v = data["steps"][j]["qval"] 
+                q = data["steps"][j]["qval"] 
                 data["steps"][j]["reward"] = v
-                data["steps"][j]["score"] = score
+                data["steps"][j]["score"] = q
                 v_sum += v
                 s_sum += score
                 acc_sum += (data["steps"][j]["state_value"]-v)**2
@@ -332,26 +332,26 @@ class Train():
             print("qval","piece len:",len(vlist),"avg:",v_sum/step_count, vlist)
             print("acc","steps len:",step_count,"avg:",acc_sum/step_count, acclist)
        
-        states, mcts_probs, values, score= [], [], [], []
+        states, mcts_probs, values, qval= [], [], [], []
 
         for data in game_datas:
             for step in data["steps"]:
                 states.append(step["state"])
                 mcts_probs.append(step["move_probs"])
                 values.append(step["reward"])
-                score.append(step["score"])
+                qval.append(step["score"])
 
         assert len(states)>0
         assert len(states)==len(values)
         assert len(states)==len(mcts_probs)
-        assert len(states)==len(score)
+        assert len(states)==len(qval)
 
         print("TRAIN Self Play end. length: %s value sum: %s saving ..." % (len(states),sum(values)))
 
         # 保存对抗数据到data_buffer
-        filetime = datetime.datetime.now().isoformat()
-        # for i, obj in enumerate(self.get_equi_data(states, mcts_probs, values, score)):
-        for i, obj in enumerate(zip(states, mcts_probs, values, score)):
+        filetime = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        # for i, obj in enumerate(self.get_equi_data(states, mcts_probs, values, qval)):
+        for i, obj in enumerate(zip(states, mcts_probs, values, qval)):
             filename = "{}-{}.pkl".format(filetime, i)
             savefile = os.path.join(data_wait_dir, filename)
             with open(savefile, "wb") as fn:
