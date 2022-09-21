@@ -89,7 +89,7 @@ class Dataset(torch.utils.data.Dataset):
             try:
                 with open(fn, "rb") as f:
                     state, mcts_prob, value, qval = pickle.load(f)                        
-                    if abs(qval)>0.3:
+                    if abs(qval)>0.5:
                         double_train_list.append(fn)
             except:
                 print("filename {} error can't load".format(fn))
