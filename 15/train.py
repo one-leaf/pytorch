@@ -45,10 +45,6 @@ class Dataset(torch.utils.data.Dataset):
             fn = self.newsample[index]
         else:
             fn = self.file_list[index]
-            qval = self.data[fn]["qval"]
-            # 这里改了采样分布，优先了 qval
-            if random.random()>abs(qval):
-                fn = random.choice(self.file_list) 
 
         data = self.data[fn]
             
@@ -88,10 +84,13 @@ class Dataset(torch.utils.data.Dataset):
         print("start load data to memory ...")
         start_time = time.time()
         sum_v=0
+        double_train_list=[]
         for fn in self.file_list:
             try:
                 with open(fn, "rb") as f:
                     state, mcts_prob, value, qval = pickle.load(f)                        
+                    if abs(qval)>0.2:
+                        double_train_list.append(fn)
             except:
                 print("filename {} error can't load".format(fn))
                 if os.path.exists(fn): os.remove(fn)
@@ -99,6 +98,9 @@ class Dataset(torch.utils.data.Dataset):
                 continue
             self.data[fn]={"value":value, "qval":qval, "state":state, "mcts_prob": mcts_prob}
             sum_v+=value
+            
+        # 将qval高的重复学习一次    
+        self.file_list.extend(double_train_list)
 
         pay_time = round(time.time()-start_time, 2)
         print("loaded to memory, paid time:", pay_time)
