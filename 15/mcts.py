@@ -193,6 +193,7 @@ class MCTS():
 class MCTSPlayer(object):
     """基于模型指导概率的MCTS + AI player"""
 
+    # c_puct MCTS child权重， 用来调节MCTS搜索深度，越大搜索越深，越相信概率，越小越相信Q 的程度 默认 5
     def __init__(self, policy_value_function, c_puct=5, n_playout=2000):
         """初始化参数"""
         self.mcts = MCTS(policy_value_function, c_puct, n_playout)
@@ -209,23 +210,28 @@ class MCTSPlayer(object):
         """计算下一步走子action"""
         game = games[curr_player]
         move_probs = np.zeros(game.actions_num)
-        value = 0
         if not game.terminal:  # 如果游戏没有结束
             # 训练的时候 temp = 1
             acts, act_probs, act_qs, state_v = self.mcts.get_action_probs(games, curr_player, temp)
             move_probs[acts] = act_probs
             max_idx = np.argmax(act_probs)    
 
+            # temp 导致 N^(1/temp) alphaezero 前 30 步设置为1 其余设置为无穷小即act_probs只取最大值
+            # temp 越大导致更均匀的搜索
+            # 对于俄罗斯方块，为1/(h+1)
             if temp==0 or len(acts)==1 or np.std(act_probs)>0.35 :
                 idx = max_idx
             else:
-                p = 0.99                 
-                dirichlet = np.random.dirichlet(0.03 * np.ones(len(act_probs)))
+                # alphazero，默认p为0.75
+                p = 0.75
+                # a=1的时候，dir机会均等，>1 强调均值， <1 强调两端
+                # 国际象棋 0.3 将棋 0.15 围棋 0.03
+                # 取值一般倾向于 a = 10/n 所以俄罗斯方块取 2
+                a = 2                  
+                dirichlet = np.random.dirichlet(a * np.ones(len(act_probs)))
                 idx = np.random.choice(range(len(acts)), p=p*act_probs + (1.0-p)*dirichlet)                                                                     
 
             action = acts[idx]
-            value = act_qs[idx]
-
             qval = act_qs[max_idx]
 
             if idx!=max_idx:

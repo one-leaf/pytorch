@@ -33,7 +33,8 @@ class Train():
         self.kl_targ = 0.02  # 策略价值网络KL值目标
         self.best_win_ratio = 0.0
         
-        self.c_puct = 1  # MCTS child权重， 用来调节MCTS中 探索/乐观 的程度 默认 5
+        # aplhazero 的最佳值是 4 
+        self.c_puct = 5  # MCTS child权重， 用来调节MCTS搜索深度，越大搜索越深，越相信概率，越小越相信Q 的程度 默认 5
 
 
     def save_status_file(self, result, status_file):
@@ -132,19 +133,19 @@ class Train():
         game_json = os.path.join(data_dir, "result.json")
         game_result = self.read_status_file(game_json)
         
+        # 由于动态cpuct并没有得到一个好的结果，所以关闭
         # 读取各自的动态cpuct
-        cpuct_result = game_result["cpuct"]
-        cpuct_list = sorted(cpuct_result, key=lambda x : cpuct_result[x]["count"])
-        cpuct = float(cpuct_list[0])
-        print("cpuct1:", cpuct_result, "-->", cpuct_list, "cpuct1:", cpuct, "n_playout:", self.n_playout)
-        cpuct_list.sort()
-
+        # cpuct_result = game_result["cpuct"]
+        # cpuct_list = sorted(cpuct_result, key=lambda x : cpuct_result[x]["count"])
+        # cpuct = float(cpuct_list[0])
+        # print("cpuct1:", cpuct_result, "-->", cpuct_list, "cpuct1:", cpuct, "n_playout:", self.n_playout)
+        # cpuct_list.sort() 
 
         if random.random()>0.1 and os.path.exists(bestmodelfile):
             policy_value_net_best = PolicyValueNet(GAME_WIDTH, GAME_HEIGHT, GAME_ACTIONS_NUM, model_file=bestmodelfile)
-            player = MCTSPlayer((policy_value_net.policy_value_fn, policy_value_net_best.policy_value_fn), c_puct=cpuct, n_playout=self.n_playout)
+            player = MCTSPlayer((policy_value_net.policy_value_fn, policy_value_net_best.policy_value_fn), c_puct=self.c_puct, n_playout=self.n_playout)
         else:
-            player = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=cpuct, n_playout=self.n_playout)
+            player = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout)
     
         data0 = {"steps":[],"shapes":[],"last_state":0,"score":0,"piece_count":0}
         data1 = {"steps":[],"shapes":[],"last_state":0,"score":0,"piece_count":0}
@@ -165,8 +166,8 @@ class Train():
             _step["shape"] = game.fallpiece["shape"]
             _step["pre_piece_height"] = game.pieceheight
 
-            # action, move_probs, state_value, qval = player.get_action(games, curr_player, temp=1/(1+game.pieceheight)) 
-            action, move_probs, state_value, qval = player.get_action(games, curr_player, temp=1) 
+            action, move_probs, state_value, qval = player.get_action(games, curr_player, temp=1/(1+game.pieceheight)) 
+            # action, move_probs, state_value, qval = player.get_action(games, curr_player, temp=1) 
             _, reward = game.step(action)
 
             _step["piece_height"] = game.pieceheight
@@ -209,10 +210,10 @@ class Train():
                     result["time"]["step_time"] = round(result["time"]["step_time"]*(1-d)+steptime*d, 3)
             
                 # 记录当前cpuct的统计结果
-                cpuct_str = str(cpuct)
-                if cpuct_str in result["cpuct"]:
-                    result["cpuct"][cpuct_str]["value"] = result["cpuct"][cpuct_str]["value"]+game_step
-                    result["cpuct"][cpuct_str]["count"] = result["cpuct"][cpuct_str]["count"]+1         
+                # cpuct_str = str(cpuct)
+                # if cpuct_str in result["cpuct"]:
+                #     result["cpuct"][cpuct_str]["value"] = result["cpuct"][cpuct_str]["value"]+game_step
+                #     result["cpuct"][cpuct_str]["count"] = result["cpuct"][cpuct_str]["count"]+1         
 
                 if game_reward>result["best"]["reward"]:
                     result["best"]["reward"] = game_reward
@@ -253,20 +254,20 @@ class Train():
                         result["time"]["step_times"].remove(result["time"]["step_times"][0])
 
                     # 每50局更新一次cpuct参数
-                    count0=result["cpuct"][cpuct_list[0]]["count"]
-                    count1=result["cpuct"][cpuct_list[1]]["count"]
-                    if count0>10 and count1>10:
-                        v0 = result["cpuct"][cpuct_list[0]]["value"]/count0
-                        v1 = result["cpuct"][cpuct_list[1]]["value"]/count1
-                        if v0 > v1:
-                            cpuct = round(float(cpuct_list[0])-0.1,1)
-                            if cpuct<0.1:
-                                result["cpuct"] = {"0.1":{"count":0,"value":0}, "0.2":{"count":0,"value":0}}
-                            else:
-                                result["cpuct"] = {str(cpuct):{"count":0,"value":0}, str(round(cpuct+0.1,1)):{"count":0,"value":0}}
-                        else:
-                            cpuct = round(float(cpuct_list[0])+0.1,1)
-                            result["cpuct"] = {str(cpuct):{"count":0,"value":0}, str(round(cpuct+0.1,1)):{"count":0,"value":0}}
+                    # count0=result["cpuct"][cpuct_list[0]]["count"]
+                    # count1=result["cpuct"][cpuct_list[1]]["count"]
+                    # if count0>10 and count1>10:
+                    #     v0 = result["cpuct"][cpuct_list[0]]["value"]/count0
+                    #     v1 = result["cpuct"][cpuct_list[1]]["value"]/count1
+                    #     if v0 > v1:
+                    #         cpuct = round(float(cpuct_list[0])-0.1,1)
+                    #         if cpuct<0.1:
+                    #             result["cpuct"] = {"0.1":{"count":0,"value":0}, "0.2":{"count":0,"value":0}}
+                    #         else:
+                    #             result["cpuct"] = {str(cpuct):{"count":0,"value":0}, str(round(cpuct+0.1,1)):{"count":0,"value":0}}
+                    #     else:
+                    #         cpuct = round(float(cpuct_list[0])+0.1,1)
+                    #         result["cpuct"] = {str(cpuct):{"count":0,"value":0}, str(round(cpuct+0.1,1)):{"count":0,"value":0}}
 
                     if max(result["steps"])==result["steps"][-1]:
                         newmodelfile = model_file+"_steps_"+str(result["steps"][-1])
