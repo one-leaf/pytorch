@@ -262,19 +262,18 @@ class Tetromino(object):
     def __init__(self, isRandomNextPiece=True):
         self.nextpiece=[]
         self.isRandomNextPiece=isRandomNextPiece
+        self.pieceCount = 0
         if not self.isRandomNextPiece:
             for i in range(199):
-                self.nextpiece.insert(0, self.getrandompiece(i%10))
+                self.nextpiece.insert(0, self.getrandompiece())
 
-    def getrandompiece(self,color=None):
+    def getrandompiece(self):
         shape = random.choice(list(pieces.keys()))
-        if color==None:
-            color = random.randint(0,len(colors)-1)
         newpiece = {'shape':shape,
                     'rotation': random.randint(0,len(pieces[shape])-1),
                     'x': int(boardwidth)//2-int(templatenum//2),
                     'y': 0,
-                    'color': color}
+                    'color': 0}
         return newpiece
 
     def calculate(self,score):
@@ -286,10 +285,13 @@ class Tetromino(object):
         if not self.isRandomNextPiece:
             if len(self.nextpiece)<100:
                 for i in range(99):
-                    self.nextpiece.insert(0, self.getrandompiece(i%10))                    
-            return self.nextpiece.pop()
+                    self.nextpiece.insert(0, self.getrandompiece())                    
+            nextpiece = self.nextpiece.pop()
         else:
-            return self.getrandompiece()    
+            nextpiece = self.getrandompiece()  
+        nextpiece["color"] = self.pieceCount % len(colors)  
+        self.pieceCount += 1
+        return nextpiece
     
     def getblankboard(self):
         board = []
