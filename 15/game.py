@@ -263,9 +263,6 @@ class Tetromino(object):
         self.nextpiece=[]
         self.isRandomNextPiece=isRandomNextPiece
         self.pieceCount = 0
-        if not self.isRandomNextPiece:
-            for i in range(199):
-                self.nextpiece.insert(0, self.getrandompiece())
 
     def getrandompiece(self):
         shape = random.choice(list(pieces.keys()))
