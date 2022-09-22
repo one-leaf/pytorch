@@ -26,7 +26,7 @@ class Train():
         self.lr_multiplier = 1.0  # 基于KL的自适应学习率
         self.temp = 1  # MCTS的概率参数，越大越不肯定，训练时1，预测时1e-3
         # self.n_playout = 512  # 每个动作的模拟战记录个数，影响后续 512/2 = 256；256/16 = 16个方块 的走法
-        self.n_playout = 128  # 每个动作的模拟战记录个数，影响后续 128/2 = 66；64/16 = 4个方块 的走法
+        self.n_playout = 512  # 每个动作的模拟战记录个数，影响后续 128/2 = 66；64/16 = 4个方块 的走法
         self.play_batch_size = 5 # 每次自学习次数
         self.buffer_size = 1000000  # cache对次数
         self.epochs = 2  # 每次更新策略价值网络的训练步骤数, 推荐是5
