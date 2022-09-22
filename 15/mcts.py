@@ -62,7 +62,7 @@ class MCTS():
             # 当前状态
             # v = self.Vs[s] if s in self.Vs else 0
             visits_sum = sum([self.Nsa[(s, a)] if (s, a) in self.Nsa else 0 for a in available_acts])          
-            act_Qs = [self.Qsa[(s, a)] if (s, a) in self.Qsa else (a, 0) for a in available_acts]
+            act_Qs = [self.Qsa[(s, a)] if (s, a) in self.Qsa else 0 for a in available_acts]
             if max(act_Qs)>0 and visits_sum > 2048: break 
 
             # 如果探索总次数大于2048次就别探索了。
