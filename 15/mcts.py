@@ -169,13 +169,14 @@ class MCTS():
         games["curr_player"] = 1 if games["curr_player"]==0 else 0
         self.depth = self.depth +1
 
-        # 如果方块落下，和对手比高，越高越差
+        # 如果方块落下，和对手比高，仅仅比对手差的时候惩罚
         sv = 0
         if game.state==1:
             curr_pieceheight = game.pieceheight
             player = games["curr_player"]
             next_pieceheight = games["games"][player].pieceheight
-            sv = (next_pieceheight-curr_pieceheight)/10
+            if curr_pieceheight>next_pieceheight:
+                sv = (next_pieceheight-curr_pieceheight)/5
 
         # sv = (prev_pieceheight - game.pieceheight)/10
         v = sv + self.search(games)
