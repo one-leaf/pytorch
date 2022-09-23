@@ -131,7 +131,7 @@ class Train():
 
 
         game_json = os.path.join(data_dir, "result.json")
-        game_result = self.read_status_file(game_json)
+        # game_result = self.read_status_file(game_json)
         
         # 由于动态cpuct并没有得到一个好的结果，所以关闭
         # 读取各自的动态cpuct
