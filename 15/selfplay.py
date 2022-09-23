@@ -141,7 +141,7 @@ class Train():
         # print("cpuct1:", cpuct_result, "-->", cpuct_list, "cpuct1:", cpuct, "n_playout:", self.n_playout)
         # cpuct_list.sort() 
 
-        if random.random()>0.1 and os.path.exists(bestmodelfile):
+        if random.random()>0.5 and os.path.exists(bestmodelfile):
             policy_value_net_best = PolicyValueNet(GAME_WIDTH, GAME_HEIGHT, GAME_ACTIONS_NUM, model_file=bestmodelfile)
             player = MCTSPlayer((policy_value_net.policy_value_fn, policy_value_net_best.policy_value_fn), c_puct=self.c_puct, n_playout=self.n_playout)
         else:
