@@ -164,12 +164,20 @@ class MCTS():
         a = best_act
         act = game.position_to_action(a)
 
-        prev_pieceheight = game.pieceheight
+        # prev_pieceheight = game.pieceheight
         game.step(act)
         games["curr_player"] = 1 if games["curr_player"]==0 else 0
         self.depth = self.depth +1
 
-        sv = (prev_pieceheight - game.pieceheight)/10
+        # 如果方块落下，比对手的高奖励
+        sv = 0
+        if game.state==1:
+            curr_pieceheight = game.pieceheight
+            player = games["curr_player"]
+            next_pieceheight = games["games"][player].pieceheight
+            sv = (next_pieceheight-curr_pieceheight)/10
+
+        # sv = (prev_pieceheight - game.pieceheight)/10
         v = sv + self.search(games)
 
         # 更新 Q 值 和 访问次数
