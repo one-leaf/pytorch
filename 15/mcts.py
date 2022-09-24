@@ -175,8 +175,8 @@ class MCTS():
             curr_pieceheight = game.pieceheight
             player = games["curr_player"]
             next_pieceheight = games["games"][player].pieceheight
-            if curr_pieceheight>next_pieceheight:
-                sv = (next_pieceheight-curr_pieceheight)/5
+            # if curr_pieceheight>next_pieceheight:
+            sv = (next_pieceheight-curr_pieceheight)/10
 
         # sv = (prev_pieceheight - game.pieceheight)/10
         v = sv + self.search(games)
