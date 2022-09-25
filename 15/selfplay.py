@@ -111,7 +111,7 @@ class Train():
         print("TRAIN Self Play starting ...")
 
         # 游戏代理
-        agent = Agent(max_height=20, isRandomNextPiece=True)
+        agent = Agent(max_height=10, isRandomNextPiece=True)
 
         borads = []
 
@@ -123,7 +123,7 @@ class Train():
         # if random.random()>0.9:
         #     agent2 = copy.deepcopy(agent)
         # else:
-        agent2 = Agent(max_height=20, isRandomNextPiece=True)
+        agent2 = Agent(max_height=10, isRandomNextPiece=True)
         games = (agent, agent2)
 
         agent.show_mcts_process= True
