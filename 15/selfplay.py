@@ -123,7 +123,7 @@ class Train():
         # if random.random()>0.9:
         #     agent2 = copy.deepcopy(agent)
         # else:
-        agent2 = Agent(max_height=20, isRandomNextPiece=False)
+        agent2 = Agent(max_height=20, isRandomNextPiece=True)
         games = (agent, agent2)
 
         agent.show_mcts_process= True
