@@ -84,13 +84,13 @@ class Dataset(torch.utils.data.Dataset):
         print("start load data to memory ...")
         start_time = time.time()
         sum_v=0
-        double_train_list=[]
+        # double_train_list=[]
         for fn in self.file_list:
             try:
                 with open(fn, "rb") as f:
                     state, mcts_prob, value, qval = pickle.load(f)                        
-                    if abs(qval)>0.5:
-                        double_train_list.append(fn)
+                    # if abs(qval)>0.5:
+                    #     double_train_list.append(fn)
             except:
                 print("filename {} error can't load".format(fn))
                 if os.path.exists(fn): os.remove(fn)
@@ -104,7 +104,7 @@ class Dataset(torch.utils.data.Dataset):
             sum_v+=value
             
         # 将qval高的重复学习一次    
-        self.file_list.extend(double_train_list)
+        # self.file_list.extend(double_train_list)
 
         pay_time = round(time.time()-start_time, 2)
         print("loaded to memory, paid time:", pay_time)
