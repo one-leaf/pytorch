@@ -111,7 +111,7 @@ class Train():
         print("TRAIN Self Play starting ...")
 
         # 游戏代理
-        agent = Agent(max_height=5, isRandomNextPiece=True)
+        agent = Agent(max_height=20, isRandomNextPiece=True)
 
         borads = []
 
@@ -123,7 +123,7 @@ class Train():
         # if random.random()>0.9:
         #     agent2 = copy.deepcopy(agent)
         # else:
-        agent2 = Agent(max_height=5, isRandomNextPiece=False)
+        agent2 = Agent(max_height=20, isRandomNextPiece=False)
         games = (agent, agent2)
 
         agent.show_mcts_process= True
@@ -230,7 +230,6 @@ class Train():
 
                 acc = []
                 for _game, _data in zip(games, game_datas):
-                    # v = -1 if _game.terminal else 1
                     for step in _data["steps"]:
                         acc.append(abs((step["state_value"]-step["qval"])))
                 acc = np.average(acc)
@@ -304,11 +303,16 @@ class Train():
             print(line)
         print((" "+" -"*agent.width+" ")*len(borads))
 
+        if games[0].terminal or games[1].terminal:
+            winner = 1 if games[0].terminal else 0
+        else:
+            winner = 1 if games[0].pieceheight > games[1].pieceheight else 0
+
         # 更新reward和score，reward为胜负，[1|-1|0]；score 为本步骤以后一共消除的行数
         for i, data in enumerate(game_datas):
             step_count = len(data["steps"])
             piece_count = -1
-            v = -1 if games[i].terminal else 1 
+            v = 1 if i==winner else -1 
             score = 0
             vlist=[]
             slist=[]

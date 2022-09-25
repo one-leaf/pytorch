@@ -119,9 +119,12 @@ class MCTS():
         game = games["games"][player]
         s = game.get_key()
 
+        other_play = 1 if player == 0 else 0
+        other_game = games["games"][other_play]
+
         if self.depth>1000: return 0
 
-        if game.terminal: self.Es[s] = 1 #max(1, game.pieceheight-4)
+        if game.terminal or game.pieceheight-other_game.pieceheight>=3: self.Es[s] = 1 #max(1, game.pieceheight-4)
 
         # 如果得分不等于0，标志探索结束
         if s in self.Es: return self.Es[s]
@@ -173,8 +176,7 @@ class MCTS():
         sv = 0
         if game.state==1:
             curr_pieceheight = game.pieceheight
-            player = games["curr_player"]
-            next_pieceheight = games["games"][player].pieceheight
+            next_pieceheight = other_game.pieceheight
             # if curr_pieceheight>next_pieceheight:
             sv = (next_pieceheight-curr_pieceheight)/10
 
