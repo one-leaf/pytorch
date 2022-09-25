@@ -172,13 +172,13 @@ class MCTS():
         a = best_act
         act = game.position_to_action(a)
 
-        prev_pieceheight = game.pieceheight
+        # prev_pieceheight = game.pieceheight
         game.step(act)
         games["curr_player"] = 1 if games["curr_player"]==0 else 0
         self.depth = self.depth +1
 
         # 如果方块落下，和对手比高，仅仅比对手差的时候惩罚
-        # sv = 0
+        sv = 0
         # if game.state==1:
             # curr_pieceheight = game.pieceheight
             # next_pieceheight = other_game.pieceheight
@@ -186,8 +186,8 @@ class MCTS():
             # sv = (next_pieceheight-curr_pieceheight)/10
         if game.reward>0:
             sv = game.reward/game.pieceheight
-        else:
-            sv = (prev_pieceheight - game.pieceheight)/10
+        # else:
+        #     sv = (prev_pieceheight - game.pieceheight)/10
         v = sv + self.search(games)
 
         # 更新 Q 值 和 访问次数
