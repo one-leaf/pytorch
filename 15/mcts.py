@@ -125,7 +125,7 @@ class MCTS():
         if self.depth>1000: return 0
 
         if game.terminal: self.Es[s] = 1 #max(1, game.pieceheight-4)
-        if game.state==1 and game.pieceheight>0:
+        if game.state==1 and game.pieceheight>0 and other_game.pieceheight>0:
             if game.pieceheight-other_game.pieceheight>=2:
                 self.Es[s] = 1
             # elif other_game.pieceheight-game.pieceheight>=3:
