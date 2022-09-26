@@ -10,7 +10,7 @@ from torchvision.models import resnet34
 from vit import VitNet
 
 # 定义游戏的保存文件名和路径
-model_name = "vit" # "mlp"
+model_name = "vit-ti" # "vit" # "mlp"
 curr_dir = os.path.dirname(os.path.abspath(__file__))
 data_dir = os.path.join(curr_dir, 'data', model_name)
 if not os.path.exists(data_dir): os.makedirs(data_dir)
@@ -191,7 +191,12 @@ class PolicyValueNet():
         self.l2_const = l2_const  
         # self.policy_value_net = ResNet(self.input_size, self.output_size)
         # self.policy_value_net = MLP_Mixer(20,10,9,2,5,128,64,512,5,8)
-        self.policy_value_net = VitNet(num_classes=5)
+        # ViT-Ti : depth 12 width 192 heads 3
+        self.policy_value_net = VitNet(embed_dim=192, depth=12, num_heads=3, num_classes=5)
+        # ViT-S : depth 12 width 386 heads 6
+        # self.policy_value_net = VitNet(embed_dim=386, depth=12, num_heads=6, num_classes=5)
+        # ViT-B : depth 12 width 768 heads 12
+        # self.policy_value_net = VitNet(num_classes=5)
         self.policy_value_net.to(device)
         # self.print_netwark()
 
