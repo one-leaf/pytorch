@@ -44,8 +44,6 @@ class Agent(object):
         self.board = self.tetromino.getblankboard()
         # 状态： 0 下落过程中 1 更换方块 2 结束一局
         self.state = 0
-        # 上一个下落方块的截图
-        self.prev_fallpiece_boards=None
         # 每个方块的高度
         self.pieces_height = []     
         # 盘面的状态
@@ -163,8 +161,8 @@ class Agent(object):
             env.render(self.board, self.score, self.level, self.fallpiece, self.nextpiece)
 
         if not isFalling:
-            self.nextpiece = self.tetromino.getnewpiece()
             self.fallpiece = self.nextpiece
+            self.nextpiece = self.tetromino.getnewpiece()
             self.piecesteps = 0
             self.piececount += 1 
             self.availables = [KEY_NONE]
