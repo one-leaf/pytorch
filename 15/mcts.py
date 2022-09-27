@@ -239,7 +239,7 @@ class MCTSPlayer(object):
             # temp 导致 N^(1/temp) alphaezero 前 30 步设置为1 其余设置为无穷小即act_probs只取最大值
             # temp 越大导致更均匀的搜索
             # 对于俄罗斯方块，为1/(h+1)
-            if temp==0 or len(acts)==1 or game.pieceheight>2 :
+            if temp==0 or len(acts)==1 or game.pieceheight==0 :
                 idx = max_idx
             else:
                 # alphazero，默认p为0.75
