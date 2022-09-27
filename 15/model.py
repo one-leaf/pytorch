@@ -288,9 +288,9 @@ class PolicyValueNet():
         probs, values = self.policy_value_net(state_batch)
 
         # value_loss = F.l1_loss(values, value_batch.unsqueeze(-1))            
-        # value_loss = F.mse_loss(values.view(-1), value_batch)
+        value_loss = F.mse_loss(values.view(-1), value_batch)
         # value_loss = 0.5 * (values.view(-1) - value_batch).pow(2).mean()
-        value_loss = 0.5 * (values - value_batch.unsqueeze(-1)).pow(2).mean()
+        # value_loss = 0.5 * (values - value_batch.unsqueeze(-1)).pow(2).mean()
         # 这些都不适用，因为第二个参数Target，需要是idx，而不是另外一个概率
         # policy_loss = F.cross_entropy(probs, mcts_probs, label_smoothing=0.1)
         # policy_loss = F.cross_entropy(probs, mcts_probs)    
