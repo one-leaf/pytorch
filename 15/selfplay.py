@@ -358,8 +358,8 @@ class Train():
 
         # 保存对抗数据到data_buffer
         filetime = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        # for i, obj in enumerate(self.get_equi_data(states, mcts_probs, values, qval)):
-        for i, obj in enumerate(zip(states, mcts_probs, values, qval)):
+        for i, obj in enumerate(self.get_equi_data(states, mcts_probs, values, qval)):
+        # for i, obj in enumerate(zip(states, mcts_probs, values, qval)):
             filename = "{}-{}.pkl".format(filetime, i)
             savefile = os.path.join(data_wait_dir, filename)
             with open(savefile, "wb") as fn:
