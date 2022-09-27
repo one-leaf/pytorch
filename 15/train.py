@@ -100,6 +100,10 @@ class Dataset(torch.utils.data.Dataset):
             # self.data[fn]={"value":(value+qval)/2., "state":state, "mcts_prob": mcts_prob}
             p = 0.5
             v = qval*p + value*(1-p)
+
+            if value<=-1:
+                mcts_prob = 0.9*mcts_prob+0.1*np.random.dirichlet(np.ones(5))
+
             self.data[fn]={"value":v, "state":state, "mcts_prob": mcts_prob}
             sum_v+=value
             

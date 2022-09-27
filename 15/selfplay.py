@@ -336,10 +336,6 @@ class Train():
                 v_sum += v
                 s_sum += score
                 acc_sum += abs(data["steps"][j]["state_value"]-data["steps"][j]["qval"])
-                if v==-1 and random.random()<q*-1:
-                    p = data["steps"][j]["move_probs"]
-                    l = len(data["steps"][j]["move_probs"])
-                    data["steps"][j]["move_probs"]=0.75*p+0.25*np.random.dirichlet(2*np.ones(l))
             print("score","max height:",data["piece_height"],"avg:",s_sum/step_count, slist)
             print("qval","piece len:",len(vlist),"avg:",v_sum/step_count, vlist)
             print("acc","steps len:",step_count,"avg:",acc_sum/step_count, acclist)
