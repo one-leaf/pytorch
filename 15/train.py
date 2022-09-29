@@ -101,8 +101,8 @@ class Dataset(torch.utils.data.Dataset):
             p = 0
             v = qval*p + value*(1-p)
 
-            if value<=-1:
-                mcts_prob = 0.9*mcts_prob+0.1*np.random.dirichlet(np.ones(5))
+            # if value<=-1:
+            #     mcts_prob = 0.9*mcts_prob+0.1*np.random.dirichlet(np.ones(5))
 
             # state drop_out
             a=state[-1]
