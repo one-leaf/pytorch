@@ -128,8 +128,8 @@ class MCTS():
         if game.state==1 and game.pieceheight>0 and other_game.pieceheight>0:
             if game.pieceheight-other_game.pieceheight>=2:
                 self.Es[s] = 1
-            elif other_game.pieceheight-game.pieceheight>=2:
-                self.Es[s] = -1
+            # elif other_game.pieceheight-game.pieceheight>=2:
+            #     self.Es[s] = -1
 
         # 如果得分不等于0，标志探索结束
         if s in self.Es: return self.Es[s]
