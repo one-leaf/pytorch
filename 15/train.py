@@ -104,6 +104,11 @@ class Dataset(torch.utils.data.Dataset):
             if value<=-1:
                 mcts_prob = 0.9*mcts_prob+0.1*np.random.dirichlet(np.ones(5))
 
+            # state drop_out
+            a=state[-1]
+            drop = np.random.rand(a.shape[0],a.shape[1])<0.95
+            state[-1]=a*drop
+
             self.data[fn]={"value":v, "state":state, "mcts_prob": mcts_prob}
             sum_v+=value
             
