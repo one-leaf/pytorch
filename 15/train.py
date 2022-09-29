@@ -98,7 +98,7 @@ class Dataset(torch.utils.data.Dataset):
                 continue
             # 这里准备数据的时候直接 value = (value+qval)/2 同时考虑两者
             # self.data[fn]={"value":(value+qval)/2., "state":state, "mcts_prob": mcts_prob}
-            p = 0.1
+            p = 0
             v = qval*p + value*(1-p)
 
             if value<=-1:
