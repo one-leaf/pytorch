@@ -178,17 +178,18 @@ class MCTS():
         self.depth = self.depth +1
 
         # 如果方块落下，和对手比高，仅仅比对手差的时候惩罚
-        sv = 0
+        # sv = 0
         # if game.state==1:
             # curr_pieceheight = game.pieceheight
             # next_pieceheight = other_game.pieceheight
             # if curr_pieceheight>next_pieceheight:
             # sv = (next_pieceheight-curr_pieceheight)/10
-        if game.reward>0:
-            sv = game.reward/game.pieceheight
+        # if game.reward>0:
+        #     sv = game.reward/game.pieceheight
         # else:
         #     sv = (prev_pieceheight - game.pieceheight)/10
-        v = sv + self.search(games)
+        # v = sv + self.search(games)
+        v = self.search(games)
 
         # 更新 Q 值 和 访问次数
         if (s, a) in self.Qsa:
