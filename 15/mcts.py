@@ -241,13 +241,13 @@ class MCTSPlayer(object):
             # 训练的时候 temp = 1
             acts, act_probs, act_qs, state_v = self.mcts.get_action_probs(games, curr_player, temp)
             move_probs[acts] = act_probs
-            max_idx = np.argmax(act_probs)    
-
+            max_probs_idx = np.argmax(act_probs)    
+            max_qs_idx = np.argmax(act_qs)    
             # temp 导致 N^(1/temp) alphaezero 前 30 步设置为1 其余设置为无穷小即act_probs只取最大值
             # temp 越大导致更均匀的搜索
             # 对于俄罗斯方块，为1/(h+1)
             if temp==0 or len(acts)==1 or game.pieceheight>0 :
-                idx = max_idx
+                idx = max_probs_idx
             else:
                 # alphazero，默认p为0.75
                 p = 0.75
@@ -258,11 +258,14 @@ class MCTSPlayer(object):
                 dirichlet = np.random.dirichlet(a * np.ones(len(act_probs)))
                 idx = np.random.choice(range(len(acts)), p=p*act_probs + (1.0-p)*dirichlet)                                                                     
 
-            action = acts[idx]
-            qval = act_qs[max_idx]
+            if max_qs_idx!=max_probs_idx and random.random()>0.75:
+                idx = max_qs_idx
 
-            if idx!=max_idx:
-                print("    random","player:", curr_player, "h:",game.pieceheight, "v:", state_v, game.position_to_action_name(acts[max_idx]), "p:", act_probs[max_idx], "q:", act_qs[max_idx], \
+            action = acts[idx]
+            qval = act_qs[max_probs_idx]
+
+            if idx!=max_probs_idx:
+                print("    random","player:", curr_player, "h:",game.pieceheight, "v:", state_v, game.position_to_action_name(acts[max_probs_idx]), "p:", act_probs[max_probs_idx], "q:", act_qs[max_probs_idx], \
                             "==>", game.position_to_action_name(acts[idx]), "p:", act_probs[idx], "q:", act_qs[idx], "std:", np.std(act_probs))  
 
             return action, move_probs, state_v, qval
