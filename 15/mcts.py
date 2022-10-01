@@ -176,6 +176,7 @@ class MCTS():
         # prev_pieceheight = game.pieceheight
         game.step(act)
 
+        # 如果差两步，游戏结束
         if game.state==1 and other_game.piececount>0:
             if game.pieceheight-other_game.pieceheight>1:
                 game.terminal = True
