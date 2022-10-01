@@ -46,7 +46,8 @@ class MCTS():
         game = games[curr_player] 
         s = game.get_key()
         self.max_depth = 0
-        self.piececount = game.piececount
+        for g in games:
+            g.piececount_mark = g.piececount
         available_acts = game.availables
         # for n in range(self._n_playout):
         for n in count():
@@ -67,8 +68,9 @@ class MCTS():
             act_Qs = [self.Qsa[(s, a)] if (s, a) in self.Qsa else 0 for a in available_acts]
             max_qs = max(act_Qs)
 
-            if game.piececount==0 and visits_sum>128: break
-            if np.argmax(act_Qs)==np.argmax(act_visits) and visits_sum > 2048: break
+            # 这样网络不稳定
+            # if game.piececount==0 and visits_sum>128: break
+            # if np.argmax(act_Qs)==np.argmax(act_visits) and visits_sum > 2048: break
             # 如果探索总次数大于2048次就别探索了。
             # if visits_sum>=2048 or game.terminal: break
             if game.terminal: break
@@ -176,24 +178,28 @@ class MCTS():
         a = best_act
         act = game.position_to_action(a)
 
-        prev_pieceheight = game.pieceheight
+        # prev_pieceheight = game.pieceheight
         game.step(act)
         games["curr_player"] = 1 if games["curr_player"]==0 else 0
         self.depth = self.depth +1
 
         # 如果方块落下，和对手比高，仅仅比对手差的时候惩罚
         sv = 0
-        if game.state==1 and game.piececount - self.piececount >1:
-            # curr_pieceheight = game.pieceheight
-            # next_pieceheight = other_game.pieceheight
-            # if curr_pieceheight>next_pieceheight:
-            # sv = (next_pieceheight-curr_pieceheight)/10
-            if game.reward>0:
-                sv = game.reward/game.pieceheight
-            else:
-                sv = (prev_pieceheight - game.pieceheight)/20
-            return -sv
-
+        # if game.state==1 and game.piececount - game.piececount_mark >1:
+        #     # curr_pieceheight = game.pieceheight
+        #     # next_pieceheight = other_game.pieceheight
+        #     # if curr_pieceheight>next_pieceheight:
+        #     # sv = (next_pieceheight-curr_pieceheight)/10
+        #     if game.reward>0:
+        #         sv = game.reward/game.pieceheight
+        #     else:
+        #         sv = (prev_pieceheight - game.pieceheight)/20
+        #     return -sv
+        if game.state == 1 and game.piececount - game.piececount_mark > 1:
+            curr_pieceheight = game.pieceheight
+            next_pieceheight = other_game.pieceheight
+            sv = curr_pieceheight - next_pieceheight
+            return sv
         # v = sv + self.search(games)
         v = self.search(games)
 
