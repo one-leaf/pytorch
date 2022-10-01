@@ -195,7 +195,7 @@ class MCTS():
         #     else:
         #         sv = (prev_pieceheight - game.pieceheight)/20
         #     return -sv
-        if game.state == 1 and game.piececount - game.piececount_mark > 1:
+        if game.state == 1 and game.piececount - game.piececount_mark > 0:
             curr_pieceheight = game.pieceheight
             next_pieceheight = other_game.pieceheight
             sv = curr_pieceheight - next_pieceheight
