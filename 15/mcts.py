@@ -184,7 +184,7 @@ class MCTS():
         self.depth = self.depth +1
 
         # 如果方块落下，和对手比高，仅仅比对手差的时候惩罚
-        sv = 0
+        # sv = 0
         # if game.state==1 and game.piececount - game.piececount_mark >1:
         #     # curr_pieceheight = game.pieceheight
         #     # next_pieceheight = other_game.pieceheight
