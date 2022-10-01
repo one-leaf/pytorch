@@ -106,7 +106,7 @@ class Dataset(torch.utils.data.Dataset):
 
             # state drop_out
             a=state[-1]
-            drop = np.random.rand(a.shape[0],a.shape[1])<0.95
+            drop = np.random.rand(a.shape[0],a.shape[1])<0.98
             state[-1]=a*drop
 
             self.data[fn]={"value":v, "state":state, "mcts_prob": mcts_prob}
