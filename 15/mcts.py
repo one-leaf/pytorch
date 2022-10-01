@@ -63,10 +63,10 @@ class MCTS():
 
             # 当前状态
             # v = self.Vs[s] if s in self.Vs else 0
-            visits_sum = sum([self.Nsa[(s, a)] if (s, a) in self.Nsa else 0 for a in available_acts])          
-            act_visits = [self.Nsa[(s, a)] if (s, a) in self.Nsa else 0 for a in available_acts]
-            act_Qs = [self.Qsa[(s, a)] if (s, a) in self.Qsa else 0 for a in available_acts]
-            max_qs = max(act_Qs)
+            # visits_sum = sum([self.Nsa[(s, a)] if (s, a) in self.Nsa else 0 for a in available_acts])          
+            # act_visits = [self.Nsa[(s, a)] if (s, a) in self.Nsa else 0 for a in available_acts]
+            # act_Qs = [self.Qsa[(s, a)] if (s, a) in self.Qsa else 0 for a in available_acts]
+            # max_qs = max(act_Qs)
 
             # 这样网络不稳定
             # if game.piececount==0 and visits_sum>128: break
