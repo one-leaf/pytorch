@@ -199,6 +199,9 @@ class Train():
                 print("#"*repeat_count, 'score:', game.score, 'height:', game.pieceheight, 'piece:', game.piececount, "shape:", game.fallpiece["shape"], \
                     'step:', game.steps, "step time:", round((time.time()-start_time)/i,3),'player:', curr_player)
 
+            # 如果训练次数超过了最大次数，则直接终止训练
+            if i >= 10000: game_stop=True
+
             if game.terminal or game_stop:
                 for _game, _data in zip(games, game_datas):
                     _data["score"] = _game.score
@@ -300,11 +303,6 @@ class Train():
 
                 break
 
-            # 如果训练次数超过了最大次数，则直接终止训练
-            if i >= 10000: game_stop=True
-            # 如果高度差超过了2，则直接终止对战
-            if abs(games[0].pieceheight - games[1].pieceheight)>=2 and games[0].pieceheight>0 and games[1].pieceheight>0:
-                game_stop=True
 
         # 打印borad：
         from game import blank 

@@ -131,10 +131,12 @@ class MCTS():
         if self.depth>1000: return 0
 
         if game.terminal: self.Es[s] = 1 #max(1, game.pieceheight-4)
-        if game.state==1 and other_game.piececount>0:
-        # if game.pieceheight>0 and other_game.pieceheight>0:
-            if game.pieceheight-other_game.pieceheight>1:
-                self.Es[s] = 1
+        # if game.state==1 and other_game.piececount>0:
+        # # # if game.pieceheight>0 and other_game.pieceheight>0:
+        #     if game.pieceheight-other_game.pieceheight>1:
+        #         self.Es[s] = 1
+        #         game.terminal = True
+        #         other_game.terminal = True
             # if other_game.pieceheight-game.pieceheight>1:
             #     self.Es[s] = -1
            
@@ -182,6 +184,11 @@ class MCTS():
 
         # prev_pieceheight = game.pieceheight
         game.step(act)
+
+        if game.state==1 and other_game.piececount>0:
+            if game.pieceheight-other_game.pieceheight>1:
+                game.terminal = True
+
         games["curr_player"] = 1 if games["curr_player"]==0 else 0
         self.depth = self.depth +1
 
