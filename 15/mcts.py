@@ -265,7 +265,7 @@ class MCTSPlayer(object):
                 dirichlet = np.random.dirichlet(a * np.ones(len(act_probs)))
                 idx = np.random.choice(range(len(acts)), p=p*act_probs + (1.0-p)*dirichlet)                                                                     
 
-            if max_qs_idx!=max_probs_idx and random.random()>0.75:
+            if max_qs_idx!=max_probs_idx and random.random()>0.9:
                 idx = max_qs_idx
 
             action = acts[idx]
