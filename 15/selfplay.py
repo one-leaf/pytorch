@@ -293,8 +293,6 @@ class Train():
                         newmodelfile = model_file+"_steps_"+str(result["steps"][-1])
                         if not os.path.exists(newmodelfile):
                             policy_value_net.save_model(newmodelfile)
-                            if os.path.exists(bestmodelfile): os.remove(bestmodelfile)
-                            policy_value_net.save_model(bestmodelfile)
                         
                 if result["curr"]["agent500"]>500:
                     result["curr"]={"reward":0,"step":0,"agent500":0,"agent50":0}
@@ -302,6 +300,9 @@ class Train():
                     newmodelfile = model_file+"_"+str(result["agent"])
                     if not os.path.exists(newmodelfile):
                         policy_value_net.save_model(newmodelfile)
+                    if os.path.exists(bestmodelfile): os.remove(bestmodelfile)
+                    policy_value_net.save_model(bestmodelfile)
+
                 result["lastupdate"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 self.save_status_file(result, game_json) 
 
