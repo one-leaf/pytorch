@@ -196,13 +196,16 @@ class MCTS():
         #     else:
         #         sv = (prev_pieceheight - game.pieceheight)/20
         #     return -sv
-        if game.state == 1 and game.piececount - game.piececount_mark > 1:
+        sv = 0
+        if game.state == 1:
             curr_pieceheight = game.pieceheight
             next_pieceheight = other_game.pieceheight
-            sv = (curr_pieceheight - next_pieceheight)/5
-            return sv
-        # v = sv + self.search(games)
-        v = self.search(games)
+            if game.piececount - game.piececount_mark > 1:
+                sv = (next_pieceheight - curr_pieceheight)/10
+                return -sv
+            sv = (next_pieceheight-curr_pieceheight)/10
+        v = sv + self.search(games)
+        # v = self.search(games)
 
         # 更新 Q 值 和 访问次数
         if (s, a) in self.Qsa:
