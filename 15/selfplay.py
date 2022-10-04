@@ -144,7 +144,11 @@ class Train():
 
         if os.path.exists(bestmodelfile):
             policy_value_net_best = PolicyValueNet(GAME_WIDTH, GAME_HEIGHT, GAME_ACTIONS_NUM, model_file=bestmodelfile)
-            player = MCTSPlayer(policy_value_net_best.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout)
+            if random.random()>0.5:
+                player = MCTSPlayer((policy_value_net.policy_value_fn, policy_value_net_best.policy_value_fn), c_puct=self.c_puct, n_playout=self.n_playout)
+            else:
+                player = MCTSPlayer((policy_value_net_best.policy_value_fn, policy_value_net.policy_value_fn), c_puct=self.c_puct, n_playout=self.n_playout)
+            # player = MCTSPlayer(policy_value_net_best.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout)
             # c = random.choice([0,1,2,3])
             # if c == 0:
             #     player = MCTSPlayer(policy_value_net_best.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout)
