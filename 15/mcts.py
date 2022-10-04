@@ -199,7 +199,7 @@ class MCTS():
         if game.state == 1 and game.piececount - game.piececount_mark > 1:
             curr_pieceheight = game.pieceheight
             next_pieceheight = other_game.pieceheight
-            sv = curr_pieceheight - next_pieceheight
+            sv = (curr_pieceheight - next_pieceheight)/5
             return sv
         # v = sv + self.search(games)
         v = self.search(games)
