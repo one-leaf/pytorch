@@ -305,8 +305,11 @@ class Train():
                     newmodelfile = model_file+"_"+str(result["agent"])
                     if not os.path.exists(newmodelfile):
                         policy_value_net.save_model(newmodelfile)
+
+                    lastmodelfile = model_file+"_last"                                        
                     if os.path.exists(bestmodelfile): os.remove(bestmodelfile)
-                    policy_value_net.save_model(bestmodelfile)
+                    if os.path.exists(lastmodelfile): os.rename(lastmodelfile, bestmodelfile)
+                    policy_value_net.save_model(lastmodelfile)
 
                 result["lastupdate"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 self.save_status_file(result, game_json) 
