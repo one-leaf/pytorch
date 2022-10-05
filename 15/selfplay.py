@@ -112,7 +112,7 @@ class Train():
         print("TRAIN Self Play starting ...")
 
         # 游戏代理
-        agent = Agent(max_height=10, isRandomNextPiece=False)
+        agent = Agent(max_height=5, isRandomNextPiece=False)
 
         borads = []
 
