@@ -218,8 +218,8 @@ class Train():
                     _data["piece_height"] = _game.pieceheight
                     borads.append(_game.board)                    
 
-                game_reward =  sum([_game.score for _game in games])/2
-                game_step =  sum([_game.steps for _game in games])/2
+                game_reward =  sum([_game.score for _game in games])
+                game_step =  sum([_game.steps for _game in games])
 
                 result = self.read_status_file(game_json)
 
@@ -244,14 +244,14 @@ class Train():
                 if game_reward>result["best"]["reward"]:
                     result["best"]["reward"] = game_reward
                     result["best"]["score"] = game.score
-                    result["best"]["agent"] = result["agent"]+1
+                    result["best"]["agent"] = result["agent"]
 
                 if not game_stop:
-                    result["agent"] += 1
+                    result["agent"] += 2
                     result["curr"]["reward"] += game_reward
                     result["curr"]["step"] += game_step
-                    result["curr"]["agent500"] += 1
-                    result["curr"]["agent50"] += 1
+                    result["curr"]["agent500"] += 2
+                    result["curr"]["agent50"] += 2
 
                 # 计算 acc 看有没有收敛
 
