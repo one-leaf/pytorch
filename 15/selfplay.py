@@ -247,12 +247,11 @@ class Train():
                     result["best"]["score"] = game.score
                     result["best"]["agent"] = result["agent"]
 
-                if not game_stop:
-                    result["agent"] += 2
-                    result["curr"]["reward"] += game_reward
-                    result["curr"]["step"] += game_step
-                    result["curr"]["agent500"] += 2
-                    result["curr"]["agent50"] += 2
+                result["agent"] += 2
+                result["curr"]["reward"] += game_reward
+                result["curr"]["step"] += game_step
+                result["curr"]["agent500"] += 2
+                result["curr"]["agent50"] += 2
 
                 # 计算 acc 看有没有收敛
 
