@@ -83,6 +83,7 @@ class MCTS():
         acts = [av[0] for av in act_visits]
         visits = [av[1] for av in act_visits]
         qs = [av[1] for av in act_Qs]
+        ps = [self.Ps[s][a] if s in self.Ps else 0 for a in available_acts]
         v = 0 if s not in self.Vs else self.Vs[s]
 
         if temp == 0:
@@ -112,7 +113,7 @@ class MCTS():
                 info.append([game.position_to_action_name(act), visit, round(q,2), round(p,2)])        
             print(game.steps, game.piececount, game.fallpiece["shape"], game.piecesteps, "search:", n+1, "depth:" ,self.max_depth,"height:", game.pieceheight, "value:", round(v,2), "qval:", round(qval,2), info, "player:", self.curr_player)
 
-        return acts, probs, qs, v
+        return acts, probs, qs, ps, v
 
     def search(self, games):
         """
@@ -252,10 +253,11 @@ class MCTSPlayer(object):
         move_probs = np.zeros(game.actions_num)
         if not game.terminal:  # 如果游戏没有结束
             # 训练的时候 temp = 1
-            acts, act_probs, act_qs, state_v = self.mcts.get_action_probs(games, curr_player, temp)
+            acts, act_probs, act_qs, act_ps, state_v = self.mcts.get_action_probs(games, curr_player, temp)
             move_probs[acts] = act_probs
             max_probs_idx = np.argmax(act_probs)    
-            max_qs_idx = np.argmax(act_qs)    
+            max_qs_idx = np.argmax(act_qs) 
+            max_ps_idx = np.argmax(act_ps)    
             # temp 导致 N^(1/temp) alphaezero 前 30 步设置为1 其余设置为无穷小即act_probs只取最大值
             # temp 越大导致更均匀的搜索
             # 对于俄罗斯方块，为1/(h+1)
@@ -281,7 +283,8 @@ class MCTSPlayer(object):
                 print("    random","player:", curr_player, "h:",game.pieceheight, "v:", state_v, game.position_to_action_name(acts[max_probs_idx]), "p:", act_probs[max_probs_idx], "q:", act_qs[max_probs_idx], \
                             "==>", game.position_to_action_name(acts[idx]), "p:", act_probs[idx], "q:", act_qs[idx], "std:", np.std(act_probs))  
 
-            return action, move_probs, state_v, qval
+            acc_ps = 1 if max_ps_idx==max_probs_idx else 0
+            return action, move_probs, state_v, qval, acc_ps
         else:
             print("WARNING: game is terminal")
 

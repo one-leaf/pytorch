@@ -189,8 +189,8 @@ class Train():
             _step["shape"] = game.fallpiece["shape"]
             _step["pre_piece_height"] = game.pieceheight
 
-            # action, move_probs, state_value, qval = player.get_action(games, curr_player, temp=1/(1+game.pieceheight)) 
-            action, move_probs, state_value, qval = player.get_action(games, curr_player, temp=1) 
+            # action, move_probs, state_value, qval, acc_ps = player.get_action(games, curr_player, temp=1/(1+game.pieceheight)) 
+            action, move_probs, state_value, qval, acc_ps = player.get_action(games, curr_player, temp=1) 
             _, reward = game.step(action)
 
             _step["piece_height"] = game.pieceheight
@@ -198,6 +198,7 @@ class Train():
             _step["move_probs"] = move_probs
             _step["state_value"] = state_value
             _step["qval"] = qval
+            _step["acc_ps"] = acc_ps
 
             data["steps"].append(_step)
 
@@ -261,7 +262,7 @@ class Train():
                 acc = []
                 for _game, _data in zip(games, game_datas):
                     for step in _data["steps"]:
-                        acc.append(abs((step["state_value"]-step["qval"])))
+                        acc.append(step["acc_ps"])
                 acc = np.average(acc)
 
                 if result["acc"]==0:
@@ -367,7 +368,7 @@ class Train():
                 data["steps"][j]["score"] = q
                 v_sum += v
                 s_sum += score
-                acc_sum += abs(data["steps"][j]["state_value"]-data["steps"][j]["qval"])
+                acc_sum += data["steps"][j]["acc_ps"]
             print("score","max height:",data["piece_height"],"avg:",s_sum/step_count, slist)
             print("qval","piece len:",len(vlist),"avg:",v_sum/step_count, vlist)
             print("acc","steps len:",step_count,"avg:",acc_sum/step_count, acclist)
