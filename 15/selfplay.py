@@ -266,9 +266,9 @@ class Train():
                 acc = np.average(acc)
 
                 if result["acc"]==0:
-                    result["acc"] = round(acc,2)
+                    result["acc"] = acc
                 else:
-                    result["acc"] = round(result["acc"]*0.99 + acc*0.01,2)   
+                    result["acc"] = result["acc"]*0.99 + acc*0.01   
 
                 if result["curr"]["agent50"]>50:
                     result["reward"].append(round(result["curr"]["reward"]/result["curr"]["agent500"],2))
