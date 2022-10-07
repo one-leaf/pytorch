@@ -321,18 +321,18 @@ class Agent(object):
 
 
     # 获得当前的全部特征
-    ## 背景 + 前2步走法 = 3
-    # 背景 + 最后一步 + 合并后旋转90度
+    # 背景 + 前2步走法 = 3
+    ## 背景 + 最后一步 + 合并后旋转90度
     # 返回 [3, height, width]
     def current_state(self):
         # return np.array(self.status)
 
         state = np.zeros((3, self.height, self.width))
-        bg = self.status[-1][1] + self.status[-1][2] 
-        bg_rot = np.rot90(bg).reshape(self.height, self.width)
+        # bg = self.status[-1][1] + self.status[-1][2] 
+        # bg_rot = np.rot90(bg).reshape(self.height, self.width)
+        # state[0] = bg_rot 
 
-        state[0] = bg_rot # self.status[-2][1]
-
+        state[0] = self.status[-2][1]
         state[1] = self.status[-1][1]
         state[2] = self.status[-1][2]
         # for i in range(3):
