@@ -35,7 +35,9 @@ class Train():
         self.best_win_ratio = 0.0
         
         # aplhazero 的最佳值是 4 
-        self.c_puct = 3  # MCTS child权重， 用来调节MCTS搜索深度，越大搜索越深，越相信概率，越小越相信Q 的程度 默认 5
+        # MCTS child权重， 用来调节MCTS搜索深度，越大搜索越深，越相信概率，越小越相信Q 的程度 默认 5
+        # 由于value完全用结果胜负来拟合，所以value不稳，只能靠概率p拟合，最后带动value来拟合
+        self.c_puct = 5  
 
 
     def save_status_file(self, result, status_file):
