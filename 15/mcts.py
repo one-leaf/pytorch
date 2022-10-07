@@ -173,7 +173,7 @@ class MCTS():
         a = best_act
         act = game.position_to_action(a)
 
-        # prev_pieceheight = game.pieceheight
+        prev_pieceheight = game.pieceheight
         game.step(act)
 
         # 如果差两步，游戏结束
@@ -198,15 +198,15 @@ class MCTS():
         #     return -sv
         sv = 0
         if game.state == 1:
-            if game.reward>0: 
-                sv = -game.reward*(0.8**game.pieceheight)
-            else:
-                curr_pieceheight = game.pieceheight
-                next_pieceheight = other_game.pieceheight
+            # if game.reward>0: 
+            #     sv = -game.reward*(0.8**game.pieceheight)
+            # else:
+            curr_pieceheight = game.pieceheight
+            next_pieceheight = other_game.pieceheight
                 # if game.piececount - game.piececount_mark > 1:
                 #     sv = (next_pieceheight - curr_pieceheight)/10
                 #     return -sv
-                sv = (next_pieceheight-curr_pieceheight)*(0.8**game.pieceheight)
+            sv = (next_pieceheight+prev_pieceheight-2*curr_pieceheight)*(0.8**game.pieceheight)
         v = sv + self.search(games)
         # v = self.search(games)
 
