@@ -148,7 +148,7 @@ class Agent(object):
             self.reward = self.tetromino.removecompleteline(self.board) 
             
             self.score += self.reward
-            self.pieceheight = self.getMaxHeight()          
+            self.pieceheight = self.getAvgHeight()          
             self.pieces_height.append(20 - fallpiece_y - self.reward)
             self.fallpiece = None
 
@@ -240,6 +240,16 @@ class Agent(object):
             if c!=-1:break  
         h = 0 if c == -1 else self.height - c                          
         return h
+
+    # 统计当前平均高度
+    def getAvgHeight(self):
+        h = 0
+        for x in range(self.width):
+            for y in range(self.height):
+                if self.board[x][y]!=blank:
+                    h+=y
+                    break
+        return h/self.width
 
     # 统计非空的个数
     def getNoEmptyCount(self):
