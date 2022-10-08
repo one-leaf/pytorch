@@ -247,7 +247,7 @@ class Agent(object):
         for x in range(self.width):
             for y in range(self.height):
                 if self.board[x][y]!=blank:
-                    h+=y
+                    h+=(self.height-y)
                     break
         return h/self.width
 
