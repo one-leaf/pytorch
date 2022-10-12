@@ -132,8 +132,9 @@ class Train():
 
         agent.show_mcts_process= True
         agent2.show_mcts_process= True
-
-
+        agent.id = 0
+        agent.id = 1
+        
         game_json = os.path.join(data_dir, "result.json")
         # game_result = self.read_status_file(game_json)
         

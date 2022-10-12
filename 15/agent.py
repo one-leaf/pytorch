@@ -15,6 +15,7 @@ class Agent(object):
         self.actions_num = len(ACTIONS)    
         self.isRandomNextPiece = isRandomNextPiece       
         self.max_height = max_height
+        self.id = 0
         self.reset()
 
 
@@ -180,8 +181,9 @@ class Agent(object):
         return self.state, self.reward
 
     def set_key(self):
-        info = self.current_state()
-        self.key = hash(info.data.tobytes())
+        # info = self.current_state()
+        info = self.status[-1][1] + self.status[-1][2]
+        self.key = hash(info.data.tobytes())+self.id
         # chars="abcdefghijklmnopqrstuvwxyz" 
         # key = ""
         # for x in range(self.width):
