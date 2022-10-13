@@ -213,7 +213,7 @@ class Train():
             # 如果训练次数超过了最大次数，则直接终止训练
             if i >= 10000: game_stop=True
 
-            if games[0].pieceheight>=5 or games[1].pieceheight>=5:
+            if game.pieceheight>=5:
                 game_stop=True
             # if games[0].piececount>1 and games[1].piececount>1 and games[0].piececount==games[1].piececount:
             #     if (games[0].score != games[1].score and games[0].pieceheight!=games[1].pieceheight): 
