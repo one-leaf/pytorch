@@ -326,14 +326,12 @@ class VitNet(nn.Module):
         # 图片转换为 patch embedding [B, C, H, W] ==> [B, num_patches, embed_dim] 
         self.patch_embed = PatchEmbed(img_size=(20,10), patch_size=(1,10), in_c=3, embed_dim=embed_dim)
         # 图片分割后的块数
-        num_patches = self.patch_embed.num_patches                      # 50
+        num_patches = self.patch_embed.num_patches                      # p
 
-        # 动作
-        self.act_token = nn.Parameter(torch.zeros(1, 1, embed_dim))     # [1, 1, 768]
         # 价值
         self.val_token = nn.Parameter(torch.zeros(1, 1, embed_dim))    # [1, 1, 768]
         # 位置层
-        self.pos_embed = nn.Parameter(torch.zeros(1, num_patches + 2, embed_dim)) # [1, 52, 768]
+        self.pos_embed = nn.Parameter(torch.zeros(1, num_patches + 1, embed_dim)) # [1, p+1, 768]
         
         # 输入损失
         self.pos_drop = nn.Dropout(p=drop_ratio)
@@ -352,16 +350,18 @@ class VitNet(nn.Module):
         ])
         self.norm = norm_layer(embed_dim)
 
-        # 分类头、蒸馏头
+        self.act_fc = nn.Linear(embed_dim, embed_dim)  # [B, 768] => [B, 768]
+        self.act_act = nn.GELU()
         self.act_dist = nn.Linear(embed_dim, num_classes)  # [B, 768] => [B, 5]
+
+        self.val_fc = nn.Linear(embed_dim, embed_dim)   # [B, 768] => [B, 768]
+        self.val_act = nn.GELU()
         self.val_dist = nn.Linear(embed_dim, 1)   # [B, 768] => [B, 1]
 
         # 参数初始化, 这里需要pytorch 1.6以上版本
         # nn.init.trunc_normal_(self.pos_embed, std=0.02)
-        # nn.init.trunc_normal_(self.act_token, std=0.02)
         # nn.init.trunc_normal_(self.val_token, std=0.02)
         nn.init.normal_(self.pos_embed, std=0.02)
-        nn.init.normal_(self.act_token, std=0.02)
         nn.init.normal_(self.val_token, std=0.02)
         self.apply(_init_vit_weights)
 
@@ -370,23 +370,27 @@ class VitNet(nn.Module):
         # [B, C, H, W] -> [B, num_patches, embed_dim]
         x = self.patch_embed(x)  # [B, 50, 768]
         # [1, 1, 768] -> [B, 1, 768] 这里每一个B的 cls_token 都是一样的，并没有复制 cls_token 到每一个B
-        act_token = self.act_token.expand(x.shape[0], -1, -1)
         val_token = self.val_token.expand(x.shape[0], -1, -1)
-        x = torch.cat((act_token, val_token, x), dim=1)    # [B, 52, 768]
+        x = torch.cat((val_token, x), dim=1)    # [B, p+1, 768]
 
         # x 加上位置层，并且Dropout
-        x = self.pos_drop(x + self.pos_embed)       # [B, 52, 768]
+        x = self.pos_drop(x + self.pos_embed)       # [B, p+1, 768]
 
         # x 到达每一层的模块，包含了按照深度，由小到大的Dropout
-        x = self.blocks(x)                    # [B, 52, 768]
+        x = self.blocks(x)                    # [B, p+1, 768]
 
         # 归一化
-        x = self.norm(x)
+        x = self.norm(x)                      # [B, p+1, 768]
 
-        act, val = x[:, 0], x[:, 1]                 # [B, 768], [B, 768]
-        
+        act = x.mean(dim = 1)                 # [B, 768]
+        act = self.act_fc(act)
+        act = self.act_act(act)
         act = self.act_dist(act)
         act = nn.Softmax(dim=1)(act)
+
+        val = x[:, 0]                         # [B, 768]
+        val = self.val_fc(val)
+        val = self.val_act(val)
         val = self.val_dist(val)
         val = nn.Tanh()(val)
 
