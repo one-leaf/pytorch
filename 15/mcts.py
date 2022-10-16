@@ -148,6 +148,14 @@ class MCTS():
             probs = np.zeros(game.actions_num)
             for act, prob in act_probs:
                 probs[act] = prob
+
+            # alpha=1的时候，dir机会均等，>1 强调均值， <1 强调两端
+            # 国际象棋 0.3 将棋 0.15 围棋 0.03
+            # 取值一般倾向于 alpha = 10/n 所以俄罗斯方块取 2
+            dirichlet_alpha=2            
+            dirichlet_probs = np.random.dirichlet([dirichlet_alpha]*game.actions_num)
+            probs = 0.75*probs + 0.25*dirichlet_probs
+
             self.Ps[s] = probs 
 
             self.Ns[s] = 0
@@ -261,7 +269,7 @@ class MCTSPlayer(object):
             # temp 导致 N^(1/temp) alphaezero 前 30 步设置为1 其余设置为无穷小即act_probs只取最大值
             # temp 越大导致更均匀的搜索
             # 对于俄罗斯方块，为1/(h+1)
-            if temp==0 or len(acts)==1 or game.piecesteps>2 :
+            if True or temp==0 or len(acts)==1 or game.piecesteps>2 :
                 idx = max_probs_idx
             else:
                 # alphazero，默认p为0.75
