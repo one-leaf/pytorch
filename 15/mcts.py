@@ -268,8 +268,6 @@ class MCTSPlayer(object):
             # 对于俄罗斯方块，每个方块放下的第一步可以探索一下
             if game.piecesteps>=1:
                 temp = 0
-            else:
-                temp = 1
 
             acts, act_probs, act_qs, act_ps, state_v = self.mcts.get_action_probs(games, curr_player, temp)
             move_probs[acts] = act_probs
