@@ -265,8 +265,8 @@ class MCTSPlayer(object):
             # temp 导致 N^(1/temp) alphaezero 前 30 步设置为1 其余设置为无穷小即act_probs只取最大值
             # temp 越大导致更均匀的搜索
 
-            # 对于俄罗斯方块，每个方块放下的第一步可以探索一下
-            if game.piecesteps>=1:
+            # 对于俄罗斯方块，每个方块放下的第一个方块可以探索一下
+            if game.piececount>=1:
                 temp = 0
 
             acts, act_probs, act_qs, act_ps, state_v = self.mcts.get_action_probs(games, curr_player, temp)
