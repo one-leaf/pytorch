@@ -194,30 +194,14 @@ class MCTS():
         games["curr_player"] = 1 if games["curr_player"]==0 else 0
         self.depth = self.depth +1
 
-        # 如果方块落下，和对手比高，仅仅比对手差的时候惩罚
-        # sv = 0
-        # if game.state==1 and game.piececount - game.piececount_mark >1:
-        #     # curr_pieceheight = game.pieceheight
-        #     # next_pieceheight = other_game.pieceheight
-        #     # if curr_pieceheight>next_pieceheight:
-        #     # sv = (next_pieceheight-curr_pieceheight)/10
-        #     if game.reward>0:
-        #         sv = game.reward/game.pieceheight
-        #     else:
-        #         sv = (prev_pieceheight - game.pieceheight)/20
-        #     return -sv
-        sv = 0
+        # 现实奖励补贴
+        reward = 0
         if game.state == 1:
-            # if game.reward>0: 
-            #     sv = -game.reward*(0.8**game.pieceheight)
-            # else:
             curr_pieceheight = game.pieceheight
             next_pieceheight = other_game.pieceheight
-                # if game.piececount - game.piececount_mark > 1:
-                #     sv = (next_pieceheight - curr_pieceheight)/10
-                #     return -sv
-            sv = (next_pieceheight+prev_pieceheight-2*curr_pieceheight)*(0.9**game.pieceheight)
-        v = sv + self.search(games)
+            reward = (next_pieceheight+prev_pieceheight-2*curr_pieceheight)
+        v = reward + self.search(games)
+
         # v = self.search(games)
 
         # 更新 Q 值 和 访问次数
