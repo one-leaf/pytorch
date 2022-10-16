@@ -215,7 +215,7 @@ class Train():
 
             if game.pieceheight>=5:
                 game_stop=True
-            if abs(games[0].pieceheight-games[1].pieceheight)>1:
+            if abs(games[0].pieceheight-games[1].pieceheight)>=2:
                 game_stop=True
                 
             # if games[0].piececount>1 and games[1].piececount>1 and games[0].piececount==games[1].piececount:
