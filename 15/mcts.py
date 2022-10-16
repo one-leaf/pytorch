@@ -262,28 +262,35 @@ class MCTSPlayer(object):
         move_probs = np.zeros(game.actions_num)
         if not game.terminal:  # 如果游戏没有结束
             # 训练的时候 temp = 1
+            # temp 导致 N^(1/temp) alphaezero 前 30 步设置为1 其余设置为无穷小即act_probs只取最大值
+            # temp 越大导致更均匀的搜索
+
+            # 对于俄罗斯方块，每个方块放下的第一步可以探索一下
+            if game.piecesteps>=1:
+                temp = 0
+            else:
+                temp = 1
+
             acts, act_probs, act_qs, act_ps, state_v = self.mcts.get_action_probs(games, curr_player, temp)
             move_probs[acts] = act_probs
             max_probs_idx = np.argmax(act_probs)    
-            max_qs_idx = np.argmax(act_qs) 
+            # max_qs_idx = np.argmax(act_qs) 
             max_ps_idx = np.argmax(act_ps)    
-            # temp 导致 N^(1/temp) alphaezero 前 30 步设置为1 其余设置为无穷小即act_probs只取最大值
-            # temp 越大导致更均匀的搜索
-            # 对于俄罗斯方块，为1/(h+1)
-            if True or temp==0 or len(acts)==1 or game.piecesteps>2 :
-                idx = max_probs_idx
-            else:
-                # alphazero，默认p为0.75
-                p = 0.75
-                # a=1的时候，dir机会均等，>1 强调均值， <1 强调两端
-                # 国际象棋 0.3 将棋 0.15 围棋 0.03
-                # 取值一般倾向于 a = 10/n 所以俄罗斯方块取 2
-                a = 2                  
-                dirichlet = np.random.dirichlet(a * np.ones(len(act_probs)))
-                idx = np.random.choice(range(len(acts)), p=p*act_probs + (1.0-p)*dirichlet)                                                                     
+            # if True or temp==0 or len(acts)==1 or game.piecesteps>2 :
+            #     idx = max_probs_idx
+            # else:
+            # alphazero，默认p为0.75
+            # p = 0.75
+            # a=1的时候，dir机会均等，>1 强调均值， <1 强调两端
+            # 国际象棋 0.3 将棋 0.15 围棋 0.03
+            # 取值一般倾向于 a = 10/n 所以俄罗斯方块取 2
+            # a = 2                  
+            # dirichlet = np.random.dirichlet(a * np.ones(len(act_probs)))
+            # idx = np.random.choice(range(len(acts)), p=p*act_probs + (1.0-p)*dirichlet)                                                                     
+            idx = np.random.choice(range(len(acts)), p=act_probs)                                                                     
 
-            if max_qs_idx!=max_probs_idx and random.random()<(act_qs[max_qs_idx]-act_qs[max_probs_idx])*act_probs[max_qs_idx]:
-                idx = max_qs_idx
+            # if max_qs_idx!=max_probs_idx and random.random()<(act_qs[max_qs_idx]-act_qs[max_probs_idx])*act_probs[max_qs_idx]:
+            #     idx = max_qs_idx
 
             action = acts[idx]
             qval = act_qs[max_probs_idx]
