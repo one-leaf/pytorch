@@ -351,12 +351,14 @@ class VitNet(nn.Module):
         self.norm = norm_layer(embed_dim)
 
         self.act_fc = nn.Linear(embed_dim, embed_dim)  # [B, 768] => [B, 768]
-        self.act_act = nn.GELU()
+        self.act_fc_act = nn.GELU()
         self.act_dist = nn.Linear(embed_dim, num_classes)  # [B, 768] => [B, 5]
+        self.act_dist_act = nn.Softmax(dim=1)
 
         self.val_fc = nn.Linear(embed_dim, embed_dim)   # [B, 768] => [B, 768]
-        self.val_act = nn.GELU()
+        self.val_fc_act = nn.GELU()
         self.val_dist = nn.Linear(embed_dim, 1)   # [B, 768] => [B, 1]
+        self.val_dist_act = nn.Tanh()
 
         # 参数初始化, 这里需要pytorch 1.6以上版本
         # nn.init.trunc_normal_(self.pos_embed, std=0.02)
@@ -369,7 +371,7 @@ class VitNet(nn.Module):
         # 特征提取
         # [B, C, H, W] -> [B, num_patches, embed_dim]
         x = self.patch_embed(x)  # [B, 50, 768]
-        # [1, 1, 768] -> [B, 1, 768] 这里每一个B的 cls_token 都是一样的，并没有复制 cls_token 到每一个B
+        # [1, 1, 768] -> [B, 1, 768] 这里每一个B的 token 都是一样的，并没有复制 token 到每一个B
         val_token = self.val_token.expand(x.shape[0], -1, -1)
         x = torch.cat((val_token, x), dim=1)    # [B, p+1, 768]
 
@@ -384,14 +386,14 @@ class VitNet(nn.Module):
 
         act = x.mean(dim = 1)                 # [B, 768]
         act = self.act_fc(act)
-        act = self.act_act(act)
+        act = self.act_fc_act(act)
         act = self.act_dist(act)
-        act = nn.Softmax(dim=1)(act)
+        act = self.act_dist_act(act)
 
         val = x[:, 0]                         # [B, 768]
         val = self.val_fc(val)
-        val = self.val_act(val)
+        val = self.val_fc_act(val)
         val = self.val_dist(val)
-        val = nn.Tanh()(val)
+        val = self.val_dist_act(val)
 
         return act, val        
