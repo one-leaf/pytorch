@@ -204,8 +204,8 @@ class Train():
                     act_probs, values = net(test_batch) 
                     values = values.view(-1)              
                     if i<5: 
-                        print("value[0] old:{} to:{}".format(values[:5], test_values[:5]))  
-                        print("probs[0] old:{} to:{}".format(act_probs[0], test_probs[0]))
+                        print("value[0] old:{} to:{}".format(values[:5].cpu().numpy(), test_values[:5].cpu().numpy()))  
+                        print("probs[0] old:{} to:{}".format(act_probs[0].cpu().numpy(), test_probs[0].cpu().numpy()))
                     loss = loss_fn(values, test_values)
                     losses.append(loss.item())
             print("loss:",losses)
@@ -259,8 +259,8 @@ class Train():
                     act_probs, values = net(test_batch) 
                     values = values.view(-1) 
                     if i<5: 
-                        print("value[0] new:{} to:{}".format(values[:5], test_values[:5]))
-                        print("probs[0] old:{} to:{}".format(act_probs[0], test_probs[0]))  
+                        print("value[0] new:{} to:{}".format(values[:5].cpu().numpy(), test_values[:5].cpu().numpy()))
+                        print("probs[0] old:{} to:{}".format(act_probs[0].cpu().numpy(), test_probs[0].cpu().numpy()))  
                     loss = loss_fn(values, test_values)
                     losses.append(loss.item())
             print("loss:",losses)
