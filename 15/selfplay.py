@@ -343,7 +343,7 @@ class Train():
         print((" "+" -"*agent.width+" ")*len(borads))
 
         if games[0].terminal or games[1].terminal:
-            if games[0].score>0 or games[1].score>0:
+            if games[0].score != games[1].score:
                 winner = 1 if games[0].terminal else 0
             else:
                 winner = -1
