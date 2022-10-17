@@ -148,7 +148,7 @@ class Dataset(torch.utils.data.Dataset):
 class Train():
     def __init__(self):
         self.game_batch_num = 2000000  # selfplay对战次数
-        self.batch_size = 512     # 每批训练的样本，早期用小，后期用大 32 64 128 256 512
+        self.batch_size = 512     # 每批训练的样本，早期用小，防止局部最小值，后期用大，网络平稳 32 64 128 256 512
 
         # training params
         self.learn_rate = 5e-5
