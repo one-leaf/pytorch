@@ -230,7 +230,7 @@ class Train():
                     borads.append(_game.board)                    
 
                 game_reward =  sum([_game.score for _game in games])
-                game_step =  sum([_game.steps for _game in games])
+                game_step =  sum([_game.piececount for _game in games])
 
                 result = self.read_status_file(game_json)
 
