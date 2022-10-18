@@ -71,7 +71,7 @@ class Train():
         if result==None:
             result={"agent":0, "reward":[], "steps":[], "accs":[], "acc":0}
         if "curr" not in result:
-            result["curr"]={"reward":0, "step":0, "agent500":0, "agent50":0}
+            result["curr"]={"reward":0, "step":0, "agent500":0, "agent50":0, "acc":0}
         if "best" not in result:
             result["best"]={"reward":0, "agent":0}
         if "cpuct" not in result:
@@ -271,10 +271,10 @@ class Train():
                         acc.append(step["acc_ps"])
                 acc = np.average(acc)
 
-                if result["acc"]==0:
-                    result["acc"] = acc
+                if result["curr"]["acc"]==0:
+                    result["curr"]["acc"] = acc
                 else:
-                    result["acc"] = result["acc"]*0.99 + acc*0.01   
+                    result["curr"]["acc"] = result["curr"]["acc"]*0.99 + acc*0.01   
 
                 if result["curr"]["agent50"]>50:
                     result["reward"].append(round(result["curr"]["reward"]/result["curr"]["agent500"],2))
@@ -311,7 +311,7 @@ class Train():
                             policy_value_net.save_model(newmodelfile)
                         
                 if result["curr"]["agent500"]>200:
-                    result["curr"]={"reward":0,"step":0,"agent500":0,"agent50":0}
+                    result["curr"]={"reward":0,"step":0,"agent500":0,"agent50":0,"acc":0}
 
                     newmodelfile = model_file+"_"+str(result["agent"])
                     if not os.path.exists(newmodelfile):
