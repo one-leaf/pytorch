@@ -106,7 +106,7 @@ class Dataset(torch.utils.data.Dataset):
 
             # state drop_out
             _,h,w = state.shape
-            drop = np.random.rand(h,w)<0.98
+            drop = np.random.rand(h,w)<0.95
             state[2]=state[2]*drop
             bg = state[1]+state[2]
             bg_rot = np.rot90(bg).reshape(h, w)
