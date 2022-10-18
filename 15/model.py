@@ -192,7 +192,7 @@ class PolicyValueNet():
         # self.policy_value_net = ResNet(self.input_size, self.output_size)
         # self.policy_value_net = MLP_Mixer(20,10,9,2,5,128,64,512,5,8)
         # ViT-Ti : depth 12 width 192 heads 3
-        self.policy_value_net = VitNet(embed_dim=192, depth=12, num_heads=3, num_classes=5)
+        self.policy_value_net = VitNet(embed_dim=192, depth=12, num_heads=3, num_classes=5, drop_ratio=0, drop_path_ratio=0, attn_drop_ratio=0)
         # ViT-S : depth 12 width 386 heads 6
         # self.policy_value_net = VitNet(embed_dim=386, depth=12, num_heads=6, num_classes=5)
         # ViT-B : depth 12 width 768 heads 12
