@@ -279,7 +279,7 @@ class Train():
                 if result["curr"]["agent50"]>50:
                     result["reward"].append(round(result["curr"]["reward"]/result["curr"]["agent500"],2))
                     result["steps"].append(round(result["curr"]["step"]/result["curr"]["agent500"],2))
-                    result["accs"].append(round(result["acc"],3))
+                    result["accs"].append(round(result["curr"]["acc"],3))
                     result["time"]["step_times"].append(result["time"]["step_time"])
                     result["curr"]["agent50"] -= 50 
                     while len(result["reward"])>200:
