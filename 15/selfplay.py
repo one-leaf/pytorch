@@ -375,9 +375,10 @@ class Train():
                 v_sum += v
                 s_sum += score
                 acc_sum += data["steps"][j]["acc_ps"]
-            print("height：",data["piece_height"],"score:",s_sum/step_count, slist)
-            print("piece：",len(vlist),"qval:",v_sum/step_count, vlist)
-            print("steps：",step_count,"acc:",acc_sum/step_count, acclist)
+            print("value:",v,"score:",data["score"],"piece_count:",data["piece_count"],"piece_height:",data["piece_height"],"steps:",step_count)
+            print("avg_score:",s_sum/step_count, slist)
+            print("avg_qval:",v_sum/step_count, vlist)
+            print("acc:",acc_sum/step_count, acclist)
        
         states, mcts_probs, values, qval= [], [], [], []
 
