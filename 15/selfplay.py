@@ -366,7 +366,7 @@ class Train():
                 if piece_count!=data["steps"][j]["piece_count"]:
                     piece_count = data["steps"][j]["piece_count"]
                     score += data["steps"][j]["reward"]
-                    vlist.insert(0,(v+data["steps"][j]["qval"])/2)
+                    vlist.insert(0, round(data["steps"][j]["qval"],2))
                     slist.insert(0, score)
                     acclist.insert(0, data["steps"][j]["state_value"])
                 q = data["steps"][j]["qval"] 
