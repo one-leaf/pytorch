@@ -365,7 +365,7 @@ class Train():
                     score += data["steps"][j]["reward"]
                     vlist.insert(0, round(data["steps"][j]["qval"],2))
                     slist.insert(0, score)
-                    acclist.insert(0, data["steps"][j]["state_value"])
+                    acclist.insert(0, round(data["steps"][j]["state_value"],2))
                 q = data["steps"][j]["qval"] 
                 data["steps"][j]["reward"] = v
                 data["steps"][j]["score"] = q
@@ -375,7 +375,7 @@ class Train():
             print(i,"value:",v,"score:",data["score"],"piece_count:",data["piece_count"],"piece_height:",data["piece_height"],"steps:",step_count)
             print(i,"avg_score:",s_sum/step_count, slist)
             print(i,"avg_qval:",v_sum/step_count, vlist)
-            print(i,"acc:",acc_sum/step_count, acclist)
+            print(i,"p_acc:",acc_sum/step_count, acclist)
        
         states, mcts_probs, values, qval= [], [], [], []
 
