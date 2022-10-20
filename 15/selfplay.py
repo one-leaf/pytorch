@@ -283,7 +283,7 @@ class Train():
                 if result["curr"]["step"]==0:
                     result["curr"]["step"] = depth
                 else:
-                    result["curr"]["step"] = result["curr"]["step"]*0.99 + depth*0.01   
+                    result["curr"]["step"] = result["curr"]["step"]*0.9 + depth*0.1   
 
                 if result["curr"]["agent50"]>50:
                     result["reward"].append(round(result["curr"]["reward"]/result["curr"]["agent500"],2))
