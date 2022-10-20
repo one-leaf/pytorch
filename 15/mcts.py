@@ -254,6 +254,7 @@ class MCTSPlayer(object):
                 temp = 0
 
             acts, act_probs, act_qs, act_ps, state_v = self.mcts.get_action_probs(games, curr_player, temp)
+            depth = self.mcts.max_depth
             move_probs[acts] = act_probs
             max_probs_idx = np.argmax(act_probs)    
             # max_qs_idx = np.argmax(act_qs) 
@@ -279,10 +280,10 @@ class MCTSPlayer(object):
 
             if idx!=max_probs_idx:
                 print("    random","player:", curr_player, "h:",game.pieceheight, "v:", state_v, game.position_to_action_name(acts[max_probs_idx]), "p:", act_probs[max_probs_idx], "q:", act_qs[max_probs_idx], \
-                            "==>", game.position_to_action_name(acts[idx]), "p:", act_probs[idx], "q:", act_qs[idx], "std:", np.std(act_probs))  
+                            "==>", game.position_to_action_name(acts[idx]), "p:", act_probs[idx], "q:", act_qs[idx])  
 
             acc_ps = 1 if max_ps_idx==max_probs_idx else 0
-            return action, move_probs, state_v, qval, acc_ps
+            return action, move_probs, state_v, qval, acc_ps, depth
         else:
             print("WARNING: game is terminal")
 

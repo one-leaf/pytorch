@@ -190,8 +190,8 @@ class Train():
             _step["shape"] = game.fallpiece["shape"]
             _step["pre_piece_height"] = game.pieceheight
 
-            # action, move_probs, state_value, qval, acc_ps = player.get_action(games, curr_player, temp=1/(1+game.pieceheight)) 
-            action, move_probs, state_value, qval, acc_ps = player.get_action(games, curr_player, temp=1) 
+            # action, move_probs, state_value, qval, acc_ps, depth = player.get_action(games, curr_player, temp=1/(1+game.pieceheight)) 
+            action, move_probs, state_value, qval, acc_ps, depth = player.get_action(games, curr_player, temp=1) 
             _, reward = game.step(action)
 
             _step["piece_height"] = game.pieceheight
@@ -200,6 +200,7 @@ class Train():
             _step["state_value"] = state_value
             _step["qval"] = qval
             _step["acc_ps"] = acc_ps
+            _step["depth"] = depth
 
             data["steps"].append(_step)
 
@@ -259,22 +260,30 @@ class Train():
 
                 result["agent"] += 2
                 result["curr"]["reward"] += game_reward
-                result["curr"]["step"] += game_step
+                # result["curr"]["step"] += game_step
                 result["curr"]["agent500"] += 2
                 result["curr"]["agent50"] += 2
 
                 # 计算 acc 看有没有收敛
 
                 acc = []
+                depth = []
                 for _game, _data in zip(games, game_datas):
                     for step in _data["steps"]:
                         acc.append(step["acc_ps"])
+                        depth.append(step["depth"])
                 acc = np.average(acc)
+                depth = np.average(depth)
 
                 if result["curr"]["acc"]==0:
                     result["curr"]["acc"] = acc
                 else:
                     result["curr"]["acc"] = result["curr"]["acc"]*0.99 + acc*0.01   
+
+                if result["curr"]["step"]==0:
+                    result["curr"]["step"] = depth
+                else:
+                    result["curr"]["step"] = result["curr"]["step"]*0.99 + depth*0.01   
 
                 if result["curr"]["agent50"]>50:
                     result["reward"].append(round(result["curr"]["reward"]/result["curr"]["agent500"],2))
