@@ -293,6 +293,8 @@ class Train():
                     result["curr"]["agent50"] -= 50 
                     while len(result["reward"])>200:
                         result["reward"].remove(result["reward"][0])
+                    while len(result["steps"])>200:
+                        result["steps"].remove(result["steps"][0])
                     while len(result["accs"])>200:
                         result["accs"].remove(result["accs"][0])
                     while len(result["time"]["step_times"])>200:    
