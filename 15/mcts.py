@@ -85,6 +85,11 @@ class MCTS():
         qs = [av[1] for av in act_Qs]
         ps = [self.Ps[s][a] if s in self.Ps else 0 for a in available_acts]
         v = 0 if s not in self.Vs else self.Vs[s]
+        n = 1 if s not in self.Ns else self.Ns[s]
+        if n>temp and temp>0:
+            temp = np.log(n)/np.log(temp)
+        else:
+            temp = 1
 
         if temp == 0:
             bestAs = np.array(np.argwhere(visits == np.max(visits))).flatten()
@@ -111,9 +116,9 @@ class MCTS():
                 if (s, act) in self.Qsa: q = self.Qsa[(s, act)]
                 if s in self.Ps: p = self.Ps[s][act]
                 info.append([game.position_to_action_name(act), visit, round(q,2), round(p,2)])        
-            print(game.steps, game.piececount, game.fallpiece["shape"], game.piecesteps, "search:", n+1, "depth:" ,self.max_depth,"height:", game.pieceheight, "value:", round(v,2), "qval:", round(qval,2), info, "player:", self.curr_player)
+            print(game.steps, game.piececount, game.fallpiece["shape"], game.piecesteps, "temp:", temp, "search:", n+1, "depth:" ,self.max_depth,"height:", game.pieceheight, "value:", round(v,2), "qval:", round(qval,2), info, "player:", self.curr_player)
 
-        return acts, probs, qs, ps, v
+        return acts, probs, qs, ps, v, n
 
     def search(self, games):
         """
@@ -198,8 +203,9 @@ class MCTS():
         reward = 0
         if game.state == 1:
             curr_pieceheight = game.pieceheight
-            next_pieceheight = other_game.pieceheight
-            reward = (next_pieceheight+prev_pieceheight-2*curr_pieceheight)/(curr_pieceheight+next_pieceheight)
+            reward = prev_pieceheight-curr_pieceheight
+            # next_pieceheight = other_game.pieceheight
+            # reward = (next_pieceheight+prev_pieceheight-2*curr_pieceheight)/(curr_pieceheight+next_pieceheight)
         v = reward + self.search(games)
 
         # v = self.search(games)
@@ -250,15 +256,25 @@ class MCTSPlayer(object):
             # temp 越大导致更均匀的搜索
 
             # 对于俄罗斯方块，每个方块放下的第一个方块可以探索一下
-            if game.piececount>=1:
-                temp = 0
+            # if game.piececount>=1:
+            #     temp = 0
+            # temp = 1000
 
-            acts, act_probs, act_qs, act_ps, state_v = self.mcts.get_action_probs(games, curr_player, temp)
+            acts, act_probs, act_qs, act_ps, state_v, state_n = self.mcts.get_action_probs(games, curr_player, temp)
             depth = self.mcts.max_depth
             move_probs[acts] = act_probs
             max_probs_idx = np.argmax(act_probs)    
-            # max_qs_idx = np.argmax(act_qs) 
+            max_qs_idx = np.argmax(act_qs) 
             max_ps_idx = np.argmax(act_ps)    
+            if max_probs_idx == max_qs_idx:
+                idx = max_probs_idx
+            else:
+                for i, qs in enumerate(act_qs):
+                    if qs<act_qs[max_qs_idx]:
+                        act_probs[i]=0
+                act_probs = act_probs/np.sum(act_probs)        
+                idx = np.random.choice(range(len(acts)), p=act_probs) 
+
             # if True or temp==0 or len(acts)==1 or game.piecesteps>2 :
             #     idx = max_probs_idx
             # else:
@@ -270,7 +286,7 @@ class MCTSPlayer(object):
             # a = 2                  
             # dirichlet = np.random.dirichlet(a * np.ones(len(act_probs)))
             # idx = np.random.choice(range(len(acts)), p=p*act_probs + (1.0-p)*dirichlet)                                                                     
-            idx = np.random.choice(range(len(acts)), p=act_probs)                                                                     
+            # idx = np.random.choice(range(len(acts)), p=act_probs)                                                                     
 
             # if max_qs_idx!=max_probs_idx and random.random()<(act_qs[max_qs_idx]-act_qs[max_probs_idx])*act_probs[max_qs_idx]:
             #     idx = max_qs_idx
@@ -283,7 +299,7 @@ class MCTSPlayer(object):
                             "==>", game.position_to_action_name(acts[idx]), "p:", act_probs[idx], "q:", act_qs[idx])  
 
             acc_ps = 1 if max_ps_idx==max_probs_idx else 0
-            return action, move_probs, state_v, qval, acc_ps, depth
+            return action, move_probs, state_v, qval, acc_ps, depth, state_n
         else:
             print("WARNING: game is terminal")
 

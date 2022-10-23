@@ -1,3 +1,4 @@
+from os import stat
 from game import Tetromino, pieces, templatenum, blank 
 # from pygame.locals import *
 import numpy as np
@@ -47,6 +48,8 @@ class Agent(object):
         self.state = 0
         # 每个方块的高度
         self.pieces_height = []     
+        # 当前所有动作
+        self.actions=[]
         # 盘面的状态
         self.status = [] #deque(maxlen=10)
         _board = np.zeros((self.height, self.width))
@@ -62,7 +65,13 @@ class Agent(object):
         self.set_key()
 
     def add_status(self):
-        self.status.append((self.get_nextpiece_borad(), self.get_fallpiece_board(), self.getBoard()))
+        acts = self.actions[:-41:-1]
+        acts_np=np.zeros((40,5))
+        for n,act in enumerate(acts):
+            acts_np[n][act]=1
+        acts_np=acts_np.reshape((20,10))
+
+        self.status.append((acts_np, self.get_fallpiece_board(), self.getBoard()))
         self.status.pop(0)
 
     # 概率的索引位置转action
@@ -117,7 +126,7 @@ class Agent(object):
         self.piecesteps += 1
         self.level, self.fallfreq = self.tetromino.calculate(self.score)
         
-        # self.actions.append(action)
+        self.actions.append(action)
 
         if action == KEY_LEFT and self.tetromino.validposition(self.board, self.fallpiece, ax=-1):
             self.fallpiece['x'] -= 1
@@ -342,10 +351,11 @@ class Agent(object):
 
         state = np.zeros((3, self.height, self.width))
 
-        bg = self.status[-1][1] + self.status[-1][2] 
-        bg_rot = np.rot90(bg).reshape(self.height, self.width)
-        state[0] = bg_rot 
+        # bg = self.status[-1][1] + self.status[-1][2] 
+        # bg_rot = np.rot90(bg).reshape(self.height, self.width)
+        # state[0] = bg_rot 
         # state[0] = self.status[-2][1]
+        state[0] = self.status[-1][0]
         state[1] = self.status[-1][1]
         state[2] = self.status[-1][2]
         # for i in range(3):

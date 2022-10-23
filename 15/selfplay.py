@@ -69,21 +69,11 @@ class Train():
                 ext = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
                 os.replace(status_file, status_file+"_"+ext) 
         if result==None:
-            result={"agent":0, "reward":[], "steps":[], "accs":[], "acc":0}
-        if "curr" not in result:
-            result["curr"]={"reward":0, "step":0, "agent500":0, "agent50":0, "acc":0}
+            result={"reward":[], "depth":[], "acc":[], "time":[], "ns":[]}
+        if "total" not in result:
+            result["total"]={"agent":0, "acc":0, "ns":0, "reward":0, "depth":0, "step_time":0, "_agent":0}
         if "best" not in result:
             result["best"]={"reward":0, "agent":0}
-        if "cpuct" not in result:
-            result["cpuct"]={"0.5":{"count":0,"value":0},"0.6":{"count":0,"value":0}}    
-        for key in result["cpuct"]:
-            if not isinstance(result["cpuct"][key], dict):
-                result["cpuct"][key] = {"count":0,"value":result["cpuct"][key]}
-        if "time" not in result:
-            result["time"]={"agent_time":0,"step_time":0,"step_times":[]}
-        if "vars" not in result or "avg" not in result["vars"]:
-            # 缺省std = sqrt(2)
-            result["vars"]={"max":1, "min":-1, "std":1, "avg":0}
 
         return result
 
@@ -136,7 +126,7 @@ class Train():
         agent.id = 1
         
         game_json = os.path.join(data_dir, "result.json")
-        # game_result = self.read_status_file(game_json)
+        result = self.read_status_file(game_json)
         
         # 由于动态cpuct并没有得到一个好的结果，所以关闭
         # 读取各自的动态cpuct
@@ -185,13 +175,13 @@ class Train():
             data = game_datas[curr_player]            
 
             _step={"step":i, "curr_player":curr_player}
-            _step["state"] = game.current_state()               
+            _step["state"] = game.current_state()    
+            # print(_step["state"])           
             _step["piece_count"] = game.piececount               
             _step["shape"] = game.fallpiece["shape"]
             _step["pre_piece_height"] = game.pieceheight
 
-            # action, move_probs, state_value, qval, acc_ps, depth = player.get_action(games, curr_player, temp=1/(1+game.pieceheight)) 
-            action, move_probs, state_value, qval, acc_ps, depth = player.get_action(games, curr_player, temp=1) 
+            action, move_probs, state_value, qval, acc_ps, depth, ns = player.get_action(games, curr_player, temp=result["total"]["ns"]) 
             _, reward = game.step(action)
 
             _step["piece_height"] = game.pieceheight
@@ -201,6 +191,7 @@ class Train():
             _step["qval"] = qval
             _step["acc_ps"] = acc_ps
             _step["depth"] = depth
+            _step["ns"] = ns
 
             data["steps"].append(_step)
 
@@ -230,101 +221,83 @@ class Train():
                     _data["piece_height"] = _game.pieceheight
                     borads.append(_game.board)                    
 
-                game_reward =  sum([_game.score for _game in games])
-                game_step =  sum([_game.piececount for _game in games])
-
+                game_reward =  sum([_game.score for _game in games])/len(games)
                 result = self.read_status_file(game_json)
 
                 paytime = time.time()-start_time
                 steptime = paytime/sum([_game.steps for _game in games])
 
-                if result["time"]["agent_time"]==0:
-                    result["time"]["agent_time"] = paytime
-                    result["time"]["step_time"] = steptime
-                else:
-                    result["time"]["agent_time"] = round(result["time"]["agent_time"]*0.99+paytime*0.01, 3)
-                    d = game.steps/10000.0
-                    if d>1 : d = 0.99
-                    result["time"]["step_time"] = round(result["time"]["step_time"]*(1-d)+steptime*d, 3)
-            
-                # 记录当前cpuct的统计结果
-                # cpuct_str = str(cpuct)
-                # if cpuct_str in result["cpuct"]:
-                #     result["cpuct"][cpuct_str]["value"] = result["cpuct"][cpuct_str]["value"]+game_step
-                #     result["cpuct"][cpuct_str]["count"] = result["cpuct"][cpuct_str]["count"]+1         
+                result["total"]["agent"] += 2
+                result["total"]["_agent"] += 2
 
+                if result["total"]["step_time"]==0:
+                    result["total"]["step_time"] = steptime
+                else:
+                    result["total"]["step_time"] = result["total"]["step_time"]*0.99 + paytime*0.01
+            
                 if game_reward>result["best"]["reward"]:
                     result["best"]["reward"] = game_reward
-                    result["best"]["score"] = game.score
-                    result["best"]["agent"] = result["agent"]
+                    result["best"]["agent"] = result["total"]["agent"]
 
-                result["agent"] += 2
-                result["curr"]["reward"] += game_reward
-                # result["curr"]["step"] += game_step
-                result["curr"]["agent500"] += 2
-                result["curr"]["agent50"] += 2
+                if result["total"]["reward"]==0:
+                    result["total"]["reward"] = game_reward
+                else:
+                    result["total"]["reward"] = result["total"]["reward"]*0.99 + game_reward*0.01
 
                 # 计算 acc 看有没有收敛
 
                 acc = []
                 depth = []
+                ns = []
                 for _game, _data in zip(games, game_datas):
                     for step in _data["steps"]:
                         acc.append(step["acc_ps"])
                         depth.append(step["depth"])
+                        ns.append(step["ns"])
                 acc = np.average(acc)
                 depth = np.average(depth)
+                ns = np.average(ns)
 
-                if result["curr"]["acc"]==0:
-                    result["curr"]["acc"] = acc
+                if result["total"]["acc"]==0:
+                    result["total"]["acc"] = acc
                 else:
-                    result["curr"]["acc"] = result["curr"]["acc"]*0.99 + acc*0.01   
+                    result["total"]["acc"] = result["total"]["acc"]*0.99 + acc*0.01   
 
-                if result["curr"]["step"]==0:
-                    result["curr"]["step"] = depth
+                if result["total"]["depth"]==0:
+                    result["total"]["depth"] = depth
                 else:
-                    result["curr"]["step"] = result["curr"]["step"]*0.9 + depth*0.1   
+                    result["total"]["depth"] = result["total"]["depth"]*0.99 + depth*0.01   
 
-                if result["curr"]["agent50"]>50:
-                    result["reward"].append(round(result["curr"]["reward"]/result["curr"]["agent500"],2))
-                    result["steps"].append(round(result["curr"]["step"]))
-                    result["accs"].append(round(result["curr"]["acc"],3))
-                    result["time"]["step_times"].append(result["time"]["step_time"])
-                    result["curr"]["agent50"] -= 50 
+                if result["total"]["ns"]==0:
+                    result["total"]["ns"] = ns
+                else:
+                    result["total"]["ns"] = result["total"]["ns"]*0.99 + depth*0.01   
+
+                if result["total"]["_agent"]>100:
+                    result["reward"].append(round(result["total"]["reward"],1))
+                    result["depth"].append(round(result["total"]["depth"],1))
+                    result["acc"].append(round(result["total"]["acc"],3))
+                    result["time"].append(round(result["total"]["step_time"],1))
+                    result["ns"].append(round(result["total"]["ns"],1))
+                    result["total"]["_agent"] -= 50 
+
                     while len(result["reward"])>200:
                         result["reward"].remove(result["reward"][0])
-                    while len(result["steps"])>200:
-                        result["steps"].remove(result["steps"][0])
-                    while len(result["accs"])>200:
-                        result["accs"].remove(result["accs"][0])
-                    while len(result["time"]["step_times"])>200:    
-                        result["time"]["step_times"].remove(result["time"]["step_times"][0])
-
-                    # 每50局更新一次cpuct参数
-                    # count0=result["cpuct"][cpuct_list[0]]["count"]
-                    # count1=result["cpuct"][cpuct_list[1]]["count"]
-                    # if count0>10 and count1>10:
-                    #     v0 = result["cpuct"][cpuct_list[0]]["value"]/count0
-                    #     v1 = result["cpuct"][cpuct_list[1]]["value"]/count1
-                    #     if v0 > v1:
-                    #         cpuct = round(float(cpuct_list[0])-0.1,1)
-                    #         if cpuct<0.1:
-                    #             result["cpuct"] = {"0.1":{"count":0,"value":0}, "0.2":{"count":0,"value":0}}
-                    #         else:
-                    #             result["cpuct"] = {str(cpuct):{"count":0,"value":0}, str(round(cpuct+0.1,1)):{"count":0,"value":0}}
-                    #     else:
-                    #         cpuct = round(float(cpuct_list[0])+0.1,1)
-                    #         result["cpuct"] = {str(cpuct):{"count":0,"value":0}, str(round(cpuct+0.1,1)):{"count":0,"value":0}}
-
-                    if max(result["steps"])==result["steps"][-1]:
-                        newmodelfile = model_file+"_steps_"+str(result["steps"][-1])
+                    while len(result["depth"])>200:
+                        result["depth"].remove(result["depth"][0])
+                    while len(result["acc"])>200:
+                        result["acc"].remove(result["acc"][0])
+                    while len(result["time"])>200:
+                        result["time"].remove(result["time"][0])
+                    while len(result["ns"])>200:
+                        result["ns"].remove(result["ns"][0])
+                   
+                    if max(result["depth"])==result["depth"][-1]:
+                        newmodelfile = model_file+"_depth_"+str(result["depth"][-1])
                         if not os.path.exists(newmodelfile):
                             policy_value_net.save_model(newmodelfile)
-                        
-                if result["curr"]["agent500"]>200:
-                    result["curr"]={"reward":0,"step":0,"agent500":0,"agent50":0,"acc":0}
-
-                    newmodelfile = model_file+"_"+str(result["agent"])
+                       
+                    newmodelfile = model_file+"_"+str(result["total"]["agent"])
                     if not os.path.exists(newmodelfile):
                         policy_value_net.save_model(newmodelfile)
 
