@@ -233,7 +233,7 @@ class Train():
                 if result["total"]["step_time"]==0:
                     result["total"]["step_time"] = steptime
                 else:
-                    result["total"]["step_time"] = result["total"]["step_time"]*0.99 + paytime*0.01
+                    result["total"]["step_time"] = result["total"]["step_time"]*0.99 + steptime*0.01
             
                 if game_reward>result["best"]["reward"]:
                     result["best"]["reward"] = game_reward
