@@ -96,6 +96,7 @@ class Dataset(torch.utils.data.Dataset):
                 if os.path.exists(fn): os.remove(fn)
                 self.file_list.remove(fn)
                 continue
+            
             # 这里准备数据的时候直接 value = (value+qval)/2 同时考虑两者
             # self.data[fn]={"value":(value+qval)/2., "state":state, "mcts_prob": mcts_prob}
             # p = 0
