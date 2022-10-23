@@ -160,7 +160,7 @@ class MCTS():
             dirichlet_alpha=2            
             dirichlet_probs = np.random.dirichlet([dirichlet_alpha]*len(act_probs))
             for (act, prob), noise in zip(act_probs, dirichlet_probs):
-                probs[act] = 0.75*prob+0.25*noise
+                probs[act] = 0.9*prob+0.1*noise
 
             self.Ps[s] = probs 
 
