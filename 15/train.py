@@ -98,20 +98,17 @@ class Dataset(torch.utils.data.Dataset):
                 continue
             # 这里准备数据的时候直接 value = (value+qval)/2 同时考虑两者
             # self.data[fn]={"value":(value+qval)/2., "state":state, "mcts_prob": mcts_prob}
-            p = 0
-            v = qval*p + value*(1-p)
+            # p = 0
+            # value = qval*p + value*(1-p)
+            # _,h,w = state.shape
+            # drop = np.random.rand(h,w)<0.95
+            # state[2]=state[2]*drop
+            # bg = state[1]+state[2]
+            # bg_rot = np.rot90(bg).reshape(h, w)
+            # state[0]=bg_rot
 
-            # if value<=-1:
-            #     mcts_prob = 0.9*mcts_prob+0.1*np.random.dirichlet(np.ones(5))
 
-            # state drop_out
-            _,h,w = state.shape
-            drop = np.random.rand(h,w)<0.95
-            state[2]=state[2]*drop
-            bg = state[1]+state[2]
-            bg_rot = np.rot90(bg).reshape(h, w)
-            state[0]=bg_rot
-            self.data[fn]={"value":v, "state":state, "mcts_prob": mcts_prob}
+            self.data[fn]={"value":value, "state":state, "mcts_prob": mcts_prob}
             sum_v+=value
             
         # 将qval高的重复学习一次    
