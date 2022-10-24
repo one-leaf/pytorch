@@ -98,7 +98,8 @@ class MCTS():
             probs[bestA] = 1
             probs = np.array(probs)
         else:
-            m = np.power(np.array(visits), 1./temp)
+            temp = 1/temp
+            m = np.power(np.array(visits), temp)
             m_sum = np.sum(m)
             if m_sum<=0:
                 v_len = len(acts)
