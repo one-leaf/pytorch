@@ -85,9 +85,9 @@ class MCTS():
         qs = [av[1] for av in act_Qs]
         ps = [self.Ps[s][a] if s in self.Ps else 0 for a in available_acts]
         v = 0 if s not in self.Vs else self.Vs[s]
-        n = 1 if s not in self.Ns else self.Ns[s]
-        if n>temp and temp>0:
-            temp = np.log(n)/np.log(temp)
+        ns = 1 if s not in self.Ns else self.Ns[s]
+        if ns>temp and temp>0:
+            temp = np.log(ns)/np.log(temp)
         else:
             temp = 1
 
@@ -116,7 +116,7 @@ class MCTS():
                 if (s, act) in self.Qsa: q = self.Qsa[(s, act)]
                 if s in self.Ps: p = self.Ps[s][act]
                 info.append([game.position_to_action_name(act), visit, round(q,2), round(p,2)])        
-            print(game.steps, game.piececount, game.fallpiece["shape"], game.piecesteps, "temp:", temp, "search:", n+1, "depth:" ,self.max_depth,"height:", game.pieceheight, "value:", round(v,2), "qval:", round(qval,2), info, "player:", self.curr_player)
+            print(game.steps, game.piececount, game.fallpiece["shape"], game.piecesteps, "temp:", temp, "ns:", ns, "search:", n+1, "depth:" ,self.max_depth,"height:", game.pieceheight, "value:", round(v,2), "qval:", round(qval,2), info, "player:", self.curr_player)
 
         return acts, probs, qs, ps, v, n
 
