@@ -353,31 +353,32 @@ class Train():
             piece_count = -1
             v = 1 if i==winner else -1 
             score = 0
-            vlist=[]
+            vacclist=[]
             slist=[]
-            acclist=[]
-            v_sum = 0
+            pacclist=[]
+            vacc_sum = 0
             s_sum = 0
-            acc_sum = 0
+            pacc_sum = 0
             d_sum = 0
             for j in range(step_count-1,-1,-1):
                 if piece_count!=data["steps"][j]["piece_count"]:
                     piece_count = data["steps"][j]["piece_count"]
                     score += data["steps"][j]["reward"]
-                    vlist.insert(0, round(data["steps"][j]["qval"],2))
+                    vacclist.insert(0, round(data["steps"][j]["state_value"],2))
                     slist.insert(0, score)
-                    acclist.insert(0, round(data["steps"][j]["state_value"],2))
+                    pacclist.insert(0, round(max(data["steps"][j]["move_probs"]),2))
                 q = data["steps"][j]["qval"] 
                 data["steps"][j]["reward"] = v
                 data["steps"][j]["score"] = q
-                v_sum += v
+
+                vacc_sum += abs(v-data["steps"][j]["state_value"])
                 s_sum += score
-                acc_sum += data["steps"][j]["acc_ps"]
+                pacc_sum += abs(1-max(data["steps"][j]["move_probs"]))
                 d_sum += data["steps"][j]["depth"]
             print(i,"value:",v,"score:",data["score"],"piece_count:",data["piece_count"],"piece_height:",data["piece_height"],"steps:",step_count,"depth:",d_sum/step_count)
             print(i,"avg_score:",s_sum/step_count, slist)
-            print(i,"avg_qval:",v_sum/step_count, vlist)
-            print(i,"p_acc:",acc_sum/step_count, acclist)
+            print(i,"v_acc:",vacc_sum/step_count, vacclist)
+            print(i,"p_acc:",pacc_sum/step_count, pacclist)
        
         states, mcts_probs, values, qval= [], [], [], []
 
