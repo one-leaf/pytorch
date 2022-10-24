@@ -267,11 +267,12 @@ class MCTSPlayer(object):
             max_probs_idx = np.argmax(act_probs)    
             max_qs_idx = np.argmax(act_qs) 
             max_ps_idx = np.argmax(act_ps)    
+
             if max_probs_idx == max_qs_idx:
                 idx = max_probs_idx
             else:
                 for i, qs in enumerate(act_qs):
-                    if qs<act_qs[max_qs_idx]:
+                    if qs<act_qs[max_probs_idx]:
                         act_probs[i]=0
                 act_probs = act_probs/np.sum(act_probs)        
                 idx = np.random.choice(range(len(acts)), p=act_probs) 
