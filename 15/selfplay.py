@@ -271,7 +271,7 @@ class Train():
                 if result["total"]["ns"]==0:
                     result["total"]["ns"] = ns
                 else:
-                    result["total"]["ns"] = result["total"]["ns"]*0.99 + depth*0.01   
+                    result["total"]["ns"] = result["total"]["ns"]*0.99 + ns*0.01   
 
                 if result["total"]["_agent"]>100:
                     result["reward"].append(round(result["total"]["reward"],1))
