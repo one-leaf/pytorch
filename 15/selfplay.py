@@ -250,7 +250,7 @@ class Train():
                 vacc = []
                 depth = []
                 ns = []
-                winner  = 0 if games[0].pieceheight > games[1].pieceheight else 1
+                winner  = 0 if games[0].pieceheight < games[1].pieceheight else 1
                 for j, _game, _data in zip([0,1], games, game_datas):
                     for step in _data["steps"]:
                         pacc.append(step["acc_ps"])
@@ -272,7 +272,7 @@ class Train():
                     result["total"]["pacc"] = result["total"]["pacc"]*0.99 + pacc*0.01   
 
                 if result["total"]["vacc"]==0:
-                    result["total"]["vacc"] = pacc
+                    result["total"]["vacc"] = vacc
                 else:
                     result["total"]["vacc"] = result["total"]["vacc"]*0.99 + vacc*0.01   
 
