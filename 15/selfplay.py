@@ -259,7 +259,7 @@ class Train():
                         if (j==winner and step["state_value"]>0) or (j!=winner and step["state_value"]<0):
                             vacc.append(1)
                         else:
-                            vacc.append(-1)
+                            vacc.append(0)
 
                 pacc = np.average(pacc)
                 vacc = np.average(vacc)
