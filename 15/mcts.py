@@ -118,7 +118,7 @@ class MCTS():
                 info.append([game.position_to_action_name(act), visit, round(q,2), round(p,2)])        
             print(game.steps, game.piececount, game.fallpiece["shape"], game.piecesteps, "temp:", temp, "ns:", ns, "search:", n+1, "depth:" ,self.max_depth,"height:", game.pieceheight, "value:", round(v,2), "qval:", round(qval,2), info, "player:", self.curr_player)
 
-        return acts, probs, qs, ps, v, n
+        return acts, probs, qs, ps, v, ns
 
     def search(self, games):
         """
