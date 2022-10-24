@@ -69,9 +69,9 @@ class Train():
                 ext = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
                 os.replace(status_file, status_file+"_"+ext) 
         if result==None:
-            result={"reward":[], "depth":[], "acc":[], "time":[], "ns":[]}
+            result={"reward":[], "depth":[], "pacc":[], "vacc":[], "time":[], "ns":[]}
         if "total" not in result:
-            result["total"]={"agent":0, "acc":0, "ns":0, "reward":0, "depth":0, "step_time":0, "_agent":0}
+            result["total"]={"agent":0, "pacc":0, "vacc":0, "ns":0, "reward":0, "depth":0, "step_time":0, "_agent":0}
         if "best" not in result:
             result["best"]={"reward":0, "agent":0}
 
@@ -246,22 +246,35 @@ class Train():
 
                 # 计算 acc 看有没有收敛
 
-                acc = []
+                pacc = []
+                vacc = []
                 depth = []
                 ns = []
-                for _game, _data in zip(games, game_datas):
+                winner  = 0 if games[0].pieceheight > games[1].pieceheight else 1
+                for j, _game, _data in zip([0,1], games, game_datas):
                     for step in _data["steps"]:
-                        acc.append(step["acc_ps"])
+                        pacc.append(step["acc_ps"])
                         depth.append(step["depth"])
                         ns.append(step["ns"])
-                acc = np.average(acc)
+                        if (j==winner and step["state_value"]>0) or (j!=winner and step["state_value"]<0):
+                            vacc.append(1)
+                        else:
+                            vacc.append(-1)
+
+                pacc = np.average(pacc)
+                vacc = np.average(vacc)
                 depth = np.average(depth)
                 ns = np.average(ns)
 
-                if result["total"]["acc"]==0:
-                    result["total"]["acc"] = acc
+                if result["total"]["pacc"]==0:
+                    result["total"]["pacc"] = pacc
                 else:
-                    result["total"]["acc"] = result["total"]["acc"]*0.99 + acc*0.01   
+                    result["total"]["pacc"] = result["total"]["pacc"]*0.99 + pacc*0.01   
+
+                if result["total"]["vacc"]==0:
+                    result["total"]["vacc"] = pacc
+                else:
+                    result["total"]["vacc"] = result["total"]["vacc"]*0.99 + vacc*0.01   
 
                 if result["total"]["depth"]==0:
                     result["total"]["depth"] = depth
@@ -276,7 +289,8 @@ class Train():
                 if result["total"]["_agent"]>100:
                     result["reward"].append(round(result["total"]["reward"],1))
                     result["depth"].append(round(result["total"]["depth"],1))
-                    result["acc"].append(round(result["total"]["acc"],3))
+                    result["pacc"].append(round(result["total"]["pacc"],3))
+                    result["vacc"].append(round(result["total"]["vacc"],3))
                     result["time"].append(round(result["total"]["step_time"],1))
                     result["ns"].append(round(result["total"]["ns"],1))
                     result["total"]["_agent"] -= 50 
@@ -285,8 +299,10 @@ class Train():
                         result["reward"].remove(result["reward"][0])
                     while len(result["depth"])>200:
                         result["depth"].remove(result["depth"][0])
-                    while len(result["acc"])>200:
-                        result["acc"].remove(result["acc"][0])
+                    while len(result["pacc"])>200:
+                        result["pacc"].remove(result["pacc"][0])
+                    while len(result["vacc"])>200:
+                        result["vacc"].remove(result["vacc"][0])
                     while len(result["time"])>200:
                         result["time"].remove(result["time"][0])
                     while len(result["ns"])>200:
