@@ -299,7 +299,7 @@ class PolicyValueNet():
         log_probs = torch.log(probs + 1e-8)
         policy_loss = -torch.mean(torch.sum(mcts_probs * log_probs, 1))
 
-        loss = value_loss + 10*policy_loss
+        loss = value_loss + policy_loss
 
         # 参数梯度清零
         self.optimizer.zero_grad()
