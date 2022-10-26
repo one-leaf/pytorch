@@ -297,8 +297,8 @@ class MCTSPlayer(object):
             qval = act_qs[max_probs_idx]
 
             if idx!=max_probs_idx:
-                print("    random","player:", curr_player, "h:",game.pieceheight, "v:", state_v, game.position_to_action_name(acts[max_probs_idx]), "p:", act_probs[max_probs_idx], "q:", act_qs[max_probs_idx], \
-                            "==>", game.position_to_action_name(acts[idx]), "p:", act_probs[idx], "q:", act_qs[idx])  
+                print("    random", game.position_to_action_name(acts[max_probs_idx]), "==>",  game.position_to_action_name(acts[idx]), \
+                           "p:", act_probs[max_probs_idx], "==>", act_probs[idx], "q:", act_qs[max_probs_idx], "==>", act_qs[idx])  
 
             acc_ps = 1 if max_ps_idx==max_probs_idx else 0
             return action, move_probs, state_v, qval, acc_ps, depth, state_n
