@@ -307,20 +307,19 @@ class Train():
                         result["time"].remove(result["time"][0])
                     while len(result["ns"])>200:
                         result["ns"].remove(result["ns"][0])
-                   
-                    if max(result["depth"])==result["depth"][-1]:
-                        newmodelfile = model_file+"_depth_"+str(result["depth"][-1])
-                        if not os.path.exists(newmodelfile):
-                            policy_value_net.save_model(newmodelfile)
-                       
+
+                    # 保存下中间步骤的agent
                     newmodelfile = model_file+"_"+str(result["total"]["agent"])
                     if not os.path.exists(newmodelfile):
                         policy_value_net.save_model(newmodelfile)
 
-                    lastmodelfile = model_file+"_last"                                        
-                    if os.path.exists(bestmodelfile): os.remove(bestmodelfile)
-                    if os.path.exists(lastmodelfile): os.rename(lastmodelfile, bestmodelfile)
-                    policy_value_net.save_model(lastmodelfile)
+                    # 如果当前最佳，将模型设置为最佳模型
+                    if max(result["depth"])==result["depth"][-1]:
+                        newmodelfile = model_file+"_depth_"+str(result["depth"][-1])
+                        if not os.path.exists(newmodelfile):
+                            policy_value_net.save_model(newmodelfile)
+                        if os.path.exists(bestmodelfile): os.remove(bestmodelfile)
+                        if os.path.exists(newmodelfile): os.link(newmodelfile, bestmodelfile)
 
                 result["lastupdate"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 self.save_status_file(result, game_json) 
