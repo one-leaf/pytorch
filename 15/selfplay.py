@@ -287,14 +287,14 @@ class Train():
                 else:
                     result["total"]["ns"] = result["total"]["ns"]*0.99 + ns*0.01   
 
-                if result["total"]["_agent"]>100:
+                if result["total"]["_agent"]>200:
                     result["reward"].append(round(result["total"]["reward"],1))
                     result["depth"].append(round(result["total"]["depth"],1))
                     result["pacc"].append(round(result["total"]["pacc"],3))
                     result["vacc"].append(round(result["total"]["vacc"],3))
                     result["time"].append(round(result["total"]["step_time"],1))
                     result["ns"].append(round(result["total"]["ns"],1))
-                    result["total"]["_agent"] -= 50 
+                    result["total"]["_agent"] -= 200 
 
                     while len(result["reward"])>200:
                         result["reward"].remove(result["reward"][0])
