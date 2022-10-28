@@ -152,16 +152,16 @@ class MCTS():
                 act_probs, v = self._policy(game)
 
             probs = np.zeros(game.actions_num)
-            # for act, prob in act_probs:
-            #     probs[act] = prob
+            for act, prob in act_probs:
+                probs[act] = prob
 
             # alpha=1的时候，dir机会均等，>1 强调均值， <1 强调两端
             # 国际象棋 0.3 将棋 0.15 围棋 0.03
             # 取值一般倾向于 alpha = 10/n 所以俄罗斯方块取 2
-            dirichlet_alpha=2            
-            dirichlet_probs = np.random.dirichlet([dirichlet_alpha]*len(act_probs))
-            for (act, prob), noise in zip(act_probs, dirichlet_probs):
-                probs[act] = 0.9*prob+0.1*noise
+            # dirichlet_alpha=2            
+            # dirichlet_probs = np.random.dirichlet([dirichlet_alpha]*len(act_probs))
+            # for (act, prob), noise in zip(act_probs, dirichlet_probs):
+            #     probs[act] = 0.9*prob+0.1*noise
 
             self.Ps[s] = probs 
 
