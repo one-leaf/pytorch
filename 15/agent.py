@@ -69,6 +69,11 @@ class Agent(object):
         acts_np=np.zeros((40,5))
         for n,act in enumerate(acts):
             acts_np[n][act]=1
+        
+        sPc = bin(self.piececount)[2:]
+        for i,c in enumerate(sPc):
+            acts_np[i][0]=int(c)
+
         acts_np=acts_np.reshape((20,10))
 
         self.status.append((acts_np, self.get_fallpiece_board(), self.getBoard()))
