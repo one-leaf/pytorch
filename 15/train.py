@@ -101,6 +101,8 @@ class Dataset(torch.utils.data.Dataset):
             # self.data[fn]={"value":(value+qval)/2., "state":state, "mcts_prob": mcts_prob}
             p = 0.5
             value = qval*p + value*(1-p)
+            if value>1: value=1
+            if value<-1: value=-1
             # _,h,w = state.shape
             # drop = np.random.rand(h,w)<0.95
             # state[2]=state[2]*drop
