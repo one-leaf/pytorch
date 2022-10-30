@@ -200,8 +200,8 @@ class PolicyValueNet():
         self.policy_value_net.to(device)
         # self.print_netwark()
 
-        self.optimizer = optim.AdamW(self.policy_value_net.parameters(), lr=1e-6, weight_decay=self.l2_const)       
-        # self.optimizer = optim.SGD(self.policy_value_net.parameters(), lr=1e-6, momentum=0.9, weight_decay=self.l2_const)
+        # self.optimizer = optim.AdamW(self.policy_value_net.parameters(), lr=1e-6, weight_decay=self.l2_const)       
+        self.optimizer = optim.SGD(self.policy_value_net.parameters(), lr=1e-6, momentum=0.9, weight_decay=self.l2_const)
 
         self.load_model_file=False
         if model_file and os.path.exists(model_file):
