@@ -151,14 +151,14 @@ class Train():
         self.batch_size = 512     # 每批训练的样本，早期用小，防止局部最小值，后期用大，网络平稳 32 64 128 256 512
 
         # training params
-        self.learn_rate = 5e-5
+        self.learn_rate = 1e-5
         self.lr_multiplier = 1.0  # 基于KL的自适应学习率
         self.temp = 1  # MCTS的概率参数，越大越不肯定，训练时1，预测时1e-3
         self.n_playout = 128  # 每个动作的模拟战记录个数
         self.play_batch_size = 1 # 每次自学习次数
         self.buffer_size = 512000  # cache对次数
         self.epochs = 1  # 每次更新策略价值网络的训练步骤数, 推荐是5
-        self.kl_targ = 0.001  # 策略价值网络KL值目标
+        self.kl_targ = 0.00001  # 策略价值网络KL值目标
         self.best_win_ratio = 0.0
         
         self.c_puct = 2  # MCTS child权重， 用来调节MCTS中 探索/乐观 的程度 默认 5
