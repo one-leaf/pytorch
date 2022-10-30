@@ -99,8 +99,8 @@ class Dataset(torch.utils.data.Dataset):
 
             # 这里准备数据的时候直接 value = (value+qval)/2 同时考虑两者
             # self.data[fn]={"value":(value+qval)/2., "state":state, "mcts_prob": mcts_prob}
-            # p = 0
-            # value = qval*p + value*(1-p)
+            p = 0.5
+            value = qval*p + value*(1-p)
             # _,h,w = state.shape
             # drop = np.random.rand(h,w)<0.95
             # state[2]=state[2]*drop
