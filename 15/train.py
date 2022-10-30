@@ -220,7 +220,7 @@ class Train():
                 _, v_loss, p_loss, entropy = self.policy_update(data, self.epochs)
                 if i%10 == 0:
                     print(("TRAIN idx {} : {} / {} v_loss:{:.5f}, p_loss:{:.5f}, entropy:{:.5f}")\
-                        .format(i, i*self.batch_size, dataset_len, v_loss, p_loss, entropy-p_loss))
+                        .format(i, i*self.batch_size, dataset_len, v_loss, p_loss, p_loss-entropy))
 
                     # 动态调整学习率
                     if old_probs is None:
