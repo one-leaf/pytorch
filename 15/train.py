@@ -97,12 +97,14 @@ class Dataset(torch.utils.data.Dataset):
                 self.file_list.remove(fn)
                 continue
 
-            # 这里准备数据的时候直接 value = (value+qval)/2 同时考虑两者
-            # self.data[fn]={"value":(value+qval)/2., "state":state, "mcts_prob": mcts_prob}
-            p = 0.5
-            value = qval*p + value*(1-p)
+            # 这里准备数据的时候直接 同时考虑两者
+            # 前期value严重预测不准，所以给少权重，逐步增加权重
+
+            p = 0.1
+            value = value*p+ qval*(1-p)
             if value>1: value=1
             if value<-1: value=-1
+            
             # _,h,w = state.shape
             # drop = np.random.rand(h,w)<0.95
             # state[2]=state[2]*drop
