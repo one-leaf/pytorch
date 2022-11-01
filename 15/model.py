@@ -276,9 +276,9 @@ class PolicyValueNet():
     def train_step(self, state_batch, mcts_probs, value_batch, lr):
         """训练一次"""
         # 输入赋值       
-        state_batch = torch.FloatTensor(state_batch).to(self.device)
-        mcts_probs = torch.FloatTensor(mcts_probs).to(self.device)
-        value_batch = torch.FloatTensor(value_batch).to(self.device)
+        state_batch = torch.FloatTensor(state_batch, requires_grad=False).to(self.device)
+        mcts_probs = torch.FloatTensor(mcts_probs, requires_grad=False).to(self.device)
+        value_batch = torch.FloatTensor(value_batch, requires_grad=False).to(self.device)
 
         # 设置学习率
         self.set_learning_rate(lr)
@@ -288,7 +288,7 @@ class PolicyValueNet():
         probs, values = self.policy_value_net(state_batch)
 
         # value_loss = F.l1_loss(values, value_batch.unsqueeze(-1))            
-        value_loss = F.mse_loss(values.view(-1), value_batch.detach())
+        value_loss = F.mse_loss(values.view(-1), value_batch)
         # value_loss = 0.5 * (values.view(-1) - value_batch).pow(2).mean()
         # value_loss = 0.5 * (values - value_batch.unsqueeze(-1)).pow(2).mean()
         # 这些都不适用，因为第二个参数Target，需要是idx，而不是另外一个概率
@@ -297,7 +297,7 @@ class PolicyValueNet():
         # policy_loss = F.nll_loss(log_probs, mcts_probs, label_smoothing=0.1)
 
         log_probs = torch.log(probs + 1e-8)
-        policy_loss = -torch.mean(torch.sum(mcts_probs.detach() * log_probs, 1))
+        policy_loss = -torch.mean(torch.sum(mcts_probs * log_probs, 1))
 
         loss = value_loss + policy_loss
 
