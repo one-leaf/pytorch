@@ -100,11 +100,11 @@ class Dataset(torch.utils.data.Dataset):
             # 这里准备数据的时候直接 同时考虑两者
             # 前期value严重预测不准，所以给少权重，逐步增加权重
 
-            
+
             # p = 0.1
             # value = value*p+ qval*(1-p)
             # value = value*math.tanh(abs(qval))
-            # value = value*(1-1/(1+abs(qval)))
+            value = value*abs(qval)
             # if value>1: value=1
             # if value<-1: value=-1
             
