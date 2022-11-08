@@ -104,7 +104,7 @@ class Dataset(torch.utils.data.Dataset):
             # p = 0.1
             # value = value*p+ qval*(1-p)
             # value = value*math.tanh(abs(qval))
-            value = value*abs(qval)
+            # value = value*abs(qval)
             # if value>1: value=1
             # if value<-1: value=-1
             
