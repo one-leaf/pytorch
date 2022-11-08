@@ -205,7 +205,7 @@ class Train():
                 with torch.no_grad(): 
                     act_probs, values = net(test_batch) 
                     if i<5: 
-                        print("value[0] old:{} to:{}".format(values[0], test_values[0].cpu().numpy()))  
+                        print("value[0] old:{} to:{}".format(values[:4], test_values[:4].cpu().numpy()))  
                         print("probs[0] old:{} to:{}".format(act_probs[0], test_probs[0].cpu().numpy()))
 
             for i, data in enumerate(training_loader):  # 计划训练批次
@@ -244,7 +244,7 @@ class Train():
                 with torch.no_grad(): 
                     act_probs, values = net(test_batch) 
                     if i<5: 
-                        print("value[0] new:{} to:{}".format(values[0], test_values[0].cpu().numpy()))
+                        print("value[0] new:{} to:{}".format(values[:4], test_values[:4].cpu().numpy()))
                         print("probs[0] old:{} to:{}".format(act_probs[0], test_probs[0].cpu().numpy()))  
 
         except KeyboardInterrupt:
