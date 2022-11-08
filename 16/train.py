@@ -192,7 +192,7 @@ class Train():
 
             dataset_len = len(self.dataset)  
             training_loader = torch.utils.data.DataLoader(self.dataset, batch_size=self.batch_size, shuffle=True, num_workers=0)
-            testing_loader = torch.utils.data.DataLoader(self.testdataset, batch_size=1, shuffle=False,num_workers=0)
+            testing_loader = torch.utils.data.DataLoader(self.testdataset, batch_size=self.batch_size, shuffle=False,num_workers=0)
             old_probs = None
             test_batch = None
 
@@ -205,17 +205,10 @@ class Train():
                 with torch.no_grad(): 
                     act_probs, values = net(test_batch) 
                     if i<5: 
-                        print("value[0] old:{} to:{}".format(values, test_values[0].cpu().numpy()))  
-                        print("probs[0] old:{} to:{}".format(act_probs, test_probs[0].cpu().numpy()))
+                        print("value[0] old:{} to:{}".format(values[0], test_values[0].cpu().numpy()))  
+                        print("probs[0] old:{} to:{}".format(act_probs[0], test_probs[0].cpu().numpy()))
 
             for i, data in enumerate(training_loader):  # 计划训练批次
-                # if i==0:
-                #     state, mcts_prob, value = data
-                #     for j in range(len(state[0])):
-                #         print(state[0][j])
-                #     print(mcts_prob[0])
-                #     print(value[0])
-
                 # 使用对抗数据重新训练策略价值网络模型
                 _, v_loss, p_loss = self.policy_update(data, self.epochs)
                 if i%10 == 0:
@@ -230,9 +223,6 @@ class Train():
                         new_probs, new_value = self.policy_value_net.policy_value(test_batch)
                         kl = np.mean(np.sum(old_probs * (np.log(old_probs + 1e-10) - np.log(new_probs + 1e-10)), axis=1))
                         
-                        # if i % 50 == 0:   
-                        #     print("probs[0] old:{} new:{} to:{}".format(old_probs[0], new_probs[0], test_probs[0]))   
-                        #     print("value[0] old:{} new:{} to:{}".format(old_value[0][0], new_value[0][0], test_values[0]))  
                         old_probs = None
                         
                         if kl > self.kl_targ * 2:
@@ -254,8 +244,8 @@ class Train():
                 with torch.no_grad(): 
                     act_probs, values = net(test_batch) 
                     if i<5: 
-                        print("value[0] new:{} to:{}".format(values, test_values[0].cpu().numpy()))
-                        print("probs[0] old:{} to:{}".format(act_probs, test_probs[0].cpu().numpy()))  
+                        print("value[0] new:{} to:{}".format(values[0], test_values[0].cpu().numpy()))
+                        print("probs[0] old:{} to:{}".format(act_probs[0], test_probs[0].cpu().numpy()))  
 
         except KeyboardInterrupt:
             print('quit')

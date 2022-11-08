@@ -83,14 +83,13 @@ class PolicyValueNet():
             state_batch_tensor = torch.FloatTensor(state_batch).to(self.device)
 
         self.policy_value_net.eval()
-
         with torch.no_grad(): 
             act_probs, value = self.policy_value_net.forward(state_batch_tensor)    #[b, num_classes] [b, num_quantiles]
-            act_probs, value = act_probs.squeeze(), value.squeeze()    # [num_classes] [num_quantiles]
-            act_probs = torch.softmax(act_probs,dim=0)
-            # print(value)
-            value =  torch.mean(value[int(len(value) * 0.75):])
-            # print(value)
+            
+        act_probs = torch.softmax(act_probs,dim=1)
+        num_quantiles = value.shape[1]
+        num_value =  int(num_quantiles * 0.75)
+        value =  torch.mean(value[:, num_value:] , dim=1)
 
         # 还原成标准的概率
         act_probs = act_probs.cpu().numpy()
@@ -107,6 +106,8 @@ class PolicyValueNet():
         if self.load_model_file:
             current_state = game.current_state().reshape(1, -1, self.input_height, self.input_width)
             act_probs, value = self.policy_value(current_state)
+            act_probs=act_probs[0]
+            value=float(value[0])
         else:
             act_len=game.actions_num
             act_probs=np.ones([act_len])/act_len
@@ -115,24 +116,15 @@ class PolicyValueNet():
         actions = game.availables
         act_probs = list(zip(actions, act_probs[actions]))
 
-        # value = value
-        # print(act_probs,value)
-        return act_probs, float(value)
+        return act_probs, value
 
     # 价值网络损失
     def quantile_regression_loss(self, quantiles, target):
-        # print("quantiles", quantiles.shape)
         num_quantiles = quantiles.shape[1]
-        # print(num_quantiles)
-        tau = (torch.arange(num_quantiles).to(quantiles) + 0.5) / num_quantiles
-        # print("tau",tau.shape)
-        target = target.unsqueeze(1)
-        target = target.repeat(1, num_quantiles)
-        # print("target",target.shape)
-        # print(target)
-        weights = torch.where(quantiles > target, tau, 1 - tau)
-        # print("weights",weights.shape)
-        # print(weights)
+        tau = (torch.arange(num_quantiles).to(quantiles) + 0.5) / num_quantiles     #[b, num_quantiles]
+        target = target.unsqueeze(1)                                                #[b, 1]
+        target = target.repeat(1, num_quantiles)                                    #[b, num_quantiles]
+        weights = torch.where(quantiles > target, tau, 1 - tau)                     #[b, num_quantiles]
         return torch.mean(weights * F.huber_loss(quantiles, target, reduction='none'))
 
     # 训练
@@ -152,8 +144,6 @@ class PolicyValueNet():
 
         value_loss = self.quantile_regression_loss(values, value_batch)
         policy_loss = F.cross_entropy(probs, mcts_probs)
-        # log_probs = torch.log(probs + 1e-8)
-        # policy_loss = -torch.mean(torch.sum(mcts_probs.detach() * log_probs, 1))
 
         loss = value_loss + policy_loss
 
@@ -162,11 +152,6 @@ class PolicyValueNet():
         # 反向传播并更新
         loss.backward()
         self.optimizer.step()
- 
-        # 计算信息熵，越小越好, 只用于监控
-        # entropy = -torch.mean(
-        #         torch.sum(probs * log_probs, 1)
-        #         )
                 
         return loss.item(), value_loss.item(), policy_loss.item()
 
