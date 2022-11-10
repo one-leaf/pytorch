@@ -53,8 +53,8 @@ class Agent(object):
         # 盘面的状态
         self.status = [] #deque(maxlen=10)
         _board = np.zeros((self.height, self.width))
-        for i in range(3):
-            self.status.append(( _board, _board, _board))
+        for i in range(7):
+            self.status.append(_board)
         self.add_status()
         # self.status.append(self.get_fallpiece_board()+self.getBoard())
         # 下一个可用步骤
@@ -65,18 +65,7 @@ class Agent(object):
         self.set_key()
 
     def add_status(self):
-        acts = self.actions[:-41:-1]
-        acts_np=np.zeros((40, 5))
-        for n,act in enumerate(acts):
-            acts_np[n][act]=1
-        
-        sPc = bin(self.piececount)[2:]
-        for i,c in enumerate(sPc):
-            acts_np[i][-1]=int(c)
-
-        acts_np=acts_np.reshape((20,10))
-
-        self.status.append((acts_np, self.get_fallpiece_board(), self.getBoard()))
+        self.status.append(self.get_fallpiece_board()+self.getBoard())
         self.status.pop(0)
 
     # 概率的索引位置转action
@@ -195,8 +184,7 @@ class Agent(object):
         return self.state, self.reward
 
     def set_key(self):
-        # info = self.current_state()
-        info = self.status[-1][1] + self.status[-1][2]
+        info = self.status[-1]
         self.key = hash(info.data.tobytes())+self.id
         # chars="abcdefghijklmnopqrstuvwxyz" 
         # key = ""
@@ -321,7 +309,7 @@ class Agent(object):
                     if shapedraw[y][x]!=blank:
                         px, py = x+piece['x'], y+piece['y']
                         if px>=0 and py>=0:
-                            board[py][px]=-1
+                            board[py][px]=1
         # else:
         #     print("fallpiece is None")
         return board
@@ -352,21 +340,21 @@ class Agent(object):
     # 背景 + 最后一步 + 合并后旋转90度
     # 返回 [3, height, width]
     def current_state(self):
-        # return np.array(self.status)
+        return np.array(self.status)
 
-        state = np.zeros((3, self.height, self.width))
+        # state = np.zeros((7, self.height, self.width))
 
-        # bg = self.status[-1][1] + self.status[-1][2] 
-        # bg_rot = np.rot90(bg).reshape(self.height, self.width)
-        # state[0] = bg_rot 
-        # state[0] = self.status[-2][1]
-        state[0] = self.status[-1][0]
-        state[1] = self.status[-1][1]
-        state[2] = self.status[-1][2]
-        # for i in range(3):
-        #     state[-1*(i+1)]=self.status[-1*(i+1)]
+        # # bg = self.status[-1][1] + self.status[-1][2] 
+        # # bg_rot = np.rot90(bg).reshape(self.height, self.width)
+        # # state[0] = bg_rot 
+        # # state[0] = self.status[-2][1]
+        # state[0] = self.status[-1][0]
+        # state[1] = self.status[-1][1]
+        # state[2] = self.status[-1][2]
+        # # for i in range(3):
+        # #     state[-1*(i+1)]=self.status[-1*(i+1)]
 
-        return state          
+        # return state          
 
 
     
