@@ -382,7 +382,7 @@ class VitNet(nn.Module):
         x = self.blocks(x)                    # [B, p+1, 768]
 
         # 归一化
-        x = self.norm(x)                        # [B, p+1, 768]
+        # x = self.norm(x)                        # [B, p+1, 768]
 
         # act = x[:, 1:].mean(dim = 1)             # [B, 768]
         act = x.max(dim = 1).values                 # [B, 768]
