@@ -384,8 +384,8 @@ class VitNet(nn.Module):
         # 归一化
         x = self.norm(x)                        # [B, p+1, 768]
 
-        act = x[:, 1:].mean(dim = 1)             # [B, 768]
-        # act = x.max(dim = 1).values                 # [B, 768]
+        # act = x[:, 1:].mean(dim = 1)             # [B, 768]
+        act = x.max(dim = 1).values                 # [B, 768]
         act = self.act_fc(act)
         act = self.act_fc_act(act)
         act = self.act_dist(act)                # [B, num_classes]
