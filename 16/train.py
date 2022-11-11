@@ -104,7 +104,7 @@ class Dataset(torch.utils.data.Dataset):
             # p = 0.1
             # value = value*p+ qval*(1-p)
             # value = value*math.tanh(abs(qval))
-            value = value*abs(qval)
+            # value = value*abs(qval)
             
             # _,h,w = state.shape
             # drop = np.random.rand(h,w)<0.95
