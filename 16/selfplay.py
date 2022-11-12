@@ -113,10 +113,11 @@ class Train():
         bestmodelfile = model_file+"_best"
 
         # 同时开两个游戏
-        if random.random()>0.25:
-            agent2 = copy.deepcopy(agent)
-        else:
-            agent2 = Agent(isRandomNextPiece=False)
+        # if random.random()>0.25:
+        #     agent2 = copy.deepcopy(agent)
+        # else:
+        #     agent2 = Agent(isRandomNextPiece=False)
+        agent2 = Agent(isRandomNextPiece=False)
         # agent2 = copy.deepcopy(agent)
         games = (agent, agent2)
 
