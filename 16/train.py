@@ -225,7 +225,7 @@ class Train():
                         
                         old_probs = None
                         
-                        if kl > self.kl_targ * 2:
+                        if kl > self.kl_targ * 2 and self.lr_multiplier > 0.1:
                             self.lr_multiplier /= 1.5
                         elif kl < self.kl_targ / 2 and self.lr_multiplier < 10:
                             self.lr_multiplier *= 1.5
