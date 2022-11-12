@@ -200,16 +200,17 @@ class MCTS():
         games["curr_player"] = 1 if games["curr_player"]==0 else 0
         self.depth = self.depth +1
 
+        v = self.search(games)
+
         # 现实奖励补贴
-        reward = 0
         if game.state == 1:
             curr_pieceheight = game.pieceheight
             # reward = prev_pieceheight + other_game.pieceheight - 2*curr_pieceheight
             reward = prev_pieceheight - curr_pieceheight
             reward = reward/(abs(reward)+0.5)
-        v = reward + self.search(games)
+            v += reward
+
         # v = v/(abs(v)+0.1)
-        # v = self.search(games)
 
         # 更新 Q 值 和 访问次数
         if (s, a) in self.Qsa:
