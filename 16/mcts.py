@@ -207,8 +207,6 @@ class MCTS():
             # reward = prev_pieceheight + other_game.pieceheight - 2*curr_pieceheight
             reward = prev_pieceheight - curr_pieceheight
             reward = reward/(abs(reward)+0.5)
-            # next_pieceheight = other_game.pieceheight
-            # reward = (next_pieceheight+prev_pieceheight-2*curr_pieceheight)/(curr_pieceheight+next_pieceheight)
         v = reward + self.search(games)
         # v = v/(abs(v)+0.1)
         # v = self.search(games)
