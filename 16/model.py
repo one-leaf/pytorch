@@ -94,8 +94,8 @@ class PolicyValueNet():
         # value =  torch.mean(value[:, num_value:] , dim=1)
         # 真实应该取均值        
         # value =  torch.mean(value, dim=1)
-        # 这边按0.25取        
-        num_value =  int(num_quantiles * 0.25)
+        # 这边按0.5取        
+        num_value =  int(num_quantiles * 0.5)
         value =  torch.mean(value[:, num_value:] , dim=1)
 
         # 还原成标准的概率
