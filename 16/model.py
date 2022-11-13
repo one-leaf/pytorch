@@ -88,9 +88,11 @@ class PolicyValueNet():
             
         act_probs = torch.softmax(act_probs,dim=1)
         num_quantiles = value.shape[1]
-        num_value =  int(num_quantiles * 0.75)
-        # value =  torch.mean(value[:, num_value:] , dim=1)
-        value =  torch.mean(value, dim=1)
+        # alphatensor 0.75
+        # num_value =  int(num_quantiles * 0.75)
+        num_value =  int(num_quantiles * 0.5)
+        value =  torch.mean(value[:, num_value:] , dim=1)
+        # value =  torch.mean(value, dim=1)
 
         # 还原成标准的概率
         act_probs = act_probs.cpu().numpy()
