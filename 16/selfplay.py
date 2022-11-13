@@ -182,6 +182,7 @@ class Train():
             _step["pre_piece_height"] = game.pieceheight
 
             action, move_probs, state_value, qval, acc_ps, depth, ns = player.get_action(games, curr_player, temp=result["total"]["ns"]) 
+            print(_step["state"][0])
             _, reward = game.step(action)
 
             _step["piece_height"] = game.pieceheight

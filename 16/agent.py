@@ -68,12 +68,14 @@ class Agent(object):
         self.status.append(self.get_fallpiece_board()+self.getBoard())
         self.status.pop(1)
         if self.state!=0:
+            self.status[0]=np.zeros((self.height,self.width))
             sPc = bin(self.piececount)[2:]
-            for i,c in enumerate(sPc):
+            for i, c in enumerate(sPc[::-1]):
                 if c=='1':
                     self.status[0][i]=np.ones((self.width))
                 else:
                     self.status[0][i]=np.zeros((self.width))
+
 
     # 概率的索引位置转action
     def position_to_action(self, position):
