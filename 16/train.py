@@ -93,7 +93,8 @@ class Dataset(torch.utils.data.Dataset):
         for fn in self.file_list:
             try:
                 with open(fn, "rb") as f:
-                    state, mcts_prob, value, qval = pickle.load(f)                        
+                    state, mcts_prob, value, qval = pickle.load(f)
+                    assert state.shape[0] == 8                         
                     # if abs(qval)>0.5:
                     #     double_train_list.append(fn)
             except:
