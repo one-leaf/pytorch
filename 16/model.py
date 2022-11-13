@@ -88,10 +88,14 @@ class PolicyValueNet():
             
         act_probs = torch.softmax(act_probs,dim=1)
         num_quantiles = value.shape[1]
-        # alphatensor 0.75 
-        num_value = int(num_quantiles * 0.25)
-        num_lenght = int(num_quantiles * 0.75)
-        value =  torch.mean(value[:, num_value:num_lenght] , dim=1)
+        
+        # alphatensor 0.75 取尾端，偏向负值用于探索
+        # num_value =  int(num_quantiles * 0.75)
+        # value =  torch.mean(value[:, num_value:] , dim=1)
+        # 这边取中间段        
+        num_f = int(num_quantiles * (0.5-0.25/2))
+        num_l = int(num_quantiles * (0.5+0.25/2))
+        value =  torch.mean(value[:, num_f:num_l] , dim=1)
         # value =  torch.mean(value, dim=1)
 
         # 还原成标准的概率
