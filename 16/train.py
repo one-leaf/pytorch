@@ -78,6 +78,11 @@ class Dataset(torch.utils.data.Dataset):
         # random.shuffle(self.file_list)
         pay_time = round(time.time()-start_time, 2)
         print("loaded data, totle:",len(self.file_list),"delete:", delcount,"paid time:", pay_time)
+        if len(self.file_list)<self.max_keep_size/2 :
+            print("SLEEP 60s for %s to %s data."%(len(self.file_list), self.max_keep_size/2))
+            time.sleep(60)
+            raise Exception("NEED SOME NEW DATA TO TRAIN")
+
 
     def calc_data(self):
         # scores=[]
@@ -125,6 +130,7 @@ class Dataset(torch.utils.data.Dataset):
         print("value sum:", sum_v, "avg:", sum_v/len(self.data))
         print("load data end")
 
+
     def copy_wait_file(self):
         print("start copy wait file to train ...")
         files = glob.glob(os.path.join(data_wait_dir, "*.pkl"))
@@ -142,7 +148,7 @@ class Dataset(torch.utils.data.Dataset):
             # if i>=100: break
             if i>=self.max_keep_size//10: break       
         print("mv %s/%s files to train"%(i+1,len(movefiles)))
-        if i==-1:
+        if i==-1 :
             print("SLEEP 60s for watting data")
             time.sleep(60)
             raise Exception("NEED SOME NEW DATA TO TRAIN")

@@ -53,7 +53,7 @@ class Agent(object):
         # 盘面的状态
         self.status = [] #deque(maxlen=10)
         _board = np.zeros((self.height, self.width))
-        for i in range(7):
+        for i in range(8):
             self.status.append(_board)
         self.add_status()
         # self.status.append(self.get_fallpiece_board()+self.getBoard())
@@ -66,7 +66,14 @@ class Agent(object):
 
     def add_status(self):
         self.status.append(self.get_fallpiece_board()+self.getBoard())
-        self.status.pop(0)
+        self.status.pop(1)
+        if self.state!=0:
+            sPc = bin(self.piececount)[2:]
+            for i,c in enumerate(sPc):
+                if c=='1':
+                    self.status[0][i]=np.ones((self.width))
+                else:
+                    self.status[0][i]=np.zeros((self.width))
 
     # 概率的索引位置转action
     def position_to_action(self, position):
@@ -155,6 +162,11 @@ class Agent(object):
             self.pieceheight = self.getAvgHeight()          
             self.pieces_height.append(20 - fallpiece_y - self.reward)
             self.fallpiece = None
+            self.state = 1
+            self.piecesteps = 0
+            self.piececount += 1 
+        else:
+            self.state = 0
 
         # self.status.append(self.get_fallpiece_board() + self.getBoard() + self.get_nextpiece_borad())
         self.add_status()
@@ -167,17 +179,11 @@ class Agent(object):
         if not isFalling:
             self.fallpiece = self.nextpiece
             self.nextpiece = self.tetromino.getnewpiece()
-            self.piecesteps = 0
-            self.piececount += 1 
             self.availables = [KEY_DOWN]
             if not self.tetromino.validposition(self.board, self.fallpiece, ay=1) or self.pieceheight>self.max_height:                  
                 self.terminal = True 
                 self.state = 2
                 return self.state, self.reward 
-            else: 
-                self.state = 1
-        else:
-            self.state = 0
         
         self.availables = self.get_availables()    
 
@@ -309,7 +315,7 @@ class Agent(object):
                     if shapedraw[y][x]!=blank:
                         px, py = x+piece['x'], y+piece['y']
                         if px>=0 and py>=0:
-                            board[py][px]=1
+                            board[py][px]=-1
         # else:
         #     print("fallpiece is None")
         return board
