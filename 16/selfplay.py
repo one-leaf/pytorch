@@ -169,8 +169,14 @@ class Train():
         print('start game time:', datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 
         game_stop= False
+        curr_player = -1
         for i in count():
-            curr_player = i%2
+            if games[0].piececount==games[1].piececount:
+                curr_player = 0 if curr_player ==1 else 1
+            elif games[0].piececount<games[1].piececount:
+                curr_player = 0
+            else:
+                curr_player = 1
             game = games[curr_player]
             data = game_datas[curr_player]            
 
@@ -206,9 +212,9 @@ class Train():
             # 如果训练次数超过了最大次数，则直接终止训练
             if i >= 10000: game_stop=True
 
-            if game.pieceheight>=5:
+            if game.pieceheight>=5 and games[0].piececount==games[1].piececount:
                 game_stop=True
-            if abs(games[0].pieceheight-games[1].pieceheight)>=2:
+            if abs(games[0].pieceheight-games[1].pieceheight)>=2 and games[0].piececount==games[1].piececount:
                 game_stop=True
                 
             # if games[0].piececount>1 and games[1].piececount>1 and games[0].piececount==games[1].piececount:
