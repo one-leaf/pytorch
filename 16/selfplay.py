@@ -104,7 +104,7 @@ class Train():
         print("TRAIN Self Play starting ...")
 
         # 游戏代理
-        agent = Agent(isRandomNextPiece=False)
+        agent = Agent(isRandomNextPiece=False, max_height=6)
 
         borads = []
 
@@ -117,7 +117,7 @@ class Train():
         #     agent2 = copy.deepcopy(agent)
         # else:
         #     agent2 = Agent(isRandomNextPiece=False)
-        agent2 = Agent(isRandomNextPiece=False)
+        agent2 = Agent(isRandomNextPiece=False, max_height=6)
         # agent2 = copy.deepcopy(agent)
         games = (agent, agent2)
 
@@ -350,7 +350,7 @@ class Train():
 
         winner = 1 if games[0].pieceheight > games[1].pieceheight else 0
         if games[0].score==0 and games[1].score==0: winner = -1
-        
+
         # 更新reward和score，reward为胜负，[1|-1|0]；score 为本步骤以后一共消除的行数
         for i, data in enumerate(game_datas):
             step_count = len(data["steps"])
