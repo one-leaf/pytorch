@@ -1,6 +1,6 @@
 from agent import Agent, ACTIONS
 from model import PolicyValueNet
-from mcts import MCTSPlayer
+from mcts_single import MCTSPlayer
 import os,time
 
 
@@ -10,30 +10,31 @@ def run():
     model_file =  os.path.join(model_dir, 'vit-ti/model.pth')
 
     try:
-        agent = Agent()    
+        agent = Agent() 
+        agent.show_mcts_process = True   
         # agent.limit_piece_count = 0
         # agent.limit_max_height = 10
         # env = TetrominoEnv(agent.tetromino)    
         # 神经网络的价值策略
         net_policy = PolicyValueNet(10, 20, 4, model_file=model_file)
-        mcts_ai_player = MCTSPlayer(net_policy.policy_value_fn, c_puct=1, n_playout=128)
+        mcts_ai_player = MCTSPlayer(net_policy.policy_value_fn, c_puct=1, n_playout=32)
         # agent.start_play(mcts_ai_player, env)
         while not agent.terminal:
-            act_probs, v = net_policy.policy_value_fn(agent)
-            act, act_p = 0, 0
-            for a, p in act_probs:
-                if p > act_p:
-                    act, act_p = a, p
+            # act_probs, v = net_policy.policy_value_fn(agent)
+            # act, act_p = 0, 0
+            # for a, p in act_probs:
+            #     if p > act_p:
+            #         act, act_p = a, p
 
-            # act, act_probs, v = mcts_ai_player.get_action([agent,agent],0)
+            act, act_probs, v, qval, acc_ps, depth, state_n = mcts_ai_player.get_action(agent,0)
             # agent.step(act, env)
 
             agent.step(act)
             # print(agent.get_availables())
-            os.system("cls")
+            # os.system("cls")
             print(v, agent.position_to_action_name(act), act_probs)
             agent.print2()
-            time.sleep(1)
+            time.sleep(0.1)
             # print(agent.current_state())
             # input()
     except KeyboardInterrupt:
