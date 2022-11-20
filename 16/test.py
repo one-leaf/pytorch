@@ -10,7 +10,7 @@ def run():
     model_file =  os.path.join(model_dir, 'vit-ti/model.pth')
 
     try:
-        agent = Agent() 
+        agent = Agent(isRandomNextPiece=False) 
         agent.show_mcts_process = True   
         # agent.limit_piece_count = 0
         # agent.limit_max_height = 10
