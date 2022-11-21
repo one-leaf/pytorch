@@ -264,17 +264,18 @@ class Agent(object):
                     break
         return h/self.width
 
-    # 统计非空的个数
-    def getNoEmptyCount(self):
+    # 统计空洞的个数
+    def getEmptyCount(self):
         c = 0
-        for y in range(self.height):
-            line_c= 0
-            for x in range(self.width):
-                if self.board[x][y]!=blank:
+        for x in range(self.width):
+            line_c = -1
+            for y in range(self.height):
+                if line_c == -1 and self.board[x][y]!=blank:
+                    line_c = 0
+                if line_c!=-1 and self.board[x][y]==blank:    
                     line_c += 1
+            if line_c == -1: line_c = 0
             c += line_c
-
-            # if line_c == 9: c += 1
         return c
 
     # 计算得分,只计算被挡住的
