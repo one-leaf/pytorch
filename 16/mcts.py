@@ -189,7 +189,7 @@ class MCTS():
         a = best_act
         act = game.position_to_action(a)
 
-        # prev_pieceheight = game.pieceheight
+        prev_pieceheight = game.pieceheight
         prev_EmptyCount = game.getEmptyCount()
         game.step(act)
 
@@ -205,12 +205,8 @@ class MCTS():
         # 现实奖励补贴
         reward = 0
         if game.state == 1:
-            # curr_pieceheight = game.pieceheight
-            # # reward = prev_pieceheight + other_game.pieceheight - 2*curr_pieceheight
-            # reward = prev_pieceheight - curr_pieceheight + 0.4
-            # reward = reward/(abs(reward)+0.5)
-            curr_EmptyCount = game.getEmptyCount()
-            reward = prev_EmptyCount - curr_EmptyCount
+            reward = prev_pieceheight - (game.pieceheight - 0.4)
+            reward += prev_EmptyCount - game.getEmptyCount()
 
         v = reward + self.search(games)
 
