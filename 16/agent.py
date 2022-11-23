@@ -255,14 +255,17 @@ class Agent(object):
 
     # 统计当前平均高度
     def getAvgHeight(self):
-        h = 0
+        h = np.zeros((self.width))
         for x in range(self.width):
             for y in range(self.height):
                 if self.board[x][y]!=blank:
-                    h+=(self.height-y)
-                    # h+=1.1**(self.height-y)
+                    h[x]=self.height-y
                     break
-        return h/self.width
+            
+        h_mean = np.mean(h)
+        h_var = np.var(h)
+        # print(h, "mean", h_mean, "var:", h_var)
+        return h_mean+h_var/(h_var+1)
 
     # 统计空洞的个数
     def getEmptyCount(self):
