@@ -61,6 +61,8 @@ class MCTS():
             # 如果只有一种走法，只探测一次
             if len(available_acts)==1 : break
 
+            if self.depth > 800 : break
+
             # 当前状态
             # v = self.Vs[s] if s in self.Vs else 0
             # visits_sum = sum([self.Nsa[(s, a)] if (s, a) in self.Nsa else 0 for a in available_acts])          
