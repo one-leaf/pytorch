@@ -54,8 +54,11 @@ class MCTS():
             if self.depth>self.max_depth: self.max_depth = self.depth
 
             # 如果只有一种走法，只探测一次
+            if game.terminal: break
             if len(available_acts)==1 : break
             if self.depth > 800 : break
+            if self.depth < 200 and n < self._n_playout*10: continue 
+
             # 当前状态
             # v = self.Vs[s] if s in self.Vs else 0
             # visits_sum = sum([self.Nsa[(s, a)] if (s, a) in self.Nsa else 0 for a in available_acts])          
@@ -68,7 +71,6 @@ class MCTS():
             # if np.argmax(act_Qs)==np.argmax(act_visits) and visits_sum > 2048: break
             # 如果探索总次数大于2048次就别探索了。
             # if visits_sum>=2048 or game.terminal: break
-            if game.terminal: break
 
             # 如果达到最大探索次数，结束探索
             if n >= self._n_playout -1 : break
@@ -192,8 +194,9 @@ class MCTS():
         # 现实奖励补贴
         reward = 0
         if game.state == 1:
-            reward = prev_pieceheight - (game.pieceheight - 0.4)
+            reward = prev_pieceheight - game.pieceheight
             reward += prev_EmptyCount - game.getEmptyCount()
+        reward *= 0.9
         v = reward + self.search(game)
 
         # v = self.search(game)
