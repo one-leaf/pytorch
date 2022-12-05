@@ -195,22 +195,17 @@ class MCTS():
         prev_EmptyCount = game.getEmptyCount()
         game.step(act)
 
-        # 如果差两步，游戏结束
-        # if game.state==1 and other_game.piececount>0:
-        #     if game.pieceheight-other_game.pieceheight>1:
-        #         game.terminal = True
-
         games["curr_player"] = 1 if games["curr_player"]==0 else 0
         self.depth = self.depth +1
-
 
         # 现实奖励补贴
         reward = 0
         if game.state == 1:
             reward = prev_pieceheight - (game.pieceheight - 0.4)
             reward += (prev_EmptyCount - game.getEmptyCount())*0.4
-        # 这个奖励要逐渐减少
-        reward *= 0.9
+    
+            # 这个奖励要逐渐减少
+            reward *= 0.99**game.piececount
 
         v = reward + self.search(games)
 
