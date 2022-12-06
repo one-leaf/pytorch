@@ -66,10 +66,10 @@ class Agent(object):
 
     def add_status(self):
         self.status.append(self.get_fallpiece_board()+self.getBoard())
-        self.status.pop(1)
+        del self.status[1]
         if self.state!=0:
             self.status[0]=self.getBoard()
-        
+
         # if self.state!=0:
         #     self.status[0]=np.zeros((self.height,self.width))
         #     sPc = bin(self.piececount)[2:]
