@@ -353,9 +353,9 @@ class Train():
         print((" "+" -"*agent.width+" ")*len(borads))
 
         winner = 1 if games[0].pieceheight > games[1].pieceheight else 0
-        
+
         if games[0].pieceheight>4 and games[1].pieceheight>4: winner = -1
-        if games[0].score==0 and games[1].score==0: winner = -1
+        # if games[0].score==0 and games[1].score==0: winner = -1
 
         # 更新reward和score，reward为胜负，[1|-1|0]；score 为本步骤以后一共消除的行数
         for i, data in enumerate(game_datas):
