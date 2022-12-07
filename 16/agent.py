@@ -266,9 +266,9 @@ class Agent(object):
                     break
             
         h_mean = np.mean(h)
-        h_var = np.var(h)
+        h_std = np.std(h)
         # print(h, "mean", h_mean, "var:", h_var)
-        return h_mean+h_var/(h_var+1)
+        return h_mean+h_std
 
     # 统计空洞的个数
     def getEmptyCount(self):
