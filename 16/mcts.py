@@ -111,7 +111,7 @@ class MCTS():
 
         qval = qs[np.argmax(probs)]
 
-        if game.show_mcts_process or game.pieceheight in [0, game.max_height] :
+        if game.show_mcts_process or game.state == 1:
             info=[]
             for idx in sorted(range(len(visits)), key=visits.__getitem__)[::-1]:
                 act, visit = act_visits[idx]
