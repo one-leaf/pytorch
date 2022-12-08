@@ -193,11 +193,11 @@ class MCTS():
 
         # 现实奖励补贴
         reward = 0
-        if game.state == 1:
-            # reward =  - game.pieceheight
-            reward = prev_pieceheight - (game.pieceheight - 0.4)
-            reward += (prev_EmptyCount - game.getEmptyCount())*0.4
-            reward *= 0.98**game.piececount
+        # if game.state == 1:
+        #     # reward =  - game.pieceheight
+        #     reward = prev_pieceheight - (game.pieceheight - 0.4)
+        #     reward += (prev_EmptyCount - game.getEmptyCount())*0.4
+        #     reward *= 0.99**game.piececount
         v = reward + self.search(game)
 
         # v = self.search(game)
