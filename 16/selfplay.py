@@ -267,7 +267,7 @@ class Train():
                         pacc.append(step["acc_ps"])
                         depth.append(step["depth"])
                         ns.append(step["ns"])
-                        if (j!=winner and step["state_value"]>0):
+                        if (j!=winner and step["state_value"]>0) or (j==winner and step["state_value"]<0):
                             vacc.append(0)
                         else:
                             vacc.append(1)
