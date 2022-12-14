@@ -205,7 +205,7 @@ class MCTS():
             reward += prev_EmptyCount - game.getEmptyCount()
     
             # 这个奖励要逐渐减少
-            reward *= 0.95**game.piececount
+            reward *= 0.9**game.piececount
 
         v = reward + self.search(games)
 
