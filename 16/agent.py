@@ -340,13 +340,14 @@ class Agent(object):
     # # 获得待下落方块的信息
     def get_nextpiece_borad(self):
         board=np.zeros((self.height, self.width))
+        off = int(self.width)//2-int(templatenum//2)
         if self.nextpiece != None:
             piece = self.nextpiece  
             shapedraw = pieces[piece['shape']][piece['rotation']]
             for x in range(templatenum):
                 for y in range(templatenum):
                     if shapedraw[y][x]!=blank:
-                        board[y][x]=-1
+                        board[y][x+off]=-1
         return board
 
 
