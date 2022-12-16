@@ -68,7 +68,7 @@ class Agent(object):
         self.status.append(self.get_fallpiece_board()+self.getBoard())
         del self.status[1]
         if self.state!=0:
-            self.status[0]=self.getBoard()
+            self.status[0]=self.getBoard()+self.get_nextpiece_borad()
 
         # if self.state!=0:
         #     self.status[0]=np.zeros((self.height,self.width))
@@ -166,10 +166,14 @@ class Agent(object):
             self.score += self.reward
             self.pieceheight = self.getAvgHeight()          
             self.pieces_height.append(20 - fallpiece_y - self.reward)
-            self.fallpiece = None
+            # self.fallpiece = None
             self.state = 1
             self.piecesteps = 0
             self.piececount += 1 
+
+            self.fallpiece = self.nextpiece
+            self.nextpiece = self.tetromino.getnewpiece()
+            self.availables = [KEY_DOWN]
         else:
             self.state = 0
 
@@ -181,14 +185,10 @@ class Agent(object):
             env.checkforquit()
             env.render(self.board, self.score, self.level, self.fallpiece, self.nextpiece)
 
-        if not isFalling:
-            self.fallpiece = self.nextpiece
-            self.nextpiece = self.tetromino.getnewpiece()
-            self.availables = [KEY_DOWN]
-            if not self.tetromino.validposition(self.board, self.fallpiece, ay=1) or self.pieceheight>self.max_height:                  
-                self.terminal = True 
-                self.state = 2
-                return self.state, self.reward 
+        if not isFalling and not self.tetromino.validposition(self.board, self.fallpiece, ay=1) or self.pieceheight>self.max_height:                  
+            self.terminal = True 
+            self.state = 2
+            return self.state, self.reward 
         
         self.availables = self.get_availables()    
 
