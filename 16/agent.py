@@ -177,7 +177,6 @@ class Agent(object):
         else:
             self.state = 0
 
-        # self.status.append(self.get_fallpiece_board() + self.getBoard() + self.get_nextpiece_borad())
         self.add_status()
         self.set_key()
 
