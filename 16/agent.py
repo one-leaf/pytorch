@@ -265,7 +265,7 @@ class Agent(object):
                     break
         h[0]=h[1]
         h[-1]=h[-2]    
-        h_mean = np.mean(h[1:2])
+        h_mean = np.mean(h[1:-1])
         if std:
             h_std = np.std(h)
             h_mean += h_std
