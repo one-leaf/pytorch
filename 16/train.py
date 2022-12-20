@@ -162,7 +162,7 @@ class Train():
         self.batch_size = 512     # 每批训练的样本，早期用小，防止局部最小值，后期用大，网络平稳 32 64 128 256 512
 
         # training params
-        self.learn_rate = 1e-5
+        self.learn_rate = 1e-4
         self.lr_multiplier = 1.0  # 基于KL的自适应学习率
         self.temp = 1  # MCTS的概率参数，越大越不肯定，训练时1，预测时1e-3
         self.n_playout = 128  # 每个动作的模拟战记录个数
