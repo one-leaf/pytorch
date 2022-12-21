@@ -213,7 +213,7 @@ class Train():
             if i >= 10000: game_stop=True
 
             if games[0].piececount==games[1].piececount:
-                if game.pieceheight>=6 or abs(games[0].pieceheight-games[1].pieceheight)>=3:
+                if game.pieceheight>=6 or abs(games[0].pieceheight-games[1].pieceheight)>=2:
                     game_stop=True
 
             # if abs(games[0].pieceheight-games[1].pieceheight)>=2 and games[0].piececount==games[1].piececount:
