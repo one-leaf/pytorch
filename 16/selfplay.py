@@ -378,7 +378,7 @@ class Train():
                     slist.insert(0, score)
                     pacclist.insert(0, round(max(data["steps"][j]["move_probs"]),2))
                 q = data["steps"][j]["qval"] 
-                data["steps"][j]["reward"] = v
+                data["steps"][j]["reward"] = v * (0.99**(step_count-j))
                 data["steps"][j]["score"] = q
 
                 vacc_sum += abs(v-data["steps"][j]["state_value"])
