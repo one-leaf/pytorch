@@ -20,11 +20,12 @@ GAME_WIDTH, GAME_HEIGHT = 10, 20
 
 
 class Dataset(torch.utils.data.Dataset):
-    def __init__(self, data_dir, max_keep_size):
+    def __init__(self, data_dir, max_keep_size, test_size):
         # 训练数据存放路径
         self.data_dir = data_dir                
         # 训练数据最大保存个数
         self.max_keep_size = max_keep_size
+        self.test_size = test_size
         self.file_list = [] # deque(maxlen=max_keep_size)    
         self.newsample = []
         self.data={}
@@ -144,7 +145,8 @@ class Dataset(torch.utils.data.Dataset):
             savefile = os.path.join(self.data_dir, filename)
             if os.path.exists(savefile): os.remove(savefile)
             os.rename(fn, savefile)
-            self.newsample.append(savefile)
+            if len(self.newsample)<self.test_size:
+                self.newsample.append(savefile)
             if (i>=99 and i>len(movefiles)*0.01) or i>=self.max_keep_size//2: break       
             if i>=self.max_keep_size//10: break       
         print("mv %s/%s files to train"%(i+1,len(movefiles)))
@@ -188,7 +190,7 @@ class Train():
         """启动训练"""
         try:
             print("start data loader")
-            self.dataset = Dataset(data_dir, self.buffer_size)
+            self.dataset = Dataset(data_dir, self.buffer_size, self.batch_size*5)
             self.testdataset = copy.copy(self.dataset)
             self.testdataset.test=True
             print("end data loader")
@@ -210,9 +212,8 @@ class Train():
                 test_values = test_values.to(self.policy_value_net.device)
                 with torch.no_grad(): 
                     act_probs, values = net(test_batch) 
-                    if i<5: 
-                        print("value[0] old:{} to:{}".format(values[:4], test_values[:4].cpu().numpy()))  
-                        print("probs[0] old:{} to:{}".format(act_probs[0], test_probs[0].cpu().numpy()))
+                    print("value[0] to:{} 0:{}".format(test_values[:5].cpu().numpy(), values[:5]))  
+                    print("probs[0] to:{} 0:{}".format(test_probs[0].cpu().numpy(), act_probs[0]))
 
             for i, data in enumerate(training_loader):  # 计划训练批次
                 # 使用对抗数据重新训练策略价值网络模型
@@ -249,9 +250,8 @@ class Train():
                 test_values = test_values.to(self.policy_value_net.device)
                 with torch.no_grad(): 
                     act_probs, values = net(test_batch) 
-                    if i<5: 
-                        print("value[0] new:{} to:{}".format(values[:4], test_values[:4].cpu().numpy()))
-                        print("probs[0] old:{} to:{}".format(act_probs[0], test_probs[0].cpu().numpy()))  
+                    print("value[0] to:{} 1:{}".format(test_values[:5].cpu().numpy(), values[:5]))  
+                    print("probs[0] to:{} 1:{}".format(test_probs[0].cpu().numpy(), act_probs[0]))
 
         except KeyboardInterrupt:
             print('quit')
