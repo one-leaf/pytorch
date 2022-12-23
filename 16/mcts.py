@@ -200,8 +200,11 @@ class MCTS():
 
         # 现实奖励补贴
         reward = 0
-        if game.state == 1:
-            reward = prev_pieceheight - (game.pieceheight - 0.4)
+        if game.state !=0 :
+            if game.pieceheight>prev_pieceheight:
+                reward = prev_pieceheight - (game.pieceheight - 0.4)
+            else:
+                reward = prev_pieceheight - game.pieceheight
             reward += prev_EmptyCount - game.getEmptyCount()
     
             # 这个奖励要逐渐减少
