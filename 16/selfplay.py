@@ -334,9 +334,7 @@ class Train():
 
                 result["lastupdate"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 self.save_status_file(result, game_json) 
-
                 break
-
 
         # 打印borad：
         from game import blank 
@@ -354,7 +352,11 @@ class Train():
 
         winner = 1 if games[0].pieceheight > games[1].pieceheight else 0
 
-        if abs(games[0].getAvgHeight(std=False) - games[1].getAvgHeight(std=False))<1 : winner = -1
+        h0 = games[0].getAvgHeight(std=False)
+        h1 = games[1].getAvgHeight(std=False)
+
+        if abs( h0-h1 )<1.5 : winner = -1
+        print("winner: %s height: %s %s" %(winner, h0, h1))
         # if games[0].score==0 and games[1].score==0: winner = -1
 
         # 更新reward和score，reward为胜负，[1|-1|0]；score 为本步骤以后一共消除的行数
