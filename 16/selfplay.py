@@ -104,7 +104,7 @@ class Train():
         print("TRAIN Self Play starting ...")
 
         # 游戏代理
-        agent = Agent(isRandomNextPiece=False, max_height=10)
+        agent = Agent(isRandomNextPiece=False)
 
         borads = []
 
@@ -117,7 +117,7 @@ class Train():
         #     agent2 = copy.deepcopy(agent)
         # else:
         #     agent2 = Agent(isRandomNextPiece=False)
-        agent2 = Agent(isRandomNextPiece=False, max_height=10)
+        agent2 = Agent(isRandomNextPiece=False)
         # agent2 = copy.deepcopy(agent)
         games = (agent, agent2)
 
@@ -213,7 +213,7 @@ class Train():
             if i >= 10000: game_stop=True
 
             if games[0].piececount==games[1].piececount:
-                if game.pieceheight>=6 or abs(games[0].pieceheight-games[1].pieceheight)>=2:
+                if abs(games[0].pieceheight-games[1].pieceheight)>=2:
                     game_stop=True
 
             # if abs(games[0].pieceheight-games[1].pieceheight)>=2 and games[0].piececount==games[1].piececount:
@@ -355,7 +355,7 @@ class Train():
         h0 = games[0].getAvgHeight(std=False)
         h1 = games[1].getAvgHeight(std=False)
 
-        if abs( h0-h1 )<1.5 : winner = -1
+        if abs(h0-h1)<2 : winner = -1
         print("winner: %s height: %s %s" %(winner, h0, h1))
         # if games[0].score==0 and games[1].score==0: winner = -1
 
