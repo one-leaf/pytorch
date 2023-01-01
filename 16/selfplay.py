@@ -355,7 +355,7 @@ class Train():
         h0 = games[0].getAvgHeight(std=False)
         h1 = games[1].getAvgHeight(std=False)
 
-        if abs(h0-h1)<2 and h0>5 and h1>5 : winner = -1
+        if abs(h0-h1)/(h0+h1) < 0.2 : winner = -1
         print("winner: %s height: %s %s" %(winner, h0, h1))
         # if games[0].score==0 and games[1].score==0: winner = -1
 
