@@ -191,8 +191,8 @@ class MCTS():
         a = best_act
         act = game.position_to_action(a)
 
-        prev_pieceheight = game.pieceheight
-        prev_EmptyCount = game.getEmptyCount()
+        # prev_pieceheight = game.pieceheight
+        # prev_EmptyCount = game.getEmptyCount()
         game.step(act)
 
         games["curr_player"] = 1 if games["curr_player"]==0 else 0
