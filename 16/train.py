@@ -108,8 +108,8 @@ class Dataset(torch.utils.data.Dataset):
             # 前期value严重预测不准，所以给少权重，逐步增加权重
 
 
-            # p = 0.1
-            # value = value*p+ qval*(1-p)
+            p = 0.5
+            value = value*p+ qval*(1-p)
             # value = value*math.tanh(abs(qval))
             # value = value*abs(qval)
             
