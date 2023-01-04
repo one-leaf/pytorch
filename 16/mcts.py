@@ -211,10 +211,15 @@ class MCTS():
         #     reward *= 0.9**game.piececount
 
         if game.state !=0:
-            if other_game.state !=0 :
-                reward = other_game.pieceheight - game.pieceheight
+            # 如果对手游戏还在掉咯，平均高度需要补偿 0.4
+            off = 0.4 if other_game.state !=0 else 0
+            diff = other_game.pieceheight + off - game.pieceheight
+            if diff>0:
+                reward = 0.1
+            elif diff<0:
+                reward = -0.1
             else:
-                reward = other_game.pieceheight + 0.4 - game.pieceheight
+                reward = 0
 
         v = reward + self.search(games)
 
