@@ -214,12 +214,11 @@ class MCTS():
             # 如果对手游戏还在掉落，平均高度需要补偿 0.4
             off = 0.4 if other_game.state !=0 else 0
             diff = other_game.pieceheight + off - game.pieceheight
-            if diff>0:
-                reward = 0.1
-            elif diff<0:
-                reward = -0.1
-            else:
+
+            if abs(diff)<=0.5:
                 reward = 0
+            else:
+                reward = 0.1 if diff>0 else -0.1
 
         v = reward + self.search(games)
 
