@@ -267,7 +267,7 @@ class Agent(object):
         h[-1]=h[-2]    
         h_mean = np.mean(h[1:-1])
         if std:
-            h_std = np.std(h)/10
+            h_std = np.std(h)/(self.width+2)
             h_mean += h_std
         # print(h, "mean", h_mean, "var:", h_var)
         return h_mean
