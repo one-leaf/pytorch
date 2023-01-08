@@ -219,7 +219,7 @@ class MCTS():
             #    reward = 0
             # else:
             #    reward = 0.1 if diff>0 else -0.1
-            reward = game.pieceheight/-20
+            reward = game.pieceheight/-10
 
         v = reward + self.search(games)
 
