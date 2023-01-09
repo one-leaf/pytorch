@@ -50,6 +50,7 @@ class MCTS():
             g.piececount_mark = g.piececount
         available_acts = game.availables
         # for n in range(self._n_playout):
+        
         for n in count():
             self.depth = 0
             game_dict = copy.deepcopy(games_dict)
@@ -210,7 +211,7 @@ class MCTS():
         #     # 这个奖励要逐渐减少
         #     reward *= 0.9**game.piececount
 
-        if game.state !=0:
+        if game.state == 1:
             # 如果对手游戏还在掉落，平均高度需要补偿 0.4
             # off = 0.4 if other_game.state !=0 else 0
             # diff = other_game.pieceheight + off - game.pieceheight
@@ -220,6 +221,8 @@ class MCTS():
             # else:
             #    reward = 0.1 if diff>0 else -0.1
             reward = game.pieceheight/-10
+            if game.piececount - game.piececount_mark >1: 
+                return -reward 
 
         v = reward + self.search(games)
 
