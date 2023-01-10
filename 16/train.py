@@ -79,10 +79,10 @@ class Dataset(torch.utils.data.Dataset):
         # random.shuffle(self.file_list)
         pay_time = round(time.time()-start_time, 2)
         print("loaded data, totle:",len(self.file_list),"delete:", delcount,"paid time:", pay_time)
-        if len(self.file_list)<self.max_keep_size/10 :
-            print("SLEEP 60s for %s to %s data."%(len(self.file_list), self.max_keep_size/10))
-            time.sleep(60)
-            raise Exception("NEED SOME NEW DATA TO TRAIN")
+        # if len(self.file_list)<self.max_keep_size/10 :
+        #     print("SLEEP 60s for %s to %s data."%(len(self.file_list), self.max_keep_size/10))
+        #     time.sleep(60)
+        #     raise Exception("NEED SOME NEW DATA TO TRAIN")
 
 
     def calc_data(self):
@@ -107,20 +107,32 @@ class Dataset(torch.utils.data.Dataset):
             # 这里准备数据的时候直接 同时考虑两者
             # 前期value严重预测不准，所以给少权重，逐步增加权重
 
-
             p = 0.5
             value = value*p+ qval*(1-p)
             # value = value*math.tanh(abs(qval))
             # value = value*abs(qval)
             
-            # _,h,w = state.shape
+            s,h,w = state.shape
             # drop = np.random.rand(h,w)<0.95
             # state[2]=state[2]*drop
             # bg = state[1]+state[2]
             # bg_rot = np.rot90(bg).reshape(h, w)
             # state[0]=bg_rot
-
-
+            canzero=[]
+            for i in range(w):
+                check=False
+                for j in range(10,20):
+                    if state[1][j][i]==1:
+                        if not check:
+                            check=True
+                        else:
+                            canzero.append([j,i])
+            zerolist_len = len(canzero)
+            if zerolist_len>10:
+                zerolist = random.sample(canzero,random.randint(1,zerolist_len//2))
+                for zero in zerolist:
+                    for i in range(s):
+                        state[i][zero[0]][zero[1]]=0
             self.data[fn]={"value":value, "state":state, "mcts_prob": mcts_prob}
             sum_v+=value
             
