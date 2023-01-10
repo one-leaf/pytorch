@@ -127,9 +127,9 @@ class Dataset(torch.utils.data.Dataset):
                             check=True
                         else:
                             canzero.append([j,i])
-            zerolist_len = len(canzero)
-            if zerolist_len>10:
-                zerolist = random.sample(canzero,random.randint(1,zerolist_len//2))
+            canzero_len = len(canzero)
+            if canzero_len>10:
+                zerolist = random.sample(canzero,random.randint(1,canzero_len//2))
                 for zero in zerolist:
                     for i in range(s):
                         state[i][zero[0]][zero[1]]=0
