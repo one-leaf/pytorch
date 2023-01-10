@@ -58,7 +58,7 @@ class MCTS():
             if game.terminal: break
             if len(available_acts)==1 : break
             if self.depth > 800 : break
-            if self.depth < 200 and n < self._n_playout*10: continue 
+            # if self.depth < 200 and n < self._n_playout*10: continue 
 
             # 当前状态
             # v = self.Vs[s] if s in self.Vs else 0
