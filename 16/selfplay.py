@@ -2,7 +2,7 @@ import os, pickle
 
 from model import PolicyValueNet, data_dir, data_wait_dir, model_file
 from agent import Agent, ACTIONS
-from mcts import MCTSPlayer
+from mcts_single import MCTSPlayer
 
 import time, json, datetime
 
@@ -153,8 +153,9 @@ class Train():
         #     elif c == 3:
         #         player = MCTSPlayer((policy_value_net_best.policy_value_fn, policy_value_net.policy_value_fn), c_puct=self.c_puct, n_playout=self.n_playout)    
         # else:
-        player = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout)
-
+        player0 = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout)
+        player1 = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout)
+        players = (player0, player1)
         # if random.random()>0.5 and os.path.exists(bestmodelfile):
         #     policy_value_net_best = PolicyValueNet(GAME_WIDTH, GAME_HEIGHT, GAME_ACTIONS_NUM, model_file=bestmodelfile)
         #     player = MCTSPlayer(policy_value_net_best.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout)
@@ -187,7 +188,7 @@ class Train():
             _step["shape"] = game.fallpiece["shape"]
             _step["pre_piece_height"] = game.pieceheight
 
-            action, move_probs, state_value, qval, acc_ps, depth, ns = player.get_action(games, curr_player, temp=result["total"]["ns"]) 
+            action, move_probs, state_value, qval, acc_ps, depth, ns = players[curr_player].get_action(game, curr_player, temp=result["total"]["ns"]) 
             _, reward = game.step(action)
 
             _step["piece_height"] = game.pieceheight

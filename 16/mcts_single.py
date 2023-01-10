@@ -44,6 +44,7 @@ class MCTS():
         s = game.get_key()
         self.max_depth = 0
         available_acts = game.availables
+        game.piececount_mark = game.piececount
         # for n in range(self._n_playout):
         for n in count():
             self.depth = 0
