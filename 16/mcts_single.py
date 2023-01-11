@@ -196,7 +196,7 @@ class MCTS():
         # reward = 0
         if game.state == 1:
             # reward = game.pieceheight/-10
-            reward = game.getEmptyCount()/-10
+            reward = (game.getEmptyCount()+game.getHeightStd())/-10
         #     # reward =  - game.pieceheight
         #     reward = prev_pieceheight - (game.pieceheight - 0.4)
         #     reward += (prev_EmptyCount - game.getEmptyCount())*0.4

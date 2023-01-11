@@ -272,26 +272,29 @@ class Agent(object):
         # print(h, "mean", h_mean, "var:", h_var)
         return h_mean
 
+    # 统计高度标准差
+    def getHeightStd(self):
+        h = np.zeros((self.width))
+        for x in range(self.width):
+            for y in range(self.height):
+                if self.board[x][y]!=blank:
+                    h[x]=self.height-y
+                    break
+        return np.std(h)
+
     # 统计空洞的个数
     def getEmptyCount(self):
         c = 0
-        h=[]
         for x in range(self.width):
             line_c = -1
             for y in range(self.height):
                 if line_c == -1 and self.board[x][y]!=blank:
                     line_c = 0
-                    h.append(y+1)
                 if line_c!=-1 and self.board[x][y]==blank:    
                     line_c += 1
             if line_c == -1: 
                 line_c = 0
-                h.append(0)
             c += line_c
-        if h[1]>h[0]:
-            c += h[1]-h[0]
-        if h[-2]>h[-1]:
-            c += h[-2]-h[-1]
         return c
 
     # 计算得分,只计算被挡住的
