@@ -115,7 +115,7 @@ class MCTS():
                 if (s, act) in self.Qsa: q = self.Qsa[(s, act)]
                 if s in self.Ps: p = self.Ps[s][act]
                 info.append([game.position_to_action_name(act), visit, round(q,2), round(p,2)])        
-            print(game.steps, game.fallpiece["shape"], "temp:", round(temp,2), "ns:", ns, "depth:", self.max_depth,"height:", round(game.pieceheight,4), "value:", round(v,2), "qval:", round(qval,2), info)
+            print(game.steps, game.fallpiece["shape"], "temp:", round(temp,2), "ns:", ns, "depth:", self.max_depth, "empty:", game.getEmptyCount(), "height:", round(game.pieceheight,2), "value:", round(v,2), "qval:", round(qval,2), info)
 
         return acts, probs, qs, ps, v, ns
 
@@ -179,8 +179,8 @@ class MCTS():
         a = best_act
         act = game.position_to_action(a)
 
-        prev_pieceheight = game.pieceheight
-        prev_EmptyCount = game.getEmptyCount()
+        # prev_pieceheight = game.pieceheight
+        # prev_EmptyCount = game.getEmptyCount()
 
         game.step(act)
 
@@ -195,7 +195,8 @@ class MCTS():
         # 现实奖励补贴
         # reward = 0
         if game.state == 1:
-            reward = game.pieceheight/-10
+            # reward = game.pieceheight/-10
+            reward = game.getEmptyCount()/-10
         #     # reward =  - game.pieceheight
         #     reward = prev_pieceheight - (game.pieceheight - 0.4)
         #     reward += (prev_EmptyCount - game.getEmptyCount())*0.4
