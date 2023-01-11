@@ -256,20 +256,14 @@ class Agent(object):
         return h
 
     # 统计当前平均高度
-    def getAvgHeight(self, std=True):
-        h = np.zeros((self.width+2))
+    def getAvgHeight(self, std=False):
+        h = np.zeros((self.width))
         for x in range(self.width):
             for y in range(self.height):
                 if self.board[x][y]!=blank:
-                    h[x+1]=self.height-y
-                    break
-        h[0]=h[1]
-        h[-1]=h[-2]    
-        h_mean = np.mean(h[1:-1])
-        if std:
-            h_std = np.std(h)/(self.width+2)
-            h_mean += h_std
-        # print(h, "mean", h_mean, "var:", h_var)
+                    h[x]=self.height-y
+                    break   
+        h_mean = np.mean(h)
         return h_mean
 
     # 统计高度标准差

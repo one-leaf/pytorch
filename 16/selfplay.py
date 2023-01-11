@@ -214,7 +214,7 @@ class Train():
             if i >= 10000: game_stop=True
 
             if games[0].piececount==games[1].piececount:
-                if abs(games[0].pieceheight-games[1].pieceheight)>=2:
+                if abs(games[0].pieceheight-games[1].pieceheight)>=2 or abs(games[0].getEmptyCount()-games[1].getEmptyCount())>=4:
                     game_stop=True
 
             # if abs(games[0].pieceheight-games[1].pieceheight)>=2 and games[0].piececount==games[1].piececount:
@@ -353,10 +353,10 @@ class Train():
 
         winner = 1 if games[0].pieceheight > games[1].pieceheight else 0
 
-        h0 = games[0].getAvgHeight(std=False)
-        h1 = games[1].getAvgHeight(std=False)
+        h0 = games[0].pieceheight
+        h1 = games[1].pieceheight
 
-        if abs(h0-h1)/(h0+h1) < 0.2 : winner = -1
+        # if abs(h0-h1)/(h0+h1) < 0.2 : winner = -1
         print("winner: %s height: %s %s" %(winner, h0, h1))
         # if games[0].score==0 and games[1].score==0: winner = -1
 
