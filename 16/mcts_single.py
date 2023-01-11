@@ -191,25 +191,11 @@ class MCTS():
 
         self.depth = self.depth +1
 
-
-        # 现实奖励补贴
-        # reward = 0
-        if game.state == 1:
-            # reward = game.pieceheight/-10
-            reward = (game.getEmptyCount()+game.getHeightStd())/-10
-        #     # reward =  - game.pieceheight
-        #     reward = prev_pieceheight - (game.pieceheight - 0.4)
-        #     reward += (prev_EmptyCount - game.getEmptyCount())*0.4
-        #     reward *= 0.99**game.piececount
-        # v = reward + self.search(game)
-            if game.piececount - game.piececount_mark >1: 
-                v = reward 
-            else:
-                v = reward + self.search(game)        
+        # 现实奖励
+        if game.state == 1 and game.piececount - game.piececount_mark >1:
+            v = (game.getEmptyCount()+game.getHeightStd())/-10
         else:
             v = self.search(game)
-
-        # v = v/(abs(v)+0.1)
 
         # 更新 Q 值 和 访问次数
         if (s, a) in self.Qsa:
