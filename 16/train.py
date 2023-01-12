@@ -126,7 +126,7 @@ class Dataset(torch.utils.data.Dataset):
 
         avg_piececount = np.average(piececounts)
         var_piececount = np.var(piececounts)
-        if var_piececount<0.01:
+        if var_piececount<0.1:
             print("SLEEP 60s for var: %s avg: %s data."%(var_piececount, avg_piececount))
             time.sleep(60)
             raise Exception("NEED SOME NEW DATA TO TRAIN")
