@@ -126,6 +126,10 @@ class Dataset(torch.utils.data.Dataset):
 
         avg_piececount = np.average(piececounts)
         var_piececount = np.var(piececounts)
+        if var_piececount<0.01:
+            print("SLEEP 60s for var: %s avg: %s data."%(var_piececount, avg_piececount))
+            time.sleep(60)
+            raise Exception("NEED SOME NEW DATA TO TRAIN")
 
         for fn in self.data:
             self.data[fn]["value"]=(self.data[fn]["value"]-avg_piececount)/var_piececount
