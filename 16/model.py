@@ -46,13 +46,12 @@ class PolicyValueNet():
         self.optimizer = optim.AdamW(self.policy_value_net.parameters(), lr=1e-6, weight_decay=self.l2_const)       
         # self.optimizer = optim.SGD(self.policy_value_net.parameters(), lr=1e-6, momentum=0.9, weight_decay=self.l2_const)
 
-        self.load_model_file=False
         if model_file and os.path.exists(model_file):
             print("Loading model", model_file)
             net_sd = torch.load(model_file, map_location=self.device)
             self.policy_value_net.load_state_dict(net_sd)
-            self.load_model_file = True
-
+        else:
+            self.save_model(model_file)
         self.lr = 0
 
     # 设置学习率
@@ -111,15 +110,10 @@ class PolicyValueNet():
         输入: 游戏
         输出: 一组（动作， 概率）和游戏当前状态的胜率
         """       
-        if self.load_model_file:
-            current_state = game.current_state().reshape(1, -1, self.input_height, self.input_width)
-            act_probs, value = self.policy_value(current_state)
-            act_probs=act_probs[0]
-            value=float(value[0])
-        else:
-            act_len=game.actions_num
-            act_probs=np.ones([act_len])/act_len
-            value = 0.
+        current_state = game.current_state().reshape(1, -1, self.input_height, self.input_width)
+        act_probs, value = self.policy_value(current_state)
+        act_probs=act_probs[0]
+        value=float(value[0])
         
         actions = game.availables
         act_probs = list(zip(actions, act_probs[actions]))

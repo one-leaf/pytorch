@@ -74,8 +74,7 @@ class Train():
             result["total"]={"agent":0, "pacc":0, "vacc":0, "ns":0, "reward":0, "depth":0, "step_time":0, "_agent":0}
         if "best" not in result:
             result["best"]={"reward":0, "agent":0}
-        if "piececount" not in result["total"]:
-            result["total"]["piececount"]=0
+
         return result
 
     def get_equi_data(self, states, mcts_probs, values, scores):
@@ -113,31 +112,86 @@ class Train():
         policy_value_net = PolicyValueNet(GAME_WIDTH, GAME_HEIGHT, GAME_ACTIONS_NUM, model_file=model_file)
         bestmodelfile = model_file+"_best"
 
+        # 同时开两个游戏
+        # if random.random()>0.25:
+        #     agent2 = copy.deepcopy(agent)
+        # else:
+        #     agent2 = Agent(isRandomNextPiece=False)
+        agent2 = Agent(isRandomNextPiece=False, max_height=10)
+        # agent2 = copy.deepcopy(agent)
+        games = (agent, agent2)
+
         agent.show_mcts_process= True
+        agent2.show_mcts_process= True
         agent.id = 0
+        agent.id = 1
         
         game_json = os.path.join(data_dir, "result.json")
         result = self.read_status_file(game_json)
         
-        player = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout)
+        # 由于动态cpuct并没有得到一个好的结果，所以关闭
+        # 读取各自的动态cpuct
+        # cpuct_result = game_result["cpuct"]
+        # cpuct_list = sorted(cpuct_result, key=lambda x : cpuct_result[x]["count"])
+        # cpuct = float(cpuct_list[0])
+        # print("cpuct1:", cpuct_result, "-->", cpuct_list, "cpuct1:", cpuct, "n_playout:", self.n_playout)
+        # cpuct_list.sort() 
+
+        # if os.path.exists(bestmodelfile):
+        #     policy_value_net_best = PolicyValueNet(GAME_WIDTH, GAME_HEIGHT, GAME_ACTIONS_NUM, model_file=bestmodelfile)
+        #     # if random.random()>0.5:
+        #     #     player = MCTSPlayer((policy_value_net.policy_value_fn, policy_value_net_best.policy_value_fn), c_puct=self.c_puct, n_playout=self.n_playout)
+        #     # else:
+        #     #     player = MCTSPlayer((policy_value_net_best.policy_value_fn, policy_value_net.policy_value_fn), c_puct=self.c_puct, n_playout=self.n_playout)
+        #     c = random.choice([0,1,2,3])
+        #     if c == 0:
+        #         player = MCTSPlayer(policy_value_net_best.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout)
+        #     elif c == 1:
+        #         player = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout)    
+        #     elif c == 2:
+        #         player = MCTSPlayer((policy_value_net.policy_value_fn, policy_value_net_best.policy_value_fn), c_puct=self.c_puct, n_playout=self.n_playout)    
+        #     elif c == 3:
+        #         player = MCTSPlayer((policy_value_net_best.policy_value_fn, policy_value_net.policy_value_fn), c_puct=self.c_puct, n_playout=self.n_playout)    
+        # else:
+        player0 = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout)
+        player1 = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout)
+        players = (player0, player1)
+        # if random.random()>0.5 and os.path.exists(bestmodelfile):
+        #     policy_value_net_best = PolicyValueNet(GAME_WIDTH, GAME_HEIGHT, GAME_ACTIONS_NUM, model_file=bestmodelfile)
+        #     player = MCTSPlayer(policy_value_net_best.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout)
+        # else:
+        #     player = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout)
     
-        data = {"steps":[],"shapes":[],"last_state":0,"score":0,"piece_count":0}
+        data0 = {"steps":[],"shapes":[],"last_state":0,"score":0,"piece_count":0}
+        data1 = {"steps":[],"shapes":[],"last_state":0,"score":0,"piece_count":0}
+        game_datas = (data0, data1)
+
         start_time = time.time()
         print('start game time:', datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 
         game_stop= False
+        curr_player = -1
         for i in count():
-            _step={"step":i, "curr_player":agent.id}
-            _step["state"] = agent.current_state()    
+            if games[0].piececount==games[1].piececount:
+                curr_player = 0 if curr_player ==1 else 1
+            elif games[0].piececount<games[1].piececount:
+                curr_player = 0
+            else:
+                curr_player = 1
+            game = games[curr_player]
+            data = game_datas[curr_player]            
+
+            _step={"step":i, "curr_player":curr_player}
+            _step["state"] = game.current_state()    
             # print(_step["state"])           
-            _step["piece_count"] = agent.piececount               
-            _step["shape"] = agent.fallpiece["shape"]
-            _step["pre_piece_height"] = agent.pieceheight
+            _step["piece_count"] = game.piececount               
+            _step["shape"] = game.fallpiece["shape"]
+            _step["pre_piece_height"] = game.pieceheight
 
-            action, move_probs, state_value, qval, acc_ps, depth, ns = player.get_action(agent, agent.id, temp=result["total"]["ns"]) 
-            _, reward = agent.step(action)
+            action, move_probs, state_value, qval, acc_ps, depth, ns = players[curr_player].get_action(game, curr_player, temp=result["total"]["ns"]) 
+            _, reward = game.step(action)
 
-            _step["piece_height"] = agent.pieceheight
+            _step["piece_height"] = game.pieceheight
             _step["reward"] = reward if reward>0 else 0
             _step["move_probs"] = move_probs
             _step["state_value"] = state_value
@@ -153,26 +207,40 @@ class Train():
                 repeat_count = 40
                 print(_step["state"][0])
                 print(_step["state"][-1])
-                print("#"*repeat_count, 'score:', agent.score, 'height:', agent.pieceheight, 'piece:', agent.piececount, "shape:", agent.fallpiece["shape"], \
-                    'step:', agent.steps, "step time:", round((time.time()-start_time)/i,3),'player:', agent.id)
+                print("#"*repeat_count, 'score:', game.score, 'height:', game.pieceheight, 'piece:', game.piececount, "shape:", game.fallpiece["shape"], \
+                    'step:', game.steps, "step time:", round((time.time()-start_time)/i,3),'player:', curr_player)
 
             # 如果训练次数超过了最大次数，则直接终止训练
             if i >= 10000: game_stop=True
 
-            if agent.terminal or game_stop:
-                data["score"] = agent.score
-                data["piece_count"] = agent.piececount
-                data["piece_height"] = agent.pieceheight
-                borads.append(agent.board)                    
+            if games[0].piececount==games[1].piececount:
+                if abs(games[0].pieceheight-games[1].pieceheight)>=2 or abs(games[0].getEmptyCount()-games[1].getEmptyCount())>=4:
+                    game_stop=True
 
-                game_reward =  agent.score 
+            # if abs(games[0].pieceheight-games[1].pieceheight)>=2 and games[0].piececount==games[1].piececount:
+            #     game_stop=True
+            # if games[0].score != games[1].score and games[0].piececount==games[1].piececount:
+            #     game_stop=True
+
+            # if games[0].piececount>1 and games[1].piececount>1 and games[0].piececount==games[1].piececount:
+            #     if (games[0].score != games[1].score and games[0].pieceheight!=games[1].pieceheight): 
+            #         game_stop=True
+
+            if game.terminal or game_stop:
+                for _game, _data in zip(games, game_datas):
+                    _data["score"] = _game.score
+                    _data["piece_count"] = _game.piececount
+                    _data["piece_height"] = _game.pieceheight
+                    borads.append(_game.board)                    
+
+                game_reward =  sum([_game.score for _game in games])/len(games)
                 result = self.read_status_file(game_json)
 
                 paytime = time.time()-start_time
-                steptime = paytime/agent.steps
+                steptime = paytime/sum([_game.steps for _game in games])
 
-                result["total"]["agent"] += 1
-                result["total"]["_agent"] += 1
+                result["total"]["agent"] += 2
+                result["total"]["_agent"] += 2
 
                 if result["total"]["step_time"]==0:
                     result["total"]["step_time"] = steptime
@@ -188,26 +256,22 @@ class Train():
                 else:
                     result["total"]["reward"] = result["total"]["reward"]*0.99 + game_reward*0.01
 
-                if result["total"]["piececount"]==0:
-                    result["total"]["piececount"] = agent.piececount
-                else:
-                    result["total"]["piececount"] = result["total"]["piececount"]*0.99 + agent.piececount*0.01
-
                 # 计算 acc 看有没有收敛
 
                 pacc = []
                 vacc = []
                 depth = []
                 ns = []
-                winner  = True if agent.piececount > result["total"]["piececount"] else False
-                for step in data["steps"]:
-                    pacc.append(step["acc_ps"])
-                    depth.append(step["depth"])
-                    ns.append(step["ns"])
-                    if (not winner and step["state_value"]>0) or (winner and step["state_value"]<0):
-                        vacc.append(0)
-                    else:
-                        vacc.append(1)
+                winner  = 0 if games[0].pieceheight < games[1].pieceheight else 1
+                for j, _game, _data in zip([0,1], games, game_datas):
+                    for step in _data["steps"]:
+                        pacc.append(step["acc_ps"])
+                        depth.append(step["depth"])
+                        ns.append(step["ns"])
+                        if (j!=winner and step["state_value"]>0) or (j==winner and step["state_value"]<0):
+                            vacc.append(0)
+                        else:
+                            vacc.append(1)
 
                 pacc = np.average(pacc)
                 vacc = np.average(vacc)
@@ -287,47 +351,56 @@ class Train():
             print(line)
         print((" "+" -"*agent.width+" ")*len(borads))
 
-        winner = True if agent.pieceheight > result["total"]["piececount"] else False
+        winner = 1 if games[0].pieceheight > games[1].pieceheight else 0
 
-        print("winner: %s piececount: %s %s" %(winner, agent.piececount, result["total"]["piececount"]))
+        h0 = games[0].pieceheight
+        h1 = games[1].pieceheight
+
+        # if abs(h0-h1)/(h0+h1) < 0.2 : winner = -1
+        print("winner: %s height: %s %s" %(winner, h0, h1))
+        # if games[0].score==0 and games[1].score==0: winner = -1
 
         # 更新reward和score，reward为胜负，[1|-1|0]；score 为本步骤以后一共消除的行数
-        step_count = len(data["steps"])
-        piece_count = -1
-        score = 0
-        vacclist=[]
-        slist=[]
-        pacclist=[]
-        vacc_sum = 0
-        s_sum = 0
-        pacc_sum = 0
-        d_sum = 0
-        for j in range(step_count-1,-1,-1):
-            if piece_count!=data["steps"][j]["piece_count"]:
-                piece_count = data["steps"][j]["piece_count"]
-                score += data["steps"][j]["reward"]
-                vacclist.insert(0, round(data["steps"][j]["state_value"],2))
-                slist.insert(0, score)
-                pacclist.insert(0, round(max(data["steps"][j]["move_probs"]),2))
-            data["steps"][j]["piececount"] = agent.piececount
-            data["steps"][j]["score"] = score
+        for i, data in enumerate(game_datas):
+            step_count = len(data["steps"])
+            piece_count = -1
+            v = 1 if i==winner else -1 
+            score = 0
+            vacclist=[]
+            slist=[]
+            pacclist=[]
+            vacc_sum = 0
+            s_sum = 0
+            pacc_sum = 0
+            d_sum = 0
+            for j in range(step_count-1,-1,-1):
+                if piece_count!=data["steps"][j]["piece_count"]:
+                    piece_count = data["steps"][j]["piece_count"]
+                    score += data["steps"][j]["reward"]
+                    vacclist.insert(0, round(data["steps"][j]["state_value"],2))
+                    slist.insert(0, score)
+                    pacclist.insert(0, round(max(data["steps"][j]["move_probs"]),2))
+                q = data["steps"][j]["qval"] 
+                data["steps"][j]["reward"] = v #* (0.99**(step_count-j))
+                data["steps"][j]["score"] = q
 
-            vacc_sum += abs(data["steps"][j]["qval"]-data["steps"][j]["state_value"])
-            s_sum += score
-            pacc_sum += abs(1-max(data["steps"][j]["move_probs"]))
-            d_sum += data["steps"][j]["depth"]
-        print(i,"score:",data["score"],"piece_count:",data["piece_count"],"piece_height:",data["piece_height"],"steps:",step_count,"depth:",d_sum/step_count)
-        print(i,"avg_score:",s_sum/step_count, slist)
-        print(i,"v_acc:",vacc_sum/step_count, vacclist)
-        print(i,"p_acc:",pacc_sum/step_count, pacclist)
+                vacc_sum += abs(v-data["steps"][j]["state_value"])
+                s_sum += score
+                pacc_sum += abs(1-max(data["steps"][j]["move_probs"]))
+                d_sum += data["steps"][j]["depth"]
+            print(i,"value:",v,"score:",data["score"],"piece_count:",data["piece_count"],"piece_height:",data["piece_height"],"steps:",step_count,"depth:",d_sum/step_count)
+            print(i,"avg_score:",s_sum/step_count, slist)
+            print(i,"v_acc:",vacc_sum/step_count, vacclist)
+            print(i,"p_acc:",pacc_sum/step_count, pacclist)
        
         states, mcts_probs, values, qval= [], [], [], []
 
-        for step in data["steps"]:
-            states.append(step["state"])
-            mcts_probs.append(step["move_probs"])
-            values.append(step["piececount"])
-            qval.append(step["qval"])
+        for data in game_datas:
+            for step in data["steps"]:
+                states.append(step["state"])
+                mcts_probs.append(step["move_probs"])
+                values.append(step["reward"])
+                qval.append(step["score"])
 
         assert len(states)>0
         assert len(states)==len(values)

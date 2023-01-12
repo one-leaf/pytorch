@@ -89,12 +89,12 @@ class Dataset(torch.utils.data.Dataset):
         # scores=[]
         print("start load data to memory ...")
         start_time = time.time()
-        sum_v=0
+        piececounts=[]
         # double_train_list=[]
         for fn in self.file_list:
             try:
                 with open(fn, "rb") as f:
-                    state, mcts_prob, value, qval = pickle.load(f)
+                    state, mcts_prob, piececount, qval = pickle.load(f)
                     assert state.shape[0] == 8                         
                     # if abs(qval)>0.5:
                     #     double_train_list.append(fn)
@@ -103,21 +103,10 @@ class Dataset(torch.utils.data.Dataset):
                 if os.path.exists(fn): os.remove(fn)
                 self.file_list.remove(fn)
                 continue
-
-            # 这里准备数据的时候直接 同时考虑两者
-            # 前期value严重预测不准，所以给少权重，逐步增加权重
-
-            p = 0.5
-            value = value*p+ qval*(1-p)
-            # value = value*math.tanh(abs(qval))
-            # value = value*abs(qval)
+            piececounts.append(piececount)
             
             s,h,w = state.shape
-            # drop = np.random.rand(h,w)<0.95
-            # state[2]=state[2]*drop
-            # bg = state[1]+state[2]
-            # bg_rot = np.rot90(bg).reshape(h, w)
-            # state[0]=bg_rot
+
             canzero=[]
             for i in range(w):
                 check=False
@@ -133,15 +122,20 @@ class Dataset(torch.utils.data.Dataset):
                 for zero in zerolist:
                     for i in range(s):
                         state[i][zero[0]][zero[1]]=0
-            self.data[fn]={"value":value, "state":state, "mcts_prob": mcts_prob}
-            sum_v+=value
-            
+            self.data[fn]={"value":piececount, "state":state, "mcts_prob": mcts_prob}
+
+        avg_piececount = np.average(piececounts)
+        var_piececount = np.var(piececounts)
+
+        for fn in self.data:
+            self.data[fn]["value"]=(self.data[fn]["value"]-avg_piececount)/var_piececount
+
         # 将qval高的重复学习一次    
         # self.file_list.extend(double_train_list)
 
         pay_time = round(time.time()-start_time, 2)
         print("loaded to memory, paid time:", pay_time)
-        print("value sum:", sum_v, "avg:", sum_v/len(self.data))
+        print("value avg:", avg_piececount, "var:", var_piececount)
         print("load data end")
 
 
