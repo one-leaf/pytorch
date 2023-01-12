@@ -79,10 +79,10 @@ class Dataset(torch.utils.data.Dataset):
         # random.shuffle(self.file_list)
         pay_time = round(time.time()-start_time, 2)
         print("loaded data, totle:",len(self.file_list),"delete:", delcount,"paid time:", pay_time)
-        # if len(self.file_list)<self.max_keep_size/10 :
-        #     print("SLEEP 60s for %s to %s data."%(len(self.file_list), self.max_keep_size/10))
-        #     time.sleep(60)
-        #     raise Exception("NEED SOME NEW DATA TO TRAIN")
+        if len(self.file_list)<self.max_keep_size/100 :
+            print("SLEEP 60s for %s to %s data."%(len(self.file_list), self.max_keep_size/10))
+            time.sleep(60)
+            raise Exception("NEED SOME NEW DATA TO TRAIN")
 
 
     def calc_data(self):
