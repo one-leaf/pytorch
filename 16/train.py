@@ -126,7 +126,9 @@ class Dataset(torch.utils.data.Dataset):
 
         avg_piececount = np.average(piececounts)
         var_piececount = np.var(piececounts)
-        if var_piececount<0.1:
+        min_piececount = np.min(piececounts)
+        max_piececount = np.max(piececounts)
+        if var_piececount<1:
             print("SLEEP 60s for piececount var: %s avg: %s data."%(var_piececount, avg_piececount))
             time.sleep(60)
             raise Exception("NEED SOME NEW DATA TO TRAIN")
@@ -139,7 +141,7 @@ class Dataset(torch.utils.data.Dataset):
 
         pay_time = round(time.time()-start_time, 2)
         print("loaded to memory, paid time:", pay_time)
-        print("piececount avg:", avg_piececount, "var:", var_piececount)
+        print("piececount avg:", avg_piececount, "var:", var_piececount,"min:", min_piececount,"max:", max_piececount)
         print("load data end")
 
 
