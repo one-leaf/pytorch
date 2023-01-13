@@ -272,7 +272,7 @@ class Agent(object):
         for x in range(self.width):
             for y in range(self.height):
                 if self.board[x][y]!=blank:
-                    h[x]=self.height-y
+                    h[x]=y
                     break
         return np.std(h)
 
