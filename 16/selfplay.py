@@ -287,7 +287,7 @@ class Train():
             print(line)
         print((" "+" -"*agent.width+" ")*len(borads))
 
-        winner = True if agent.pieceheight > result["total"]["piececount"] else False
+        winner = True if agent.piececount > result["total"]["piececount"] else False
 
         print("winner: %s piececount: %s %s" %(winner, agent.piececount, result["total"]["piececount"]))
 
