@@ -274,7 +274,7 @@ class Agent(object):
                 if self.board[x][y]!=blank:
                     h[x]=y
                     break
-        return np.std(h)
+        return np.std(h)/self.width
 
     # 统计空洞的个数
     def getEmptyCount(self):
