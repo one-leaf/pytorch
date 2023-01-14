@@ -181,7 +181,7 @@ class MCTS():
         act = game.position_to_action(a)
 
         prev_pieceheight = game.pieceheight
-        prev_EmptyCount = game.getEmptyCount()
+        prev_EmptyCount = game.emptyCount
 
         game.step(act)
 
@@ -194,10 +194,10 @@ class MCTS():
 
         # 现实奖励
         if game.state == 1 and game.piececount - game.piececount_mark >1:
-            if game.getEmptyCount()<=prev_EmptyCount and game.pieceheight<=prev_pieceheight:
+            if game.emptyCount<=prev_EmptyCount and game.pieceheight<=prev_pieceheight:
                 v = 1
             else:
-                v = (game.getEmptyCount()+game.getHeightStd())/-10
+                v = (game.emptyCount+game.getHeightStd())/-10
         else:
             v = self.search(game)
 

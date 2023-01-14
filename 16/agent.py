@@ -40,8 +40,10 @@ class Agent(object):
         self.piecesteps = 0
         # 方块的数量
         self.piececount = 0
-        # 方块的最高高度
+        # 方块的平均高度
         self.pieceheight = 0
+        # 方块空洞数量
+        self.emptyCount = 0
         # 面板
         self.board = self.tetromino.getblankboard()
         # 状态： 0 下落过程中 1 更换方块 2 结束一局
@@ -164,7 +166,8 @@ class Agent(object):
             self.reward = self.tetromino.removecompleteline(self.board) 
             
             self.score += self.reward
-            self.pieceheight = self.getAvgHeight()          
+            self.pieceheight = self.getAvgHeight()    
+            self.emptyCount = self.getEmptyCount()      
             self.pieces_height.append(20 - fallpiece_y - self.reward)
             # self.fallpiece = None
             self.state = 1
