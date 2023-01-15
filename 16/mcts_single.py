@@ -115,7 +115,7 @@ class MCTS():
                 if (s, act) in self.Qsa: q = self.Qsa[(s, act)]
                 if s in self.Ps: p = self.Ps[s][act]
                 info.append([game.position_to_action_name(act), visit, round(q,2), round(p,2)])        
-            print(game.steps, game.fallpiece["shape"], "temp:", round(temp,2), "ns:", ns, "depth:", self.max_depth, "empty:", game.getEmptyCount(), "height:", round(game.pieceheight,2), "value:", round(v,2), "qval:", round(qval,2), info, "std:", round(game.getHeightStd(),2))
+            print(game.steps, game.fallpiece["shape"], "temp:", round(temp,2), "ns:", ns, "depth:", self.max_depth, "empty:", game.getEmptyCount(), "height:", round(game.pieceheight,2), "value:", round(v,2), "qval:", round(qval,2), info, "std:", round(game.getHeightDiff(),4))
 
         return acts, probs, qs, ps, v, ns
 
@@ -197,7 +197,7 @@ class MCTS():
             if game.emptyCount<=prev_EmptyCount and game.pieceheight<=prev_pieceheight and game.reward>0:
                 v = 1
             elif game.piececount - game.piececount_mark > 1:
-                v = (game.emptyCount+game.getHeightStd())/-10
+                v = (game.emptyCount+game.getHeightDiff())/-10
             else:
                 v = self.search(game)
         else:

@@ -279,6 +279,20 @@ class Agent(object):
                     break
         return np.std(h)/self.width
 
+    # 统计数据相邻差值
+    def getHeightDiff(self):
+        h = np.zeros((self.width))
+        for x in range(self.width):            
+            for y in range(self.height):
+                if self.board[x][y]!=blank:
+                    h[x]=y
+                    break
+        v = 0
+        for x in range(1,self.width):
+            v += abs(h[x]-h[x-1])
+        v /= (self.width-1)
+        return v/10.
+
     # 统计空洞的个数
     def getEmptyCount(self):
         c = 0
