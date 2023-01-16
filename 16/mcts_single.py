@@ -195,7 +195,7 @@ class MCTS():
         # 现实奖励
         if game.state == 1:
             if game.emptyCount<=prev_EmptyCount and game.pieceheight<=prev_pieceheight and game.reward>0:
-                v = 1
+                v = prev_EmptyCount - game.emptyCount + prev_pieceheight - game.pieceheight
             elif game.piececount - game.piececount_mark > 1:
                 v = (game.emptyCount+game.getHeightDiff())/-10
             else:
