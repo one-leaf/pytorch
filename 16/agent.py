@@ -287,7 +287,7 @@ class Agent(object):
                 if self.board[x][y]!=blank:
                     h[x]=self.height-y
                     break
-        return (max(h)-min(h))/10.
+        return (max(h)-min(h))**2/10.
 
     # 统计空洞的个数
     def getEmptyCount(self):
