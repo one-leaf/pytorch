@@ -289,8 +289,8 @@ class Agent(object):
                     break
         v = 0
         for x in range(1,self.width):
-            v += abs(h[x]-h[x-1])
-        v = max(v)
+            if v < abs(h[x]-h[x-1]):
+                v = abs(h[x]-h[x-1])
         return v/10.
 
     # 统计空洞的个数
