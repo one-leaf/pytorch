@@ -290,9 +290,7 @@ class Agent(object):
         v = 0
         for x in range(1,self.width):
             v += abs(h[x]-h[x-1])
-        v += abs(h[1]-h[0])
-        v += abs(h[-2]-h[-1])
-        v /= (self.width+1)
+        v = max(v)
         return v/10.
 
     # 统计空洞的个数
