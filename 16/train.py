@@ -134,7 +134,7 @@ class Dataset(torch.utils.data.Dataset):
             raise Exception("NEED SOME NEW DATA TO TRAIN")
 
         for fn in self.data:
-            self.data[fn]["value"]=(self.data[fn]["value"]-avg_piececount)/var_piececount
+            self.data[fn]["value"]=(self.data[fn]["value"]-avg_piececount)/(max_piececount-min_piececount)
 
         # 将qval高的重复学习一次    
         # self.file_list.extend(double_train_list)
