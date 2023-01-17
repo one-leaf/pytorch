@@ -128,13 +128,14 @@ class Dataset(torch.utils.data.Dataset):
         var_piececount = np.var(piececounts)
         min_piececount = np.min(piececounts)
         max_piececount = np.max(piececounts)
+        dif_piececount = max_piececount-min_piececount
         if var_piececount<1:
             print("SLEEP 60s for piececount var: %s avg: %s data."%(var_piececount, avg_piececount))
             time.sleep(60)
             raise Exception("NEED SOME NEW DATA TO TRAIN")
 
         for fn in self.data:
-            self.data[fn]["value"]=(self.data[fn]["value"]-avg_piececount)/(max_piececount-min_piececount)
+            self.data[fn]["value"]=(self.data[fn]["value"]-avg_piececount)/dif_piececount
 
         # 将qval高的重复学习一次    
         # self.file_list.extend(double_train_list)

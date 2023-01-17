@@ -159,7 +159,7 @@ class Train():
                     'step:', agent.steps, "step time:", round((time.time()-start_time)/i,3),'player:', agent.id)
 
             # 如果训练次数超过了最大次数，则直接终止训练
-            if i >= 10000: game_stop=True
+            if i >= 10000 and agent.state == 1: game_stop=True
 
             if agent.terminal or game_stop:
                 data["score"] = agent.score
