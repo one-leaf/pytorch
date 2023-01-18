@@ -196,8 +196,8 @@ class MCTS():
         if game.state == 1:
             if game.emptyCount>prev_EmptyCount:
                 v = prev_EmptyCount - game.emptyCount                
-            elif game.emptyCount<=prev_EmptyCount and game.pieceheight<=prev_pieceheight and game.reward>0:
-                v = prev_EmptyCount - game.emptyCount + prev_pieceheight - game.pieceheight
+            elif (game.emptyCount<prev_EmptyCount or game.emptyCount==0) and game.reward>0:
+                v = prev_pieceheight - game.pieceheight
             elif game.piececount - game.piececount_mark > 1:
                 # v = (game.emptyCount+game.getHeightDiff())/-10
                 v = (game.pieceheight+game.getHeightDiff())/-10
