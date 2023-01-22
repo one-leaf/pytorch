@@ -5,6 +5,8 @@ import numpy as np
 # import random
 # from collections import deque
 import math
+import copy
+
 
 KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN = 0, 1, 2, 3
 ACTIONS = [KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN]
@@ -235,10 +237,7 @@ class Agent(object):
         print("level:", self.level, "score:", self.score, "steps:", self.steps,"piececount:", self.piececount)
 
     def print(self):
-        board = self.tetromino.getblankboard()
-        for x in range(self.width):
-            for y in range(self.height):
-                board[x][y]=self.board[x][y]
+        board = copy.copy(self.board)
         for x in range(templatenum):
             for y in range(templatenum):
                 w = x + self.fallpiece['x']
