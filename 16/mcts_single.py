@@ -44,7 +44,9 @@ class MCTS():
         s = game.get_key()
         self.max_depth = 0
         available_acts = game.availables
-        game.piececount_mark = game.piececount
+        game.prev_piececount = game.piececount
+        game.prev_pieceheight = game.pieceheight
+        game.prev_EmptyCount = game.emptyCount
         # for n in range(self._n_playout):
         for n in count():
             self.depth = 0
@@ -194,11 +196,11 @@ class MCTS():
         self.depth = self.depth +1
 
         # 现实奖励
-        if game.state == 1 and game.piececount - game.piececount_mark > 1:
-            if game.emptyCount!=prev_EmptyCount:
-                v = prev_EmptyCount - game.emptyCount                
+        if game.state == 1 and game.piececount - game.prev_piececount > 1:
+            if game.emptyCount!=game.prev_EmptyCount:
+                v = game.prev_EmptyCount - game.emptyCount                
             else:
-                v = prev_pieceheight - game.pieceheight
+                v = game.prev_pieceheight - game.pieceheight
         else:
             v = self.search(game)
 
