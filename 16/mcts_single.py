@@ -108,6 +108,7 @@ class MCTS():
         qval = qs[np.argmax(probs)]
 
         if game.show_mcts_process or game.state == 1 :
+            if game.state == 1: game.print()
             info=[]
             for idx in sorted(range(len(visits)), key=visits.__getitem__)[::-1]:
                 act, visit = act_visits[idx]

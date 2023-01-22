@@ -153,8 +153,8 @@ class Train():
             # 这里的奖励是消除的行数
             if reward > 0:
                 repeat_count = 40
-                print(_step["state"][0])
-                print(_step["state"][-1])
+                # print(_step["state"][0])
+                # print(_step["state"][-1])
                 print("#"*repeat_count, 'score:', agent.score, 'height:', agent.pieceheight, 'piece:', agent.piececount, "shape:", agent.fallpiece["shape"], \
                     'step:', agent.steps, "step time:", round((time.time()-start_time)/i,3),'player:', agent.id)
 
