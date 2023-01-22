@@ -237,7 +237,7 @@ class Agent(object):
         print("level:", self.level, "score:", self.score, "steps:", self.steps,"piececount:", self.piececount)
 
     def print(self):
-        board = copy.copy(self.board)
+        board = copy.deepcopy(self.board)
         for x in range(templatenum):
             for y in range(templatenum):
                 w = x + self.fallpiece['x']
