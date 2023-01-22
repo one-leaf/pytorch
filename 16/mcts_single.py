@@ -197,7 +197,6 @@ class MCTS():
             if game.emptyCount!=prev_EmptyCount:
                 v = prev_EmptyCount - game.emptyCount                
             elif game.piececount - game.piececount_mark > 1:
-                # v = (game.emptyCount+game.getHeightDiff())/-10
                 v = (game.pieceheight+game.getHeightDiff())/-10
             else:
                 v = self.search(game)
