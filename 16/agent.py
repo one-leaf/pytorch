@@ -235,13 +235,25 @@ class Agent(object):
         print("level:", self.level, "score:", self.score, "steps:", self.steps,"piececount:", self.piececount)
 
     def print(self):
+        board = self.tetromino.getblankboard()
+        for x in range(self.width):
+            for y in range(self.height):
+                board[x][y]=self.board[x][y]
+        for x in range(templatenum):
+            for y in range(templatenum):
+                w = x + self.fallpiece['x']
+                h = y + self.fallpiece['y']
+                if pieces[self.fallpiece['shape']][self.fallpiece['rotation']][y][x]!=blank:
+                    if w>=0 and w<self.width and h>=0 and h<self.height:
+                        board[w][h] = self.fallpiece['color']
+
         for y in range(self.height):
             line="| "
             for x in range(self.width):
-                if self.board[x][y]==blank:
+                if board[x][y]==blank:
                     line=line+"  "
                 else:
-                    line=line+str(self.board[x][y])+" "
+                    line=line+str(board[x][y])+" "
             print(line)
         print(" "+" -"*self.width)
         print("level:", self.level, "score:", self.score, "steps:", self.steps,"piececount:", self.piececount)
