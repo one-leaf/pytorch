@@ -157,10 +157,9 @@ class Agent(object):
         isFalling=True
         if self.tetromino.validposition(self.board, self.fallpiece, ay=1):
             self.fallpiece['y'] += 1
+            if not self.tetromino.validposition(self.board, self.fallpiece, ay=1):
+                isFalling = False
         else:
-            isFalling = False
-
-        if not self.tetromino.validposition(self.board, self.fallpiece, ay=1):
             isFalling = False
 
         fallpiece_y = self.fallpiece['y']
@@ -174,7 +173,6 @@ class Agent(object):
             self.emptyCount = self.getEmptyCount()   
             self.heightDiff = self.getHeightDiff()   
             self.pieces_height.append(20 - fallpiece_y - self.reward)
-            # self.fallpiece = None
             self.state = 1
             self.piecesteps = 0
             self.piececount += 1 
