@@ -46,6 +46,8 @@ class Agent(object):
         self.pieceheight = 0
         # 方块空洞数量
         self.emptyCount = 0
+        # 方块最大高度差
+        self.heightDiff = 0
         # 面板
         self.board = self.tetromino.getblankboard()
         # 状态： 0 下落过程中 1 更换方块 2 结束一局
@@ -169,7 +171,8 @@ class Agent(object):
             
             self.score += self.reward
             self.pieceheight = self.getAvgHeight()    
-            self.emptyCount = self.getEmptyCount()      
+            self.emptyCount = self.getEmptyCount()   
+            self.heightDiff = self.getHeightDiff()   
             self.pieces_height.append(20 - fallpiece_y - self.reward)
             # self.fallpiece = None
             self.state = 1
@@ -301,7 +304,7 @@ class Agent(object):
         v = []
         for x in range(1,self.width):
             v.append(abs(h[x]-h[x-1]))
-        return max(v)**2/10.
+        return max(v)/10.
 
     # 统计空洞的个数
     def getEmptyCount(self):
