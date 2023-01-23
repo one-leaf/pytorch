@@ -47,6 +47,7 @@ class MCTS():
         game.prev_piececount = game.piececount
         game.prev_pieceheight = game.pieceheight
         game.prev_EmptyCount = game.emptyCount
+        game.prev_heightDiff = game.heightDiff
         # for n in range(self._n_playout):
         for n in count():
             self.depth = 0
@@ -200,7 +201,7 @@ class MCTS():
             if game.emptyCount!=game.prev_EmptyCount:
                 v = game.prev_EmptyCount - game.emptyCount                
             else:
-                v = game.prev_pieceheight - game.pieceheight
+                v = game.prev_pieceheight - game.pieceheight + game.prev_heightDiff - game.heightDiff
         else:
             v = self.search(game)
 
