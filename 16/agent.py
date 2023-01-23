@@ -329,8 +329,8 @@ class Agent(object):
         for x in range(1,self.width-1):
             v.append(min(h[x-1]-h[x],h[x+1]-h[x]))
         for h in v:
-            if h>=3:
-                c+=h-2
+            if h>3:
+                c+=h-3
         return c
 
     # 计算得分,只计算被挡住的
