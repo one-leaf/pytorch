@@ -358,7 +358,7 @@ class VitNet(nn.Module):
         self.val_fc = nn.Linear(embed_dim, embed_dim)   # [B, 768] => [B, 768]
         self.val_fc_act = nn.GELU()
         self.val_dist = nn.Linear(embed_dim, num_quantiles)   # [B, 768] => [B, 1]
-        # self.val_dist_act = nn.Tanh()
+        self.val_dist_act = nn.Tanh()
 
         # 参数初始化, 这里需要pytorch 1.6以上版本
         # nn.init.trunc_normal_(self.pos_embed, std=0.02)
@@ -395,6 +395,6 @@ class VitNet(nn.Module):
         val = self.val_fc(val)
         val = self.val_fc_act(val)
         val = self.val_dist(val)                # [B, num_quantiles]
-        # val = self.val_dist_act(val)
+        val = self.val_dist_act(val)
 
         return act, val        
