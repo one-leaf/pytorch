@@ -201,7 +201,7 @@ class MCTS():
             if game.prev_pieceheight<6:
                 v = game.prev_EmptyCount - game.emptyCount + game.prev_pieceheight - game.pieceheight + game.prev_heightDiff - game.heightDiff
             else:
-                v = game.prev_pieceheight - game.pieceheight + game.prev_heightDiff - game.heightDiff
+                v = game.prev_pieceheight - game.pieceheight
         else:
             v = self.search(game)
 
