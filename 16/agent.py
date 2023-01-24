@@ -308,14 +308,17 @@ class Agent(object):
     def getEmptyCount(self):
         c = 0
         h = np.zeros((self.width))
+        lines_c={}
         for x in range(self.width):
             line_c = -1
             for y in range(self.height):
                 if line_c == -1 and self.board[x][y]!=blank:
                     line_c = 0
                     h[x]=self.height-y
-                if line_c!=-1 and self.board[x][y]==blank:    
-                    line_c += 1
+                if line_c!=-1 and self.board[x][y]==blank:  
+                    if y not in lines_c:
+                        lines_c[y]=1  
+                        line_c += 1
             if line_c == -1: 
                 line_c = 0
             c += line_c
