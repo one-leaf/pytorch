@@ -119,6 +119,7 @@ class Train():
         agent.id = 0
         
         game_json = os.path.join(data_dir, "result.json")
+        stop_file = os.path.join(data_dir, "stop")
         result = self.read_status_file(game_json)
         
         player = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout)
@@ -159,7 +160,7 @@ class Train():
                     'step:', agent.steps, "step time:", round((time.time()-start_time)/i,3),'player:', agent.id)
 
             # 如果训练次数超过了最大次数，则直接终止训练
-            if i >= 10000 and agent.state == 1: game_stop=True
+            if (i >= 10000 or os.path.exists(stop_file)) and agent.state == 1: game_stop=True
 
             if agent.terminal or game_stop:
                 data["score"] = agent.score
