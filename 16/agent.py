@@ -302,7 +302,7 @@ class Agent(object):
         v = []
         for x in range(1,self.width):
             v.append(abs(h[x]-h[x-1]))
-        return max(v)/10.
+        return max(v)/5.
 
     # 统计空洞的个数
     def getEmptyCount(self):
