@@ -197,7 +197,7 @@ class MCTS():
         self.depth = self.depth +1
 
         # 现实奖励
-        if game.state == 1 and game.prev_pieceheight<10 and game.piececount - game.prev_piececount > 1:
+        if game.state == 1 and game.prev_pieceheight<12 and game.piececount - game.prev_piececount > 1:
             v = game.prev_EmptyCount - game.emptyCount + game.prev_pieceheight - game.pieceheight + game.prev_heightDiff - game.heightDiff
         else:
             v = self.search(game)
