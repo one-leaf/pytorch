@@ -126,6 +126,7 @@ class Train():
         data = {"steps":[],"shapes":[],"last_state":0,"score":0,"piece_count":0}
         start_time = time.time()
         print('start game time:', datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+        max_piececount = result["total"]["piececount"]*1.2
 
         game_stop= False
         for i in count():
@@ -159,7 +160,7 @@ class Train():
                     'step:', agent.steps, "step time:", round((time.time()-start_time)/i,3),'player:', agent.id)
 
             # 如果训练次数超过了最大次数，则直接终止训练
-            if (i >= 1000 and agent.piececount>result["total"]["piececount"]*1.2) and agent.state == 1: game_stop=True
+            if (i >= 1000 and agent.piececount>max_piececount) and agent.state == 1: game_stop=True
 
             if agent.terminal or game_stop:
                 data["score"] = agent.score
