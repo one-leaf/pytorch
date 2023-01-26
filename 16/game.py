@@ -269,7 +269,7 @@ class Tetromino(object):
         newpiece = {'shape':shape,
                     'rotation': 0,
                     'x': int(boardwidth)//2-int(templatenum//2),
-                    'y': 0,
+                    'y': -1,
                     'color': 0}
         return newpiece
 
