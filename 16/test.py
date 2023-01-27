@@ -20,13 +20,13 @@ def run():
         mcts_ai_player = MCTSPlayer(net_policy.policy_value_fn, c_puct=1, n_playout=64)
         # agent.start_play(mcts_ai_player, env)
         while not agent.terminal:
-            # act_probs, v = net_policy.policy_value_fn(agent)
-            # act, act_p = 0, 0
-            # for a, p in act_probs:
-            #     if p > act_p:
-            #         act, act_p = a, p
+            act_probs, v = net_policy.policy_value_fn(agent)
+            act, act_p = 0, 0
+            for a, p in act_probs:
+                if p > act_p:
+                    act, act_p = a, p
 
-            act, act_probs, v, qval, acc_ps, depth, state_n = mcts_ai_player.get_action(agent,0)
+            # act, act_probs, v, qval, acc_ps, depth, state_n = mcts_ai_player.get_action(agent,0)
             # agent.step(act, env)
 
             agent.step(act)
