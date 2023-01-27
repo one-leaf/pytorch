@@ -260,7 +260,7 @@ class MCTSPlayer(object):
             max_qs_idx = np.argmax(act_qs) 
             max_ps_idx = np.argmax(act_ps)    
 
-            if max_probs_idx == max_qs_idx:
+            if max_probs_idx == max_qs_idx or temp==0:
                 idx = max_probs_idx
             else:
                 for i, qs in enumerate(act_qs):
