@@ -23,7 +23,8 @@ class MCTS():
         self.Vs = {}  # 保存游戏局面打分 key: s # 这个不需要，只是缓存
         print("create mcts, c_puct: {}, n_playout: {}".format(c_puct, n_playout))
 
-        self.state = None
+        self.state = None        
+        self.ext_reward = True # 是否中途额外奖励
 
     def reset(self):
         self.Qsa = {}  # 保存 Q 值, key: s,a
@@ -197,7 +198,7 @@ class MCTS():
         self.depth = self.depth +1
 
         # 现实奖励
-        if game.state == 1 and game.piececount - game.prev_piececount > 1:
+        if game.state == 1 and self.ext_reward and game.piececount - game.prev_piececount > 1:
             v = game.prev_EmptyCount - game.emptyCount + game.prev_pieceheight - game.pieceheight + game.prev_heightDiff - game.heightDiff
             if game.prev_pieceheight>10 and game.piececount - game.prev_piececount <= 5:
                 v = v + self.search(game)
