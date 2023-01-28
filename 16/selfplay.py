@@ -125,6 +125,7 @@ class Train():
         
         n_playout = int(result["total"]["n_playout"])
         if n_playout<10: n_playout=10
+        if n_playout>500: n_playout=500
         player = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=n_playout)
     
         data = {"steps":[],"shapes":[],"last_state":0,"score":0,"piece_count":0}
