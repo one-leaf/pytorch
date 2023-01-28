@@ -181,9 +181,9 @@ class Train():
                 steptime = paytime/agent.steps
 
                 if agent.piececount > result["total"]["piececount"]:
-                    result["total"]["n_playout"] = result["total"]["n_playout"] - 5
+                    result["total"]["n_playout"] = result["total"]["n_playout"] - 10
                 else:
-                    result["total"]["n_playout"] = result["total"]["n_playout"] + 5
+                    result["total"]["n_playout"] = result["total"]["n_playout"] + 10
                                 
                 result["total"]["agent"] += 1
                 result["total"]["_agent"] += 1
