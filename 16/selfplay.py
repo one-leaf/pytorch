@@ -126,7 +126,6 @@ class Train():
         n_playout = int(result["total"]["n_playout"])
         if n_playout<10: n_playout=10
         player = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=n_playout)
-        print("create mcts player, c_puct: %s , n_playout: %s"%(self.c_puct, n_playout))
     
         data = {"steps":[],"shapes":[],"last_state":0,"score":0,"piece_count":0}
         start_time = time.time()
