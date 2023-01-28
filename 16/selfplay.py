@@ -76,6 +76,8 @@ class Train():
             result["best"]={"reward":0, "agent":0}
         if "piececount" not in result["total"]:
             result["total"]["piececount"]=0
+        if "n_playout" not in result["total"]:
+            result["total"]["n_playout"]=self.n_playout
         if "piececount" not in result:
             result["piececount"]=[]
         return result
@@ -121,7 +123,9 @@ class Train():
         game_json = os.path.join(data_dir, "result.json")
         result = self.read_status_file(game_json)
         
-        player = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout)
+        n_playout = int(result["total"]["n_playout"]
+        player = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=n_playout))
+        print("create mcts player, c_puct: %s , n_playout: %s"%(self.c_puct, n_playout))
     
         data = {"steps":[],"shapes":[],"last_state":0,"score":0,"piece_count":0}
         start_time = time.time()
@@ -175,6 +179,11 @@ class Train():
                 paytime = time.time()-start_time
                 steptime = paytime/agent.steps
 
+                if agent.piececount > result["total"]["piececount"]:
+                    result["total"]["n_playout"] = result["total"]["n_playout"] - 10
+                else:
+                    result["total"]["n_playout"] = result["total"]["n_playout"] + 10
+                                
                 result["total"]["agent"] += 1
                 result["total"]["_agent"] += 1
 
