@@ -124,7 +124,7 @@ class Train():
         result = self.read_status_file(game_json)
         
         n_playout = int(result["total"]["n_playout"])
-        if n_playout<8: n_playout=8
+        if n_playout<10: n_playout=10
         player = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=n_playout)
         print("create mcts player, c_puct: %s , n_playout: %s"%(self.c_puct, n_playout))
     
