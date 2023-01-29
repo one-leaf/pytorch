@@ -186,7 +186,7 @@ class Train():
         self.temp = 1  # MCTS的概率参数，越大越不肯定，训练时1，预测时1e-3
         self.n_playout = 128  # 每个动作的模拟战记录个数
         self.play_batch_size = 1 # 每次自学习次数
-        self.buffer_size = 640000  # cache对次数
+        self.buffer_size = 320000  # cache对次数
         self.epochs = 1  # 每次更新策略价值网络的训练步骤数, 推荐是5
         self.kl_targ = 0.02  # 策略价值网络KL值目标        
         self.c_puct = 2  # MCTS child权重， 用来调节MCTS中 探索/乐观 的程度 默认 5
