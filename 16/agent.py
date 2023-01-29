@@ -319,6 +319,8 @@ class Agent(object):
                     if y not in lines_c:
                         lines_c[y]=1  
                         line_c += 1
+                    else:
+                        line_c += 0.5
             if line_c == -1: 
                 line_c = 0
             c += line_c
