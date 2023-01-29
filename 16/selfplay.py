@@ -78,6 +78,10 @@ class Train():
             result["total"]["piececount"]=0
         if "n_playout" not in result["total"]:
             result["total"]["n_playout"]=self.n_playout
+        if "win_count" not in result["total"]:
+            result["total"]["win_count"]=0            
+        if "lost_count" not in result["total"]:
+            result["total"]["lost_count"]=0            
         if "piececount" not in result:
             result["piececount"]=[]
         return result
@@ -181,9 +185,11 @@ class Train():
                 steptime = paytime/agent.steps
 
                 if agent.piececount > result["total"]["piececount"]:
-                    result["total"]["n_playout"] = result["total"]["n_playout"] - 10
+                    result["total"]["n_playout"] -= 10
+                    result["total"]["win_count"] += 1
                 else:
-                    result["total"]["n_playout"] = result["total"]["n_playout"] + 5
+                    result["total"]["n_playout"] += 5
+                    result["total"]["lost_count"] += 1
                                 
                 result["total"]["agent"] += 1
                 result["total"]["_agent"] += 1
