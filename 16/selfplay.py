@@ -184,7 +184,7 @@ class Train():
                 paytime = time.time()-start_time
                 steptime = paytime/agent.steps
 
-                if agent.piececount > result["total"]["piececount"]:
+                if agent.score > 50:
                     result["total"]["n_playout"] -= 5
                     result["total"]["win_count"] += 1
                 else:
