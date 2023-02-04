@@ -199,7 +199,7 @@ class MCTS():
 
         # 现实奖励
         if game.state == 1 and self.ext_reward and game.piececount - game.prev_piececount > 1:
-            v = game.prev_EmptyCount - game.emptyCount + game.prev_heightDiff - game.heightDiff 
+            v = game.prev_EmptyCount - game.emptyCount + game.prev_heightDiff - game.heightDiff + (game.prev_pieceheight - game.pieceheight)*0.1
             if v>0: v=v*0.1
         else:
             v = self.search(game)
