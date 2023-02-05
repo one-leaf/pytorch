@@ -81,7 +81,9 @@ class Train():
         if "win_count" not in result["total"]:
             result["total"]["win_count"]=0            
         if "lost_count" not in result["total"]:
-            result["total"]["lost_count"]=0            
+            result["total"]["lost_count"]=0           
+        if "avg_score" not in result["total"]:
+            result["total"]["avg_score"]=0      
         if "piececount" not in result:
             result["piececount"]=[]
         return result
@@ -187,12 +189,14 @@ class Train():
                 steptime = paytime/agent.steps
 
                 # 速度控制在消耗50行
-                if agent.score >= result["total"]["n_playout"]:
-                    result["total"]["n_playout"] += 1
-                    result["total"]["win_count"] += 1
-                else:
+                if agent.score >= result["total"]["avg_score"]:
                     result["total"]["n_playout"] -= 1
+                    result["total"]["win_count"] += 1
+                    result["total"]["avg_score"] += 1
+                else:
+                    result["total"]["n_playout"] += 1
                     result["total"]["lost_count"] += 1
+                    result["total"]["avg_score"] -= 1
                 
                 result["total"]["agent"] += 1
                 result["total"]["_agent"] += 1
