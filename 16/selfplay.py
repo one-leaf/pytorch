@@ -187,13 +187,13 @@ class Train():
                 steptime = paytime/agent.steps
 
                 # 速度控制在消耗50行
-                if agent.score >= 50:
-                    result["total"]["n_playout"] -= 5
+                if agent.score >= result["total"]["n_playout"]:
+                    result["total"]["n_playout"] += 1
                     result["total"]["win_count"] += 1
                 else:
-                    result["total"]["n_playout"] += 5
+                    result["total"]["n_playout"] -= 1
                     result["total"]["lost_count"] += 1
-                                
+                
                 result["total"]["agent"] += 1
                 result["total"]["_agent"] += 1
 
