@@ -134,7 +134,7 @@ class Dataset(torch.utils.data.Dataset):
         max_piececount = np.max(piececounts)
         per_piececount = np.percentile(piececounts,(25,50,75), method="midpoint")
         print("midpoint(25%,50%,75%):",per_piececount)
-        print("var/avg/min/max:",[std_piececount,avg_piececount,min_piececount,max_piececount])
+        print("std/avg/min/max:",[std_piececount,avg_piececount,min_piececount,max_piececount])
         dif_piececount = per_piececount[2]-per_piececount[0]
         cen_piececount = per_piececount[1]
         # if var_piececount<1:
