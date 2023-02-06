@@ -129,12 +129,12 @@ class Dataset(torch.utils.data.Dataset):
             self.data[fn]={"value":piececount, "state":state, "mcts_prob": mcts_prob}
 
         avg_piececount = np.average(piececounts)
-        var_piececount = np.var(piececounts)
+        std_piececount = np.std(piececounts)
         min_piececount = np.min(piececounts)
         max_piececount = np.max(piececounts)
         per_piececount = np.percentile(piececounts,(20,50,80), method="midpoint")
         print("midpoint(25%,50%,75%):",per_piececount)
-        print("var/avg/min/max:",[var_piececount,avg_piececount,min_piececount,max_piececount])
+        print("var/avg/min/max:",[std_piececount,avg_piececount,min_piececount,max_piececount])
         dif_piececount = per_piececount[2]-per_piececount[0]
         cen_piececount = per_piececount[1]
         # if var_piececount<1:
@@ -144,7 +144,7 @@ class Dataset(torch.utils.data.Dataset):
 
         for fn in self.data:
             # self.data[fn]["value"]=(self.data[fn]["value"]-cen_piececount)/dif_piececount
-            self.data[fn]["value"]=(self.data[fn]["value"]-avg_piececount)/var_piececount
+            self.data[fn]["value"]=(self.data[fn]["value"]-avg_piececount)/std_piececount
 
         # 将qval高的重复学习一次    
         # self.file_list.extend(double_train_list)
