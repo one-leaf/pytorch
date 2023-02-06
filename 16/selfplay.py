@@ -161,6 +161,7 @@ class Train():
             _step["acc_ps"] = acc_ps
             _step["depth"] = depth
             _step["ns"] = ns
+            _step["score"] = agent.score
 
             data["steps"].append(_step)
 
@@ -344,6 +345,7 @@ class Train():
                 slist.insert(0, score)
                 pacclist.insert(0, round(max(data["steps"][j]["move_probs"]),2))
             data["steps"][j]["piececount"] = agent.piececount - data["steps"][j]["piece_count"]
+            data["steps"][j]["score"] = agent.score - data["steps"][j]["score"]
             # data["steps"][j]["piececount"] = agent.piececount 
 
             data["steps"][j]["score"] = score
@@ -358,26 +360,26 @@ class Train():
         print(i,"v_acc:",vacc_sum/step_count, vacclist)
         print(i,"p_acc:",pacc_sum/step_count, pacclist)
        
-        states, mcts_probs, values, qval= [], [], [], []
+        states, mcts_probs, values, score= [], [], [], []
 
         for step in data["steps"]:
             states.append(step["state"])
             mcts_probs.append(step["move_probs"])
             values.append(step["piececount"])
-            qval.append(step["qval"])
+            score.append(step["score"])
 
         assert len(states)>0
         assert len(states)==len(values)
         assert len(states)==len(mcts_probs)
-        assert len(states)==len(qval)
+        assert len(states)==len(score)
 
         print("TRAIN Self Play end. length: %s value sum: %s saving ..." % (len(states),sum(values)))
 
         # 保存对抗数据到data_buffer
         filetime = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         # 现在第一层改为了横向，所以不能做图片左右翻转增强
-        # for i, obj in enumerate(self.get_equi_data(states, mcts_probs, values, qval)):
-        for i, obj in enumerate(zip(states, mcts_probs, values, qval)):
+        # for i, obj in enumerate(self.get_equi_data(states, mcts_probs, values, score)):
+        for i, obj in enumerate(zip(states, mcts_probs, values, score)):
             filename = "{}-{}.pkl".format(filetime, i)
             savefile = os.path.join(data_wait_dir, filename)
             with open(savefile, "wb") as fn:
