@@ -171,7 +171,7 @@ class Train():
                 # print(_step["state"][-1])
                 print("#"*repeat_count, 'score:', agent.score, 'height:', agent.pieceheight, 'piece:', agent.piececount, "shape:", agent.fallpiece["shape"], \
                     'step:', agent.steps, "step time:", round((time.time()-start_time)/i,3),'player:', agent.id)
-                if agent.score>result["total"]["reward"]+20: game_stop=True
+                # if agent.score>result["total"]["reward"]+20: game_stop=True
 
             # 如果训练次数超过了最大次数，则直接终止训练
             if (agent.piececount>max_piececount and max_piececount>0) and agent.state == 1: game_stop=True
@@ -339,8 +339,8 @@ class Train():
                 vacclist.insert(0, round(data["steps"][j]["state_value"],2))
                 slist.insert(0, score)
                 pacclist.insert(0, round(max(data["steps"][j]["move_probs"]),2))
-            # data["steps"][j]["piececount"] = agent.piececount - data["steps"][j]["piece_count"]
-            data["steps"][j]["piececount"] = agent.piececount 
+            data["steps"][j]["piececount"] = agent.piececount - data["steps"][j]["piece_count"]
+            # data["steps"][j]["piececount"] = agent.piececount 
 
             data["steps"][j]["score"] = score
 
