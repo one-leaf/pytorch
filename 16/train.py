@@ -89,7 +89,7 @@ class Dataset(torch.utils.data.Dataset):
         # scores=[]
         print("start load data to memory ...")
         start_time = time.time()
-        # piececounts=[]
+        piececounts=[]
         # double_train_list=[]
         for fn in self.file_list:
             try:
@@ -103,7 +103,7 @@ class Dataset(torch.utils.data.Dataset):
                 if os.path.exists(fn): os.remove(fn)
                 self.file_list.remove(fn)
                 continue
-            # piececounts.append(piececount)
+            piececounts.append(piececount)
             
             s,h,w = state.shape
 
@@ -125,24 +125,26 @@ class Dataset(torch.utils.data.Dataset):
             # if score%1==0:
             #     self.data[fn]={"value":-1/(score+1), "state":state, "mcts_prob": mcts_prob}
             # else:
-            self.data[fn]={"value":-1/(piececount**0.5), "state":state, "mcts_prob": mcts_prob}
+            # self.data[fn]={"value":-1/(piececount**0.5), "state":state, "mcts_prob": mcts_prob}
+            self.data[fn]={"value":piececount, "state":state, "mcts_prob": mcts_prob}
 
-        # avg_piececount = np.average(piececounts)
-        # var_piececount = np.var(piececounts)
-        # min_piececount = np.min(piececounts)
-        # max_piececount = np.max(piececounts)
-        # per_piececount = np.percentile(piececounts,(25,50,75), method="midpoint")
-        # print("midpoint(25%,50%,75%):",per_piececount)
-        # print("var/avg/min/max:",[var_piececount,avg_piececount,min_piececount,max_piececount])
-        # dif_piececount = per_piececount[2]-per_piececount[0]
-        # avg_piececount = per_piececount[1]
+        avg_piececount = np.average(piececounts)
+        var_piececount = np.var(piececounts)
+        min_piececount = np.min(piececounts)
+        max_piececount = np.max(piececounts)
+        per_piececount = np.percentile(piececounts,(25,50,75), method="midpoint")
+        print("midpoint(25%,50%,75%):",per_piececount)
+        print("var/avg/min/max:",[var_piececount,avg_piececount,min_piececount,max_piececount])
+        dif_piececount = per_piececount[2]-per_piececount[0]
+        cen_piececount = per_piececount[1]
         # if var_piececount<1:
         #     print("SLEEP 60s for piececount var: %s avg: %s data."%(var_piececount, avg_piececount))
         #     time.sleep(60)
         #     raise Exception("NEED SOME NEW DATA TO TRAIN")
 
-        # for fn in self.data:
-        #     self.data[fn]["value"]=(self.data[fn]["value"]-avg_piececount)/dif_piececount
+        for fn in self.data:
+            # self.data[fn]["value"]=(self.data[fn]["value"]-cen_piececount)/dif_piececount
+            self.data[fn]["value"]=(self.data[fn]["value"]-avg_piececount)/var_piececount
 
         # 将qval高的重复学习一次    
         # self.file_list.extend(double_train_list)
@@ -240,7 +242,7 @@ class Train():
                 if math.isnan(v_loss): 
                     print("v_loss is nan!")
                     return
-                    
+
                 if i%10 == 0:
                     print(("TRAIN idx {} : {} / {} v_loss:{:.5f}, p_loss:{:.5f}")\
                         .format(i, i*self.batch_size, dataset_len, v_loss, p_loss))
