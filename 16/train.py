@@ -89,7 +89,7 @@ class Dataset(torch.utils.data.Dataset):
         # scores=[]
         print("start load data to memory ...")
         start_time = time.time()
-        piececounts=[]
+        # piececounts=[]
         # double_train_list=[]
         for fn in self.file_list:
             try:
@@ -103,7 +103,7 @@ class Dataset(torch.utils.data.Dataset):
                 if os.path.exists(fn): os.remove(fn)
                 self.file_list.remove(fn)
                 continue
-            piececounts.append(piececount)
+            # piececounts.append(piececount)
             
             s,h,w = state.shape
 
@@ -122,31 +122,32 @@ class Dataset(torch.utils.data.Dataset):
                 for zero in zerolist:
                     for i in range(s):
                         state[i][zero[0]][zero[1]]=0
-            self.data[fn]={"value":piececount, "state":state, "mcts_prob": mcts_prob}
 
-        avg_piececount = np.average(piececounts)
-        var_piececount = np.var(piececounts)
-        min_piececount = np.min(piececounts)
-        max_piececount = np.max(piececounts)
-        per_piececount = np.percentile(piececounts,(25,50,75), method="midpoint")
-        print("midpoint(25%,50%,75%):",per_piececount)
-        print("var/avg/min/max:",[var_piececount,avg_piececount,min_piececount,max_piececount])
-        dif_piececount = per_piececount[2]-per_piececount[0]
-        avg_piececount = per_piececount[1]
-        if var_piececount<1:
-            print("SLEEP 60s for piececount var: %s avg: %s data."%(var_piececount, avg_piececount))
-            time.sleep(60)
-            raise Exception("NEED SOME NEW DATA TO TRAIN")
+            self.data[fn]={"value":-1./piececount, "state":state, "mcts_prob": mcts_prob}
 
-        for fn in self.data:
-            self.data[fn]["value"]=(self.data[fn]["value"]-avg_piececount)/dif_piececount
+        # avg_piececount = np.average(piececounts)
+        # var_piececount = np.var(piececounts)
+        # min_piececount = np.min(piececounts)
+        # max_piececount = np.max(piececounts)
+        # per_piececount = np.percentile(piececounts,(25,50,75), method="midpoint")
+        # print("midpoint(25%,50%,75%):",per_piececount)
+        # print("var/avg/min/max:",[var_piececount,avg_piececount,min_piececount,max_piececount])
+        # dif_piececount = per_piececount[2]-per_piececount[0]
+        # avg_piececount = per_piececount[1]
+        # if var_piececount<1:
+        #     print("SLEEP 60s for piececount var: %s avg: %s data."%(var_piececount, avg_piececount))
+        #     time.sleep(60)
+        #     raise Exception("NEED SOME NEW DATA TO TRAIN")
+
+        # for fn in self.data:
+        #     self.data[fn]["value"]=(self.data[fn]["value"]-avg_piececount)/dif_piececount
 
         # 将qval高的重复学习一次    
         # self.file_list.extend(double_train_list)
 
         pay_time = round(time.time()-start_time, 2)
         print("loaded to memory, paid time:", pay_time)
-        print("piececount avg:", avg_piececount, "var:", var_piececount,"min:", min_piececount,"max:", max_piececount)
+        # print("piececount avg:", avg_piececount, "var:", var_piececount,"min:", min_piececount,"max:", max_piececount)
         print("load data end")
 
 
