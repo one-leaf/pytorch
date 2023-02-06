@@ -334,7 +334,7 @@ class Train():
         d_sum = 0
         # 如果游戏没有结束，所以预估一个未来可能最大的方块数
         if not agent.terminal:
-            agent.piececount += agent.piececount*(1-agent.pieceheight/18.)
+            agent.piececount += agent.piececount*(1-agent.pieceheight/20.)
 
         for j in range(step_count-1,-1,-1):
             if piece_count!=data["steps"][j]["piece_count"]:
