@@ -122,8 +122,10 @@ class Dataset(torch.utils.data.Dataset):
                 for zero in zerolist:
                     for i in range(s):
                         state[i][zero[0]][zero[1]]=0
-
-            self.data[fn]={"value":-1/(piececount**0.5), "state":state, "mcts_prob": mcts_prob}
+            if score%1==0:
+                self.data[fn]={"value":-1/((score+1)**0.5), "state":state, "mcts_prob": mcts_prob}
+            else:
+                self.data[fn]={"value":-1/(piececount**0.5), "state":state, "mcts_prob": mcts_prob}
 
         # avg_piececount = np.average(piececounts)
         # var_piececount = np.var(piececounts)
