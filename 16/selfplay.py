@@ -339,7 +339,7 @@ class Train():
                 vacclist.insert(0, round(data["steps"][j]["state_value"],2))
                 slist.insert(0, score)
                 pacclist.insert(0, round(max(data["steps"][j]["move_probs"]),2))
-            data["steps"][j]["piececount"] = agent.piececount
+            data["steps"][j]["piececount"] = agent.piececount - data["steps"][j]["piece_count"]
             data["steps"][j]["score"] = score
 
             vacc_sum += abs(data["steps"][j]["qval"]-data["steps"][j]["state_value"])
