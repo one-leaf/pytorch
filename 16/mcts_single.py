@@ -202,15 +202,17 @@ class MCTS():
                 v = game.prev_EmptyCount - game.emptyCount + game.prev_heightDiff - game.heightDiff
                 if v == 0 and game.prev_pieceheight > game.pieceheight: v = game.prev_pieceheight - game.pieceheight
             else:
-                act_probs , v = self._policy(game)
                 _s = game.get_key()
                 if _s not in self.Ps[s]:
+                    act_probs , v = self._policy(game)
                     probs = np.zeros(game.actions_num)
                     for act, prob in act_probs:
                         probs[act] = prob
                     self.Ps[_s] = probs 
                     self.Ns[_s] = 0
                     self.Vs[_s] = v                
+                else:
+                    v = self.Vs[_s]
         else:
             v = self.search(game)
 
