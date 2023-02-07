@@ -198,9 +198,12 @@ class MCTS():
         self.depth = self.depth +1
 
         # 现实奖励
-        if game.state == 1 and self.ext_reward and game.piececount - game.prev_piececount > 1:
-            v = game.prev_EmptyCount - game.emptyCount + game.prev_heightDiff - game.heightDiff
-            if v == 0 and game.prev_pieceheight > game.pieceheight: v = game.prev_pieceheight - game.pieceheight
+        if game.state == 1 and game.piececount - game.prev_piececount > 1:
+            if self.ext_reward:
+                v = game.prev_EmptyCount - game.emptyCount + game.prev_heightDiff - game.heightDiff
+                if v == 0 and game.prev_pieceheight > game.pieceheight: v = game.prev_pieceheight - game.pieceheight
+            else:
+                _ , v = self._policy(game)
         else:
             v = self.search(game)
 

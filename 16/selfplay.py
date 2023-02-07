@@ -135,7 +135,7 @@ class Train():
         # 先锁定
         n_playout = 100
         player = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=n_playout)
-    
+        
         data = {"steps":[],"shapes":[],"last_state":0,"score":0,"piece_count":0}
         start_time = time.time()
         print('start game time:', datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
