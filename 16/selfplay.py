@@ -135,10 +135,11 @@ class Train():
         # 先锁定
         n_playout = 100
         player = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=n_playout)
-        
+        player.mcts.ext_reward = random.random()>0.5
+
         data = {"steps":[],"shapes":[],"last_state":0,"score":0,"piece_count":0}
         start_time = time.time()
-        print('start game time:', datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+        print('start game time:', datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), "ext_reward:", player.mcts.ext_reward)
         # 最大方块数
         max_piececount = result["total"]["piececount"]+100
 
