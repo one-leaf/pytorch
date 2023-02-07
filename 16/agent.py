@@ -165,7 +165,7 @@ class Agent(object):
         fallpiece_y = self.fallpiece['y']
 
         if not isFalling:
-            self.tetromino.addtoboard(self.board,self.fallpiece)            
+            self.tetromino.addtoboard(self.board, self.fallpiece)            
             self.reward = self.tetromino.removecompleteline(self.board) 
             
             self.score += self.reward
