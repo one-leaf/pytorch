@@ -157,10 +157,9 @@ class MCTS():
             # dirichlet_alpha=2            
             # dirichlet_probs = np.random.dirichlet([dirichlet_alpha]*len(act_probs))
             # for (act, prob), noise in zip(act_probs, dirichlet_probs):
-            #     probs[act] = 0.9*prob+0.1*noise
+            #     probs[act] = 0.75*prob+0.25*noise
 
             self.Ps[s] = probs 
-
             self.Ns[s] = 0
             self.Vs[s] = v
 
@@ -203,7 +202,15 @@ class MCTS():
                 v = game.prev_EmptyCount - game.emptyCount + game.prev_heightDiff - game.heightDiff
                 if v == 0 and game.prev_pieceheight > game.pieceheight: v = game.prev_pieceheight - game.pieceheight
             else:
-                _ , v = self._policy(game)
+                act_probs , v = self._policy(game)
+                _s = game.get_key()
+                if _s not in self.Ps[s]:
+                    probs = np.zeros(game.actions_num)
+                    for act, prob in act_probs:
+                        probs[act] = prob
+                    self.Ps[_s] = probs 
+                    self.Ns[_s] = 0
+                    self.Vs[_s] = v                
         else:
             v = self.search(game)
 
@@ -266,27 +273,27 @@ class MCTSPlayer(object):
             if max_probs_idx == max_qs_idx or temp==0:
                 idx = max_probs_idx
             else:
-                # for i, qs in enumerate(act_qs):
-                #     if qs<act_qs[max_probs_idx]:
-                #         act_probs[i]=0
-                # act_probs = act_probs/np.sum(act_probs)        
-                # idx = np.random.choice(range(len(acts)), p=act_probs) 
+                for i, qs in enumerate(act_qs):
+                    if qs<act_qs[max_probs_idx]:
+                        act_probs[i]=0
+                act_probs = act_probs/np.sum(act_probs)        
+                idx = np.random.choice(range(len(acts)), p=act_probs) 
 
-            # if True or temp==0 or len(acts)==1 or game.piecesteps>2 :
-            #     idx = max_probs_idx
-            # else:
-                # alphazero，默认p为0.75
-                p = 0.75
-                # a=1的时候，dir机会均等，>1 强调均值， <1 强调两端
-                # 国际象棋 0.3 将棋 0.15 围棋 0.03
-                # 取值一般倾向于 a = 10/n 所以俄罗斯方块取 2
-                a = 2                  
-                dirichlet = np.random.dirichlet(a * np.ones(len(act_probs)))
-                idx = np.random.choice(range(len(acts)), p=p*act_probs + (1.0-p)*dirichlet)                                                                     
-                # idx = np.random.choice(range(len(acts)), p=act_probs)                                                                     
+            # # if True or temp==0 or len(acts)==1 or game.piecesteps>2 :
+            # #     idx = max_probs_idx
+            # # else:
+            #     # alphazero，默认p为0.75
+            #     p = 0.75
+            #     # a=1的时候，dir机会均等，>1 强调均值， <1 强调两端
+            #     # 国际象棋 0.3 将棋 0.15 围棋 0.03
+            #     # 取值一般倾向于 a = 10/n 所以俄罗斯方块取 2
+            #     a = 2                  
+            #     dirichlet = np.random.dirichlet(a * np.ones(len(act_probs)))
+            #     idx = np.random.choice(range(len(acts)), p=p*act_probs + (1.0-p)*dirichlet)                                                                     
+            #     # idx = np.random.choice(range(len(acts)), p=act_probs)                                                                     
 
-            # if max_qs_idx!=max_probs_idx and random.random()<(act_qs[max_qs_idx]-act_qs[max_probs_idx])*act_probs[max_qs_idx]:
-            #     idx = max_qs_idx
+            # # if max_qs_idx!=max_probs_idx and random.random()<(act_qs[max_qs_idx]-act_qs[max_probs_idx])*act_probs[max_qs_idx]:
+            # #     idx = max_qs_idx
 
             action = acts[idx]
             qval = act_qs[max_probs_idx]
