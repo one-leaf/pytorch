@@ -83,7 +83,9 @@ class Train():
         if "lost_count" not in result["total"]:
             result["total"]["lost_count"]=0           
         if "avg_score" not in result["total"]:
-            result["total"]["avg_score"]=0      
+            result["total"]["avg_score"]=0  
+        if "avg_score_ex" not in result["total"]:
+            result["total"]["avg_score_ex"]=0                  
         if "piececount" not in result:
             result["piececount"]=[]
         return result
@@ -191,15 +193,18 @@ class Train():
                 paytime = time.time()-start_time
                 steptime = paytime/agent.steps
 
+                if player.mcts.ext_reward:
+                    result["total"]["avg_score_ex"] = result["total"]["avg_score_ex"]*0.99 + agent.score*0.01  
+                else:  
+                    result["total"]["avg_score"] = result["total"]["avg_score"]*0.99 + agent.score*0.01
+
                 # 速度控制在消耗50行
                 if agent.score >= result["total"]["avg_score"]:
                     result["total"]["n_playout"] -= 1
                     result["total"]["win_count"] += 1
-                    result["total"]["avg_score"] += 1
                 else:
                     result["total"]["n_playout"] += 1
                     result["total"]["lost_count"] += 1
-                    result["total"]["avg_score"] -= 1
                 
                 result["total"]["agent"] += 1
                 result["total"]["_agent"] += 1
