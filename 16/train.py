@@ -103,7 +103,7 @@ class Dataset(torch.utils.data.Dataset):
                 if os.path.exists(fn): os.remove(fn)
                 self.file_list.remove(fn)
                 continue
-            piececounts.append(piececount)
+            piececounts.append(score)
             
             s,h,w = state.shape
 
@@ -126,7 +126,7 @@ class Dataset(torch.utils.data.Dataset):
             #     self.data[fn]={"value":-1/(score+1), "state":state, "mcts_prob": mcts_prob}
             # else:
             # self.data[fn]={"value":-1/(piececount**0.5), "state":state, "mcts_prob": mcts_prob}
-            self.data[fn]={"value":piececount, "state":state, "mcts_prob": mcts_prob}
+            self.data[fn]={"value":score, "state":state, "mcts_prob": mcts_prob}
 
         avg_piececount = np.average(piececounts)
         std_piececount = np.std(piececounts)
