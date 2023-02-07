@@ -194,12 +194,14 @@ class Train():
                 steptime = paytime/agent.steps
 
                 if player.mcts.ext_reward:
-                    result["total"]["avg_score_ex"] = result["total"]["avg_score_ex"]*0.99 + agent.score*0.01  
+                    result["total"]["avg_score_ex"] = result["total"]["avg_score_ex"]*0.99 + agent.score*0.01 
+                    mark_score = result["total"]["avg_score_ex"]
                 else:  
                     result["total"]["avg_score"] = result["total"]["avg_score"]*0.99 + agent.score*0.01
+                    mark_score = result["total"]["avg_score"]
 
                 # 速度控制在消耗50行
-                if agent.score >= result["total"]["avg_score"]:
+                if agent.score >= mark_score:
                     result["total"]["n_playout"] -= 1
                     result["total"]["win_count"] += 1
                 else:
