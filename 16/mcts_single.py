@@ -176,9 +176,10 @@ class MCTS():
                     u = self.Qsa[(s, a)] + self._c_puct * self.Ps[s][a] * math.sqrt(self.Ns[s]) / (1 + self.Nsa[(s, a)])
                 else:
                     u = self._c_puct * self.Ps[s][a] * math.sqrt(self.Ns[s] + EPS)  # 加一个EPS小量防止 Q = 0 
-                    cur_best = u
-                    best_act = a
-                    break
+                    if not self.ext_reward:
+                        cur_best = u
+                        best_act = a
+                        break
 
                 if u > cur_best:
                     cur_best = u
