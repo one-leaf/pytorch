@@ -63,10 +63,10 @@ class Dataset(torch.utils.data.Dataset):
 
         modified_time = os.path.getmtime(files[0])
         convert_time = time.localtime(modified_time)
-        print("first time:",time.strftime('%Y-%m-%d %H:%M:%S', convert_time))
+        print("first time:",time.strftime('%y-%m-%d %H:%M:%S', convert_time))
         modified_time = os.path.getmtime(files[-1])
         convert_time = time.localtime(modified_time)
-        print("last time:",time.strftime('%Y-%m-%d %H:%M:%S', convert_time))
+        print("last time:",time.strftime('%y-%m-%d %H:%M:%S', convert_time))
         
         delcount = 0
         for i, filename in enumerate(files):
