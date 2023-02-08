@@ -89,12 +89,13 @@ class Dataset(torch.utils.data.Dataset):
         # scores=[]
         print("start load data to memory ...")
         start_time = time.time()
-        piececounts=[]
+        scores=[]
+        values=[]
         # double_train_list=[]
         for fn in self.file_list:
             try:
                 with open(fn, "rb") as f:
-                    state, mcts_prob, piececount, score = pickle.load(f)
+                    state, mcts_prob, value, score = pickle.load(f)
                     assert state.shape[0] == 8                         
                     # if abs(qval)>0.5:
                     #     double_train_list.append(fn)
@@ -103,8 +104,8 @@ class Dataset(torch.utils.data.Dataset):
                 if os.path.exists(fn): os.remove(fn)
                 self.file_list.remove(fn)
                 continue
-            piececounts.append(score)
-            
+            scores.append(score)
+            values.append(value)
             # s,h,w = state.shape
 
             # canzero=[]
@@ -131,13 +132,14 @@ class Dataset(torch.utils.data.Dataset):
             # 未来的收益，评估当前局面的状态，但这个收益有点扩大了
             self.data[fn]={"value":score, "state":state, "mcts_prob": mcts_prob}
 
-        avg_piececount = np.average(piececounts)
-        std_piececount = np.std(piececounts)
-        min_piececount = np.min(piececounts)
-        max_piececount = np.max(piececounts)
-        print("min/avg/max/std:",[min_piececount,avg_piececount,max_piececount,std_piececount])
+        print("value min/avg/max:",np.min(values),np.average(values),np.max(values))
+        avg_scores = np.average(scores)
+        std_scores = np.std(scores)
+        min_scores = np.min(scores)
+        max_scores = np.max(scores)
+        print("score min/avg/max/std:",[min_scores,avg_scores,max_scores,std_scores])
         for fn in self.data:
-            self.data[fn]["value"]=(self.data[fn]["value"]-avg_piececount)/std_piececount
+            self.data[fn]["value"]=(self.data[fn]["value"]-avg_scores)/std_scores
 
         # 将qval高的重复学习一次    
         # self.file_list.extend(double_train_list)
