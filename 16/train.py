@@ -61,10 +61,10 @@ class Dataset(torch.utils.data.Dataset):
         files = glob.glob(os.path.join(self.data_dir, "*.pkl"))
         files = sorted(files, key=lambda x: os.path.getmtime(x), reverse=True)
 
-        modified_time = os.path.getmtime(files[0])
+        modified_time = os.path.getmtime(files[-1])
         convert_time = time.localtime(modified_time)
         print("first time:",time.strftime('%y-%m-%d %H:%M:%S', convert_time))
-        modified_time = os.path.getmtime(files[-1])
+        modified_time = os.path.getmtime(files[0])
         convert_time = time.localtime(modified_time)
         print("last time:",time.strftime('%y-%m-%d %H:%M:%S', convert_time))
         
