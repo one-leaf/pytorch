@@ -364,8 +364,12 @@ class Train():
             pacc_sum += abs(1-max(data["steps"][j]["move_probs"]))
             d_sum += data["steps"][j]["depth"]
 
+        _r = 0
+        if not agent.terminal:
+            _r = agent.score/agent.piececount
+            
         for m in range(step_count):
-            data["steps"][m]["value"]=0
+            data["steps"][m]["value"]=_r
         for m in range(step_count):
             if data["steps"][m]["reward"]>0:
                 _r = data["steps"][m]["reward"]/(data["steps"][m]["piece_count"]+1)
