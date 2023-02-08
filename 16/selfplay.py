@@ -142,7 +142,7 @@ class Train():
         # 先锁定
         n_playout = 100
         player = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=n_playout)
-        player.mcts.ext_reward = random.random()>0.5
+        player.mcts.ext_reward = random.random()>0.2
 
         data = {"steps":[],"shapes":[],"last_state":0,"score":0,"piece_count":0}
         start_time = time.time()
