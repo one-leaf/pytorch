@@ -153,10 +153,7 @@ class Train():
             _step["piece_count"] = agent.piececount               
             _step["shape"] = agent.fallpiece["shape"]
             _step["pre_piece_height"] = agent.pieceheight
-            if player.mcts.ext_reward:
-                action, move_probs, state_value, qval, acc_ps, depth, ns = player.get_action(agent, agent.id, temp=result["total"]["ns"]) 
-            else:
-                action, move_probs, state_value, qval, acc_ps, depth, ns = player.get_action(agent, agent.id, temp=0) 
+            action, move_probs, state_value, qval, acc_ps, depth, ns = player.get_action(agent, agent.id, temp=result["total"]["ns"]) 
             _, reward = agent.step(action)
 
             _step["piece_height"] = agent.pieceheight
