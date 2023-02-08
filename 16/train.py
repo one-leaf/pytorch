@@ -122,29 +122,21 @@ class Dataset(torch.utils.data.Dataset):
             #     for zero in zerolist:
             #         for i in range(s):
             #             state[i][zero[0]][zero[1]]=0
-            
+
             # if score%1==0:
             #     self.data[fn]={"value":-1/(score+1), "state":state, "mcts_prob": mcts_prob}
             # else:
             # self.data[fn]={"value":-1/(piececount**0.5), "state":state, "mcts_prob": mcts_prob}
+            
+            # 未来的收益，评估当前局面的状态，但这个收益有点扩大了
             self.data[fn]={"value":score, "state":state, "mcts_prob": mcts_prob}
 
         avg_piececount = np.average(piececounts)
         std_piececount = np.std(piececounts)
         min_piececount = np.min(piececounts)
         max_piececount = np.max(piececounts)
-        per_piececount = np.percentile(piececounts,(25,50,75), method="midpoint")
-        print("midpoint(25%,50%,75%):",per_piececount)
-        print("std/avg/min/max:",[std_piececount,avg_piececount,min_piececount,max_piececount])
-        dif_piececount = per_piececount[2]-per_piececount[0]
-        cen_piececount = per_piececount[1]
-        # if var_piececount<1:
-        #     print("SLEEP 60s for piececount var: %s avg: %s data."%(var_piececount, avg_piececount))
-        #     time.sleep(60)
-        #     raise Exception("NEED SOME NEW DATA TO TRAIN")
-
+        print("min/avg/max/std:",[min_piececount,avg_piececount,max_piececount,std_piececount])
         for fn in self.data:
-            # self.data[fn]["value"]=(self.data[fn]["value"]-cen_piececount)/dif_piececount
             self.data[fn]["value"]=(self.data[fn]["value"]-avg_piececount)/std_piececount
 
         # 将qval高的重复学习一次    

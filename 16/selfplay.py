@@ -364,6 +364,21 @@ class Train():
             pacc_sum += abs(1-max(data["steps"][j]["move_probs"]))
             d_sum += data["steps"][j]["depth"]
 
+        for m in range(step_count):
+            data["steps"][m]["value"]=0
+        for m in range(step_count):
+            if data["steps"][m]["reward"]>0:
+                _r = data["steps"][m]["reward"]/(data["steps"][m]["piece_count"]+1)
+                for j in range(m):
+                    data["steps"][j]["value"] += _r 
+        vlist=[0]
+        for m in range(step_count):
+            if data["steps"][m]["value"]!=vlist[-1]:
+                vlist.append(data["steps"][m]["value"])
+        vlist.pop(0)
+        print(i,"vlist:",vlist)
+
+
         print(i,"score:",data["score"],"piece_count:",data["piece_count"],"piece_height:",data["piece_height"],"steps:",step_count,"depth:",d_sum/step_count)
         print(i,"avg_score:",s_sum/step_count, slist)
         print(i,"v_acc:",vacc_sum/step_count, vacclist)
@@ -374,7 +389,7 @@ class Train():
         for step in data["steps"]:
             states.append(step["state"])
             mcts_probs.append(step["move_probs"])
-            values.append(step["piececount"])
+            values.append(step["value"])
             score.append(step["score"])
 
         assert len(states)>0
