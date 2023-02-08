@@ -132,14 +132,18 @@ class Dataset(torch.utils.data.Dataset):
             # 未来的收益，评估当前局面的状态，但这个收益有点扩大了
             self.data[fn]={"value":score, "state":state, "mcts_prob": mcts_prob}
         values_items = list(values.values())
-        print("value min/avg/max:",[np.min(values_items),np.average(values_items),np.max(values_items)])
+        avg_values = np.average(values_items)
+        min_values = np.min(values_items)
+        max_values = np.max(values_items)
+        print("value min/avg/max:",[min_values, avg_values, max_values])
+
         avg_scores = np.average(scores)
         std_scores = np.std(scores)
         min_scores = np.min(scores)
         max_scores = np.max(scores)
-        print("score min/avg/max/std:",[min_scores,avg_scores,max_scores,std_scores])
+        print("score min/avg/max/std:",[min_scores, avg_scores, max_scores, std_scores])
         for fn in self.data:
-            if values[fn]<1 :
+            if values[fn]<1 or max_values<5:
                 self.data[fn]["value"]=values[fn]-1
             else:
                 self.data[fn]["value"]=(self.data[fn]["value"]-avg_scores)/std_scores
