@@ -116,6 +116,11 @@ class Train():
         """收集自我对抗数据用于训练"""       
         print("TRAIN Self Play starting ...")
 
+        if os.path.exists(model_file):
+            if time.time()-os.path.getmtime(model_file)>30*60:
+                time.sleep(60)
+                raise Exception("超过30分钟模型都没有更新了，停止训练")
+
         # 游戏代理
         agent = Agent(isRandomNextPiece=True)
 
@@ -367,7 +372,7 @@ class Train():
         _r = 0
         if not agent.terminal:
             _r = agent.score/agent.piececount
-            
+
         for m in range(step_count):
             data["steps"][m]["value"]=_r
         for m in range(step_count):
