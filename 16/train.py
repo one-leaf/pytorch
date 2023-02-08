@@ -90,7 +90,7 @@ class Dataset(torch.utils.data.Dataset):
         print("start load data to memory ...")
         start_time = time.time()
         scores=[]
-        values=[]
+        values={}
         # double_train_list=[]
         for fn in self.file_list:
             try:
@@ -105,7 +105,7 @@ class Dataset(torch.utils.data.Dataset):
                 self.file_list.remove(fn)
                 continue
             scores.append(score)
-            values.append(value)
+            values[fn]=value
             # s,h,w = state.shape
 
             # canzero=[]
@@ -131,17 +131,17 @@ class Dataset(torch.utils.data.Dataset):
 
             # 未来的收益，评估当前局面的状态，但这个收益有点扩大了
             self.data[fn]={"value":score, "state":state, "mcts_prob": mcts_prob}
-
-        print("value min/avg/max:",[np.min(values),np.average(values),np.max(values)])
+        values_items = list(values.values())
+        print("value min/avg/max:",[np.min(values_items),np.average(values_items),np.max(values_items)])
         avg_scores = np.average(scores)
         std_scores = np.std(scores)
         min_scores = np.min(scores)
         max_scores = np.max(scores)
         print("score min/avg/max/std:",[min_scores,avg_scores,max_scores,std_scores])
-        for i, fn in enumerate(self.data):
-            if values[i]<2:
-                self.data[fn]["value"]=values[i]-1
-            else:    
+        for fn in self.data:
+            if values[fn]<2:
+                self.data[fn]["value"]=values[fn]-1
+            else:
                 self.data[fn]["value"]=(self.data[fn]["value"]-avg_scores)/std_scores
 
         # 将qval高的重复学习一次    
