@@ -127,7 +127,7 @@ class Dataset(torch.utils.data.Dataset):
             #     self.data[fn]={"value":-1/(score+1), "state":state, "mcts_prob": mcts_prob}
             # else:
             # self.data[fn]={"value":-1/(piececount**0.5), "state":state, "mcts_prob": mcts_prob}
-            
+
             # 未来的收益，评估当前局面的状态，但这个收益有点扩大了
             self.data[fn]={"value":score, "state":state, "mcts_prob": mcts_prob}
 
@@ -162,7 +162,7 @@ class Dataset(torch.utils.data.Dataset):
             os.rename(fn, savefile)
             if len(self.newsample)<self.test_size:
                 self.newsample.append(savefile)
-            if (i>=127 and i>len(movefiles)*0.02) or i>=self.max_keep_size//2: break       
+            if (i>=127 and i>len(movefiles)*0.1) or i>=self.max_keep_size//2: break       
             if i>=self.max_keep_size//10: break       
         print("mv %s/%s files to train"%(i+1,len(movefiles)))
         if i==-1 :
