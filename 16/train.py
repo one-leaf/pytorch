@@ -130,7 +130,7 @@ class Dataset(torch.utils.data.Dataset):
             # self.data[fn]={"value":-1/(piececount**0.5), "state":state, "mcts_prob": mcts_prob}
 
             # 未来的收益，评估当前局面的状态，但这个收益有点扩大了
-            self.data[fn]={"value":score, "state":state, "mcts_prob": mcts_prob}
+            self.data[fn]={"value":value, "state":state, "mcts_prob": mcts_prob}
         values_items = list(values.values())
         avg_values = np.average(values_items)
         min_values = np.min(values_items)
@@ -138,18 +138,15 @@ class Dataset(torch.utils.data.Dataset):
         print("value min/avg/max:",[min_values, avg_values, max_values])
 
         avg_scores = np.average(scores)
-        std_scores = np.std(scores)
+        # std_scores = np.std(scores)
         min_scores = np.min(scores)
         max_scores = np.max(scores)
-        print("score min/avg/max/std:",[min_scores, avg_scores, max_scores, std_scores])
+        print("score min/avg/max/std:",[min_scores, avg_scores, max_scores])
         for fn in self.data:
-            if values[fn]<1 or max_values<5:
-                self.data[fn]["value"]=values[fn]-1
-            else:
-                self.data[fn]["value"]=(self.data[fn]["value"]-avg_scores)/std_scores
-
-        # 将qval高的重复学习一次    
-        # self.file_list.extend(double_train_list)
+            # if values[fn]<1 or max_values<5:
+            self.data[fn]["value"] -= 1
+            # else:
+            #     self.data[fn]["value"]=(self.data[fn]["value"]-avg_scores)/std_scores
 
         pay_time = round(time.time()-start_time, 2)
         print("loaded to memory, paid time:", pay_time)
