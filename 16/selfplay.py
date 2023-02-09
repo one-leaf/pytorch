@@ -386,16 +386,20 @@ class Train():
                 for j in range(m):
                     data["steps"][j]["value"] += _r 
 
-        # 按方块的贡献度
+        # 按方块的贡献度计算奖励
         for m in range(step_count):
-            # 计算后面的奖励
-            _r = 0
-            curr_piece_ount = data["steps"][m]["piece_count"]
-            for n in range(m+1,step_count):
-                if data["steps"][n]["reward"]>0:
-                    piece_count = data["steps"][n]["piece_count"]
-                    _r += data["steps"][n]["reward"]*(0.5**(piece_count+1-curr_piece_ount))
-            data["steps"][m]["score"] += _r 
+            if data["steps"][m]["reward"]>0:
+                curr_piece_count = data["steps"][m]["piece_count"]
+                r = data["steps"][m]["reward"]
+                _piece_count=-1
+                _r = 0
+                for j in range(m):
+                    piece_count = data["steps"][j]["piece_count"]
+                    if piece_count!=_piece_count:
+                        _r = 0.5**(curr_piece_count-piece_count)*r
+                        r -= _r
+                        _piece_count = piece_count
+                    data["steps"][j]["score"] += _r             
 
         vlist=[0]
         for m in range(step_count):
