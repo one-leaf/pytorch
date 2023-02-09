@@ -358,35 +358,58 @@ class Train():
                 vacclist.insert(0, round(data["steps"][j]["state_value"],2))
                 slist.insert(0, score)
                 pacclist.insert(0, round(max(data["steps"][j]["move_probs"]),2))
-            data["steps"][j]["piececount"] = agent.piececount - data["steps"][j]["piece_count"]
-            data["steps"][j]["score"] = agent.score - data["steps"][j]["score"]
+            # data["steps"][j]["piececount"] = agent.piececount - data["steps"][j]["piece_count"]
+            # data["steps"][j]["score"] = agent.score - data["steps"][j]["score"]
             # data["steps"][j]["piececount"] = agent.piececount 
 
-            data["steps"][j]["score"] = score
+            # data["steps"][j]["score"] = score
 
             vacc_sum += abs(data["steps"][j]["qval"]-data["steps"][j]["state_value"])
             s_sum += score
             pacc_sum += abs(1-max(data["steps"][j]["move_probs"]))
             d_sum += data["steps"][j]["depth"]
 
+        # 奖励的分配
         _r = 0
         if not agent.terminal:
             _r = (agent.score/agent.piececount)*(1-agent.pieceheight/(agent.height-1))
 
         for m in range(step_count):
             data["steps"][m]["value"]=_r
+            data["steps"][m]["score"]=_r
+
+        # 按方块的个数的平均奖励
         for m in range(step_count):
             if data["steps"][m]["reward"]>0:
                 _r = data["steps"][m]["reward"]/(data["steps"][m]["piece_count"]+1)
+                # 奖励均匀分配
                 for j in range(m):
                     data["steps"][j]["value"] += _r 
+
+        # 按方块的贡献度
+        for m in range(step_count):
+            # 计算后面的奖励
+            _r = 0
+            curr_piece_ount = data["steps"][m]["piece_count"]
+            for n in range(m+1,step_count-m):
+                if data["steps"][n]["reward"]>0:
+                    piece_count = data["steps"][n]["piece_count"]
+                    _r += data["steps"][n]["reward"]*(0.5**(piece_count+1-curr_piece_ount))
+            data["steps"][m]["score"] += _r 
+
+        vlist=[0]
+        for m in range(step_count):
+            if data["steps"][m]["score"]!=vlist[-1]:
+                vlist.append(data["steps"][m]["score"])
+        vlist.pop(0)
+        print(i,"score:",vlist)
+
         vlist=[0]
         for m in range(step_count):
             if data["steps"][m]["value"]!=vlist[-1]:
                 vlist.append(data["steps"][m]["value"])
         vlist.pop(0)
-        print(i,"vlist:",vlist)
-
+        print(i,"value:",vlist)
 
         print(i,"score:",data["score"],"piece_count:",data["piece_count"],"piece_height:",data["piece_height"],"steps:",step_count,"depth:",d_sum/step_count)
         print(i,"avg_score:",s_sum/step_count, slist)
