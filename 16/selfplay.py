@@ -391,7 +391,7 @@ class Train():
             # 计算后面的奖励
             _r = 0
             curr_piece_ount = data["steps"][m]["piece_count"]
-            for n in range(m+1,step_count-m):
+            for n in range(m+1,step_count):
                 if data["steps"][n]["reward"]>0:
                     piece_count = data["steps"][n]["piece_count"]
                     _r += data["steps"][n]["reward"]*(0.5**(piece_count+1-curr_piece_ount))
