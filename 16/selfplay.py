@@ -371,7 +371,7 @@ class Train():
 
         _r = 0
         if not agent.terminal:
-            _r = (agent.score/agent.piececount)*(1-agent.pieceheight/agent.height)
+            _r = (agent.score/agent.piececount)*(1-agent.pieceheight/(agent.height-1))
 
         for m in range(step_count):
             data["steps"][m]["value"]=_r
