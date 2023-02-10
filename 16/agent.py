@@ -304,7 +304,7 @@ class Agent(object):
         if h[2]-h[1]>2: v.append((h[2]-h[1])**2)
         if h[3]-h[2]>2: v.append((h[3]-h[2])**2)
         if h[4]-h[3]>2: v.append((h[4]-h[3])**2)
-        v.append((h[4]-h[5])**2)
+        if abs(h[4]-h[5])>2: v.append((h[4]-h[5])**2)
         if h[5]-h[6]>2: v.append((h[5]-h[6])**2)
         if h[6]-h[7]>2: v.append((h[6]-h[7])**2)
         if h[7]-h[8]>2: v.append((h[7]-h[8])**2)
