@@ -235,7 +235,7 @@ class Agent(object):
                     line=line+"* "
             print(line)
         print(" "+" -"*self.width)            
-        print("score:", self.score, "steps:", self.steps,"piececount:", self.piececount)
+        print("score:", self.score, "steps:", self.steps,"piececount:", self.piececount, "pieceheight:", self.pieceheight)
 
     def print(self):
         board = copy.deepcopy(self.board)
@@ -256,7 +256,7 @@ class Agent(object):
                     line=line+str(board[x][y])+" "
             print(line)
         print(" "+" -"*self.width)
-        print("score:", self.score, "steps:", self.steps,"piececount:", self.piececount)
+        print("score:", self.score, "steps:", self.steps,"piececount:", self.piececount, "pieceheight:", self.pieceheight)
 
     # 统计当前最大高度
     def getMaxHeight(self):
