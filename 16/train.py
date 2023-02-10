@@ -130,7 +130,7 @@ class Dataset(torch.utils.data.Dataset):
             # self.data[fn]={"value":-1/(piececount**0.5), "state":state, "mcts_prob": mcts_prob}
 
             # 未来的收益，评估当前局面的状态，但这个收益有点扩大了
-            self.data[fn]={"value":value, "state":state, "mcts_prob": mcts_prob}
+            self.data[fn]={"value":score, "state":state, "mcts_prob": mcts_prob}
         values_items = list(values.values())
         avg_values = np.average(values_items)
         min_values = np.min(values_items)
