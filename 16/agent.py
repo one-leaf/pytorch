@@ -300,15 +300,15 @@ class Agent(object):
                     h[x]=self.height-y
                     break
         v = []
-        if h[1]-h[0]>0: v.append((h[1]-h[0])**2)
-        if h[2]-h[1]>0: v.append((h[2]-h[1])**2)
-        if h[3]-h[2]>0: v.append((h[3]-h[2])**2)
-        if h[4]-h[3]>0: v.append((h[4]-h[3])**2)
+        if h[1]-h[0]>2: v.append((h[1]-h[0])**2)
+        if h[2]-h[1]>2: v.append((h[2]-h[1])**2)
+        if h[3]-h[2]>2: v.append((h[3]-h[2])**2)
+        if h[4]-h[3]>2: v.append((h[4]-h[3])**2)
         v.append((h[4]-h[5])**2)
-        if h[5]-h[6]>0: v.append((h[5]-h[6])**2)
-        if h[6]-h[7]>0: v.append((h[6]-h[7])**2)
-        if h[7]-h[8]>0: v.append((h[7]-h[8])**2)
-        if h[8]-h[9]>0: v.append((h[8]-h[9])**2)
+        if h[5]-h[6]>2: v.append((h[5]-h[6])**2)
+        if h[6]-h[7]>2: v.append((h[6]-h[7])**2)
+        if h[7]-h[8]>2: v.append((h[7]-h[8])**2)
+        if h[8]-h[9]>2: v.append((h[8]-h[9])**2)
         return max(v)/10.
 
     # 统计空洞的个数
