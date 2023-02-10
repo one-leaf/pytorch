@@ -204,7 +204,7 @@ class MCTS():
         if game.state == 1 and game.piececount - game.prev_piececount > 1:
             if self.ext_reward:                 
                 v = game.prev_EmptyCount - game.emptyCount + game.prev_heightDiff - game.heightDiff
-                v = v*(1-game.prev_pieceheight/20) + (game.prev_pieceheight - game.pieceheight + 0.4)*game.prev_pieceheight/20
+                v = v*(1-game.prev_pieceheight/19) + (game.prev_pieceheight - game.pieceheight + 0.4)*game.prev_pieceheight/19
                 # if v < 0.5 and game.prev_pieceheight > game.pieceheight: v = game.prev_pieceheight - game.pieceheight
             else:
                 _s = game.get_key()
