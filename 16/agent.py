@@ -299,7 +299,7 @@ class Agent(object):
                 if self.board[x][y]!=blank:
                     h[x]=self.height-y
                     break
-        v = []
+        v = [0]
         if h[1]-h[0]>2: v.append((h[1]-h[0])**2)
         if h[2]-h[1]>2: v.append((h[2]-h[1])**2)
         if h[3]-h[2]>2: v.append((h[3]-h[2])**2)
