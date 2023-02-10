@@ -24,6 +24,7 @@ function gitpush()
             break
         fi
     done
+    echo `date -R`
 }
 
 gitpush
