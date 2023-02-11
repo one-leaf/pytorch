@@ -408,7 +408,7 @@ class Train():
             for n in range(m, step_count):
                 if data["steps"][n]["reward"]>0:
                     # 奖励按当前最大高度反比折扣
-                    _reward = data["steps"][n]["reward"]*(1-data["steps"][n]["piece_height"]/(agent.height-1))
+                    _reward = data["steps"][n]["reward"] #*(1-data["steps"][n]["piece_height"]/(agent.height-1))
                     # 奖励按出现的顺序摊分，越前面越有价值
                     # _reward = data["steps"][n]["reward"]*(1-data["steps"][n]["piece_count"]/agent.piececount)
 
