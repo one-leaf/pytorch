@@ -176,10 +176,10 @@ class MCTS():
                     u = self.Qsa[(s, a)] + self._c_puct * self.Ps[s][a] * math.sqrt(self.Ns[s]) / (1 + self.Nsa[(s, a)])
                 else:
                     u = self._c_puct * self.Ps[s][a] * math.sqrt(self.Ns[s] + EPS)  # 加一个EPS小量防止 Q = 0 
-                    if not self.ext_reward:
-                        cur_best = u
-                        best_act = a
-                        break
+                    # if not self.ext_reward:
+                    #     cur_best = u
+                    #     best_act = a
+                    #     break
 
                 if u > cur_best:
                     cur_best = u
@@ -207,17 +207,18 @@ class MCTS():
                 v += (game.prev_pieceheight - game.pieceheight+0.8)*game.prev_pieceheight/20
                 # if v < 0.5 and game.prev_pieceheight > game.pieceheight: v = game.prev_pieceheight - game.pieceheight
             else:
-                _s = game.get_key()
-                if _s not in self.Ps[s]:
-                    act_probs , v = self._policy(game)
-                    probs = np.zeros(game.actions_num)
-                    for act, prob in act_probs:
-                        probs[act] = prob
-                    self.Ps[_s] = probs 
-                    self.Ns[_s] = 0
-                    self.Vs[_s] = v                
-                else:
-                    v = self.Vs[_s]
+                v = -game.pieceheight/20
+                # _s = game.get_key()
+                # if _s not in self.Ps[s]:
+                #     act_probs , v = self._policy(game)
+                #     probs = np.zeros(game.actions_num)
+                #     for act, prob in act_probs:
+                #         probs[act] = prob
+                #     self.Ps[_s] = probs 
+                #     self.Ns[_s] = 0
+                #     self.Vs[_s] = v                
+                # else:
+                #     v = self.Vs[_s]
         else:
             v = self.search(game)
 
