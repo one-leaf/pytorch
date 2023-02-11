@@ -207,7 +207,7 @@ class MCTS():
                 v += (game.prev_pieceheight - game.pieceheight+0.8)*game.prev_pieceheight/20
                 # if v < 0.5 and game.prev_pieceheight > game.pieceheight: v = game.prev_pieceheight - game.pieceheight
             else:
-                v = -game.pieceheight/20
+                v = -0.1
                 # _s = game.get_key()
                 # if _s not in self.Ps[s]:
                 #     act_probs , v = self._policy(game)
