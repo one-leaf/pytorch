@@ -48,6 +48,8 @@ class Agent(object):
         self.emptyCount = 0
         # 方块最大高度差
         self.heightDiff = 0
+        # 当前方块的高度
+        self.fallpieceheight = 0
         # 面板
         self.board = self.tetromino.getblankboard()
         # 状态： 0 下落过程中 1 更换方块 2 结束一局
@@ -162,7 +164,7 @@ class Agent(object):
         else:
             isFalling = False
 
-        fallpiece_y = self.fallpiece['y']
+        self.fallpieceheight = self.fallpiece['y']
 
         if not isFalling:
             self.tetromino.addtoboard(self.board, self.fallpiece)            
@@ -172,7 +174,7 @@ class Agent(object):
             self.pieceheight = self.getAvgHeight()    
             self.emptyCount = self.getEmptyCount()   
             self.heightDiff = self.getHeightDiff()   
-            self.pieces_height.append(20 - fallpiece_y - self.reward)
+            self.pieces_height.append(20 - self.fallpieceheight - self.reward)
             self.state = 1
             self.piecesteps = 0
             self.piececount += 1 
