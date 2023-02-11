@@ -89,7 +89,7 @@ class Dataset(torch.utils.data.Dataset):
         # scores=[]
         print("start load data to memory ...")
         start_time = time.time()
-        scores=[]
+        scores={}
         values={}
         # double_train_list=[]
         for fn in self.file_list:
@@ -104,7 +104,7 @@ class Dataset(torch.utils.data.Dataset):
                 if os.path.exists(fn): os.remove(fn)
                 self.file_list.remove(fn)
                 continue
-            scores.append(score)
+            scores[fn]=score
             values[fn]=value
             # s,h,w = state.shape
 
@@ -130,21 +130,22 @@ class Dataset(torch.utils.data.Dataset):
             # self.data[fn]={"value":-1/(piececount**0.5), "state":state, "mcts_prob": mcts_prob}
 
             # 未来的收益，评估当前局面的状态，但这个收益有点扩大了
-            self.data[fn]={"value":score, "state":state, "mcts_prob": mcts_prob}
+            self.data[fn]={"value":0, "state":state, "mcts_prob": mcts_prob}
         values_items = list(values.values())
         avg_values = np.average(values_items)
         min_values = np.min(values_items)
         max_values = np.max(values_items)
         print("value min/avg/max:",[min_values, avg_values, max_values])
 
-        avg_scores = np.average(scores)
+        scores_items = list(scores.values())
+        avg_scores = np.average(scores_items)
         # std_scores = np.std(scores)
-        min_scores = np.min(scores)
-        max_scores = np.max(scores)
+        min_scores = np.min(scores_items)
+        max_scores = np.max(scores_items)
         print("score min/avg/max/std:",[min_scores, avg_scores, max_scores])
         for fn in self.data:
             # if values[fn]<1 or max_values<5:
-            self.data[fn]["value"] -= avg_scores
+            self.data[fn]["value"] = (values[fn] - avg_values)*0.5 + (scores[fn]-avg_scores)*0.5
             # else:
             #     self.data[fn]["value"]=(self.data[fn]["value"]-avg_scores)/std_scores
 
