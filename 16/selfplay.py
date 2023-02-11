@@ -398,16 +398,15 @@ class Train():
                     _r += _avg
             data["steps"][m]["score"] += _r     
 
-        vlist=[0]
-        for m in range(step_count):
-            if data["steps"][m]["score"]!=vlist[-1]:
+        vlist=[]
+        for m in range(1, step_count):
+            if data["steps"][m]["piece_count"]-data["steps"][m-1]["piece_count"]==1:
                 vlist.append(data["steps"][m]["score"])
-        vlist.pop(0)
         print(i,"score:",vlist)
-
-        vlist=[0]
-        for m in range(step_count):
-            if data["steps"][m]["value"]!=vlist[-1]:
+        print()
+        vlist=[]
+        for m in range(1, step_count):
+            if data["steps"][m]["piece_count"]-data["steps"][m-1]["piece_count"]==1:
                 vlist.append(data["steps"][m]["value"])
         vlist.pop(0)
         print(i,"value:",vlist)
