@@ -405,7 +405,7 @@ class Train():
         # 按方块的未来得分计算价值
         for m in range(step_count):
             _r = 0
-            for n in range(m+1, step_count):
+            for n in range(m, step_count):
                 if data["steps"][n]["reward"]>0:
                     # 奖励按当前最大高度反比折扣
                     _reward = data["steps"][n]["reward"]*(1-data["steps"][n]["piece_height"]/(agent.height-1))
