@@ -139,14 +139,16 @@ class Train():
         n_playout = int(result["total"]["n_playout"])
         if n_playout<5: n_playout=5
         if n_playout>self.n_playout: n_playout=self.n_playout
-        # 先锁定
+
+        test_mode = random.random()>0.9
+        # 锁定100
         n_playout = 100
         player = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=n_playout)
-        player.mcts.ext_reward = random.random()>0.2
+        # player.mcts.ext_reward = random.random()>0.2
 
         data = {"steps":[],"shapes":[],"last_state":0,"score":0,"piece_count":0}
         start_time = time.time()
-        print('start game time:', datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), "ext_reward:", player.mcts.ext_reward)
+        print('start game time:', datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), "test_mode:", test_mode)
         # 最大方块数
         max_piececount = result["total"]["piececount"]+100
 
@@ -158,7 +160,19 @@ class Train():
             _step["piece_count"] = agent.piececount               
             _step["shape"] = agent.fallpiece["shape"]
             _step["pre_piece_height"] = agent.pieceheight
-            action, move_probs, state_value, qval, acc_ps, depth, ns = player.get_action(agent, agent.id, temp=result["total"]["ns"]) 
+
+            if test_mode:
+                move_probs, state_value = policy_value_net.policy_value_fn(agent)
+                action, acc_ps = 0, 0
+                for a, p in move_probs:
+                    if p > acc_ps:
+                        action, acc_ps = a, p
+                depth = 0
+                ns = 0
+                qval = state_value                
+            else:
+                action, move_probs, state_value, qval, acc_ps, depth, ns = player.get_action(agent, agent.id, temp=result["total"]["ns"]) 
+
             _, reward = agent.step(action)
 
             _step["piece_height"] = agent.pieceheight
@@ -197,12 +211,12 @@ class Train():
                 paytime = time.time()-start_time
                 steptime = paytime/agent.steps
 
-                if player.mcts.ext_reward:
-                    result["total"]["avg_score_ex"] = result["total"]["avg_score_ex"]*0.99 + agent.score*0.01 
-                    mark_score = result["total"]["avg_score_ex"]
-                else:  
+                if test_mode:
                     result["total"]["avg_score"] = result["total"]["avg_score"]*0.99 + agent.score*0.01
                     mark_score = result["total"]["avg_score"]
+                else:  
+                    result["total"]["avg_score_ex"] = result["total"]["avg_score_ex"]*0.99 + agent.score*0.01 
+                    mark_score = result["total"]["avg_score_ex"]
 
                 # 速度控制在消耗50行
                 if agent.score >= mark_score:
@@ -334,6 +348,8 @@ class Train():
         winner = True if agent.piececount > result["total"]["piececount"] else False
 
         print("winner: %s piececount: %s %s" %(winner, agent.piececount, result["total"]["piececount"]))
+
+        if test_mode: return
 
         # 更新reward和score，reward为胜负，[1|-1|0]；score 为本步骤以后一共消除的行数
         step_count = len(data["steps"])
