@@ -209,7 +209,7 @@ class MCTS():
                 v += (game.prev_heightDiff - game.heightDiff)/100 
                 # 希望下落方块在同等条件下选择低一点的
                 v -= game.fallpieceheight/100
-                # 逐步增加消行的奖励
+                # 局面变差时增加消行的奖励
                 v += (game.prev_pieceheight - game.pieceheight)*game.prev_pieceheight/20
                 # if v < 0.5 and game.prev_pieceheight > game.pieceheight: v = game.prev_pieceheight - game.pieceheight
             else:
