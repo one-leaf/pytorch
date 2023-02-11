@@ -202,7 +202,8 @@ class MCTS():
 
         # 现实奖励
         if game.state == 1 and game.piececount - game.prev_piececount > 1:
-            if self.ext_reward:                 
+            if self.ext_reward:
+                # 不能有空窗                 
                 v = game.prev_EmptyCount - game.emptyCount 
                 # 希望边缘高一点，中间低一点
                 v += (game.prev_heightDiff - game.heightDiff)/100 
