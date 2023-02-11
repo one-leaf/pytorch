@@ -144,7 +144,7 @@ class Dataset(torch.utils.data.Dataset):
         print("score min/avg/max/std:",[min_scores, avg_scores, max_scores])
         for fn in self.data:
             # if values[fn]<1 or max_values<5:
-            self.data[fn]["value"] -= 1
+            self.data[fn]["value"] -= avg_scores
             # else:
             #     self.data[fn]["value"]=(self.data[fn]["value"]-avg_scores)/std_scores
 
