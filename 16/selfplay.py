@@ -391,7 +391,10 @@ class Train():
             _r = 0
             for n in range(m+1, step_count):
                 if data["steps"][n]["reward"]>0:
-                    _avg = data["steps"][n]["reward"]*0.5/(data["steps"][n]["piece_count"]+1-data["steps"][m]["piece_count"])
+                    # 奖励按当前最大高度反比折扣
+                    _reward = data["steps"][n]["reward"]*(1-data["steps"][n]["piece_height"]/20)
+                    # 奖励平均摊分到当前方块和奖励方块之间的所有方块
+                    _avg = _reward/(data["steps"][n]["piece_count"]+1-data["steps"][m]["piece_count"])
                     _r += _avg
             data["steps"][m]["score"] += _r     
 
