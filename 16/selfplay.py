@@ -394,7 +394,7 @@ class Train():
             data["steps"][m]["value"]=_r
             data["steps"][m]["score"]=_r
 
-        # 按方块的历史得分计算贡献度
+        # value 长期收益，按方块的历史得分计算贡献度
         for m in range(step_count):
             if data["steps"][m]["reward"]>0:
                 _r = data["steps"][m]["reward"]/(data["steps"][m]["piece_count"]+1)
@@ -402,7 +402,7 @@ class Train():
                 for j in range(m):
                     data["steps"][j]["value"] += _r 
 
-        # 按方块的未来得分计算价值
+        # score 短期收益，按方块的未来得分计算价值
         for m in range(step_count):
             _r = 0
             for n in range(m, step_count):
