@@ -197,7 +197,7 @@ class Train():
                 # if agent.score>result["total"]["reward"]+20: game_stop=True
 
             # 如果训练次数超过了最大次数，则直接终止训练
-            if not test_mode and (agent.piececount>max_piececount and max_piececount>0) and agent.state == 1: game_stop=True
+            if agent.state == 1 and not test_mode and (agent.piececount>max_piececount and max_piececount>0) : game_stop=True
 
             if agent.terminal or game_stop:
                 data["score"] = agent.score
