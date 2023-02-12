@@ -206,9 +206,9 @@ class MCTS():
                 # 不能有空窗                 
                 v = game.prev_EmptyCount - game.emptyCount 
                 # 希望边缘高一点，中间低一点
-                v += (game.prev_heightDiff - game.heightDiff)/10 
+                v += (game.prev_heightDiff - game.heightDiff)**2/20 
                 # 希望下落方块在同等条件下选择低一点的
-                v -= game.fallpieceheight/100
+                v -= game.fallpieceheight/20
                 # 局面变差时增加消行的奖励
                 v += (game.prev_pieceheight - game.pieceheight)*game.prev_pieceheight/20
                 # if v < 0.5 and game.prev_pieceheight > game.pieceheight: v = game.prev_pieceheight - game.pieceheight
