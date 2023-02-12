@@ -207,9 +207,9 @@ class MCTS():
                 # 空窗越少越好                 
                 v = game.prev_EmptyCount - game.emptyCount 
                 # 边缘高一点，中间低一点
-                v += (game.prev_heightDiff - game.heightDiff)/20
+                v += (game.prev_heightDiff - game.heightDiff)/10
                 # 高度标准差越小越好
-                v += (game.prev_heightStd-game.heightStd)/20
+                v += (game.prev_heightStd-game.heightStd)/10
                 # 局面变差时增加消行的奖励
                 v += (game.prev_pieceheight - game.pieceheight)*game.prev_pieceheight/20
                 # if v>0:
