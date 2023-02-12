@@ -146,10 +146,7 @@ class Dataset(torch.utils.data.Dataset):
         max_scores = np.max(scores_items)
         print("score min/avg/max/std:",[min_scores, avg_scores, max_scores, std_scores])
         for fn in self.data:
-            # if values[fn]<1 or max_values<5:
-            self.data[fn]["value"] = (values[fn] - avg_values)/std_values*0.5 + (scores[fn]-avg_scores)/std_scores*0.5
-            # else:
-            #     self.data[fn]["value"]=(self.data[fn]["value"]-avg_scores)/std_scores
+            self.data[fn]["value"] = (values[fn] - avg_values)/(max_values-min_values)*0.5 + (scores[fn]-avg_scores)/(max_scores-min_scores)*0.5            
 
         pay_time = round(time.time()-start_time, 2)
         print("loaded to memory, paid time:", pay_time)
