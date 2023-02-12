@@ -402,13 +402,13 @@ class Train():
                 for j in range(m):
                     data["steps"][j]["value"] += _r 
 
-        # score 短期收益，按方块的未来得分计算价值
+        # score 短期收益，按方块的未来得分计算价值,注意消除多行也按1行计算,如果按实际会引导到多行合并消除
         for m in range(step_count):
             _r = 0
             for n in range(m, step_count):
                 if data["steps"][n]["reward"]>0:
                     # 奖励按当前最大高度反比折扣
-                    _reward = data["steps"][n]["reward"] #*(1-data["steps"][n]["piece_height"]/(agent.height-1))
+                    _reward = min(data["steps"][n]["reward"],1) #*(1-data["steps"][n]["piece_height"]/(agent.height-1))
                     # 奖励按出现的顺序摊分，越前面越有价值
                     # _reward = data["steps"][n]["reward"]*(1-data["steps"][n]["piece_count"]/agent.piececount)
 
