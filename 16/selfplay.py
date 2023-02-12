@@ -140,7 +140,7 @@ class Train():
         if n_playout<5: n_playout=5
         if n_playout>self.n_playout: n_playout=self.n_playout
 
-        test_mode = random.random()>0.8
+        test_mode = random.random()>0.5
         # 锁定100
         n_playout = 100
         player = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=n_playout)
