@@ -261,7 +261,7 @@ class Agent(object):
                     line=line+str(board[x][y])+" "
             print(line)
         print(" "+" -"*self.width)
-        print("score:", self.score, "steps:", self.steps,"piececount:", self.piececount, "pieceheight:", self.pieceheight)
+        print("score:", self.score, "piececount:", self.piececount, "emptyCount:", self.emptyCount, "pieceheight:", self.pieceheight, "heightDiff:", self.heightDiff, "getHeightStd:", self.heightStd)
 
     # 统计当前最大高度
     def getMaxHeight(self):
@@ -309,7 +309,7 @@ class Agent(object):
         if h[2]-h[1]>2: v.append((h[2]-h[1]))
         if h[3]-h[2]>2: v.append((h[3]-h[2]))
         if h[4]-h[3]>2: v.append((h[4]-h[3]))
-        if abs(h[4]-h[5])>2: v.append((h[4]-h[5]))
+        if abs(h[4]-h[5])>2: v.append(abs(h[4]-h[5]))
         if h[5]-h[6]>2: v.append((h[5]-h[6]))
         if h[6]-h[7]>2: v.append((h[6]-h[7]))
         if h[7]-h[8]>2: v.append((h[7]-h[8]))
