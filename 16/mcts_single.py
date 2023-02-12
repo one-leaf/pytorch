@@ -49,6 +49,7 @@ class MCTS():
         game.prev_pieceheight = game.pieceheight
         game.prev_EmptyCount = game.emptyCount
         game.prev_heightDiff = game.heightDiff
+        game.prev_heightStd = game.heightStd
         # for n in range(self._n_playout):
         for n in count():
             self.depth = 0
@@ -207,6 +208,8 @@ class MCTS():
                 v = game.prev_EmptyCount - game.emptyCount 
                 # 希望边缘高一点，中间低一点
                 v += (game.prev_heightDiff - game.heightDiff)**2/20 
+                # 希望高度标准差越小越好
+                v += (game.prev_heightStd-game.heightStd)/20
                 # 希望下落方块在同等条件下选择低一点的
                 v -= game.fallpieceheight/20
                 # 局面变差时增加消行的奖励

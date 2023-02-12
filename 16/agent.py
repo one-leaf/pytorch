@@ -48,6 +48,8 @@ class Agent(object):
         self.emptyCount = 0
         # 方块最大高度差
         self.heightDiff = 0
+        # 方块高度标准差
+        self.heightStd = 0
         # 当前方块的高度
         self.fallpieceheight = 0
         # 面板
@@ -173,7 +175,8 @@ class Agent(object):
             self.score += self.reward
             self.pieceheight = self.getAvgHeight()    
             self.emptyCount = self.getEmptyCount()   
-            self.heightDiff = self.getHeightDiff()   
+            self.heightDiff = self.getHeightDiff()
+            self.heightStd = self.getHeightStd()   
             self.pieces_height.append(20 - self.fallpieceheight - self.reward)
             self.state = 1
             self.piecesteps = 0
@@ -291,7 +294,7 @@ class Agent(object):
                 if self.board[x][y]!=blank:
                     h[x]=y
                     break
-        return np.std(h)/self.width
+        return np.std(h)
 
     # 统计数据相邻差值
     def getHeightDiff(self):
