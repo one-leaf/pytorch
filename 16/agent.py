@@ -319,23 +319,33 @@ class Agent(object):
     # 统计空洞的个数
     def getEmptyCount(self):
         c = 0
-        h = np.zeros((self.width))
-        lines_c={}
         for x in range(self.width):
-            line_c = -1
+            find_block=False
             for y in range(self.height):
-                if line_c == -1 and self.board[x][y]!=blank:
-                    line_c = 0
-                    h[x]=self.height-y
-                if line_c!=-1 and self.board[x][y]==blank:  
-                    if y not in lines_c:
-                        lines_c[y]=1  
-                        line_c += 1
-                    else:
-                        line_c += 1
-            if line_c == -1: 
-                line_c = 0
-            c += line_c
+                if find_block==False and self.board[x][y]!=blank:
+                    find_block = True
+                if find_block and self.board[x][y]==blank: 
+                    e_h = self.height-y
+                    c += e_h
+                    break
+
+        # h = np.zeros((self.width))
+        # lines_c={}
+        # for x in range(self.width):
+        #     line_c = -1
+        #     for y in range(self.height):
+        #         if line_c == -1 and self.board[x][y]!=blank:
+        #             line_c = 0
+        #             h[x]=self.height-y
+        #         if line_c!=-1 and self.board[x][y]==blank:  
+        #             if y not in lines_c:
+        #                 lines_c[y]=1  
+        #                 line_c += 1
+        #             else:
+        #                 line_c += 1
+        #     if line_c == -1: 
+        #         line_c = 0
+        #     c += line_c
 
         # 加上夹壁
         # v = []
