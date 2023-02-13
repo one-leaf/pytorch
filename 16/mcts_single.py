@@ -211,7 +211,7 @@ class MCTS():
                 # 边缘高一点,相差3个以上就超过1个空窗的危害
                 # v += (game.prev_heightDiff**2 - game.heightDiff**2)/10
                 # 高度标准差越小越好
-                v += (game.prev_heightStd - game.heightStd)/10
+                # v += (game.prev_heightStd - game.heightStd)/10
                 # 增加消行的奖励
                 v += game.prev_pieceheight - game.pieceheight
                 # if v>0:
