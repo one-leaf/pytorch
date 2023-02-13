@@ -47,7 +47,7 @@ class MCTS():
         available_acts = game.availables
         game.prev_piececount = game.piececount
         game.prev_pieceheight = game.pieceheight
-        game.prev_EmptyCount = game.emptyCount
+        game.prev_emptyCount = game.emptyCount
         game.prev_heightDiff = game.heightDiff
         game.prev_heightStd = game.heightStd
         # for n in range(self._n_playout):
@@ -192,7 +192,7 @@ class MCTS():
         act = game.position_to_action(a)
 
         # prev_pieceheight = game.pieceheight
-        # prev_EmptyCount = game.emptyCount
+        # prev_emptyCount = game.emptyCount
 
         game.step(act)
 
@@ -207,7 +207,7 @@ class MCTS():
         if game.state == 1 and game.piececount - game.prev_piececount > 1:
             if self.ext_reward:
                 # 空窗越少越好                 
-                v = (game.prev_EmptyCount - game.emptyCount)/10
+                v = (game.prev_emptyCount - game.emptyCount)/10
                 # 边缘高一点,相差3个以上就超过1个空窗的危害
                 # v += (game.prev_heightDiff**2 - game.heightDiff**2)/10
                 # 高度标准差越小越好
@@ -215,7 +215,7 @@ class MCTS():
                 # 增加消行的奖励
                 v += game.prev_pieceheight - game.pieceheight
                 # if v>0:
-                #     print("v:",v,"empty:", game.prev_EmptyCount - game.emptyCount, "heightDiff:", (game.prev_heightDiff - game.heightDiff)**2, \
+                #     print("v:",v,"empty:", game.prev_emptyCount - game.emptyCount, "heightDiff:", (game.prev_heightDiff - game.heightDiff)**2, \
                 #         "heightStd:", (game.prev_heightStd-game.heightStd)/20, "fallpieceheight:", -game.fallpieceheight/100,\
                 #         "pieceheight:", (game.prev_pieceheight - game.pieceheight)*game.prev_pieceheight/20)
             else:
