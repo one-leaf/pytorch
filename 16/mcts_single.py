@@ -212,8 +212,8 @@ class MCTS():
                 # v += (game.prev_heightDiff**2 - game.heightDiff**2)/10
                 # 高度标准差越小越好
                 v += (game.prev_heightStd - game.heightStd)/10
-                # 局面变差时增加消行的奖励
-                # v += (game.prev_pieceheight - game.pieceheight)*game.prev_pieceheight/20
+                # 增加消行的奖励
+                v += (game.prev_pieceheight - game.pieceheight)/10
                 # if v>0:
                 #     print("v:",v,"empty:", game.prev_EmptyCount - game.emptyCount, "heightDiff:", (game.prev_heightDiff - game.heightDiff)**2, \
                 #         "heightStd:", (game.prev_heightStd-game.heightStd)/20, "fallpieceheight:", -game.fallpieceheight/100,\
