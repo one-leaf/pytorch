@@ -320,23 +320,24 @@ class Agent(object):
     def getEmptyCount(self):
         # 每一列的空洞最高点
         c = np.zeros((self.width))
-        h = np.zeros((self.width))
+        h = np.zeros((self.width+2))
         for x in range(self.width):
             find_block=False
             for y in range(self.height):
                 if find_block==False and self.board[x][y]!=blank:
                     find_block = True
-                    h[x]=self.height-y
+                    h[x+1]=self.height-y
                 if find_block and self.board[x][y]==blank: 
                     c[x] = self.height-y
                     break
+        h[0]=h[2]
+        h[-1]=h[-3]
         # 加上夹壁，高度折算为0.5
-        if (h[1]-h[0])>=3 and c[0]<h[1]/2: c[0]=h[1]/2
-        if (h[-2]-h[-1])>=3 and c[-2]<h[-2]/2: c[-1]=h[-2]/2
-        for x in range(1,self.width-1):
-            _c=min(h[x-1]-h[x],h[x+1]-h[x])
-            _h=min(h[x-1],h[x+1])
-            if _c>=3 and c[x]<_h/2: c[x]=_h/2
+        for x in range(self.width):
+            _c=min(h[x-1]-h[x],h[x+1]-h[x]) #夹壁高度
+            _h=min(h[x-1],h[x+1])-_c/2
+            if _c>=3 and c[x]<_h:
+                c[x]=_h
 
         return sum(c)
 
