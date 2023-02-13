@@ -338,14 +338,14 @@ class Agent(object):
             c += line_c
 
         # 加上夹壁
-        v = []
-        v.append(h[1]-h[0])
-        v.append(h[-2]-h[-1])
-        for x in range(1,self.width-1):
-            v.append(min(h[x-1]-h[x],h[x+1]-h[x]))
-        for h in v:
-            if h>2:
-                c+=(h-2)
+        # v = []
+        # v.append(h[1]-h[0])
+        # v.append(h[-2]-h[-1])
+        # for x in range(1,self.width-1):
+        #     v.append(min(h[x-1]-h[x],h[x+1]-h[x]))
+        # for h in v:
+        #     if h>2:
+        #         c+=(h-2)
         return c
 
     # 计算得分,只计算被挡住的
