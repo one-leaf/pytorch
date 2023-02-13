@@ -333,9 +333,9 @@ class Agent(object):
         h[0]=h[2]
         h[-1]=h[-3]
         # 加上夹壁，高度折算为0.5
-        for x in range(1,self.width+1):
-            _c=min(h[x-1]-h[x],h[x+1]-h[x]) #夹壁高度
-            _h=min(h[x-1],h[x+1])-_c/2
+        for x in range(self.width):
+            _c=min(h[x]-h[x+1],h[x+2]-h[x+1]) #夹壁高度
+            _h=min(h[x],h[x+2])-_c/2
             if _c>=3 and c[x]<_h:
                 c[x]=_h
 
