@@ -207,7 +207,7 @@ class MCTS():
         if game.state == 1 and game.piececount - game.prev_piececount > 1:
             if self.ext_reward:
                 # 空窗越少越好                 
-                v = game.prev_EmptyCount - game.emptyCount 
+                v = (game.prev_EmptyCount - game.emptyCount)/10
                 # 边缘高一点,相差3个以上就超过1个空窗的危害
                 # v += (game.prev_heightDiff**2 - game.heightDiff**2)/10
                 # 高度标准差越小越好
