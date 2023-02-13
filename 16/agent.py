@@ -332,7 +332,7 @@ class Agent(object):
                         lines_c[y]=1  
                         line_c += 1
                     else:
-                        line_c += 0.5
+                        line_c += 1
             if line_c == -1: 
                 line_c = 0
             c += line_c
@@ -345,7 +345,7 @@ class Agent(object):
             v.append(min(h[x-1]-h[x],h[x+1]-h[x]))
         for h in v:
             if h>2:
-                c+=(h-2)*0.5
+                c+=(h-2)
         return c
 
     # 计算得分,只计算被挡住的
