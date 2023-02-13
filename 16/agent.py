@@ -318,45 +318,27 @@ class Agent(object):
 
     # 统计空洞的个数
     def getEmptyCount(self):
-        c = 0
+        # 每一列的空洞最高点
+        c = np.zeros((self.width))
+        h = np.zeros((self.width))
         for x in range(self.width):
             find_block=False
             for y in range(self.height):
                 if find_block==False and self.board[x][y]!=blank:
                     find_block = True
+                    h[x]=self.height-y
                 if find_block and self.board[x][y]==blank: 
-                    e_h = self.height-y
-                    c += e_h
+                    c[x] = self.height-y
                     break
-
-        # h = np.zeros((self.width))
-        # lines_c={}
-        # for x in range(self.width):
-        #     line_c = -1
-        #     for y in range(self.height):
-        #         if line_c == -1 and self.board[x][y]!=blank:
-        #             line_c = 0
-        #             h[x]=self.height-y
-        #         if line_c!=-1 and self.board[x][y]==blank:  
-        #             if y not in lines_c:
-        #                 lines_c[y]=1  
-        #                 line_c += 1
-        #             else:
-        #                 line_c += 1
-        #     if line_c == -1: 
-        #         line_c = 0
-        #     c += line_c
-
         # 加上夹壁
-        # v = []
-        # v.append(h[1]-h[0])
-        # v.append(h[-2]-h[-1])
-        # for x in range(1,self.width-1):
-        #     v.append(min(h[x-1]-h[x],h[x+1]-h[x]))
-        # for h in v:
-        #     if h>2:
-        #         c+=(h-2)
-        return c
+        if (h[1]-h[0])>3 and c[0]<h[1]: c[0]=h[1]
+        if (h[-2]-h[-1])>3 and c[-2]<h[-2]: c[-1]=h[-2]
+        for x in range(1,self.width-1):
+            _c=min(h[x-1]-h[x],h[x+1]-h[x])
+            _h=min(h[x-1],h[x+1])
+            if _c>3 and c[x]<_h: c[x]=_h
+
+        return sum(c)
 
     # 计算得分,只计算被挡住的
     def getScore(self):
