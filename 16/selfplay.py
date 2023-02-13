@@ -150,7 +150,7 @@ class Train():
         start_time = time.time()
         print('start game time:', datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), "test_mode:", test_mode)
         # 最大方块数
-        max_piececount = result["total"]["piececount"]*2
+        max_piececount = result["total"]["piececount"]*10
 
         game_stop= False
         for i in count():
