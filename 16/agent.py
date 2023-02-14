@@ -334,18 +334,18 @@ class Agent(object):
                     h[x+1]=self.height-y
                 if find_block and self.board[x][y]==blank: 
                     c[x] += 1
-        h[0]=h[2]
-        h[-1]=h[-3]
-        # 加上夹壁
-        for x in range(self.width):
-            _c=max(h[x]-h[x+1],h[x+2]-h[x+1]) #山峰高度
-            if _c>=3:
-                c[x] += (_c-3)
+        # h[0]=h[2]
+        # h[-1]=h[-3]
+        # # 加上夹壁
+        # for x in range(self.width):
+        #     _c=max(h[x]-h[x+1],h[x+2]-h[x+1]) #山峰高度
+        #     if _c>=3:
+        #         c[x] += (_c-3)
 
-        # 加上高度差
-        _c = (max(h) - min(h)) - 6 
-        _c = _c if _c > 0 else 0 
-        return sum(c) + _c
+        # # 加上高度差
+        # _c = (max(h) - min(h)) - 6 
+        # _c = _c if _c > 0 else 0 
+        return sum(c)# + _c
 
     # 计算得分,只计算被挡住的
     def getScore(self):
