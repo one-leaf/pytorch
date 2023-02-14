@@ -215,8 +215,8 @@ class MCTS():
                 if game.prev_heightStd - game.heightStd>0:
                     v += (game.prev_heightStd - game.heightStd)/10
                 # 增加消行的奖励
-                # if game.prev_pieceheight - game.pieceheight > 0:
-                # v += game.prev_pieceheight - game.pieceheight              
+                if game.prev_emptyCount >= game.emptyCount and game.prev_pieceheight > game.pieceheight:
+                    v += game.prev_pieceheight - game.pieceheight              
                 # if v>0:
                 #     print("v:",v,"empty:", game.prev_emptyCount - game.emptyCount, "heightDiff:", (game.prev_heightDiff - game.heightDiff)**2, \
                 #         "heightStd:", (game.prev_heightStd-game.heightStd)/20, "fallpieceheight:", -game.fallpieceheight/100,\
