@@ -211,12 +211,15 @@ class MCTS():
                 # v -= game.pieceheight/20
                 # 边缘高一点,相差3个以上就超过1个空窗的危害
                 # v += (game.prev_heightDiff**2 - game.heightDiff**2)/10
-                # 鼓励标准差越小越好
-                if game.prev_heightStd > game.heightStd:
-                    v += (game.prev_heightStd - game.heightStd)/10
-                # 鼓励消行的奖励
-                if game.prev_emptyCount >= game.emptyCount and game.prev_pieceheight > game.pieceheight:
-                    v += game.prev_pieceheight - game.pieceheight              
+                
+                # 在空窗没有变化的前提下：
+                if game.prev_emptyCount >= game.emptyCount:
+                    # 鼓励标准差越小越好
+                    if game.prev_heightStd > game.heightStd:
+                        v += (game.prev_heightStd - game.heightStd)/10
+                    # 鼓励消行的奖励
+                    if game.prev_pieceheight > game.pieceheight:
+                        v += game.prev_pieceheight - game.pieceheight              
                 # if v>0:
                 #     print("v:",v,"empty:", game.prev_emptyCount - game.emptyCount, "heightDiff:", (game.prev_heightDiff - game.heightDiff)**2, \
                 #         "heightStd:", (game.prev_heightStd-game.heightStd)/20, "fallpieceheight:", -game.fallpieceheight/100,\
