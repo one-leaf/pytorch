@@ -288,13 +288,18 @@ class Agent(object):
 
     # 统计高度标准差
     def getHeightStd(self):
-        h = np.zeros((self.width))
+        h = np.zeros((self.width+2))
         for x in range(self.width):
             for y in range(self.height):
                 if self.board[x][y]!=blank:
-                    h[x]=y
+                    h[x+1]=self.height-y
                     break
-        return np.std(h)
+        h[0]=h[2]
+        h[-1]=h[-3]
+        v = np.zeros((self.width))
+        for x in range(self.width):
+            v[x] = abs(h[x]-h[x+1]) + abs(h[x+2]-h[x+1])
+        return np.std(v)
 
     # 统计数据相邻差值
     def getHeightDiff(self):
