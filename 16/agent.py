@@ -343,8 +343,8 @@ class Agent(object):
                 c[x] += (_c-3)
 
         # 加上高度差
-        _c = (max(h) - min(h)) - 5 
-        _c = _c if _c >0 else 0 
+        _c = (max(h) - min(h)) - 6 
+        _c = _c if _c > 0 else 0 
         return sum(c) + _c
 
     # 计算得分,只计算被挡住的
