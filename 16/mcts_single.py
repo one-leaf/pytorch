@@ -214,7 +214,7 @@ class MCTS():
 
                 # 鼓励标准差越小越好
                 # if game.prev_heightStd > game.heightStd:
-                v += (game.prev_heightStd - game.heightStd)/10
+                v += (game.prev_heightStd - game.heightStd)/20
 
                 # if v>0:
                 #     print("v:",v,"empty:", game.prev_emptyCount - game.emptyCount, "heightDiff:", (game.prev_heightDiff - game.heightDiff)**2, \
