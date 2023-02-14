@@ -206,9 +206,9 @@ class MCTS():
         # 现实奖励
         if game.state == 1 and game.piececount - game.prev_piececount > 1:
             if self.ext_reward:
-                if game.heightStd<10:
+                if game.heightStd<5:
                     # 用空窗作为奖惩基准                 
-                    v = (game.prev_emptyCount - game.emptyCount)/10
+                    v = game.prev_emptyCount - game.emptyCount
                 else:
                     v = 1 if game.reward > 0 else -1
 
