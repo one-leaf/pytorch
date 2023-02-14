@@ -79,8 +79,8 @@ class MCTS():
 
             # 如果达到最大探索次数，结束探索
             if n >= self._n_playout -1 :
-                visits_sum = sum([self.Nsa[(s, a)] if (s, a) in self.Nsa else 0 for a in available_acts])          
-                if visits_sum<self._n_playout*2: continue
+                # visits_sum = sum([self.Nsa[(s, a)] if (s, a) in self.Nsa else 0 for a in available_acts])          
+                # if visits_sum<self._n_playout*2: continue
                 break
 
         act_visits = [(a, self.Nsa[(s, a)]) if (s, a) in self.Nsa else (a, 0) for a in available_acts]
