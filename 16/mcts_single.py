@@ -216,7 +216,7 @@ class MCTS():
                 #         v = 1 if game.prev_heightStd > game.heightStd or game.reward > 0 else -1
                 # else:
                 #     v = 1 if game.reward > 0 or game.prev_emptyCount > game.emptyCount else -1
-                v = 1 if game.reward > 0 and game.prev_emptyCount >= game.emptyCount else -1
+                v = 1 if game.reward > 0 else -1
 
                 # 鼓励标准差越小越好
                 # if game.prev_heightStd > game.heightStd:
