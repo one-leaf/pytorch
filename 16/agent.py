@@ -282,7 +282,7 @@ class Agent(object):
         for x in range(self.width):
             for y in range(self.height):
                 if self.board[x][y]!=blank:
-                    h[x]=self.height-y
+                    h[x]=(self.height-y)*1.01
                     break   
         h_mean = np.mean(h)
         return h_mean
