@@ -210,7 +210,7 @@ class MCTS():
                     # 用空窗作为奖惩基准                 
                     v = (game.prev_emptyCount - game.emptyCount)/10
                 else:
-                    v = game.prev_pieceheight - game.pieceheight
+                    v = 1 if game.reward > 0 else -1
 
                 # 鼓励标准差越小越好
                 if game.prev_heightStd > game.heightStd:
