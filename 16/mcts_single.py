@@ -207,14 +207,19 @@ class MCTS():
         if game.state == 1 and game.piececount - game.prev_piececount > 1:
             if self.ext_reward:
                 if game.heightStd<5:
-                    # 用空窗作为奖惩基准                 
-                    v = game.prev_emptyCount - game.emptyCount
+                    # 用空窗作为奖惩基准
+                    if game.prev_emptyCount > game.emptyCount:
+                        v = 1
+                    elif game.prev_emptyCount < game.emptyCount:
+                        v = -1
+                    else:
+                        v = 1 if game.prev_heightStd > game.heightStd or game.reward > 0 else -1
                 else:
                     v = 1 if game.reward > 0 else -1
 
                 # 鼓励标准差越小越好
                 # if game.prev_heightStd > game.heightStd:
-                v += (game.prev_heightStd - game.heightStd)/10
+                # v += (game.prev_heightStd - game.heightStd)/10
 
                 # if v>0:
                 #     print("v:",v,"empty:", game.prev_emptyCount - game.emptyCount, "heightDiff:", (game.prev_heightDiff - game.heightDiff)**2, \
