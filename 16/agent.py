@@ -299,7 +299,7 @@ class Agent(object):
         v = np.zeros((self.width))
         for x in range(self.width):
             v[x] = max(abs(h[x]-h[x+1]) , abs(h[x+2]-h[x+1]))
-        return np.max(v)
+        return np.std(v)
 
     # 统计数据相邻差值
     def getHeightDiff(self):
