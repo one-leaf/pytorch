@@ -166,7 +166,7 @@ class Agent(object):
         else:
             isFalling = False
 
-        self.fallpieceheight = self.fallpiece['y']
+        self.fallpieceheight = 20 - self.fallpiece['y']
 
         if not isFalling:
             self.tetromino.addtoboard(self.board, self.fallpiece)            
@@ -177,7 +177,7 @@ class Agent(object):
             self.emptyCount = self.getEmptyCount()   
             self.heightDiff = self.getHeightDiff()
             self.heightStd = self.getHeightStd()   
-            self.pieces_height.append(20 - self.fallpieceheight - self.reward)
+            self.pieces_height.append(self.fallpieceheight)
             self.state = 1
             self.piecesteps = 0
             self.piececount += 1 
