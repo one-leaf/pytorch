@@ -338,11 +338,13 @@ class Agent(object):
         h[-1]=h[-3]
         # 加上夹壁
         for x in range(self.width):
-            _c=min(h[x]-h[x+1],h[x+2]-h[x+1]) #夹壁高度
+            _c=max(h[x]-h[x+1],h[x+2]-h[x+1]) #山峰高度
             if _c>=3:
-                c[x] += 1
+                c[x] += (_c-3)
 
-        return sum(c)
+        # # 加上高度差
+        # _c = (max(h) - min(h))//3 
+        return sum(c) 
 
     # 计算得分,只计算被挡住的
     def getScore(self):
