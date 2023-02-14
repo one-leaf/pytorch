@@ -261,7 +261,8 @@ class Agent(object):
                     line=line+str(board[x][y])+" "
             print(line)
         print(" "+" -"*self.width)
-        print("score:", self.score, "piececount:", self.piececount, "emptyCount:", self.emptyCount, "pieceheight:", self.pieceheight, "heightDiff:", self.heightDiff, "getHeightStd:", self.heightStd)
+        print("score:", self.score, "piececount:", self.piececount, "emptyCount:", self.emptyCount, "fallpieceheight", self.fallpieceheight, \
+            "pieceheight:", self.pieceheight, "heightDiff:", self.heightDiff, "getHeightStd:", self.heightStd)
 
     # 统计当前最大高度
     def getMaxHeight(self):
