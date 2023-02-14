@@ -333,16 +333,14 @@ class Agent(object):
                     find_block = True
                     h[x+1]=self.height-y
                 if find_block and self.board[x][y]==blank: 
-                    c[x] = self.height-y
-                    break
+                    c[x] += 1
         h[0]=h[2]
         h[-1]=h[-3]
-        # 加上夹壁，高度折算为0.5
+        # 加上夹壁
         for x in range(self.width):
             _c=min(h[x]-h[x+1],h[x+2]-h[x+1]) #夹壁高度
-            _h=min(h[x],h[x+2])-_c/2
-            if _c>=3 and c[x]<_h:
-                c[x]=_h
+            if _c>=3:
+                c[x] += 1
 
         return sum(c)
 
