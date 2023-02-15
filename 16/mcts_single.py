@@ -216,7 +216,12 @@ class MCTS():
                 #         v = 1 if game.prev_heightStd > game.heightStd or game.reward > 0 else -1
                 # else:
                 #     v = 1 if game.reward > 0 or game.prev_emptyCount > game.emptyCount else -1
-                v = 1 if (game.reward > 0 and game.prev_emptyCount >= game.emptyCount) else game.prev_pieceheight-game.pieceheight
+                if game.reward > 0 and game.prev_emptyCount >= game.emptyCount:
+                    v = 1
+                else:
+                    v = (game.prev_pieceheight+0.8-game.pieceheight)*10
+
+                # v = 1 if (game.reward > 0 and game.prev_emptyCount >= game.emptyCount) else game.prev_pieceheight-game.pieceheight
 
                 # 鼓励标准差越小越好
                 # if game.prev_heightStd > game.heightStd:
