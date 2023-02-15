@@ -219,7 +219,7 @@ class MCTS():
                 if game.reward > 0 and game.prev_emptyCount >= game.emptyCount:
                     v = 1
                 else:
-                    v = (game.prev_pieceheight+0.8-game.pieceheight)*10
+                    v = game.prev_pieceheight-game.pieceheight
 
                 # v = 1 if (game.reward > 0 and game.prev_emptyCount >= game.emptyCount) else game.prev_pieceheight-game.pieceheight
 
