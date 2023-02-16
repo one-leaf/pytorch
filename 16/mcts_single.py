@@ -219,7 +219,7 @@ class MCTS():
                 if game.reward > 0 and game.prev_emptyCount >= game.emptyCount:
                     v = 10
                 else:
-                    v = -1
+                    v = -1 + self.search(game)
 
                 # v = 1 if (game.reward > 0 and game.prev_emptyCount >= game.emptyCount) else game.prev_pieceheight-game.pieceheight
 
@@ -232,7 +232,7 @@ class MCTS():
                 #         "heightStd:", (game.prev_heightStd-game.heightStd)/20, "fallpieceheight:", -game.fallpieceheight/100,\
                 #         "pieceheight:", (game.prev_pieceheight - game.pieceheight)*game.prev_pieceheight/20)
             else:
-                v = -0.1
+                v = self.search(game)
                 # _s = game.get_key()
                 # if _s not in self.Ps[s]:
                 #     act_probs , v = self._policy(game)
