@@ -204,46 +204,53 @@ class MCTS():
         self.depth = self.depth +1
 
         # 现实奖励
-        if game.state == 1 and game.piececount - game.prev_piececount > 1:
-            if self.ext_reward:
-                # if game.heightStd<5:
-                #     # 用空窗作为奖惩基准
-                #     if game.prev_emptyCount > game.emptyCount:
-                #         v = 1
-                #     elif game.prev_emptyCount < game.emptyCount:
-                #         v = -1
-                #     else:
-                #         v = 1 if game.prev_heightStd > game.heightStd or game.reward > 0 else -1
-                # else:
-                #     v = 1 if game.reward > 0 or game.prev_emptyCount > game.emptyCount else -1
-                if game.reward > 0 and game.prev_emptyCount >= game.emptyCount:
-                    v = 10
-                else:
-                    v = -1 + self.search(game)
 
-                # v = 1 if (game.reward > 0 and game.prev_emptyCount >= game.emptyCount) else game.prev_pieceheight-game.pieceheight
-
-                # 鼓励标准差越小越好
-                # if game.prev_heightStd > game.heightStd:
-                # v += (game.prev_heightStd - game.heightStd)/10
-
-                # if v>0:
-                #     print("v:",v,"empty:", game.prev_emptyCount - game.emptyCount, "heightDiff:", (game.prev_heightDiff - game.heightDiff)**2, \
-                #         "heightStd:", (game.prev_heightStd-game.heightStd)/20, "fallpieceheight:", -game.fallpieceheight/100,\
-                #         "pieceheight:", (game.prev_pieceheight - game.pieceheight)*game.prev_pieceheight/20)
+        if game.state == 1 and self.ext_reward:
+            if game.reward > 0 and game.prev_pieceheight+0.4>game.pieceheight:
+                v = 10
             else:
-                v = self.search(game)
-                # _s = game.get_key()
-                # if _s not in self.Ps[s]:
-                #     act_probs , v = self._policy(game)
-                #     probs = np.zeros(game.actions_num)
-                #     for act, prob in act_probs:
-                #         probs[act] = prob
-                #     self.Ps[_s] = probs 
-                #     self.Ns[_s] = 0
-                #     self.Vs[_s] = v                
-                # else:
-                #     v = self.Vs[_s]
+                v = -1 + self.search(game)
+
+        # if game.state == 1 and game.piececount - game.prev_piececount > 1:
+        #     if self.ext_reward:
+        #         # if game.heightStd<5:
+        #         #     # 用空窗作为奖惩基准
+        #         #     if game.prev_emptyCount > game.emptyCount:
+        #         #         v = 1
+        #         #     elif game.prev_emptyCount < game.emptyCount:
+        #         #         v = -1
+        #         #     else:
+        #         #         v = 1 if game.prev_heightStd > game.heightStd or game.reward > 0 else -1
+        #         # else:
+        #         #     v = 1 if game.reward > 0 or game.prev_emptyCount > game.emptyCount else -1
+        #         if game.reward > 0 and game.prev_emptyCount >= game.emptyCount:
+        #             v = 10
+        #         else:
+        #             v = -1 + self.search(game)
+
+        #         # v = 1 if (game.reward > 0 and game.prev_emptyCount >= game.emptyCount) else game.prev_pieceheight-game.pieceheight
+
+        #         # 鼓励标准差越小越好
+        #         # if game.prev_heightStd > game.heightStd:
+        #         # v += (game.prev_heightStd - game.heightStd)/10
+
+        #         # if v>0:
+        #         #     print("v:",v,"empty:", game.prev_emptyCount - game.emptyCount, "heightDiff:", (game.prev_heightDiff - game.heightDiff)**2, \
+        #         #         "heightStd:", (game.prev_heightStd-game.heightStd)/20, "fallpieceheight:", -game.fallpieceheight/100,\
+        #         #         "pieceheight:", (game.prev_pieceheight - game.pieceheight)*game.prev_pieceheight/20)
+        #     else:
+        #         v = self.search(game)
+        #         # _s = game.get_key()
+        #         # if _s not in self.Ps[s]:
+        #         #     act_probs , v = self._policy(game)
+        #         #     probs = np.zeros(game.actions_num)
+        #         #     for act, prob in act_probs:
+        #         #         probs[act] = prob
+        #         #     self.Ps[_s] = probs 
+        #         #     self.Ns[_s] = 0
+        #         #     self.Vs[_s] = v                
+        #         # else:
+        #         #     v = self.Vs[_s]
         else:
             v = self.search(game)
 
