@@ -60,9 +60,10 @@ class MCTS():
             if self.depth>self.max_depth: self.max_depth = self.depth
 
             # 如果只有一种走法，只探测一次
-            if game.terminal: break
+            if game_.terminal: break
             if len(available_acts)==1 : break
             if self.depth > self._n_playout or n > self._n_playout*10 : break
+            if game_.piececount - game.prev_piececount>1: break
             # if self.depth < 200 and n < self._n_playout*10: continue 
 
             # 当前状态
