@@ -333,7 +333,7 @@ class Agent(object):
                 if find_block==False and self.board[x][y]!=blank:
                     find_block = True
                 if find_block and self.board[x][y]==blank: 
-                    c[y] += 1
+                    c[self.height-y] += 1
                     if self.height-y>h: h = self.height-y
         # h[0]=h[2]
         # h[-1]=h[-3]
@@ -347,7 +347,7 @@ class Agent(object):
         # _c = (max(h) - min(h)) - 6 
         # _c = _c if _c > 0 else 0 
 
-        return h + c[self.height-h]/10.
+        return h + c[h]/10.
 
     # 计算得分,只计算被挡住的
     def getScore(self):
