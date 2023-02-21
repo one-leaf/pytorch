@@ -323,7 +323,7 @@ class MCTSPlayer(object):
                         act_probs[i]=0
                 act_probs = act_probs/np.sum(act_probs)        
                 idx = np.random.choice(range(len(acts)), p=act_probs) 
-            else:
+            elif random.random()>0.8:
                 p = 0.75
                 # a=1的时候，dir机会均等，>1 强调均值， <1 强调两端
                 # 国际象棋 0.3 将棋 0.15 围棋 0.03
@@ -331,22 +331,9 @@ class MCTSPlayer(object):
                 a = 2                  
                 dirichlet = np.random.dirichlet(a * np.ones(len(act_probs)))
                 idx = np.random.choice(range(len(acts)), p=p*act_probs + (1.0-p)*dirichlet)                                                                     
-
-            # # if True or temp==0 or len(acts)==1 or game.piecesteps>2 :
-            # #     idx = max_probs_idx
-            # # else:
-            #     # alphazero，默认p为0.75
-                # p = 0.75
-                # # a=1的时候，dir机会均等，>1 强调均值， <1 强调两端
-                # # 国际象棋 0.3 将棋 0.15 围棋 0.03
-                # # 取值一般倾向于 a = 10/n 所以俄罗斯方块取 2
-                # a = 2                  
-                # dirichlet = np.random.dirichlet(a * np.ones(len(act_probs)))
-                # idx = np.random.choice(range(len(acts)), p=p*act_probs + (1.0-p)*dirichlet)                                                                     
-                # # idx = np.random.choice(range(len(acts)), p=act_probs)                                                                     
-
-            # # if max_qs_idx!=max_probs_idx and random.random()<(act_qs[max_qs_idx]-act_qs[max_probs_idx])*act_probs[max_qs_idx]:
-            # #     idx = max_qs_idx
+            else:
+                # 按PS的最大值运行
+                idx = max_ps_idx          
 
             action = acts[idx]
             qval = act_qs[max_probs_idx]
