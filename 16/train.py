@@ -148,7 +148,7 @@ class Dataset(torch.utils.data.Dataset):
         for fn in self.data:
             # self.data[fn]["value"] = (values[fn] - avg_values)/(max_values-min_values) + (scores[fn]-avg_scores)/(max_scores-min_scores)            
             # self.data[fn]["value"] = (values[fn]+scores[fn])*0.5 - 1 
-            self.data[fn]["value"] = (scores[fn]-avg_scores)*0.5 + (values[fn]-avg_values)*0.5
+            self.data[fn]["value"] = (scores[fn]-min_scores)/(max_scores-min_scores) + (values[fn]-min_values)/(max_values-min_values)-1
 
         pay_time = round(time.time()-start_time, 2)
         print("loaded to memory, paid time:", pay_time)
