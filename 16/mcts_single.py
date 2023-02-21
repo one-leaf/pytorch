@@ -315,7 +315,7 @@ class MCTSPlayer(object):
 
             if max_probs_idx == max_qs_idx or temp==0 or not self.mcts.ext_reward:
                 idx = max_probs_idx
-            elif act_qs[max_probs_idx]>0:
+            elif act_qs[max_probs_idx]>0 or random.random()>0.5:
                 for i, qs in enumerate(act_qs):
                     if qs<act_qs[max_probs_idx]:
                         act_probs[i]=0
