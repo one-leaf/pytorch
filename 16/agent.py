@@ -327,7 +327,7 @@ class Agent(object):
         # 每一列的空洞最高点
         c = np.zeros((self.height))
         c_h = 0
-        h = np.zeros((self.height+2))
+        h = np.zeros((self.width+2))
         for x in range(self.width):
             find_block=False
             for y in range(self.height):
