@@ -326,28 +326,28 @@ class Agent(object):
     def getEmptyCount(self):
         # 每一列的空洞最高点
         c = np.zeros((self.height))
-        h = 0
+        c_h = 0
+        h = np.zeros((self.height+2))
         for x in range(self.width):
             find_block=False
             for y in range(self.height):
                 if find_block==False and self.board[x][y]!=blank:
                     find_block = True
+                    h[x+1] = self.height-y
                 if find_block and self.board[x][y]==blank: 
                     c[self.height-y] += 1
-                    if self.height-y>h: h = self.height-y
-        # h[0]=h[2]
-        # h[-1]=h[-3]
-        # # 加上夹壁
-        # for x in range(self.width):
-        #     _c=max(h[x]-h[x+1],h[x+2]-h[x+1]) #山峰高度
-        #     if _c>=3:
-        #         c[x] += (_c-3)
+                    if self.height-y>c_h: c_h = self.height-y
+        
+        # 加上夹壁
+        h[0]=h[2]
+        h[-1]=h[-3]
+        c_j =0
+        for x in range(self.width):
+            _c=min(h[x]-h[x+1],h[x+2]-h[x+1]) 
+            if _c>=3:
+                c_j += _c-2
 
-        # # 加上高度差
-        # _c = (max(h) - min(h)) - 6 
-        # _c = _c if _c > 0 else 0 
-
-        return h + c[h]/10.
+        return c_h + c[c_h]/10. + c_j
 
     # 计算得分,只计算被挡住的
     def getScore(self):
