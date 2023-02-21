@@ -238,6 +238,8 @@ class Train():
                 if game_reward>result["best"]["reward"]:
                     result["best"]["reward"] = game_reward
                     result["best"]["agent"] = result["total"]["agent"]
+                else:
+                    result["best"]["reward"] *= 0.999
 
                 if result["total"]["reward"]==0:
                     result["total"]["reward"] = game_reward
