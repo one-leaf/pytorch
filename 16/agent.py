@@ -325,7 +325,7 @@ class Agent(object):
     # 统计空洞的个数
     def getEmptyCount(self):
         # 每一列的空洞最高点
-        c = np.zeros((self.height))
+        c = np.zeros((self.height+1))
         h = 0
         for x in range(self.width):
             find_block=False
@@ -333,8 +333,8 @@ class Agent(object):
                 if find_block==False and self.board[x][y]!=blank:
                     find_block = True
                 if find_block and self.board[x][y]==blank: 
+                    c[self.height-y] += 1
                     if self.height-y>h: h = self.height-y
-                    c[h] += 1
         # h[0]=h[2]
         # h[-1]=h[-3]
         # # 加上夹壁
