@@ -89,7 +89,7 @@ class MCTS():
         acts = [av[0] for av in act_visits]
         visits = [av[1] for av in act_visits]
         qs = [av[1] for av in act_Qs]
-        ps = [self.Ps[s][a] if s in self.Ps else 0 for a in available_acts]
+        ps = [self.Ps[s][a] if s in self.Ps else 0 for a in acts]
         v = 0 if s not in self.Vs else self.Vs[s]
         ns = 1 if s not in self.Ns else self.Ns[s]
         if ns>temp and temp>0:
@@ -313,9 +313,10 @@ class MCTSPlayer(object):
             move_probs[acts] = act_probs
             max_probs_idx = np.argmax(act_probs)    
             max_qs_idx = np.argmax(act_qs) 
-            max_ps_idx = np.argmax(act_ps)    
+            max_ps_idx = np.argmax(act_ps)
 
-            if max_probs_idx == max_qs_idx or temp==0 or not self.mcts.ext_reward:
+            # 如果最大探索次数等于概率预测直接选定
+            if max_probs_idx == max_ps_idx or temp==0 or not self.mcts.ext_reward:
                 idx = max_probs_idx
             elif act_qs[max_probs_idx]>0:
                 for i, qs in enumerate(act_qs):
@@ -340,7 +341,7 @@ class MCTSPlayer(object):
 
             if idx!=max_probs_idx:
                 print("    random", game.position_to_action_name(acts[max_probs_idx]), "==>",  game.position_to_action_name(acts[idx]), \
-                           "p:", act_probs[max_probs_idx], "==>", act_probs[idx], "q:", act_qs[max_probs_idx], "==>", act_qs[idx])  
+                           "p:", act_ps[max_probs_idx], "==>", act_ps[idx], "q:", act_qs[max_probs_idx], "==>", act_qs[idx])  
 
             acc_ps = 1 if max_ps_idx==max_probs_idx else 0
             return action, move_probs, state_v, qval, acc_ps, depth, state_n
