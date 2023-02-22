@@ -58,7 +58,7 @@ class Agent(object):
         self.state = 0
         # 每个方块的高度
         self.pieces_height = []     
-        # 当前所有动作
+        # 当前prices所有动作
         self.actions=[]
         # 盘面的状态
         self.status = [] #deque(maxlen=10)
@@ -128,6 +128,13 @@ class Agent(object):
                 acts.remove(KEY_ROTATION)
             self.fallpiece['rotation'] = r
 
+        # 加 5 个规则，如果有R后面就不能L，有L就不能有R，有D就不能有O/R/L
+        # if KEY_RIGHT in self.actions and KEY_LEFT in acts: acts.remove(KEY_LEFT)
+        # if KEY_LEFT in self.actions  and KEY_RIGHT in acts: acts.remove(KEY_RIGHT)
+        # if KEY_DOWN in self.actions  and KEY_ROTATION in acts: acts.remove(KEY_ROTATION)
+        # if KEY_DOWN in self.actions  and KEY_RIGHT in acts: acts.remove(KEY_RIGHT)
+        # if KEY_DOWN in self.actions  and KEY_LEFT in acts: acts.remove(KEY_LEFT)
+
         if not KEY_DOWN in acts : acts.append(KEY_DOWN)
 
         # random.shuffle(acts)
@@ -185,6 +192,7 @@ class Agent(object):
             self.fallpiece = self.nextpiece
             self.nextpiece = self.tetromino.getnewpiece()
             self.availables = [KEY_DOWN]
+            self.actions = []
         else:
             self.state = 0
 
