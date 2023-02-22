@@ -287,20 +287,38 @@ class Agent(object):
         h_mean = np.mean(h)
         return h_mean
 
-    # 统计高度标准差
+    # 统计高度标准差,按照碗型
     def getHeightStd(self):
-        h = np.zeros((self.width+2))
-        for x in range(self.width):
+        # h = np.zeros((self.width+2))
+        # for x in range(self.width):
+        #     for y in range(self.height):
+        #         if self.board[x][y]!=blank:
+        #             h[x+1]=self.height-y
+        #             break
+        # h[0]=h[2]
+        # h[-1]=h[-3]
+        # v = np.zeros((self.width))
+        # for x in range(self.width):
+        #     v[x] = max(abs(h[x]-h[x+1]) , abs(h[x+2]-h[x+1]))
+    
+        h = np.zeros((self.width))
+        for x in range(self.width):            
             for y in range(self.height):
                 if self.board[x][y]!=blank:
-                    h[x+1]=self.height-y
+                    h[x]=self.height-y
                     break
-        h[0]=h[2]
-        h[-1]=h[-3]
-        v = np.zeros((self.width))
-        for x in range(self.width):
-            v[x] = max(abs(h[x]-h[x+1]) , abs(h[x+2]-h[x+1]))
+
+        v = [abs(h[4]-h[5])]
+        v.append((h[1]-h[0]) if h[1]-h[0]>0 else max(0,h[0]-h[1]-3))
+        v.append((h[2]-h[1]) if h[2]-h[1]>0 else max(0,h[1]-h[2]-3))
+        v.append((h[3]-h[2]) if h[3]-h[2]>0 else max(0,h[2]-h[3]-3))
+        v.append((h[4]-h[3]) if h[4]-h[3]>0 else max(0,h[3]-h[4]-3))
+        v.append((h[5]-h[6]) if h[5]-h[6]>0 else max(0,h[6]-h[5]-3))
+        v.append((h[6]-h[7]) if h[6]-h[7]>0 else max(0,h[7]-h[6]-3))
+        v.append((h[7]-h[8]) if h[7]-h[8]>0 else max(0,h[8]-h[7]-3))
+        v.append((h[8]-h[9]) if h[8]-h[9]>0 else max(0,h[9]-h[8]-3))
         return np.std(v)
+    
 
     # 统计数据相邻差值
     def getHeightDiff(self):
