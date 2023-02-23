@@ -356,88 +356,81 @@ class Train():
 
         # 更新reward和score，reward为胜负，[1|-1|0]；score 为本步骤以后一共消除的行数
         step_count = len(data["steps"])
-        piece_count = -1
-        score = 0
-        vacclist=[]
-        slist=[]
-        pacclist=[]
-        vacc_sum = 0
-        s_sum = 0
-        pacc_sum = 0
-        d_sum = 0
-        # 如果游戏没有结束，所以预估一个未来可能最大的方块数和奖励
-        if not agent.terminal:
-            agent.piececount += agent.piececount*(1-agent.pieceheight/20.)
-            agent.score += agent.score*(1-agent.pieceheight/20.)
-
-        for j in range(step_count-1,-1,-1):
-            if piece_count!=data["steps"][j]["piece_count"]:
-                piece_count = data["steps"][j]["piece_count"]
-                score += data["steps"][j]["reward"]
-                vacclist.insert(0, round(data["steps"][j]["state_value"],2))
-                slist.insert(0, score)
-                pacclist.insert(0, round(max(data["steps"][j]["move_probs"]),2))
-            # data["steps"][j]["piececount"] = agent.piececount - data["steps"][j]["piece_count"]
-            # data["steps"][j]["score"] = agent.score - data["steps"][j]["score"]
-            # data["steps"][j]["piececount"] = agent.piececount 
-
-            # data["steps"][j]["score"] = score
-
-            vacc_sum += abs(data["steps"][j]["qval"]-data["steps"][j]["state_value"])
-            s_sum += score
-            pacc_sum += abs(1-max(data["steps"][j]["move_probs"]))
-            d_sum += data["steps"][j]["depth"]
-
+       
         # 奖励的分配
+        # 过去的价值
+        pieces_value = [0 for _ in range(agent.piececount)]
+        # 未来的收益
+        pieces_score = [0 for _ in range(agent.piececount)]
+        # 奖励的位置
+        pieces_reward = [0 for _ in range(agent.piececount)]
+        # 奖励的位置
+        pieces_steps = [0 for _ in range(agent.piececount)]
+
+        # 游戏未结束的基础平均奖励
         _r = 0
         if not agent.terminal:
             _r = (agent.score/agent.piececount)*(1-agent.pieceheight/(agent.height-1))
+        for m in range(agent.piececount):
+            pieces_value[m]=_r
+            pieces_score[m]=_r
 
+        # 统计所有获得奖励的方块
         for m in range(step_count):
-            data["steps"][m]["value"]=_r
-            data["steps"][m]["score"]=_r
-
-        # value 长期收益，按方块的历史得分计算贡献度
-        for m in range(step_count):
+            pieces_steps[data["steps"][m]["piece_count"]] = m
             if data["steps"][m]["reward"]>0:
-                _r = data["steps"][m]["reward"]/(data["steps"][m]["piece_count"]+1)
-                # 奖励均匀分配
-                for j in range(m):
-                    data["steps"][j]["value"] += _r 
+                pieces_reward[data["steps"][m]["piece_count"]] = 1
 
-        # score 短期收益，按方块的未来得分计算价值,注意消除多行也按1行计算,如果按实际会导致倾向多行消除
+        # 统计过去的价值
+        for m in range(agent.piececount):
+            _r =  pieces_reward[m]
+            avg_r = _r/(m+1)
+            for n in range(m+1):
+                pieces_value[n] += avg_r
+
+        # 统计未来的收益
+        for m in range(agent.piececount):
+            p_r = 0
+            for n in range(m, agent.piececount):
+                _r =  pieces_reward[n]
+                avg_r = _r/(n-m+1)
+                p_r += avg_r
+            pieces_score[m] += p_r
+
+        print(i, pieces_reward)
+        print(i, pieces_value)
+        print(i, pieces_score)
+
+        # 分配收益到每一步
         for m in range(step_count):
-            _r = 0
-            for n in range(m, step_count):
-                if data["steps"][n]["reward"]>0:
-                    # 奖励按当前最大高度反比折扣
-                    # _reward = data["steps"][n]["reward"] #*(1-data["steps"][n]["piece_height"]/(agent.height-1))
-                    _reward = 1
-                    # 奖励按出现的顺序摊分，越前面越有价值
-                    # _reward = data["steps"][n]["reward"]*(1-data["steps"][n]["piece_count"]/agent.piececount)
+            p_id = data["steps"][m]["piece_count"]
+            s_step = 0 if p_id == 0 else pieces_steps[p_id-1]
+            e_step = pieces_steps[p_id]
+            s_value = 0 if p_id == 0 else pieces_value[p_id-1]
+            e_value = pieces_value[p_id]
+            s_reward = 0 if p_id == 0 else pieces_score[p_id-1]
+            e_reward = pieces_score[p_id]
+            if s_step==e_step:
+                data["steps"][m]["value"]=e_value
+                data["steps"][m]["score"]=e_reward
+            else:        
+                data["steps"][m]["value"]=s_value+(m-s_step)/(e_step-s_step)*(e_value-s_value)
+                data["steps"][m]["score"]=s_reward+(m-s_step)/(e_step-s_step)*(e_reward-s_reward)
 
-                    # 奖励平均摊分到当前方块和奖励方块之间的所有方块
-                    _avg = _reward/(data["steps"][n]["piece_count"]+1-data["steps"][m]["piece_count"])
-                    _r += _avg
-            data["steps"][m]["score"] += _r     
-
+        print()
         vlist=[]
-        for m in range(1, step_count):
-            if data["steps"][m]["piece_count"]-data["steps"][m-1]["piece_count"]==1:
-                vlist.append(data["steps"][m]["score"])
+        for m in range(step_count):
+            vlist.append(data["steps"][m]["score"])
         print(i,"score:",vlist)
         print()
         vlist=[]
-        for m in range(1, step_count):
-            if data["steps"][m]["piece_count"]-data["steps"][m-1]["piece_count"]==1:
-                vlist.append(data["steps"][m]["value"])
-        vlist.pop(0)
+        for m in range(step_count):
+            vlist.append(data["steps"][m]["value"])
         print(i,"value:",vlist)
+        print()
 
-        print(i,"score:",data["score"],"piece_count:",data["piece_count"],"piece_height:",data["piece_height"],"steps:",step_count,"depth:",d_sum/step_count)
-        print(i,"avg_score:",s_sum/step_count, slist)
-        print(i,"v_acc:",vacc_sum/step_count, vacclist)
-        print(i,"p_acc:",pacc_sum/step_count, pacclist)
+
+        print(i,"score:",data["score"],"piece_count:",data["piece_count"],"piece_height:",data["piece_height"],"steps:",step_count)
        
         states, mcts_probs, values, score= [], [], [], []
 
