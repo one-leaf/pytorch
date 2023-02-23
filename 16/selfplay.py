@@ -397,9 +397,13 @@ class Train():
                 p_r += avg_r
             pieces_score[m] += p_r
 
+        print()
         print(i, pieces_reward)
+        print()
         print(i, pieces_value)
+        print()
         print(i, pieces_score)
+        print()
 
         # 分配收益到每一步
         for m in range(step_count):
@@ -417,17 +421,17 @@ class Train():
                 data["steps"][m]["value"]=s_value+(m-s_step)/(e_step-s_step)*(e_value-s_value)
                 data["steps"][m]["score"]=s_score+(m-s_step)/(e_step-s_step)*(e_score-s_score)
 
-        print()
-        vlist=[]
-        for m in range(step_count):
-            vlist.append(data["steps"][m]["score"])
-        print(i,"score:",vlist)
-        print()
-        vlist=[]
-        for m in range(step_count):
-            vlist.append(data["steps"][m]["value"])
-        print(i,"value:",vlist)
-        print()
+        # print()
+        # vlist=[]
+        # for m in range(step_count):
+        #     vlist.append(data["steps"][m]["score"])
+        # print(i,"score:",vlist)
+        # print()
+        # vlist=[]
+        # for m in range(step_count):
+        #     vlist.append(data["steps"][m]["value"])
+        # print(i,"value:",vlist)
+        # print()
 
 
         print(i,"score:",data["score"],"piece_count:",data["piece_count"],"piece_height:",data["piece_height"],"steps:",step_count)
