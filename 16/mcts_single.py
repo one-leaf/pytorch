@@ -192,70 +192,17 @@ class MCTS():
         a = best_act
         act = game.position_to_action(a)
 
-        # prev_pieceheight = game.pieceheight
-        # prev_emptyCount = game.emptyCount
-
         game.step(act)
-
-        # 如果差两步，游戏结束
-        # if game.state==1 and other_game.piececount>0:
-        #     if game.pieceheight-other_game.pieceheight>1:
-        #         game.terminal = True
 
         self.depth = self.depth +1
 
         # 现实奖励
 
         if game.state == 1 and self.ext_reward:            
-            # if game.reward > 0 and game.prev_emptyCount >= game.emptyCount:
-            #     v = 1
-            # else:
-            # v = game.prev_pieceheight - game.pieceheight + 0.4*(game.piececount-game.prev_piececount)
             v = game.prev_emptyCount - game.emptyCount
             if v>=0: v += game.reward
             v += game.prev_heightStd - game.heightStd
             v = v + self.search(game)
-
-        # if game.state == 1 and game.piececount - game.prev_piececount > 1:
-        #     if self.ext_reward:
-        #         # if game.heightStd<5:
-        #         #     # 用空窗作为奖惩基准
-        #         #     if game.prev_emptyCount > game.emptyCount:
-        #         #         v = 1
-        #         #     elif game.prev_emptyCount < game.emptyCount:
-        #         #         v = -1
-        #         #     else:
-        #         #         v = 1 if game.prev_heightStd > game.heightStd or game.reward > 0 else -1
-        #         # else:
-        #         #     v = 1 if game.reward > 0 or game.prev_emptyCount > game.emptyCount else -1
-        #         if game.reward > 0 and game.prev_emptyCount >= game.emptyCount:
-        #             v = 10
-        #         else:
-        #             v = -1 + self.search(game)
-
-        #         # v = 1 if (game.reward > 0 and game.prev_emptyCount >= game.emptyCount) else game.prev_pieceheight-game.pieceheight
-
-        #         # 鼓励标准差越小越好
-        #         # if game.prev_heightStd > game.heightStd:
-        #         # v += (game.prev_heightStd - game.heightStd)/10
-
-        #         # if v>0:
-        #         #     print("v:",v,"empty:", game.prev_emptyCount - game.emptyCount, "heightDiff:", (game.prev_heightDiff - game.heightDiff)**2, \
-        #         #         "heightStd:", (game.prev_heightStd-game.heightStd)/20, "fallpieceheight:", -game.fallpieceheight/100,\
-        #         #         "pieceheight:", (game.prev_pieceheight - game.pieceheight)*game.prev_pieceheight/20)
-        #     else:
-        #         v = self.search(game)
-        #         # _s = game.get_key()
-        #         # if _s not in self.Ps[s]:
-        #         #     act_probs , v = self._policy(game)
-        #         #     probs = np.zeros(game.actions_num)
-        #         #     for act, prob in act_probs:
-        #         #         probs[act] = prob
-        #         #     self.Ps[_s] = probs 
-        #         #     self.Ns[_s] = 0
-        #         #     self.Vs[_s] = v                
-        #         # else:
-        #         #     v = self.Vs[_s]
         else:
             v = self.search(game)
 
@@ -318,12 +265,15 @@ class MCTSPlayer(object):
             # 如果最大探索次数等于概率预测直接选定
             if max_probs_idx == max_ps_idx or temp==0 or not self.mcts.ext_reward:
                 idx = max_probs_idx
-            elif act_qs[max_probs_idx]>0:
+            # elif act_qs[max_probs_idx]>0:
+            # 20% 按得分大于当前的概率
+            elif random.random()>0.8:
                 for i, qs in enumerate(act_qs):
                     if qs<act_qs[max_probs_idx]:
                         act_probs[i]=0
                 act_probs = act_probs/np.sum(act_probs)        
                 idx = np.random.choice(range(len(acts)), p=act_probs) 
+            # 20% 按概率
             elif random.random()>0.8:
                 p = 0.75
                 # a=1的时候，dir机会均等，>1 强调均值， <1 强调两端
@@ -331,7 +281,8 @@ class MCTSPlayer(object):
                 # 取值一般倾向于 a = 10/n 所以俄罗斯方块取 2
                 a = 2                  
                 dirichlet = np.random.dirichlet(a * np.ones(len(act_probs)))
-                idx = np.random.choice(range(len(acts)), p=p*act_probs + (1.0-p)*dirichlet)                                                                     
+                idx = np.random.choice(range(len(acts)), p=p*act_probs + (1.0-p)*dirichlet)
+            # 60% 按概率
             else:
                 # 按PS的最大值运行
                 idx = max_ps_idx          
