@@ -182,10 +182,10 @@ class Train():
         agent.id = 0
         if need_replay: 
             agent.tetromino.nextpiece = his_pieces
+            agent.fallpiece = self.tetromino.getnewpiece()
+            agent.nextpiece = self.tetromino.getnewpiece()
             print("replay test again")
             print([p["shape"] for p in his_pieces])
-            agent.reset()
-            agent.show_mcts_process= True
         game_stop= False
 
         for i in count():
