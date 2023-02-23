@@ -271,9 +271,9 @@ class MCTSPlayer(object):
                 a = 2                  
                 dirichlet = np.random.dirichlet(a * np.ones(len(act_probs)))
                 idx = np.random.choice(range(len(acts)), p=p*act_probs + (1.0-p)*dirichlet)
-            # # 如果最大探索次数等于概率预测直接选定
-            # elif max_probs_idx == max_ps_idx or temp==0 or not self.mcts.ext_reward:
-            #     idx = max_probs_idx
+            # 如果当前局面不错，并且探索概率等于直接概率
+            elif act_qs[max_probs_idx]>0 and max_probs_idx == max_ps_idx:
+                idx = max_probs_idx
             # 50% 按得分大于当前的概率
             elif random.random()>0.5:
                 for i, qs in enumerate(act_qs):
