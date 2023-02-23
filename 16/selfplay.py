@@ -159,7 +159,7 @@ class Train():
                 _, reward = agent.step(action)
                 if reward > 0:
                     print("#"*40, 'score:', agent.score, 'height:', agent.pieceheight, 'piece:', agent.piececount, "shape:", agent.fallpiece["shape"], \
-                        'step:', agent.steps, "step time:", round((time.time()-start_time)/i,3),'player:', agent.id)            
+                        'step:', agent.steps, "step time:", round((time.time()-start_time)/i,3),'avg_score:', result["total"]["avg_score"])            
                 if agent.state == 1 and (agent.piececount>max_piececount and max_piececount>0) : game_stop=True
                 if agent.terminal or game_stop:            
                     result["total"]["avg_score"] = result["total"]["avg_score"]*0.99 + agent.score*0.01
