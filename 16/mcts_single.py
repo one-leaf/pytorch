@@ -282,7 +282,7 @@ class MCTSPlayer(object):
                 a = 2                  
                 dirichlet = np.random.dirichlet(a * np.ones(len(act_probs)))
                 idx = np.random.choice(range(len(acts)), p=p*act_probs + (1.0-p)*dirichlet)
-            # 60% 按概率
+            # 60% 按首次概率
             else:
                 # 按PS的最大值运行
                 idx = max_ps_idx          
