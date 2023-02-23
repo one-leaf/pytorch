@@ -1,4 +1,4 @@
-import random
+import random,copy
  
 boxsize = 20
 boardwidth = 10
@@ -263,6 +263,7 @@ class Tetromino(object):
         self.nextpiece=[]
         self.isRandomNextPiece=isRandomNextPiece
         self.pieceCount = 0
+        self.piecehis=[]
 
     def getrandompiece(self):
         shape = random.choice(list(pieces.keys()))
@@ -282,10 +283,12 @@ class Tetromino(object):
         if not self.isRandomNextPiece:
             if len(self.nextpiece)<100:
                 for i in range(99):
-                    self.nextpiece.insert(0, self.getrandompiece())                    
+                    self.nextpiece.insert(0, self.getrandompiece()) 
+        if len(self.nextpiece)>0:
             nextpiece = self.nextpiece.pop()
         else:
             nextpiece = self.getrandompiece()  
+        self.piecehis.append(nextpiece)
         nextpiece["color"] = self.pieceCount % len(colors)  
         self.pieceCount += 1
         return nextpiece
