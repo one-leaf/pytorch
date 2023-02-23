@@ -408,14 +408,14 @@ class Train():
             e_step = pieces_steps[p_id]
             s_value = 0 if p_id == 0 else pieces_value[p_id-1]
             e_value = pieces_value[p_id]
-            s_reward = 0 if p_id == 0 else pieces_score[p_id-1]
-            e_reward = pieces_score[p_id]
+            s_score = 0 if p_id == 0 else pieces_score[p_id-1]
+            e_score = pieces_score[p_id]
             if s_step==e_step:
                 data["steps"][m]["value"]=e_value
-                data["steps"][m]["score"]=e_reward
+                data["steps"][m]["score"]=e_score
             else:        
                 data["steps"][m]["value"]=s_value+(m-s_step)/(e_step-s_step)*(e_value-s_value)
-                data["steps"][m]["score"]=s_reward+(m-s_step)/(e_step-s_step)*(e_reward-s_reward)
+                data["steps"][m]["score"]=s_score+(m-s_step)/(e_step-s_step)*(e_score-s_score)
 
         print()
         vlist=[]
