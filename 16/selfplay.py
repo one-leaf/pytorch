@@ -183,6 +183,7 @@ class Train():
         if need_replay: 
             agent.tetromino.nextpiece = his_pieces
             print("replay test again")
+            print([p["shape"] for p in his_pieces])
             agent.reset()
             agent.show_mcts_process= True
         game_stop= False
