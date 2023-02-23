@@ -288,7 +288,7 @@ class Tetromino(object):
             nextpiece = self.nextpiece.pop(0)
         else:
             nextpiece = self.getrandompiece()  
-        self.piecehis.append(nextpiece)
+        self.piecehis.append(copy.copy(nextpiece))
         nextpiece["color"] = self.pieceCount % len(colors)  
         self.pieceCount += 1
         return nextpiece
