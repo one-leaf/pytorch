@@ -283,9 +283,9 @@ class Tetromino(object):
         if not self.isRandomNextPiece:
             if len(self.nextpiece)<100:
                 for i in range(99):
-                    self.nextpiece.insert(0, self.getrandompiece()) 
+                    self.nextpiece.append(self.getrandompiece()) 
         if len(self.nextpiece)>0:
-            nextpiece = self.nextpiece.pop()
+            nextpiece = self.nextpiece.pop(0)
         else:
             nextpiece = self.getrandompiece()  
         self.piecehis.append(nextpiece)

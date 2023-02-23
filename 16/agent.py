@@ -12,18 +12,20 @@ KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN = 0, 1, 2, 3
 ACTIONS = [KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN]
 ACTIONS_NAME = ["O","L","R","D"]
 class Agent(object):
-    def __init__(self, isRandomNextPiece=False, max_height=20):
+    def __init__(self, isRandomNextPiece=False, max_height=20, nextpieces=None):
         self.width = 10
         self.height = 20
         self.actions_num = len(ACTIONS)    
         self.isRandomNextPiece = isRandomNextPiece       
         self.max_height = max_height
         self.id = 0
+        self.nextpieces = nextpieces
         self.reset()
 
 
     def reset(self):
         self.tetromino = Tetromino(isRandomNextPiece=self.isRandomNextPiece)
+        if self.nextpieces!=None: self.tetromino.nextpiece = self.nextpieces
         # 下落的方块
         self.fallpiece = self.tetromino.getnewpiece()
         # 下一个待下落的方块

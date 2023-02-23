@@ -177,15 +177,14 @@ class Train():
         # 锁定 64
         n_playout = 128
         player = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=n_playout)
-        agent = Agent(isRandomNextPiece=True)
-        agent.show_mcts_process= True
-        agent.id = 0
-        if need_replay: 
-            agent.tetromino.nextpiece = his_pieces
-            agent.fallpiece = agent.tetromino.getnewpiece()
-            agent.nextpiece = agent.tetromino.getnewpiece()
+        if need_replay:
             print("replay test again")
             print([p["shape"] for p in his_pieces])
+            agent = Agent(isRandomNextPiece=True, nextpieces=his_pieces)
+        else:
+            agent = Agent(isRandomNextPiece=True)
+        agent.show_mcts_process= True
+        agent.id = 0
         game_stop= False
 
         for i in count():
