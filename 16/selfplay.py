@@ -182,8 +182,8 @@ class Train():
         agent.id = 0
         if need_replay: 
             agent.tetromino.nextpiece = his_pieces
-            agent.fallpiece = self.tetromino.getnewpiece()
-            agent.nextpiece = self.tetromino.getnewpiece()
+            agent.fallpiece = agent.tetromino.getnewpiece()
+            agent.nextpiece = agent.tetromino.getnewpiece()
             print("replay test again")
             print([p["shape"] for p in his_pieces])
         game_stop= False
