@@ -262,8 +262,8 @@ class MCTSPlayer(object):
             max_qs_idx = np.argmax(act_qs) 
             max_ps_idx = np.argmax(act_ps)
 
-            # 如果当前局面不错，尝试其他的走法
-            if act_qs[max_probs_idx]>0 and game.piecesteps<3:
+            # 前3步尝试其他的走法
+            if game.piecesteps<3:
                 p = 0.75
                 # a=1的时候，dir机会均等，>1 强调均值， <1 强调两端
                 # 国际象棋 0.3 将棋 0.15 围棋 0.03
@@ -271,8 +271,8 @@ class MCTSPlayer(object):
                 a = 2                  
                 dirichlet = np.random.dirichlet(a * np.ones(len(act_probs)))
                 idx = np.random.choice(range(len(acts)), p=p*act_probs + (1.0-p)*dirichlet)
-            # 如果当前局面不错，并且探索概率等于直接概率
-            elif act_qs[max_probs_idx]>0 and max_probs_idx == max_ps_idx:
+            # 如果探索概率等于直接概率
+            elif max_probs_idx == max_ps_idx:
                 idx = max_probs_idx
             # 50% 按得分大于当前的概率
             elif random.random()>0.5:
