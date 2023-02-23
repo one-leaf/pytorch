@@ -274,14 +274,14 @@ class MCTSPlayer(object):
             # # 如果最大探索次数等于概率预测直接选定
             # elif max_probs_idx == max_ps_idx or temp==0 or not self.mcts.ext_reward:
             #     idx = max_probs_idx
-            # 20% 按得分大于当前的概率
-            elif random.random()>0.8:
+            # 50% 按得分大于当前的概率
+            elif random.random()>0.5:
                 for i, qs in enumerate(act_qs):
                     if qs<act_qs[max_probs_idx]:
                         act_probs[i]=0
                 act_probs = act_probs/np.sum(act_probs)        
                 idx = np.random.choice(range(len(acts)), p=act_probs) 
-            # 60% 按首次概率
+            # 50% 按首次概率
             else:
                 # 按PS的最大值运行
                 idx = max_ps_idx          
