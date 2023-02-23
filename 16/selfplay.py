@@ -144,32 +144,34 @@ class Train():
         print('start game time:', datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), "max piececount:", max_piececount)
 
         # 先运行测试
-        agent = Agent(isRandomNextPiece=True)
-        agent.show_mcts_process= True
-        agent.id = 0
-        game_stop= False
+        for _ in range(10):
+            agent = Agent(isRandomNextPiece=True)
+            agent.show_mcts_process= True
+            agent.id = 0
+            game_stop= False
 
-        for i in count():
-            move_probs, state_value = policy_value_net.policy_value_fn(agent)
-            action, acc_ps = 0, 0
-            for a, p in move_probs:
-                if p > acc_ps:
-                    action, acc_ps = a, p
-            _, reward = agent.step(action)
-            if reward > 0:
-                print("#"*40, 'score:', agent.score, 'height:', agent.pieceheight, 'piece:', agent.piececount, "shape:", agent.fallpiece["shape"], \
-                    'step:', agent.steps, "step time:", round((time.time()-start_time)/i,3),'player:', agent.id)            
-            if agent.state == 1 and (agent.piececount>max_piececount and max_piececount>0) : game_stop=True
-            if agent.terminal or game_stop:            
-                result["total"]["avg_score"] = result["total"]["avg_score"]*0.99 + agent.score*0.01
-                result["lastupdate"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                self.save_status_file(result, game_json) 
-                break
-        agent.print()
+            for i in count():
+                move_probs, state_value = policy_value_net.policy_value_fn(agent)
+                action, acc_ps = 0, 0
+                for a, p in move_probs:
+                    if p > acc_ps:
+                        action, acc_ps = a, p
+                _, reward = agent.step(action)
+                if reward > 0:
+                    print("#"*40, 'score:', agent.score, 'height:', agent.pieceheight, 'piece:', agent.piececount, "shape:", agent.fallpiece["shape"], \
+                        'step:', agent.steps, "step time:", round((time.time()-start_time)/i,3),'player:', agent.id)            
+                if agent.state == 1 and (agent.piececount>max_piececount and max_piececount>0) : game_stop=True
+                if agent.terminal or game_stop:            
+                    result["total"]["avg_score"] = result["total"]["avg_score"]*0.99 + agent.score*0.01
+                    result["lastupdate"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                    break
+            agent.print()
 
-        # 判断是否需要重新玩一次
-        his_pieces = agent.tetromino.piecehis
-        need_replay = True if agent.score < result["total"]["avg_score"] else False
+            # 判断是否需要重新玩一次
+            his_pieces = agent.tetromino.piecehis
+            need_replay = True if agent.score < result["total"]["avg_score"] else False
+            if need_replay: break
+        self.save_status_file(result, game_json) 
 
         # 正式运行
         # 锁定 64
