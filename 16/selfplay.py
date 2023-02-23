@@ -404,7 +404,7 @@ class Train():
         # 分配收益到每一步
         for m in range(step_count):
             p_id = data["steps"][m]["piece_count"]
-            s_step = 0 if p_id == 0 else pieces_steps[p_id-1]
+            s_step = -1 if p_id == 0 else pieces_steps[p_id-1]
             e_step = pieces_steps[p_id]
             s_value = 0 if p_id == 0 else pieces_value[p_id-1]
             e_value = pieces_value[p_id]
