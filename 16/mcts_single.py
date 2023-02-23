@@ -262,19 +262,8 @@ class MCTSPlayer(object):
             max_qs_idx = np.argmax(act_qs) 
             max_ps_idx = np.argmax(act_ps)
 
-            # 如果最大探索次数等于概率预测直接选定
-            if max_probs_idx == max_ps_idx or temp==0 or not self.mcts.ext_reward:
-                idx = max_probs_idx
-            # elif act_qs[max_probs_idx]>0:
-            # 20% 按得分大于当前的概率
-            elif random.random()>0.8:
-                for i, qs in enumerate(act_qs):
-                    if qs<act_qs[max_probs_idx]:
-                        act_probs[i]=0
-                act_probs = act_probs/np.sum(act_probs)        
-                idx = np.random.choice(range(len(acts)), p=act_probs) 
-            # 20% 按概率
-            elif random.random()>0.8:
+            # 如果当前局面不错，尝试其他的走法
+            if act_qs[max_probs_idx]>0:
                 p = 0.75
                 # a=1的时候，dir机会均等，>1 强调均值， <1 强调两端
                 # 国际象棋 0.3 将棋 0.15 围棋 0.03
@@ -282,6 +271,16 @@ class MCTSPlayer(object):
                 a = 2                  
                 dirichlet = np.random.dirichlet(a * np.ones(len(act_probs)))
                 idx = np.random.choice(range(len(acts)), p=p*act_probs + (1.0-p)*dirichlet)
+            # # 如果最大探索次数等于概率预测直接选定
+            # elif max_probs_idx == max_ps_idx or temp==0 or not self.mcts.ext_reward:
+            #     idx = max_probs_idx
+            # 20% 按得分大于当前的概率
+            elif random.random()>0.8:
+                for i, qs in enumerate(act_qs):
+                    if qs<act_qs[max_probs_idx]:
+                        act_probs[i]=0
+                act_probs = act_probs/np.sum(act_probs)        
+                idx = np.random.choice(range(len(acts)), p=act_probs) 
             # 60% 按首次概率
             else:
                 # 按PS的最大值运行
