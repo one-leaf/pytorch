@@ -181,7 +181,7 @@ class Train():
         n_playout = 128
         player = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=n_playout)
         if test_score < result["total"]["avg_score"]:
-            print("replay test again")
+            print("replay test again, test score:", test_score)
             print([p["shape"] for p in his_pieces])
             agent = Agent(isRandomNextPiece=True, nextpieces=his_pieces)
         else:
