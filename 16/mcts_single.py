@@ -34,7 +34,7 @@ class MCTS():
         self.Es = {}  # 保存游戏最终得分 key: s
         self.Vs = {}  # 保存游戏局面打分 key: s # 这个不需要，只是缓存
 
-    def get_action_probs(self, game, temp=1):
+    def get_action_probs(self, game, temp=1, avg_ns=0):
         """
         获得mcts模拟后的最终概率， 输入游戏的当前状态 s
         Returns:
@@ -92,8 +92,8 @@ class MCTS():
         ps = [self.Ps[s][a] if s in self.Ps else 0 for a in acts]
         v = 0 if s not in self.Vs else self.Vs[s]
         ns = 1 if s not in self.Ns else self.Ns[s]
-        if ns>temp and temp>0:
-            temp = np.log(ns)/np.log(temp)
+        if ns>avg_ns and avg_ns>0:
+            temp = np.log(ns)/np.log(avg_ns)
         else:
             temp = 1
 
@@ -242,7 +242,7 @@ class MCTSPlayer(object):
     def reset_player(self):
         self.mcts.reset()
 
-    def get_action(self, game, curr_player, temp=0):        
+    def get_action(self, game, curr_player, temp=0, avg_ns=0, avg_piececount=0):        
         """计算下一步走子action"""
         move_probs = np.zeros(game.actions_num)
         if not game.terminal:  # 如果游戏没有结束
@@ -255,7 +255,7 @@ class MCTSPlayer(object):
             #     temp = 0
             # temp = 1000
 
-            acts, act_probs, act_qs, act_ps, state_v, state_n = self.mcts.get_action_probs(game, temp)
+            acts, act_probs, act_qs, act_ps, state_v, state_n = self.mcts.get_action_probs(game, temp, avg_ns)
             depth = self.mcts.max_depth
             move_probs[acts] = act_probs
             max_probs_idx = np.argmax(act_probs)    
@@ -263,7 +263,7 @@ class MCTSPlayer(object):
             max_ps_idx = np.argmax(act_ps)
 
             # 前3步尝试其他的走法
-            if game.piecesteps<3:
+            if game.piecesteps<3 or random.random()<(game.piececount - avg_piececount)/avg_piececount:
                 p = 0.75
                 # a=1的时候，dir机会均等，>1 强调均值， <1 强调两端
                 # 国际象棋 0.3 将棋 0.15 围棋 0.03

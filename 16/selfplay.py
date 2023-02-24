@@ -195,7 +195,7 @@ class Train():
             _step["shape"] = agent.fallpiece["shape"]
             _step["pre_piece_height"] = agent.pieceheight
 
-            action, move_probs, state_value, qval, acc_ps, depth, ns = player.get_action(agent, agent.id, temp=result["total"]["ns"]) 
+            action, move_probs, state_value, qval, acc_ps, depth, ns = player.get_action(agent, agent.id, temp=1, avg_ns=result["total"]["ns"], avg_piececount=result["total"]["piececount"]) 
 
             _, reward = agent.step(action)
 
