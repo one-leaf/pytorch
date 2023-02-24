@@ -263,7 +263,7 @@ class MCTSPlayer(object):
             max_ps_idx = np.argmax(act_ps)
 
             # 前3步尝试其他的走法
-            if game.piecesteps<3 or random.random()<(game.piececount - avg_piececount)/avg_piececount:
+            if game.piecesteps<3 or (avg_piececount>0 and random.random()<(game.piececount - avg_piececount)/avg_piececount):
                 p = 0.75
                 # a=1的时候，dir机会均等，>1 强调均值， <1 强调两端
                 # 国际象棋 0.3 将棋 0.15 围棋 0.03
