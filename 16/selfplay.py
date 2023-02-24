@@ -144,7 +144,7 @@ class Train():
         print('start game time:', datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), "max piececount:", max_piececount)
 
         # 先运行测试
-        test_score = 0
+        test_score = result["total"]["avg_score"]
         his_pieces = []
         for _ in range(10):
             agent = Agent(isRandomNextPiece=True)
@@ -170,10 +170,10 @@ class Train():
             agent.print()
 
             # 判断是否需要重新玩一次
-            if agent.score > test_score:
+            if agent.score < test_score:
                 his_pieces = agent.tetromino.piecehis
                 test_score = agent.score
-                
+
         self.save_status_file(result, game_json) 
 
         # 正式运行
