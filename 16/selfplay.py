@@ -144,6 +144,8 @@ class Train():
         print('start game time:', datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), "max piececount:", max_piececount)
 
         # 先运行测试
+        test_score = 0
+        his_pieces = []
         for _ in range(10):
             agent = Agent(isRandomNextPiece=True)
             agent.show_mcts_process= True
@@ -168,16 +170,17 @@ class Train():
             agent.print()
 
             # 判断是否需要重新玩一次
-            his_pieces = agent.tetromino.piecehis
-            need_replay = True if agent.score < result["total"]["avg_score"] else False
-            if need_replay: break
+            if agent.score > test_score:
+                his_pieces = agent.tetromino.piecehis
+                test_score = agent.score
+                
         self.save_status_file(result, game_json) 
 
         # 正式运行
         # 锁定 64
         n_playout = 128
         player = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=n_playout)
-        if need_replay:
+        if test_score < result["total"]["avg_score"]:
             print("replay test again")
             print([p["shape"] for p in his_pieces])
             agent = Agent(isRandomNextPiece=True, nextpieces=his_pieces)
