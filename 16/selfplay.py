@@ -408,7 +408,7 @@ class Train():
                 pieces_value[n] += avg_r
 
         # 统计局部的收益
-        for m in range(1, agent.piececount):
+        for m in range(0, agent.piececount):                    
             pieces_score[m] = data["steps"][pieces_steps[m]]["pre_piece_height"] - data["steps"][pieces_steps[m]]["piece_height"]
 
         # 统计局部的收益
