@@ -394,7 +394,7 @@ class Train():
             _r = (agent.score/agent.piececount)*(1-agent.pieceheight/(agent.height-1))
         for m in range(agent.piececount):
             pieces_value[m]=_r
-            # pieces_score[m]=_r
+            pieces_score[m]=_r
 
         # 统计所有获得奖励的方块
         for m in range(step_count):
@@ -404,7 +404,7 @@ class Train():
 
         # 统计局部的损失
         for m in range(1, agent.piececount):
-            pieces_loss[m] = min(data["steps"][pieces_steps[m]]["pre_piece_height"]+0.4 - data["steps"][pieces_steps[m]]["piece_height"], 0)
+            pieces_loss[m] = min(data["steps"][pieces_steps[m]]["pre_piece_height"] - data["steps"][pieces_steps[m]]["piece_height"], 0)
 
         # 统计整体价值
         for m in range(agent.piececount):
@@ -420,7 +420,7 @@ class Train():
                 _r =  pieces_reward[n]
                 avg_r = _r/(n-m+1)
                 p_r += avg_r
-            pieces_score[m] = p_r + pieces_loss[m]
+            pieces_score[m] += p_r + pieces_loss[m]
 
         print()
         print(i, pieces_reward)
