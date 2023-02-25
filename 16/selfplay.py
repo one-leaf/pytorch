@@ -404,7 +404,7 @@ class Train():
 
         # 统计局部的损失
         for m in range(1, agent.piececount):
-            pieces_loss[m] = data["steps"][pieces_steps[m]]["pre_piece_height"]+0.4 - data["steps"][pieces_steps[m]]["piece_height"] 
+            pieces_loss[m] = min(data["steps"][pieces_steps[m]]["pre_piece_height"]+0.4 - data["steps"][pieces_steps[m]]["piece_height"], 0)
 
         # 统计整体价值
         for m in range(agent.piececount):
