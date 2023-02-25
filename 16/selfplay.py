@@ -420,7 +420,7 @@ class Train():
                 _r =  pieces_reward[n]
                 avg_r = _r/(n-m+1)
                 p_r += avg_r
-            pieces_score[m] = p_r + pieces_loss[m]
+            pieces_score[m] += p_r + pieces_loss[m]
 
         print()
         print(i, pieces_reward)
