@@ -379,7 +379,7 @@ class Train():
         # 奖励的分配
         # 整体的价值
         pieces_value = [0 for _ in range(agent.piececount)]
-        # 未来的收益
+        # 局部的收益
         pieces_score = [0 for _ in range(agent.piececount)]
         # 局部的损失
         pieces_loss = [0 for _ in range(agent.piececount)]
@@ -413,7 +413,7 @@ class Train():
             for n in range(m+1):
                 pieces_value[n] += avg_r
 
-        # 统计未来的收益
+        # 统计局部的收益
         for m in range(agent.piececount):
             p_r = 0
             for n in range(m, agent.piececount):
