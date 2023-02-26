@@ -202,7 +202,7 @@ class MCTS():
             v = game.prev_emptyCount - game.emptyCount
             if v>=0: v += game.reward
             v += game.prev_heightStd - game.heightStd
-            # if v>=1: return 1
+            if v>=1: return 1
             v = v + self.search(game)
             if v>1: v=1
         else:
@@ -265,7 +265,7 @@ class MCTSPlayer(object):
             max_ps_idx = np.argmax(act_ps)
 
             # 前3步尝试其他的走法
-            if game.piecesteps<3 or random.random()<(game.piececount - avg_piececount)/(avg_piececount+1):
+            if game.piecesteps<3 or random.random()<(game.piececount - avg_piececount - 100)/(avg_piececount+1):
                 p = 0.75
                 # a=1的时候，dir机会均等，>1 强调均值， <1 强调两端
                 # 国际象棋 0.3 将棋 0.15 围棋 0.03
