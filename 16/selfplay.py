@@ -146,7 +146,7 @@ class Train():
         # 先运行测试
         test_score = result["total"]["avg_score"]
         his_pieces = []
-        for _ in range(10):
+        for _ in range(5):
             agent = Agent(isRandomNextPiece=True)
             agent.show_mcts_process= True
             agent.id = 0
