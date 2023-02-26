@@ -200,11 +200,9 @@ class MCTS():
 
         if game.state == 1 and self.ext_reward:            
             v = game.prev_emptyCount - game.emptyCount
-            if v>=0: v += game.reward
+            if v>=0: v += game.reward*0.1
             v += game.prev_heightStd - game.heightStd
-            if v>=1: return 1
             v = v + self.search(game)
-            if v>1: v=1
         else:
             v = self.search(game)
 
