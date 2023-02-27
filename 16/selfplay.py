@@ -405,15 +405,6 @@ class Train():
         for m in range(agent.piececount):                    
             pieces_score[m] = data["steps"][pieces_steps[m]]["pre_piece_height"] + 0.4 - data["steps"][pieces_steps[m]]["piece_height"]
 
-        # 统计局部的收益
-        # for m in range(agent.piececount):
-        #     p_r = 0
-        #     for n in range(m, agent.piececount):
-        #         _r =  pieces_reward[n]
-        #         avg_r = _r/(n-m+1)
-        #         p_r += avg_r
-        #     pieces_score[m] += p_r + pieces_loss[m]
-
         print()
         print(i, pieces_reward)
         print()
@@ -422,34 +413,27 @@ class Train():
         print(i, pieces_score)
         print()
 
-        # 分配收益到每一步
+        # # 分配收益到每一步
+        # for m in range(step_count):
+        #     p_id = data["steps"][m]["piece_count"]
+        #     s_step = -1 if p_id == 0 else pieces_steps[p_id-1]
+        #     e_step = pieces_steps[p_id]
+        #     s_value = 0 if p_id == 0 else pieces_value[p_id-1]
+        #     e_value = pieces_value[p_id]
+        #     s_score = 0 if p_id == 0 else pieces_score[p_id-1]
+        #     e_score = pieces_score[p_id]
+        #     if s_step==e_step:
+        #         data["steps"][m]["value"]=e_value
+        #         data["steps"][m]["score"]=e_score
+        #     else:        
+        #         data["steps"][m]["value"]=s_value+(m-s_step)/(e_step-s_step)*(e_value-s_value)
+        #         data["steps"][m]["score"]=s_score+(m-s_step)/(e_step-s_step)*(e_score-s_score)
+
+        # 分配收益到整个方块
         for m in range(step_count):
             p_id = data["steps"][m]["piece_count"]
-            s_step = -1 if p_id == 0 else pieces_steps[p_id-1]
-            e_step = pieces_steps[p_id]
-            s_value = 0 if p_id == 0 else pieces_value[p_id-1]
-            e_value = pieces_value[p_id]
-            s_score = 0 if p_id == 0 else pieces_score[p_id-1]
-            e_score = pieces_score[p_id]
-            if s_step==e_step:
-                data["steps"][m]["value"]=e_value
-                data["steps"][m]["score"]=e_score
-            else:        
-                data["steps"][m]["value"]=s_value+(m-s_step)/(e_step-s_step)*(e_value-s_value)
-                data["steps"][m]["score"]=s_score+(m-s_step)/(e_step-s_step)*(e_score-s_score)
-
-        # print()
-        # vlist=[]
-        # for m in range(step_count):
-        #     vlist.append(data["steps"][m]["score"])
-        # print(i,"score:",vlist)
-        # print()
-        # vlist=[]
-        # for m in range(step_count):
-        #     vlist.append(data["steps"][m]["value"])
-        # print(i,"value:",vlist)
-        # print()
-
+            data["steps"][m]["value"]=pieces_value[p_id]
+            data["steps"][m]["score"]=pieces_score[p_id]
 
         print(i,"score:",data["score"],"piece_count:",data["piece_count"],"piece_height:",data["piece_height"],"steps:",step_count)
        
