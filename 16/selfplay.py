@@ -414,6 +414,7 @@ class Train():
         print()
 
         # # 分配收益到每一步
+        # # 按照平滑收益方式效果并不好，因为很多状态本来就是突然变化的 
         # for m in range(step_count):
         #     p_id = data["steps"][m]["piece_count"]
         #     s_step = -1 if p_id == 0 else pieces_steps[p_id-1]
