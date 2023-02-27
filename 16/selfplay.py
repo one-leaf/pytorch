@@ -131,12 +131,8 @@ class Train():
 
         
         game_json = os.path.join(data_dir, "result.json")
-        result = self.read_status_file(game_json)
-        
-        n_playout = int(result["total"]["n_playout"])
-        if n_playout<5: n_playout=5
-        if n_playout>self.n_playout: n_playout=self.n_playout
-
+        result = self.read_status_file(game_json)     
+  
         data = {"steps":[],"shapes":[],"last_state":0,"score":0,"piece_count":0}
         start_time = time.time()
         # 最大方块数
@@ -177,9 +173,7 @@ class Train():
         self.save_status_file(result, game_json) 
 
         # 正式运行
-        # 锁定 64
-        n_playout = 128
-        player = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=n_playout)
+        player = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout)
         if test_score < result["total"]["avg_score"]:
             print("replay test again, test score:", test_score)
             print([p["shape"] for p in his_pieces])
