@@ -183,13 +183,14 @@ class Train():
         player = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout)
 
         files = glob.glob(os.path.join(self.waitplaydir, "*.pkl"))
-        his_pieces_file=None
         if len(files)>0:
             his_pieces_file = random.choice(files)
             with open(his_pieces_file,"rb") as fn:
-                his_pieces = pickle.load(fn)        
+                his_pieces = pickle.load(fn)     
             print("replay test again, load file:", his_pieces_file)
             print([p["shape"] for p in his_pieces])
+            print("delete", his_pieces_file)
+            os.remove(his_pieces_file)
             agent = Agent(isRandomNextPiece=True, nextpieces=his_pieces)
         else:
             agent = Agent(isRandomNextPiece=True)
@@ -479,14 +480,9 @@ class Train():
         print("saved file basename:", filetime, "length:", i+1)
 
         # 删除训练集
-        if not his_pieces_file is None and agent.piececount >= result["total"]["piececount"]/2:
-            print("delete", his_pieces_file)
-            os.remove(his_pieces_file)
-        
         if agent.piececount < result["total"]["piececount"]/2:
-            if his_pieces_file is None: 
-                filename = "{}-{}.pkl".format(agent.score, int(round(time.time() * 1000000)))
-                his_pieces_file = os.path.join(self.waitplaydir, filename)
+            filename = "{}-{}.pkl".format(agent.score, int(round(time.time() * 1000000)))
+            his_pieces_file = os.path.join(self.waitplaydir, filename)
             with open(his_pieces_file, "wb") as fn:
                 pickle.dump(agent.tetromino.piecehis, fn)
 
