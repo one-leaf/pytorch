@@ -480,7 +480,7 @@ class Train():
         print("saved file basename:", filetime, "length:", i+1)
 
         # 删除训练集
-        if not his_pieces_file is None and agent.piececount > result["total"]["piececount"]/2:
+        if not his_pieces_file and agent.piececount > result["total"]["piececount"]/2:
             print("delete", his_pieces_file)
             os.remove(his_pieces_file)
 
