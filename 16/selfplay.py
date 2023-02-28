@@ -1,4 +1,4 @@
-import os, pickle
+import os, glob, pickle
 
 from model import PolicyValueNet, data_dir, data_wait_dir, model_file
 from agent import Agent, ACTIONS
@@ -38,6 +38,10 @@ class Train():
         # MCTS child权重， 用来调节MCTS搜索深度，越大搜索越深，越相信概率，越小越相信Q 的程度 默认 5
         # 由于value完全用结果胜负来拟合，所以value不稳，只能靠概率p拟合，最后带动value来拟合
         self.c_puct = 5  
+
+        # 等待训练的序列
+        self.waitplaydir=os.path.join(data_dir,"play")
+        if not os.path.exists(self.waitplaydir): os.makedirs(self.waitplaydir)
 
 
     def save_status_file(self, result, status_file):
@@ -165,21 +169,32 @@ class Train():
                     break
             agent.print()
 
-            # 判断是否需要重新玩一次
-            if agent.score < test_score:
+            # 判断是否需要重新玩,如果当前奖励小于平均奖励的一半，放到运行池训练
+            if agent.score < result["total"]["avg_score"]/2:
                 his_pieces = agent.tetromino.piecehis
-                test_score = agent.score
+                filename = "{}-{}.pkl".format(agent.score, int(round(time.time() * 1000000)))
+                savefile = os.path.join(self.waitplaydir, filename)
+                with open(savefile, "wb") as fn:
+                    pickle.dump(his_pieces, fn)
+
 
         self.save_status_file(result, game_json) 
 
         # 正式运行
         player = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout)
-        if test_score < result["total"]["avg_score"]:
-            print("replay test again, test score:", test_score)
+
+        files = glob.glob(os.path.join(self.waitplaydir, "*.pkl"))
+        his_pieces_file=None
+        if len(files)>0:
+            his_pieces_file = random.choice(files)
+            with open(his_pieces_file,"rb") as fn:
+                his_pieces = pickle.load(fn)        
+            print("replay test again, load file:", his_pieces_file)
             print([p["shape"] for p in his_pieces])
             agent = Agent(isRandomNextPiece=True, nextpieces=his_pieces)
         else:
             agent = Agent(isRandomNextPiece=True)
+
         agent.show_mcts_process= True
         agent.id = 0
         game_stop= False
@@ -463,6 +478,11 @@ class Train():
             with open(savefile, "wb") as fn:
                 pickle.dump(obj, fn)
         print("saved file basename:", filetime, "length:", i+1)
+
+        # 删除训练集
+        if not his_pieces_file is None and agent.piececount > result["total"]["piececount"]/2:
+            print("delete", his_pieces_file)
+            os.remove(his_pieces_file)
 
     def run(self):
         """启动训练"""
