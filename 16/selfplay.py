@@ -144,7 +144,6 @@ class Train():
         print('start game time:', datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), "max piececount:", max_piececount)
 
         # 先运行测试
-        test_score = result["total"]["avg_score"]
         his_pieces = []
         for _ in range(5):
             agent = Agent(isRandomNextPiece=True)
@@ -480,9 +479,16 @@ class Train():
         print("saved file basename:", filetime, "length:", i+1)
 
         # 删除训练集
-        if his_pieces_file and agent.piececount > result["total"]["piececount"]/2:
+        if not his_pieces_file is None and agent.piececount > result["total"]["piececount"]/2:
             print("delete", his_pieces_file)
             os.remove(his_pieces_file)
+        
+        if agent.piececount < result["total"]["piececount"]/2:
+            if his_pieces_file is None: 
+                filename = "{}-{}.pkl".format(agent.score, int(round(time.time() * 1000000)))
+                his_pieces_file = os.path.join(self.waitplaydir, filename)
+            with open(his_pieces_file, "wb") as fn:
+                pickle.dump(agent.tetromino.piecehis, fn)
 
     def run(self):
         """启动训练"""
