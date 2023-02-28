@@ -2,7 +2,7 @@ from os import stat
 from game import Tetromino, pieces, templatenum, blank 
 # from pygame.locals import *
 import numpy as np
-# import random
+import random
 # from collections import deque
 import math
 import copy
@@ -139,7 +139,7 @@ class Agent(object):
 
         if not KEY_DOWN in acts : acts.append(KEY_DOWN)
 
-        # random.shuffle(acts)
+        random.shuffle(acts)
         
         return acts         
 
