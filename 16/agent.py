@@ -213,6 +213,7 @@ class Agent(object):
 
     # 最差分 0 ~ -10
     def get_final_reward(self):
+        # return -self.max_pieces_count/self.piececount+1
         return (self.piececount-self.max_pieces_count)*self.get_singe_piece_value()
     
     # 每一个方块的价值
