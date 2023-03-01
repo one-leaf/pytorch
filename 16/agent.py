@@ -12,12 +12,12 @@ KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN = 0, 1, 2, 3
 ACTIONS = [KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN]
 ACTIONS_NAME = ["O","L","R","D"]
 class Agent(object):
-    def __init__(self, isRandomNextPiece=False, max_height=20, nextpieces=None):
+    def __init__(self, isRandomNextPiece=False, max_pieces_count=1000, nextpieces=None):
         self.width = 10
         self.height = 20
         self.actions_num = len(ACTIONS)    
         self.isRandomNextPiece = isRandomNextPiece       
-        self.max_height = max_height
+        self.max_pieces_count = max_pieces_count
         self.id = 0
         self.nextpieces = nextpieces
         self.reset()
@@ -81,16 +81,6 @@ class Agent(object):
         del self.status[1]
         if self.state!=0:
             self.status[0]=self.getBoard()+self.get_nextpiece_borad()
-
-        # if self.state!=0:
-        #     self.status[0]=np.zeros((self.height,self.width))
-        #     sPc = bin(self.piececount)[2:]
-        #     for i, c in enumerate(sPc[::-1]):
-        #         if c=='1':
-        #             self.status[0][i]=np.ones((self.width))
-        #         else:
-        #             self.status[0][i]=np.zeros((self.width))
-
 
     # 概率的索引位置转action
     def position_to_action(self, position):
@@ -205,7 +195,7 @@ class Agent(object):
             env.checkforquit()
             env.render(self.board, self.score, self.level, self.fallpiece, self.nextpiece)
 
-        if not isFalling and (not self.tetromino.validposition(self.board, self.fallpiece, ay=1) or self.pieceheight>self.max_height):                  
+        if not isFalling and (not self.tetromino.validposition(self.board, self.fallpiece, ay=1) or self.piececount>=self.max_pieces_count):                  
             self.terminal = True 
             self.state = 2
             return self.state, self.reward 
@@ -217,27 +207,18 @@ class Agent(object):
     def set_key(self):
         info = self.status[-1]
         self.key = hash(info.data.tobytes())+self.id
-        # chars="abcdefghijklmnopqrstuvwxyz" 
-        # key = ""
-        # for x in range(self.width):
-        #     h = "a"
-        #     for y in range(self.height):
-        #         if self.board[x][y]!=blank:
-        #             h = chars[y]
-        #             break
-        #     key = key + h
-        # r = self.fallpiece['rotation']
-        # key = key + chars[r]
-        # x = self.fallpiece['x']
-        # key = key + chars[x]
-        # y = self.fallpiece['y']
-        # key = key + chars[y]
-        # key = key + self.fallpiece['shape']
-        # self.key = key
 
     def get_key(self):
         return self.key
 
+    # 最差分 0 ~ -10
+    def get_final_reward(self):
+        return (self.piececount-self.max_pieces_count)*self.get_singe_piece_value()
+    
+    # 每一个方块的价值
+    def get_singe_piece_value(self):
+        return 10./self.max_pieces_count
+    
     # 打印
     def print2(self):
         info = self.status[-1]
@@ -380,25 +361,7 @@ class Agent(object):
             if c[x]>0:
                 return x + c[x]/10       
         return 0
-
-    # 计算得分,只计算被挡住的
-    def getScore(self):
-        empty_count = 0 
-        fill_count = 0
-        for x in range(self.width):
-            line_f, line_e = 0, -1
-            for y in range(self.height):
-                if self.board[x][y] != blank:
-                    line_f += 1
-                    if line_e == -1: line_e = 0
-                else:
-                    if line_e !=-1: line_e += 1
-            empty_count += line_e
-            fill_count += line_f
-
-        if fill_count==0: return 0
-        return max(-1, -1 * (empty_count/fill_count))        
-
+    
     # 获得当前局面信息
     def getBoard(self):
         board=np.zeros((self.height, self.width))
@@ -454,20 +417,7 @@ class Agent(object):
     # 返回 [3, height, width]
     def current_state(self):
         return np.array(self.status)
-
-        # state = np.zeros((7, self.height, self.width))
-
-        # # bg = self.status[-1][1] + self.status[-1][2] 
-        # # bg_rot = np.rot90(bg).reshape(self.height, self.width)
-        # # state[0] = bg_rot 
-        # # state[0] = self.status[-2][1]
-        # state[0] = self.status[-1][0]
-        # state[1] = self.status[-1][1]
-        # state[2] = self.status[-1][2]
-        # # for i in range(3):
-        # #     state[-1*(i+1)]=self.status[-1*(i+1)]
-
-        # return state          
+       
 
 
     

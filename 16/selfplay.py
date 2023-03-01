@@ -139,17 +139,14 @@ class Train():
   
         data = {"steps":[],"shapes":[],"last_state":0,"score":0,"piece_count":0}
         start_time = time.time()
-        # 最大方块数
-        max_piececount = result["total"]["piececount"]*10
-        print('start game time:', datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), "max piececount:", max_piececount)
+        print('start game time:', datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 
         # 先运行测试
         his_pieces = []
         for _ in range(5):
-            agent = Agent(isRandomNextPiece=True)
+            agent = Agent(isRandomNextPiece=True,)
             agent.show_mcts_process= True
             agent.id = 0
-            game_stop= False
 
             for i in count():
                 move_probs, state_value = policy_value_net.policy_value_fn(agent)
@@ -161,8 +158,8 @@ class Train():
                 if reward > 0:
                     print("#"*40, 'score:', agent.score, 'height:', agent.pieceheight, 'piece:', agent.piececount, "shape:", agent.fallpiece["shape"], \
                         'step:', agent.steps, "step time:", round((time.time()-start_time)/i,3),'avg_score:', result["total"]["avg_score"])            
-                if agent.state == 1 and (agent.piececount>max_piececount and max_piececount>0) : game_stop=True
-                if agent.terminal or game_stop:            
+
+                if agent.terminal:            
                     result["total"]["avg_score"] = result["total"]["avg_score"]*0.99 + agent.score*0.01
                     result["lastupdate"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                     break
@@ -175,7 +172,6 @@ class Train():
                 savefile = os.path.join(self.waitplaydir, filename)
                 with open(savefile, "wb") as fn:
                     pickle.dump(his_pieces, fn)
-
 
         self.save_status_file(result, game_json) 
 
@@ -193,11 +189,10 @@ class Train():
             os.remove(his_pieces_file)
             agent = Agent(isRandomNextPiece=True, nextpieces=his_pieces)
         else:
-            agent = Agent(isRandomNextPiece=True)
+            agent = Agent(isRandomNextPiece=True, )
 
         agent.show_mcts_process= True
         agent.id = 0
-        game_stop= False
 
         for i in count():
             _step={"step":i, "curr_player":agent.id}
@@ -233,9 +228,8 @@ class Train():
                 # if agent.score>result["total"]["reward"]+20: game_stop=True
 
             # 如果训练次数超过了最大次数，则直接终止训练
-            if agent.state == 1 and (agent.piececount>max_piececount and max_piececount>0) : game_stop=True
 
-            if agent.terminal or game_stop:
+            if agent.terminal:
                 data["score"] = agent.score
                 data["piece_count"] = agent.piececount
                 data["piece_height"] = agent.pieceheight
@@ -386,6 +380,9 @@ class Train():
         step_count = len(data["steps"])
        
         # 奖励的分配
+        # 重新定义价值为探索深度，因此value应该是[0,-X]
+        # 如何评价最后的得分？最完美的情况（填满比）
+
         # 整体的价值
         pieces_value = [0 for _ in range(agent.piececount)]
         # 局部的收益
@@ -395,26 +392,18 @@ class Train():
         # 奖励的位置
         pieces_steps = [0 for _ in range(agent.piececount)]
 
-        # 游戏未结束的基础平均奖励
-        _r = 0
-        if not agent.terminal:
-            _r = (agent.score/agent.piececount)*(1-agent.pieceheight/(agent.height-1))
+        # 游戏的最终得分（0~-10）        
+        r = agent.get_final_reward()
+        # 每个方块的价值
+        _r = agent.get_singe_piece_value()
         for m in range(agent.piececount):
-            pieces_value[m]=_r
-            pieces_score[m]=_r
+            pieces_value[m] = r + _r*(agent.piececount-m-1)
 
         # 统计所有获得奖励的方块
         for m in range(step_count):
             pieces_steps[data["steps"][m]["piece_count"]] = m
             if data["steps"][m]["reward"]>0:
                 pieces_reward[data["steps"][m]["piece_count"]] = 1
-
-        # 统计整体价值
-        for m in range(agent.piececount):
-            _r =  pieces_reward[m]
-            avg_r = _r/(m+1)
-            for n in range(m+1):
-                pieces_value[n] += avg_r
 
         # 统计局部的收益
         for m in range(agent.piececount):                    

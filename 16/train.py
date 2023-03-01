@@ -138,6 +138,9 @@ class Dataset(torch.utils.data.Dataset):
         std_values = np.std(values_items)
 
         print("value min/avg/max/std:",[min_values, avg_values, max_values, std_values])
+        ig_value=max_values>0
+        if ig_value:
+            print("ig value") 
 
         scores_items = list(scores.values())
         avg_scores = np.average(scores_items)
@@ -148,7 +151,10 @@ class Dataset(torch.utils.data.Dataset):
         for fn in self.data:
             # self.data[fn]["value"] = (values[fn] - avg_values)/(max_values-min_values) + (scores[fn]-avg_scores)/(max_scores-min_scores)            
             # self.data[fn]["value"] = (values[fn]+scores[fn])*0.5 - 1 
-            self.data[fn]["value"] = (scores[fn]-min_scores)/(max_scores-min_scores) + (values[fn]-min_values)/(max_values-min_values)-1
+            if ig_value:
+                self.data[fn]["value"] = (scores[fn]-min_scores)/(max_scores-min_scores) - 0.5
+            else:
+                self.data[fn]["value"] = values[fn]
 
         pay_time = round(time.time()-start_time, 2)
         print("loaded to memory, paid time:", pay_time)
