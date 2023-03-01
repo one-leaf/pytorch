@@ -138,7 +138,7 @@ class Dataset(torch.utils.data.Dataset):
         std_values = np.std(values_items)
 
         print("value min/avg/max/std:",[min_values, avg_values, max_values, std_values])
-        ig_value=max_values>0
+        ig_value=max_values>0 or min_values<-1
         if ig_value:
             print("ig value") 
 
