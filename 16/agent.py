@@ -211,14 +211,14 @@ class Agent(object):
     def get_key(self):
         return self.key
 
-    # 最差分 0 ~ -10
+    # 最差分 0 ~ -1
     def get_final_reward(self):
         # return -self.max_pieces_count/self.piececount+1
         return (self.piececount-self.max_pieces_count)*self.get_singe_piece_value()
     
     # 每一个方块的价值
     def get_singe_piece_value(self):
-        return 10./self.max_pieces_count
+        return 1./self.max_pieces_count
     
     # 打印
     def print2(self):
