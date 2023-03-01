@@ -152,7 +152,7 @@ class Dataset(torch.utils.data.Dataset):
             # self.data[fn]["value"] = (values[fn] - avg_values)/(max_values-min_values) + (scores[fn]-avg_scores)/(max_scores-min_scores)            
             # self.data[fn]["value"] = (values[fn]+scores[fn])*0.5 - 1 
             if ig_value:
-                self.data[fn]["value"] = (scores[fn]-min_scores)/(max_scores-min_scores) - 0.5
+                self.data[fn]["value"] = (scores[fn]-min_scores)*2/(max_scores-min_scores) - 1
             else:
                 self.data[fn]["value"] = values[fn]
 
