@@ -392,12 +392,12 @@ class Train():
         # 奖励的位置
         pieces_steps = [0 for _ in range(agent.piececount)]
 
-        # 游戏的最终得分（0~-10）        
+        # 游戏的最终得分（0~-1）        
         r = agent.get_final_reward()
         # 每个方块的价值
         _r = agent.get_singe_piece_value()
         for m in range(agent.piececount):
-            pieces_value[m] = r + _r*(agent.piececount-m-1)
+            pieces_value[m] = r - _r*m
 
         # 统计所有获得奖励的方块
         for m in range(step_count):
