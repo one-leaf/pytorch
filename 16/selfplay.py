@@ -397,7 +397,7 @@ class Train():
         # 每个方块的价值
         _r = agent.get_singe_piece_value()
         for m in range(agent.piececount):
-            pieces_value[m] = r - _r*m
+            pieces_value[m] = r  - _r*(agent.piececount-m-1)
 
         # 统计所有获得奖励的方块
         for m in range(step_count):

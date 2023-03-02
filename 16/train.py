@@ -62,11 +62,11 @@ class Dataset(torch.utils.data.Dataset):
         files = sorted(files, key=lambda x: os.path.getmtime(x), reverse=True)
 
         modified_time = os.path.getmtime(files[-1])
-        convert_time = time.localtime(modified_time)
-        print("first time:",time.strftime('%y-%m-%d %H:%M:%S', convert_time))
+        self.first_time = time.localtime(modified_time)
+        print("first time:",time.strftime('%y-%m-%d %H:%M:%S', self.first_time))
         modified_time = os.path.getmtime(files[0])
-        convert_time = time.localtime(modified_time)
-        print("last time:",time.strftime('%y-%m-%d %H:%M:%S', convert_time))
+        self.last_time = time.localtime(modified_time)
+        print("last time:",time.strftime('%y-%m-%d %H:%M:%S', self.last_time))
         
         delcount = 0
         for i, filename in enumerate(files):
@@ -137,10 +137,7 @@ class Dataset(torch.utils.data.Dataset):
         max_values = np.max(values_items)
         std_values = np.std(values_items)
 
-        print("value min/avg/max/std:",[min_values, avg_values, max_values, std_values])
-        ig_value=max_values>0 or min_values<-1
-        if ig_value:
-            print("ig value") 
+        print("value min/avg/max/std:",[min_values, avg_values, max_values, std_values])        
 
         scores_items = list(scores.values())
         avg_scores = np.average(scores_items)
