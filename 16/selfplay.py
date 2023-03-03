@@ -423,10 +423,11 @@ class Train():
             p_id = data["steps"][m]["piece_count"]
             s_step = -1 if p_id == 0 else pieces_steps[p_id-1]
             e_step = pieces_steps[p_id]
+
             s_value = 0 if p_id == 0 else pieces_value[p_id-1]
             e_value = pieces_value[p_id]
-            # 局部收益始终初始为 0
-            s_score = 0 # 0 if p_id == 0 else pieces_score[p_id-1] 
+            
+            s_score = 0 if p_id == 0 else pieces_score[p_id-1] 
             e_score = pieces_score[p_id]
             if s_step==e_step:
                 data["steps"][m]["value"]=e_value
