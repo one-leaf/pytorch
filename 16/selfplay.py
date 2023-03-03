@@ -406,9 +406,12 @@ class Train():
                 pieces_reward[data["steps"][m]["piece_count"]] = 1
 
         # 统计局部的收益
+        max_piececount = result["total"]["piececount"]*2
+        r = min(0, agent.piececount - max_piececount)
         for m in range(agent.piececount):                    
             # pieces_score[m] = data["steps"][pieces_steps[m]]["pre_piece_height"] + 0.4 - data["steps"][pieces_steps[m]]["piece_height"]
-            pieces_score[m] = (r - _r*(m+1))*10
+            # pieces_score[m] = (r - _r*(m+1))*10
+            pieces_score[m] = (r - m)
 
         print()
         print(i, pieces_reward)
