@@ -179,6 +179,7 @@ class Train():
 
         self.save_status_file(result, game_json) 
 
+        max_pieces_count = result["total"]["avg_piececount"]+100
         # 正式运行
         player = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout)
 
@@ -191,9 +192,9 @@ class Train():
             print([p["shape"] for p in his_pieces])
             print("delete", his_pieces_file)
             os.remove(his_pieces_file)
-            agent = Agent(isRandomNextPiece=True, nextpieces=his_pieces)
+            agent = Agent(isRandomNextPiece=True, max_pieces_count= max_pieces_count, nextpieces=his_pieces)
         else:
-            agent = Agent(isRandomNextPiece=True, )
+            agent = Agent(isRandomNextPiece=True, max_pieces_count= max_pieces_count,)
 
         agent.show_mcts_process= True
         agent.id = 0
@@ -410,12 +411,14 @@ class Train():
                 pieces_reward[data["steps"][m]["piece_count"]] = 1
 
         # 统计局部的收益
-        max_piececount = result["total"]["avg_piececount"]+100
-        r = min(0, agent.piececount - max_piececount)
+        r = min(0, agent.piececount - max_pieces_count)
         for m in range(agent.piececount):                    
             # pieces_score[m] = data["steps"][pieces_steps[m]]["pre_piece_height"] + 0.4 - data["steps"][pieces_steps[m]]["piece_height"]
             # pieces_score[m] = (r - _r*(m+1))*10
-            pieces_score[m] = (r - m)
+            if r == 0:
+                pieces_score[m] = 0
+            else:    
+                pieces_score[m] = (r - m)
 
         print()
         print(i, pieces_reward)
