@@ -209,7 +209,7 @@ class MCTS():
             if _s in self.Vs and game.piececount - game.prev_piececount > 1:
                 v = self.Vs[_s]
             else: 
-                v = v + self.search(game)
+                v = self.search(game)
         else:
             v = self.search(game)
 
