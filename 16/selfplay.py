@@ -28,7 +28,7 @@ class Train():
         self.n_playout = 256  # 每个动作的模拟战记录个数，影响后续 512/2 = 256；256/16 = 16个方块 的走法
         # 64/128 都不行
         # self.n_playout = 128  # 每个动作的模拟战记录个数，影响后续 128/2 = 66；64/16 = 4个方块 的走法
-        self.play_batch_size = 5 # 每次自学习次数
+        self.play_size = 5 # 每次测试次数
         self.buffer_size = 1000000  # cache对次数
         self.epochs = 2  # 每次更新策略价值网络的训练步骤数, 推荐是5
         self.kl_targ = 0.02  # 策略价值网络KL值目标
@@ -146,7 +146,7 @@ class Train():
 
         # 先运行测试
         his_pieces = []
-        for _ in range(5):
+        for _ in range(self.play_size):
             agent = Agent(isRandomNextPiece=True,)
             agent.show_mcts_process= True
             agent.id = 0
