@@ -51,6 +51,7 @@ class MCTS():
         game.prev_heightDiff = game.heightDiff
         game.prev_heightStd = game.heightStd
         # for n in range(self._n_playout):
+        test_count = 0
         for n in count():
             self.depth = 0
             game_ = copy.deepcopy(game)
@@ -83,7 +84,7 @@ class MCTS():
                 # visits_sum = sum([self.Nsa[(s, a)] if (s, a) in self.Nsa else 0 for a in available_acts])          
                 # if visits_sum<self._n_playout*2: continue
                 break
-
+        test_count = n
         act_visits = [(a, self.Nsa[(s, a)]) if (s, a) in self.Nsa else (a, 0) for a in available_acts]
         act_Qs = [(a, self.Qsa[(s, a)]) if (s, a) in self.Qsa else (a, 0) for a in available_acts]
         acts = [av[0] for av in act_visits]
@@ -124,7 +125,7 @@ class MCTS():
                 if (s, act) in self.Qsa: q = self.Qsa[(s, act)]
                 if s in self.Ps: p = self.Ps[s][act]
                 info.append([game.position_to_action_name(act), visit, round(q,2), round(p,2)])  
-            print(game.steps, game.fallpiece["shape"], "temp:", round(temp,2), "ns:", ns, "depth:", self.max_depth, "empty:", game.getEmptyCount(), "height:", round(game.pieceheight,2), "value:", round(v,2), "qval:", round(qval,2), info, "diff:", round(game.getHeightDiff(),4))
+            print(game.steps, game.fallpiece["shape"], "temp:", round(temp,2), "ns:", ns,"/", test_count, "depth:", self.max_depth, "empty:", game.getEmptyCount(), "height:", round(game.pieceheight,2), "value:", round(v,2), "qval:", round(qval,2), info, "diff:", round(game.getHeightDiff(),4))
 
         return acts, probs, qs, ps, v, ns
 
