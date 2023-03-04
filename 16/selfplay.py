@@ -81,6 +81,8 @@ class Train():
             result["best"]={"reward":0, "agent":0}
         if "piececount" not in result["total"]:
             result["total"]["piececount"]=0
+        if "avg_piececount" not in result["total"]:
+            result["total"]["avg_piececount"]=0            
         if "n_playout" not in result["total"]:
             result["total"]["n_playout"]=self.n_playout
         if "win_count" not in result["total"]:
@@ -161,7 +163,8 @@ class Train():
                         'step:', agent.steps, "step time:", round((time.time()-start_time)/i,3),'avg_score:', result["total"]["avg_score"])            
 
                 if agent.terminal:            
-                    result["total"]["avg_score"] = result["total"]["avg_score"]*0.99 + agent.score*0.01
+                    result["total"]["avg_score"] = result["total"]["avg_score"]*0.999 + agent.score*0.001
+                    result["total"]["avg_piececount"] = result["total"]["avg_piececount"]*0.999 + agent.piececount*0.001
                     result["lastupdate"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                     break
             agent.print()
