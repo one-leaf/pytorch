@@ -84,7 +84,7 @@ class MCTS():
                 # visits_sum = sum([self.Nsa[(s, a)] if (s, a) in self.Nsa else 0 for a in available_acts])          
                 # if visits_sum<self._n_playout*2: continue
                 break
-        test_count = n
+        test_count = n+1
         act_visits = [(a, self.Nsa[(s, a)]) if (s, a) in self.Nsa else (a, 0) for a in available_acts]
         act_Qs = [(a, self.Qsa[(s, a)]) if (s, a) in self.Qsa else (a, 0) for a in available_acts]
         acts = [av[0] for av in act_visits]
