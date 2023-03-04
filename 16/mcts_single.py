@@ -279,16 +279,17 @@ class MCTSPlayer(object):
                 dirichlet = np.random.dirichlet(a * np.ones(len(act_probs)))
                 idx = np.random.choice(range(len(acts)), p=p*act_probs + (1.0-p)*dirichlet)
             # 50% 按得分大于当前的概率
-            elif random.random()>0.5:
+            else:
+            # elif random.random()<0.5:
                 for i, qs in enumerate(act_qs):
                     if qs<act_qs[max_probs_idx]:
                         act_probs[i]=0
                 act_probs = act_probs/np.sum(act_probs)        
                 idx = np.random.choice(range(len(acts)), p=act_probs) 
             # 50% 按首次概率
-            else:
-                # 按PS的最大值运行
-                idx = max_ps_idx          
+            # else:
+            #     # 按PS的最大值运行
+            #     idx = max_ps_idx          
 
             action = acts[idx]
             qval = act_qs[max_probs_idx]
