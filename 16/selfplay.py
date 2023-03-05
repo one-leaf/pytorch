@@ -397,30 +397,21 @@ class Train():
         # 奖励的位置
         pieces_steps = [0 for _ in range(agent.piececount)]
 
-        # 游戏的最终得分（0~-1）        
-        # r = agent.get_final_reward()
-        # 每个方块的价值
-        # _r = agent.get_singe_piece_value()
-        r = min(0, agent.piececount - max_pieces_count)
-        for m in range(agent.piececount):
-            _r = min(0, r + (agent.piececount-m))
-            pieces_value[m] = _r
-
         # 统计所有获得奖励的方块
         for m in range(step_count):
             pieces_steps[data["steps"][m]["piece_count"]] = m
             if data["steps"][m]["reward"]>0:
                 pieces_reward[data["steps"][m]["piece_count"]] = 1
 
-        # 统计局部的收益
+        # 游戏的得分算法1，以终点为最终得分
+        r = min(0, agent.piececount - max_pieces_count)
+        for m in range(agent.piececount):
+            pieces_value[m] = min(0, r + (agent.piececount-m))
+
+        # 游戏的得分算法2，以起点为最终得分
         r = min(0, agent.piececount - max_pieces_count)
         for m in range(agent.piececount):                    
-            # pieces_score[m] = data["steps"][pieces_steps[m]]["pre_piece_height"] + 0.4 - data["steps"][pieces_steps[m]]["piece_height"]
-            # pieces_score[m] = (r - _r*(m+1))*10
-            if r == 0:
-                pieces_score[m] = 0
-            else:    
-                pieces_score[m] = (r - m)
+            pieces_score[m] = min(0, (r - m))
 
         print()
         print(i, pieces_reward)
