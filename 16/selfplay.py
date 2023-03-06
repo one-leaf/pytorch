@@ -412,7 +412,7 @@ class Train():
         # 游戏的得分算法1，以终点为最终得分
         r = min(0, agent.piececount - max_pieces_count)
         for m in range(agent.piececount):
-            pieces_value[m] = min(0, r + (agent.piececount-m))
+            pieces_value[m] = min(0, r + agent.piececount*(1-pieces_height[m]/pieces_height[-1]))
 
         # 游戏的得分算法2，以起点为最终得分
         r = min(0, agent.piececount - max_pieces_count)
