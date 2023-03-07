@@ -187,6 +187,10 @@ class Train():
         files = glob.glob(os.path.join(self.waitplaydir, "*.pkl"))
         if len(files)>0:
             files = sorted(files, key=lambda x: os.path.getmtime(x))
+            while len(files)>1000:
+                fn = files.pop(0)
+                os.remove(fn)
+                
             his_pieces_file = files[0]
             with open(his_pieces_file,"rb") as fn:
                 his_pieces = pickle.load(fn)     
