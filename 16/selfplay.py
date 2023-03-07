@@ -484,7 +484,7 @@ class Train():
 
         # 删除训练集
         if abs(agent.piececount - result["total"]["piececount"])/result["total"]["piececount"]<0.2:
-            filename = "{}-{}.pkl".format(agent.score, int(round(time.time() * 1000000)))
+            filename = "{}-{}.pkl".format(agent.piececount, int(round(time.time() * 1000000)))
             his_pieces_file = os.path.join(self.waitplaydir, filename)
             print("save need replay", his_pieces_file)
             with open(his_pieces_file, "wb") as fn:
