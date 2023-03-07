@@ -412,12 +412,14 @@ class Train():
         # 游戏的得分算法1，以终点的得分为动态值，好的更好，差的更差
         r = min(0, agent.piececount - max_pieces_count)
         for m in range(agent.piececount):
-            pieces_value[m] = min(0, r + agent.piececount*(1-pieces_height[m]/pieces_height[-1]))
+            # pieces_value[m] = min(0, r + agent.piececount*(1-pieces_height[m]/pieces_height[-1]))
+            pieces_value[m] = min(0, r + (agent.piececount-m))
 
         # 游戏的得分算法2，以终点的得分为固定值，最终失败相对恒定
         r = -max_pieces_count
         for m in range(agent.piececount):                    
-            pieces_score[m] = min(0, r + agent.piececount*(1-pieces_height[m]/pieces_height[-1]))
+            # pieces_score[m] = min(0, r + agent.piececount*(1-pieces_height[m]/pieces_height[-1]))
+            pieces_score[m] = min(0, r + (agent.piececount-m))
 
         print()
         print(i, pieces_reward)
