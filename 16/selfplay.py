@@ -410,16 +410,16 @@ class Train():
             pieces_height[m] = data["steps"][pieces_steps[m]]["piece_height"]
 
         # 游戏的得分算法1，以终点的得分为动态值，好的更好，差的更差
-        r = min(0, agent.piececount - max_pieces_count)
+        pieces_value_init = min(0, 2*agent.piececount - max_pieces_count)
         for m in range(agent.piececount):
             # pieces_value[m] = min(0, r + agent.piececount*(1-pieces_height[m]/pieces_height[-1]))
-            pieces_value[m] = min(0, r + (agent.piececount-m))
+            pieces_value[m] = pieces_value_init - m 
 
         # 游戏的得分算法2，以终点的得分为固定值，最终失败相对恒定
-        r = -max_pieces_count
+        pieces_score_init = min(0, agent.piececount - max_pieces_count)
         for m in range(agent.piececount):                    
             # pieces_score[m] = min(0, r + agent.piececount*(1-pieces_height[m]/pieces_height[-1]))
-            pieces_score[m] = min(0, r + (agent.piececount-m))
+            pieces_score[m] = pieces_score_init - m 
 
         print()
         print(i, pieces_reward)
@@ -435,10 +435,10 @@ class Train():
             s_step = -1 if p_id == 0 else pieces_steps[p_id-1]
             e_step = pieces_steps[p_id]
 
-            s_value = 0 if p_id == 0 else pieces_value[p_id-1]
+            s_value = pieces_value[p_id]+1 if p_id == 0 else pieces_value[p_id-1]
             e_value = pieces_value[p_id]
             
-            s_score = 0 if p_id == 0 else pieces_score[p_id-1] 
+            s_score = pieces_score[p_id]+1 if p_id == 0 else pieces_score[p_id-1] 
             e_score = pieces_score[p_id]
             if s_step==e_step:
                 data["steps"][m]["value"]=e_value
