@@ -170,8 +170,8 @@ class Train():
                     break
             agent.print()
 
-            # 判断是否需要重新玩,如果当前小于平均的0.8，放到运行池训练
-            if agent.piececount < result["total"]["avg_piececount"]*0.8:
+            # 判断是否需要重新玩,如果当前小于平均的0.7，放到运行池训练
+            if agent.piececount < result["total"]["avg_piececount"]*0.7:
                 his_pieces = agent.tetromino.piecehis
                 filename = "{}-{}.pkl".format(agent.piececount, int(round(time.time() * 1000000)))
                 savefile = os.path.join(self.waitplaydir, filename)
