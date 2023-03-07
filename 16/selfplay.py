@@ -138,7 +138,6 @@ class Train():
 
         
         game_json = os.path.join(data_dir, "result.json")
-        result = self.read_status_file(game_json)     
   
         data = {"steps":[],"shapes":[],"last_state":0,"score":0,"piece_count":0}
         start_time = time.time()
@@ -147,6 +146,7 @@ class Train():
         # 先运行测试
         his_pieces = []
         for _ in range(self.play_size):
+            result = self.read_status_file(game_json)     
             agent = Agent(isRandomNextPiece=True,)
             agent.show_mcts_process= True
             agent.id = 0
@@ -177,7 +177,7 @@ class Train():
                 with open(savefile, "wb") as fn:
                     pickle.dump(his_pieces, fn)
 
-        self.save_status_file(result, game_json) 
+            self.save_status_file(result, game_json) 
 
         max_pieces_count = result["total"]["avg_piececount"]+100
         # 正式运行
