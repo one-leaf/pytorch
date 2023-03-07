@@ -172,10 +172,10 @@ class Agent(object):
             self.reward = self.tetromino.removecompleteline(self.board) 
             
             self.score += self.reward
-            self.pieceheight = self.getAvgHeight()    
-            self.emptyCount = self.getEmptyCount()   
-            self.heightDiff = self.getHeightDiff()
-            self.heightStd = self.getHeightStd()   
+            # self.pieceheight = self.getAvgHeight()    
+            # self.emptyCount = self.getEmptyCount()   
+            # self.heightDiff = self.getHeightDiff()
+            # self.heightStd = self.getHeightStd()   
             self.pieces_height.append(self.fallpieceheight)
             self.state = 1
             self.piecesteps = 0
