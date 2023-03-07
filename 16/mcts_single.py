@@ -206,7 +206,7 @@ class MCTS():
                 # 鼓励消行
                 v = self.Vs[_s]
             else: 
-                v =  + self.search(game)
+                v = self.search(game)
             v += game.reward
         else:
             v = self.search(game)
