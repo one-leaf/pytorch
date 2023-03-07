@@ -173,7 +173,7 @@ class Train():
             # 判断是否需要重新玩,如果当前小于平均的0.8，放到运行池训练
             if agent.piececount < result["total"]["avg_piececount"]*0.8:
                 his_pieces = agent.tetromino.piecehis
-                filename = "{}-{}.pkl".format(agent.score, int(round(time.time() * 1000000)))
+                filename = "{}-{}.pkl".format(agent.piececount, int(round(time.time() * 1000000)))
                 savefile = os.path.join(self.waitplaydir, filename)
                 with open(savefile, "wb") as fn:
                     pickle.dump(his_pieces, fn)
