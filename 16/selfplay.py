@@ -142,6 +142,7 @@ class Train():
         data = {"steps":[],"shapes":[],"last_state":0,"score":0,"piece_count":0}
         start_time = time.time()
         print('start game time:', datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+        result = self.read_status_file(game_json)     
 
         # 先运行测试
         his_pieces = []
