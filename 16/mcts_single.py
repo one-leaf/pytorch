@@ -207,7 +207,7 @@ class MCTS():
             else: 
                 v = self.search(game)
             # 鼓励消行
-            v += game.reward
+            # v += game.reward
         else:
             v = self.search(game)
 

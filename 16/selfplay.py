@@ -170,8 +170,8 @@ class Train():
                     break
             agent.print()
 
-            # 判断是否需要重新玩,如果当前小于平均的1/2，放到运行池训练
-            if agent.piececount < result["total"]["avg_piececount"]/2:
+            # 判断是否需要重新玩,如果当前小于平均的0.8，放到运行池训练
+            if agent.piececount < result["total"]["avg_piececount"]*0.8:
                 his_pieces = agent.tetromino.piecehis
                 filename = "{}-{}.pkl".format(agent.score, int(round(time.time() * 1000000)))
                 savefile = os.path.join(self.waitplaydir, filename)
@@ -190,7 +190,7 @@ class Train():
             while len(files)>1000:
                 fn = files.pop(0)
                 os.remove(fn)
-                
+
             his_pieces_file = files[0]
             with open(his_pieces_file,"rb") as fn:
                 his_pieces = pickle.load(fn)     
