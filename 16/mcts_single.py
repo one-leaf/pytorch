@@ -203,10 +203,10 @@ class MCTS():
         if game.state == 1 and self.ext_reward:       
             _s = game.get_key()
             if _s in self.Vs and game.piececount - game.prev_piececount > 1:
-                # 鼓励消行
                 v = self.Vs[_s]
             else: 
                 v = self.search(game)
+            # 鼓励消行
             v += game.reward
         else:
             v = self.search(game)
