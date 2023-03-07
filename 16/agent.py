@@ -275,7 +275,16 @@ class Agent(object):
             for y in range(self.height):
                 if self.board[x][y]!=blank:
                     h[x]=(self.height-y)*1.01
-                    break   
+                    break
+        # 修复夹壁>2
+        for i in range(self.width):
+            if i==0:
+                h[i]= max(h[i], h[i+1]-2)
+            elif i==self.width-1:
+                h[i]= max(h[i], h[i-1]-2)
+            else:
+                h[i]= max(h[i], min(h[i-1]-2, h[i+1]-2))
+
         h_mean = np.mean(h)
         return h_mean
 
