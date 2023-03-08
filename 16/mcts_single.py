@@ -268,7 +268,7 @@ class MCTSPlayer(object):
             max_ps_idx = np.argmax(act_ps)
 
             # 尝试其他的走法
-            if (random.random() > game.piececount/(avg_piececount+1))  or random.random()<(game.piececount - avg_piececount)/(avg_piececount+1):
+            if (random.random() > 2*game.piececount/(avg_piececount+1))  or random.random()<(game.piececount - avg_piececount)/(avg_piececount+1):
                 p = 0.75
                 # a=1的时候，dir机会均等，>1 强调均值， <1 强调两端
                 # 国际象棋 0.3 将棋 0.15 围棋 0.03
@@ -276,9 +276,9 @@ class MCTSPlayer(object):
                 a = 2                  
                 dirichlet = np.random.dirichlet(a * np.ones(len(act_probs)))
                 idx = np.random.choice(range(len(acts)), p=p*act_probs + (1.0-p)*dirichlet)
-            # 50% 按得分大于当前的概率
+            # 20% 按得分大于当前的概率
             else:
-            # elif random.random()<0.5:
+            # elif random.random() > 0.8:
                 for i, qs in enumerate(act_qs):
                     if act_qs[max_probs_idx] - qs > 0:
                         act_probs[i]=0
@@ -286,6 +286,7 @@ class MCTSPlayer(object):
                 idx = np.random.choice(range(len(acts)), p=act_probs) 
             # 50% 按首次概率
             # else:
+            #     idx = max_qs_idx
             #     # 按PS的最大值运行
             #     idx = max_ps_idx          
 
