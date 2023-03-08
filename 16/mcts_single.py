@@ -206,8 +206,8 @@ class MCTS():
                 v = self.Vs[_s]
             else: 
                 v = self.search(game)
-            # 鼓励消行
-            # v += game.reward
+            # 鼓励低的平均高度
+            v += game.prev_pieceheight - game.pieceheight + 0.4*(game.piececount - game.prev_piececount)  
         else:
             v = self.search(game)
 

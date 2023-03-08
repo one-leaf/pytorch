@@ -172,7 +172,7 @@ class Agent(object):
             self.reward = self.tetromino.removecompleteline(self.board) 
             
             self.score += self.reward
-            # self.pieceheight = self.getAvgHeight()    
+            self.pieceheight = self.getAvgHeight()    
             # self.emptyCount = self.getEmptyCount()   
             # self.heightDiff = self.getHeightDiff()
             # self.heightStd = self.getHeightStd()   
@@ -274,7 +274,7 @@ class Agent(object):
         for x in range(self.width):
             for y in range(self.height):
                 if self.board[x][y]!=blank:
-                    h[x]=(self.height-y)*1.01
+                    h[x]=(self.height-y)
                     break
         # 修复夹壁>2
         for i in range(self.width):
