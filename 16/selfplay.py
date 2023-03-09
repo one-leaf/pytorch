@@ -415,11 +415,11 @@ class Train():
         for m in range(agent.piececount):
             pieces_height[m] = data["steps"][pieces_steps[m]]["piece_height"]
 
-        # 游戏的得分算法1，以终点的得分为动态值，好的更好，差的更差
-        pieces_value_init = min(0, 2*agent.piececount - max_pieces_count)
+        # 游戏的得分算法1，以终点的得分为第一步的得分
+        pieces_value_init = min(0, agent.piececount - max_pieces_count)
         for m in range(agent.piececount):
             # pieces_value[m] = min(0, r + agent.piececount*(1-pieces_height[m]/pieces_height[-1]))
-            pieces_value[m] = pieces_value_init - m 
+            pieces_value[m] = pieces_value_init - pieces_steps[m] 
 
         # 游戏的得分算法2，以终点的得分为固定值，最终失败相对恒定
         pieces_score_init = min(0, agent.piececount - max_pieces_count)
