@@ -181,7 +181,7 @@ class Train():
             self.save_status_file(result, game_json) 
 
         # max_pieces_count = result["total"]["avg_piececount"]+100
-        max_pieces_count = 122
+        max_pieces_count = 100
         # 正式运行
         player = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout)
 
