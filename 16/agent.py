@@ -197,7 +197,7 @@ class Agent(object):
 
         if not isFalling and (not self.tetromino.validposition(self.board, self.fallpiece, ay=1) or self.piececount>=self.max_pieces_count):                  
             self.terminal = True 
-            self.state = 2
+            self.state = 1
             return self.state, self.reward 
         
         self.availables = self.get_availables()    
