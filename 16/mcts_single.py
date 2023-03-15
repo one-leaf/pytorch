@@ -211,7 +211,7 @@ class MCTS():
         #     # v += (game.prev_pieceheight - game.pieceheight + 0.4*(game.piececount - game.prev_piececount))  
         # else:
         #     v = self.search(game)
-        v = game.reward*10 + self.search(game)
+        v = self.search(game) + game.reward*10
 
         # 更新 Q 值 和 访问次数
         if (s, a) in self.Qsa:
