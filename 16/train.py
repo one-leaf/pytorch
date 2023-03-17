@@ -165,8 +165,8 @@ class Dataset(torch.utils.data.Dataset):
             # self.data[fn]["value"] = (values[fn] - avg_values)/(max_values-min_values) + (scores[fn]-avg_scores)/(max_scores-min_scores)            
             # self.data[fn]["value"] = (values[fn]+scores[fn])*0.5 - 1 
             # self.data[fn]["value"] = (scores[fn]-min_scores)*2/(max_scores-min_scores) - 1
-            # self.data[fn]["value"] = values[fn]
-            self.data[fn]["value"] = scores[fn]
+            self.data[fn]["value"] = values[fn]
+            # self.data[fn]["value"] = scores[fn]
 
         pay_time = round(time.time()-start_time, 2)
         print("loaded to memory, paid time:", pay_time)
@@ -205,7 +205,7 @@ class Train():
         self.batch_size = 512     # 每批训练的样本，早期用小，防止局部最小值，后期用大，网络平稳 32 64 128 256 512
 
         # training params
-        self.learn_rate = 1e-4
+        self.learn_rate = 1e-3
         self.lr_multiplier = 1.0  # 基于KL的自适应学习率
         self.temp = 1  # MCTS的概率参数，越大越不肯定，训练时1，预测时1e-3
         self.n_playout = 128  # 每个动作的模拟战记录个数

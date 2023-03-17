@@ -206,7 +206,8 @@ class Train():
         agent.show_mcts_process= True
         agent.id = 0
         piececount = agent.piececount
-
+        curr_steps = 0
+        max_steps = 100
         for i in count():
             _step={"step":i, "curr_player":agent.id}
             _step["state"] = agent.current_state()    
@@ -233,6 +234,7 @@ class Train():
 
             # 这里的奖励是消除的行数
             if reward > 0:
+                curr_steps = 0
                 repeat_count = 40
                 # print(_step["state"][0])
                 # print(_step["state"][-1])
@@ -240,9 +242,10 @@ class Train():
                     'step:', agent.steps, "step time:", round((time.time()-start_time)/i,3),'player:', agent.id)
                 # if agent.score>result["total"]["reward"]+20: game_stop=True
 
-            # 如果落了过半，为了加快速度，后面直接模拟算了
+            # 如果走了100步还没有获得消行奖励，直接后面模拟
+            curr_steps += 1 
             piececount = agent.piececount
-            if result["total"]["_agent"]%2==0 and agent.state == 1 and agent.fallpieceheight>10:
+            if curr_steps>max_steps:
                 while not agent.terminal:
                     move_probs, state_value = policy_value_net.policy_value_fn(agent)
                     action, acc_ps = 0, 0
@@ -417,27 +420,38 @@ class Train():
         pieces_height = [0 for _ in range(piececount)]
 
         # 统计所有获得奖励的方块
+        last_reward = -agent.getSimpleEmptyCount()
         for m in range(step_count):
             pieces_steps[data["steps"][m]["piece_count"]] = m
             if data["steps"][m]["reward"]>0:
                 pieces_reward[data["steps"][m]["piece_count"]] = 1
+        for m in range(piececount-1,-1,-1):
+            if pieces_reward[m]>0: break
+            pieces_reward[m] = last_reward 
 
         # 统计方块的高度
         for m in range(piececount):
             pieces_height[m] = data["steps"][pieces_steps[m]]["piece_height"]
 
         # 游戏的得分算法1，以终点的得分为第一步的得分
-        pieces_value_init = min(0, agent.piececount - max_pieces_count)
+        pieces_value_init = 0
         for m in range(piececount):
-            # pieces_value[m] = min(0, r + agent.piececount*(1-pieces_height[m]/pieces_height[-1]))
-            pieces_value[m] = pieces_value_init - pieces_steps[m] 
-
+            # pieces_value[m] = min(0, r + agent.piececount*(1-pieces_height[m]/pieces_height[-1]))            
+            if pieces_reward[m]>0: 
+                pieces_value_init = 0
+            else:
+                pieces_value_init = pieces_reward[m]
+            pieces_value_init -= pieces_steps[m]
+            pieces_value[m] = pieces_value_init 
+            
         # 游戏的得分算法2，以终点的得分为固定值，最终失败相对恒定，为了保证每一步有差距，得分放大到10倍
         pieces_score_init = min(0, agent.piececount - max_pieces_count)
         for m in range(piececount):                    
             # pieces_score[m] = min(0, r + agent.piececount*(1-pieces_height[m]/pieces_height[-1]))
             pieces_score[m] = (pieces_score_init - m)*10 
 
+        print()
+        print(i, pieces_reward)
         print()
         print(i, pieces_height)
         print()

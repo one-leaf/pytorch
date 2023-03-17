@@ -167,10 +167,13 @@ class Agent(object):
 
         self.fallpieceheight = 20 - self.fallpiece['y']
 
+        self.add_status()
+        self.set_key()
+
         if not isFalling:
             self.tetromino.addtoboard(self.board, self.fallpiece)            
-            self.reward = self.tetromino.removecompleteline(self.board) 
-            
+
+            self.reward = self.tetromino.removecompleteline(self.board)            
             self.score += self.reward
             self.pieceheight = self.getAvgHeight()    
             # self.emptyCount = self.getEmptyCount()   
@@ -187,9 +190,6 @@ class Agent(object):
             self.actions = []
         else:
             self.state = 0
-
-        self.add_status()
-        self.set_key()
 
         if  env:
             env.checkforquit()
@@ -340,6 +340,14 @@ class Agent(object):
         if h[7]-h[8]>2: v.append((h[7]-h[8]))
         if h[8]-h[9]>2: v.append((h[8]-h[9]))
         return max(v)
+
+    def getSimpleEmptyCount(self):
+        c = 0
+        for x in range(self.width):
+            for y in range(self.height):
+                if self.board[x][y]==blank:
+                    c+=1
+        return c
 
     # 统计空洞的个数
     # 空洞最高点+空洞的最高点总数/10

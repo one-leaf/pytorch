@@ -142,8 +142,9 @@ class MCTS():
 
         if self.depth>1000: return 0
 
-        if game.terminal: 
-            self.Es[s] = -1000
+        if game.terminal: self.Es[s] = -1000
+        if game.reward>0: self.Es[s] = 0
+
 
         # 如果得分不等于0，标志探索结束
         if s in self.Es: return self.Es[s]
@@ -201,7 +202,7 @@ class MCTS():
         self.depth = self.depth +1
 
         # 现实奖励
-        if game.state == 1:       
+        if game.state == 1:     
             _s = game.get_key()
             if _s in self.Vs and game.piececount - game.prev_piececount > 1:
                 v = self.Vs[_s]
