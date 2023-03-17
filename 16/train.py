@@ -11,12 +11,13 @@ import copy, math
 import numpy as np
 import torch
 
-try:
-    import memcache
-    cache = memcache.Client(['172.17.0.1:11211'], debug=0)
-    print("active memcache cache")
-except:
-    cache = None
+# 添加 cache 反而更慢
+# try:
+#     import memcache
+#     cache = memcache.Client(['172.17.0.1:11211'], debug=0)
+#     print("active memcache cache")
+# except:
+#     cache = None
 
 # 定义游戏的动作
 KEY_NONE, KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN = 0, 1, 2, 3, 4
@@ -79,7 +80,7 @@ class Dataset(torch.utils.data.Dataset):
         for i, filename in enumerate(files):
             if i >= self.max_keep_size:
                 os.remove(filename)
-                if cache: cache.delete(filename, noreply=True)                     
+                # if cache: cache.delete(filename, noreply=True)                     
                 delcount += 1
             else:
                 self.file_list.append(filename)
@@ -102,17 +103,17 @@ class Dataset(torch.utils.data.Dataset):
         # double_train_list=[]
         for fn in self.file_list:
             try:
-                if cache: 
-                    obj = cache.get(fn)
-                    if obj!=None:
-                        state, mcts_prob, value, score = obj
-                    else:   
-                        with open(fn, "rb") as f:
-                            state, mcts_prob, value, score = pickle.load(f)
-                            cache.add(fn, (state, mcts_prob, value, score))
-                else:
-                    with open(fn, "rb") as f:
-                        state, mcts_prob, value, score = pickle.load(f)
+                # if cache: 
+                #     obj = cache.get(fn)
+                #     if obj!=None:
+                #         state, mcts_prob, value, score = obj
+                #     else:   
+                #         with open(fn, "rb") as f:
+                #             state, mcts_prob, value, score = pickle.load(f)
+                #             cache.add(fn, (state, mcts_prob, value, score))
+                # else:
+                with open(fn, "rb") as f:
+                    state, mcts_prob, value, score = pickle.load(f)
                 assert state.shape[0] == 8                         
             except:
                 print("filename {} error can't load".format(fn))
