@@ -195,23 +195,23 @@ class MCTS():
         a = best_act
         act = game.position_to_action(a)
 
-        steps = game.piecesteps
+        # steps = game.piecesteps
         game.step(act)
 
         self.depth = self.depth +1
 
         # 现实奖励
-        # if game.state == 1 and steps>5:       
-        #     _s = game.get_key()
-        #     if _s in self.Vs and game.piececount - game.prev_piececount > 1:
-        #         v = self.Vs[_s]
-        #     else: 
-        #         v = self.search(game)
-        #     # 鼓励低的平均高度
-        #     # v += (game.prev_pieceheight - game.pieceheight + 0.4*(game.piececount - game.prev_piececount))  
-        # else:
-        #     v = self.search(game)
-        v = self.search(game)
+        if game.state == 1:       
+            _s = game.get_key()
+            if _s in self.Vs and game.piececount - game.prev_piececount > 1:
+                v = self.Vs[_s]
+            else: 
+                v = self.search(game)
+            # 鼓励低的平均高度
+            # v += (game.prev_pieceheight - game.pieceheight + 0.4*(game.piececount - game.prev_piececount))  
+        else:
+            v = self.search(game)
+        # v = self.search(game)
 
         # 更新 Q 值 和 访问次数
         if (s, a) in self.Qsa:
