@@ -343,10 +343,13 @@ class Agent(object):
 
     def getSimpleEmptyCount(self):
         c = 0
-        for x in range(self.width):
-            for y in range(self.height):
-                if self.board[x][y]==blank:
-                    c+=1
+        for y in range(self.height):
+            l_c = 0
+            for x in range(self.width):
+                if self.board[x][y] == blank:
+                    l_c += 1
+            if l_c != self.width:
+                c += l_c      
         return c
 
     # 统计空洞的个数

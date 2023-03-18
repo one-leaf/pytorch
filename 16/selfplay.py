@@ -245,16 +245,8 @@ class Train():
             # 如果走了100步还没有获得消行奖励，直接后面模拟
             curr_steps += 1 
             piececount = agent.piececount
-            if curr_steps>max_steps and agent.state==1: # and result["total"]["_agent"]%5>0:
-                while not agent.terminal:
-                    move_probs, state_value = policy_value_net.policy_value_fn(agent)
-                    action, acc_ps = 0, 0
-                    for a, p in move_probs:
-                        if p > acc_ps:
-                            action, acc_ps = a, p
-                    _, reward = agent.step(action)
 
-            if agent.terminal:
+            if agent.terminal or (curr_steps>max_steps and agent.state==1):
                 data["score"] = agent.score
                 data["piece_count"] = agent.piececount
                 data["piece_height"] = agent.pieceheight
