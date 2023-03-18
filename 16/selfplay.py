@@ -458,7 +458,7 @@ class Train():
             s_step = -1 if p_id == 0 else pieces_steps[p_id-1]
             e_step = pieces_steps[p_id]
 
-            s_value = pieces_value_init if p_id == 0 else pieces_value[p_id-1]
+            s_value = 0 if p_id == 0 else pieces_value[p_id-1]
             e_value = pieces_value[p_id]
             
             s_score = pieces_score[p_id]+10 if p_id == 0 else pieces_score[p_id-1] 
