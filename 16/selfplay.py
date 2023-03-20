@@ -206,8 +206,8 @@ class Train():
         agent.show_mcts_process= True
         agent.id = 0
         piececount = agent.piececount
-        curr_steps = 0
-        max_steps = 100
+        prev_reward_piece_idx = -1
+        max_pieces = 8
         for i in count():
             _step={"step":i, "curr_player":agent.id}
             _step["state"] = agent.current_state()    
@@ -234,7 +234,7 @@ class Train():
 
             # 这里的奖励是消除的行数
             if reward > 0:
-                curr_steps = 0
+                prev_reward_piece_idx = agent.piececount
                 repeat_count = 40
                 # print(_step["state"][0])
                 # print(_step["state"][-1])
@@ -242,11 +242,10 @@ class Train():
                     'step:', agent.steps, "step time:", round((time.time()-start_time)/i,3),'player:', agent.id)
                 # if agent.score>result["total"]["reward"]+20: game_stop=True
 
-            # 如果走了100步还没有获得消行奖励，直接后面模拟
-            curr_steps += 1 
             piececount = agent.piececount
 
-            if agent.terminal or (curr_steps>max_steps and agent.state==1):
+            # 如果游戏结束或放了max_pieces个方块还没有消行，游戏结束
+            if agent.terminal or (piececount-prev_reward_piece_idx>max_pieces and agent.state==1):
                 data["score"] = agent.score
                 data["piece_count"] = agent.piececount
                 data["piece_height"] = agent.pieceheight
