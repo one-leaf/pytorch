@@ -180,8 +180,7 @@ class Train():
 
             self.save_status_file(result, game_json) 
 
-        # max_pieces_count = result["total"]["avg_piececount"]+100
-        max_pieces_count = 100
+        must_reward_pieces_count = 8
         # 正式运行
         player = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout)
 
@@ -199,15 +198,13 @@ class Train():
             print([p["shape"] for p in his_pieces])
             print("delete", his_pieces_file)
             os.remove(his_pieces_file)
-            agent = Agent(isRandomNextPiece=True, max_pieces_count= max_pieces_count, nextpieces=his_pieces)
+            agent = Agent(isRandomNextPiece=True, must_reward_pieces_count= must_reward_pieces_count, nextpieces=his_pieces)
         else:
-            agent = Agent(isRandomNextPiece=True, max_pieces_count= max_pieces_count,)
+            agent = Agent(isRandomNextPiece=True, must_reward_pieces_count= must_reward_pieces_count,)
 
         agent.show_mcts_process= True
         agent.id = 0
         piececount = agent.piececount
-        prev_reward_piece_idx = -1
-        max_pieces = 8
         for i in count():
             _step={"step":i, "curr_player":agent.id}
             _step["state"] = agent.current_state()    
@@ -234,7 +231,6 @@ class Train():
 
             # 这里的奖励是消除的行数
             if reward > 0:
-                prev_reward_piece_idx = agent.piececount
                 repeat_count = 40
                 # print(_step["state"][0])
                 # print(_step["state"][-1])
@@ -244,8 +240,8 @@ class Train():
 
             piececount = agent.piececount
 
-            # 如果游戏结束或放了max_pieces个方块还没有消行，游戏结束
-            if agent.terminal or (piececount-prev_reward_piece_idx>max_pieces and agent.state==1):
+            # 如果游戏结束
+            if agent.terminal:
                 data["score"] = agent.score
                 data["piece_count"] = agent.piececount
                 data["piece_height"] = agent.pieceheight
@@ -436,7 +432,7 @@ class Train():
             pieces_value[m] = pieces_value_init 
             
         # 游戏的得分算法2，以终点的得分为固定值，最终失败相对恒定，为了保证每一步有差距，得分放大到10倍
-        pieces_score_init = min(0, agent.piececount - max_pieces_count)
+        pieces_score_init = min(0, agent.piececount - 100)
         for m in range(piececount):                    
             # pieces_score[m] = min(0, r + agent.piececount*(1-pieces_height[m]/pieces_height[-1]))
             pieces_score[m] = (pieces_score_init - m)*10 

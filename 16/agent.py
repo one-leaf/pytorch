@@ -12,12 +12,12 @@ KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN = 0, 1, 2, 3
 ACTIONS = [KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN]
 ACTIONS_NAME = ["O","L","R","D"]
 class Agent(object):
-    def __init__(self, isRandomNextPiece=False, max_pieces_count=1000, nextpieces=[]):
+    def __init__(self, isRandomNextPiece=False, must_reward_pieces_count=8, nextpieces=[]):
         self.width = 10
         self.height = 20
         self.actions_num = len(ACTIONS)    
         self.isRandomNextPiece = isRandomNextPiece       
-        self.max_pieces_count = max_pieces_count
+        self.must_reward_piece_count = must_reward_pieces_count
         self.id = 0
         self.nextpieces = nextpieces
         self.reset()
@@ -73,6 +73,8 @@ class Agent(object):
         self.availables=self.get_availables()
         # 显示mcts中间过程
         self.show_mcts_process = False
+        # 最后一次得奖的方块序号
+        self.last_reward_piece_idx = -1
         # key
         self.set_key()
 
@@ -173,7 +175,8 @@ class Agent(object):
         if not isFalling:
             self.tetromino.addtoboard(self.board, self.fallpiece)            
 
-            self.reward = self.tetromino.removecompleteline(self.board)            
+            self.reward = self.tetromino.removecompleteline(self.board) 
+            if self.reward>0: self.last_reward_piece_idx = self.piececount         
             self.score += self.reward
             self.pieceheight = self.getAvgHeight()    
             # self.emptyCount = self.getEmptyCount()   
@@ -195,7 +198,7 @@ class Agent(object):
             env.checkforquit()
             env.render(self.board, self.score, self.level, self.fallpiece, self.nextpiece)
 
-        if not isFalling and (not self.tetromino.validposition(self.board, self.fallpiece, ay=1) or self.piececount>=self.max_pieces_count):                  
+        if not isFalling and (not self.tetromino.validposition(self.board, self.fallpiece, ay=1) or self.piececount-self.last_reward_piece_idx>=self.must_reward_piece_count):                  
             self.terminal = True 
             self.state = 1
             return self.state, self.reward 
