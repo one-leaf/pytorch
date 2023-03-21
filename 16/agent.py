@@ -65,7 +65,7 @@ class Agent(object):
         # 盘面的状态
         self.status = [] #deque(maxlen=10)
         _board = np.zeros((self.height, self.width))
-        for i in range(8):
+        for _ in range(8):
             self.status.append(_board)
         self.add_status()
         # self.status.append(self.get_fallpiece_board()+self.getBoard())
@@ -198,7 +198,7 @@ class Agent(object):
             env.checkforquit()
             env.render(self.board, self.score, self.level, self.fallpiece, self.nextpiece)
 
-        if not isFalling and (not self.tetromino.validposition(self.board, self.fallpiece, ay=1) or self.piececount-self.last_reward_piece_idx>=self.must_reward_piece_count):                  
+        if not isFalling and (not self.tetromino.validposition(self.board, self.fallpiece, ay=1) or (self.piececount-self.last_reward_piece_idx)>=self.must_reward_piece_count):                  
             self.terminal = True 
             self.state = 1
             return self.state, self.reward 
