@@ -237,7 +237,7 @@ class Train():
                 # print(_step["state"][0])
                 # print(_step["state"][-1])
                 print("#"*repeat_count, 'score:', agent.score, 'height:', agent.pieceheight, 'piece:', agent.piececount, "shape:", agent.fallpiece["shape"], \
-                    'step:', agent.steps, "step time:", round((time.time()-start_time)/i,3),'player:', agent.id)
+                    'step:', agent.steps, "step time:", round((time.time()-start_time)/i,3),'reward_p:', agent.piececount-agent.last_reward_piece_idx)
                 # if agent.score>result["total"]["reward"]+20: game_stop=True
                 result = self.read_status_file(game_json)
                 result["total"]["avg_reward_piececount"] = result["total"]["avg_reward_piececount"]*0.99 + (agent.piececount-agent.last_reward_piece_idx)*0.01
