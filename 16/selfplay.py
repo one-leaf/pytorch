@@ -207,6 +207,7 @@ class Train():
         agent.show_mcts_process= True
         agent.id = 0
         piececount = agent.piececount
+        mark_reward_piececount = -1
         for i in count():
             _step={"step":i, "curr_player":agent.id}
             _step["state"] = agent.current_state()    
@@ -237,11 +238,12 @@ class Train():
                 # print(_step["state"][0])
                 # print(_step["state"][-1])
                 print("#"*repeat_count, 'score:', agent.score, 'height:', agent.pieceheight, 'piece:', agent.piececount, "shape:", agent.fallpiece["shape"], \
-                    'step:', agent.steps, "step time:", round((time.time()-start_time)/i,3),'reward_p:', agent.piececount-agent.last_reward_piece_idx)
+                    'step:', agent.steps, "step time:", round((time.time()-start_time)/i,3),'reward_p:', agent.piececount-mark_reward_piececount)
                 # if agent.score>result["total"]["reward"]+20: game_stop=True
                 result = self.read_status_file(game_json)
-                result["total"]["avg_reward_piececount"] = result["total"]["avg_reward_piececount"]*0.99 + (agent.piececount-agent.last_reward_piece_idx)*0.01
+                result["total"]["avg_reward_piececount"] = result["total"]["avg_reward_piececount"]*0.99 + (agent.piececount-mark_reward_piececount)*0.01
                 self.save_status_file(result, game_json)
+                mark_reward_piececount = agent.piececount
 
             piececount = agent.piececount
 
