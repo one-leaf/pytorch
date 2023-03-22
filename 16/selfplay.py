@@ -425,56 +425,33 @@ class Train():
         for m in range(piececount):
             pieces_height[m] = data["steps"][pieces_steps[m]]["piece_height"]
 
-        # 游戏的得分算法1，以终点的得分为第一步的得分
-        pieces_value_init = 0
-        for m in range(piececount):
-            # pieces_value[m] = min(0, r + agent.piececount*(1-pieces_height[m]/pieces_height[-1]))            
-            if pieces_reward[m]>0: 
-                pieces_value_init = 0
-            else:
-                pieces_value_init = pieces_reward[m]
-            pieces_value_init -= pieces_steps[m]
-            pieces_value[m] = pieces_value_init 
-            
-        # 游戏的得分算法2，以终点的得分为固定值，最终失败相对恒定，为了保证每一步有差距，得分放大到10倍
-        pieces_score_init = min(0, agent.piececount - 100)
-        for m in range(piececount):                    
-            # pieces_score[m] = min(0, r + agent.piececount*(1-pieces_height[m]/pieces_height[-1]))
-            pieces_score[m] = (pieces_score_init - m)*10 
-
-        print()
-        print(i, pieces_reward)
-        print()
-        print(i, pieces_height)
-        print()
-        print(i, pieces_value)
-        print()
-        print(i, pieces_score)
-        print()
-
-        # 分配收益到每一步
+        # 游戏的得分算法1，每一步都减1，如果碰到惩罚直接加
         for m in range(step_count):
-            p_id = data["steps"][m]["piece_count"]
-            s_step = -1 if p_id == 0 else pieces_steps[p_id-1]
-            e_step = pieces_steps[p_id]
+            p =  data["steps"][m]["piece_count"]
+            ext_reward = 0 if pieces_reward[p]>=0 else pieces_reward[p]
+            data["steps"][m]["value"]= -m + ext_reward 
+        pieces_value = [data["steps"][pieces_steps[p]]["value"] for p in range(piececount)]
 
-            s_value = 0 if p_id == 0 else pieces_value[p_id-1]
-            e_value = pieces_value[p_id]
-            
-            s_score = pieces_score[p_id]+10 if p_id == 0 else pieces_score[p_id-1] 
-            e_score = pieces_score[p_id]
-            if s_step==e_step:
-                data["steps"][m]["value"]=e_value
-                data["steps"][m]["score"]=e_score
-            else:        
-                data["steps"][m]["value"]=s_value+(m-s_step)/(e_step-s_step)*(e_value-s_value)
-                data["steps"][m]["score"]=s_score+(m-s_step)/(e_step-s_step)*(e_score-s_score)
+        # 游戏的得分算法2，每一步都减1，如果碰到奖励，重置步骤，如果碰到惩罚直接加
+        reward_mask = 0
+        for m in range(step_count):
+            p =  data["steps"][m]["piece_count"]
+            ext_reward = 0 if pieces_reward[p]>=0 else pieces_reward[p]
+            data["steps"][m]["score"]= -m + reward_mask + ext_reward  
+            if pieces_reward[p]>0 and m==pieces_steps[p] : reward_mask=m+1 
+        pieces_score = [data["steps"][pieces_steps[p]]["score"] for p in range(piececount)]
 
-        # # 分配收益到整个方块
-        # for m in range(step_count):
-        #     p_id = data["steps"][m]["piece_count"]
-        #     data["steps"][m]["value"]=pieces_value[p_id]
-        #     data["steps"][m]["score"]=pieces_score[p_id]
+        print()
+        print("steps: ", pieces_steps)
+        print()
+        print("reward:", pieces_reward)
+        print()
+        print("height:", pieces_height)
+        print()
+        print("value: ", pieces_value)
+        print()
+        print("score: ", pieces_score)
+        print()
 
         print(i,"score:",data["score"],"piece_count:",data["piece_count"],"piece_height:",data["piece_height"],"steps:",step_count)
        
@@ -485,7 +462,7 @@ class Train():
             mcts_probs.append(step["move_probs"])
             values.append(step["value"])
             score.append(step["score"])
-
+        
         assert len(states)>0
         assert len(states)==len(values)
         assert len(states)==len(mcts_probs)
