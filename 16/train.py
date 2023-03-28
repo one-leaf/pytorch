@@ -236,7 +236,11 @@ class Train():
             self.testdataset.test=True
             print("end data loader")
 
-            self.policy_value_net = PolicyValueNet(GAME_WIDTH, GAME_HEIGHT, GAME_ACTIONS_NUM, model_file=model_file)
+            try:
+                self.policy_value_net = PolicyValueNet(GAME_WIDTH, GAME_HEIGHT, GAME_ACTIONS_NUM, model_file=model_file)
+            except:
+                os.rename(model_file, model_file+"_err")
+                return
             self.policy_value_net.save_model(model_file+".bak")           
 
             dataset_len = len(self.dataset)  
