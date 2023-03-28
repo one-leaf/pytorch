@@ -316,7 +316,7 @@ class VisionTransformer(nn.Module):
 
 class VitNet(nn.Module):
     def __init__(self,  embed_dim=768, drop_ratio=0.1, drop_path_ratio=0.1, depth=12, num_heads=12, 
-                        mlp_ratio=4.0, qkv_bias=True, qk_scale=None, attn_drop_ratio=0.3, num_classes=1000, num_quantiles=12):
+                        mlp_ratio=4.0, qkv_bias=True, qk_scale=None, attn_drop_ratio=0.3, num_classes=1000, num_quantiles=64):
         super(VitNet, self).__init__()
 
         assert embed_dim % num_heads==0, "embed_dim must be divisible by num_heads"
