@@ -238,8 +238,10 @@ class Train():
 
             try:
                 self.policy_value_net = PolicyValueNet(GAME_WIDTH, GAME_HEIGHT, GAME_ACTIONS_NUM, model_file=model_file)
-            except:
-                os.rename(model_file, model_file+"_err")
+            except Exception as e:
+                print(str(e))
+                time.sleep(60)
+                # os.rename(model_file, model_file+"_err")
                 return
             self.policy_value_net.save_model(model_file+".bak")           
 
