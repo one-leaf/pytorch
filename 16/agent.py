@@ -62,27 +62,34 @@ class Agent(object):
         self.pieces_height = []     
         # 当前prices所有动作
         self.actions=[]
+        # 最后一次得奖的方块序号
+        self.last_reward_piece_idx = -1
+        # 下一个可用步骤
+        self.availables=self.get_availables()
+        # 显示mcts中间过程
+        self.show_mcts_process = False
+
         # 盘面的状态
         self.status = [] #deque(maxlen=10)
         _board = np.zeros((self.height, self.width))
         for _ in range(8):
             self.status.append(_board)
-        self.add_status()
-        # self.status.append(self.get_fallpiece_board()+self.getBoard())
-        # 下一个可用步骤
-        self.availables=self.get_availables()
-        # 显示mcts中间过程
-        self.show_mcts_process = False
-        # 最后一次得奖的方块序号
-        self.last_reward_piece_idx = -1
+        self.add_status(True)
+
         # key
         self.set_key()
 
-    def add_status(self):
+    def add_status(self, init=False):
         self.status.append(self.get_fallpiece_board()+self.getBoard())
         del self.status[1]
-        if self.state!=0:
-            self.status[0]=self.getBoard()+self.get_nextpiece_borad()
+        if self.state!=0 or init:
+            self.status[0]=self.get_nextpiece_borad()
+            idx = self.piececount-self.last_reward_piece_idx
+            assert idx < self.height
+            for h in range(idx):
+                for w in range(self.width):
+                    y = self.height-h-1
+                    self.status[0][y][w] = 1 if self.status[0][y][w]==0 else 0
 
     # 概率的索引位置转action
     def position_to_action(self, position):
@@ -431,7 +438,7 @@ class Agent(object):
             for x in range(templatenum):
                 for y in range(templatenum):
                     if shapedraw[y][x]!=blank:
-                        board[y][x+off]=-1
+                        board[y][x+off]=1
         return board
 
 

@@ -211,7 +211,7 @@ class Train():
         for i in count():
             _step={"step":i, "curr_player":agent.id}
             _step["state"] = agent.current_state()    
-            # print(_step["state"])           
+            # print(_step["state"][0])           
             _step["piece_count"] = agent.piececount               
             _step["shape"] = agent.fallpiece["shape"]
             _step["pre_piece_height"] = agent.pieceheight
