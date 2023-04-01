@@ -264,31 +264,32 @@ class Train():
             for i, data in enumerate(training_loader):  # 计划训练批次
                 # 使用对抗数据重新训练策略价值网络模型
                 _, v_loss, p_loss = self.policy_update(data, self.epochs)
+                print(i,v_loss,p_loss)
                 if math.isnan(v_loss): 
                     print("v_loss is nan!")
                     return
 
-                if i%10 == 0:
-                    print(("TRAIN idx {} : {} / {} v_loss:{:.5f}, p_loss:{:.5f}")\
-                        .format(i, i*self.batch_size, dataset_len, v_loss, p_loss))
+                # if i%10 == 0:
+                #     print(("TRAIN idx {} : {} / {} v_loss:{:.5f}, p_loss:{:.5f}")\
+                #         .format(i, i*self.batch_size, dataset_len, v_loss, p_loss))
 
-                    # 动态调整学习率
-                    if old_probs is None:
-                        test_batch, test_probs, test_values = data
-                        old_probs, old_value = self.policy_value_net.policy_value(test_batch) 
-                    else:
-                        new_probs, new_value = self.policy_value_net.policy_value(test_batch)
-                        kl = np.mean(np.sum(old_probs * (np.log(old_probs + 1e-10) - np.log(new_probs + 1e-10)), axis=1))
+                #     # 动态调整学习率
+                #     if old_probs is None:
+                #         test_batch, test_probs, test_values = data
+                #         old_probs, old_value = self.policy_value_net.policy_value(test_batch) 
+                #     else:
+                #         new_probs, new_value = self.policy_value_net.policy_value(test_batch)
+                #         kl = np.mean(np.sum(old_probs * (np.log(old_probs + 1e-10) - np.log(new_probs + 1e-10)), axis=1))
                         
-                        old_probs = None
+                #         old_probs = None
                         
-                        if kl > self.kl_targ * 2 and self.lr_multiplier > 0.1:
-                            self.lr_multiplier /= 1.5
-                        elif kl < self.kl_targ / 2 and self.lr_multiplier < 10:
-                            self.lr_multiplier *= 1.5
-                        else:
-                            continue
-                        print("kl:{} lr_multiplier:{} lr:{}".format(kl, self.lr_multiplier, self.learn_rate*self.lr_multiplier))
+                #         if kl > self.kl_targ * 2 and self.lr_multiplier > 0.1:
+                #             self.lr_multiplier /= 1.5
+                #         elif kl < self.kl_targ / 2 and self.lr_multiplier < 10:
+                #             self.lr_multiplier *= 1.5
+                #         else:
+                #             continue
+                #         print("kl:{} lr_multiplier:{} lr:{}".format(kl, self.lr_multiplier, self.learn_rate*self.lr_multiplier))
 
             self.policy_value_net.save_model(model_file)
    
