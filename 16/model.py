@@ -140,7 +140,7 @@ class PolicyValueNet():
         value_batch = torch.FloatTensor(value_batch).to(self.device)
 
         # 设置学习率
-        self.set_learning_rate(lr)
+        # self.set_learning_rate(lr)
 
         # 前向传播
         self.policy_value_net.train()
