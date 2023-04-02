@@ -306,8 +306,8 @@ class Train():
                 test_batch = test_batch.to(self.policy_value_net.device)
                 with torch.no_grad(): 
                     act_probs, values = net(test_batch) 
-                    print("value[0] begin:{} end:{} to:{}".format(begin_values[i], values[:5]), test_values[:5].numpy())  
-                    print("probs[0] begin:{} end:{} to:{} ".format(begin_act_probs[i], act_probs[0]),test_probs[0].numpy())
+                    print("value[0] begin:{} end:{} to:{}".format(begin_values[i], values[:5], test_values[:5].numpy()))  
+                    print("probs[0] begin:{} end:{} to:{} ".format(begin_act_probs[i], act_probs[0],test_probs[0].numpy()))
 
         except KeyboardInterrupt:
             print('quit')
