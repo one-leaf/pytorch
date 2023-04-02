@@ -252,14 +252,18 @@ class Train():
             test_batch = None
 
             net = self.policy_value_net.policy_value
+            begin_values=[]
+            begin_act_probs=[]
             for i, data in enumerate(testing_loader):
                 test_batch, test_probs, test_values = data
                 test_batch = test_batch.to(self.policy_value_net.device)
-                test_values = test_values.to(self.policy_value_net.device)
+                # test_values = test_values.to(self.policy_value_net.device)
                 with torch.no_grad(): 
                     act_probs, values = net(test_batch) 
-                    print("value[0] dst:{} pred_s:{}".format(test_values[:5].cpu().numpy(), values[:5]))  
-                    print("probs[0] dst:{} pred_s:{}".format(test_probs[0].cpu().numpy(), act_probs[0]))
+                    # print("value[0] dst:{} pred_s:{}".format(test_values[:5].cpu().numpy(), values[:5]))  
+                    # print("probs[0] dst:{} pred_s:{}".format(test_probs[0].cpu().numpy(), act_probs[0]))
+                    begin_values.append(values[:5])
+                    begin_act_probs.append(act_probs[0])
 
             self.policy_value_net.set_learning_rate(self.learn_rate*0.1)
             for i, data in enumerate(training_loader):  # 计划训练批次
@@ -300,11 +304,10 @@ class Train():
             for i, data in enumerate(testing_loader):
                 test_batch, test_probs, test_values = data
                 test_batch = test_batch.to(self.policy_value_net.device)
-                test_values = test_values.to(self.policy_value_net.device)
                 with torch.no_grad(): 
                     act_probs, values = net(test_batch) 
-                    print("value[0] dst:{} pred_e:{}".format(test_values[:5].cpu().numpy(), values[:5]))  
-                    print("probs[0] dst:{} pred_e:{}".format(test_probs[0].cpu().numpy(), act_probs[0]))
+                    print("value[0] begin:{} end:{} to:{}".format(begin_values[i], values[:5]), test_values[:5].numpy())  
+                    print("probs[0] begin:{} end:{} to:{} ".format(begin_act_probs[i], act_probs[0]),test_probs[0].numpy())
 
         except KeyboardInterrupt:
             print('quit')
