@@ -265,7 +265,7 @@ class Train():
                     begin_values.append(values[:5])
                     begin_act_probs.append(act_probs[0])
 
-            self.policy_value_net.set_learning_rate(self.learn_rate*0.1)
+            self.policy_value_net.set_learning_rate(self.learn_rate)
             for i, data in enumerate(training_loader):  # 计划训练批次
                 # 使用对抗数据重新训练策略价值网络模型
                 _, v_loss, p_loss = self.policy_update(data, self.epochs)
