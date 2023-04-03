@@ -420,7 +420,8 @@ class Train():
             if data["steps"][m]["reward"]>0:
                 pieces_reward[data["steps"][m]["piece_count"]] = 1
         for m in range(piececount-1,-1,-1):
-            if pieces_reward[m]>0: break
+            if pieces_reward[m]>0: 
+                last_reward = last_reward/2
             pieces_reward[m] = last_reward 
 
         # 统计方块的高度
@@ -430,7 +431,7 @@ class Train():
         # 游戏的得分算法1，每一步都减1，如果碰到惩罚直接加
         for m in range(step_count):
             p =  data["steps"][m]["piece_count"]
-            ext_reward = 0 if pieces_reward[p]>=0 else pieces_reward[p]
+            ext_reward = pieces_reward[p]
             data["steps"][m]["value"]= -m + ext_reward 
         pieces_value = [data["steps"][pieces_steps[p]]["value"] for p in range(piececount)]
 
@@ -438,7 +439,7 @@ class Train():
         reward_mask = 0
         for m in range(step_count):
             p =  data["steps"][m]["piece_count"]
-            ext_reward = 0 if pieces_reward[p]>=0 else pieces_reward[p]
+            ext_reward = pieces_reward[p]
             data["steps"][m]["score"]= -m + reward_mask + ext_reward  
             if pieces_reward[p]>0 and m==pieces_steps[p] : reward_mask=m+1 
         pieces_score = [data["steps"][pieces_steps[p]]["score"] for p in range(piececount)]
