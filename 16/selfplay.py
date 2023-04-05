@@ -451,6 +451,8 @@ class Train():
         print()
         print("reward:", pieces_reward)
         print()
+        print("exreward:", pieces_exreward)
+        print()
         print("height:", pieces_height)
         print()
         print("value: ", pieces_value)
