@@ -85,7 +85,7 @@ class Agent(object):
         if self.state!=0 or init:
             self.status[0]=self.get_nextpiece_borad()
             idx = self.piececount-self.last_reward_piece_idx
-            assert idx < self.height
+            idx = min(self.height, idx)
             for h in range(idx):
                 for w in range(self.width):
                     y = self.height-h-1
