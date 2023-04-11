@@ -143,7 +143,7 @@ class MCTS():
         if self.depth>1000: return 0
 
         if game.terminal: self.Es[s] = -1000
-        if game.reward>0: self.Es[s] = 0
+        # if game.reward>0: self.Es[s] = 0
 
 
         # 如果得分不等于0，标志探索结束
@@ -213,6 +213,7 @@ class MCTS():
         # else:
         #     v = self.search(game)
         v = self.search(game)
+        if game.reward>0: v=v/2
 
         # 更新 Q 值 和 访问次数
         if (s, a) in self.Qsa:
