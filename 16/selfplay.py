@@ -200,7 +200,7 @@ class Train():
             print([p["shape"] for p in his_pieces])
             print("delete", his_pieces_file)
             os.remove(his_pieces_file)
-            agent = Agent(isRandomNextPiece=True, must_reward_pieces_count= must_reward_pieces_count, nextpieces=his_pieces)
+            agent = Agent(isRandomNextPiece=False, must_reward_pieces_count= must_reward_pieces_count, nextpieces=his_pieces)
         else:
             agent = Agent(isRandomNextPiece=True, must_reward_pieces_count= must_reward_pieces_count,)
 
