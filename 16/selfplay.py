@@ -431,7 +431,7 @@ class Train():
             pieces_height[m] = data["steps"][pieces_steps[m]]["piece_height"]
 
         # 游戏的得分算法1，每一步都减1，如果碰到奖励，不重置步骤，最终/除以全局的奖励
-        # 最大失分为100
+        # 最大失分为-100
         score_mask = (sum(pieces_reward)+1)*(agent.piececount+1)/100
         for m in range(step_count):
             p =  data["steps"][m]["piece_count"]
