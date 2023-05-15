@@ -436,8 +436,8 @@ class Train():
         for m in range(step_count):
             p =  data["steps"][m]["piece_count"]
             data["steps"][m]["value"]= -p/score_mask
-            if pieces_reward[p]>0 and m==pieces_steps[p] : 
-                score_mask=score_mask-1
+            # if pieces_reward[p]>0 and m==pieces_steps[p] : 
+            #     score_mask=score_mask-1
         pieces_value = [data["steps"][pieces_steps[p]]["value"] for p in range(piececount)]
 
         # 游戏的得分算法2，每一步都减1，如果碰到奖励，重置步骤，如果碰到惩罚直接加
