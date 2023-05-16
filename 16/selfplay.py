@@ -151,7 +151,7 @@ class Train():
         for _ in range(self.play_size):
             result = self.read_status_file(game_json)     
             agent = Agent(isRandomNextPiece=True,must_reward_pieces_count=20)
-            agent.show_mcts_process= True
+            agent.show_mcts_process= False
             agent.id = 0
 
             for i in count():
@@ -204,7 +204,7 @@ class Train():
         else:
             agent = Agent(isRandomNextPiece=False, must_reward_pieces_count= must_reward_pieces_count,)
 
-        agent.show_mcts_process= True
+        agent.show_mcts_process= False
         agent.id = 0
         piececount = agent.piececount
         mark_reward_piececount = -1
