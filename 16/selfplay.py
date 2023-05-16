@@ -204,7 +204,7 @@ class Train():
         else:
             agent = Agent(isRandomNextPiece=False, must_reward_pieces_count= must_reward_pieces_count,)
 
-        agent.show_mcts_process= False
+        agent.show_mcts_process= True
         agent.id = 0
         piececount = agent.piececount
         mark_reward_piececount = -1

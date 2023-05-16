@@ -64,7 +64,7 @@ class MCTS():
             # if game_.terminal: break
             # if len(available_acts)==1 : break
 
-            if self.depth > self._n_playout or n > self._n_playout*10 : break
+            if n >= self._n_playout-1 : break
             # if game_.piececount - game.prev_piececount>1 and n>self._n_playout/2: break
             # if self.depth < 200 and n < self._n_playout*10: continue 
 
@@ -81,10 +81,10 @@ class MCTS():
             # if visits_sum>=2048 or game.terminal: break
 
             # 如果达到最大探索次数，结束探索
-            if n >= self._n_playout -1 :
-                # visits_sum = sum([self.Nsa[(s, a)] if (s, a) in self.Nsa else 0 for a in available_acts])          
-                # if visits_sum<self._n_playout*2: continue
-                break
+            if avg_ns>0 and n >= self._n_playout/2:
+                visits_sum = sum([self.Nsa[(s, a)] if (s, a) in self.Nsa else 0 for a in available_acts])          
+                if visits_sum>avg_ns*1.2: break
+
         test_count = n+1
         act_visits = [(a, self.Nsa[(s, a)]) if (s, a) in self.Nsa else (a, 0) for a in available_acts]
         act_Qs = [(a, self.Qsa[(s, a)]) if (s, a) in self.Qsa else (a, 0) for a in available_acts]
