@@ -123,8 +123,6 @@ class Dataset(torch.utils.data.Dataset):
             scores[fn]=score
             values[fn]=value
 
-            print(state[1])
-
             b,h,w = state.shape
             for j in range(h):
                 if random.random()>0.5: continue
@@ -135,8 +133,6 @@ class Dataset(torch.utils.data.Dataset):
                 v = 0 if state[1][j][idx]==1 else 1            
                 for i in range(1,b):
                      state[i][j][idx]=v
-
-            print(state[1])
 
             # if score%1==0:
             #     self.data[fn]={"value":-1/(score+1), "state":state, "mcts_prob": mcts_prob}
