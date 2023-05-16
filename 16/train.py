@@ -122,23 +122,17 @@ class Dataset(torch.utils.data.Dataset):
                 continue
             scores[fn]=score
             values[fn]=value
-            # s,h,w = state.shape
 
-            # canzero=[]
-            # for i in range(w):
-            #     check=False
-            #     for j in range(10,20):
-            #         if state[1][j][i]==1:
-            #             if not check:
-            #                 check=True
-            #             else:
-            #                 canzero.append([j,i])
-            # canzero_len = len(canzero)
-            # if canzero_len>10:
-            #     zerolist = random.sample(canzero,random.randint(1,canzero_len//2))
-            #     for zero in zerolist:
-            #         for i in range(s):
-            #             state[i][zero[0]][zero[1]]=0
+
+            b,h,w = state.shape
+            for j in range(h):
+                if random.random()>0.5: continue
+                c = np.sum(state[1][j]) 
+                if c==0 or c==1 or c==w-1: continue
+                idx = random.randint(0,w-1)
+                v = 0 if state[1][j][idx]==1 else 1            
+                for i in range(1,b):
+                     state[i][j][idx]=v
 
             # if score%1==0:
             #     self.data[fn]={"value":-1/(score+1), "state":state, "mcts_prob": mcts_prob}
