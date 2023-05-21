@@ -81,7 +81,7 @@ class MCTS():
             # if visits_sum>=2048 or game.terminal: break
 
             # 如果达到最大探索次数，结束探索
-            if avg_ns>0:
+            if avg_ns>0 and n>=self._n_playout/4:
                 visits_sum = sum([self.Nsa[(s, a)] if (s, a) in self.Nsa else 0 for a in available_acts])          
                 if visits_sum>avg_ns*1.2: break
 
