@@ -300,15 +300,16 @@ class Train():
                 vacc = []
                 depth = []
                 ns = []
-                winner  = True if agent.piececount > result["total"]["piececount"] else False
+                # winner  = True if agent.piececount > result["total"]["piececount"] else False
                 for step in data["steps"]:
                     pacc.append(step["acc_ps"])
                     depth.append(step["depth"])
                     ns.append(step["ns"])
-                    if (not winner and step["state_value"]>0) or (winner and step["state_value"]<0):
-                        vacc.append(0)
-                    else:
-                        vacc.append(1)
+                    vacc.append(step["state_value"])
+                    # if (not winner and step["state_value"]>0) or (winner and step["state_value"]<0):
+                    #     vacc.append(0)
+                    # else:
+                    #     vacc.append(1)
 
                 pacc = np.average(pacc)
                 vacc = np.average(vacc)
