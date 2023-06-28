@@ -126,8 +126,8 @@ class Train():
         print("TRAIN Self Play starting ...")
 
         if os.path.exists(model_file):
-            if time.time()-os.path.getmtime(model_file)>30*60:
-                print("超过30分钟模型都没有更新了，停止训练")
+            if time.time()-os.path.getmtime(model_file)>120*60:
+                print("超过120分钟模型都没有更新了，停止训练")
                 time.sleep(60)
                 return
 
