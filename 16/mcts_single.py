@@ -203,7 +203,7 @@ class MCTS():
 
         # 现实奖励
         if game.state == 1 and game.reward>0:
-            v = game.reward/10. + self.search(game)  
+            v = 1 #game.reward/10. + self.search(game)  
         else:     
             v = self.search(game) 
         #     _s = game.get_key()
