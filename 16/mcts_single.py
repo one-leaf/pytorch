@@ -202,10 +202,10 @@ class MCTS():
         self.depth = self.depth +1
 
         # 现实奖励
-        if game.state == 1 and game.reward>0:
-            v = 0
-        else:     
-            v = self.search(game)
+        # if game.state == 1 and game.reward>0:
+        #     v = 0
+        # else:     
+        v = self.search(game)
         #     _s = game.get_key()
         #     if _s in self.Vs and len(game.nextpiece)==0 and game.piececount - game.prev_piececount > 1:
         #         v = self.Vs[_s]
