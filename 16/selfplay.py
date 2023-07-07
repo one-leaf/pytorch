@@ -150,7 +150,7 @@ class Train():
         his_pieces = []
         for _ in range(self.play_size):
             result = self.read_status_file(game_json)     
-            agent = Agent(isRandomNextPiece=True,must_reward_pieces_count=20)
+            agent = Agent(isRandomNextPiece=True, must_reward_pieces_count=20)
             agent.show_mcts_process= False
             agent.id = 0
 
