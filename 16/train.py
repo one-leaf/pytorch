@@ -183,7 +183,7 @@ class Dataset(torch.utils.data.Dataset):
             os.rename(fn, savefile)
             if len(self.newsample)<self.test_size:
                 self.newsample.append(savefile)
-            if (i>=32 and i>len(movefiles)*0.1) or i>=self.max_keep_size//2: break       
+            if (i>=31 and i>len(movefiles)*0.1) or i>=self.max_keep_size//2: break       
             if i>=self.max_keep_size//10: break       
         print("mv %s/%s files to train"%(i+1,len(movefiles)))
         if i==-1 :
