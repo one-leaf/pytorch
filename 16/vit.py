@@ -389,12 +389,12 @@ class VitNet(nn.Module):
         act = self.act_fc(act)
         act = self.act_fc_act(act)
         act = self.act_dist(act)                # [B, num_classes]
-        act = self.act_dist_act(act)
+        # act = self.act_dist_act(act)
 
         val = x[:, 0]                           # [B, 768]
         val = self.val_fc(val)
         val = self.val_fc_act(val)
         val = self.val_dist(val)                # [B, num_quantiles]
-        # val = self.val_dist_act(val)
+        val = self.val_dist_act(val)
 
         return act, val        
