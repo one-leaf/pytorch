@@ -142,7 +142,7 @@ class MCTS():
 
         if self.depth>1000: return 0
 
-        if game.terminal: self.Es[s] = -2
+        if game.terminal: self.Es[s] = -1
         # if game.reward>0: self.Es[s] = 0
 
 
