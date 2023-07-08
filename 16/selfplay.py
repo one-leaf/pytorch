@@ -312,7 +312,7 @@ class Train():
                     #     vacc.append(1)
 
                 pacc = np.average(pacc)
-                vacc = np.var(vacc)
+                vacc = np.average(vacc)
                 depth = np.average(depth)
                 ns = np.average(ns)
 
