@@ -170,7 +170,6 @@ class MCTS():
             self.Ps[s] = probs 
             self.Ns[s] = 0
             self.Vs[s] = v
-
             return v
 
         # 当前最佳概率和最佳动作
@@ -188,7 +187,6 @@ class MCTS():
                     #     cur_best = u
                     #     best_act = a
                     #     break
-
                 if u > cur_best:
                     cur_best = u
                     best_act = a
