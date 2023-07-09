@@ -207,7 +207,7 @@ class Agent(object):
 
         if not isFalling and (not self.tetromino.validposition(self.board, self.fallpiece, ay=1) \
                               or (self.piececount-self.last_reward_piece_idx)>self.must_reward_piece_count \
-                              or (self.fallpieceheight>self.score+6)):                  
+                              or (self.getFailLines()>self.score+5)):                  
             self.terminal = True 
             self.state = 1
             return self.state, self.reward 
@@ -267,6 +267,18 @@ class Agent(object):
         print(" "+" -"*self.width)
         print("score:", self.score, "piececount:", self.piececount, "emptyCount:", self.emptyCount, "fallpieceheight", self.fallpieceheight, \
             "pieceheight:", self.pieceheight, "heightDiff:", self.heightDiff, "getHeightStd:", self.heightStd)
+
+    # 统计不可消除行的数量
+    def getFailLines(self):
+        failLines=set()
+        for x in range(self.width):
+            block = False
+            for y in range(self.height):
+                if self.board[x][y]!=blank:
+                    block=True
+                elif block:
+                    failLines.add(y)
+        return len(failLines)
 
     # 统计当前最大高度
     def getMaxHeight(self):
