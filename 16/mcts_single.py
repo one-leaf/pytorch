@@ -195,13 +195,15 @@ class MCTS():
         act = game.position_to_action(a)
 
         # steps = game.piecesteps
+        flines = game.failLines
         game.step(act)
+        flines = flines - game.failLines 
 
         self.depth = self.depth +1
 
         # 现实奖励
-        if game.state == 1 and game.reward>0:
-            v = game.reward/10. + self.search(game)  
+        if game.state == 1:
+            v = flines/10. + self.search(game)  
         else:     
             v = self.search(game) 
         #     _s = game.get_key()

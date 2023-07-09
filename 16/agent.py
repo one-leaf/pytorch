@@ -247,7 +247,7 @@ class Agent(object):
                     line=line+"* "
             print(line)
         print(" "+" -"*self.width)            
-        print("score:", self.score, "steps:", self.steps,"piececount:", self.piececount, "pieceheight:", self.pieceheight, "faileLines:",self.failLines)
+        print("score:", self.score, "steps:", self.steps,"piececount:", self.piececount, "pieceheight:", self.pieceheight, "failLines:",self.failLines)
 
     def print(self):
         board = copy.deepcopy(self.board)
@@ -269,7 +269,7 @@ class Agent(object):
             print(line)
         print(" "+" -"*self.width)
         print("score:", self.score, "piececount:", self.piececount, "emptyCount:", self.emptyCount, "fallpieceheight", self.fallpieceheight, \
-            "pieceheight:", self.pieceheight, "heightDiff:", self.heightDiff, "getHeightStd:", self.heightStd, "faileLines:",self.failLines)
+            "pieceheight:", self.pieceheight, "heightDiff:", self.heightDiff, "getHeightStd:", self.heightStd, "failLines:",self.failLines)
 
     # 统计不可消除行的数量
     def getFailLines(self):
