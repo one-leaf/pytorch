@@ -276,7 +276,7 @@ class MCTSPlayer(object):
             # if max_qs_idx ==  max_ps_idx:
             #     idx = max_qs_idx                
             # elif (random.random() > 2*game.piececount/(avg_piececount+1))  or random.random()<(game.piececount - avg_piececount)/(avg_piececount+1):
-            if np.min(act_qs)>0 :
+            if np.min(act_qs)>=0 :
                 p = 0.9
                 # a=1的时候，dir机会均等，>1 强调均值， <1 强调两端
                 # 国际象棋 0.3 将棋 0.15 围棋 0.03
