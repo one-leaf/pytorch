@@ -210,7 +210,7 @@ class Agent(object):
 
         if not isFalling and (not self.tetromino.validposition(self.board, self.fallpiece, ay=1) \
                               or (self.piececount-self.last_reward_piece_idx)>self.must_reward_piece_count \
-                              or (self.failLines>self.score+5)):                  
+                              or (self.failLines>self.score+3)):                  
             self.terminal = True 
             self.state = 1
             return self.state, self.reward 
