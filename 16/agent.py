@@ -52,6 +52,8 @@ class Agent(object):
         self.heightDiff = 0
         # 方块高度标准差
         self.heightStd = 0
+        # 方块不能消除的行数
+        self.failLines = 0        
         # 当前方块的高度
         self.fallpieceheight = 0
         # 面板
@@ -185,7 +187,8 @@ class Agent(object):
             self.reward = self.tetromino.removecompleteline(self.board) 
             if self.reward>0: self.last_reward_piece_idx = self.piececount         
             self.score += self.reward
-            self.pieceheight = self.getAvgHeight()    
+            self.pieceheight = self.getAvgHeight()  
+            self.failLines = self.getFailLines()  
             # self.emptyCount = self.getEmptyCount()   
             # self.heightDiff = self.getHeightDiff()
             # self.heightStd = self.getHeightStd()   
@@ -207,7 +210,7 @@ class Agent(object):
 
         if not isFalling and (not self.tetromino.validposition(self.board, self.fallpiece, ay=1) \
                               or (self.piececount-self.last_reward_piece_idx)>self.must_reward_piece_count \
-                              or (self.getFailLines()>self.score+5)):                  
+                              or (self.failLines>self.score+5)):                  
             self.terminal = True 
             self.state = 1
             return self.state, self.reward 
@@ -244,7 +247,7 @@ class Agent(object):
                     line=line+"* "
             print(line)
         print(" "+" -"*self.width)            
-        print("score:", self.score, "steps:", self.steps,"piececount:", self.piececount, "pieceheight:", self.pieceheight)
+        print("score:", self.score, "steps:", self.steps,"piececount:", self.piececount, "pieceheight:", self.pieceheight, "faileLines:",self.failLines)
 
     def print(self):
         board = copy.deepcopy(self.board)
@@ -266,7 +269,7 @@ class Agent(object):
             print(line)
         print(" "+" -"*self.width)
         print("score:", self.score, "piececount:", self.piececount, "emptyCount:", self.emptyCount, "fallpieceheight", self.fallpieceheight, \
-            "pieceheight:", self.pieceheight, "heightDiff:", self.heightDiff, "getHeightStd:", self.heightStd)
+            "pieceheight:", self.pieceheight, "heightDiff:", self.heightDiff, "getHeightStd:", self.heightStd, "faileLines:",self.failLines)
 
     # 统计不可消除行的数量
     def getFailLines(self):
