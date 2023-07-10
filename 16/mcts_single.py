@@ -195,9 +195,9 @@ class MCTS():
         act = game.position_to_action(a)
 
         # steps = game.piecesteps
-        flines = game.failLines
+        # flines = game.failLines
         game.step(act)
-        flines = flines - game.failLines 
+        # flines = flines - game.failLines 
 
         self.depth = self.depth +1
 
