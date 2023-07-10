@@ -202,10 +202,10 @@ class MCTS():
         self.depth = self.depth +1
 
         # 现实奖励
-        if game.state == 1:
-            v = flines/10. + self.search(game)  
-        else:     
-            v = self.search(game) 
+        # if game.state == 1:
+        #     v = flines/10. + self.search(game)  
+        # else:     
+        v = self.search(game) 
         #     _s = game.get_key()
         #     if _s in self.Vs and len(game.nextpiece)==0 and game.piececount - game.prev_piececount > 1:
         #         v = self.Vs[_s]
@@ -278,7 +278,7 @@ class MCTSPlayer(object):
             # if max_qs_idx ==  max_ps_idx:
             #     idx = max_qs_idx                
             # elif (random.random() > 2*game.piececount/(avg_piececount+1))  or random.random()<(game.piececount - avg_piececount)/(avg_piececount+1):
-            if True or np.min(act_qs)>=0 :
+            if np.min(act_qs)>=0 :
                 p = 0.9
                 # a=1的时候，dir机会均等，>1 强调均值， <1 强调两端
                 # 国际象棋 0.3 将棋 0.15 围棋 0.03
