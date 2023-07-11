@@ -44,6 +44,7 @@ class MCTS():
 
         s = game.get_key()
         self.max_depth = 0
+        max_piececount = 0
         available_acts = game.availables
         game.prev_piececount = game.piececount
         game.prev_pieceheight = game.pieceheight
@@ -59,7 +60,7 @@ class MCTS():
             #     print(i, [a['shape'] for a in g.tetromino.nextpiece[-20:]])
             self.search(game_)
             if self.depth>self.max_depth: self.max_depth = self.depth
-
+            max_piececount = game_.piececount
             # 如果只有一种走法，只探测一次
             # if game_.terminal: break
             # if len(available_acts)==1 : break
@@ -126,7 +127,7 @@ class MCTS():
                 if (s, act) in self.Qsa: q = self.Qsa[(s, act)]
                 if s in self.Ps: p = self.Ps[s][act]
                 info.append([game.position_to_action_name(act), visit, round(q,2), round(p,2)])  
-            print(game.steps, game.fallpiece["shape"], "temp:", round(temp,2), "ns:", ns, "/", test_count, "depth:", self.max_depth, \
+            print(game.steps, game.fallpiece["shape"], "temp:", round(temp,2), "ns:", ns, "/", test_count, "depth:", self.max_depth,'/',max_piececount-game.piececount, \
                   "empty:", game.emptyCount, "height:", round(game.pieceheight,2), "value:", round(v,2), info)
 
         return acts, probs, qs, ps, v, ns
