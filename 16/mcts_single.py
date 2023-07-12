@@ -60,7 +60,7 @@ class MCTS():
             #     print(i, [a['shape'] for a in g.tetromino.nextpiece[-20:]])
             self.search(game_)
             if self.depth>self.max_depth: self.max_depth = self.depth
-            max_piececount = game_.piececount
+            if game_.piececount>max_piececount:  max_piececount = game_.piececount
             # 如果只有一种走法，只探测一次
             # if game_.terminal: break
             # if len(available_acts)==1 : break
