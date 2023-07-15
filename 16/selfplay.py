@@ -258,9 +258,9 @@ class Train():
 
                 result["total"]["avg_score_ex"] = result["total"]["avg_score_ex"]*0.99 + agent.score*0.01 
                 if game_reward>0:
-                    result["total"]["avg_reward_piececount"] = result["total"]["avg_reward_piececount"]*0.99 + (game_reward/agent.piececount)*0.01
+                    result["total"]["avg_reward_piececount"] = result["total"]["avg_reward_piececount"]*0.999 + (game_reward/agent.piececount)*0.001
                 else:
-                    result["total"]["avg_reward_piececount"] = result["total"]["avg_reward_piececount"]*1.01
+                    result["total"]["avg_reward_piececount"] = result["total"]["avg_reward_piececount"]*1.001
                 mark_score = result["total"]["avg_score_ex"]
 
                 # 速度控制在消耗50行
