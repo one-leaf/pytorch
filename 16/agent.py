@@ -150,24 +150,23 @@ class Agent(object):
         self.reward = 0
         self.steps += 1
         self.piecesteps += 1
-        self.level, self.fallfreq = self.tetromino.calculate(self.score)
+        # self.level, self.fallfreq = self.tetromino.calculate(self.score)
         
         self.actions.append(action)
 
-        if action == KEY_LEFT and self.tetromino.validposition(self.board, self.fallpiece, ax=-1):
-            self.fallpiece['x'] -= 1
+        # if action == KEY_LEFT and self.tetromino.validposition(self.board, self.fallpiece, ax=-1):
+        #     self.fallpiece['x'] -= 1
 
-        if action == KEY_RIGHT and self.tetromino.validposition(self.board, self.fallpiece, ax=1):
-            self.fallpiece['x'] += 1  
+        # if action == KEY_RIGHT and self.tetromino.validposition(self.board, self.fallpiece, ax=1):
+        #     self.fallpiece['x'] += 1  
 
-        if (action == KEY_DOWN) and self.tetromino.validposition(self.board, self.fallpiece, ay=1):
-            self.fallpiece['y'] += 1  
+        # if (action == KEY_DOWN) and self.tetromino.validposition(self.board, self.fallpiece, ay=1):
+        #     self.fallpiece['y'] += 1  
 
-        if action == KEY_ROTATION:
-            self.fallpiece['rotation'] =  (self.fallpiece['rotation'] + 1) % len(pieces[self.fallpiece['shape']])
-            if not self.tetromino.validposition(self.board,self.fallpiece):
-                self.fallpiece['rotation'] = (self.fallpiece['rotation'] - 1) % len(pieces[self.fallpiece['shape']])
-
+        # if action == KEY_ROTATION:
+        #     self.fallpiece['rotation'] =  (self.fallpiece['rotation'] + 1) % len(pieces[self.fallpiece['shape']])
+        #     if not self.tetromino.validposition(self.board,self.fallpiece):
+        #         self.fallpiece['rotation'] = (self.fallpiece['rotation'] - 1) % len(pieces[self.fallpiece['shape']])
         isFalling=True
         if self.tetromino.validposition(self.board, self.fallpiece, ay=1):
             self.fallpiece['y'] += 1
@@ -176,7 +175,7 @@ class Agent(object):
         else:
             isFalling = False
 
-        self.fallpieceheight = 20 - self.fallpiece['y']
+        # self.fallpieceheight = 20 - self.fallpiece['y']
 
         self.add_status()
         self.set_key()
@@ -187,12 +186,12 @@ class Agent(object):
             self.reward = self.tetromino.removecompleteline(self.board) 
             if self.reward>0: self.last_reward_piece_idx = self.piececount         
             self.score += self.reward
-            self.pieceheight = self.getAvgHeight()  
+            # self.pieceheight = self.getAvgHeight()  
             self.failLines = self.getFailLines()  
             # self.emptyCount = self.getEmptyCount()   
             # self.heightDiff = self.getHeightDiff()
             # self.heightStd = self.getHeightStd()   
-            self.pieces_height.append(self.fallpieceheight)
+            # self.pieces_height.append(self.fallpieceheight)
             self.state = 1
             self.piecesteps = 0
             self.piececount += 1 
@@ -209,7 +208,7 @@ class Agent(object):
             env.render(self.board, self.score, self.level, self.fallpiece, self.nextpiece)
 
         if not isFalling and (not self.tetromino.validposition(self.board, self.fallpiece, ay=1) \
-                              or (self.piececount-self.last_reward_piece_idx)>self.must_reward_piece_count \
+                            #   or (self.piececount-self.last_reward_piece_idx)>self.must_reward_piece_count \
                               or (self.failLines>self.score+3)):                  
             self.terminal = True 
             self.state = 1
