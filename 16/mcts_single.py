@@ -116,7 +116,7 @@ class MCTS():
             else:
                 probs = m/m_sum
 
-        qval = qs[np.argmax(probs)]
+        # qval = qs[np.argmax(probs)]
 
         if game.show_mcts_process or game.state == 1 :
             if game.state == 1: game.print()
