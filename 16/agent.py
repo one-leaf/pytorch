@@ -154,19 +154,19 @@ class Agent(object):
         
         self.actions.append(action)
 
-        # if action == KEY_LEFT and self.tetromino.validposition(self.board, self.fallpiece, ax=-1):
-        #     self.fallpiece['x'] -= 1
+        if action == KEY_LEFT:# and self.tetromino.validposition(self.board, self.fallpiece, ax=-1):
+            self.fallpiece['x'] -= 1
 
-        # if action == KEY_RIGHT and self.tetromino.validposition(self.board, self.fallpiece, ax=1):
-        #     self.fallpiece['x'] += 1  
+        if action == KEY_RIGHT:# and self.tetromino.validposition(self.board, self.fallpiece, ax=1):
+            self.fallpiece['x'] += 1  
 
-        # if (action == KEY_DOWN) and self.tetromino.validposition(self.board, self.fallpiece, ay=1):
-        #     self.fallpiece['y'] += 1  
+        if action == KEY_DOWN:# and self.tetromino.validposition(self.board, self.fallpiece, ay=1):
+            self.fallpiece['y'] += 1  
 
-        # if action == KEY_ROTATION:
-        #     self.fallpiece['rotation'] =  (self.fallpiece['rotation'] + 1) % len(pieces[self.fallpiece['shape']])
-        #     if not self.tetromino.validposition(self.board,self.fallpiece):
-        #         self.fallpiece['rotation'] = (self.fallpiece['rotation'] - 1) % len(pieces[self.fallpiece['shape']])
+        if action == KEY_ROTATION:
+            self.fallpiece['rotation'] =  (self.fallpiece['rotation'] + 1) % len(pieces[self.fallpiece['shape']])
+            # if not self.tetromino.validposition(self.board,self.fallpiece):
+                # self.fallpiece['rotation'] = (self.fallpiece['rotation'] - 1) % len(pieces[self.fallpiece['shape']])
         isFalling=True
         if self.tetromino.validposition(self.board, self.fallpiece, ay=1):
             self.fallpiece['y'] += 1
