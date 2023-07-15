@@ -182,7 +182,7 @@ class Train():
 
             self.save_status_file(result, game_json) 
 
-        must_reward_pieces_count = 20
+        must_reward_pieces_count = max(5,result["total"]["avg_reward_piececount"])
         # 正式运行
         player = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout)
 
@@ -240,10 +240,6 @@ class Train():
                 print("#"*repeat_count, 'score:', agent.score, 'height:', agent.pieceheight, 'piece:', agent.piececount, "shape:", agent.fallpiece["shape"], \
                     'step:', agent.steps, "step time:", round((time.time()-start_time)/i,3),'reward_p:', agent.piececount-mark_reward_piececount)
                 # if agent.score>result["total"]["reward"]+20: game_stop=True
-                result = self.read_status_file(game_json)
-                result["total"]["avg_reward_piececount"] = result["total"]["avg_reward_piececount"]*0.99 + (agent.piececount-mark_reward_piececount)*0.01
-                self.save_status_file(result, game_json)
-                mark_reward_piececount = agent.piececount
 
             piececount = agent.piececount
 
@@ -261,6 +257,7 @@ class Train():
                 steptime = paytime/agent.steps
 
                 result["total"]["avg_score_ex"] = result["total"]["avg_score_ex"]*0.99 + agent.score*0.01 
+                result["total"]["avg_reward_piececount"] = result["total"]["avg_reward_piececount"]*0.99 + (game_reward/agent.piececount)*0.01
                 mark_score = result["total"]["avg_score_ex"]
 
                 # 速度控制在消耗50行

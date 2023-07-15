@@ -207,10 +207,9 @@ class Agent(object):
             env.checkforquit()
             env.render(self.board, self.score, self.level, self.fallpiece, self.nextpiece)
 
-        if not isFalling and (not self.tetromino.validposition(self.board, self.fallpiece, ay=1)):
-                            #   \
-                            #   or (self.piececount-self.last_reward_piece_idx)>self.must_reward_piece_count \
-                            #   or (self.failLines>self.score+3)):                  
+        if not isFalling and (not self.tetromino.validposition(self.board, self.fallpiece, ay=1) \
+                              or (self.piececount > (self.score+1)*self.must_reward_piece_count)
+                              ):                                      
             self.terminal = True 
             self.state = 1
             return self.state, self.reward 
