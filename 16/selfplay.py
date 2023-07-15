@@ -182,7 +182,7 @@ class Train():
 
             self.save_status_file(result, game_json) 
 
-        must_reward_pieces_count = max(6,result["total"]["avg_reward_piececount"])
+        must_reward_pieces_count = max(5,result["total"]["avg_reward_piececount"])
         # 正式运行
         player = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout)
 
@@ -257,7 +257,10 @@ class Train():
                 steptime = paytime/agent.steps
 
                 result["total"]["avg_score_ex"] = result["total"]["avg_score_ex"]*0.99 + agent.score*0.01 
-                result["total"]["avg_reward_piececount"] = result["total"]["avg_reward_piececount"]*0.99 + (game_reward/agent.piececount)*0.01
+                if game_reward>0:
+                    result["total"]["avg_reward_piececount"] = result["total"]["avg_reward_piececount"]*0.99 + (game_reward/agent.piececount)*0.01
+                else:
+                    result["total"]["avg_reward_piececount"] = result["total"]["avg_reward_piececount"]*1.01
                 mark_score = result["total"]["avg_score_ex"]
 
                 # 速度控制在消耗50行
