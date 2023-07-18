@@ -173,6 +173,8 @@ class MCTS():
             self.Vs[s] = v
             return v
 
+        if game.piececount>game.prev_piececount+1: return self.Vs[s]
+
         # 当前最佳概率和最佳动作
         cur_best = -float('inf')
         best_act = -1
