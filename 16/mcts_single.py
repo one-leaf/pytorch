@@ -173,6 +173,7 @@ class MCTS():
             self.Vs[s] = v
             return v
 
+        # 限制探索方块仅仅限于2个
         if game.piececount>game.prev_piececount+1: return self.Vs[s]
 
         # 当前最佳概率和最佳动作
