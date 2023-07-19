@@ -447,9 +447,10 @@ class Train():
 
         # 游戏的得分算法1 ~ -1 平均分布
         # score_mask = (sum(pieces_reward)+1)*(agent.piececount+1)/100
+        begin_vaule = 1 if agent.score>0 else 0
         for m in range(step_count):
             p =  data["steps"][m]["piece_count"]
-            data["steps"][m]["value"] = 1.-(m+1)*2./step_count
+            data["steps"][m]["value"] = begin_vaule-(m+1)*(begin_vaule+1)/step_count
             # data["steps"][m]["value"]= -(p+1)/score_mask
             # if pieces_reward[p]>0 and m==pieces_steps[p] : 
             #     score_mask=score_mask-1
