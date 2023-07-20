@@ -290,7 +290,7 @@ class Train():
                             self.lr_multiplier *= 1.5
                         else:
                             continue
-                        print("kl:{} lr_multiplier:{} lr:{}".format(kl, self.lr_multiplier, self.learn_rate*self.lr_multiplier))
+                        print("kl:{} vs {} lr_multiplier:{} lr:{}".format(kl, self.kl_targ, self.lr_multiplier, self.learn_rate*self.lr_multiplier))
 
             self.policy_value_net.save_model(model_file)
    
