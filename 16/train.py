@@ -247,8 +247,8 @@ class Train():
             test_batch = None
 
             net = self.policy_value_net.policy_value
-            begin_values=[]
-            begin_act_probs=[]
+            begin_values=None
+            begin_act_probs=None
             for i, data in enumerate(testing_loader):
                 test_batch, test_probs, test_values = data
                 test_batch = test_batch.to(self.policy_value_net.device)
@@ -257,10 +257,23 @@ class Train():
                     act_probs, values = net(test_batch) 
                     # print("value[0] dst:{} pred_s:{}".format(test_values[:5].cpu().numpy(), values[:5]))  
                     # print("probs[0] dst:{} pred_s:{}".format(test_probs[0].cpu().numpy(), act_probs[0]))
-                    begin_values.append(values[:5])
-                    begin_act_probs.append(act_probs[0])
+                    if begin_values is None:
+                        begin_values = values
+                    else:
+                        begin_values = np.concatenate((begin_values, values), axis=0)
+                    if begin_act_probs is None:
+                        begin_act_probs = act_probs
+                    else:
+                        begin_act_probs = np.concatenate((begin_act_probs, act_probs), axis=0)
+                    # begin_values.append(values[:5])
+                    # begin_act_probs.append(act_probs[0])
 
-            self.policy_value_net.set_learning_rate(self.learn_rate)
+            train_conf_file=os.path.join(data_dir,"train_conf_pkl")
+            if os.path.exists(train_conf_file):
+                with open(train_conf_file, "rb") as fn:
+                    self.lr_multiplier = pickle.load(fn)
+                    print("lr_multiplier:", self.lr_multiplier, "learn_rate:", self.learn_rate*self.lr_multiplier)
+            self.policy_value_net.set_learning_rate(self.learn_rate*self.lr_multiplier)
             for i, data in enumerate(training_loader):  # 计划训练批次
                 # 使用对抗数据重新训练策略价值网络模型
                 _, v_loss, p_loss = self.policy_update(data, self.epochs)
@@ -270,39 +283,60 @@ class Train():
                     print("v_loss is nan!")
                     return
 
-                if i%10 == 0:
-                    print(("TRAIN idx {} : {} / {} v_loss:{:.5f}, p_loss:{:.5f}")\
-                        .format(i, i*self.batch_size, dataset_len, v_loss, p_loss))
+                # if i%10 == 0:
+                #     print(("TRAIN idx {} : {} / {} v_loss:{:.5f}, p_loss:{:.5f}")\
+                #         .format(i, i*self.batch_size, dataset_len, v_loss, p_loss))
 
-                    # 动态调整学习率
-                    if old_probs is None:
-                        test_batch, test_probs, test_values = data
-                        old_probs, old_value = self.policy_value_net.policy_value(test_batch) 
-                    else:
-                        new_probs, new_value = self.policy_value_net.policy_value(test_batch)
-                        kl = np.mean(np.sum(old_probs * (np.log(old_probs + 1e-10) - np.log(new_probs + 1e-10)), axis=1))
+                #     # 动态调整学习率
+                #     if old_probs is None:
+                #         test_batch, test_probs, test_values = data
+                #         old_probs, old_value = self.policy_value_net.policy_value(test_batch) 
+                #     else:
+                #         new_probs, new_value = self.policy_value_net.policy_value(test_batch)
+                #         kl = np.mean(np.sum(old_probs * (np.log(old_probs + 1e-10) - np.log(new_probs + 1e-10)), axis=1))
                         
-                        old_probs = None
+                #         old_probs = None
                         
-                        if kl > self.kl_targ * 2 and self.lr_multiplier > 0.1:
-                            self.lr_multiplier /= 1.5
-                        elif kl < self.kl_targ / 2 and self.lr_multiplier < 10:
-                            self.lr_multiplier *= 1.5
-                        else:
-                            continue
-                        print("kl:{} vs {} lr_multiplier:{} lr:{}".format(kl, self.kl_targ, self.lr_multiplier, self.learn_rate*self.lr_multiplier))
+                #         if kl > self.kl_targ * 2 and self.lr_multiplier > 0.1:
+                #             self.lr_multiplier /= 1.5
+                #         elif kl < self.kl_targ / 2 and self.lr_multiplier < 10:
+                #             self.lr_multiplier *= 1.5
+                #         else:
+                #             continue
+                #         print("kl:{} vs {} lr_multiplier:{} lr:{}".format(kl, self.kl_targ, self.lr_multiplier, self.learn_rate*self.lr_multiplier))
 
             self.policy_value_net.save_model(model_file)
    
-
+            end_values=None
+            end_act_probs=None
             net = self.policy_value_net.policy_value
             for i, data in enumerate(testing_loader):
                 test_batch, test_probs, test_values = data
                 test_batch = test_batch.to(self.policy_value_net.device)
                 with torch.no_grad(): 
                     act_probs, values = net(test_batch) 
-                    print("value[0] begin:{} end:{} to:{}".format(begin_values[i], values[:5], test_values[:5].numpy()))  
-                    print("probs[0] begin:{} end:{} to:{} ".format(begin_act_probs[i], act_probs[0],test_probs[0].numpy()))
+                    if end_values is None:
+                        end_values=values
+                    else:
+                        end_values=np.concatenate((end_values, values), axis=0)
+                    if end_act_probs is None:
+                        end_act_probs=act_probs
+                    else:
+                        end_act_probs=np.concatenate((end_act_probs, act_probs), axis=0)
+
+                print("value[0] begin:{} end:{} to:{}".format(begin_values[-1], end_values[-1], test_values[-1].numpy()))  
+                print("probs[0] begin:{} end:{} to:{} ".format(begin_act_probs[-1], end_act_probs[-1],test_probs[-1].numpy()))
+            
+            kl = np.mean(np.sum(begin_act_probs * (np.log(begin_act_probs + 1e-10) - np.log(end_act_probs + 1e-10)), axis=1))
+            print("act_probs, kl:",kl)
+            if kl > self.kl_targ * 2 and self.lr_multiplier > 0.1:
+                self.lr_multiplier /= 1.5
+            elif kl < self.kl_targ / 2 and self.lr_multiplier < 10:
+                self.lr_multiplier *= 1.5
+            print("kl:{} vs {} lr_multiplier:{} lr:{}".format(kl, self.kl_targ, self.lr_multiplier, self.learn_rate*self.lr_multiplier))
+            with open(train_conf_file, 'wb') as fn:
+                pickle.dump(self.lr_multiplier, fn)
+
 
         except KeyboardInterrupt:
             print('quit')
