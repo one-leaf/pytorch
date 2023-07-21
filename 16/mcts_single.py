@@ -65,7 +65,7 @@ class MCTS():
             # if game_.terminal: break
             # if len(available_acts)==1 : break
             
-            if n >= self._n_playout/8 and game.piececount>game.score*2.5+game.must_reward_piece_count: break
+            if n >= self._n_playout/16-1 and game.piececount>game.score*2.5+game.must_reward_piece_count: break
             if n >= self._n_playout-1 : break
             # if game_.piececount - game.prev_piececount>1 and n>self._n_playout/2: break
             # if self.depth < 200 and n < self._n_playout*10: continue 
