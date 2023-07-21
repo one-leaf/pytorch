@@ -54,6 +54,8 @@ class Agent(object):
         self.heightStd = 0
         # 方块不能消除的行数
         self.failLines = 0        
+        # 方块不能消除的最大高度
+        self.failtop = 0
         # 当前方块的高度
         self.fallpieceheight = 0
         # 面板
@@ -192,6 +194,7 @@ class Agent(object):
             # self.heightDiff = self.getHeightDiff()
             # self.heightStd = self.getHeightStd()   
             # self.pieces_height.append(self.fallpieceheight)
+            self.failtop = self.getFailTop()
             self.state = 1
             self.piecesteps = 0
             self.piececount += 1 
@@ -268,7 +271,7 @@ class Agent(object):
             print(line)
         print(" "+" -"*self.width)
         print("score:", self.score, "piececount:", self.piececount, "emptyCount:", self.emptyCount, "fallpieceheight", self.fallpieceheight, \
-            "pieceheight:", self.pieceheight, "heightDiff:", self.heightDiff, "getHeightStd:", self.heightStd, "failLines:",self.failLines)
+            "pieceheight:", self.pieceheight, "heightDiff:", self.heightDiff, "getHeightStd:", self.heightStd, "failTop:",self.failtop)
 
     # 统计不可消除行的数量
     def getFailLines(self):
@@ -281,6 +284,17 @@ class Agent(object):
                 elif block:
                     failLines.add(y)
         return len(failLines)
+
+    # 统计不可消除行的最高高度
+    def getFailTop(self):
+        blocks = [False for x in range(self.width)]
+        for y in range(self.height):
+            for x in range(self.width):            
+                if self.board[x][y]!=blank:
+                    blocks[x]=True
+                elif blocks[x]==True:
+                    return self.height-y
+        return 0
 
     # 统计当前最大高度
     def getMaxHeight(self):

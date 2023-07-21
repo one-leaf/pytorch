@@ -176,8 +176,8 @@ class MCTS():
 
         # 限制探索方块仅仅限于2个
         if game.state==1 and game.piececount>game.prev_piececount+1: 
-            if game.piececount>game.score*2.5+game.must_reward_piece_count: return -1+game.reward
-            return self.Vs[s] + game.reward
+            if game.piececount>game.score*2.5+game.must_reward_piece_count: return -1-game.failtop/20
+            return self.Vs[s] - game.failtop/20
 
         # 当前最佳概率和最佳动作
         cur_best = -float('inf')
