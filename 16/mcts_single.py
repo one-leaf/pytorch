@@ -47,10 +47,11 @@ class MCTS():
         max_piececount = 0
         available_acts = game.availables
         game.prev_piececount = game.piececount
-        game.prev_pieceheight = game.pieceheight
-        game.prev_emptyCount = game.emptyCount
-        game.prev_heightDiff = game.heightDiff
-        game.prev_heightStd = game.heightStd
+        # game.prev_pieceheight = game.pieceheight
+        # game.prev_emptyCount = game.emptyCount
+        # game.prev_heightDiff = game.heightDiff
+        # game.prev_heightStd = game.heightStd
+        game.prev_failtop = game.failtop
         # for n in range(self._n_playout):
         test_count = 0
         for n in count():
@@ -176,8 +177,10 @@ class MCTS():
 
         # 限制探索方块仅仅限于2个
         if game.state==1 and game.piececount>game.prev_piececount+1: 
-            if game.piececount>game.score*2.5+game.must_reward_piece_count: return -1-game.failtop/20
-            return self.Vs[s] - game.failtop/20
+            reward = game.reward if game.failtop<=game.prev_failtop else 0
+                
+            if game.piececount>game.score*2.5+game.must_reward_piece_count: return -1+reward
+            return self.Vs[s] + reward
 
         # 当前最佳概率和最佳动作
         cur_best = -float('inf')
