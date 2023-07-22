@@ -177,10 +177,8 @@ class MCTS():
 
         # 限制探索方块仅仅限于2个
         if game.state==1 and game.piececount>game.prev_piececount+1: 
-            reward = 0
-            if game.reward>0:                
-                reward = game.reward if game.failtop<=game.prev_failtop else -game.failtop/20
-                
+            reward = game.reward if game.failtop<=game.prev_failtop else (game.prev_failtop-game.failtop)/20
+          
             if game.piececount>game.score*2.5+game.must_reward_piece_count: return -1+reward
             return self.Vs[s] + reward
 
