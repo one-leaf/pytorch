@@ -182,8 +182,9 @@ class Train():
 
             self.save_status_file(result, game_json) 
 
-        must_reward_pieces_count = max(5,result["total"]["avg_reward_piececount"])
-        must_reward_pieces_count = min(10,must_reward_pieces_count)
+        # must_reward_pieces_count = max(5,result["total"]["avg_reward_piececount"])
+        # must_reward_pieces_count = min(10,must_reward_pieces_count)
+        must_reward_pieces_count = 10
         # 正式运行
         player = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout)
 
