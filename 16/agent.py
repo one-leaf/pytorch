@@ -83,11 +83,13 @@ class Agent(object):
         # key
         self.set_key()
 
+    # 状态一共8层， 0 下一个方块， 1 是背景 ，剩下得是 6 步下落的方块
     def add_status(self, init=False):
         self.status.append(self.get_fallpiece_board())
-        del self.status[0]
-        self.status[0]=self.get_nextpiece_borad()
-        self.status[1]=self.getBoard()
+        del self.status[2]
+        if self.state!=0 or init:
+            self.status[0]=self.get_nextpiece_borad()
+            self.status[1]=self.getBoard()
         # del self.status[1]
         # if self.state!=0 or init:
         #     self.status[0]=self.get_nextpiece_borad()
