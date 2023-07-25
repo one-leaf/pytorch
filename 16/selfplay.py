@@ -108,11 +108,9 @@ class Train():
         for i in range(len(states)):
             state, mcts_prob, value, score=states[i], mcts_probs[i], values[i], scores[i]
             extend_data.append((state, mcts_prob, value, score))
-            # 如果旋转的概率不大，则可以反转左右来增加样本数
-            if mcts_prob[0]<0.1:
-                equi_state = np.array([np.fliplr(s) for s in state])
-                equi_mcts_prob = mcts_prob[[0,2,1,3]]
-                extend_data.append((equi_state, equi_mcts_prob, value, score))
+            equi_state = np.array([np.fliplr(s) for s in state])
+            equi_mcts_prob = mcts_prob[[0,2,1,3]]
+            extend_data.append((equi_state, equi_mcts_prob, value, score))
             # if i==0:
             #     print("state:",state)
             #     print("mcts_prob:",mcts_prob)
@@ -500,8 +498,8 @@ class Train():
         # 保存对抗数据到data_buffer
         filetime = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         # 现在第一层改为了横向，所以不能做图片左右翻转增强
-        # for i, obj in enumerate(self.get_equi_data(states, mcts_probs, values, score)):
-        for i, obj in enumerate(zip(states, mcts_probs, values, score)):
+        for i, obj in enumerate(self.get_equi_data(states, mcts_probs, values, score)):
+        # for i, obj in enumerate(zip(states, mcts_probs, values, score)):
             filename = "{}-{}.pkl".format(filetime, i)
             savefile = os.path.join(data_wait_dir, filename)
             with open(savefile, "wb") as fn:

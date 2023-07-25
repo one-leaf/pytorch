@@ -84,16 +84,19 @@ class Agent(object):
         self.set_key()
 
     def add_status(self, init=False):
-        self.status.append(self.get_fallpiece_board()+self.getBoard())
-        del self.status[1]
-        if self.state!=0 or init:
-            self.status[0]=self.get_nextpiece_borad()
-            idx = self.piececount-self.last_reward_piece_idx
-            idx = min(self.height, idx)
-            for h in range(idx):
-                for w in range(self.width):
-                    y = self.height-h-1
-                    self.status[0][y][w] = 1 if self.status[0][y][w]==0 else 0
+        self.status.append(self.get_fallpiece_board())
+        del self.status[0]
+        self.status[0]=self.get_nextpiece_borad()
+        self.status[1]=self.getBoard()
+        # del self.status[1]
+        # if self.state!=0 or init:
+        #     self.status[0]=self.get_nextpiece_borad()
+            # idx = self.piececount-self.last_reward_piece_idx
+            # idx = min(self.height, idx)
+            # for h in range(idx):
+            #     for w in range(self.width):
+            #         y = self.height-h-1
+            #         self.status[0][y][w] = 1 if self.status[0][y][w]==0 else 0
 
     # 概率的索引位置转action
     def position_to_action(self, position):
@@ -145,6 +148,25 @@ class Agent(object):
         random.shuffle(acts)
         
         return acts         
+
+    # def getNextStatus(self):
+    #     actions = self.availables
+    #     fallpiece = copy.deepcopy(self.fallpiece)
+    #     result={}
+    #     for action in actions:
+    #         if action == KEY_LEFT: fallpiece['x'] -=1
+    #         if action == KEY_RIGHT: fallpiece['x'] +=1
+    #         if action == KEY_DOWN: fallpiece['y'] +=1
+    #         if action == KEY_ROTATION: fallpiece['rotation'] = (fallpiece['rotation'] +1)%len(pieces[self.fallpiece['shape']])
+    #         if self.tetromino.validposition(self.board, fallpiece, ay=1): fallpiece['y'] +=1
+    #         status = [None for i in range(8)]
+    #         status[0] = self.status[0]            
+    #         for i in range(1,8-1,1):
+    #             status[i]=self.status[i+1]
+    #         status[-1]=self.get_fallpiece_board(fallpiece)
+    #         key = hash((status[-1]+status[0]).data.tobytes())+self.id
+    #         result[key]=status
+    #     return result
 
     def step(self, action, env=None):
         # 状态 0 下落过程中 1 更换方块 2 结束一局
@@ -222,7 +244,7 @@ class Agent(object):
         return self.state, self.reward
 
     def set_key(self):
-        info = self.status[-1]
+        info = self.status[-1]+self.status[1]
         self.key = hash(info.data.tobytes())+self.id
 
     def get_key(self):
@@ -434,11 +456,13 @@ class Agent(object):
         return board
 
     # 获得下落方块的信息
-    def get_fallpiece_board(self):   
+    def get_fallpiece_board(self, fallpiece=None):   
         board=np.zeros((self.height, self.width))
         # 需要加上当前下落方块的值
-        if self.fallpiece != None:
-            piece = self.fallpiece
+        if fallpiece==None: fallpiece = self.fallpiece
+
+        if fallpiece != None:
+            piece = fallpiece
             shapedraw = pieces[piece['shape']][piece['rotation']]
             for x in range(templatenum):
                 for y in range(templatenum):
