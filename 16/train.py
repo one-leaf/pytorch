@@ -352,6 +352,7 @@ class Train():
 if __name__ == '__main__':
     # train
     # logging.basicConfig(format='%(asctime)s %(message)s', level=logging.DEBUG)
+    os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
     print('start training',datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
     training = Train()
     training.run()
