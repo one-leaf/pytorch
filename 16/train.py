@@ -277,8 +277,11 @@ class Train():
             for i, data in enumerate(training_loader):  # 计划训练批次
                 # 使用对抗数据重新训练策略价值网络模型
                 _, v_loss, p_loss = self.policy_update(data, self.epochs)
+                
                 if i%100 == 0:
                     print(i,"v_loss:",v_loss,"p_loss",p_loss)
+                    time.sleep(0.1)
+
                 if math.isnan(v_loss): 
                     print("v_loss is nan!")
                     return
@@ -331,7 +334,7 @@ class Train():
                 print("probs[0] begin:{} end:{} to:{} ".format(begin_act_probs[b_idx], end_act_probs[b_idx],test_probs[-1].numpy()))
                 print("probs[1] begin:{} end:{} to:{} ".format(begin_act_probs[b_idx-1], end_act_probs[b_idx-1],test_probs[-2].numpy()))
                 print("probs[2] begin:{} end:{} to:{} ".format(begin_act_probs[b_idx-2], end_act_probs[b_idx-2],test_probs[-3].numpy()))
-            
+                
             kl = np.mean(np.sum(begin_act_probs * (np.log(begin_act_probs + 1e-10) - np.log(end_act_probs + 1e-10)), axis=1))
             print("act_probs, kl:",kl)
             if kl > self.kl_targ * 2 and self.lr_multiplier > 0.1:
