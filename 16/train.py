@@ -217,8 +217,8 @@ class Train():
         # 随机抽取data_buffer中的对抗数据
         state_batch, mcts_probs_batch, values_batch = sample_data
         # 训练策略价值网络
-        for i in range(epochs):
-            loss, v_loss, p_loss= self.policy_value_net.train_step(state_batch, mcts_probs_batch, values_batch, self.learn_rate * self.lr_multiplier)
+        # for i in range(epochs):
+        loss, v_loss, p_loss= self.policy_value_net.train_step(state_batch, mcts_probs_batch, values_batch, self.learn_rate * self.lr_multiplier)
          
         return loss, v_loss, p_loss
 
