@@ -203,7 +203,7 @@ class Train():
         self.learn_rate = 1e-5
         self.lr_multiplier = 1.0  # 基于KL的自适应学习率
         self.temp = 1  # MCTS的概率参数，越大越不肯定，训练时1，预测时1e-3
-        self.n_playout = 64  # 每个动作的模拟战记录个数
+        self.n_playout = 256  # 每个动作的模拟战记录个数
         self.play_batch_size = 1 # 每次自学习次数
         self.buffer_size = 200000  # cache对次数
         self.epochs = 1  # 每次更新策略价值网络的训练步骤数, 推荐是5
@@ -278,7 +278,7 @@ class Train():
                 # 使用对抗数据重新训练策略价值网络模型
                 _, v_loss, p_loss = self.policy_update(data, self.epochs)
 
-                if i%100 == 0:
+                if i%10 == 0:
                     print(i,"v_loss:",v_loss,"p_loss",p_loss)
                     time.sleep(0.1)
 
