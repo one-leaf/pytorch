@@ -232,6 +232,8 @@ class Train():
 
             data["steps"].append(_step)
 
+            time.sleep(0.1)
+
             # 这里的奖励是消除的行数
             if reward > 0:
                 repeat_count = 40
