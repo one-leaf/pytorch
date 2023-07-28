@@ -337,9 +337,9 @@ class Train():
                 
             kl = np.mean(np.sum(begin_act_probs * (np.log(begin_act_probs + 1e-10) - np.log(end_act_probs + 1e-10)), axis=1))
             print("act_probs, kl:",kl)
-            if kl > self.kl_targ * 2 and self.lr_multiplier > 0.1:
+            if kl > self.kl_targ * 2 and self.lr_multiplier > 0.01:
                 self.lr_multiplier /= 1.5
-            elif kl < self.kl_targ / 2 and self.lr_multiplier < 10:
+            elif kl < self.kl_targ / 2 and self.lr_multiplier < 100:
                 self.lr_multiplier *= 1.5
             print("kl:{} vs {} lr_multiplier:{} lr:{}".format(kl, self.kl_targ, self.lr_multiplier, self.learn_rate*self.lr_multiplier))
             with open(train_conf_file, 'wb') as fn:
