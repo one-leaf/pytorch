@@ -123,12 +123,13 @@ class MCTS():
         if game.show_mcts_process or game.state == 1 :
             if game.state == 1: game.print()
             info=[]
+            visits_sum=sum(visits)
             for idx in sorted(range(len(visits)), key=visits.__getitem__)[::-1]:
                 act, visit = act_visits[idx]
                 q, p = 0,0
                 if (s, act) in self.Qsa: q = self.Qsa[(s, act)]
                 if s in self.Ps: p = self.Ps[s][act]
-                info.append([game.position_to_action_name(act), visit, round(q,2), round(p,2)])  
+                info.append([game.position_to_action_name(act), round(visit/visits_sum,2), round(q,2), round(p,2)])  
             print(game.steps, game.fallpiece["shape"], "temp:", round(temp,2), "ns:", ns, "/", test_count, "depth:", self.max_depth,'/',max_piececount-game.piececount, \
                   "empty:", game.emptyCount, "height:", round(game.pieceheight,2), "value:", round(v,2), info)
 
