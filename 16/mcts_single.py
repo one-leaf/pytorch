@@ -52,9 +52,9 @@ class MCTS():
         # game.prev_heightDiff = game.heightDiff
         # game.prev_heightStd = game.heightStd
         game.prev_failtop = game.failtop
-        # for n in range(self._n_playout):
         test_count = 0
-        for n in count():
+        for n in range(self._n_playout):
+        # for n in count():
             self.depth = 0
             game_ = copy.deepcopy(game)
             # for i, g in enumerate(games_dict["games"]):

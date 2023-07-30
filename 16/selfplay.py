@@ -40,6 +40,8 @@ class Train():
         # 由于value完全用结果胜负来拟合，所以value不稳，只能靠概率p拟合，最后带动value来拟合
         self.c_puct = 1  
 
+        self.max_step_count = 10000 
+
         # 等待训练的序列
         self.waitplaydir=os.path.join(data_dir,"play")
         if not os.path.exists(self.waitplaydir): os.makedirs(self.waitplaydir)
@@ -152,7 +154,7 @@ class Train():
             agent.show_mcts_process= False
             agent.id = 0
 
-            for i in count():
+            for i in range(self.max_step_count):
                 move_probs, state_value = policy_value_net.policy_value_fn(agent)
                 action, acc_ps = 0, 0
                 for a, p in move_probs:
@@ -168,6 +170,7 @@ class Train():
                     result["total"]["avg_piececount"] = result["total"]["avg_piececount"]*0.9999 + agent.piececount*0.0001
                     result["lastupdate"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                     break
+
             agent.print()
 
             # 判断是否需要重新玩,如果当前小于平均的0.8，放到运行池训练
@@ -208,7 +211,7 @@ class Train():
         agent.id = 0
         piececount = agent.piececount
         mark_reward_piececount = -1
-        for i in count():
+        for i in range(self.max_step_count):
             _step={"step":i, "curr_player":agent.id}
             _step["state"] = agent.current_state()    
             # print(_step["state"][0])           
