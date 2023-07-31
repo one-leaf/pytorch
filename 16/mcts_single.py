@@ -160,10 +160,10 @@ class MCTS():
             act_probs, v = self._policy(game)
 
             if game.reward==0 and game.state==1 and game.piececount==game.score*2.5+game.must_reward_piece_count:
-                v = -1
+                v = -1+v
             elif game.reward>0 and game.state==1 and game.piececount<=game.score*2.5+game.must_reward_piece_count:
-                v = 1
-                
+                v = 1+v
+
             probs = np.zeros(game.actions_num)
             for act, prob in act_probs:
                 probs[act] = prob
