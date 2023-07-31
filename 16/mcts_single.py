@@ -131,7 +131,7 @@ class MCTS():
                 if s in self.Ps: p = self.Ps[s][act]
                 info.append([game.position_to_action_name(act), round(q,2), round(p,2)],'->', round(visit/visits_sum,2),)  
             print(game.steps, game.fallpiece["shape"], "temp:", round(temp,2), "ns:", ns, "/", test_count, "depth:", self.max_depth,'/',max_piececount-game.piececount, \
-                  "empty:", game.emptyCount, "height:", round(game.pieceheight,2), "value:", round(v,2), info)
+                  "value:", round(v,2), info)
 
         return acts, probs, qs, ps, v, ns
 
