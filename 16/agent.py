@@ -252,6 +252,9 @@ class Agent(object):
     def get_key(self):
         return self.key
 
+    def is_status_optimal(self):
+        return self.piececount<=self.score*2.5+self.must_reward_piece_count
+
     # 最差分 0 ~ -1
     def get_final_reward(self):
         # return -self.max_pieces_count/self.piececount+1
