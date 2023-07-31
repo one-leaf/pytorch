@@ -99,8 +99,8 @@ class PolicyValueNet():
         # value =  torch.mean(value, dim=1)
 
         # 还原成标准的概率
-        act_probs = act_probs.cpu().numpy()
-        value = value.cpu().numpy()
+        act_probs = act_probs.cpu().detach().numpy()
+        value = value.cpu().detach().numpy()
 
         return act_probs, value
 
