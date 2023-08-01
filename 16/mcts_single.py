@@ -49,7 +49,7 @@ class MCTS():
         available_acts = game.availables
         game.prev_piececount = game.piececount
         # game.prev_pieceheight = game.pieceheight
-        # game.prev_emptyCount = game.emptyCount
+        game.prev_emptyCount = game.emptyCount
         # game.prev_heightDiff = game.heightDiff
         # game.prev_heightStd = game.heightStd
         game.prev_failtop = game.failtop
@@ -162,10 +162,8 @@ class MCTS():
             # 获得当前局面的概率 和 局面的打分, 这个已经过滤掉了不可用走法
             act_probs, v = self._policy(game)
 
-            if game.reward==0 and game.state==1 and game.is_status_optimal():
-                v = -1+v
-            elif game.reward>0 and game.state==1 and game.is_status_optimal():
-                v = 1+v
+            if game.exreward and game.state==1:
+                v += game.prev_emptyCount-game.emptyCount
 
             probs = np.zeros(game.actions_num)
             for act, prob in act_probs:

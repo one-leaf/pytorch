@@ -214,7 +214,7 @@ class Agent(object):
             self.score += self.reward
             # self.pieceheight = self.getAvgHeight()  
             # self.failLines = self.getFailLines()  
-            # self.emptyCount = self.getEmptyCount()   
+            self.emptyCount = self.getSimpleEmptyCount()   
             # self.heightDiff = self.getHeightDiff()
             # self.heightStd = self.getHeightStd()   
             # self.pieces_height.append(self.fallpieceheight)
@@ -410,13 +410,14 @@ class Agent(object):
 
     def getSimpleEmptyCount(self):
         c = 0
-        for y in range(self.height):
-            l_c = 0
-            for x in range(self.width):
+        for x in range(self.width):
+            l_c = -1
+            for y in range(self.height):
                 if self.board[x][y] == blank:
-                    l_c += 1
-            if l_c != self.width:
-                c += l_c      
+                    if l_c>=0: l_c += 1
+                elif l_c==-1:
+                    l_c = 0
+            if l_c>0: c+=l_c
         return c
 
     # 统计空洞的个数
