@@ -4,6 +4,7 @@ import math
 import copy
 import random
 import numpy as np
+import time
 
 EPS = 1e-8
 
@@ -130,7 +131,7 @@ class MCTS():
                 if (s, act) in self.Qsa: q = self.Qsa[(s, act)]
                 if s in self.Ps: p = self.Ps[s][act]
                 info.append([game.position_to_action_name(act), round(q,2), round(p,2),'>', round(visit/visits_sum,2),])  
-            print(game.steps, game.fallpiece["shape"], "temp:", round(temp,2), "ns:", ns, "/", test_count, "depth:", self.max_depth,'/',max_piececount-game.piececount, \
+            print(time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())), game.steps, game.fallpiece["shape"], "temp:", round(temp,2), "ns:", ns, "/", test_count, "depth:", self.max_depth,'/',max_piececount-game.piececount, \
                   "value:", round(v,2), info)
 
         return acts, probs, qs, ps, v, ns
@@ -144,7 +145,7 @@ class MCTS():
         """
         s = game.get_key()
 
-        if self.depth>1000: return 0
+        if self.depth>50: return 0
 
         if game.terminal: self.Es[s] = -2
         # if game.reward>0: self.Es[s] = 0
@@ -314,7 +315,7 @@ class MCTSPlayer(object):
             qval = act_qs[max_probs_idx]
 
             if idx!=max_probs_idx:
-                print("    random", game.position_to_action_name(acts[max_probs_idx]), "==>",  game.position_to_action_name(acts[idx]), \
+                print("\t\t\t\trandom", game.position_to_action_name(acts[max_probs_idx]), "==>",  game.position_to_action_name(acts[idx]), \
                            "p:", act_ps[max_probs_idx], "==>", act_ps[idx], "q:", act_qs[max_probs_idx], "==>", act_qs[idx])  
 
             acc_ps = 1 if max_ps_idx==max_probs_idx else 0
