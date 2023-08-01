@@ -315,7 +315,7 @@ class MCTSPlayer(object):
             qval = act_qs[max_probs_idx]
 
             if idx!=max_probs_idx:
-                print("\t\t\t\trandom", game.position_to_action_name(acts[max_probs_idx]), "==>",  game.position_to_action_name(acts[idx]), \
+                print("\t\trandom", game.position_to_action_name(acts[max_probs_idx]), "==>",  game.position_to_action_name(acts[idx]), \
                            "p:", act_ps[max_probs_idx], "==>", act_ps[idx], "q:", act_qs[max_probs_idx], "==>", act_qs[idx])  
 
             acc_ps = 1 if max_ps_idx==max_probs_idx else 0
