@@ -145,7 +145,7 @@ class MCTS():
         """
         s = game.get_key()
 
-        if self.depth>50: return 0
+        if self.depth>100: return 0
 
         if game.terminal: self.Es[s] = -2
         # if game.reward>0: self.Es[s] = 0
