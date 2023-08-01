@@ -58,6 +58,7 @@ class MCTS():
         # for n in count():
             self.depth = 0
             game_ = copy.deepcopy(game)
+            game_.search = 0
             # for i, g in enumerate(games_dict["games"]):
             #     print(i, [a['shape'] for a in g.tetromino.nextpiece[-20:]])
             self.search(game_)
@@ -143,9 +144,10 @@ class MCTS():
         返回:
             v: 当前局面的状态
         """
-        s = game.get_key()
+        if game.search>1000: return 0
+        game.search += 1 
 
-        if self.depth>100: return 0
+        s = game.get_key()
 
         if game.terminal: self.Es[s] = -2
         # if game.reward>0: self.Es[s] = 0
