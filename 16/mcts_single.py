@@ -164,7 +164,7 @@ class MCTS():
             act_probs, v = self._policy(game)
 
             if game.exreward:
-                if game.prev_emptyCount=game.emptyCount:
+                if game.prev_emptyCount == game.emptyCount:
                     v += game.score - game.prev_score
                 else:
                     v += game.prev_emptyCount-game.emptyCount
