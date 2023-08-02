@@ -47,6 +47,7 @@ class MCTS():
         self.max_depth = 0
         max_piececount = 0
         available_acts = game.availables
+        game.prev_score = game.score
         game.prev_piececount = game.piececount
         # game.prev_pieceheight = game.pieceheight
         game.prev_emptyCount = game.emptyCount
@@ -163,7 +164,10 @@ class MCTS():
             act_probs, v = self._policy(game)
 
             if game.exreward:
-                v += game.prev_emptyCount-game.emptyCount
+                if game.prev_emptyCount=game.emptyCount:
+                    v += game.score - game.prev_score
+                else:
+                    v += game.prev_emptyCount-game.emptyCount
 
             probs = np.zeros(game.actions_num)
             for act, prob in act_probs:
