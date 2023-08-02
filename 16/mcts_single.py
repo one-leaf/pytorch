@@ -162,7 +162,7 @@ class MCTS():
             # 获得当前局面的概率 和 局面的打分, 这个已经过滤掉了不可用走法
             act_probs, v = self._policy(game)
 
-            if game.exreward and game.state==1:
+            if game.exreward:
                 v += game.prev_emptyCount-game.emptyCount
 
             probs = np.zeros(game.actions_num)
