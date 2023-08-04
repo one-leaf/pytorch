@@ -410,6 +410,7 @@ class Agent(object):
 
     def getSimpleEmptyCount(self):
         c = 0
+        h = np.zeros((self.width+2))
         for x in range(self.width):
             l_c = -1
             for y in range(self.height):
@@ -417,7 +418,16 @@ class Agent(object):
                     if l_c>=0: l_c += 1
                 elif l_c==-1:
                     l_c = 0
+                    h[x+1]=self.height-y
             if l_c>0: c+=l_c
+
+        # 加上夹壁
+        h[0]=20
+        h[-1]=20
+        for x in range(self.width):
+            _c=min(h[x]-h[x+1],h[x+2]-h[x+1]) 
+            if _c>=3:
+                c += 1
         return c
 
     # 统计空洞的个数
