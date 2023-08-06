@@ -211,7 +211,7 @@ class Train():
         agent.id = 0
         agent.exreward = random.random()>0.5
         agent.exreward_piececount = random.randint(0,10)
-        print("exreward mode :", agent.exreward)
+        print("exreward mode:", agent.exreward,"exreward_piececount:",agent.exreward_piececount)
         piececount = agent.piececount
         mark_reward_piececount = -1
         for i in range(self.max_step_count):
