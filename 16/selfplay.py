@@ -210,6 +210,7 @@ class Train():
         agent.show_mcts_process= True
         agent.id = 0
         agent.exreward = random.random()>0.5
+        agent.exreward_piececount = random.randint(0,10)
         print("exreward mode :", agent.exreward)
         piececount = agent.piececount
         mark_reward_piececount = -1
