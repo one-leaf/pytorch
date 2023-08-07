@@ -313,7 +313,7 @@ class MCTSPlayer(object):
             # 20% 按得分大于当前的概率
             else:
                 for i, qs in enumerate(act_qs):
-                    if act_qs[max_probs_idx] - qs > 0:
+                    if act_qs[max_probs_idx] - qs > 0 and qs <= 0:
                         act_probs[i]=0
                 act_probs = act_probs/np.sum(act_probs)        
                 idx = np.random.choice(range(len(acts)), p=act_probs) 
