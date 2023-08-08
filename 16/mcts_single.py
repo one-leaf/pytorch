@@ -173,7 +173,7 @@ class MCTS():
                     else:
                         v -= 1
                 else:
-                    v -= min((game.piececount-game.score*2.5)/game.exreward_piececount,1)
+                    v -= (game.piececount-game.score*2.5)/game.piececount
 
             probs = np.zeros(game.actions_num)
             for act, prob in act_probs:
