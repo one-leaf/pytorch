@@ -151,7 +151,7 @@ class MCTS():
 
         s = game.get_key()
 
-        if game.terminal: self.Es[s] = -20 if game.exreward else -2
+        if game.terminal: self.Es[s] = -20 if game.exreward else -100
         # if game.reward>0: self.Es[s] = 0
 
 
@@ -169,7 +169,7 @@ class MCTS():
                     if game.prev_emptyCount == game.emptyCount:
                         v += game.score - game.prev_score
                     elif game.prev_emptyCount > game.emptyCount:
-                        v += game.score - game.prev_score + 1
+                        v += game.score - game.prev_score + game.prev_emptyCount - game.emptyCount
                     else:
                         v -= 1
                 else:
