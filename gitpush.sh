@@ -10,6 +10,8 @@ function gitpush()
     while true
     do
         echo "***开始push本地仓库***"
+        git config --global http.https://github.com.proxy socks5://127.0.0.1:10086
+
         var=$(git push origin master:master 2>&1)
         if [[ $var =~ $error_str1 || $var =~ $error_str2 ]]; then 
             echo "***push远程仓库出现错误***"
@@ -23,6 +25,8 @@ function gitpush()
             echo "***push完成***"
             break
         fi
+        git config --global --unset http.https://github.com.proxy
+
     done
     echo `date -R`
 }
