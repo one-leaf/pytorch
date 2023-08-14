@@ -173,7 +173,7 @@ class MCTS():
                     else:
                         v -= 1
                 else:
-                    v += game.score - game.prev_score - 0.5
+                    v += game.score - game.prev_score
 
             probs = np.zeros(game.actions_num)
             for act, prob in act_probs:
