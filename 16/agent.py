@@ -297,7 +297,7 @@ class Agent(object):
                     line=line+str(board[x][y])+" "
             print(line)
         print(" "+" -"*self.width)
-        print("score:", self.score, "piececount:", self.piececount, "emptyCount:", self.emptyCount, "isRandomNextPiece", self.isRandomNextPiece, \
+        print("score:", self.score, "piececount:", self.piececount, "emptyCount:", self.emptyCount, "isRandomNextPiece:", self.isRandomNextPiece, \
             "must_reward_piece_count:", self.must_reward_piece_count, "failTop:",self.failtop)
 
     # 统计不可消除行的数量
