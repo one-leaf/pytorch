@@ -168,13 +168,14 @@ class MCTS():
             if game.exreward:
                 if game.piececount>=game.score*2.5+game.exreward_piececount:
                     if game.prev_emptyCount == game.emptyCount:
-                        v += game.score - game.prev_score
+                        if game.score > game.prev_score:
+                            v += 1
                     elif game.prev_emptyCount > game.emptyCount:
-                        v += game.score - game.prev_score + game.prev_emptyCount - game.emptyCount
+                        v += 1
                     else:
                         v -= 1
-                else:
-                    v += game.score - game.prev_score
+                elif game.score > game.prev_score:
+                    v += 1 
 
             probs = np.zeros(game.actions_num)
             for act, prob in act_probs:
