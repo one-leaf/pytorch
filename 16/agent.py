@@ -187,7 +187,10 @@ class Agent(object):
             self.fallpiece['x'] += 1  
 
         if action == KEY_DOWN:# and self.tetromino.validposition(self.board, self.fallpiece, ay=1):
-            self.fallpiece['y'] += 1  
+            n = 1
+            while self.tetromino.validposition(self.board, self.fallpiece, ay=n+1):
+                n += 1
+            self.fallpiece['y'] += n  
 
         if action == KEY_ROTATION:
             self.fallpiece['rotation'] =  (self.fallpiece['rotation'] + 1) % len(pieces[self.fallpiece['shape']])
