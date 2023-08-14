@@ -128,6 +128,7 @@ class MCTS():
             if game.state == 1: game.print()
             info=[]
             visits_sum=sum(visits)
+            if visits_sum==0: visits_sum=1
             for idx in sorted(range(len(visits)), key=visits.__getitem__)[::-1]:
                 act, visit = act_visits[idx]
                 q, p = 0,0
