@@ -152,7 +152,7 @@ class MCTS():
 
         s = game.get_key()
 
-        if game.terminal: self.Es[s] = -20 if game.exreward else -100
+        if game.terminal: self.Es[s] = -20 if game.exreward else -2
         # if game.reward>0: self.Es[s] = 0
 
 
