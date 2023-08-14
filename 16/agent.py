@@ -297,8 +297,8 @@ class Agent(object):
                     line=line+str(board[x][y])+" "
             print(line)
         print(" "+" -"*self.width)
-        print("score:", self.score, "piececount:", self.piececount, "emptyCount:", self.emptyCount, "fallpieceheight", self.fallpieceheight, \
-            "pieceheight:", self.pieceheight, "heightDiff:", self.heightDiff, "getHeightStd:", self.heightStd, "failTop:",self.failtop)
+        print("score:", self.score, "piececount:", self.piececount, "emptyCount:", self.emptyCount, "isRandomNextPiece", self.isRandomNextPiece, \
+            "must_reward_piece_count:", self.must_reward_piece_count, "failTop:",self.failtop)
 
     # 统计不可消除行的数量
     def getFailLines(self):
