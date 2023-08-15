@@ -430,7 +430,7 @@ class Agent(object):
         for x in range(self.width):
             _c=min(h[x]-h[x+1],h[x+2]-h[x+1]) 
             if _c>=3:
-                c += 1
+                c += _c-2
         return c
 
     # 统计空洞的个数
