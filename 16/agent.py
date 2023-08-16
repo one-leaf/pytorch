@@ -58,6 +58,8 @@ class Agent(object):
         self.failtop = 0
         # 当前方块的高度
         self.fallpieceheight = 0
+        # mcts的额外奖励
+        self.exreward=False
         # 面板
         self.board = self.tetromino.getblankboard()
         # 状态： 0 下落过程中 1 更换方块 2 结束一局
@@ -301,7 +303,7 @@ class Agent(object):
             print(line)
         print(" "+" -"*self.width)
         print("score:", self.score, "piececount:", self.piececount, "emptyCount:", self.emptyCount, "isRandomNextPiece:", self.isRandomNextPiece, \
-            "must_reward_piece_count:", self.must_reward_piece_count, "failTop:",self.failtop)
+            "must_reward_piece_count:", self.must_reward_piece_count, "exreward:", self.exreward, "failTop:",self.failtop)
 
     # 统计不可消除行的数量
     def getFailLines(self):
