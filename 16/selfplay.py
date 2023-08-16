@@ -203,13 +203,13 @@ class Train():
             print([p["shape"] for p in his_pieces])
             print("delete", his_pieces_file)
             os.remove(his_pieces_file)
-            agent = Agent(isRandomNextPiece=random.random()>0.1, must_reward_pieces_count= must_reward_pieces_count, nextpieces=his_pieces)
+            agent = Agent(isRandomNextPiece=random.random()>0.5, must_reward_pieces_count= must_reward_pieces_count, nextpieces=his_pieces)
         else:
-            agent = Agent(isRandomNextPiece=random.random()>0.1, must_reward_pieces_count= must_reward_pieces_count,)
+            agent = Agent(isRandomNextPiece=random.random()>0.5, must_reward_pieces_count= must_reward_pieces_count,)
 
         agent.show_mcts_process= True
         agent.id = 0
-        agent.exreward = random.random()>0.1
+        agent.exreward = random.random()>0.5
         agent.exreward_piececount = random.randint(0,20)
         print("exreward mode:", agent.exreward,"exreward_piececount:",agent.exreward_piececount,"isRandomNextPiece:",agent.isRandomNextPiece)
         piececount = agent.piececount
