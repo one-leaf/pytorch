@@ -174,7 +174,7 @@ class MCTS():
                     elif game.prev_emptyCount > game.emptyCount:
                         v += 1
                     else:
-                        v -= 1
+                        v -= 0.1
                 elif game.score > game.prev_score:
                     v += 1 
 
