@@ -315,7 +315,7 @@ class MCTSPlayer(object):
             
 
             # 直接用最初的走法
-            if random.random()>1/game.piececount:
+            if random.random()>0.9**game.piececount:
                 idx = max_ps_idx
             else:
                 p = 0.75
