@@ -308,7 +308,8 @@ class MCTSPlayer(object):
             p = 0.75
             a = 2
             dirichlet = np.random.dirichlet(a * np.ones(len(acts)))
-            idx = np.random.choice(range(len(acts)), p=p*np.array(act_ps)/np.sum(act_ps) + (1.0-p)*dirichlet)
+            rp = p*np.array(act_ps) + (1.0-p)*dirichlet
+            idx = np.random.choice(range(len(acts)), p=rp/np.sum(rp))
 
             # 尝试其他的走法
             # if max_qs_idx ==  max_ps_idx:
