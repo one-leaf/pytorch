@@ -329,7 +329,7 @@ class Train():
 
                 b_idx = len(end_values)-1
                 print("value[0] begin:{} end:{} to:{}".format(begin_values[b_idx], end_values[b_idx], test_values[-1].numpy()))  
-                if len(test_values)>3:
+                if len(test_values)>=3:
                     print("value[1] begin:{} end:{} to:{}".format(begin_values[b_idx-1], end_values[b_idx-1], test_values[-2].numpy()))  
                     print("value[2] begin:{} end:{} to:{}".format(begin_values[b_idx-2], end_values[b_idx-2], test_values[-3].numpy()))  
                 print("probs[0] begin:{} end:{} to:{} ".format(begin_act_probs[b_idx], end_act_probs[b_idx],test_probs[-1].numpy()))
