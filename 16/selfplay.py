@@ -459,10 +459,10 @@ class Train():
             p =  data["steps"][m]["piece_count"]
             data["steps"][m]["value"] = begin_vaule-(m+1)*(begin_vaule+1)/step_count
 
-        # 如果后面没有score，则全部标记为-1
-        for m in range(step_count-1,-1,-1):
-            if data["steps"][m]["reward"]>0: break
-            data["steps"][m]["value"]=-1  
+        # # 如果后面没有score，则全部标记为-1
+        # for m in range(step_count-1,-1,-1):
+        #     if data["steps"][m]["reward"]>0: break
+        #     data["steps"][m]["value"]=-1  
 
         pieces_value = [data["steps"][pieces_steps[p]]["value"] for p in range(piececount)]
 
