@@ -220,7 +220,7 @@ class Agent(object):
             # self.pieceheight = self.getAvgHeight()  
             # self.failLines = self.getFailLines()  
             self.emptyCount = self.getSimpleEmptyCount()   
-            # self.heightDiff = self.getHeightDiff()
+            self.heightDiff = self.getHeightDiff()
             # self.heightStd = self.getHeightStd()   
             # self.pieces_height.append(self.fallpieceheight)
             self.failtop = self.getFailTop()
@@ -303,7 +303,7 @@ class Agent(object):
             print(line)
         print(" "+" -"*self.width)
         print("score:", self.score, "piececount:", self.piececount, "emptyCount:", self.emptyCount, "isRandomNextPiece:", self.isRandomNextPiece, \
-            "must_reward_piece_count:", self.must_reward_piece_count, "exreward:", self.exreward, "failTop:",self.failtop)
+            "must_reward_piece_count:", self.must_reward_piece_count, "exreward:", self.exreward, "failTop:",self.failtop,"heightDiff:",self.heightDiff)
 
     # 统计不可消除行的数量
     def getFailLines(self):
@@ -402,15 +402,16 @@ class Agent(object):
                     h[x]=self.height-y
                     break
         v = [0]
-        if h[1]-h[0]>2: v.append((h[1]-h[0]))
-        if h[2]-h[1]>2: v.append((h[2]-h[1]))
-        if h[3]-h[2]>2: v.append((h[3]-h[2]))
-        if h[4]-h[3]>2: v.append((h[4]-h[3]))
-        if abs(h[4]-h[5])>2: v.append(abs(h[4]-h[5]))
-        if h[5]-h[6]>2: v.append((h[5]-h[6]))
-        if h[6]-h[7]>2: v.append((h[6]-h[7]))
-        if h[7]-h[8]>2: v.append((h[7]-h[8]))
-        if h[8]-h[9]>2: v.append((h[8]-h[9]))
+        v.append(abs(h[1]-h[0]))
+        v.append(abs(h[2]-h[1]))
+        v.append(abs(h[3]-h[2]))
+        v.append(abs(h[4]-h[3]))
+        v.append(abs(h[5]-h[4]))
+        v.append(abs(h[6]-h[5]))
+        v.append(abs(h[7]-h[6]))
+        v.append(abs(h[8]-h[7]))
+        v.append(abs(h[9]-h[8]))
+        v.remove(max(v))
         return max(v)
 
     def getSimpleEmptyCount(self):

@@ -51,7 +51,7 @@ class MCTS():
         game.prev_piececount = game.piececount
         # game.prev_pieceheight = game.pieceheight
         game.prev_emptyCount = game.emptyCount
-        # game.prev_heightDiff = game.heightDiff
+        game.prev_heightDiff = game.heightDiff
         # game.prev_heightStd = game.heightStd
         game.prev_failtop = game.failtop
         test_count = 0
@@ -173,7 +173,7 @@ class MCTS():
                 elif game.prev_emptyCount > game.emptyCount:
                     v += 1
                 else:
-                    v -= (game.emptyCount-game.prev_emptyCount)
+                    v -= (game.emptyCount-game.prev_emptyCount)+(game.heightDiff - game.prev_heightDiff)*0.1
 
                 # if game.piececount>=game.score*2.5+game.exreward_piececount:
                 #     if game.prev_emptyCount == game.emptyCount:
