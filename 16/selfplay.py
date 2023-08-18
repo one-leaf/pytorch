@@ -467,7 +467,7 @@ class Train():
             data["steps"][m]["value"]=-1  
             # data["steps"][m]["move_probs"]=data["steps"][m]["move_probs"]*0.9+np.ones_like(data["steps"][m]["move_probs"])*0.1/GAME_ACTIONS_NUM
 
-        pieces_value = [data["steps"][pieces_steps[p]]["value"] for p in range(piececount)]
+        pieces_value = [round(data["steps"][pieces_steps[p]]["value"],2) for p in range(piececount)]
 
         # 游戏的得分算法2，每一步都减1，如果碰到奖励，重置步骤，如果碰到惩罚直接加
         reward_mask = 0
