@@ -169,9 +169,9 @@ class MCTS():
             if game.exreward:
                 if game.prev_emptyCount == game.emptyCount:
                     if game.score > game.prev_score:
-                        v += 1
+                        v += 10*(game.score-game.prev_score)
                 elif game.prev_emptyCount > game.emptyCount:
-                    v += 1
+                    v += (game.prev_emptyCount-game.emptyCount)
                 else:
                     v -= (game.emptyCount-game.prev_emptyCount)+(game.failtop-game.prev_failtop)+(game.heightDiff - game.prev_heightDiff)*0.1
 
