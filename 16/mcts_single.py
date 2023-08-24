@@ -101,10 +101,10 @@ class MCTS():
         ps = [self.Ps[s][a] if s in self.Ps else 0 for a in acts]
         v = 0 if s not in self.Vs else self.Vs[s]
         ns = 1 if s not in self.Ns else self.Ns[s]
-        if ns>avg_ns and avg_ns>0:
-            temp = np.log(ns)/np.log(avg_ns)
-        else:
-            temp = 1
+        # if ns>avg_ns and avg_ns>0:
+        #     temp = np.log(ns)/np.log(avg_ns)
+        # else:
+        temp = temp
 
         if temp == 0:
             bestAs = np.array(np.argwhere(visits == np.max(visits))).flatten()
