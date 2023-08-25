@@ -173,7 +173,7 @@ class MCTS():
                 elif game.prev_emptyCount > game.emptyCount:
                     v += (game.prev_emptyCount-game.emptyCount)
                 else:
-                    v -= (game.emptyCount-game.prev_emptyCount)+(game.failtop-game.prev_failtop+game.heightDiff - game.prev_heightDiff)*0.1
+                    v -= (game.emptyCount-game.prev_emptyCount)+(game.failtop-game.prev_failtop+game.heightDiff-game.prev_heightDiff)*0.1
 
                 # if game.piececount>=game.score*2.5+game.exreward_piececount:
                 #     if game.prev_emptyCount == game.emptyCount:
