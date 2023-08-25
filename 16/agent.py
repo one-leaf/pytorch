@@ -141,11 +141,12 @@ class Agent(object):
             self.fallpiece['rotation'] = r
 
         # 加 5 个规则，如果有R后面就不能L，有L就不能有R，有D就不能有O/R/L
-        # if KEY_RIGHT in self.actions and KEY_LEFT in acts: acts.remove(KEY_LEFT)
-        # if KEY_LEFT in self.actions  and KEY_RIGHT in acts: acts.remove(KEY_RIGHT)
+        if KEY_RIGHT in self.actions and KEY_LEFT in acts: acts.remove(KEY_LEFT)
+        if KEY_LEFT in self.actions  and KEY_RIGHT in acts: acts.remove(KEY_RIGHT)
         # if KEY_DOWN in self.actions  and KEY_ROTATION in acts: acts.remove(KEY_ROTATION)
         # if KEY_DOWN in self.actions  and KEY_RIGHT in acts: acts.remove(KEY_RIGHT)
         # if KEY_DOWN in self.actions  and KEY_LEFT in acts: acts.remove(KEY_LEFT)
+        if KEY_ROTATION in acts and len([a for a in self.actions if a==KEY_ROTATION])==3:acts.remove(KEY_ROTATION)
 
         if not KEY_DOWN in acts : acts.append(KEY_DOWN)
 

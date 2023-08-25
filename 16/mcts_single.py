@@ -219,7 +219,8 @@ class MCTS():
 
         if best_act == -1:
             # 选择具有最高置信上限的动作
-            for a in game.availables:
+            # 加快速度，每次多探测D
+            for a in game.availables:                
                 if (s, a) in self.Qsa:
                     u = self.Qsa[(s, a)] + self._c_puct * self.Ps[s][a] * math.sqrt(self.Ns[s]) / (1 + self.Nsa[(s, a)])
                 else:
@@ -231,7 +232,7 @@ class MCTS():
                 if u > cur_best:
                     cur_best = u
                     best_act = a
-
+                    
         a = best_act
         act = game.position_to_action(a)
 
