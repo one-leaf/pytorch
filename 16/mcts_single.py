@@ -321,7 +321,12 @@ class MCTSPlayer(object):
             elif random.random()<0.9**game.piececount:
                 idx = max_ps_idx
             else:
-                idx = max_qs_idx      
+                for i, qs in enumerate(act_qs):
+                    if act_qs[max_probs_idx] - qs > 0 and qs <= 0:
+                        act_probs[i]=0
+                act_probs = act_probs/np.sum(act_probs)        
+                idx = np.random.choice(range(len(acts)), p=act_probs) 
+            #       
             # if random.random()>0.5**game.piececount:
             #     idx = max_ps_idx
             # else:
