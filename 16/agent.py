@@ -417,11 +417,14 @@ class Agent(object):
     def getSimpleEmptyCount(self):
         c = 0
         h = np.zeros((self.width+2))
+        hs = []
         for x in range(self.width):
             l_c = -1
             for y in range(self.height):
                 if self.board[x][y] == blank:
-                    if l_c>=0: l_c += 1
+                    if l_c>=0 and y not in hs: 
+                        l_c += 1
+                        hs.append(y)
                 elif l_c==-1:
                     l_c = 0
                     h[x+1]=self.height-y
