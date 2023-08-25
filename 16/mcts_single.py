@@ -316,7 +316,7 @@ class MCTSPlayer(object):
             if random.random()>0.5**game.piececount:
                 idx = max_ps_idx
             else:
-                p = 0.95
+                p = 0.75
                 a = 2
                 dirichlet = np.random.dirichlet(a * np.ones(len(acts)))
                 rp = p*np.array(act_ps) + (1.0-p)*dirichlet
