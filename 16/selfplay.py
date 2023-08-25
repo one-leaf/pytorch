@@ -465,13 +465,9 @@ class Train():
         for m in range(step_count-1,-1,-1):
             if data["steps"][m]["reward"]>0: break
             data["steps"][m]["value"]=-1  
-            # p = data["steps"][m]["move_probs"].copy()
-            # p[p>0]=1
-            # data["steps"][m]["move_probs"]=data["steps"][m]["move_probs"]*0.50+p*0.50/np.sum(p)
-            # data["steps"][m]["move_probs"][data["steps"][m]["move_probs"]>0]=1
-            # data["steps"][m]["move_probs"] = data["steps"][m]["move_probs"] / np.sum(data["steps"][m]["move_probs"])
-            # print(data["steps"][m]["move_probs"])
-            # data["steps"][m]["move_probs"]=data["steps"][m]["move_probs"]*0.75+np.ones_like(data["steps"][m]["move_probs"])*0.25/GAME_ACTIONS_NUM
+            p = data["steps"][m]["move_probs"].copy()
+            p[p>0]=1
+            data["steps"][m]["move_probs"]=data["steps"][m]["move_probs"]*0.50+p*0.50/np.sum(p)           
 
         pieces_value = [round(data["steps"][pieces_steps[p]]["value"],2) for p in range(piececount)]
 
