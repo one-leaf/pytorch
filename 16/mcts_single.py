@@ -322,7 +322,7 @@ class MCTSPlayer(object):
             # 直接用最初的走法
             if max_qs_idx ==  max_ps_idx:
                 idx = max_ps_idx
-            elif game.score>0 or random.random()<0.95**game.piececount:
+            elif game.score>0 or random.random()>0.5:
                 idx = max_ps_idx
             else:
                 for i, qs in enumerate(act_qs):
