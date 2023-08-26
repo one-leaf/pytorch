@@ -460,14 +460,13 @@ class Train():
             p =  data["steps"][m]["piece_count"]
             data["steps"][m]["value"] = begin_vaule-(m+1)*(begin_vaule+1)/step_count
 
-        # 如果后面没有score，则全部标记为-1
-        
+        # 如果后面没有score，其步骤概率全部降低75%，则全部标记为-1        
         for m in range(step_count-1,-1,-1):
             if data["steps"][m]["reward"]>0: break
-            data["steps"][m]["value"]=-1  
+            # data["steps"][m]["value"]=-1  
             p = data["steps"][m]["move_probs"].copy()
             p[p>0]=1
-            data["steps"][m]["move_probs"]=data["steps"][m]["move_probs"]*0.50+p*0.50/np.sum(p)           
+            data["steps"][m]["move_probs"]=data["steps"][m]["move_probs"]*0.75+p*0.25/np.sum(p)           
 
         pieces_value = [round(data["steps"][pieces_steps[p]]["value"],2) for p in range(piececount)]
 
