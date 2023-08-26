@@ -167,14 +167,14 @@ class MCTS():
             act_probs, v = self._policy(game)
 
             if game.exreward:
-                if game.score > game.prev_score:
-                    v += (game.score-game.prev_score)
-                elif game.prev_emptyCount == game.emptyCount:
+                # if game.score > game.prev_score:
+                #     v += (game.score-game.prev_score)
+                if game.prev_emptyCount == game.emptyCount:
                     v -= (game.heightDiff-game.prev_heightDiff)*0.1
-                    # if game.score > game.prev_score:
-                    #     v += (game.score-game.prev_score)
+                    if game.score > game.prev_score:
+                        v += (game.score-game.prev_score)
                 elif game.prev_emptyCount > game.emptyCount:
-                    v += (game.prev_emptyCount-game.emptyCount)
+                    v += (game.prev_emptyCount-game.emptyCount) + (game.score-game.prev_score)
                 else:
                     v -= (game.emptyCount-game.prev_emptyCount)+(game.failtop-game.prev_failtop+game.heightDiff-game.prev_heightDiff)*0.1
 
@@ -232,7 +232,7 @@ class MCTS():
                 if u > cur_best:
                     cur_best = u
                     best_act = a
-                    
+
         a = best_act
         act = game.position_to_action(a)
 
