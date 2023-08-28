@@ -5,6 +5,7 @@ import copy
 import random
 import numpy as np
 import time
+from agent import ACTIONS
 
 EPS = 1e-8
 
@@ -26,6 +27,10 @@ class MCTS():
 
         self.state = None        
         self.ext_reward = True # 是否中途额外奖励
+
+        self.actionCounter={}
+        for a in ACTIONS:
+            self.actionCounter[a]=0
 
     def reset(self):
         self.Qsa = {}  # 保存 Q 值, key: s,a
@@ -216,27 +221,29 @@ class MCTS():
         best_act = -1
 
         if best_act == -1:
-            # 选择具有最高置信上限的动作
-            # 加快速度，每次多探测D
-            for a in game.availables:                
+            # 选择具有最高置信上限的动作             
+            for a in game.availables:   
                 if (s, a) in self.Qsa:
                     u = self.Qsa[(s, a)] + self._c_puct * self.Ps[s][a] * math.sqrt(self.Ns[s]) / (1 + self.Nsa[(s, a)])
                 else:
                     u = self._c_puct * self.Ps[s][a] * math.sqrt(self.Ns[s] + EPS)  # 加一个EPS小量防止 Q = 0 
-                    # if not self.ext_reward:
-                    #     cur_best = u
-                    #     best_act = a
-                    #     break
+
+                    # 加快速度，每次多探测D
+                    if a==ACTIONS[-1]:
+                        if self.actionCounter[ACTIONS[0]]>1 or (self.actionCounter[ACTIONS[1]]>1 and self.actionCounter[ACTIONS[2]]>1): 
+                            best_act = a
+                            break
+ 
                 if u > cur_best:
                     cur_best = u
                     best_act = a
 
         a = best_act
-        act = game.position_to_action(a)
+        # act = game.position_to_action(a)
 
         # steps = game.piecesteps
         # flines = game.failLines
-        game.step(act)
+        game.step(a)
         # flines = flines - game.failLines 
 
         self.depth = self.depth +1
@@ -364,6 +371,9 @@ class MCTSPlayer(object):
                            "p:", act_ps[max_probs_idx], "==>", act_ps[idx], "q:", act_qs[max_probs_idx], "==>", act_qs[idx])  
 
             acc_ps = 1 if max_ps_idx==max_probs_idx else 0
+
+            self.mcts.actionCounter[action] += 1
+
             return action, move_probs, state_v, qval, acc_ps, depth, state_n
         else:
             print("WARNING: game is terminal")
