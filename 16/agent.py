@@ -426,9 +426,12 @@ class Agent(object):
             l_c = -1
             for y in range(self.height):
                 if self.board[x][y] == blank:
-                    if l_c>=0 and y not in hs: 
-                        l_c += 1
-                        hs.append(y)
+                    if l_c>=0:
+                        if y not in hs: 
+                            l_c += 1
+                            hs.append(y)
+                        else:
+                            l_c += 0.1
                 elif l_c==-1:
                     l_c = 0
                     h[x+1]=self.height-y
