@@ -60,6 +60,8 @@ class Agent(object):
         self.fallpieceheight = 0
         # mcts的额外奖励
         self.exreward=False
+        # 限制步骤
+        self.limitstep=False
         # 面板
         self.board = self.tetromino.getblankboard()
         # 状态： 0 下落过程中 1 更换方块 2 结束一局
@@ -141,7 +143,7 @@ class Agent(object):
             self.fallpiece['rotation'] = r
 
         # 加 5 个规则，如果有R后面就不能L，有L就不能有R，有D就不能有O/R/L
-        if self.score==0:
+        if self.limitstep:
             if KEY_RIGHT in self.actions and KEY_LEFT in acts: acts.remove(KEY_LEFT)
             if KEY_LEFT in self.actions  and KEY_RIGHT in acts: acts.remove(KEY_RIGHT)
             # if KEY_DOWN in self.actions  and KEY_ROTATION in acts: acts.remove(KEY_ROTATION)
