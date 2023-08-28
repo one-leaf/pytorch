@@ -167,19 +167,12 @@ class MCTS():
             act_probs, v = self._policy(game)
 
             if game.exreward:
-                # if game.score > game.prev_score:
-                #     v += (game.score-game.prev_score)
                 if game.prev_emptyCount == game.emptyCount:
                     v -= (game.heightDiff-game.prev_heightDiff)*0.1
-                    if game.state==1:
-                        v += game.reward #(game.score-game.prev_score)
                 elif game.prev_emptyCount > game.emptyCount:
                     v += (game.prev_emptyCount-game.emptyCount)*0.1 
-                    if game.state==1:
-                        v += game.reward #(game.score-game.prev_score)
                 else:
                     v -= (game.emptyCount-game.prev_emptyCount)*0.1+(game.failtop-game.prev_failtop+game.heightDiff-game.prev_heightDiff)*0.1
-
                 if v>1: v=1
                 if v<-1: v=-1
 
@@ -249,10 +242,11 @@ class MCTS():
         self.depth = self.depth +1
 
         # 现实奖励
-        # if game.state == 1:
+        if game.state == 1:
+            v = game.reward + self.search(game)
         #     v = flines/10. + self.search(game)  
-        # else:     
-        v = self.search(game) 
+        else:     
+            v = self.search(game) 
         #     _s = game.get_key()
         #     if _s in self.Vs and len(game.nextpiece)==0 and game.piececount - game.prev_piececount > 1:
         #         v = self.Vs[_s]
