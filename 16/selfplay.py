@@ -467,7 +467,7 @@ class Train():
             # data["steps"][m]["value"]=-1  
             p = data["steps"][m]["move_probs"].copy()
             p[p>0]=1
-            data["steps"][m]["move_probs"]=p/np.sum(p) #data["steps"][m]["move_probs"]*0.75+p*0.25/np.sum(p)           
+            data["steps"][m]["move_probs"]=data["steps"][m]["move_probs"]*0.5+p*0.5/np.sum(p)           
 
         pieces_value = [round(data["steps"][pieces_steps[p]]["value"],2) for p in range(piececount)]
         pieces_probs = [round(np.max(data["steps"][pieces_steps[p]]["move_probs"]),2) for p in range(piececount)]
