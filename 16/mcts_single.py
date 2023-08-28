@@ -166,15 +166,17 @@ class MCTS():
             # 获得当前局面的概率 和 局面的打分, 这个已经过滤掉了不可用走法
             act_probs, v = self._policy(game)
 
-            if game.exreward and game.state==1:
+            if game.exreward:
                 # if game.score > game.prev_score:
                 #     v += (game.score-game.prev_score)
                 if game.prev_emptyCount == game.emptyCount:
                     v -= (game.heightDiff-game.prev_heightDiff)*0.1
-                    v += game.reward #(game.score-game.prev_score)
+                    if game.state==1:
+                        v += game.reward #(game.score-game.prev_score)
                 elif game.prev_emptyCount > game.emptyCount:
                     v += (game.prev_emptyCount-game.emptyCount)*0.1 
-                    v += game.reward #(game.score-game.prev_score)
+                    if game.state==1:
+                        v += game.reward #(game.score-game.prev_score)
                 else:
                     v -= (game.emptyCount-game.prev_emptyCount)*0.1+(game.failtop-game.prev_failtop+game.heightDiff-game.prev_heightDiff)*0.1
 
