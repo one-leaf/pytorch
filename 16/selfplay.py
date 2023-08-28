@@ -470,6 +470,7 @@ class Train():
             data["steps"][m]["move_probs"]=p/np.sum(p) #data["steps"][m]["move_probs"]*0.75+p*0.25/np.sum(p)           
 
         pieces_value = [round(data["steps"][pieces_steps[p]]["value"],2) for p in range(piececount)]
+        pieces_probs = [round(np.max(data["steps"][pieces_steps[p]]["move_probs"]),2) for p in range(piececount)]
 
         # 游戏的得分算法2，每一步都减1，如果碰到奖励，重置步骤，如果碰到惩罚直接加
         reward_mask = 0
@@ -491,6 +492,10 @@ class Train():
         # print()
         print("value: ", pieces_value)
         print()
+        print("probs: ", pieces_probs)
+        print()
+
+        
         # print("score: ", pieces_score)
         # print()
 
