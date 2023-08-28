@@ -171,27 +171,6 @@ class MCTS():
             # 获得当前局面的概率 和 局面的打分, 这个已经过滤掉了不可用走法
             act_probs, v = self._policy(game)
 
-            if game.exreward:
-                if game.prev_emptyCount == game.emptyCount:
-                    v -= (game.heightDiff-game.prev_heightDiff)*0.1
-                elif game.prev_emptyCount > game.emptyCount:
-                    v += (game.prev_emptyCount-game.emptyCount)*0.1 
-                else:
-                    v -= (game.emptyCount-game.prev_emptyCount)*0.1+(game.failtop-game.prev_failtop+game.heightDiff-game.prev_heightDiff)*0.1
-                # if v>1: v=1
-                # if v<-1: v=-1
-
-                # if game.piececount>=game.score*2.5+game.exreward_piececount:
-                #     if game.prev_emptyCount == game.emptyCount:
-                #         if game.score > game.prev_score:
-                #             v += 1
-                #     elif game.prev_emptyCount > game.emptyCount:
-                #         v += 1
-                #     else:
-                #         v -= 0.1
-                # elif game.score > game.prev_score:
-                #     v += 1 
-
             probs = np.zeros(game.actions_num)
             for act, prob in act_probs:
                 probs[act] = prob
@@ -249,11 +228,33 @@ class MCTS():
         self.depth = self.depth +1
 
         # 现实奖励
+        v = 0
         if game.state == 1:
-            v = game.reward + self.search(game)
+            v = game.reward 
+            if game.exreward:
+                if game.prev_emptyCount == game.emptyCount:
+                    v -= (game.heightDiff-game.prev_heightDiff)*0.1
+                elif game.prev_emptyCount > game.emptyCount:
+                    v += (game.prev_emptyCount-game.emptyCount)*0.1 
+                else:
+                    v -= (game.emptyCount-game.prev_emptyCount)*0.1+(game.failtop-game.prev_failtop+game.heightDiff-game.prev_heightDiff)*0.1
+                # if v>1: v=1
+                # if v<-1: v=-1
+
+                # if game.piececount>=game.score*2.5+game.exreward_piececount:
+                #     if game.prev_emptyCount == game.emptyCount:
+                #         if game.score > game.prev_score:
+                #             v += 1
+                #     elif game.prev_emptyCount > game.emptyCount:
+                #         v += 1
+                #     else:
+                #         v -= 0.1
+                # elif game.score > game.prev_score:
+                #     v += 1 
+
         #     v = flines/10. + self.search(game)  
-        else:     
-            v = self.search(game) 
+
+        v += self.search(game) 
         #     _s = game.get_key()
         #     if _s in self.Vs and len(game.nextpiece)==0 and game.piececount - game.prev_piececount > 1:
         #         v = self.Vs[_s]
