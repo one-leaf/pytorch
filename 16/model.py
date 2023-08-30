@@ -155,8 +155,9 @@ class PolicyValueNet():
 
         # 参数梯度清零
         self.optimizer.zero_grad()
-        # 反向传播并更新
+        # 反向传播并计算梯度
         loss.backward()
+        # 更新参数
         self.optimizer.step()
                 
         return loss.item(), value_loss.item(), policy_loss.item()
