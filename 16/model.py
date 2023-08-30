@@ -8,6 +8,7 @@ import numpy as np
 from collections import OrderedDict
 from torchvision.models import resnet34
 from vit import VitNet
+from lion_pytorch import Lion
 
 # 定义游戏的保存文件名和路径
 model_name = "vit-ti" # "vit" # "mlp"
@@ -22,7 +23,7 @@ model_file =  os.path.join(model_dir, 'model.pth')
 
 
 class PolicyValueNet():
-    def __init__(self, input_width, input_height, output_size, model_file=None, device=None, l2_const=1e-5):
+    def __init__(self, input_width, input_height, output_size, model_file=None, device=None, l2_const=1e-4):
         self.input_width = input_width
         self.input_height = input_height
         self.input_size = input_width * input_height
@@ -44,7 +45,8 @@ class PolicyValueNet():
         # self.print_netwark()
 
         # self.optimizer = optim.AdamW(self.policy_value_net.parameters(), lr=1e-6, weight_decay=self.l2_const)       
-        self.optimizer = optim.SGD(self.policy_value_net.parameters(), lr=1e-6, momentum=0.9, weight_decay=self.l2_const)
+        # self.optimizer = optim.SGD(self.policy_value_net.parameters(), lr=1e-6, momentum=0.9, weight_decay=self.l2_const)
+        self.optimizer = Lion(self.policy_value_net.parameters(), lr=1e-4, weight_decay=self.l2_const)
 
         if model_file and os.path.exists(model_file):
             print("Loading model", model_file)
