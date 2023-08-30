@@ -114,7 +114,6 @@ class Dataset(torch.utils.data.Dataset):
                 # else:
                 with open(fn, "rb") as f:
                     state, mcts_prob, value, score = pickle.load(f)
-                assert state.shape[0] == 8                         
             except:
                 print("filename {} error can't load".format(fn))
                 if os.path.exists(fn): os.remove(fn)
