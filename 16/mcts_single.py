@@ -323,7 +323,7 @@ class MCTSPlayer(object):
             max_qs_idx = np.argmax(act_qs) 
             max_ps_idx = np.argmax(act_ps)
 
-            # 直接用最初的走法
+            # 直接用概率最大的走法
             idx = max_ps_idx
 
             # 都兼顾
