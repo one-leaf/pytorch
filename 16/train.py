@@ -332,8 +332,9 @@ class Train():
                     print("value[1] begin:{} end:{} to:{}".format(begin_values[b_idx-1], end_values[b_idx-1], test_values[-2].numpy()))  
                     print("value[2] begin:{} end:{} to:{}".format(begin_values[b_idx-2], end_values[b_idx-2], test_values[-3].numpy()))  
                 print("probs[0] begin:{} end:{} to:{} ".format(begin_act_probs[b_idx], end_act_probs[b_idx],test_probs[-1].numpy()))
-                print("probs[1] begin:{} end:{} to:{} ".format(begin_act_probs[b_idx-1], end_act_probs[b_idx-1],test_probs[-2].numpy()))
-                print("probs[2] begin:{} end:{} to:{} ".format(begin_act_probs[b_idx-2], end_act_probs[b_idx-2],test_probs[-3].numpy()))
+                if len(test_values)>=3:
+                    print("probs[1] begin:{} end:{} to:{} ".format(begin_act_probs[b_idx-1], end_act_probs[b_idx-1],test_probs[-2].numpy()))
+                    print("probs[2] begin:{} end:{} to:{} ".format(begin_act_probs[b_idx-2], end_act_probs[b_idx-2],test_probs[-3].numpy()))
                 
             kl = np.mean(np.sum(begin_act_probs * (np.log(begin_act_probs + 1e-10) - np.log(end_act_probs + 1e-10)), axis=1))
             print("act_probs, kl:",kl)
