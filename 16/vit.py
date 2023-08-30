@@ -314,6 +314,25 @@ class VisionTransformer(nn.Module):
         return x
 
 
+class VitPatchEmbed(nn.Module):
+    """
+    图片转嵌入数据，由 [B, C, H, W] -> [B, HW, C]
+    """
+    def __init__(self, img_size=(20,10), in_c=3, kernel_size=3, embed_dim=200, padding=0, stride=1, norm_layer=None):
+        super().__init__()
+        image_height, image_width = pair(img_size)
+        self.proj = nn.Conv2d(in_c, embed_dim, kernel_size=kernel_size, stride=stride, padding=padding)
+        self.norm = norm_layer(embed_dim) if norm_layer else nn.Identity()
+        self.num_patches = ((image_height-kernel_size+2*padding)//stride+1) * ((image_width-kernel_size+2*padding)//stride+1)
+
+    def forward(self, x):
+        # B, C, H, W = x.shape
+        # flatten: [B, C, H, W] -> [B, C, HW]
+        # transpose: [B, C, HW] -> [B, HW, C]
+        x = self.proj(x).flatten(2).transpose(1, 2)
+        x = self.norm(x)
+        return x
+
 class VitNet(nn.Module):
     def __init__(self,  embed_dim=768, drop_ratio=0.1, drop_path_ratio=0.1, depth=12, num_heads=12, 
                         mlp_ratio=4.0, qkv_bias=True, qk_scale=None, attn_drop_ratio=0.3, num_classes=1000, num_quantiles=64):
@@ -324,7 +343,8 @@ class VitNet(nn.Module):
         norm_layer = partial(nn.LayerNorm, eps=1e-6)
         act_layer =  nn.GELU
         # 图片转换为 patch embedding [B, C, H, W] ==> [B, num_patches, embed_dim] 
-        self.patch_embed = PatchEmbed(img_size=(20,10), patch_size=(1,10), in_c=8, embed_dim=embed_dim)
+        # self.patch_embed = PatchEmbed(img_size=(20,10), patch_size=(1,10), in_c=8, embed_dim=embed_dim)
+        self.patch_embed = VitPatchEmbed(img_size=(20,10), in_c=3, embed_dim=embed_dim)
         # 图片分割后的块数
         num_patches = self.patch_embed.num_patches                      # p
 

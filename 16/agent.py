@@ -78,10 +78,12 @@ class Agent(object):
         self.show_mcts_process = False
 
         # 盘面的状态
-        self.status = [] #deque(maxlen=10)
-        _board = np.zeros((self.height, self.width))
-        for _ in range(8):
-            self.status.append(_board)
+        # self.status = [] #deque(maxlen=10)
+        # _board = np.zeros((self.height, self.width))
+        # for _ in range(8):
+        #     self.status.append(_board)
+        self.status = np.zeros((3, self.height, self.width))
+
         self.add_status(True)
 
         # key
@@ -89,11 +91,16 @@ class Agent(object):
 
     # 状态一共8层， 0 下一个方块， 1 是背景 ，剩下得是 6 步下落的方块
     def add_status(self, init=False):
-        self.status.append(self.get_fallpiece_board())
-        del self.status[2]
-        if self.state!=0 or init:
-            self.status[0]=self.get_nextpiece_borad()
-            self.status[1]=self.getBoard()
+        self.status[0]=self.get_fallpiece_board()
+        self.status[1]=self.getBoard()
+        self.status[2]=self.get_nextpiece_borad()
+
+        # self.status.append(self.get_fallpiece_board())
+        # del self.status[2]
+        # if self.state!=0 or init:
+        #     self.status[0]=self.get_nextpiece_borad()
+        #     self.status[1]=self.getBoard()
+
         # del self.status[1]
         # if self.state!=0 or init:
         #     self.status[0]=self.get_nextpiece_borad()
@@ -255,8 +262,9 @@ class Agent(object):
         return self.state, self.reward
 
     def set_key(self):
-        info = self.status[-1]+self.status[1]
-        self.key = hash(info.data.tobytes())+self.id
+        # info = self.status[-1]+self.status[1]
+        # self.key = hash(info.data.tobytes())+self.id
+        self.key = hash(self.status.data.tobytes())+self.id
 
     def get_key(self):
         return self.key
@@ -533,7 +541,8 @@ class Agent(object):
     # 背景 + 最后一步 + 合并后旋转90度
     # 返回 [3, height, width]
     def current_state(self):
-        return np.array(self.status)
+        return self.status
+        # return np.array(self.status)
        
 
 
