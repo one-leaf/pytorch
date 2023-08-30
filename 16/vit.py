@@ -318,12 +318,16 @@ class VitPatchEmbed(nn.Module):
     """
     图片转嵌入数据，由 [B, C, H, W] -> [B, HW, C]
     """
-    def __init__(self, img_size=(20,10), in_c=3, kernel_size=3, embed_dim=200, padding=0, stride=1, norm_layer=None):
+    def __init__(self, img_size=(20,10), in_c=3, kernel_size=(4,2), embed_dim=768, padding=0, stride=(4,2), norm_layer=None):
         super().__init__()
         image_height, image_width = pair(img_size)
-        self.proj = nn.Conv2d(in_c, embed_dim, kernel_size=kernel_size, stride=stride, padding=padding)
+        kernel_height, kernel_width = pair(kernel_size)
+        padding_height, padding_width = pair(padding) 
+        stride_height, stride_width = pair(stride) 
+        self.proj = nn.Conv2d(in_c, embed_dim, kernel_size=kernel_size, stride=stride, padding=padding, bias=False)
         self.norm = norm_layer(embed_dim) if norm_layer else nn.Identity()
-        self.num_patches = ((image_height-kernel_size+2*padding)//stride+1) * ((image_width-kernel_size+2*padding)//stride+1)
+        self.num_patches = ((image_height-kernel_height+2*padding_height)//stride_height+1) * ((image_width-kernel_width+2*padding_width)//stride_width+1)
+        print("sequence length:",self.num_patches)
 
     def forward(self, x):
         # B, C, H, W = x.shape
