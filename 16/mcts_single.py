@@ -208,10 +208,10 @@ class MCTS():
                     u = self._c_puct * self.Ps[s][a] * math.sqrt(self.Ns[s] + EPS)  # 加一个EPS小量防止 Q = 0 
 
                     # 加快速度，每次多探测D
-                    if a==ACTIONS[-1]:
-                        if self.actionCounter[ACTIONS[0]]>1 or (self.actionCounter[ACTIONS[1]]>1 and self.actionCounter[ACTIONS[2]]>1): 
-                            best_act = a
-                            break
+                    # if a==ACTIONS[-1]:
+                    #     if self.actionCounter[ACTIONS[0]]>1 or (self.actionCounter[ACTIONS[1]]>1 and self.actionCounter[ACTIONS[2]]>1): 
+                    #         best_act = a
+                    #         break
  
                 if u > cur_best:
                     cur_best = u
