@@ -324,16 +324,21 @@ class MCTSPlayer(object):
             max_ps_idx = np.argmax(act_ps)
 
             # 直接用最初的走法
-            if max_qs_idx ==  max_ps_idx:
-                idx = max_qs_idx
-            elif random.random()>0.25:
-                idx = max_ps_idx
-            else:
-                for i, qs in enumerate(act_qs):
-                    if act_qs[max_probs_idx] - qs > 0 and qs <= 0:
-                        act_probs[i]=0
-                act_probs = act_probs/np.sum(act_probs)        
-                idx = np.random.choice(range(len(acts)), p=act_probs) 
+            idx = max_ps_idx
+
+            # 都兼顾
+            # if max_qs_idx ==  max_ps_idx:
+            #     idx = max_qs_idx
+            # elif random.random()>0.25:
+            #     idx = max_ps_idx
+            # else:
+            #     for i, qs in enumerate(act_qs):
+            #         if act_qs[max_probs_idx] - qs > 0 and qs <= 0:
+            #             act_probs[i]=0
+            #     act_probs = act_probs/np.sum(act_probs)        
+            #     idx = np.random.choice(range(len(acts)), p=act_probs) 
+
+
             #       
             # if random.random()>0.5**game.piececount:
             #     idx = max_ps_idx
