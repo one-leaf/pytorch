@@ -266,17 +266,20 @@ class Train():
                         begin_act_probs = np.concatenate((begin_act_probs, act_probs), axis=0)
                     # begin_values.append(values[:5])
                     # begin_act_probs.append(act_probs[0])
-
+            self.train_conf = {"lr_multiplier":1,"optimizer_type":0}
             train_conf_file=os.path.join(data_dir,"train_conf_pkl")
             if os.path.exists(train_conf_file):
                 with open(train_conf_file, "rb") as fn:
-                    self.lr_multiplier = pickle.load(fn)
+                    self.train_conf = pickle.load(fn)
+                    self.lr_multiplier = self.train_conf["lr_multiplier"]
                     print("lr_multiplier:", self.lr_multiplier, "learn_rate:", self.learn_rate*self.lr_multiplier)
+            v_loss_list=[]
+            self.policy_value_net.set_optimizer(self.train_conf["optimizer_type"])
             self.policy_value_net.set_learning_rate(self.learn_rate*self.lr_multiplier)
             for i, data in enumerate(training_loader):  # 计划训练批次
                 # 使用对抗数据重新训练策略价值网络模型
                 _, v_loss, p_loss = self.policy_update(data, self.epochs)
-
+                v_loss_list.append(v_loss)
                 if i%10 == 0:
                     print(i,"v_loss:",v_loss,"p_loss",p_loss)
                     time.sleep(0.1)
@@ -344,7 +347,14 @@ class Train():
                 self.lr_multiplier *= 1.5
             print("kl:{} vs {} lr_multiplier:{} lr:{}".format(kl, self.kl_targ, self.lr_multiplier, self.learn_rate*self.lr_multiplier))
             with open(train_conf_file, 'wb') as fn:
-                pickle.dump(self.lr_multiplier, fn)
+                self.train_conf["lr_multiplier"] = self.lr_multiplier
+                if self.train_conf["optimizer_type"]==0 and np.average(v_loss_list)<0.8:
+                    self.train_conf["optimizer_type"]=1
+                    self.train_conf["lr_multiplier"]=1
+                if self.train_conf["optimizer_type"]==1 and np.average(v_loss_list)>0.8:
+                    self.train_conf["optimizer_type"]=0
+                    self.train_conf["lr_multiplier"]=1
+                pickle.dump(self.train_conf, fn)
 
 
         except KeyboardInterrupt:
