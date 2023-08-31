@@ -282,19 +282,6 @@ class Agent(object):
         return 1./self.max_pieces_count
     
     # 打印
-    def print2(self):
-        info = self.status[-1]
-        for y in range(self.height):
-            line=str(y%10)+" "
-            for x in range(self.width):
-                if info[y][x]==0:
-                    line=line+"  "
-                else:
-                    line=line+"* "
-            print(line)
-        print(" "+" -"*self.width)            
-        print("score:", self.score, "steps:", self.steps,"piececount:", self.piececount, "pieceheight:", self.pieceheight, "failLines:",self.failLines)
-
     def print(self):
         board = copy.deepcopy(self.board)
         for x in range(templatenum):
