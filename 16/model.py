@@ -36,7 +36,7 @@ class PolicyValueNet():
 
         self.l2_const = l2_const  
         # ViT-Ti : depth 12 width 192 heads 3
-        self.policy_value_net = VitNet(embed_dim=192, depth=12, num_heads=3, num_classes=4, num_quantiles=128, drop_ratio=0.5, drop_path_ratio=0.1, attn_drop_ratio=0.1)
+        self.policy_value_net = VitNet(embed_dim=192, depth=12, num_heads=3, num_classes=4, num_quantiles=128, drop_ratio=0.1, drop_path_ratio=0.1, attn_drop_ratio=0.1)
         # ViT-S : depth 12 width 386 heads 6
         # self.policy_value_net = VitNet(embed_dim=386, depth=12, num_heads=6, num_classes=4, num_quantiles=128)
         # ViT-B : depth 12 width 768 heads 12
@@ -48,7 +48,7 @@ class PolicyValueNet():
         self.optimizer = optim.AdamW(self.policy_value_net.parameters(), lr=1e-6, weight_decay=self.l2_const)       
         # 后面用这个
         # self.optimizer = optim.SGD(self.policy_value_net.parameters(), lr=1e-6, momentum=0.9, weight_decay=self.l2_const)
-        
+
         # 测试失败，学不会
         # self.optimizer = Lion(self.policy_value_net.parameters(), lr=1e-4, weight_decay=self.l2_const)
 
