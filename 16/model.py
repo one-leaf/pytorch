@@ -48,6 +48,8 @@ class PolicyValueNet():
         self.optimizer = optim.AdamW(self.policy_value_net.parameters(), lr=1e-6, weight_decay=self.l2_const)       
         # 后面用这个
         # self.optimizer = optim.SGD(self.policy_value_net.parameters(), lr=1e-6, momentum=0.9, weight_decay=self.l2_const)
+        
+        # 测试失败，学不会
         # self.optimizer = Lion(self.policy_value_net.parameters(), lr=1e-4, weight_decay=self.l2_const)
 
         if model_file and os.path.exists(model_file):
