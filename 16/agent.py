@@ -496,7 +496,7 @@ class Agent(object):
                     if shapedraw[y][x]!=blank:
                         px, py = x+piece['x'], y+piece['y']
                         if px>=0 and py>=0:
-                            board[py][px]=-1
+                            board[py][px]=1
         # else:
         #     print("fallpiece is None")
         return board
