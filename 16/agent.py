@@ -82,7 +82,7 @@ class Agent(object):
         # _board = np.zeros((self.height, self.width))
         # for _ in range(8):
         #     self.status.append(_board)
-        self.status = np.zeros((3, self.height, self.width))
+        self.status = [None,None,None]
 
         self.set_status()
 
@@ -264,7 +264,7 @@ class Agent(object):
     def set_key(self):
         # info = self.status[-1]+self.status[1]
         # self.key = hash(info.data.tobytes())+self.id
-        self.key = hash(self.status.data.tobytes())+self.id
+        self.key = hash(np.sum(self.status).data.tobytes())+self.id
 
     def get_key(self):
         return self.key
@@ -528,5 +528,5 @@ class Agent(object):
     # 背景 + 最后一步 + 合并后旋转90度
     # 返回 [3, height, width]
     def current_state(self):
-        return self.status
-        # return np.array(self.status)
+        # return self.status
+        return np.array(self.status)

@@ -250,8 +250,10 @@ class Train():
             net = self.policy_value_net.policy_value
             begin_values=None
             begin_act_probs=None
+            test_data=None
             for i, data in enumerate(testing_loader):
                 test_batch, test_probs, test_values = data
+                if i==0: test_data=[test_batch, test_probs, test_values]
                 test_batch = test_batch.to(self.policy_value_net.device)
                 # test_values = test_values.to(self.policy_value_net.device)
                 with torch.no_grad(): 
@@ -331,15 +333,12 @@ class Train():
                     else:
                         end_act_probs=np.concatenate((end_act_probs, act_probs), axis=0)
 
-                b_idx = len(end_values)-1
-                print("value[0] begin:{} end:{} to:{}".format(begin_values[b_idx], end_values[b_idx], test_values[-1].numpy()))  
-                if len(test_values)>=3:
-                    print("value[1] begin:{} end:{} to:{}".format(begin_values[b_idx-1], end_values[b_idx-1], test_values[-2].numpy()))  
-                    print("value[2] begin:{} end:{} to:{}".format(begin_values[b_idx-2], end_values[b_idx-2], test_values[-3].numpy()))  
-                print("probs[0] begin:{} end:{} to:{} ".format(begin_act_probs[b_idx], end_act_probs[b_idx],test_probs[-1].numpy()))
-                if len(test_values)>=3:
-                    print("probs[1] begin:{} end:{} to:{} ".format(begin_act_probs[b_idx-1], end_act_probs[b_idx-1],test_probs[-2].numpy()))
-                    print("probs[2] begin:{} end:{} to:{} ".format(begin_act_probs[b_idx-2], end_act_probs[b_idx-2],test_probs[-3].numpy()))
+            for i in range(len(test_data)):
+                print("value[{}] begin:{} end:{} to:{}".format(i, begin_values[i], end_values[i], test_data[2][i].numpy()))  
+                if i>=4:break
+            for i in range(len(test_data)):
+                print("probs[{}] begin:{} end:{} to:{} ".format(i, begin_act_probs[i], end_act_probs[i],test_data[1][i].numpy()))
+                if i>=4:break
                 
             kl = np.mean(np.sum(begin_act_probs * (np.log(begin_act_probs + 1e-10) - np.log(end_act_probs + 1e-10)), axis=1))
             print("act_probs, kl:",kl)
