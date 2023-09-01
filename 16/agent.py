@@ -530,8 +530,3 @@ class Agent(object):
     def current_state(self):
         return self.status
         # return np.array(self.status)
-       
-
-
-    
-                
