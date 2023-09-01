@@ -519,7 +519,7 @@ class Agent(object):
             for x in range(templatenum):
                 for y in range(templatenum):
                     if shapedraw[y][x]!=blank:
-                        board[y][x+off]=1
+                        board[y][x+off]=-1
         return board
 
 
