@@ -50,7 +50,7 @@ class PolicyValueNet():
         # self.optimizer = optim.SGD(self.policy_value_net.parameters(), lr=1e-6, momentum=0.9, weight_decay=self.l2_const)
 
         # 测试失败，学不会
-        # self.optimizer = Lion(self.policy_value_net.parameters(), lr=1e-4, weight_decay=self.l2_const)
+        # self.optimizer = Lion(self.policy_value_net.parameters(), lr=1e-6, weight_decay=self.l2_const)
 
         if model_file and os.path.exists(model_file):
             print("Loading model", model_file)
@@ -62,9 +62,10 @@ class PolicyValueNet():
 
     def set_optimizer(self, type_id):
         if type_id==0:
-            self.optimizer = optim.AdamW(self.policy_value_net.parameters(), lr=1e-4, weight_decay=self.l2_const) 
+            self.optimizer = Lion(self.policy_value_net.parameters(), lr=1e-5, weight_decay=self.l2_const)
+            # self.optimizer = optim.AdamW(self.policy_value_net.parameters(), lr=1e-4, weight_decay=self.l2_const) 
         else:
-            self.optimizer = optim.SGD(self.policy_value_net.parameters(), lr=1e-4, momentum=0.9, weight_decay=self.l2_const)
+            self.optimizer = optim.SGD(self.policy_value_net.parameters(), lr=1e-5, momentum=0.9, weight_decay=self.l2_const)
 
     # 设置学习率
     def set_learning_rate(self, lr):

@@ -318,7 +318,7 @@ class VitPatchEmbed(nn.Module):
     """
     图片转嵌入数据，由 [B, C, H, W] -> [B, HW, C]
     """
-    def __init__(self, img_size=(20,10), in_c=3, kernel_size=(4,2), embed_dim=768, padding=0, stride=(4,2), norm_layer=None):
+    def __init__(self, img_size=(20,10), in_c=3, kernel_size=(20,1), embed_dim=768, padding=0, stride=1, norm_layer=None):
         super().__init__()
         image_height, image_width = pair(img_size)
         kernel_height, kernel_width = pair(kernel_size)
