@@ -84,13 +84,13 @@ class Agent(object):
         #     self.status.append(_board)
         self.status = np.zeros((3, self.height, self.width))
 
-        self.add_status(True)
+        self.set_status()
 
         # key
         self.set_key()
 
     # 状态一共8层， 0 下一个方块， 1 是背景 ，剩下得是 6 步下落的方块
-    def add_status(self, init=False):
+    def set_status(self):
         self.status[0]=self.get_fallpiece_board()
         self.status[1]=self.getBoard()
         self.status[2]=self.get_nextpiece_borad()
@@ -219,7 +219,7 @@ class Agent(object):
 
         # self.fallpieceheight = 20 - self.fallpiece['y']
 
-        self.add_status()
+        self.set_status()
         self.set_key()
 
         if not isFalling:
