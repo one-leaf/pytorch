@@ -201,7 +201,7 @@ class Train():
         self.batch_size = 256     # 每批训练的样本，早期用小，防止局部最小值，后期用大，网络平稳 32 64 128 256 512
 
         # training params
-        self.learn_rate = 1e-4
+        self.learn_rate = 5e-5
         self.lr_multiplier = 1.0  # 基于KL的自适应学习率
         self.temp = 1  # MCTS的概率参数，越大越不肯定，训练时1，预测时1e-3
         self.n_playout = 256  # 每个动作的模拟战记录个数
@@ -347,6 +347,8 @@ class Train():
                 self.lr_multiplier /= 1.5
             elif kl < self.kl_targ / 2 and self.lr_multiplier < 100:
                 self.lr_multiplier *= 1.5
+            if self.learn_rate*self.lr_multiplier>1e-3: self.lr_multiplier = 1e-3/self.learn_rate
+            if self.learn_rate*self.lr_multiplier<1e-6: self.lr_multiplier = 1e-6/self.learn_rate
             print("kl:{} vs {} lr_multiplier:{} lr:{}".format(kl, self.kl_targ, self.lr_multiplier, self.learn_rate*self.lr_multiplier))
             with open(train_conf_file, 'wb') as fn:
                 self.train_conf["lr_multiplier"] = self.lr_multiplier
