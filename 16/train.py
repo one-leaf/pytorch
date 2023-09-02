@@ -253,7 +253,7 @@ class Train():
             test_data=None
             for i, data in enumerate(testing_loader):
                 test_batch, test_probs, test_values = data
-                if i==0: test_data=[test_batch, test_probs, test_values]
+                if test_data==None: test_data=[test_batch, test_probs, test_values]
                 test_batch = test_batch.to(self.policy_value_net.device)
                 # test_values = test_values.to(self.policy_value_net.device)
                 with torch.no_grad(): 
@@ -333,10 +333,10 @@ class Train():
                     else:
                         end_act_probs=np.concatenate((end_act_probs, act_probs), axis=0)
 
-            for i in range(len(test_data)):
+            for i in range(len(begin_values)):
                 print("value[{}] begin:{} end:{} to:{}".format(i, begin_values[i], end_values[i], test_data[2][i].numpy()))  
                 if i>=4:break
-            for i in range(len(test_data)):
+            for i in range(len(begin_values)):
                 print("probs[{}] begin:{} end:{} to:{} ".format(i, begin_act_probs[i], end_act_probs[i],test_data[1][i].numpy()))
                 if i>=4:break
                 
