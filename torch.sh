@@ -3,10 +3,13 @@
 
 docker run --name torch --gpus device=1 -it -p 5901:5901 -p 6901:6901 -v $PWD:/mnt -w /mnt -v /etc/localtime:/etc/localtime:ro pytorch/pytorch:1.5.1-cuda10.1-cudnn7-runtime bash
 
-# train
+# selfplay
 docker run --gpus device=1 -it --rm -v $PWD:/mnt -w /mnt -v /etc/localtime:/etc/localtime:ro pytorch-opencv:v14 bash
 
-# selfplay
+# train
 docker run --gpus device=0 -it --rm -v $PWD:/mnt -w /mnt -v /etc/localtime:/etc/localtime:ro pytorch-opencv:v14 bash
+
+# taskset
+taskset -cp 8-15 PID
 
 docker run --gpus device=1 -it --rm -v $PWD:/mnt -v /srv/data:/mnt/12/data  -w /mnt -v /etc/localtime:/etc/localtime:ro pytorch-opencv:v14 bash
