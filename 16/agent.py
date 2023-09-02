@@ -264,7 +264,7 @@ class Agent(object):
     def set_key(self):
         # info = self.status[-1]+self.status[1]
         # self.key = hash(info.data.tobytes())+self.id
-        self.key = hash(np.sum(self.status).data.tobytes())+self.id
+        self.key = hash(self.current_state().data.tobytes())+self.id
 
     def get_key(self):
         return self.key
