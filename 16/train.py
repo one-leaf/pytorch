@@ -351,12 +351,12 @@ class Train():
             print("kl:{} vs {} lr_multiplier:{} lr:{}".format(kl, self.kl_targ, self.lr_multiplier, self.learn_rate*self.lr_multiplier))
             with open(train_conf_file, 'wb') as fn:
                 self.train_conf["lr_multiplier"] = self.lr_multiplier
-                if self.train_conf["optimizer_type"]==0 and np.average(v_loss_list)<0.1:
-                    self.train_conf["optimizer_type"]=1
-                    self.train_conf["lr_multiplier"]=1
-                if self.train_conf["optimizer_type"]==1 and np.average(v_loss_list)>0.2:
-                    self.train_conf["optimizer_type"]=0
-                    self.train_conf["lr_multiplier"]=1
+                # if self.train_conf["optimizer_type"]==0 and np.average(v_loss_list)<0.1:
+                #     self.train_conf["optimizer_type"]=1
+                #     self.train_conf["lr_multiplier"]=1
+                # if self.train_conf["optimizer_type"]==1 and np.average(v_loss_list)>0.2:
+                #     self.train_conf["optimizer_type"]=0
+                #     self.train_conf["lr_multiplier"]=1
                 pickle.dump(self.train_conf, fn)
 
 
