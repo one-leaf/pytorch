@@ -232,12 +232,7 @@ class MCTS():
         if game.state == 1:
             v = game.reward 
             if game.exreward:
-                if game.prev_emptyCount == game.emptyCount:
-                    v -= (game.heightDiff-game.prev_heightDiff)*0.1
-                elif game.prev_emptyCount > game.emptyCount:
-                    v += (game.prev_emptyCount-game.emptyCount)*0.1 
-                else:
-                    v -= (game.emptyCount-game.prev_emptyCount)*0.1+(game.failtop-game.prev_failtop+game.heightDiff-game.prev_heightDiff)*0.1
+                v -= (game.emptyCount-game.prev_emptyCount)*0.1+(game.failtop-game.prev_failtop+game.heightDiff-game.prev_heightDiff)*0.01
                 # if v>1: v=1
                 # if v<-1: v=-1
 
