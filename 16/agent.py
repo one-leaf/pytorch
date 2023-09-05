@@ -60,6 +60,8 @@ class Agent(object):
         self.fallpieceheight = 0
         # mcts的额外奖励
         self.exreward=False
+        # mcts的额外奖励因子
+        self.exrewardRate=0 
         # 限制步骤
         self.limitstep=False
         # 面板
