@@ -222,6 +222,7 @@ class MCTS():
 
         # steps = game.piecesteps
         # flines = game.failLines
+        prev_emptyCount = game.emptyCount
         game.step(a)
         # flines = flines - game.failLines 
 
@@ -231,7 +232,7 @@ class MCTS():
         v = 0
         if game.state == 1:
             if game.exreward:
-                v = game.reward if game.emptyCount<=game.prev_emptyCount else 0  
+                v = game.reward if game.emptyCount<=prev_emptyCount else 0  
                 v -= (game.emptyCount-game.prev_emptyCount)*0.1+(game.failtop-game.prev_failtop+game.heightDiff-game.prev_heightDiff)*0.01
                 # if v>1: v=1
                 # if v<-1: v=-1
