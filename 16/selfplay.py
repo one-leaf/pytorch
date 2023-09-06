@@ -101,8 +101,8 @@ class Train():
             result["piececount"]=[]
         if "exrewardRate" not in result:
             result["exrewardRate"]={}
-            for i in range(100):
-                result["exrewardRate"][str(round(i/100,2))]=20
+            for i in range(10):
+                result["exrewardRate"][str(round(i/10,2))]=20
         return result
 
     def get_equi_data(self, states, mcts_probs, values, scores):
