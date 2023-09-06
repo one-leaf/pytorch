@@ -103,9 +103,9 @@ class Train():
             result["exrewardRate"]={}
             for i in range(10):
                 result["exrewardRate"][str(round(i/10,2))]=20
-        else:
-            for k in list(result["exrewardRate"].keys()):
-                if len(k)>3: del result["exrewardRate"][k]
+        # else:
+        #     for k in list(result["exrewardRate"].keys()):
+        #         if len(k)>3: del result["exrewardRate"][k]
         return result
 
     def get_equi_data(self, states, mcts_probs, values, scores):
