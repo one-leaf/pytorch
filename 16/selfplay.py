@@ -339,7 +339,7 @@ class Train():
                 ns = np.average(ns)
 
                 if agent.exrewardRate>0:
-                    result["exrewardRate"][str(agent.exrewardRate)] = agent.piececount*0.1 + float(result["exrewardRate"][str(agent.exrewardRate)])*0.9
+                    result["exrewardRate"][str(agent.exrewardRate)] = round(agent.piececount*0.1 + float(result["exrewardRate"][str(agent.exrewardRate)])*0.9,2)
 
                 if result["total"]["pacc"]==0:
                     result["total"]["pacc"] = pacc
