@@ -99,6 +99,10 @@ class Train():
             result["total"]["avg_score_ex"]=0                  
         if "piececount" not in result:
             result["piececount"]=[]
+        if "exrewardRate" not in result:
+            result["exrewardRate"]={}
+            for i in range(100):
+                result["exrewardRate"][str(round(i/100,2))]=20
         return result
 
     def get_equi_data(self, states, mcts_probs, values, scores):
@@ -210,9 +214,15 @@ class Train():
 
         agent.show_mcts_process= True
         agent.id = 0
-        agent.exreward = random.random()>0.5
+        agent.exreward = True # random.random()>0.5
         if agent.exreward:
-            agent.exrewardRate = random.random()
+            v,p = [], np.ones((len(result["exrewardRate"])))
+            for i, k in enumerate(result["exrewardRate"]):
+                v.append(float(k))
+                p[i]=result["exrewardRate"][k]
+            agent.exrewardRate = np.random.choice(v, p=p/np.sum(p))
+        else:
+            agent.exrewardRate = 0
         agent.limitstep = random.random()<0.25
         agent.exreward_piececount = 0 #random.randint(0,20)
         print("exreward:", agent.exreward,"exrewardRate:", agent.exrewardRate ,"exreward_piececount:",agent.exreward_piececount,"isRandomNextPiece:",agent.isRandomNextPiece,"limitstep:",agent.limitstep)
@@ -327,6 +337,9 @@ class Train():
                 vacc = np.average(vacc)
                 depth = np.average(depth)
                 ns = np.average(ns)
+
+                if agent.exrewardRate>0:
+                    result["exrewardRate"][str(agent.exrewardRate)] = agent.piececount*0.1 + float(result["exrewardRate"][str(agent.exrewardRate)])*0.9
 
                 if result["total"]["pacc"]==0:
                     result["total"]["pacc"] = pacc
