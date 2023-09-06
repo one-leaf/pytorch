@@ -215,12 +215,14 @@ class Train():
         agent.show_mcts_process= True
         agent.id = 0
         agent.exreward = True # random.random()>0.5
+        exrewardRateKey="0.0"
         if agent.exreward:
             v,p = [], np.ones((len(result["exrewardRate"])))
             for i, k in enumerate(result["exrewardRate"]):
-                v.append(float(k))
+                v.append(k)
                 p[i]=result["exrewardRate"][k]
-            agent.exrewardRate = np.random.choice(v, p=p/np.sum(p))
+            exrewardRateKey=np.random.choice(v, p=p/np.sum(p))
+            agent.exrewardRate = float(exrewardRateKey)
         else:
             agent.exrewardRate = 0
         agent.limitstep = random.random()<0.25
@@ -339,7 +341,7 @@ class Train():
                 ns = np.average(ns)
 
                 if agent.exrewardRate>0:
-                    result["exrewardRate"][str(agent.exrewardRate)] = round(agent.piececount*0.1 + float(result["exrewardRate"][str(agent.exrewardRate)])*0.9,2)
+                    result["exrewardRate"][exrewardRateKey] = round(agent.piececount*0.1 + float(result["exrewardRate"][exrewardRateKey])*0.9,2)
 
                 if result["total"]["pacc"]==0:
                     result["total"]["pacc"] = pacc
