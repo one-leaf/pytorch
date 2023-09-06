@@ -340,7 +340,7 @@ class Train():
                 depth = np.average(depth)
                 ns = np.average(ns)
 
-                if agent.exrewardRate>0:
+                if agent.exreward:
                     result["exrewardRate"][exrewardRateKey] = round(agent.piececount*0.1 + float(result["exrewardRate"][exrewardRateKey])*0.9,2)
 
                 if result["total"]["pacc"]==0:
