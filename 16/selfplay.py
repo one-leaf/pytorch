@@ -222,7 +222,7 @@ class Train():
             v,p = [], np.ones((len(result["exrewardRate"])))
             for i, k in enumerate(result["exrewardRate"]):
                 v.append(k)
-                p[i]=result["exrewardRate"][k]
+                p[i]=result["exrewardRate"][k] if result["exrewardRate"][k]>0 else 0.01
             exrewardRateKey=np.random.choice(v, p=p/np.sum(p))
             agent.exrewardRate = float(exrewardRateKey)
         else:
