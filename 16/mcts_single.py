@@ -367,7 +367,7 @@ class MCTSPlayer(object):
             #     idx = np.random.choice(range(len(acts)), p=act_probs) 
 
             action = acts[idx]
-            qval = act_qs[max_probs_idx]
+            qval = np.max(act_qs)
 
             if idx!=max_probs_idx:
                 print("\t\trandom", game.position_to_action_name(acts[max_probs_idx]), "==>",  game.position_to_action_name(acts[idx]), \
