@@ -366,10 +366,10 @@ class Train():
                     result["total"]["ns"] = result["total"]["ns"]*0.99 + ns*0.01   
 
                 if result["total"]["_agent"]>100:
-                    result["reward"].append(round(result["total"]["avg_score"],3))
+                    result["reward"].append(round(result["total"]["avg_score"],2))
                     result["depth"].append(round(result["total"]["depth"],1))
-                    result["pacc"].append(round(result["total"]["pacc"],3))
-                    result["vacc"].append(round(result["total"]["vacc"],3))
+                    result["pacc"].append(round(result["total"]["pacc"],2))
+                    result["vacc"].append(round(result["total"]["vacc"],2))
                     result["time"].append(round(result["total"]["step_time"],1))
                     result["ns"].append(round(result["total"]["ns"],1))
                     result["piececount"].append(round(result["total"]["piececount"],1))
