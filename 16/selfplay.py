@@ -216,7 +216,7 @@ class Train():
 
         agent.show_mcts_process= True
         agent.id = 0
-        agent.exreward = True # random.random()>0.5
+        agent.exreward = random.random()>0.8
         exrewardRateKey="0.0"
         if agent.exreward:
             v,p = [], np.ones((len(result["exrewardRate"])))
@@ -342,8 +342,8 @@ class Train():
                 depth = np.average(depth)
                 ns = np.average(ns)
 
-                if agent.exreward:
-                    result["exrewardRate"][exrewardRateKey] = round(pacc*0.1 + float(result["exrewardRate"][exrewardRateKey])*0.9, 2)
+                # if agent.exreward:
+                result["exrewardRate"][exrewardRateKey] = round(pacc*0.1 + float(result["exrewardRate"][exrewardRateKey])*0.9, 2)
 
                 if result["total"]["pacc"]==0:
                     result["total"]["pacc"] = pacc
