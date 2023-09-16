@@ -232,7 +232,8 @@ class MCTS():
         # 现实奖励
         v = 0
         if game.state == 1:
-            v = game.reward if game.emptyCount<=game.prev_emptyCount else 0 
+            # v = game.reward if game.emptyCount<=game.prev_emptyCount else 0 
+            v = game.prev_emptyCount - game.emptyCount if game.emptyCount<game.prev_emptyCount else 0
             if game.exreward and v==0:                 
                 v -= (game.emptyCount-game.prev_emptyCount-game.reward+(game.failtop-game.prev_failtop+game.heightDiff-game.prev_heightDiff)*0.1)*game.exrewardRate
                 # if v>1: v=1
