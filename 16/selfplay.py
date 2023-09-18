@@ -216,7 +216,7 @@ class Train():
 
         agent.show_mcts_process= True
         agent.id = 0
-        agent.exreward = True #random.random()>0.8
+        agent.exreward = random.random()>0.5
         exrewardRateKey="0.0"
         if agent.exreward:
             v,p = [], np.ones((len(result["exrewardRate"])))
