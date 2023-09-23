@@ -326,6 +326,8 @@ class MCTSPlayer(object):
                 idx = max_ps_idx
             elif random.random()>0.8:
                 idx = max_qs_idx
+            else:
+                idx = max_ps_idx 
 
             # 都兼顾
             # if max_qs_idx ==  max_ps_idx:
