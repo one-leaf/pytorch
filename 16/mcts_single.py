@@ -322,7 +322,10 @@ class MCTSPlayer(object):
             max_ps_idx = np.argmax(act_ps)
 
             # 直接用概率最大的走法
-            idx = max_ps_idx
+            if max_qs_idx ==  max_ps_idx:
+                idx = max_ps_idx
+            elif random.random()>0.8:
+                idx = max_qs_idx
 
             # 都兼顾
             # if max_qs_idx ==  max_ps_idx:
