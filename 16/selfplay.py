@@ -474,11 +474,25 @@ class Train():
 
 
         # score_mask = (sum(pieces_reward)+1)*(agent.piececount+1)/100
-        # 游戏的得分算法begin_vaule ~ -1 平均分布
+        # 游戏的得分算法0 + agent.score*2.5/(agent.piececount+1) ~ -1 平均分布 
         begin_vaule = agent.score*2.5/(agent.piececount+1)
+        print("begin_vaule",begin_vaule)
         for m in range(step_count):
             p =  data["steps"][m]["piece_count"]
             data["steps"][m]["value"] = begin_vaule-(m+1)*(begin_vaule+1)/step_count
+                     
+        # for m in range(step_count):
+        #     p =  data["steps"][m]["piece_count"]
+        #     data["steps"][m]["value"] = -(m+1)/step_count
+        # idx = 0
+        # for n in range(piececount):
+        #     if pieces_reward[n]>0:
+        #         for m in range(idx, step_count):
+        #             if data["steps"][m]["piece_count"]<=n:
+        #                 data["steps"][m]["value"] += pieces_reward[n]*2.5/(n+1)
+        #             else:
+        #                 idx = m
+        #                 break           
 
         # 如果后面没有score，其步骤概率全部降低75%，则全部标记为-1        
         # for m in range(step_count-1,-1,-1):
@@ -538,8 +552,8 @@ class Train():
         # 保存对抗数据到data_buffer
         filetime = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         # 现在第一层改为了横向，所以不能做图片左右翻转增强
-        for i, obj in enumerate(self.get_equi_data(states, mcts_probs, values, score)):
-        # for i, obj in enumerate(zip(states, mcts_probs, values, score)):
+        # for i, obj in enumerate(self.get_equi_data(states, mcts_probs, values, score)):
+        for i, obj in enumerate(zip(states, mcts_probs, values, score)):
             filename = "{}-{}.pkl".format(filetime, i)
             savefile = os.path.join(data_wait_dir, filename)
             with open(savefile, "wb") as fn:
