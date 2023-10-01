@@ -116,7 +116,7 @@ class Train():
         for i in range(len(states)):
             state, mcts_prob, value, score=states[i], mcts_probs[i], values[i], scores[i]
             extend_data.append((state, mcts_prob, value, score))
-            if mcts_prob[0]<0.1:
+            if score>0 and mcts_prob[0]<0.1:
                 equi_state = np.array([np.fliplr(s) for s in state])
                 equi_mcts_prob = mcts_prob[[0,2,1,3]]
                 extend_data.append((equi_state, equi_mcts_prob, value, score))
@@ -480,7 +480,7 @@ class Train():
         for m in range(step_count):
             p =  data["steps"][m]["piece_count"]
             data["steps"][m]["value"] = begin_vaule-(m+1)*(begin_vaule+1)/step_count
-                     
+            data["steps"][m]["score"] = data["steps"][m]["qval"]         
         # for m in range(step_count):
         #     p =  data["steps"][m]["piece_count"]
         #     data["steps"][m]["value"] = -(m+1)/step_count
@@ -506,13 +506,13 @@ class Train():
         pieces_probs = [round(np.max(data["steps"][pieces_steps[p]]["move_probs"]),2) for p in range(piececount)]
 
         # 游戏的得分算法2，每一步都减1，如果碰到奖励，重置步骤，如果碰到惩罚直接加
-        reward_mask = 0
-        for m in range(step_count):
-            p =  data["steps"][m]["piece_count"]
-            ext_reward = pieces_exreward[p]
-            data["steps"][m]["score"]= -m + reward_mask + ext_reward  
-            if pieces_reward[p]>0 and m==pieces_steps[p] : reward_mask=m+1 
-        pieces_score = [data["steps"][pieces_steps[p]]["score"] for p in range(piececount)]
+        # reward_mask = 0
+        # for m in range(step_count):
+        #     p =  data["steps"][m]["piece_count"]
+        #     ext_reward = pieces_exreward[p]
+        #     data["steps"][m]["score"]= -m + reward_mask + ext_reward  
+        #     if pieces_reward[p]>0 and m==pieces_steps[p] : reward_mask=m+1 
+        # pieces_score = [data["steps"][pieces_steps[p]]["score"] for p in range(piececount)]
 
         print()
         print("steps: ", pieces_steps)
@@ -552,8 +552,8 @@ class Train():
         # 保存对抗数据到data_buffer
         filetime = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         # 现在第一层改为了横向，所以不能做图片左右翻转增强
-        # for i, obj in enumerate(self.get_equi_data(states, mcts_probs, values, score)):
-        for i, obj in enumerate(zip(states, mcts_probs, values, score)):
+        for i, obj in enumerate(self.get_equi_data(states, mcts_probs, values, score)):
+        # for i, obj in enumerate(zip(states, mcts_probs, values, score)):
             filename = "{}-{}.pkl".format(filetime, i)
             savefile = os.path.join(data_wait_dir, filename)
             with open(savefile, "wb") as fn:
