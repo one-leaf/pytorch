@@ -382,7 +382,7 @@ class Train():
                     result["pacc"].append(round(result["total"]["pacc"],2))
                     result["vacc"].append(round(result["total"]["vacc"],2))
                     result["time"].append(round(result["total"]["step_time"],1))
-                    result["ns"].append(round(result["total"]["ns"],1))
+                    result["ns"].append(round(result["total"]["avg_piececount"],1))
                     result["piececount"].append(round(result["total"]["piececount"],1))
                     result["total"]["_agent"] -= 100 
 
