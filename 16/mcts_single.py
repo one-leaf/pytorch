@@ -75,7 +75,7 @@ class MCTS():
             # if len(available_acts)==1 : break
             
             # if n >= self._n_playout/2-game.score and not game.is_status_optimal(): break
-            if n >= 2*self._n_playout-1 : break
+            if n >= 2*self._n_playout-1 and (game_.state == 1 or game_.terminal): break
             # if n >= self._n_playout-game.score : break
             # if game_.piececount - game.prev_piececount>1 and n>self._n_playout/2: break
             # if self.depth < 200 and n < self._n_playout*10: continue 
@@ -83,7 +83,7 @@ class MCTS():
             # 当前状态
             # v = self.Vs[s] if s in self.Vs else 0
             act_visits = [self.Nsa[(s, a)] if (s, a) in self.Nsa else 0 for a in available_acts]
-            if n >= self._n_playout/2-1 and max(act_visits)/sum(act_visits)>0.8: break
+            if n >= self._n_playout/2-1 and max(act_visits)/sum(act_visits)>0.8 and (game_.state == 1 or game_.terminal): break
             # act_Qs = [self.Qsa[(s, a)] if (s, a) in self.Qsa else 0 for a in available_acts]
             # max_qs = max(act_Qs)
 
