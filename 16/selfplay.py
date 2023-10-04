@@ -105,6 +105,10 @@ class Train():
             result["exrewardRate"]={}
             for i in range(10):
                 result["exrewardRate"][str(round(i/10,1))]=30
+        if "exrewardN" not in result:
+            result["exrewardN"]={}
+            for i in range(10):
+                result["exrewardN"][str(round(i/10,1))]=0
         return result
 
     def get_equi_data(self, states, mcts_probs, values, scores):
@@ -219,12 +223,16 @@ class Train():
         agent.exreward = random.random()>0.5
         exrewardRateKey="0.0"
         if agent.exreward:
-            v,p = [], np.ones((len(result["exrewardRate"])))
-            for i, k in enumerate(result["exrewardRate"]):
-                v.append(k)
-                p[i]=result["exrewardRate"][k] if result["exrewardRate"][k]>0 else 0.01
-            exrewardRateKey=np.random.choice(v, p=p/np.sum(p))
-            agent.exrewardRate = float(exrewardRateKey)
+            # v,p = [], np.ones((len(result["exrewardRate"])))
+            # for i, k in enumerate(result["exrewardRate"]):
+            #     v.append(k)
+            #     p[i]=result["exrewardRate"][k] if result["exrewardRate"][k]>0 else 0.01
+            # exrewardRateKey=np.random.choice(v, p=p/np.sum(p))
+            if random.random()>1/((sum(result["exrewardN"].values())+1)**0.5):
+                exrewardRateKey = max(result["exrewardRate"], key=result["exrewardRate"].get)
+            else:
+                exrewardRateKey = random.choice(list(result["exrewardRate"].keys()))
+            agent.exrewardRate = float(exrewardRateKey)    
         else:
             agent.exrewardRate = 0
         agent.limitstep = random.random()<0.25
@@ -343,7 +351,8 @@ class Train():
                 ns = np.average(ns)
 
                 # if agent.exreward:
-                result["exrewardRate"][exrewardRateKey] = round(agent.piececount*0.01 + float(result["exrewardRate"][exrewardRateKey])*0.99, 2)
+                result["exrewardN"][exrewardRateKey] += 1
+                result["exrewardRate"][exrewardRateKey] += round((agent.piececount - result["exrewardRate"][exrewardRateKey])/result["exrewardN"][exrewardRateKey],2)
 
                 if result["total"]["pacc"]==0:
                     result["total"]["pacc"] = pacc
