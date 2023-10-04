@@ -220,7 +220,7 @@ class Train():
 
         agent.show_mcts_process= True
         agent.id = 0
-        agent.exreward = random.random()>0.5
+        agent.exreward = True #random.random()>0.5
         exrewardRateKey="0.0"
         if agent.exreward:
             # v,p = [], np.ones((len(result["exrewardRate"])))
@@ -352,7 +352,9 @@ class Train():
 
                 # if agent.exreward:
                 result["exrewardN"][exrewardRateKey] += 1
-                result["exrewardRate"][exrewardRateKey] += round((agent.piececount - result["exrewardRate"][exrewardRateKey])/result["exrewardN"][exrewardRateKey],2)
+                _q = result["exrewardRate"][exrewardRateKey]
+                _n = result["exrewardN"][exrewardRateKey]
+                result["exrewardRate"][exrewardRateKey] = round(_q+(agent.piececount-_q)/_n, 2)
 
                 if result["total"]["pacc"]==0:
                     result["total"]["pacc"] = pacc
