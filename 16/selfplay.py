@@ -109,6 +109,12 @@ class Train():
             result["exrewardN"]={}
             for i in range(10):
                 result["exrewardN"][str(round(i/10,1))]=0
+        if "0.9" in result["exrewardRate"]:
+            result["exrewardRate"]={}
+            result["exrewardN"]={}
+            for i in range(10):
+                result["exrewardRate"][str(round(i/100,2))]=50
+                result["exrewardN"][str(round(i/100,2))]=0
         return result
 
     def get_equi_data(self, states, mcts_probs, values, scores):
