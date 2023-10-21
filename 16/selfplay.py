@@ -197,7 +197,7 @@ class Train():
                 savefile = os.path.join(self.waitplaydir, filename)
                 with open(savefile, "wb") as fn:
                     pickle.dump(his_pieces, fn)
-
+            
             self.save_status_file(result, game_json) 
 
         # must_reward_pieces_count = max(5,result["total"]["avg_reward_piececount"])
@@ -351,10 +351,10 @@ class Train():
                     # else:
                     #     vacc.append(1)
 
-                pacc = np.average(pacc)
-                vacc = np.sum([1 for v in vacc if v>0])
-                depth = np.average(depth)
-                ns = np.average(ns)
+                pacc = float(np.average(pacc))
+                vacc = float(np.sum([1 for v in vacc if v>0]))
+                depth = float(np.average(depth))
+                ns = float(np.average(ns))
 
                 # if agent.exreward:
                 result["exrewardN"][exrewardRateKey] += 1
