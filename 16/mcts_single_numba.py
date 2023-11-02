@@ -106,24 +106,34 @@ def updateQN(s:int, a:int, v:float, Ns:S_V, Qsa:SA_V, Nsa:SA_V):
 
 @njit    
 def expandPN(s:int, actions_num:int, availables:List[int], act_probs, v, Ps, Ns, Vs):
-    # probs=act_probs[availables]
     probs = np.zeros(actions_num)    
     for i in availables:
         probs[i]=act_probs[i]
     Ps[s] = probs 
     Ns[s] = 0
     Vs[s] = v
-                
+
+@njit
+def checkNeedExit(s:int, availables, Nsa)->bool:
+    _act_visits = []
+    for a in availables:
+        if (s,a) in Nsa:
+            _act_visits.append(Nsa[(s,a)])
+    if len(_act_visits)==0: return False
+    return max(_act_visits)/sum(_act_visits)>0.8
+
 def getEmptySV_Dict():
     return numba.typed.Dict.empty(
         key_type = numba.types.int64,
         value_type = numba.types.float64
     )
+    
 def getEmptySAV_Dict():
     return numba.typed.Dict.empty(
         key_type = numba.types.UniTuple(numba.types.int64,2),
         value_type = numba.types.float64
     )
+    
 def getEmptySP_Dict():
     return numba.typed.Dict.empty(
         key_type = numba.types.int64,
@@ -171,17 +181,14 @@ class MCTS():
         
         for n in range(self._n_playout*2):
             self.depth = 0
+            self.simulation_count = n+1
             
             state_:State =state.clone()
             
             self.search(state_) 
             
             if self.depth>self.max_depth: self.max_depth = self.depth
-
-            # 当前状态
-            _act_visits:List[float] = [self.Nsa[(s, a)] if (s, a) in self.Nsa else 0 for a in self.available_acts]
-            if n >= self._n_playout/2-1 and max(_act_visits)/sum(_act_visits)>0.8 and (state_.game.state == 1 or state_.terminal): break
-            self.simulation_count = n+1
+            if n >= self._n_playout/2-1 and (state_.game.state == 1 or state_.terminal) and checkNeedExit(s, state_.availables_nb(), self.Nsa): break
                         
         act_visits:List[Tuple[int,float]] = [(a, self.Nsa[(s, a)]) if (s, a) in self.Nsa else (a, 0) for a in self.available_acts]
         act_Qs:List[Tuple[int,float]] = [(a, self.Qsa[(s, a)]) if (s, a) in self.Qsa else (a, 0) for a in self.available_acts]
