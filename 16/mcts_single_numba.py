@@ -122,6 +122,25 @@ def checkNeedExit(s:int, availables, Nsa)->bool:
     if len(_act_visits)==0: return False
     return max(_act_visits)/sum(_act_visits)>0.8
 
+@njit
+def getprobsFromNsa(s:int, temp:float, availables, Nsa):
+    len_availables = len(availables)
+    visits = np.zeros(len_availables)
+    for i, a in enumerate(availables):
+        if (s,a) in Nsa:
+            visits[i]=Nsa[(s,a)]
+    if temp == 0:
+        bestA = np.argmax(visits)
+        visits[bestA] = 1
+    else:
+        m_sum = np.sum(visits)
+        if m_sum<=0:
+            visits = np.ones(len_availables)/len_availables
+        else:
+            visits = np.power(visits,1/temp)/m_sum
+    return visits
+
+
 def getEmptySV_Dict():
     return numba.typed.Dict.empty(
         key_type = numba.types.int64,
@@ -189,46 +208,49 @@ class MCTS():
             
             if self.depth>self.max_depth: self.max_depth = self.depth
             if n >= self._n_playout/2-1 and (state_.game.state == 1 or state_.terminal) and checkNeedExit(s, state_.availables_nb(), self.Nsa): break
+
+        probs = getprobsFromNsa(s, temp, state.availables_nb(), self.Nsa)
                         
-        act_visits:List[Tuple[int,float]] = [(a, self.Nsa[(s, a)]) if (s, a) in self.Nsa else (a, 0) for a in self.available_acts]
+        # act_visits:List[Tuple[int,float]] = [(a, self.Nsa[(s, a)]) if (s, a) in self.Nsa else (a, 0) for a in self.available_acts]
+        # visits:List[float] = [av[1] for av in act_visits]
+
         act_Qs:List[Tuple[int,float]] = [(a, self.Qsa[(s, a)]) if (s, a) in self.Qsa else (a, 0) for a in self.available_acts]
-        acts:List[float] = [av[0] for av in act_visits]
-        visits:List[float] = [av[1] for av in act_visits]
+        acts:List[float] = [a for a in self.available_acts]
         qs:List[float] = [av[1] for av in act_Qs]
         ps:List[float] = [self.Ps[s][a] if s in self.Ps else 0 for a in acts]
         v:float = 0 if s not in self.Vs else self.Vs[s]
         ns:float = 1 if s not in self.Ns else self.Ns[s]
 
-        if temp == 0:
-            _probs:np.ndarray = np.zeros(len(visits))
-            bestA:int = np.argmax(visits).tolist()
-            _probs[bestA] = 1
-        else:
-            m:np.ndarray = np.power(np.array(visits), 1/temp)
-            m_sum:Any = np.sum(m)
-            if m_sum<=0:
-                v_len:int = len(visits)
-                _probs:np.ndarray = np.ones(v_len)/v_len
-            else:
-                _probs:np.ndarray = m/m_sum
-        probs:List[float] = _probs.tolist()
+        # if temp == 0:
+        #     _probs:np.ndarray = np.zeros(len(visits))
+        #     bestA:int = np.argmax(visits).tolist()
+        #     _probs[bestA] = 1
+        # else:
+        #     m:np.ndarray = np.power(np.array(visits), 1/temp)
+        #     m_sum:Any = np.sum(m)
+        #     if m_sum<=0:
+        #         v_len:int = len(visits)
+        #         _probs:np.ndarray = np.ones(v_len)/v_len
+        #     else:
+        #         _probs:np.ndarray = m/m_sum
+        # probs:List[float] = _probs.tolist()
         
         game = state.game
         if game.show_mcts_process or game.state == 1 :
             if game.state == 1: game.print()
-            info=[]
-            visits_sum:float=sum(visits)
-            if visits_sum==0: visits_sum=1
-            for idx in sorted(range(len(visits)), key=visits.__getitem__)[::-1]:
-                act,visit = act_visits[idx]
-                q:float = 0
-                p:float = 0
-                if (s, act) in self.Qsa: q:float = self.Qsa[(s, act)]
-                if s in self.Ps: p:float = self.Ps[s][act]
-                info.append([game.position_to_action_name(act), round(q,2), round(p,2),'>', round(visit/visits_sum,2),])  
+            # info=[]
+            # visits_sum:float=sum(visits)
+            # if visits_sum==0: visits_sum=1
+            # for idx in sorted(range(len(visits)), key=visits.__getitem__)[::-1]:
+            #     act,visit = act_visits[idx]
+            #     q:float = 0
+            #     p:float = 0
+            #     if (s, act) in self.Qsa: q:float = self.Qsa[(s, act)]
+            #     if s in self.Ps: p:float = self.Ps[s][act]
+            #     info.append([game.position_to_action_name(act), round(q,2), round(p,2),'>', round(visit/visits_sum,2),])  
             print(time.strftime('%m-%d %H:%M:%S',time.localtime(time.time())), game.steps, game.fallpiece["shape"], \
                   "temp:", round(temp,2), "ns:", ns, "/", self.simulation_count, "depth:", self.max_depth, \
-                  "value:", round(v,2), info)
+                  "value:", round(v,2))
 
         return acts, probs, qs, ps, v, ns
 
