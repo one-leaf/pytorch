@@ -36,7 +36,7 @@ class State():
             if self.game.emptyCount>self.marks["emptyCount"]:
                 v = self.marks["emptyCount"] - self.game.emptyCount
             elif self.game.exreward:                 
-                v = (self.game.score - self.marks["score"]) + \
+                v = (self.game.reward) + \
                     ((self.marks["emptyCount"] - self.game.emptyCount) + \
                     (self.marks["failtop"] - self.game.failtop) + \
                     (self.marks["heightDiff"] - self.game.heightDiff)*0.1)*self.game.exrewardRate        
