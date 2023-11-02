@@ -126,12 +126,19 @@ class PolicyValueNet():
         current_state = game.current_state().reshape(1, -1, self.input_height, self.input_width)
         act_probs, value = self.policy_value(current_state)
         act_probs=act_probs[0]
-        value=float(value[0])
+        value=value[0]
+        return act_probs, value
+    
+    def policy_value_fn_best_act(self, game):
+        """
+        输入: 游戏
+        输出: 一组（动作， 概率）和游戏当前状态的胜率
+        """  
+        act_probs,_ = self.policy_value_fn(game)
         
         actions = game.availables
-        act_probs = list(zip(actions, act_probs[actions]))
-
-        return act_probs, value
+        idx = np.argmax(act_probs[actions])
+        return actions[idx]
 
     # 价值网络损失
     def quantile_regression_loss(self, quantiles, target):

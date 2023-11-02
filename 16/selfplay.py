@@ -2,7 +2,7 @@ import os, glob, pickle
 
 from model import PolicyValueNet, data_dir, data_wait_dir, model_file
 from agent import Agent, ACTIONS
-from mcts_single import MCTSPlayer
+from mcts_single_numba import MCTSPlayer
 
 import time, json, datetime
 
@@ -159,7 +159,6 @@ class Train():
         game_json = os.path.join(data_dir, "result.json")
   
         data = {"steps":[],"shapes":[],"last_state":0,"score":0,"piece_count":0}
-        start_time = time.time()
         print('start game time:', datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
         result = self.read_status_file(game_json)     
 
@@ -168,15 +167,12 @@ class Train():
         for _ in range(self.play_size):
             result = self.read_status_file(game_json)     
             agent = Agent(isRandomNextPiece=True, must_reward_pieces_count=20)
+            start_time = time.time()
             agent.show_mcts_process= False
             agent.id = 0
 
             for i in range(self.max_step_count):
-                move_probs, state_value = policy_value_net.policy_value_fn(agent)
-                action, acc_ps = 0, 0
-                for a, p in move_probs:
-                    if p > acc_ps:
-                        action, acc_ps = a, p
+                action = policy_value_net.policy_value_fn_best_act(agent)
                 _, reward = agent.step(action)
                 if reward > 0:
                     print("#"*40, 'score:', agent.score, 'height:', agent.pieceheight, 'piece:', agent.piececount, "shape:", agent.fallpiece["shape"], \
@@ -243,6 +239,7 @@ class Train():
             agent.exrewardRate = 0
         agent.limitstep = random.random()<0.25
         agent.exreward_piececount = 0 #random.randint(0,20)
+        start_time = time.time()
         print("exreward:", agent.exreward,"exrewardRate:", agent.exrewardRate ,"exreward_piececount:",agent.exreward_piececount,"isRandomNextPiece:",agent.isRandomNextPiece,"limitstep:",agent.limitstep)
         piececount = agent.piececount
         mark_reward_piececount = -1
@@ -295,7 +292,7 @@ class Train():
 
                 paytime = time.time()-start_time
                 steptime = paytime/agent.steps
-
+                print("step pay time:", steptime)
                 result["total"]["avg_score_ex"] = result["total"]["avg_score_ex"]*0.99 + agent.score*0.01 
                 if game_reward>0:
                     result["total"]["avg_reward_piececount"] = result["total"]["avg_reward_piececount"]*0.999 + (agent.piececount/game_reward)*0.001

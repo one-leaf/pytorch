@@ -11,17 +11,15 @@ import copy
 KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN = 0, 1, 2, 3
 ACTIONS = [KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN]
 ACTIONS_NAME = ["O","L","R","D"]
-class Agent(object):
+class Agent():
     def __init__(self, isRandomNextPiece=False, must_reward_pieces_count=8, nextpieces=[]):
         self.width = 10
         self.height = 20
         self.actions_num = len(ACTIONS)    
         self.isRandomNextPiece = isRandomNextPiece       
         self.must_reward_piece_count = must_reward_pieces_count
-        self.id = 0
         self.nextpieces = nextpieces
         self.reset()
-
 
     def reset(self):
         self.tetromino = Tetromino(isRandomNextPiece=self.isRandomNextPiece)
@@ -84,12 +82,10 @@ class Agent(object):
         # _board = np.zeros((self.height, self.width))
         # for _ in range(8):
         #     self.status.append(_board)
-        self.status = [None,None,None]
-
+        self.status = np.zeros((3, self.height, self.width))
         self.set_status()
-
         # key
-        self.set_key()
+        self.set_key()   
 
     # 状态一共8层， 0 下一个方块， 1 是背景 ，剩下得是 6 步下落的方块
     def set_status(self):
@@ -151,18 +147,7 @@ class Agent(object):
                 acts.remove(KEY_ROTATION)
             self.fallpiece['rotation'] = r
 
-        # 加 5 个规则，如果有R后面就不能L，有L就不能有R，有D就不能有O/R/L
-        # if self.limitstep:
-        #     if KEY_RIGHT in self.actions and KEY_LEFT in acts: acts.remove(KEY_LEFT)
-        #     if KEY_LEFT in self.actions  and KEY_RIGHT in acts: acts.remove(KEY_RIGHT)
-        #     # if KEY_DOWN in self.actions  and KEY_ROTATION in acts: acts.remove(KEY_ROTATION)
-        #     # if KEY_DOWN in self.actions  and KEY_RIGHT in acts: acts.remove(KEY_RIGHT)
-        #     # if KEY_DOWN in self.actions  and KEY_LEFT in acts: acts.remove(KEY_LEFT)
-        #     if KEY_ROTATION in acts and len([a for a in self.actions if a==KEY_ROTATION])==3:acts.remove(KEY_ROTATION)
-
         if not KEY_DOWN in acts : acts.append(KEY_DOWN)
-
-        # random.shuffle(acts)
         
         return acts         
 
@@ -181,7 +166,7 @@ class Agent(object):
     #         for i in range(1,8-1,1):
     #             status[i]=self.status[i+1]
     #         status[-1]=self.get_fallpiece_board(fallpiece)
-    #         key = hash((status[-1]+status[0]).data.tobytes())+self.id
+    #         key = hash((status[-1]+status[0]).data.tobytes())
     #         result[key]=status
     #     return result
 
@@ -266,7 +251,7 @@ class Agent(object):
     def set_key(self):
         # info = self.status[-1]+self.status[1]
         # self.key = hash(info.data.tobytes())+self.id
-        self.key = hash(self.current_state().data.tobytes())+self.id
+        self.key = hash(self.current_state().data.tobytes())
 
     def get_key(self):
         return self.key
@@ -434,13 +419,13 @@ class Agent(object):
                     h[x+1]=self.height-y
             if l_c>0: c+=l_c
 
-        # 加上夹壁
-        h[0]=20
-        h[-1]=20
-        for x in range(self.width):
-            _c=min(h[x]-h[x+1],h[x+2]-h[x+1]) 
-            if _c>=3:
-                c += _c-2
+        # # 加上夹壁
+        # h[0]=20
+        # h[-1]=20
+        # for x in range(self.width):
+        #     _c=min(h[x]-h[x+1],h[x+2]-h[x+1]) 
+        #     if _c>=3:
+        #         c += _c-2
         return c
 
     # 统计空洞的个数
