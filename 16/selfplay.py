@@ -246,7 +246,7 @@ class Train():
         mark_reward_piececount = -1
         for i in range(self.max_step_count):
             _step={"step":i, "curr_player":agent.id}
-            _step["state"] = agent.current_state()    
+            _step["state"] = np.copy(agent.current_state())
             # print(_step["state"][0])           
             _step["piece_count"] = agent.piececount               
             _step["shape"] = agent.fallpiece["shape"]
