@@ -5,7 +5,7 @@ import copy
 import random
 import numpy as np
 import time
-from agent import ACTIONS
+from agent_numba import ACTONS_LEN
 from typing import Set, List, Dict, Tuple, Callable, Union, Sequence, Any
 from numba import njit
 import numba
@@ -19,7 +19,7 @@ class State():
         # 最大递归搜索深度
         self.search=0
         # 动作的类型数目
-        self.actions_num = game.actions_num
+        self.actions_num = ACTONS_LEN
         self.marks = {}
         self._availables = numba.typed.List.empty_list(numba.types.int64)
         
@@ -247,10 +247,11 @@ class MCTS():
             #     p:float = 0
             #     if (s, act) in self.Qsa: q:float = self.Qsa[(s, act)]
             #     if s in self.Ps: p:float = self.Ps[s][act]
-            #     info.append([game.position_to_action_name(act), round(q,2), round(p,2),'>', round(visit/visits_sum,2),])  
+            #     info.append([game.position_to_action_name(act), round(q,2), round(p,2),'>', round(visit/visits_sum,2),]) 
+            act = acts[np.argmax(probs)]
             print(time.strftime('%m-%d %H:%M:%S',time.localtime(time.time())), game.steps, game.fallpiece["shape"], \
                   "temp:", round(temp,2), "ns:", ns, "/", self.simulation_count, "depth:", self.max_depth, \
-                  "value:", round(v,2))
+                  "value:", round(v,2),game.position_to_action_name(act),self.Ps[s][act])
 
         return acts, probs, qs, ps, v, ns
 
@@ -319,7 +320,7 @@ class MCTSPlayer(object):
 
     def get_action(self, game, curr_player, temp=0, avg_ns=0, avg_piececount=0):        
         """计算下一步走子action"""
-        move_probs = np.zeros(game.actions_num)
+        move_probs = np.zeros(ACTONS_LEN)
         if not game.terminal:  # 如果游戏没有结束
             # 训练的时候 temp = 1
             # temp 导致 N^(1/temp) alphaezero 前 30 步设置为1 其余设置为无穷小即act_probs只取最大值

@@ -1,4 +1,4 @@
-from agent import Agent, ACTIONS
+from agent_numba import Agent
 from model import PolicyValueNet
 import os,time
 

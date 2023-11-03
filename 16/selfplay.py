@@ -1,7 +1,7 @@
 import os, glob, pickle
 
 from model import PolicyValueNet, data_dir, data_wait_dir, model_file
-from agent import Agent, ACTIONS
+from agent_numba import Agent, ACTIONS
 from mcts_single_numba import MCTSPlayer
 
 import time, json, datetime
@@ -166,7 +166,7 @@ class Train():
         his_pieces = []
         for _ in range(self.play_size):
             result = self.read_status_file(game_json)     
-            agent = Agent(isRandomNextPiece=True, must_reward_pieces_count=20)
+            agent = Agent(isRandomNextPiece=True)
             start_time = time.time()
             agent.show_mcts_process= False
             agent.id = 0
@@ -198,7 +198,6 @@ class Train():
 
         # must_reward_pieces_count = max(5,result["total"]["avg_reward_piececount"])
         # must_reward_pieces_count = min(10,must_reward_pieces_count)
-        must_reward_pieces_count = 6
         # 正式运行
         player = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout)
 
@@ -213,12 +212,14 @@ class Train():
             with open(his_pieces_file,"rb") as fn:
                 his_pieces = pickle.load(fn)     
             print("replay test again, load file:", his_pieces_file)
-            print([p["shape"] for p in his_pieces])
             print("delete", his_pieces_file)
             os.remove(his_pieces_file)
-            agent = Agent(isRandomNextPiece=False, must_reward_pieces_count= must_reward_pieces_count, nextpieces=his_pieces)
+            if not isinstance(his_pieces[0],str): his_pieces=[]                
+            print([p for p in his_pieces])
+
+            agent = Agent(isRandomNextPiece=False, nextPiecesList=his_pieces)
         else:
-            agent = Agent(isRandomNextPiece=False, must_reward_pieces_count= must_reward_pieces_count,)
+            agent = Agent(isRandomNextPiece=False, )
 
         agent.show_mcts_process= True
         agent.id = 0
@@ -422,22 +423,22 @@ class Train():
                 break
 
         # 打印borad：
-        from game import blank 
-        for y in range(agent.height):
-            line=""
-            for b in borads:
-                line+="| "
-                for x in range(agent.width):
-                    if b[x][y]==blank:
-                        line+="  "
-                    else:
-                        line+="%s " % b[x][y]
-            print(line)
-        print((" "+" -"*agent.width+" ")*len(borads))
+        # from game import blank 
+        # for y in range(agent.height):
+        #     line=""
+        #     for b in borads:
+        #         line+="| "
+        #         for x in range(agent.width):
+        #             if b[x][y]==blank:
+        #                 line+="  "
+        #             else:
+        #                 line+="%s " % b[x][y]
+        #     print(line)
+        # print((" "+" -"*agent.width+" ")*len(borads))
 
-        winner = True if agent.piececount > result["total"]["piececount"] else False
+        # winner = True if agent.piececount > result["total"]["piececount"] else False
 
-        print("winner: %s piececount: %s %s" %(winner, agent.piececount, result["total"]["piececount"]))
+        # print("winner: %s piececount: %s %s" %(winner, agent.piececount, result["total"]["piececount"]))
 
         # 更新reward和score，reward为胜负，[1|-1|0]；score 为本步骤以后一共消除的行数
         step_count = len(data["steps"])
@@ -580,7 +581,7 @@ class Train():
             his_pieces_file = os.path.join(self.waitplaydir, filename)
             print("save need replay", his_pieces_file)
             with open(his_pieces_file, "wb") as fn:
-                pickle.dump(agent.tetromino.piecehis, fn)
+                pickle.dump(agent.piecehis, fn)
 
     def run(self):
         """启动训练"""
