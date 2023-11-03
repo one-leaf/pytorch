@@ -285,9 +285,7 @@ class MCTS():
         self.depth += 1
 
         # 现实奖励
-        v = state.reward()
-        if self.depth<self._n_playout:
-            v += self.search(state) 
+        v = state.reward() + self.search(state)
 
         # 更新 Q 值 和 访问次数
         updateQN(s, a, v, self.Ns, self.Qsa, self.Nsa)
