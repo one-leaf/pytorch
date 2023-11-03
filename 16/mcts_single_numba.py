@@ -36,7 +36,7 @@ class State():
             if self.game.emptyCount>self.marks["emptyCount"]:
                 v = self.marks["emptyCount"] - self.game.emptyCount
             elif self.game.exreward:                 
-                v = (self.game.reward) + \
+                v = (self.game.score-self.marks["score"]) + \
                     ((self.marks["emptyCount"] - self.game.emptyCount) + \
                     (self.marks["failtop"] - self.game.failtop) + \
                     (self.marks["heightDiff"] - self.game.heightDiff)*0.1)*self.game.exrewardRate        
@@ -286,7 +286,7 @@ class MCTS():
         self.depth += 1
 
         # 现实奖励
-        v = state.reward() + self.search(state)
+        v = self.search(state) + state.reward()
 
         # 更新 Q 值 和 访问次数
         updateQN(s, a, v, self.Ns, self.Qsa, self.Nsa)
