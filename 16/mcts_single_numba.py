@@ -33,13 +33,10 @@ class State():
     def reward(self)->float:
         v:float = 0
         if self.game.state == 1:
-            if self.game.emptyCount>self.marks["emptyCount"]:
-                v = self.marks["emptyCount"] - self.game.emptyCount
-            elif self.game.exreward:                 
-                v = (self.game.score-self.marks["score"]) + \
-                    ((self.marks["emptyCount"] - self.game.emptyCount) + \
-                    (self.marks["failtop"] - self.game.failtop) + \
-                    (self.marks["heightDiff"] - self.game.heightDiff)*0.1)*self.game.exrewardRate        
+            v = self.game.score-self.marks["score"]            
+            if self.game.exreward:                 
+                v += ((self.marks["emptyCount"] - self.game.emptyCount) + \
+                    (self.marks["failtop"] - self.game.failtop))*self.game.exrewardRate        
             return v
         return v
     
@@ -64,7 +61,6 @@ class State():
         self.marks["piececount"] = self.game.piececount
         self.marks["emptyCount"] = self.game.emptyCount
         self.marks["failtop"] = self.game.failtop
-        self.marks["heightDiff"] = self.game.heightDiff
 
     def clone(self):
         game = copy.deepcopy(self.game)

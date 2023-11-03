@@ -390,7 +390,7 @@ class Agent(Tetromino):
             # self.pieceheight = self.getAvgHeight()  
             # self.failLines = self.getFailLines()  
             self.emptyCount = self.getSimpleEmptyCount()   
-            self.heightDiff = self.getHeightDiff()
+            # self.heightDiff = self.getHeightDiff()
             # self.heightStd = self.getHeightStd()   
             # self.pieces_height.append(self.fallpieceheight)
             self.failtop = self.getFailTop()
