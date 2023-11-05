@@ -359,7 +359,7 @@ class Train():
                 result["exrewardN"][exrewardRateKey] += 1
                 _q = result["exrewardRate"][exrewardRateKey]
                 _n = result["exrewardN"][exrewardRateKey]
-                result["exrewardRate"][exrewardRateKey] = round(_q+(agent.score-_q)/100, 2)
+                result["exrewardRate"][exrewardRateKey] = round(_q+(agent.piececount-_q)/10, 2)
 
                 if result["total"]["pacc"]==0:
                     result["total"]["pacc"] = pacc
