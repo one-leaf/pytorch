@@ -205,7 +205,7 @@ class MCTS():
         s = hash(state)
 
         if state.terminal(): 
-            self.Es[s] = state.game.score-1            
+            self.Es[s] = 0 #state.game.score-1            
          
         # 如果得分不等于0，标志探索结束
         if s in self.Es: 
@@ -235,6 +235,7 @@ class MCTS():
         v += self.search(state)
 
         # 更新 Q 值 和 访问次数
+        # q[s,a] += v[s]/Nsa[s,a]
         updateQN(s, a, v, self.Ns, self.Qsa, self.Nsa)
 
         return v
