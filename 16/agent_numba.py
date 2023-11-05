@@ -224,10 +224,6 @@ class Agent(Tetromino):
         self.terminal = False
         # 得分
         self.score = 0
-        # 当前步得分
-        self.reward = 0
-        # 等级
-        self.level = 0
         # 全部步长
         self.steps = 0
         # 每个方块的步长
@@ -262,8 +258,6 @@ class Agent(Tetromino):
         self.pieces_height = []     
         # 当前prices所有动作
         self.actions=[]
-        # 最后一次得奖的方块序号
-        self.last_reward_piece_idx = -1
         # 下一个可用步骤
         self.availables=self.get_availables()
         # 显示mcts中间过程
@@ -344,7 +338,6 @@ class Agent(Tetromino):
     def step(self, action):
         # 状态 0 下落过程中 1 更换方块 2 结束一局
         
-        self.reward = 0
         self.steps += 1
         self.piecesteps += 1
         # self.level, self.fallfreq = self.calculate(self.score)
@@ -362,6 +355,7 @@ class Agent(Tetromino):
             while self.validposition(self.board, self.fallpiece, ay=n+1):
                 n += 1
             self.fallpiece['y'] += n  
+            down_count = n
 
         if action == KEY_ROTATION:
             self.fallpiece['rotation'] =  (self.fallpiece['rotation'] + 1) % len(pieces[self.fallpiece['shape']])
@@ -379,21 +373,26 @@ class Agent(Tetromino):
 
         self.set_status()
         self.set_key()
-
+        reward = 0
+        self.score -= 0.001
         if not isFalling:            
             self.addtoboard(self.board, self.fallpiece)            
             self.need_update_status=True
+            lines = self.removecompleteline(self.board)
+            reward = lines * 2.5
             
-            self.reward = self.removecompleteline(self.board) 
-            if self.reward>0: self.last_reward_piece_idx = self.piececount         
-            self.score += self.reward
+            # 鼓励垂直下落
+            if lines>0 and action == KEY_DOWN:
+                reward += down_count*0.1    
+                
+            self.score += reward    # 一个方块1点 
             # self.pieceheight = self.getAvgHeight()  
             # self.failLines = self.getFailLines()  
-            self.emptyCount = self.getSimpleEmptyCount()   
+            # self.emptyCount = self.getSimpleEmptyCount()   
             # self.heightDiff = self.getHeightDiff()
             # self.heightStd = self.getHeightStd()   
             # self.pieces_height.append(self.fallpieceheight)
-            self.failtop = self.getFailTop()
+            # self.failtop = self.getFailTop()
             self.state = 1
             self.piecesteps = 0
             self.piececount += 1 
@@ -410,11 +409,10 @@ class Agent(Tetromino):
                               ):                                      
             self.terminal = True 
             self.state = 1
-            return self.state, self.reward 
+            return self.state, reward 
         
-        self.availables = self.get_availables()    
-
-        return self.state, self.reward
+        self.availables = self.get_availables()
+        return self.state, self.score
 
     def set_key(self):
         self.key = hash(self.current_state().data.tobytes())

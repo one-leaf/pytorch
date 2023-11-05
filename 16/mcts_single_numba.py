@@ -20,26 +20,14 @@ class State():
         self.search=0
         # 动作的类型数目
         self.actions_num = ACTONS_LEN
-        self.marks = {}
         self._availables = numba.typed.List.empty_list(numba.types.int64)
         
     def step(self,act:int):
-        self.game.step(act)
+        self.game.step(act)                      
         
     def terminal(self)->bool:
         return self.game.terminal
-    
-    # 中途奖励
-    def reward(self)->float:
-        v:float = 0
-        if self.game.state == 1:
-            v = self.game.score-self.marks["score"]            
-            if self.game.exreward:                 
-                v += ((self.marks["emptyCount"] - self.game.emptyCount) + \
-                    (self.marks["failtop"] - self.game.failtop))*self.game.exrewardRate        
-            return v
-        return v
-    
+      
     def __hash__(self)->int:
         return self.game.get_key()
 
@@ -55,17 +43,9 @@ class State():
             self._availables.append(act)
         return self._availables
         
-    # 中途记录状态
-    def mark(self):
-        self.marks["score"] = self.game.score
-        self.marks["piececount"] = self.game.piececount
-        self.marks["emptyCount"] = self.game.emptyCount
-        self.marks["failtop"] = self.game.failtop
-
     def clone(self):
         game = copy.deepcopy(self.game)
         state = State(game)
-        state.marks=self.marks
         return state
 
 S_V = Dict[int, float]
@@ -74,15 +54,17 @@ SA_V = Dict[Tuple[int,int],float]
 P_V_R = Tuple[List[Tuple[int,float]],float]
 
 @njit
-def getBestAction(s:int, availables:List[int], _c_puct:float, Ps:S_V, Ns:S_V, Qsa:SA_V, Nsa:SA_V):
+def selectAction(s:int, availables:List[int], _c_puct:float, Ps:S_V, Ns:S_V, Qsa:SA_V, Nsa:SA_V):
     EPS = 1e-8
-    cur_best:float = -10000
+    cur_best:float = -100000
     best_act:int = -1
     if best_act == -1:
         # 选择具有最高置信上限的动作             
-        for a in availables:   
+        for a in availables:            
             if (s, a) in Qsa:
-                u = Qsa[(s, a)] + _c_puct * Ps[s][a] * sqrt(Ns[s]) / (1 + Nsa[(s, a)])
+                # 由于奖励都是正数，所以需要所有的步骤至少探索一次
+                if Nsa[(s,a)]==0: return a
+                u = Qsa[(s, a)] + _c_puct * Ps[s][a] * sqrt(Ns[s]) / Nsa[(s, a)]
             else:
                 u = _c_puct * Ps[s][a] * sqrt(Ns[s] + EPS)  # 加一个EPS小量防止 Q = 0                 
             if u > cur_best:
@@ -93,7 +75,7 @@ def getBestAction(s:int, availables:List[int], _c_puct:float, Ps:S_V, Ns:S_V, Qs
 @njit
 def updateQN(s:int, a:int, v:float, Ns:S_V, Qsa:SA_V, Nsa:SA_V):
     if (s, a) in Qsa:
-        Qsa[(s, a)] = (Nsa[(s, a)] * Qsa[(s, a)] + v) / (Nsa[(s, a)] + 1)
+        Qsa[(s, a)] += v / Nsa[(s, a)]
         Nsa[(s, a)] += 1
     else:
         Qsa[(s, a)] = v
@@ -101,13 +83,12 @@ def updateQN(s:int, a:int, v:float, Ns:S_V, Qsa:SA_V, Nsa:SA_V):
     Ns[s] += 1
 
 @njit    
-def expandPN(s:int, actions_num:int, availables:List[int], act_probs, v, Ps, Ns, Vs):
+def expandPN(s:int, actions_num:int, availables:List[int], act_probs, v, Ps, Ns):
     probs = np.zeros(actions_num)    
     for i in availables:
         probs[i]=act_probs[i]
     Ps[s] = probs 
     Ns[s] = 0
-    Vs[s] = v
 
 @njit
 def checkNeedExit(s:int, availables, Nsa)->bool:
@@ -163,20 +144,13 @@ class MCTS():
         self._n_playout:int = n_playout         # 做几次探索
         self.Qsa:SA_V = getEmptySAV_Dict()  # 保存 Q 值, key: s,a
         self.Nsa:SA_V = getEmptySAV_Dict()  # 保存 遍历次数 key: s,a
-        self.Ns:S_V = getEmptySV_Dict()  # 保存 遍历次数 key: s
-        self.Ps:S_P = getEmptySP_Dict()  # 保存 动作概率 key: s, a
-        self.Es:S_V = getEmptySV_Dict()  # 保存游戏最终得分 key: s
-        self.Vs:S_V = getEmptySV_Dict()  # 保存游戏局面打分 key: s # 这个不需要，只是缓存
+        self.Ns:S_V = getEmptySV_Dict()     # 保存 遍历次数 key: s
+        self.Ps:S_P = getEmptySP_Dict()     # 保存 动作概率 key: s, a
+        self.Es:S_V = getEmptySV_Dict()     # 保存游戏最终得分 key: s
+        self.Vs:S_V = getEmptySV_Dict()     # 保存游戏局面差异奖励 key: s
+        self.Ss:S_V = getEmptySV_Dict()     # 保存游戏局面全局奖励 key: s        
         print("create mcts, c_puct: {}, n_playout: {}".format(c_puct, n_playout))
         self.ext_reward:bool = True # 是否中途额外奖励
-
-    def reset(self):
-        self.Qsa:SA_V = {}  # 保存 Q 值, key: s,a
-        self.Nsa:SA_V = {}  # 保存 遍历次数 key: s,a
-        self.Ns:S_V = {}  # 保存 遍历次数 key: s
-        self.Ps:S_P = {}  # 保存 动作概率 key: s, a
-        self.Es:S_V = {}  # 保存游戏最终得分 key: s
-        self.Vs:S_V = {}  # 保存游戏局面打分 key: s # 这个不需要，只是缓存
     
     def get_action_probs(self, state:State, temp:float=1)->Tuple[List[int],List[float],List[float],float,int]:
         """
@@ -184,14 +158,12 @@ class MCTS():
         Returns:
             probs: a policy vector where the probability of the ith action is
                    proportional to Nsa[(s,a)]**(1./temp)
-        """
-       
+        """       
         s:int = hash(state)
         
         self.max_depth:int = 0
         self.depth:int = 0
         self.simulation_count = 0
-        state.mark()
         self.available_acts = state.availables()
         
         for n in range(self._n_playout*2):
@@ -205,10 +177,7 @@ class MCTS():
             if self.depth>self.max_depth: self.max_depth = self.depth
             if n >= self._n_playout/2-1 and (state_.game.state == 1 or state_.terminal) and checkNeedExit(s, state_.availables_nb(), self.Nsa): break
 
-        probs = getprobsFromNsa(s, temp, state.availables_nb(), self.Nsa)
-                        
-        # act_visits:List[Tuple[int,float]] = [(a, self.Nsa[(s, a)]) if (s, a) in self.Nsa else (a, 0) for a in self.available_acts]
-        # visits:List[float] = [av[1] for av in act_visits]
+        probs = getprobsFromNsa(s, temp, state.availables_nb(), self.Nsa)                       
 
         act_Qs:List[Tuple[int,float]] = [(a, self.Qsa[(s, a)]) if (s, a) in self.Qsa else (a, 0) for a in self.available_acts]
         acts:List[float] = [a for a in self.available_acts]
@@ -216,52 +185,26 @@ class MCTS():
         ps:List[float] = [self.Ps[s][a] if s in self.Ps else 0 for a in acts]
         v:float = 0 if s not in self.Vs else self.Vs[s]
         ns:float = 1 if s not in self.Ns else self.Ns[s]
-
-        # if temp == 0:
-        #     _probs:np.ndarray = np.zeros(len(visits))
-        #     bestA:int = np.argmax(visits).tolist()
-        #     _probs[bestA] = 1
-        # else:
-        #     m:np.ndarray = np.power(np.array(visits), 1/temp)
-        #     m_sum:Any = np.sum(m)
-        #     if m_sum<=0:
-        #         v_len:int = len(visits)
-        #         _probs:np.ndarray = np.ones(v_len)/v_len
-        #     else:
-        #         _probs:np.ndarray = m/m_sum
-        # probs:List[float] = _probs.tolist()
         
         game = state.game
         if game.show_mcts_process or game.state == 1 :
             if game.state == 1: game.print()
-            # info=[]
-            # visits_sum:float=sum(visits)
-            # if visits_sum==0: visits_sum=1
-            # for idx in sorted(range(len(visits)), key=visits.__getitem__)[::-1]:
-            #     act,visit = act_visits[idx]
-            #     q:float = 0
-            #     p:float = 0
-            #     if (s, act) in self.Qsa: q:float = self.Qsa[(s, act)]
-            #     if s in self.Ps: p:float = self.Ps[s][act]
-            #     info.append([game.position_to_action_name(act), round(q,2), round(p,2),'>', round(visit/visits_sum,2),]) 
             act = acts[np.argmax(probs)]
             print(time.strftime('%m-%d %H:%M:%S',time.localtime(time.time())), game.steps, game.fallpiece["shape"], \
                   "temp:", round(temp,2), "ns:", ns, "/", self.simulation_count, "depth:", self.max_depth, \
-                  "value:", round(v,2),game.position_to_action_name(act),self.Ps[s][act])
-
+                  "value:", round(v,2), game.position_to_action_name(act), qs)
+        # 动作数，概率，每个动作的Q，原始概率，当前局面的v，当前局面的总探索次数
         return acts, probs, qs, ps, v, ns
 
-    # @njit(parallel=True)
     def search(self, state:State)->float:
         """
         蒙特卡洛树搜索        
-        NOTE: 返回当前局面的状态 [-1,1] 如果是当前玩家是 v ，如果是对手是 -v.
         返回:
             v: 当前局面的状态
         """
         s = hash(state)
 
-        if state.terminal(): self.Es[s] = -2
+        if state.terminal(): self.Es[s] = state.game.score-1
          
         # 如果得分不等于0，标志探索结束
         if s in self.Es: return self.Es[s]
@@ -271,18 +214,23 @@ class MCTS():
         if s not in self.Ps:                          
             # 获得当前局面的概率 和 局面的打分, 这个已经过滤掉了不可用走法
             act_probs, v = self._policy(state.game)               
-            expandPN(s, state.actions_num, state.availables_nb(), act_probs, v, self.Ps, self.Ns, self.Vs)             
+            expandPN(s, state.actions_num, state.availables_nb(), act_probs, v, self.Ps, self.Ns)             
+            self.Ss[s] = state.game.score
+            self.Vs[s] = v
             return v
 
         # 当前最佳概率和最佳动作
-        a = getBestAction(s, state.availables_nb(), self._c_puct, self.Ps, self.Ns, self.Qsa, self.Nsa)
+        # 比较 Qsa[s, a] + c_puct * Ps[s,a] * sqrt(Ns[s]) / Nsa[s, a], 选择最大的
+        a = selectAction(s, state.availables_nb(), self._c_puct, self.Ps, self.Ns, self.Qsa, self.Nsa)
  
         state.step(a)
-        
         self.depth += 1
 
         # 现实奖励
-        v = self.search(state) + state.reward()
+        # 按照DQN，  q[s,a] += 0.1*(r+ 0.99*(max(q[s+1])-q[s,a])
+        # 目前Mcts， q[s,a] += v[s]/Nsa[s,a]
+        v = self.search(state)
+        v += state.game.exrewardRate*(state.game.score-self.Ss[s])
 
         # 更新 Q 值 和 访问次数
         updateQN(s, a, v, self.Ns, self.Qsa, self.Nsa)
@@ -316,7 +264,6 @@ class MCTSPlayer(object):
 
     def get_action(self, game, curr_player, temp=0, avg_ns=0, avg_piececount=0):        
         """计算下一步走子action"""
-        move_probs = np.zeros(ACTONS_LEN)
         if not game.terminal:  # 如果游戏没有结束
             # 训练的时候 temp = 1
             # temp 导致 N^(1/temp) alphaezero 前 30 步设置为1 其余设置为无穷小即act_probs只取最大值
@@ -327,67 +274,28 @@ class MCTSPlayer(object):
             #     temp = 0
             # temp = 1000
             state = State(game)
+            # 动作数，概率，每个动作的Q，原始概率，当前局面的v，当前局面的总探索次数 
             acts, act_probs, act_qs, act_ps, state_v, state_n = self.mcts.get_action_probs(state, temp)
             depth = self.mcts.max_depth
-            move_probs[acts] = act_probs
+            
             max_probs_idx = np.argmax(act_probs)    
             max_qs_idx = np.argmax(act_qs) 
             max_ps_idx = np.argmax(act_ps)
 
-            # idx = max_qs_idx
-            # 直接用概率最大的走法
             if max_qs_idx ==  max_ps_idx:
-                idx = max_ps_idx
-            elif random.random()>0.8:
                 idx = max_qs_idx
+            elif random.random()>0.5:
+                idx = max_ps_idx
             else:
-                idx = max_ps_idx 
-
-            # 都兼顾
-            # if max_qs_idx ==  max_ps_idx:
-            #     idx = max_qs_idx
-            # elif random.random()>0.25:
-            #     idx = max_ps_idx
-            # else:
-            #     for i, qs in enumerate(act_qs):
-            #         if act_qs[max_probs_idx] - qs > 0 and qs <= 0:
-            #             act_probs[i]=0
-            #     act_probs = act_probs/np.sum(act_probs)        
-            #     idx = np.random.choice(range(len(acts)), p=act_probs) 
-
-
-            #       
-            # if random.random()>0.5**game.piececount:
-            #     idx = max_ps_idx
-            # else:
-            #     p = 0.75
-            #     a = 2
-            #     dirichlet = np.random.dirichlet(a * np.ones(len(acts)))
-            #     rp = p*np.array(act_ps) + (1.0-p)*dirichlet
-            #     idx = np.random.choice(range(len(acts)), p=rp/np.sum(rp))
-
-            # 尝试其他的走法
-            # if max_qs_idx ==  max_ps_idx:
-            #     idx = max_qs_idx                
-            # elif (random.random() > 2*game.piececount/(avg_piececount+1))  or random.random()<(game.piececount - avg_piececount)/(avg_piececount+1):
-            # if False or game.is_status_optimal():
-            #     p = 0.75
-            #     # a=1的时候，dir机会均等，>1 强调均值， <1 强调两端
-            #     # 国际象棋 0.3 将棋 0.15 围棋 0.03
-            #     # 取值一般倾向于 a = 10/n 所以俄罗斯方块取 2
-            #     a = 2                  
-            #     dirichlet = np.random.dirichlet(a * np.ones(len(act_probs)))
-            #     idx = np.random.choice(range(len(acts)), p=p*act_probs + (1.0-p)*dirichlet)
-            # # 20% 按得分大于当前的概率
-            # else:
-            #     for i, qs in enumerate(act_qs):
-            #         if act_qs[max_probs_idx] - qs > 0 and qs <= 0:
-            #             act_probs[i]=0
-            #     act_probs = act_probs/np.sum(act_probs)        
-            #     idx = np.random.choice(range(len(acts)), p=act_probs) 
+                for i, qs in enumerate(act_qs):
+                    if act_qs[max_probs_idx] - qs > 0:
+                        act_probs[i]=0
+                act_probs = act_probs/np.sum(act_probs)        
+                idx = np.random.choice(range(len(acts)), p=act_probs) 
 
             action = acts[idx]
-            qval = np.max(act_qs)
+            qval = act_qs[idx]
+            max_qval = np.max(act_qs)
 
             if idx!=max_probs_idx:
                 print("\t\trandom", game.position_to_action_name(acts[max_probs_idx]), "==>",  game.position_to_action_name(acts[idx]), \
@@ -395,7 +303,10 @@ class MCTSPlayer(object):
 
             acc_ps = 1 if max_ps_idx==max_probs_idx else 0
 
-            return action, move_probs, state_v, qval, acc_ps, depth, state_n
+            move_probs = np.zeros(ACTONS_LEN)
+            move_probs[acts] = act_probs
+
+            return action, qval, move_probs, state_v, max_qval, acc_ps, depth, state_n
         else:
             print("WARNING: game is terminal")
 
