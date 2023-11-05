@@ -374,7 +374,6 @@ class Agent(Tetromino):
         self.set_status()
         self.set_key()
         reward = 0
-        self.score -= 0.001
         if not isFalling:            
             self.addtoboard(self.board, self.fallpiece)            
             self.need_update_status=True
