@@ -286,7 +286,7 @@ class MCTSPlayer(object):
                 idx = max_ps_idx
             else:
                 for i, qs in enumerate(act_qs):
-                    if act_qs[max_probs_idx] - qs > 0:
+                    if act_qs[max_probs_idx] - qs > 1:
                         act_probs[i]=0
                 act_probs = act_probs/np.sum(act_probs)        
                 idx = np.random.choice(range(len(acts)), p=act_probs) 
