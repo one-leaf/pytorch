@@ -232,7 +232,7 @@ class MCTS():
         # 按照DQN，  q[s,a] += 0.1*(r+ 0.99*(max(q[s+1])-q[s,a])
         # 目前Mcts， q[s,a] += v[s]/Nsa[s,a]
         v = self.search(state)
-        v += state.game.exrewardRate*(state.game.score-self.Ss[s])
+        v += state.game.score-self.Ss[s]
 
         # 更新 Q 值 和 访问次数
         updateQN(s, a, v, self.Ns, self.Qsa, self.Nsa)
