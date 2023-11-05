@@ -419,6 +419,6 @@ class VitNet(nn.Module):
         val = self.val_fc(val)
         val = self.val_fc_act(val)
         val = self.val_dist(val)                # [B, num_quantiles]
-        val = self.val_dist_act(val)
+        # val = self.val_dist_act(val)          # 不要 Tanh
 
         return act, val        
