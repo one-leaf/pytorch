@@ -412,7 +412,7 @@ class Agent(Tetromino):
             return self.state, reward 
         
         self.availables = self.get_availables()
-        return self.state, self.score
+        return self.state, reward
 
     def set_key(self):
         self.key = hash(self.current_state().data.tobytes())

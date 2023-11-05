@@ -75,11 +75,11 @@ def selectAction(s:int, availables:List[int], _c_puct:float, Ps:S_V, Ns:S_V, Qsa
 @njit
 def updateQN(s:int, a:int, v:float, Ns:S_V, Qsa:SA_V, Nsa:SA_V):
     if (s, a) in Qsa:
-        Qsa[(s, a)] += v / Nsa[(s, a)]
         Nsa[(s, a)] += 1
+        Qsa[(s, a)] += v / Nsa[(s, a)]
     else:
-        Qsa[(s, a)] = v
         Nsa[(s, a)] = 1
+        Qsa[(s, a)] = v
     Ns[s] += 1
 
 @njit    
@@ -204,10 +204,12 @@ class MCTS():
         """
         s = hash(state)
 
-        if state.terminal(): self.Es[s] = state.game.score-1
+        if state.terminal(): 
+            self.Es[s] = state.game.score-1            
          
         # 如果得分不等于0，标志探索结束
-        if s in self.Es: return self.Es[s]
+        if s in self.Es: 
+            return self.Es[s]
 
         # 如果当前状态没有子节点，增加子节点
         # 增加 Ps[s] Vs[s] Ns[s]
@@ -269,10 +271,6 @@ class MCTSPlayer(object):
             # temp 导致 N^(1/temp) alphaezero 前 30 步设置为1 其余设置为无穷小即act_probs只取最大值
             # temp 越大导致更均匀的搜索
 
-            # 对于俄罗斯方块，每个方块放下的第一个方块可以探索一下
-            # if game.piececount>=1:
-            #     temp = 0
-            # temp = 1000
             state = State(game)
             # 动作数，概率，每个动作的Q，原始概率，当前局面的v，当前局面的总探索次数 
             acts, act_probs, act_qs, act_ps, state_v, state_n = self.mcts.get_action_probs(state, temp)

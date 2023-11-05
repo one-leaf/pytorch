@@ -548,25 +548,28 @@ class Train():
 
         print(i,"score:",data["score"],"piece_count:",data["piece_count"],"piece_height:",data["piece_height"],"steps:",step_count)
        
-        states, mcts_probs, values, score= [], [], [], []
+        states, mcts_probs, values, scores= [], [], [], []
 
         for step in data["steps"]:
             states.append(step["state"])
             mcts_probs.append(step["move_probs"])
             values.append(step["qval"])
-            score.append(step["reward"])
+            scores.append(step["reward"])
+        
+        # print([round(v,2) for v in values])
+        # print([round(s,2) for s in scores])
         
         assert len(states)>0
         assert len(states)==len(values)
         assert len(states)==len(mcts_probs)
-        assert len(states)==len(score)
+        assert len(states)==len(scores)
 
         print("TRAIN Self Play end. length: %s value sum: %s saving ..." % (len(states),sum(values)))
 
         # 保存对抗数据到data_buffer
         filetime = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         # 现在第一层改为了横向，所以不能做图片左右翻转增强
-        for i, obj in enumerate(self.get_equi_data(states, mcts_probs, values, score)):
+        for i, obj in enumerate(self.get_equi_data(states, mcts_probs, values, scores)):
         # for i, obj in enumerate(zip(states, mcts_probs, values, score)):
             filename = "{}-{}.pkl".format(filetime, i)
             savefile = os.path.join(data_wait_dir, filename)
