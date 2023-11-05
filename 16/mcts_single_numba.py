@@ -76,7 +76,7 @@ def selectAction(s:int, availables:List[int], _c_puct:float, Ps:S_V, Ns:S_V, Qsa
 def updateQN(s:int, a:int, v:float, Ns:S_V, Qsa:SA_V, Nsa:SA_V):
     if (s, a) in Qsa:
         Nsa[(s, a)] += 1
-        Qsa[(s, a)] += v / Nsa[(s, a)]
+        Qsa[(s, a)] += (v- Qsa[(s, a)])/Nsa[(s, a)]
     else:
         Nsa[(s, a)] = 1
         Qsa[(s, a)] = v
