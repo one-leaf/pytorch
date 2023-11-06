@@ -356,7 +356,7 @@ class Agent(Tetromino):
             n = 1
             while self.validposition(self.board, self.fallpiece, ay=n+1):
                 n += 1
-                self.down_count += 1
+                self.downcount += 1
             self.fallpiece['y'] += n  
             
 
@@ -385,8 +385,8 @@ class Agent(Tetromino):
             
             # 鼓励垂直下落
             if lines>0 and action == KEY_DOWN:
-                reward += self.down_count*0.1   
-                self.down_count = 0 
+                reward += self.downcount*0.1   
+                self.downcount = 0 
                 
             self.score += reward    # 一个方块1点 
             # self.pieceheight = self.getAvgHeight()  
