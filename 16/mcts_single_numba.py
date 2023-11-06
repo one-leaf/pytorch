@@ -62,10 +62,11 @@ def selectAction(s:int, availables:List[int], _c_puct:float, Ps:S_V, Ns:S_V, Qsa
         # 选择具有最高置信上限的动作             
         for a in availables:            
             if (s, a) in Qsa:
-                # 由于奖励都是正数，所以需要所有的步骤至少探索一次
                 u = Qsa[(s, a)] + _c_puct * Ps[s][a] * sqrt(Ns[s]) / Nsa[(s, a)]
             else:
+                # 由于奖励都是正数，所以需要所有的步骤至少探索一次
                 return a
+                # u = _c_puct * Ps[s][a] * sqrt(Ns[s] + EPS)  # 加一个EPS小量防止 Q = 0                 
             if u > cur_best:
                 cur_best = u
                 best_act = a    
