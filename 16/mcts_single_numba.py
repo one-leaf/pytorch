@@ -175,7 +175,7 @@ class MCTS():
             self.search(state_) 
             
             if self.depth>self.max_depth: self.max_depth = self.depth
-            if n >= self._n_playout-1 and (state_.game.state == 1 or state_.terminal) and checkNeedExit(s, state_.availables_nb(), self.Nsa): break
+            if n >= self._n_playout//2-1 and state_.game.state==1 and checkNeedExit(s, state_.availables_nb(), self.Nsa): break
 
         probs = getprobsFromNsa(s, temp, state.availables_nb(), self.Nsa)                       
 
