@@ -6,7 +6,7 @@ import random
 import numpy as np
 import time
 from agent_numba import ACTONS_LEN
-from typing import Set, List, Dict, Tuple, Callable, Union, Sequence, Any
+from typing import List, Dict, Tuple, Callable, Any
 from numba import njit
 import numba
 
@@ -175,7 +175,7 @@ class MCTS():
             self.search(state_) 
             
             if self.depth>self.max_depth: self.max_depth = self.depth
-            if n >= self._n_playout/2-1 and (state_.game.state == 1 or state_.terminal) and checkNeedExit(s, state_.availables_nb(), self.Nsa): break
+            if n >= self._n_playout-1 and (state_.game.state == 1 or state_.terminal) and checkNeedExit(s, state_.availables_nb(), self.Nsa): break
 
         probs = getprobsFromNsa(s, temp, state.availables_nb(), self.Nsa)                       
 
