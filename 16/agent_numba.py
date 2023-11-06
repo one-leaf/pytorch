@@ -262,6 +262,8 @@ class Agent(Tetromino):
         self.availables=self.get_availables()
         # 显示mcts中间过程
         self.show_mcts_process = False
+        # 按下降的次数
+        self.downcount=0
         # 盘面的状态
         self.need_update_status=True
         self.status = np.zeros((3, boardheight, boardwidth))
@@ -354,8 +356,9 @@ class Agent(Tetromino):
             n = 1
             while self.validposition(self.board, self.fallpiece, ay=n+1):
                 n += 1
+                self.down_count += 1
             self.fallpiece['y'] += n  
-            down_count = n
+            
 
         if action == KEY_ROTATION:
             self.fallpiece['rotation'] =  (self.fallpiece['rotation'] + 1) % len(pieces[self.fallpiece['shape']])
@@ -382,7 +385,8 @@ class Agent(Tetromino):
             
             # 鼓励垂直下落
             if lines>0 and action == KEY_DOWN:
-                reward += down_count*0.1    
+                reward += self.down_count*0.1   
+                self.down_count = 0 
                 
             self.score += reward    # 一个方块1点 
             # self.pieceheight = self.getAvgHeight()  
