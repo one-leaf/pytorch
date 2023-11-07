@@ -224,6 +224,8 @@ class Agent(Tetromino):
         self.terminal = False
         # 得分
         self.score = 0
+        # 消行数
+        self.removedlines = 0
         # 全部步长
         self.steps = 0
         # 每个方块的步长
@@ -381,6 +383,7 @@ class Agent(Tetromino):
             self.addtoboard(self.board, self.fallpiece)            
             self.need_update_status=True
             lines = self.removecompleteline(self.board)
+            self.removedlines += lines
             reward = lines * 2.5
             
             # 鼓励垂直下落

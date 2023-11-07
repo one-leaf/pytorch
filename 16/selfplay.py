@@ -179,7 +179,7 @@ class Train():
                         'step:', agent.steps, "step time:", round((time.time()-start_time)/i,3),'avg_score:', result["total"]["avg_score"])            
 
                 if agent.terminal:            
-                    result["total"]["avg_score"] = result["total"]["avg_score"]*0.999 + agent.score*0.001
+                    result["total"]["avg_score"] = result["total"]["avg_score"]*0.999 + agent.removedlines*0.001
                     result["total"]["avg_piececount"] = result["total"]["avg_piececount"]*0.9999 + agent.piececount*0.0001
                     result["lastupdate"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                     break
@@ -189,7 +189,7 @@ class Train():
             # 判断是否需要重新玩,如果当前小于平均的0.8，放到运行池训练
             if agent.piececount < result["total"]["avg_piececount"]*0.7:
                 his_pieces = agent.piecehis
-                filename = "T{}-{}-{}.pkl".format(agent.piececount, agent.score ,int(round(time.time() * 1000000)))
+                filename = "T{}-{}-{}.pkl".format(agent.piececount, agent.removedlines ,int(round(time.time() * 1000000)))
                 savefile = os.path.join(self.waitplaydir, filename)
                 with open(savefile, "wb") as fn:
                     pickle.dump(his_pieces, fn)
@@ -289,13 +289,13 @@ class Train():
                 data["piece_height"] = agent.pieceheight
                 borads.append(agent.board)                    
 
-                game_score =  agent.score 
+                game_score =  agent.removedlines 
                 result = self.read_status_file(game_json)
 
                 paytime = time.time()-start_time
                 steptime = paytime/agent.steps
                 print("step pay time:", steptime)
-                result["total"]["avg_score_ex"] = result["total"]["avg_score_ex"]*0.99 + agent.score*0.01 
+                result["total"]["avg_score_ex"] = result["total"]["avg_score_ex"]*0.99 + game_score*0.01 
                 if game_score>0:
                     result["total"]["avg_reward_piececount"] = result["total"]["avg_reward_piececount"]*0.999 + (agent.piececount/game_score)*0.001
                 else:
