@@ -203,9 +203,6 @@ class MCTS():
             v: 当前局面的状态
         """
         s = hash(state)
-
-        if state.terminal(): 
-            self.Es[s] = -1 #state.game.score-1            
          
         # 如果得分不等于0，标志探索结束
         if s in self.Es: 
@@ -226,14 +223,18 @@ class MCTS():
         a = selectAction(s, state.availables_nb(), self._c_puct, self.Ps, self.Ns, self.Qsa, self.Nsa)
  
         state.step(a)
-        self.depth += 1
-
-        # 现实奖励
-        # 按照DQN，  q[s,a] += 0.1*(r+ 0.99*(max(q[s+1])-q[s,a])
-        # 目前Mcts， q[s,a] += v[s]/Nsa[s,a]
-        v = state.game.score-self.Ss[s] 
-        v += self.search(state)
-
+        
+        if state.terminal(): 
+            self.Es[s] = -1
+            v = -1
+        else:
+            # 现实奖励
+            # 按照DQN，  q[s,a] += 0.1*(r+ 0.99*(max(q[s+1])-q[s,a])
+            # 目前Mcts， q[s,a] += v[s]/Nsa[s,a]
+            v = state.game.score-self.Ss[s] 
+            v += self.search(state)
+            self.depth += 1
+            
         # 更新 Q 值 和 访问次数
         # q[s,a] += v[s]/Nsa[s,a]
         updateQN(s, a, v, self.Ns, self.Qsa, self.Nsa)
