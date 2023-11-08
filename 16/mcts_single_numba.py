@@ -108,14 +108,15 @@ def getprobsFromNsa(s:int, temp:float, availables, Nsa):
             visits[i]=Nsa[(s,a)]
     if temp == 0:
         bestA = np.argmax(visits)
-        visits[bestA] = 1
+        probs = np.zeros(len_availables)
+        probs[bestA] = 1
     else:
         m_sum = np.sum(visits)
         if m_sum<=0:
-            visits = np.ones(len_availables)/len_availables
+            probs = np.ones(len_availables)/len_availables
         else:
-            visits = np.power(visits,1/temp)/m_sum
-    return visits
+            probs = np.power(visits,1/temp)/m_sum
+    return probs
 
 
 def getEmptySV_Dict():
