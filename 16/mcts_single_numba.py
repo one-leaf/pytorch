@@ -282,16 +282,27 @@ class MCTSPlayer(object):
             max_qs_idx = np.argmax(act_qs) 
             max_ps_idx = np.argmax(act_ps)
 
-            if max_qs_idx ==  max_ps_idx:
-                idx = max_qs_idx
-            elif random.random()>0.5:
-                idx = max_ps_idx
+            if act_qs[max_qs_idx]>1:
+                if max_qs_idx ==  max_ps_idx:
+                    idx = max_qs_idx
+                elif random.random()>0.5:
+                    idx = max_ps_idx
+                else:
+                    idx = np.random.choice(range(len(acts)), p=act_probs)
             else:
-                for i, qs in enumerate(act_qs):
-                    if act_qs[max_probs_idx] - qs > 1:
-                        act_probs[i]=0
-                act_probs = act_probs/np.sum(act_probs)        
-                idx = np.random.choice(range(len(acts)), p=act_probs) 
+                idx = np.random.choice(range(len(acts)))
+
+
+            # if max_qs_idx ==  max_ps_idx:
+            #     idx = max_qs_idx
+            # elif random.random()>0.5:
+            #     idx = max_ps_idx
+            # else:
+            #     for i, qs in enumerate(act_qs):
+            #         if act_qs[max_probs_idx] - qs > 1:
+            #             act_probs[i]=0
+            #     act_probs = act_probs/np.sum(act_probs)        
+            #     idx = np.random.choice(range(len(acts)), p=act_probs)                     
 
             action = acts[idx]
             qval = act_qs[idx]
