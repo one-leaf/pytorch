@@ -290,7 +290,7 @@ class MCTSPlayer(object):
                 else:
                     idx = np.random.choice(range(len(acts)), p=act_probs)
             else:
-                idx = np.random.choice(range(len(acts)))
+                idx = max_ps_idx
 
 
             # if max_qs_idx ==  max_ps_idx:
