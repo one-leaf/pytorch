@@ -272,8 +272,9 @@ class MCTSPlayer(object):
             # 训练的时候 temp = 1
             # temp 导致 N^(1/temp) alphaezero 前 30 步设置为1 其余设置为无穷小即act_probs只取最大值
             # temp 越大导致更均匀的搜索
-
             state = State(game)
+            # 清零game的方块下落次数
+            game.downcount=0
             # 动作数，概率，每个动作的Q，原始概率，当前局面的v，当前局面的总探索次数 
             acts, act_probs, act_qs, act_ps, state_v, state_n = self.mcts.get_action_probs(state, temp)
             depth = self.mcts.max_depth
