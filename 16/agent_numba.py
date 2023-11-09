@@ -158,7 +158,7 @@ def nb_addtoboard(board,piece,piece_x,piece_y,boardwidth=10,boardheight=20):
                 if w>=0 and w<boardwidth and h>=0 and h<boardheight:
                     board[h][w] = 1    
 
-@njit
+# @njit
 def nb_removecompleteline(board, boardheight=20):
     numremove = 0
     y = boardheight-1
