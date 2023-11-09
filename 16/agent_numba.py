@@ -137,7 +137,7 @@ ACTIONS = [KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN]
 ACTIONS_NAME = ["O","L","R","D"]
 ACTONS_LEN = len(ACTIONS)
 
-# @njit    
+@njit    
 def nb_validposition(board,piece,piece_x,piece_y,ax = 0,ay = 0,templatenum=5,boardwidth=10,boardheight=20):
     for x in range(templatenum):
         for y in range(templatenum):
@@ -152,7 +152,7 @@ def nb_validposition(board,piece,piece_x,piece_y,ax = 0,ay = 0,templatenum=5,boa
                 return False
     return True
 
-# @njit
+@njit
 def nb_addtoboard(board,piece,piece_x,piece_y,boardwidth=10,boardheight=20):
     for x in range(templatenum):
         for y in range(templatenum):
@@ -162,7 +162,7 @@ def nb_addtoboard(board,piece,piece_x,piece_y,boardwidth=10,boardheight=20):
                 if w>=0 and w<boardwidth and h>=0 and h<boardheight:
                     board[h][w] = 1    
 
-# @njit
+@njit
 def nb_removecompleteline(board, boardheight=20):
     numremove = 0
     y = boardheight-1
@@ -176,6 +176,7 @@ def nb_removecompleteline(board, boardheight=20):
             y-=1
     return numremove
 
+@njit
 def nb_get_status(piece, p_x, p_y, xoff=0):
     status=np.zeros((boardheight, boardwidth), dtype=np.int8)
     for x in range(templatenum):
