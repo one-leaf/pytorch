@@ -133,7 +133,7 @@ pieces = {'s':stemplate,
           't':ttemplate}
  
 
-@njit    
+# @njit    
 def nb_validposition(board,piece,piece_x,piece_y,ax = 0,ay = 0,templatenum=5,boardwidth=10,boardheight=20):
     for x in range(templatenum):
         for y in range(templatenum):
@@ -544,7 +544,6 @@ class Agent(Tetromino):
     def current_state(self):
         return self.status
 
-@njit
 def nb_get_status(piece, p_x, p_y, xoff=0):
     status=np.zeros((boardheight, boardwidth))
     for x in range(templatenum):
@@ -556,7 +555,6 @@ def nb_get_status(piece, p_x, p_y, xoff=0):
     return status                        
 
 # 统计不可消除行的数量
-@njit
 def nb_getFailLines(board):
     failLines=set()
     for x in range(boardwidth):
@@ -569,7 +567,6 @@ def nb_getFailLines(board):
     return len(failLines)
 
 # 统计不可消除行的最高高度
-@njit
 def nb_getFailTop(board):
     blocks = [False for x in range(boardwidth)]
     for y in range(boardheight):
@@ -581,7 +578,6 @@ def nb_getFailTop(board):
     return 0
 
 # 统计当前最大高度
-@njit
 def nb_getMaxHeight(board):
     c = -1
     for y in range(boardheight):
@@ -594,7 +590,6 @@ def nb_getMaxHeight(board):
     return h
 
 # 统计当前平均高度
-@njit
 def nb_getAvgHeight(board, std=False):
     h = np.zeros((boardwidth))
     for x in range(boardwidth):
@@ -615,7 +610,6 @@ def nb_getAvgHeight(board, std=False):
     return h_mean
 
 # 统计高度标准差,按照碗型
-@njit
 def nb_getHeightStd(board):
     h = np.zeros((boardwidth))
     for x in range(boardwidth):            
@@ -637,7 +631,6 @@ def nb_getHeightStd(board):
 
 
 # 统计数据相邻差值
-@njit
 def nb_getHeightDiff(board):
     h = np.zeros((boardwidth))
     for x in range(boardwidth):            
@@ -658,7 +651,6 @@ def nb_getHeightDiff(board):
     v.remove(max(v))
     return max(v)
 
-@njit
 def nb_getSimpleEmptyCount(board):
     c = 0
     h = np.zeros((boardwidth+2))
@@ -683,7 +675,6 @@ def nb_getSimpleEmptyCount(board):
 
 # 统计空洞的个数
 # 空洞最高点+空洞的最高点总数/10
-@njit
 def nb_getEmptyCount(board):
     # 每高度的的空洞数
     c = np.zeros((boardheight))
