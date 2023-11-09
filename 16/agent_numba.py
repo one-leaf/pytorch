@@ -153,10 +153,10 @@ def nb_addtoboard(board,piece,piece_x,piece_y,boardwidth=10,boardheight=20):
     for x in range(templatenum):
         for y in range(templatenum):
             if piece[y][x]!=0:
-                # if w>=0 and w<boardwidth and h>=0 and h<boardheight:
                 w = x + piece_x
                 h = y + piece_y
-                board[h][w] = 1    
+                if w>=0 and w<boardwidth and h>=0 and h<boardheight:
+                    board[h][w] = 1    
 
 @njit
 def nb_removecompleteline(board, boardheight=20):
