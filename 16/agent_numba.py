@@ -177,7 +177,7 @@ def nb_removecompleteline(board, boardheight=20):
     return numremove
 
 def nb_get_status(piece, p_x, p_y, xoff=0):
-    status=np.zeros((boardheight, boardwidth))
+    status=np.zeros((boardheight, boardwidth), dtype=np.int8)
     for x in range(templatenum):
         for y in range(templatenum):
             if piece[y][x]!=blank:
@@ -223,7 +223,7 @@ def nb_getMaxHeight(board):
 
 # 统计当前平均高度
 def nb_getAvgHeight(board, std=False):
-    h = np.zeros((boardwidth))
+    h = np.zeros((boardwidth), dtype=np.int8)
     for x in range(boardwidth):
         for y in range(boardheight):
             if board[y][x]!=blank:
@@ -243,7 +243,7 @@ def nb_getAvgHeight(board, std=False):
 
 # 统计高度标准差,按照碗型
 def nb_getHeightStd(board):
-    h = np.zeros((boardwidth))
+    h = np.zeros((boardwidth), dtype=np.int8)
     for x in range(boardwidth):            
         for y in range(boardheight):
             if board[y][x]!=blank:
@@ -264,7 +264,7 @@ def nb_getHeightStd(board):
 
 # 统计数据相邻差值
 def nb_getHeightDiff(board):
-    h = np.zeros((boardwidth))
+    h = np.zeros((boardwidth), dtype=np.int8)
     for x in range(boardwidth):            
         for y in range(boardheight):
             if board[y][x]!=blank:
@@ -285,7 +285,7 @@ def nb_getHeightDiff(board):
 
 def nb_getSimpleEmptyCount(board):
     c = 0
-    h = np.zeros((boardwidth+2))
+    h = np.zeros((boardwidth+2), dtype=np.int8)
     hs = []
     for x in range(boardwidth):
         l_c = -1
@@ -309,9 +309,9 @@ def nb_getSimpleEmptyCount(board):
 # 空洞最高点+空洞的最高点总数/10
 def nb_getEmptyCount(board):
     # 每高度的的空洞数
-    c = np.zeros((boardheight))
+    c = np.zeros((boardheight), dtype=np.int8)
     # 每列的高度
-    h = np.zeros((boardwidth+2))
+    h = np.zeros((boardwidth+2), dtype=np.int8)
     for x in range(boardwidth):
         find_block=False
         for y in range(boardheight):
@@ -395,7 +395,7 @@ class Agent():
         self.downcount=0
         # 盘面的状态
         self.need_update_status=True
-        self.status = np.zeros((3, boardheight, boardwidth), dtype=np.float32)
+        self.status = np.zeros((3, boardheight, boardwidth), dtype=np.int8)
         self.set_status()
         # key
         self.set_key()   
