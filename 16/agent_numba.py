@@ -131,7 +131,11 @@ pieces = {'s':stemplate,
           'l':ltemplate,
           'j':jtemplate,
           't':ttemplate}
- 
+
+KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN = 0, 1, 2, 3
+ACTIONS = [KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN]
+ACTIONS_NAME = ["O","L","R","D"]
+ACTONS_LEN = len(ACTIONS)
 
 # @njit    
 def nb_validposition(board,piece,piece_x,piece_y,ax = 0,ay = 0,templatenum=5,boardwidth=10,boardheight=20):
@@ -172,10 +176,6 @@ def nb_removecompleteline(board, boardheight=20):
             y-=1
     return numremove
 
-KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN = 0, 1, 2, 3
-ACTIONS = [KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN]
-ACTIONS_NAME = ["O","L","R","D"]
-ACTONS_LEN = len(ACTIONS)
 
 class Agent():
     def __init__(self, isRandomNextPiece=False, nextPiecesList=[]):
