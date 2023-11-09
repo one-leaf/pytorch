@@ -131,6 +131,46 @@ pieces = {'s':stemplate,
           'l':ltemplate,
           'j':jtemplate,
           't':ttemplate}
+ 
+
+@njit    
+def nb_validposition(board,piece,piece_x,piece_y,ax = 0,ay = 0,templatenum=5,boardwidth=10,boardheight=20):
+    for x in range(templatenum):
+        for y in range(templatenum):
+            aboveboard = y + piece_y + ay < 0
+            if aboveboard or piece[y][x]==0:
+                continue
+            _x = x+piece_x+ax
+            _y = y+piece_y+ay
+            if _x <0 or _x>boardwidth or y>boardheight:
+                return False
+            if board[_y][_x]!=0:
+                return False
+    return True
+
+@njit
+def nb_addtoboard(board,piece,piece_x,piece_y,boardwidth=10,boardheight=20):
+    for x in range(templatenum):
+        for y in range(templatenum):
+            if piece[y][x]!=0:
+                # if w>=0 and w<boardwidth and h>=0 and h<boardheight:
+                w = x + piece_x
+                h = y + piece_y
+                board[h][w] = 1    
+
+@njit
+def nb_removecompleteline(board, boardheight=20):
+    numremove = 0
+    y = boardheight-1
+    while y >=0:
+        if np.min(board[y])==1:
+            for pulldowny in range(y, 0, -1):
+                board[pulldowny] = board[pulldowny-1]
+            board[0] = 0
+            numremove+=1
+        else:
+            y-=1
+    return numremove
 
 class Tetromino():  
     def __init__(self, isRandomNextPiece=True, nextPieceList=[]):
@@ -169,44 +209,23 @@ class Tetromino():
         return board
     
     def addtoboard(self,board,piece):
-        for x in range(templatenum):
-            for y in range(templatenum):
-                w = x + piece['x']
-                h = y + piece['y']
-                if pieces[piece['shape']][piece['rotation']][y][x]!=blank:
-                    if w>=0 and w<boardwidth and h>=0 and h<boardheight:
-                        board[h][w] = 1
+        _piece = pieces[piece['shape']][piece['rotation']]
+        nb_addtoboard(board, _piece, piece['x'], piece['y'])
+        # for x in range(templatenum):
+        #     for y in range(templatenum):
+        #         w = x + piece['x']
+        #         h = y + piece['y']
+        #         if pieces[piece['shape']][piece['rotation']][y][x]!=blank:
+        #             if w>=0 and w<boardwidth and h>=0 and h<boardheight:
+        #                 board[h][w] = 1
                 
-    def onboard(self,x,y):
-        return x >=0 and x<boardwidth and y<boardheight
         
     def validposition(self,board,piece,ax = 0,ay = 0):
-        for x in range(templatenum):
-            for y in range(templatenum):
-                aboveboard = y +piece['y'] +ay < 0
-                if aboveboard or pieces[piece['shape']][piece['rotation']][y][x]==blank:
-                    continue
-                if not self.onboard(x + piece['x']+ax,y+piece['y']+ay):
-                    return False
-                if board[y+piece['y']+ay][x+piece['x']+ax]!=blank:
-                    return False
-        return True
-    
-    def completeline(self,board,y):
-        return np.min(board[y])==1
+        _piece = pieces[piece['shape']][piece['rotation']]
+        return nb_validposition(board, _piece, piece['x'], piece['y'], ax=ax, ay=ay)
     
     def removecompleteline(self,board):
-        numremove = 0
-        y = boardheight-1
-        while y >=0:
-            if self.completeline(board,y):
-                for pulldowny in range(y,0,-1):
-                    board[pulldowny] = board[pulldowny-1]
-                board[0] = blank
-                numremove+=1
-            else:
-                y-=1
-        return numremove
+        return nb_removecompleteline(board)
 
 KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN = 0, 1, 2, 3
 ACTIONS = [KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN]

@@ -593,10 +593,23 @@ class Train():
         except KeyboardInterrupt:
             print('quit')
 
+def test():
+    training = Train()
+    training.run()
+
+def profiler():
+    import cProfile
+    profiler = cProfile.Profile()
+    profiler.enable()
+    test()
+    profiler.disable()
+    profiler.print_stats()
+
 if __name__ == '__main__':
     print('start training',datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
     training = Train()
     training.run()
+    # profiler()
     print('end training',datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
     print("")
 
