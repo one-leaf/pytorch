@@ -84,12 +84,8 @@ def expandPN(s:int, availables, act_probs, Ps, Ns, Nsa, Qsa, actions_num):
 
 @njit
 def checkNeedExit(s:int, Nsa)->bool:
-    if s in Nsa:
-        max_v = np.max(Nsa[s])
-        if max_v==0 : return False
-        return max_v/np.sum(Nsa[s])>0.8
-    else:
-        return False
+    max_v = np.max(Nsa[s])
+    return max_v>0 and max_v/np.sum(Nsa[s])>0.8
 
 @njit
 def getprobsFromNsa(s:int, temp:float, availables, actions_num, Nsa):
@@ -168,7 +164,7 @@ class MCTS():
         self.simulation_count = 0
         self.available_acts = state.availables()
         
-        for n in range(self._n_playout):
+        for n in range(self._n_playout*2):
             self.depth = 0
             self.simulation_count = n+1
             
@@ -177,7 +173,7 @@ class MCTS():
             self.search(state_) 
             
             if self.depth>self.max_depth: self.max_depth = self.depth
-            # if n >= self._n_playout//2-1 and state_.game.state==1 and checkNeedExit(s, self.Nsa): break
+            if n >= self._n_playout//2-1 and state_.game.state==1 and checkNeedExit(s, self.Nsa): break
 
         probs = getprobsFromNsa(s, temp, state.availables_nb(), state.actions_num, self.Nsa)                       
 
