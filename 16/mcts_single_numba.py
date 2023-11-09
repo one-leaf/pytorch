@@ -112,6 +112,12 @@ def getEmptySF_Dict():
         value_type = numba.types.float64
     )
 
+def getEmptySAF_Dict():
+    return numba.typed.Dict.empty(
+        key_type = numba.types.int64,
+        value_type = numba.types.float64[:]
+    )
+
 def getEmptySV_Dict():
     return numba.typed.Dict.empty(
         key_type = numba.types.int64,
@@ -122,12 +128,6 @@ def getEmptySAV_Dict():
     return numba.typed.Dict.empty(
         key_type = numba.types.int64,
         value_type = numba.types.int64[:]
-    )
-
-def getEmptySAF_Dict():
-    return numba.typed.Dict.empty(
-        key_type = numba.types.int64,
-        value_type = numba.types.float64[:]
     )
 
 class MCTS():
@@ -231,15 +231,6 @@ class MCTS():
         updateQN(s, a, v, self.Ns, self.Qsa, self.Nsa, state.actions_num)
 
         return v
-
-    # 返回某个局面的action信息
-    def getInfo(self, state:str, act:int):
-        s = state
-        n = q = p = 0
-        if s in self.Nsa: n = self.Nsa[s][act]
-        if s in self.Qsa: q = self.Qsa[s][act]
-        if s in self.Ps: p = self.Ps[s][act]
-        return n, q, p
 
 class MCTSPlayer(object):
     """基于模型指导概率的MCTS + AI player"""
