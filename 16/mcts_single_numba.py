@@ -183,7 +183,7 @@ class MCTS():
             act = np.argmax(probs)
             print(time.strftime('%m-%d %H:%M:%S',time.localtime(time.time())), game.steps, game.fallpiece["shape"], \
                   "temp:", round(temp,2), "ns:", ns, "/", self.simulation_count, "depth:", self.max_depth, \
-                  "value:", round(v,2), act, qs, probs)
+                  "value:", round(v,2), act, self.Nsa[s], qs)
         # 动作数，概率，每个动作的Q，原始概率，当前局面的v，当前局面的总探索次数
         return probs, qs, ps, v, ns
 
