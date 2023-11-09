@@ -55,7 +55,7 @@ def selectAction(s:int, availables, _c_puct:float, Ps, Ns, Qsa, Nsa):
     if best_act == -1:
         # 选择具有最高置信上限的动作             
         for a in availables:            
-            if s in Qsa and Qsa[s][a]!=0:
+            if Qsa[s][a]!=0:
                 u = Qsa[s][a] + _c_puct * Ps[s][a] * sqrt(Ns[s]) / Nsa[s][a]
             else:
                 # 由于奖励都是正数，所以需要所有的步骤至少探索一次
@@ -89,26 +89,21 @@ def checkNeedExit(s:int, Nsa)->bool:
 
 @njit
 def getprobsFromNsa(s:int, temp:float, availables, actions_num, Nsa):
-    probs = np.zeros(actions_num, dtype=np.float64)
-    
+    probs = np.zeros(actions_num, dtype=np.float64)    
     if temp == 0:
-        if s in Nsa:
-            probs[np.argmax(Nsa[s])] = 1
-        else:
-            probs[availables[0]] = 1
+        probs[np.argmax(Nsa[s])] = 1        
     else:
-        if s in Nsa:
-            m_sum = np.sum(Nsa[s])
-            if m_sum>0:
-                probs = np.power(Nsa[s],1/temp)/m_sum
-            else:
-                avg_v = 1/len(availables)
-                for a in availables:
-                    probs[a] = avg_v
-        else:        
+        m_sum = np.sum(Nsa[s])
+        if m_sum==0:
             avg_v = 1/len(availables)
             for a in availables:
-                probs[a] = avg_v
+                probs[a] = avg_v        
+        else:
+            if temp == 1:
+                probs = Nsa[s]/m_sum
+            else:
+                probs = np.power(Nsa[s],1/temp)
+                probs = probs/np.sum(probs)                
     return probs
 
 def getEmptySF_Dict():
