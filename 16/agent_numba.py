@@ -148,7 +148,7 @@ def nb_validposition(board,piece,piece_x,piece_y,ax = 0,ay = 0,templatenum=5,boa
                 return False
     return True
 
-@njit
+# @njit
 def nb_addtoboard(board,piece,piece_x,piece_y,boardwidth=10,boardheight=20):
     for x in range(templatenum):
         for y in range(templatenum):
