@@ -268,7 +268,7 @@ class Agent(Tetromino):
         self.downcount=0
         # 盘面的状态
         self.need_update_status=True
-        self.status = np.zeros((3, boardheight, boardwidth))
+        self.status = np.zeros((3, boardheight, boardwidth), dtype=np.float32)
         self.set_status()
         # key
         self.set_key()   
