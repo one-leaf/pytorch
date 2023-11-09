@@ -210,15 +210,7 @@ class Tetromino():
     
     def addtoboard(self,board,piece):
         _piece = pieces[piece['shape']][piece['rotation']]
-        nb_addtoboard(board, _piece, piece['x'], piece['y'])
-        # for x in range(templatenum):
-        #     for y in range(templatenum):
-        #         w = x + piece['x']
-        #         h = y + piece['y']
-        #         if pieces[piece['shape']][piece['rotation']][y][x]!=blank:
-        #             if w>=0 and w<boardwidth and h>=0 and h<boardheight:
-        #                 board[h][w] = 1
-                
+        nb_addtoboard(board, _piece, piece['x'], piece['y'])               
         
     def validposition(self,board,piece,ax = 0,ay = 0):
         _piece = pieces[piece['shape']][piece['rotation']]
