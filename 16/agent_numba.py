@@ -172,61 +172,18 @@ def nb_removecompleteline(board, boardheight=20):
             y-=1
     return numremove
 
-class Tetromino():  
-    def __init__(self, isRandomNextPiece=True, nextPieceList=[]):
-        self.nextPieceList=nextPieceList
-        self.isRandomNextPiece=isRandomNextPiece
-        self.pieceCount = 0
-        self.piecehis=[]
-
-    def getpiece(self, shape=None):
-        if shape==None:
-            shape = random.choice(list(pieces.keys()))
-        newpiece = {
-                    'shape':shape,
-                    'rotation': 0,
-                    'x': int(boardwidth)//2-int(templatenum//2),
-                    'y': -1,
-                   }
-        return newpiece
-        
-    def getnewpiece(self):
-        if not self.isRandomNextPiece:
-            if len(self.nextPieceList)<100:
-                for _ in range(99):
-                    self.nextPieceList.append(random.choice(list(pieces.keys()))) 
-        if len(self.nextPieceList)>0:
-            nextpieceshape = self.nextPieceList.pop(0)
-            nextpiece = self.getpiece(nextpieceshape)
-        else:
-            nextpiece = self.getpiece()  
-        self.piecehis.append(nextpiece["shape"])
-        self.pieceCount += 1
-        return nextpiece
-    
-    def getblankboard(self):
-        board = np.zeros((boardheight,boardwidth),dtype=np.int8)
-        return board
-    
-    def addtoboard(self,board,piece):
-        _piece = pieces[piece['shape']][piece['rotation']]
-        nb_addtoboard(board, _piece, piece['x'], piece['y'])               
-        
-    def validposition(self,board,piece,ax = 0,ay = 0):
-        _piece = pieces[piece['shape']][piece['rotation']]
-        return nb_validposition(board, _piece, piece['x'], piece['y'], ax=ax, ay=ay)
-    
-    def removecompleteline(self,board):
-        return nb_removecompleteline(board)
-
 KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN = 0, 1, 2, 3
 ACTIONS = [KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN]
 ACTIONS_NAME = ["O","L","R","D"]
 ACTONS_LEN = len(ACTIONS)
 
-class Agent(Tetromino):
+class Agent():
     def __init__(self, isRandomNextPiece=False, nextPiecesList=[]):
-        super(Agent, self).__init__(isRandomNextPiece, nextPiecesList)  
+        self.nextPieceList=nextPiecesList
+        self.isRandomNextPiece=isRandomNextPiece
+        self.pieceCount = 0
+        self.piecehis=[]
+        
         # 下落的方块
         self.fallpiece = self.getnewpiece()
         # 下一个待下落的方块
@@ -283,8 +240,47 @@ class Agent(Tetromino):
         self.set_status()
         # key
         self.set_key()   
-        
 
+    def getpiece(self, shape=None):
+        if shape==None:
+            shape = random.choice(list(pieces.keys()))
+        newpiece = {
+                    'shape':shape,
+                    'rotation': 0,
+                    'x': int(boardwidth)//2-int(templatenum//2),
+                    'y': -1,
+                   }
+        return newpiece
+        
+    def getnewpiece(self):
+        if not self.isRandomNextPiece:
+            if len(self.nextPieceList)<100:
+                for _ in range(99):
+                    self.nextPieceList.append(random.choice(list(pieces.keys()))) 
+        if len(self.nextPieceList)>0:
+            nextpieceshape = self.nextPieceList.pop(0)
+            nextpiece = self.getpiece(nextpieceshape)
+        else:
+            nextpiece = self.getpiece()  
+        self.piecehis.append(nextpiece["shape"])
+        self.pieceCount += 1
+        return nextpiece
+    
+    def getblankboard(self):
+        board = np.zeros((boardheight,boardwidth),dtype=np.int8)
+        return board
+    
+    def addtoboard(self,board,piece):
+        _piece = pieces[piece['shape']][piece['rotation']]
+        nb_addtoboard(board, _piece, piece['x'], piece['y'])               
+        
+    def validposition(self,board,piece,ax = 0,ay = 0):
+        _piece = pieces[piece['shape']][piece['rotation']]
+        return nb_validposition(board, _piece, piece['x'], piece['y'], ax=ax, ay=ay)
+    
+    def removecompleteline(self,board):
+        return nb_removecompleteline(board)
+    
     # 状态一共3层， 0 下一个方块， 1 是背景 ，剩下得是 6 步下落的方块
     def set_status(self):
         self.status[0]=0
