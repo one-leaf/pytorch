@@ -146,7 +146,7 @@ def nb_validposition(board,piece,piece_x,piece_y,ax = 0,ay = 0,templatenum=5,boa
                 continue
             _x = x+piece_x+ax
             _y = y+piece_y+ay
-            if _x <0 or _x>boardwidth or y>boardheight:
+            if _x <0 or _x>=boardwidth or _y>=boardheight:
                 return False
             if board[_y][_x]!=0:
                 return False
