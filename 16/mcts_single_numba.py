@@ -172,11 +172,10 @@ class MCTS():
 
         probs = getprobsFromNsa(s, temp, state.availables_nb(), state.actions_num, self.Nsa)                       
 
-        qs = self.Qsa[s] if s in self.Qsa else np.zeros(state.actions_num, dtype=np.float64)
-        ps = self.Ps[s] if s in self.Ps else np.zeros(state.actions_num, dtype=np.float64)
-        
-        v:float = 0 if s not in self.Vs else self.Vs[s]
-        ns:float = 1 if s not in self.Ns else self.Ns[s]
+        qs = self.Qsa[s] 
+        ps = self.Ps[s]         
+        v:float = self.Vs[s]
+        ns:float = self.Ns[s]
         
         game = state.game
         if game.show_mcts_process or game.state == 1 :
