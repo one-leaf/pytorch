@@ -176,6 +176,165 @@ def nb_removecompleteline(board, boardheight=20):
             y-=1
     return numremove
 
+def nb_get_status(piece, p_x, p_y, xoff=0):
+    status=np.zeros((boardheight, boardwidth))
+    for x in range(templatenum):
+        for y in range(templatenum):
+            if piece[y][x]!=blank:
+                px, py = x+p_x, y+p_y
+                if px>=0 and py>=0:
+                    status[py][px+xoff]=1
+    return status                        
+
+# 统计不可消除行的数量
+def nb_getFailLines(board):
+    failLines=set()
+    for x in range(boardwidth):
+        block = False
+        for y in range(boardheight):
+            if board[y][x]!=blank:
+                block=True
+            elif block:
+                failLines.add(y)
+    return len(failLines)
+
+# 统计不可消除行的最高高度
+def nb_getFailTop(board):
+    blocks = [False for x in range(boardwidth)]
+    for y in range(boardheight):
+        for x in range(boardwidth):            
+            if board[y][x]!=blank:
+                blocks[x]=True
+            elif blocks[x]==True:
+                return boardheight-y
+    return 0
+
+# 统计当前最大高度
+def nb_getMaxHeight(board):
+    c = -1
+    for y in range(boardheight):
+        for x in range(boardwidth):
+            if board[y][x]!=blank:
+                c=y
+                break
+        if c!=-1:break  
+    h = 0 if c == -1 else boardheight - c                          
+    return h
+
+# 统计当前平均高度
+def nb_getAvgHeight(board, std=False):
+    h = np.zeros((boardwidth))
+    for x in range(boardwidth):
+        for y in range(boardheight):
+            if board[y][x]!=blank:
+                h[x]=(boardheight-y)
+                break
+    # 修复夹壁>2
+    for i in range(boardwidth):
+        if i==0:
+            h[i]= max(h[i], h[i+1]-2)
+        elif i==boardwidth-1:
+            h[i]= max(h[i], h[i-1]-2)
+        else:
+            h[i]= max(h[i], min(h[i-1]-2, h[i+1]-2))
+
+    h_mean = np.mean(h)
+    return h_mean
+
+# 统计高度标准差,按照碗型
+def nb_getHeightStd(board):
+    h = np.zeros((boardwidth))
+    for x in range(boardwidth):            
+        for y in range(boardheight):
+            if board[y][x]!=blank:
+                h[x]=boardheight-y
+                break
+
+    v = [abs(h[4]-h[5])]
+    v.append((h[1]-h[0]) if h[1]-h[0]>0 else max(0,h[0]-h[1]-3))
+    v.append((h[2]-h[1]) if h[2]-h[1]>0 else max(0,h[1]-h[2]-3))
+    v.append((h[3]-h[2]) if h[3]-h[2]>0 else max(0,h[2]-h[3]-3))
+    v.append((h[4]-h[3]) if h[4]-h[3]>0 else max(0,h[3]-h[4]-3))
+    v.append((h[5]-h[6]) if h[5]-h[6]>0 else max(0,h[6]-h[5]-3))
+    v.append((h[6]-h[7]) if h[6]-h[7]>0 else max(0,h[7]-h[6]-3))
+    v.append((h[7]-h[8]) if h[7]-h[8]>0 else max(0,h[8]-h[7]-3))
+    v.append((h[8]-h[9]) if h[8]-h[9]>0 else max(0,h[9]-h[8]-3))
+    return np.std(v)
+
+
+# 统计数据相邻差值
+def nb_getHeightDiff(board):
+    h = np.zeros((boardwidth))
+    for x in range(boardwidth):            
+        for y in range(boardheight):
+            if board[y][x]!=blank:
+                h[x]=boardheight-y
+                break
+    v = [0]
+    v.append(abs(h[1]-h[0]))
+    v.append(abs(h[2]-h[1]))
+    v.append(abs(h[3]-h[2]))
+    v.append(abs(h[4]-h[3]))
+    v.append(abs(h[5]-h[4]))
+    v.append(abs(h[6]-h[5]))
+    v.append(abs(h[7]-h[6]))
+    v.append(abs(h[8]-h[7]))
+    v.append(abs(h[9]-h[8]))
+    v.remove(max(v))
+    return max(v)
+
+def nb_getSimpleEmptyCount(board):
+    c = 0
+    h = np.zeros((boardwidth+2))
+    hs = []
+    for x in range(boardwidth):
+        l_c = -1
+        for y in range(boardheight):
+            if board[y][x] == blank:
+                if l_c>=0:
+                    if y not in hs: 
+                        l_c += 1
+                        hs.append(y)
+                    else:
+                        l_c += 0.1
+            elif l_c==-1:
+                l_c = 0
+                h[x+1]=boardheight-y
+        if l_c>0: c+=l_c
+
+
+    return c
+
+# 统计空洞的个数
+# 空洞最高点+空洞的最高点总数/10
+def nb_getEmptyCount(board):
+    # 每高度的的空洞数
+    c = np.zeros((boardheight))
+    # 每列的高度
+    h = np.zeros((boardwidth+2))
+    for x in range(boardwidth):
+        find_block=False
+        for y in range(boardheight):
+            if find_block==False and board[y][x]!=blank:
+                find_block = True
+                h[x+1] = boardheight-y
+            if find_block and board[y][x]==blank: 
+                c[boardheight-y] += 1
+
+                # if self.height-y>c_h: c_h = self.height-y
+    # 加上夹壁
+    h[0]=h[2]
+    h[-1]=h[-3]
+    for x in range(boardwidth):
+        _c=min(h[x]-h[x+1],h[x+2]-h[x+1]) 
+        if _c>=3:
+            k = int(min(h[x],h[x+2])-2)
+            c[k] += 1
+
+    for x in range(boardheight-1,0,-1):
+        if c[x]>0:
+            return x + c[x]/10       
+    return 0
 
 class Agent():
     def __init__(self, isRandomNextPiece=False, nextPiecesList=[]):
@@ -540,162 +699,3 @@ class Agent():
     def current_state(self):
         return self.status
 
-def nb_get_status(piece, p_x, p_y, xoff=0):
-    status=np.zeros((boardheight, boardwidth))
-    for x in range(templatenum):
-        for y in range(templatenum):
-            if piece[y][x]!=blank:
-                px, py = x+p_x, y+p_y
-                if px>=0 and py>=0:
-                    status[py][px+xoff]=1
-    return status                        
-
-# 统计不可消除行的数量
-def nb_getFailLines(board):
-    failLines=set()
-    for x in range(boardwidth):
-        block = False
-        for y in range(boardheight):
-            if board[y][x]!=blank:
-                block=True
-            elif block:
-                failLines.add(y)
-    return len(failLines)
-
-# 统计不可消除行的最高高度
-def nb_getFailTop(board):
-    blocks = [False for x in range(boardwidth)]
-    for y in range(boardheight):
-        for x in range(boardwidth):            
-            if board[y][x]!=blank:
-                blocks[x]=True
-            elif blocks[x]==True:
-                return boardheight-y
-    return 0
-
-# 统计当前最大高度
-def nb_getMaxHeight(board):
-    c = -1
-    for y in range(boardheight):
-        for x in range(boardwidth):
-            if board[y][x]!=blank:
-                c=y
-                break
-        if c!=-1:break  
-    h = 0 if c == -1 else boardheight - c                          
-    return h
-
-# 统计当前平均高度
-def nb_getAvgHeight(board, std=False):
-    h = np.zeros((boardwidth))
-    for x in range(boardwidth):
-        for y in range(boardheight):
-            if board[y][x]!=blank:
-                h[x]=(boardheight-y)
-                break
-    # 修复夹壁>2
-    for i in range(boardwidth):
-        if i==0:
-            h[i]= max(h[i], h[i+1]-2)
-        elif i==boardwidth-1:
-            h[i]= max(h[i], h[i-1]-2)
-        else:
-            h[i]= max(h[i], min(h[i-1]-2, h[i+1]-2))
-
-    h_mean = np.mean(h)
-    return h_mean
-
-# 统计高度标准差,按照碗型
-def nb_getHeightStd(board):
-    h = np.zeros((boardwidth))
-    for x in range(boardwidth):            
-        for y in range(boardheight):
-            if board[y][x]!=blank:
-                h[x]=boardheight-y
-                break
-
-    v = [abs(h[4]-h[5])]
-    v.append((h[1]-h[0]) if h[1]-h[0]>0 else max(0,h[0]-h[1]-3))
-    v.append((h[2]-h[1]) if h[2]-h[1]>0 else max(0,h[1]-h[2]-3))
-    v.append((h[3]-h[2]) if h[3]-h[2]>0 else max(0,h[2]-h[3]-3))
-    v.append((h[4]-h[3]) if h[4]-h[3]>0 else max(0,h[3]-h[4]-3))
-    v.append((h[5]-h[6]) if h[5]-h[6]>0 else max(0,h[6]-h[5]-3))
-    v.append((h[6]-h[7]) if h[6]-h[7]>0 else max(0,h[7]-h[6]-3))
-    v.append((h[7]-h[8]) if h[7]-h[8]>0 else max(0,h[8]-h[7]-3))
-    v.append((h[8]-h[9]) if h[8]-h[9]>0 else max(0,h[9]-h[8]-3))
-    return np.std(v)
-
-
-# 统计数据相邻差值
-def nb_getHeightDiff(board):
-    h = np.zeros((boardwidth))
-    for x in range(boardwidth):            
-        for y in range(boardheight):
-            if board[y][x]!=blank:
-                h[x]=boardheight-y
-                break
-    v = [0]
-    v.append(abs(h[1]-h[0]))
-    v.append(abs(h[2]-h[1]))
-    v.append(abs(h[3]-h[2]))
-    v.append(abs(h[4]-h[3]))
-    v.append(abs(h[5]-h[4]))
-    v.append(abs(h[6]-h[5]))
-    v.append(abs(h[7]-h[6]))
-    v.append(abs(h[8]-h[7]))
-    v.append(abs(h[9]-h[8]))
-    v.remove(max(v))
-    return max(v)
-
-def nb_getSimpleEmptyCount(board):
-    c = 0
-    h = np.zeros((boardwidth+2))
-    hs = []
-    for x in range(boardwidth):
-        l_c = -1
-        for y in range(boardheight):
-            if board[y][x] == blank:
-                if l_c>=0:
-                    if y not in hs: 
-                        l_c += 1
-                        hs.append(y)
-                    else:
-                        l_c += 0.1
-            elif l_c==-1:
-                l_c = 0
-                h[x+1]=boardheight-y
-        if l_c>0: c+=l_c
-
-
-    return c
-
-# 统计空洞的个数
-# 空洞最高点+空洞的最高点总数/10
-def nb_getEmptyCount(board):
-    # 每高度的的空洞数
-    c = np.zeros((boardheight))
-    # 每列的高度
-    h = np.zeros((boardwidth+2))
-    for x in range(boardwidth):
-        find_block=False
-        for y in range(boardheight):
-            if find_block==False and board[y][x]!=blank:
-                find_block = True
-                h[x+1] = boardheight-y
-            if find_block and board[y][x]==blank: 
-                c[boardheight-y] += 1
-
-                # if self.height-y>c_h: c_h = self.height-y
-    # 加上夹壁
-    h[0]=h[2]
-    h[-1]=h[-3]
-    for x in range(boardwidth):
-        _c=min(h[x]-h[x+1],h[x+2]-h[x+1]) 
-        if _c>=3:
-            k = int(min(h[x],h[x+2])-2)
-            c[k] += 1
-
-    for x in range(boardheight-1,0,-1):
-        if c[x]>0:
-            return x + c[x]/10       
-    return 0
