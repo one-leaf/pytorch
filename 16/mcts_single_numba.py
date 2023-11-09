@@ -182,8 +182,8 @@ class MCTS():
             if game.state == 1: game.print()
             act = np.argmax(probs)
             print(time.strftime('%m-%d %H:%M:%S',time.localtime(time.time())), game.steps, game.fallpiece["shape"], \
-                  "temp:", round(temp,2), "ns:", ns, "/", self.simulation_count, "depth:", self.max_depth, \
-                  "value:", round(v,2), act, self.Nsa[s], qs)
+                  "ns:", str(ns).rjust(4), "/", str(self.simulation_count).ljust(4), "depth:", str(self.max_depth).ljust(3), \
+                  "value:", round(v,2), "\t", act, self.Nsa[s], qs)
         # 动作数，概率，每个动作的Q，原始概率，当前局面的v，当前局面的总探索次数
         return probs, qs, ps, v, ns
 
@@ -293,7 +293,7 @@ class MCTSPlayer(object):
 
             if idx!=max_probs_idx:
                 print("\t\trandom", game.position_to_action_name(max_probs_idx), "==>",  game.position_to_action_name(idx), \
-                           "p:", act_ps[max_probs_idx], "==>", act_ps[idx], "q:", act_qs[max_probs_idx], "==>", act_qs[idx])  
+                           "p:", round(act_ps[max_probs_idx],2), "==>", round(act_ps[idx],2), "q:", round(act_qs[max_probs_idx],2), "==>", round(act_qs[idx],2))  
 
             acc_ps = 1 if max_ps_idx==max_probs_idx else 0
 
