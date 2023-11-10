@@ -137,7 +137,7 @@ ACTIONS = [KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN]
 ACTIONS_NAME = ["O","L","R","D"]
 ACTONS_LEN = len(ACTIONS)
 
-@njit
+@njit(cache=True)
 def nb_calc_down_count(board, piece, piece_x, piece_y, templatenum=5):
     p_h= np.sum(piece,axis=0, dtype=np.int8) + np.argmax(piece,axis=0)
     _board = np.copy(board)
@@ -154,7 +154,7 @@ def nb_calc_down_count(board, piece, piece_x, piece_y, templatenum=5):
     count = min_y-piece_y 
     return count
 
-@njit
+@njit(cache=True)
 def nb_validposition(board,piece,piece_x,piece_y,ax = 0,ay = 0,templatenum=5,boardwidth=10,boardheight=20):
     for y in range(templatenum-1,-1,-1):
         for x in range(templatenum):
@@ -165,7 +165,7 @@ def nb_validposition(board,piece,piece_x,piece_y,ax = 0,ay = 0,templatenum=5,boa
                     return False
     return True
 
-@njit
+@njit(cache=True)
 def nb_addtoboard(board,piece,piece_x,piece_y,boardwidth=10,boardheight=20):
     for x in range(templatenum):
         for y in range(templatenum):
@@ -175,7 +175,7 @@ def nb_addtoboard(board,piece,piece_x,piece_y,boardwidth=10,boardheight=20):
                 if w>=0 and w<boardwidth and h>=0 and h<boardheight:
                     board[h][w] = 1    
 
-@njit
+@njit(cache=True)
 def nb_removecompleteline(board, boardheight=20):
     numremove = 0
     y = boardheight-1
@@ -189,7 +189,7 @@ def nb_removecompleteline(board, boardheight=20):
             y-=1
     return numremove
 
-@njit
+@njit(cache=True)
 def nb_get_status(piece, p_x, p_y, xoff=0):
     status=np.zeros((boardheight, boardwidth), dtype=np.int8)
     for x in range(templatenum):
@@ -201,6 +201,7 @@ def nb_get_status(piece, p_x, p_y, xoff=0):
     return status                        
 
 # 统计不可消除行的数量
+@njit(cache=True)
 def nb_getFailLines(board):
     failLines=set()
     for x in range(boardwidth):
@@ -213,6 +214,7 @@ def nb_getFailLines(board):
     return len(failLines)
 
 # 统计不可消除行的最高高度
+@njit(cache=True)
 def nb_getFailTop(board):
     blocks = [False for x in range(boardwidth)]
     for y in range(boardheight):
@@ -224,6 +226,7 @@ def nb_getFailTop(board):
     return 0
 
 # 统计当前最大高度
+@njit(cache=True)
 def nb_getMaxHeight(board):
     c = -1
     for y in range(boardheight):
@@ -236,6 +239,7 @@ def nb_getMaxHeight(board):
     return h
 
 # 统计当前平均高度
+@njit(cache=True)
 def nb_getAvgHeight(board, std=False):
     h = np.zeros((boardwidth), dtype=np.int8)
     for x in range(boardwidth):
@@ -256,6 +260,7 @@ def nb_getAvgHeight(board, std=False):
     return h_mean
 
 # 统计高度标准差,按照碗型
+@njit(cache=True)
 def nb_getHeightStd(board):
     h = np.zeros((boardwidth), dtype=np.int8)
     for x in range(boardwidth):            
@@ -277,6 +282,7 @@ def nb_getHeightStd(board):
 
 
 # 统计数据相邻差值
+@njit(cache=True)
 def nb_getHeightDiff(board):
     h = np.zeros((boardwidth), dtype=np.int8)
     for x in range(boardwidth):            
@@ -297,6 +303,7 @@ def nb_getHeightDiff(board):
     v.remove(max(v))
     return max(v)
 
+@njit(cache=True)
 def nb_getSimpleEmptyCount(board):
     c = 0
     h = np.zeros((boardwidth+2), dtype=np.int8)
@@ -321,6 +328,7 @@ def nb_getSimpleEmptyCount(board):
 
 # 统计空洞的个数
 # 空洞最高点+空洞的最高点总数/10
+@njit(cache=True)
 def nb_getEmptyCount(board):
     # 每高度的的空洞数
     c = np.zeros((boardheight), dtype=np.int8)
