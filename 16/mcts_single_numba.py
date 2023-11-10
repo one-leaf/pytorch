@@ -19,7 +19,8 @@ class State():
         self.search=0
         # 动作的类型数目
         self.actions_num = ACTONS_LEN
-        self._availables = numba.typed.List.empty_list(numba.types.int64)
+        self._availables = {}
+        # self._availables = numba.typed.List.empty_list(numba.types.int64)
         
     def step(self,act:int):
         return self.game.step(act)                      
