@@ -156,8 +156,8 @@ def nb_calc_down_count(board, piece, piece_x, piece_y, templatenum=5):
 
 @njit
 def nb_validposition(board,piece,piece_x,piece_y,ax = 0,ay = 0,templatenum=5,boardwidth=10,boardheight=20):
-    for x in range(templatenum):
-        for y in range(templatenum-1,-1,-1):
+    for y in range(templatenum-1,-1,-1):
+        for x in range(templatenum):
             if piece[y][x]!=0: 
                 _x = x+piece_x+ax
                 _y = y+piece_y+ay
