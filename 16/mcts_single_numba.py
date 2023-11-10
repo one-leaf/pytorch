@@ -55,12 +55,13 @@ def selectAction(s:int, availables, _c_puct:float, Ps, Ns, Qsa, Nsa):
     best_act:int = -1
     if best_act == -1:
         # 选择具有最高置信上限的动作   
-        for i,a in enumerate(availables[availables>0]):                        
+        for a in range(np.count_nonzero(availables)):     
+            if availables[a]==0: continue                   
             if Qsa[s][a]!=0:
                 u = Qsa[s][a] + _c_puct * Ps[s][a] * sqrt(Ns[s]) / Nsa[s][a]
             else:
                 # 由于奖励都是正数，所以需要所有的步骤至少探索一次
-                return i
+                return a
                 # u = _c_puct * Ps[s][a] * sqrt(Ns[s] + EPS)  # 加一个EPS小量防止 Q = 0                 
             if u > cur_best:
                 cur_best = u
