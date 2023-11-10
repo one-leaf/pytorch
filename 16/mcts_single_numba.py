@@ -50,7 +50,14 @@ class State():
 
 # @njit(cache=True)
 def selectAction(s:int, availables, _c_puct:float, Ps, Ns, Qsa, Nsa):
-    # EPS = 1e-8
+    # 如果有一次都没有探索的，返回
+    if np.min(Nsa[s][availables==1])==0:
+        return np.argmax(Nsa[s]+availables == 1)
+    
+    q = (Qsa[s]+ _c_puct * Ps[s] * sqrt(Ns[s]) / (Nsa[s]+1e-5))*availables
+    return np.argmax(q)
+   
+    # EPS = 1e-8    
     cur_best:float = -100000
     best_act:int = -1
     if best_act == -1:
