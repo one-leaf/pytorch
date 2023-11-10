@@ -190,14 +190,14 @@ def nb_removecompleteline(board, boardheight=20):
     return numremove
 
 # @njit(cache=True)
-def nb_get_status(piece, p_x, p_y, xoff=0):
+def nb_get_status(piece, p_x, p_y, templatenum=5):
     status=np.zeros((boardheight, boardwidth), dtype=np.int8)
     for x in range(templatenum):
         for y in range(templatenum):
             if piece[y][x]!=blank:
                 px, py = x+p_x, y+p_y
-                if px+xoff>=0 and px+xoff<boardheight and py>=0:
-                    status[py][px+xoff]=1
+                if px>=0 and py>=0:
+                    status[py][px]=1
     return status                        
 
 # 统计不可消除行的数量
@@ -467,22 +467,21 @@ class Agent():
         return nb_calc_down_count(board, _piece, piece['x'], piece['y'])
         
     
-    # 状态一共3层， 0 下一个方块， 1 是背景 ，剩下得是 6 步下落的方块
+    # 状态一共3层， 0 当前下落方块， 1 是背景 ，2是下一个方块
     def set_status(self):
         self.status[0]=0
         if self.fallpiece != None:
             piece = self.fallpiece
             shapedraw = pieces[piece['shape']][piece['rotation']]
-            self.status[0] = nb_get_status(shapedraw, piece['x'], piece['y'], 0)
+            self.status[0] = nb_get_status(shapedraw, piece['x'], piece['y'])
                             
         if self.need_update_status==True:
             self.status[1]=self.board
             self.status[2]=0
             if self.nextpiece != None:
-                off = int(boardwidth)//2-int(templatenum//2)
                 piece = self.nextpiece  
                 shapedraw = pieces[piece['shape']][piece['rotation']]
-                self.status[0] = nb_get_status(shapedraw, piece['x'], piece['y'], off)
+                self.status[2] = nb_get_status(shapedraw, piece['x'], piece['y'])
                             
             self.need_update_status=False
         
