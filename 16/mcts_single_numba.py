@@ -139,7 +139,7 @@ class MCTS():
         self.Nsa = getEmptySAV_Dict()  # 保存 遍历次数 key: s,a
         self.Ns = getEmptySV_Dict()     # 保存 遍历次数 key: s
         self.Ps = getEmptySAF_Dict()     # 保存 动作概率 key: s, a
-        self.Es = getEmptySF_Dict()     # 保存游戏最终得分 key: s
+        # self.Es = getEmptySF_Dict()     # 保存游戏最终得分 key: s
         self.Vs = getEmptySF_Dict()     # 保存游戏局面差异奖励 key: s
         print("create mcts, c_puct: {}, n_playout: {}".format(c_puct, n_playout))
     
@@ -195,8 +195,8 @@ class MCTS():
         s = hash(state)
          
         # 如果得分不等于0，标志探索结束
-        if s in self.Es: 
-            return self.Es[s]
+        # if s in self.Es: 
+        #     return self.Es[s]
 
         # 如果当前状态没有子节点，增加子节点
         # 增加 Ps[s] Vs[s] Ns[s]
@@ -214,7 +214,7 @@ class MCTS():
         _, v = state.step(a)
         
         if state.terminal(): 
-            self.Es[s] = -1
+            # self.Es[s] = -1
             v = -1
         else:
             # 现实奖励
