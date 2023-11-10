@@ -22,7 +22,7 @@ class State():
         self._availables = numba.typed.List.empty_list(numba.types.int64)
         
     def step(self,act:int):
-        self.game.step(act)                      
+        return self.game.step(act)                      
         
     def terminal(self):
         return self.game.terminal
@@ -141,9 +141,7 @@ class MCTS():
         self.Ps = getEmptySAF_Dict()     # 保存 动作概率 key: s, a
         self.Es = getEmptySF_Dict()     # 保存游戏最终得分 key: s
         self.Vs = getEmptySF_Dict()     # 保存游戏局面差异奖励 key: s
-        self.Ss = getEmptySF_Dict()     # 保存游戏局面全局奖励 key: s        
         print("create mcts, c_puct: {}, n_playout: {}".format(c_puct, n_playout))
-        self.ext_reward:bool = True # 是否中途额外奖励
     
     def get_action_probs(self, state:State, temp:float=1):
         """
@@ -206,7 +204,6 @@ class MCTS():
             # 获得当前局面的概率 和 局面的打分, 这个已经过滤掉了不可用走法
             act_probs, v = self._policy(state.game)   
             expandPN(s, state.availables_nb(), act_probs, self.Ps, self.Ns, self.Nsa, self.Qsa, state.actions_num)             
-            self.Ss[s] = state.game.score
             self.Vs[s] = v
             return v
 
@@ -214,7 +211,7 @@ class MCTS():
         # 比较 Qsa[s, a] + c_puct * Ps[s,a] * sqrt(Ns[s]) / Nsa[s, a], 选择最大的
         a = selectAction(s, state.availables_nb(), self._c_puct, self.Ps, self.Ns, self.Qsa, self.Nsa)
  
-        state.step(a)
+        _, v = state.step(a)
         
         if state.terminal(): 
             self.Es[s] = -1
@@ -223,7 +220,6 @@ class MCTS():
             # 现实奖励
             # 按照DQN，  q[s,a] += 0.1*(r+ 0.99*(max(q[s+1])-q[s,a])
             # 目前Mcts， q[s,a] += v[s]/Nsa[s,a]
-            v = state.game.score-self.Ss[s] 
             v += self.search(state)
             self.depth += 1
             
