@@ -19,7 +19,6 @@ class State():
         self.search=0
         # 动作的类型数目
         self.actions_num = ACTONS_LEN
-        self._availables = []
         # self._availables = numba.typed.List.empty_list(numba.types.int64)
         
     def step(self,act:int):
@@ -38,9 +37,11 @@ class State():
         return self.game.availables
 
     def availables_nb(self):
-        self._availables.clear()
+        self._availables = np.zeros((ACTONS_LEN),dtype=np.int8)
+        # self._availables.clear()
         for act in self.game.availables:
-            self._availables.append(act)
+        #     self._availables.append(act)
+            self._availables[act] = 1
         return self._availables
         
     def clone(self):
@@ -54,8 +55,8 @@ def selectAction(s:int, availables, _c_puct:float, Ps, Ns, Qsa, Nsa):
     cur_best:float = -100000
     best_act:int = -1
     if best_act == -1:
-        # 选择具有最高置信上限的动作             
-        for a in availables:            
+        # 选择具有最高置信上限的动作   
+        for a in availables[availables>0]:                        
             if Qsa[s][a]!=0:
                 u = Qsa[s][a] + _c_puct * Ps[s][a] * sqrt(Ns[s]) / Nsa[s][a]
             else:
@@ -76,8 +77,9 @@ def updateQN(s:int, a:int, v:float, Ns, Qsa, Nsa, actions_num):
 # @njit(cache=True)    
 def expandPN(s:int, availables, act_probs, Ps, Ns, Nsa, Qsa, actions_num):
     probs = np.zeros(actions_num, dtype=np.float64)
-    for i in availables:
-        probs[i]=act_probs[i]
+    probs = act_probs*availables
+    # for i in availables:
+    #     probs[i]=act_probs[i]
     Ps[s] = probs 
     Ns[s] = 0
     Nsa[s] = np.zeros(actions_num, dtype=np.int64)
@@ -96,9 +98,10 @@ def getprobsFromNsa(s:int, temp:float, availables, actions_num, Nsa):
     else:
         m_sum = np.sum(Nsa[s])
         if m_sum==0:
-            avg_v = 1/len(availables)
-            for a in availables:
-                probs[a] = avg_v        
+            # avg_v = 1/len(availables)
+            probs = availables/np.sum(availables)
+            # for a in availables:
+            #     probs[a] = avg_v        
         else:
             if temp == 1:
                 probs = Nsa[s]/m_sum
