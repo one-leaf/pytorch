@@ -47,7 +47,7 @@ class State():
         state = State(game)
         return state
 
-@njit(cache=True)
+# @njit(cache=True)
 def selectAction(s:int, availables, _c_puct:float, Ps, Ns, Qsa, Nsa):
     # EPS = 1e-8
     cur_best:float = -100000
@@ -66,13 +66,13 @@ def selectAction(s:int, availables, _c_puct:float, Ps, Ns, Qsa, Nsa):
                 best_act = a    
     return best_act
 
-@njit(cache=True)
+# @njit(cache=True)
 def updateQN(s:int, a:int, v:float, Ns, Qsa, Nsa, actions_num):
     Nsa[s][a] += 1
     Qsa[s][a] += (v- Qsa[s][a])/Nsa[s][a]
     Ns[s] += 1
 
-@njit(cache=True)    
+# @njit(cache=True)    
 def expandPN(s:int, availables, act_probs, Ps, Ns, Nsa, Qsa, actions_num):
     probs = np.zeros(actions_num, dtype=np.float64)
     for i in availables:
@@ -82,12 +82,12 @@ def expandPN(s:int, availables, act_probs, Ps, Ns, Nsa, Qsa, actions_num):
     Nsa[s] = np.zeros(actions_num, dtype=np.int64)
     Qsa[s] = np.zeros(actions_num, dtype=np.float64)
 
-@njit(cache=True)
+# @njit(cache=True)
 def checkNeedExit(s:int, Nsa)->bool:
     max_v = np.max(Nsa[s])
     return max_v>0 and max_v/np.sum(Nsa[s])>0.8
 
-@njit(cache=True)
+# @njit(cache=True)
 def getprobsFromNsa(s:int, temp:float, availables, actions_num, Nsa):
     probs = np.zeros(actions_num, dtype=np.float64)    
     if temp == 0:
