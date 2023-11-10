@@ -1,6 +1,6 @@
 import numpy as np
 import random
-from numba import njit
+from numba import njit,prange
 
 boxsize = 20
 boardwidth = 10
@@ -137,7 +137,7 @@ ACTIONS = [KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN]
 ACTIONS_NAME = ["O","L","R","D"]
 ACTONS_LEN = len(ACTIONS)
 
-@njit    
+@njit
 def nb_validposition(board,piece,piece_x,piece_y,ax = 0,ay = 0,templatenum=5,boardwidth=10,boardheight=20):
     for x in range(templatenum):
         for y in range(templatenum):
