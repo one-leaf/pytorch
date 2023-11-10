@@ -39,8 +39,6 @@ class State():
     def availables_nb(self):
         _availables = np.zeros((ACTONS_LEN),dtype=np.int8)
         _availables[self.game.availables]=1
-        # for act in self.game.availables:
-        #     _availables[act] = 1
         return _availables
         
     def clone(self):
@@ -48,109 +46,109 @@ class State():
         state = State(game)
         return state
 
-# @njit(cache=True)
+@njit(cache=True)
 def selectAction(s:int, availables, _c_puct:float, Ps, Ns, Qsa, Nsa):
     # 如果有一次都没有探索的，返回
+    # 开销 8.05366921094275e-05 S
+    # njit 4.298482243524901e-05 S
     if np.min(Nsa[s][availables==1])==0:
         return np.argmax(Nsa[s]+availables == 1)
-    
-    # q = Qsa[s]+ availables * _c_puct * Ps[s] * sqrt(Ns[s]) / (Nsa[s]+1e-5)
-    # q[availables==0]=-10000
-    # i = np.argmax(q)
-    # if availables[i]==0:
-    #     print("q:",q,"availables:",availables)
-    #     raise Exception("ERROR")
-    # return i
-    
-   
-    # EPS = 1e-8    
-    cur_best:float = -100000
-    best_act:int = -1
-    if best_act == -1:
-        # 选择具有最高置信上限的动作   
-        for a in range(len(availables)):     
-            if availables[a]==0: continue                   
-            # if Qsa[s][a]!=0:
-            u = Qsa[s][a] + _c_puct * Ps[s][a] * sqrt(Ns[s]) / Nsa[s][a]
-            # else:
-            #     # 由于奖励都是正数，所以需要所有的步骤至少探索一次
-            #     return a
-                # u = _c_puct * Ps[s][a] * sqrt(Ns[s] + EPS)  # 加一个EPS小量防止 Q = 0                 
-            if u > cur_best:
-                cur_best = u
-                best_act = a    
-    return best_act
+    q = Qsa[s]+ _c_puct * availables * Ps[s] * sqrt(Ns[s]) / (Nsa[s]+1E-8)
+    return np.argmax((q + 10000)*availables)
+        
+    # EPS = 1e-8
+    # 开销 6.048132081767674e-05 S
+    # njit 4.2826029136094145e-05 S
+    # cur_best:float = -100000
+    # best_act:int = -1
+    # if best_act == -1:
+    #     # 选择具有最高置信上限的动作   
+    #     for a in range(len(availables)):     
+    #         if availables[a]==0: continue                   
+    #         if Qsa[s][a]!=0:
+    #             u = Qsa[s][a] + _c_puct * Ps[s][a] * sqrt(Ns[s]) / Nsa[s][a]
+    #         else:
+    #             # 由于奖励都是正数，所以需要所有的步骤至少探索一次
+    #             return a
+    #             # u = _c_puct * Ps[s][a] * sqrt(Ns[s] + EPS)  # 加一个EPS小量防止 Q = 0                 
+    #         if u > cur_best:
+    #             cur_best = u
+    #             best_act = a    
+    # return best_act
 
-# @njit(cache=True)
+@njit(cache=True)
+# njit 9.572226293848707e-06
+# 2.3297934257853874e-05
 def updateQN(s:int, a:int, v:float, Ns, Qsa, Nsa, actions_num):
     Nsa[s][a] += 1
     Qsa[s][a] += (v- Qsa[s][a])/Nsa[s][a]
     Ns[s] += 1
 
-# @njit(cache=True)    
+@njit(cache=True)   
+# njit  0.00022558832222352673
+# 0.0001987227917925678
 def expandPN(s:int, availables, act_probs, Ps, Ns, Nsa, Qsa, actions_num):
-    probs = np.zeros(actions_num, dtype=np.float64)
-    probs = act_probs*availables
-    # for i in availables:
+    # probs = np.zeros(actions_num, dtype=np.float64)
+    # for i in range(len(availables)):
+    #     if availables[i]==0: continue
     #     probs[i]=act_probs[i]
+    probs = (act_probs*availables).astype(np.float64)
     Ps[s] = probs 
     Ns[s] = 0
     Nsa[s] = np.zeros(actions_num, dtype=np.int64)
     Qsa[s] = np.zeros(actions_num, dtype=np.float64)
 
-# @njit(cache=True)
+@njit(cache=True)
 def checkNeedExit(s:int, Nsa)->bool:
     max_v = np.max(Nsa[s])
     return max_v>0 and max_v/np.sum(Nsa[s])>0.8
 
 # @njit(cache=True)
+#njit 0.00561012750790443
+# 0.0007797207943228788
 def getprobsFromNsa(s:int, temp:float, availables, actions_num, Nsa):
-    probs = np.zeros(actions_num, dtype=np.float64)    
     if temp == 0:
+        probs = np.zeros(actions_num, dtype=np.float64)    
         probs[np.argmax(Nsa[s])] = 1        
     else:
         m_sum = np.sum(Nsa[s])
         if m_sum==0:
-            # avg_v = 1/len(availables)
             probs = availables/np.sum(availables)
-            # for a in availables:
-            #     probs[a] = avg_v        
         else:
             if temp == 1:
                 probs = Nsa[s]/m_sum
             else:
                 probs = np.power(Nsa[s],1/temp)
                 probs = probs/np.sum(probs) 
-    # probs = probs*availables               
     return probs
 
 def getEmptySF_Dict():
-    return{}
-    # return numba.typed.Dict.empty(
-    #     key_type = numba.types.int64,
-    #     value_type = numba.types.float64
-    # )
+    # return{}
+    return numba.typed.Dict.empty(
+        key_type = numba.types.int64,
+        value_type = numba.types.float64
+    )
     
 def getEmptySAF_Dict():
-    return{}
-    # return numba.typed.Dict.empty(
-    #     key_type = numba.types.int64,
-    #     value_type = numba.types.float64[:]
-    # )
+    # return{}
+    return numba.typed.Dict.empty(
+        key_type = numba.types.int64,
+        value_type = numba.types.float64[:]
+    )
 
 def getEmptySV_Dict():
-    return{}
-    # return numba.typed.Dict.empty(
-    #     key_type = numba.types.int64,
-    #     value_type = numba.types.int64
-    # )
+    # return{}
+    return numba.typed.Dict.empty(
+        key_type = numba.types.int64,
+        value_type = numba.types.int64
+    )
 
 def getEmptySAV_Dict():
-    return{}
-    # return numba.typed.Dict.empty(
-    #     key_type = numba.types.int64,
-    #     value_type = numba.types.int64[:]
-    # )
+    # return{}
+    return numba.typed.Dict.empty(
+        key_type = numba.types.int64,
+        value_type = numba.types.int64[:]
+    )
 
 class MCTS():
     def __init__(self, policy_value_fn, c_puct:float=5, n_playout:int=10000):
@@ -164,6 +162,8 @@ class MCTS():
         # self.Es = getEmptySF_Dict()     # 保存游戏最终得分 key: s
         self.Vs = getEmptySF_Dict()     # 保存游戏局面差异奖励 key: s
         print("create mcts, c_puct: {}, n_playout: {}".format(c_puct, n_playout))
+        self.t = 0
+        self.c = 0
     
     def get_action_probs(self, state:State, temp:float=1):
         """
@@ -189,9 +189,9 @@ class MCTS():
             
             if self.depth>self.max_depth: self.max_depth = self.depth
             if n >= self._n_playout//2-1 and state_.game.state==1 and checkNeedExit(s, self.Nsa): break
-
+        
         probs = getprobsFromNsa(s, temp, state.availables_nb(), state.actions_num, self.Nsa)                       
-
+        
         qs = self.Qsa[s] 
         ps = self.Ps[s]         
         v:float = self.Vs[s]
@@ -204,7 +204,7 @@ class MCTS():
             act = np.argmax(probs)
             print(time.strftime('%m-%d %H:%M:%S',time.localtime(time.time())), game.steps, game.fallpiece["shape"], \
                   "ns:", str(ns).rjust(4), "/", str(self.simulation_count).ljust(4), "depth:", str(self.max_depth).ljust(3), \
-                  "value:", round(v,2), "\t", act, self.Nsa[s], "Q:", round(qs[max_p],2), "P:", round(ps[max_p],2), "-->", round(probs[max_p],2))
+                  "value:", round(v,2), "\t", act, self.Nsa[s], "Q:", round(qs[max_p],2), "P:", round(ps[max_p],2), "-->", round(probs[max_p],2), self.t/self.c)
         # 动作数，概率，每个动作的Q，原始概率，当前局面的v，当前局面的总探索次数
         return probs, qs, ps, v, ns
 
@@ -224,15 +224,17 @@ class MCTS():
         # 增加 Ps[s] Vs[s] Ns[s]
         if s not in self.Ps:                          
             # 获得当前局面的概率 和 局面的打分, 这个已经过滤掉了不可用走法
-            act_probs, v = self._policy(state.game)   
+            act_probs, v = self._policy(state.game) 
+              
             expandPN(s, state.availables_nb(), act_probs, self.Ps, self.Ns, self.Nsa, self.Qsa, state.actions_num)             
+
             self.Vs[s] = v
             return v
 
         # 当前最佳概率和最佳动作
         # 比较 Qsa[s, a] + c_puct * Ps[s,a] * sqrt(Ns[s]) / Nsa[s, a], 选择最大的
         a = selectAction(s, state.availables_nb(), self._c_puct, self.Ps, self.Ns, self.Qsa, self.Nsa)
- 
+        
         _, v = state.step(a)
         
         if state.terminal(): 
@@ -248,6 +250,9 @@ class MCTS():
         # 更新 Q 值 和 访问次数
         # q[s,a] += v[s]/Nsa[s,a]
         updateQN(s, a, v, self.Ns, self.Qsa, self.Nsa, state.actions_num)
+        # t = time.time()     
+        # self.c += 1
+        # self.t += time.time()-t 
 
         return v
 
