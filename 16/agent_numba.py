@@ -138,12 +138,27 @@ ACTIONS_NAME = ["O","L","R","D"]
 ACTONS_LEN = len(ACTIONS)
 
 @njit
+def nb_calc_down_count(board, piece, piece_x, piece_y, templatenum=5):
+    p_h= np.sum(piece,axis=0, dtype=np.int8) + np.argmax(piece,axis=0)
+    _board = np.copy(board)
+    if piece_y>0:
+        _board[:piece_y]=0
+    b = np.argmax(_board, axis=0)
+    b[b==0]=20
+    c = np.zeros_like(b, dtype=np.int8)    
+    for x in range(templatenum):
+        if p_h[x]>0:
+            c[piece_x+x] = p_h[x]
+    b[c==0]=20
+    min_y=np.min(b-c)
+    count = min_y-piece_y 
+    return count
+
+@njit
 def nb_validposition(board,piece,piece_x,piece_y,ax = 0,ay = 0,templatenum=5,boardwidth=10,boardheight=20):
     for x in range(templatenum):
         for y in range(templatenum):
-            aboveboard = y + piece_y + ay < 0
-            if aboveboard or piece[y][x]==0:
-                continue
+            if piece[y][x]==0: continue
             _x = x+piece_x+ax
             _y = y+piece_y+ay
             if _x <0 or _x>=boardwidth or _y>=boardheight:
@@ -387,7 +402,7 @@ class Agent():
         # 每个方块的高度
         self.pieces_height = []     
         # 当前prices所有动作
-        self.actions=[]
+        # self.actions=[]
         # 下一个可用步骤
         self.availables=self.get_availables()
         # 显示mcts中间过程
@@ -440,6 +455,11 @@ class Agent():
     
     def removecompleteline(self,board):
         return nb_removecompleteline(board)
+    
+    def calc_down_count(self,board,piece):
+        _piece = pieces[piece['shape']][piece['rotation']]
+        return nb_calc_down_count(board, _piece, piece['x'], piece['y'])
+        
     
     # 状态一共3层， 0 下一个方块， 1 是背景 ，剩下得是 6 步下落的方块
     def set_status(self):
@@ -513,7 +533,7 @@ class Agent():
         self.piecesteps += 1
         # self.level, self.fallfreq = self.calculate(self.score)
         
-        self.actions.append(action)
+        # self.actions.append(action)
 
         if action == KEY_LEFT:# and self.validposition(self.board, self.fallpiece, ax=-1):
             self.fallpiece['x'] -= 1
@@ -522,12 +542,12 @@ class Agent():
             self.fallpiece['x'] += 1  
 
         if action == KEY_DOWN:# and self.validposition(self.board, self.fallpiece, ay=1):
-            n = 1
-            while self.validposition(self.board, self.fallpiece, ay=n+1):
-                n += 1
+            # n = self.calc_down_count(self.board, self.fallpiece)
+            # self.fallpiece['y'] += n
+            # self.downcount += n
+            while self.validposition(self.board, self.fallpiece, ay=1):
                 self.downcount += 1
-            self.fallpiece['y'] += n  
-            
+                self.fallpiece['y'] += 1                          
 
         if action == KEY_ROTATION:
             self.fallpiece['rotation'] =  (self.fallpiece['rotation'] + 1) % len(pieces[self.fallpiece['shape']])
@@ -573,7 +593,7 @@ class Agent():
             self.fallpiece = self.nextpiece
             self.nextpiece = self.getnewpiece()
             self.availables = [KEY_DOWN]
-            self.actions = []
+            # self.actions = []
         else:
             self.state = 0
 

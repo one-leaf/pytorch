@@ -593,15 +593,12 @@ class Train():
         except KeyboardInterrupt:
             print('quit')
 
-def test():
-    training = Train()
-    training.run()
-
 def profiler():
     import cProfile
     profiler = cProfile.Profile()
     profiler.enable()
-    test()
+    training = Train()
+    training.run()
     profiler.disable()
     profiler.print_stats()
 
