@@ -55,7 +55,7 @@ def selectAction(s:int, availables, _c_puct:float, Ps, Ns, Qsa, Nsa):
     best_act:int = -1
     if best_act == -1:
         # 选择具有最高置信上限的动作   
-        for a in range(np.count_nonzero(availables)):     
+        for a in range(len(availables)):     
             if availables[a]==0: continue                   
             if Qsa[s][a]!=0:
                 u = Qsa[s][a] + _c_puct * Ps[s][a] * sqrt(Ns[s]) / Nsa[s][a]
