@@ -54,7 +54,7 @@ def selectAction(s:int, availables, _c_puct:float, Ps, Ns, Qsa, Nsa):
     if np.min(Nsa[s][availables==1])==0:
         return np.argmax(Nsa[s]+availables == 1)
     
-    q = (Qsa[s]+ _c_puct * Ps[s] * sqrt(Ns[s]) / (Nsa[s]+1e-5))*availables
+    q = Qsa[s]+ availables * _c_puct * Ps[s] * sqrt(Ns[s]) / (Nsa[s]+1e-5)
     return np.argmax(q)
    
     # EPS = 1e-8    

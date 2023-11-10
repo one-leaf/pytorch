@@ -196,7 +196,7 @@ def nb_get_status(piece, p_x, p_y, xoff=0):
         for y in range(templatenum):
             if piece[y][x]!=blank:
                 px, py = x+p_x, y+p_y
-                if px>=0 and py>=0:
+                if px+xoff>=0 and px+xoff<boardheight and py>=0:
                     status[py][px+xoff]=1
     return status                        
 
