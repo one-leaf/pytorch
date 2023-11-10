@@ -54,8 +54,14 @@ def selectAction(s:int, availables, _c_puct:float, Ps, Ns, Qsa, Nsa):
     if np.min(Nsa[s][availables==1])==0:
         return np.argmax(Nsa[s]+availables == 1)
     
-    q = Qsa[s]+ availables * _c_puct * Ps[s] * sqrt(Ns[s]) / (Nsa[s]+1e-5)
-    return np.argmax(q)
+    # q = Qsa[s]+ availables * _c_puct * Ps[s] * sqrt(Ns[s]) / (Nsa[s]+1e-5)
+    # q[availables==0]=-10000
+    # i = np.argmax(q)
+    # if availables[i]==0:
+    #     print("q:",q,"availables:",availables)
+    #     raise Exception("ERROR")
+    # return i
+    
    
     # EPS = 1e-8    
     cur_best:float = -100000
@@ -64,11 +70,11 @@ def selectAction(s:int, availables, _c_puct:float, Ps, Ns, Qsa, Nsa):
         # 选择具有最高置信上限的动作   
         for a in range(len(availables)):     
             if availables[a]==0: continue                   
-            if Qsa[s][a]!=0:
-                u = Qsa[s][a] + _c_puct * Ps[s][a] * sqrt(Ns[s]) / Nsa[s][a]
-            else:
-                # 由于奖励都是正数，所以需要所有的步骤至少探索一次
-                return a
+            # if Qsa[s][a]!=0:
+            u = Qsa[s][a] + _c_puct * Ps[s][a] * sqrt(Ns[s]) / Nsa[s][a]
+            # else:
+            #     # 由于奖励都是正数，所以需要所有的步骤至少探索一次
+            #     return a
                 # u = _c_puct * Ps[s][a] * sqrt(Ns[s] + EPS)  # 加一个EPS小量防止 Q = 0                 
             if u > cur_best:
                 cur_best = u
@@ -114,7 +120,8 @@ def getprobsFromNsa(s:int, temp:float, availables, actions_num, Nsa):
                 probs = Nsa[s]/m_sum
             else:
                 probs = np.power(Nsa[s],1/temp)
-                probs = probs/np.sum(probs)                
+                probs = probs/np.sum(probs) 
+    # probs = probs*availables               
     return probs
 
 def getEmptySF_Dict():
