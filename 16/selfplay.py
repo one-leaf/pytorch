@@ -126,7 +126,7 @@ class Train():
         for i in range(len(states)):
             state, mcts_prob, value, score=states[i], mcts_probs[i], values[i], scores[i]
             extend_data.append((state, mcts_prob, value, score))
-            if abs(value)>1 and mcts_prob[0]<0.1:
+            if score==1 and mcts_prob[0]<0.1:
                 equi_state = np.array([np.fliplr(s) for s in state])
                 equi_mcts_prob = mcts_prob[[0,2,1,3]]
                 extend_data.append((equi_state, equi_mcts_prob, value, score))
@@ -555,7 +555,7 @@ class Train():
             states.append(step["state"])
             mcts_probs.append(step["move_probs"])
             values.append(step["qval"])
-            scores.append(step["reward"])
+            scores.append(step["acc_ps"])
         
         # print([round(v,2) for v in values])
         # print([round(s,2) for s in scores])
