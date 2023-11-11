@@ -410,7 +410,8 @@ class Agent():
         # 当前prices所有动作
         # self.actions=[]
         # 下一个可用步骤
-        self.availables=self.get_availables()
+        self.availables=np.ones(ACTONS_LEN, dtype=np.int8)
+        self.set_availables()
         # 显示mcts中间过程
         self.show_mcts_process = False
         # 按下降的次数
@@ -508,29 +509,36 @@ class Agent():
 
     # 获取可用步骤, 保留一个旋转始终有用
     # 将单人游戏变为双人博弈，一个正常下，一个只下走，
-    def get_availables(self):
-        acts=[KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN]
-
+    def set_availables(self):
+        # acts=[KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN]
         if not self.validposition(self.board, self.fallpiece, ax = -1):
-            acts.remove(KEY_LEFT)
+            self.availables[KEY_LEFT]=0
+        else:
+            self.availables[KEY_LEFT]=1
+            # acts.remove(KEY_LEFT)
         if not self.validposition(self.board, self.fallpiece, ax = 1):
-            acts.remove(KEY_RIGHT)   
-        if not self.validposition(self.board, self.fallpiece, ay = 1):
-            acts.remove(KEY_DOWN)
+            self.availables[KEY_RIGHT]=0
+        else:
+            self.availables[KEY_RIGHT]=1
+            # acts.remove(KEY_RIGHT)   
+        # if not self.validposition(self.board, self.fallpiece, ay = 1):
+        #     acts.remove(KEY_DOWN)
 
         if self.fallpiece['shape']=="o":
-            acts.remove(KEY_ROTATION)
-        else:
+            self.availables[KEY_ROTATION]=0
+            # acts.remove(KEY_ROTATION)
+        else:            
             r = self.fallpiece['rotation']
             self.fallpiece['rotation'] =  (self.fallpiece['rotation'] + 1) % len(pieces[self.fallpiece['shape']])
             if not self.validposition(self.board,self.fallpiece):
-                acts.remove(KEY_ROTATION)
+                self.availables[KEY_ROTATION]=0
+            else:
+                self.availables[KEY_ROTATION]=1
+                # acts.remove(KEY_ROTATION)
             self.fallpiece['rotation'] = r
 
-        if not KEY_DOWN in acts : acts.append(KEY_DOWN)
+        # if not KEY_DOWN in acts : acts.append(KEY_DOWN)
         
-        return acts         
-
     def step(self, action):
         # 状态 0 下落过程中 1 更换方块 2 结束一局
         
@@ -596,8 +604,7 @@ class Agent():
             self.piececount += 1 
 
             self.fallpiece = self.nextpiece
-            self.nextpiece = self.getnewpiece()
-            self.availables = [KEY_DOWN]
+            self.nextpiece = self.getnewpiece()            
             # self.actions = []
         else:
             self.state = 0
@@ -607,7 +614,7 @@ class Agent():
             self.state = 1
             return self.state, reward 
         
-        self.availables = self.get_availables()
+        self.set_availables()
         return self.state, reward
 
     def set_key(self):

@@ -137,8 +137,8 @@ class PolicyValueNet():
         act_probs,_ = self.policy_value_fn(game)
         
         actions = game.availables
-        idx = np.argmax(act_probs[actions])
-        return actions[idx]
+        idx = np.argmax(act_probs*actions)
+        return idx
 
     # 价值网络损失
     def quantile_regression_loss(self, quantiles, target):

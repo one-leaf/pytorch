@@ -19,14 +19,14 @@ class State():
         self.search=0
         # 动作的类型数目
         self.actions_num = ACTONS_LEN
-        # self._availables = numba.typed.List.empty_list(numba.types.int64)
         
     def step(self,act:int):
         return self.game.step(act)                      
         
     def terminal(self):
         return self.game.terminal
-      
+    
+    # 2.049623722920656e-06  
     def __hash__(self):
         return self.game.get_key()
 
@@ -35,12 +35,8 @@ class State():
 
     def availables(self):
         return self.game.availables
-
-    def availables_nb(self):
-        _availables = np.zeros((ACTONS_LEN),dtype=np.int8)
-        _availables[self.game.availables]=1
-        return _availables
-        
+    
+    # 0.00022098371224809986  
     def clone(self):
         game = copy.deepcopy(self.game)
         state = State(game)
@@ -88,15 +84,15 @@ def updateQN(s:int, a:int, v:float, Ns, Qsa, Nsa, actions_num):
 # njit  0.00022558832222352673
 # 0.0001987227917925678
 def expandPN(s:int, availables, act_probs, Ps, Ns, Nsa, Qsa, actions_num):
-    # probs = np.zeros(actions_num, dtype=np.float64)
+    # probs = np.zeros(actions_num, dtype=np.float32)
     # for i in range(len(availables)):
     #     if availables[i]==0: continue
     #     probs[i]=act_probs[i]
-    probs = (act_probs*availables).astype(np.float64)
+    probs = (act_probs*availables).astype(np.float32)
     Ps[s] = probs 
     Ns[s] = 0
     Nsa[s] = np.zeros(actions_num, dtype=np.int64)
-    Qsa[s] = np.zeros(actions_num, dtype=np.float64)
+    Qsa[s] = np.zeros(actions_num, dtype=np.float32)
 
 @njit(cache=True)
 def checkNeedExit(s:int, Nsa)->bool:
@@ -108,7 +104,7 @@ def checkNeedExit(s:int, Nsa)->bool:
 # 0.0007797207943228788
 def getprobsFromNsa(s:int, temp:float, availables, actions_num, Nsa):
     if temp == 0:
-        probs = np.zeros(actions_num, dtype=np.float64)    
+        probs = np.zeros(actions_num, dtype=np.float32)    
         probs[np.argmax(Nsa[s])] = 1        
     else:
         m_sum = np.sum(Nsa[s])
@@ -123,28 +119,24 @@ def getprobsFromNsa(s:int, temp:float, availables, actions_num, Nsa):
     return probs
 
 def getEmptySF_Dict():
-    # return{}
     return numba.typed.Dict.empty(
         key_type = numba.types.int64,
-        value_type = numba.types.float64
+        value_type = numba.types.float32
     )
     
 def getEmptySAF_Dict():
-    # return{}
     return numba.typed.Dict.empty(
         key_type = numba.types.int64,
-        value_type = numba.types.float64[:]
+        value_type = numba.types.float32[:]
     )
 
 def getEmptySV_Dict():
-    # return{}
     return numba.typed.Dict.empty(
         key_type = numba.types.int64,
         value_type = numba.types.int64
     )
 
 def getEmptySAV_Dict():
-    # return{}
     return numba.typed.Dict.empty(
         key_type = numba.types.int64,
         value_type = numba.types.int64[:]
@@ -163,7 +155,7 @@ class MCTS():
         self.Vs = getEmptySF_Dict()     # 保存游戏局面差异奖励 key: s
         print("create mcts, c_puct: {}, n_playout: {}".format(c_puct, n_playout))
         self.t = 0
-        self.c = 0
+        self.c = 1
     
     def get_action_probs(self, state:State, temp:float=1):
         """
@@ -177,20 +169,23 @@ class MCTS():
         self.max_depth:int = 0
         self.depth:int = 0
         self.simulation_count = 0
-        self.available_acts = state.availables()
         
         for n in range(self._n_playout*2):
             self.depth = 0
             self.simulation_count = n+1
             
+            # t = time.time()     
             state_:State =state.clone()
+            # self.c += 1
+            # self.t += time.time()-t 
+
             
             self.search(state_) 
             
             if self.depth>self.max_depth: self.max_depth = self.depth
             if n >= self._n_playout//2-1 and state_.game.state==1 and checkNeedExit(s, self.Nsa): break
         
-        probs = getprobsFromNsa(s, temp, state.availables_nb(), state.actions_num, self.Nsa)                       
+        probs = getprobsFromNsa(s, temp, state.availables(), state.actions_num, self.Nsa)                       
         
         qs = self.Qsa[s] 
         ps = self.Ps[s]         
@@ -226,14 +221,14 @@ class MCTS():
             # 获得当前局面的概率 和 局面的打分, 这个已经过滤掉了不可用走法
             act_probs, v = self._policy(state.game) 
               
-            expandPN(s, state.availables_nb(), act_probs, self.Ps, self.Ns, self.Nsa, self.Qsa, state.actions_num)             
+            expandPN(s, state.availables(), act_probs, self.Ps, self.Ns, self.Nsa, self.Qsa, state.actions_num)             
 
             self.Vs[s] = v
             return v
 
         # 当前最佳概率和最佳动作
         # 比较 Qsa[s, a] + c_puct * Ps[s,a] * sqrt(Ns[s]) / Nsa[s, a], 选择最大的
-        a = selectAction(s, state.availables_nb(), self._c_puct, self.Ps, self.Ns, self.Qsa, self.Nsa)
+        a = selectAction(s, state.availables(), self._c_puct, self.Ps, self.Ns, self.Qsa, self.Nsa)
         
         _, v = state.step(a)
         
@@ -250,9 +245,6 @@ class MCTS():
         # 更新 Q 值 和 访问次数
         # q[s,a] += v[s]/Nsa[s,a]
         updateQN(s, a, v, self.Ns, self.Qsa, self.Nsa, state.actions_num)
-        # t = time.time()     
-        # self.c += 1
-        # self.t += time.time()-t 
 
         return v
 
