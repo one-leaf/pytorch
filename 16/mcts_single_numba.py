@@ -312,7 +312,7 @@ class MCTSPlayer(object):
                 print("\t\trandom", game.position_to_action_name(max_probs_idx), "==>",  game.position_to_action_name(idx), \
                            "p:", round(act_ps[max_probs_idx],2), "==>", round(act_ps[idx],2), "q:", round(act_qs[max_probs_idx],2), "==>", round(act_qs[idx],2))  
 
-            acc_ps = 1 if abs(act_ps[idx]-act_probs[idx])>0.5 else 0
+            acc_ps = 0 if abs(act_ps[idx]-act_probs[idx])>0.5 else 1
 
             return action, qval, act_probs, state_v, max_qval, acc_ps, depth, state_n
         else:
