@@ -200,6 +200,12 @@ def nb_get_status(piece, p_x, p_y, templatenum=5):
                     status[py][px]=1
     return status                        
 
+# 统计为空的个数
+# @njit(cache=True)
+def nb_getEmptyCount(board):
+    d=(20-np.argmax(board,axis=0)-np.sum(board,axis=0))
+    return np.sum(d[d!=20])
+
 # 统计不可消除行的数量
 # @njit(cache=True)
 def nb_getFailLines(board):
@@ -329,7 +335,7 @@ def nb_getSimpleEmptyCount(board):
 # 统计空洞的个数
 # 空洞最高点+空洞的最高点总数/10
 # @njit(cache=True)
-def nb_getEmptyCount(board):
+def nb_getEmptyCount2(board):
     # 每高度的的空洞数
     c = np.zeros((boardheight), dtype=np.int8)
     # 每列的高度
@@ -591,10 +597,13 @@ class Agent():
                 reward += self.downcount*0.1   
                 self.downcount = 0 
                 
+            emptyCount = self.getEmptyCount()   
+            reward -= (emptyCount - self.emptyCount)*0.1
+            self.emptyCount  = emptyCount
+            
             self.score += reward    # 一个方块1点 
             # self.pieceheight = self.getAvgHeight()  
             # self.failLines = self.getFailLines()  
-            # self.emptyCount = self.getSimpleEmptyCount()   
             # self.heightDiff = self.getHeightDiff()
             # self.heightStd = self.getHeightStd()   
             # self.pieces_height.append(self.fallpieceheight)
