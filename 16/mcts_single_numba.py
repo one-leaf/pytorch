@@ -240,7 +240,7 @@ class MCTS():
             # 现实奖励
             # 按照DQN，  q[s,a] += 0.1*(r+ 0.99*(max(q[s+1])-q[s,a])
             # 目前Mcts， q[s,a] += v[s]/Nsa[s,a]
-            v += self.search(state)
+            v = v*0.5 + self.search(state)
             self.depth += 1
             
         # 更新 Q 值 和 访问次数
