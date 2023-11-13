@@ -1,5 +1,6 @@
 '''
 https://github.com/WZMIAOMIAO/deep-learning-for-image-processing/blob/master/pytorch_classification/vision_transformer/vit_model.py
+https://github.com/huggingface/pytorch-image-models/blob/main/timm/models/vision_transformer.py
 '''
 import torch
 import torch.nn as nn
@@ -8,6 +9,7 @@ from collections import OrderedDict
 
 def pair(t):
     return t if isinstance(t, tuple) else (t, t)
+
 class PatchEmbed(nn.Module):
     """
     图片转嵌入数据，由 [B, C, H, W] -> [B, HW, C]
@@ -36,6 +38,30 @@ class PatchEmbed(nn.Module):
         x = self.norm(x)
         return x
 
+# class hMLP_stem(nn.Module):
+#     """ Image to Patch Embedding
+#     """
+#     def __init__(self, img_size=(224,224), patch_size=(16,16), in_chans=3, embed_dim=768):
+#         super().__init__()
+#         num_patches = (img_size[1] // patch_size[1]) * (img_size[0] // patch_size[0])
+#         self.img_size = img_size
+#         self.patch_size = patch_size
+#         self.num_patches = num_patches
+#         self.proj = torch.nn.Sequential(
+#             *[nn.Conv2d(in_chans, embed_dim//4, kernel_size=4, stride=4),
+#             nn.SyncBatchNorm(embed_dim//4), # 这里采用BN，也可以采用LN
+#             nn.GELU(),
+#             nn.Conv2d(embed_dim//4, embed_dim//4, kernel_size=2, stride=2),
+#             nn.SyncBatchNorm(embed_dim//4),
+#             nn.GELU(),
+#             nn.Conv2d(embed_dim//4, embed_dim, kernel_size=2, stride=2),
+#             nn.SyncBatchNorm(embed_dim),
+#         ])
+#     def forward(self, x):
+#         B, C, H, W = x.shape
+#         x = self.proj(x)
+#         return x
+
 class Attention(nn.Module):
     def __init__(self,
                  dim,   # 输入token的dim
@@ -44,7 +70,8 @@ class Attention(nn.Module):
                  qk_scale=None,
                  attn_drop_ratio=0.,
                  proj_drop_ratio=0.):
-        super(Attention, self).__init__()
+        super().__init__()
+        assert dim % num_heads == 0
         self.num_heads = num_heads
         head_dim = dim // num_heads
         # 确保softmax前的方差为1
@@ -148,20 +175,67 @@ class Block(nn.Module):
                  drop_path_ratio=0.,
                  act_layer=nn.GELU,
                  norm_layer=nn.LayerNorm):
-        super(Block, self).__init__()
-        self.norm1 = norm_layer(dim)
+        super().__init__()               
+        self.norm1 = norm_layer(dim)        
         self.attn = Attention(dim, num_heads=num_heads, qkv_bias=qkv_bias, qk_scale=qk_scale,
                               attn_drop_ratio=attn_drop_ratio, proj_drop_ratio=drop_ratio)
+        
         # NOTE: drop path for stochastic depth, we shall see if this is better than dropout here
         self.drop_path = DropPath(drop_path_ratio) if drop_path_ratio > 0. else nn.Identity()
         self.norm2 = norm_layer(dim)
-        mlp_hidden_dim = int(dim * mlp_ratio)
-        self.mlp = Mlp(in_features=dim, hidden_features=mlp_hidden_dim, act_layer=act_layer, drop=drop_ratio)
+        self.mlp = Mlp(in_features=dim, hidden_features=int(dim * mlp_ratio),
+                       act_layer=act_layer, drop=drop_ratio)
 
     def forward(self, x):
         x = x + self.drop_path(self.attn(self.norm1(x)))
         x = x + self.drop_path(self.mlp(self.norm2(x)))
         return x
+
+class ParallelThingsBlock(nn.Module):
+    """ Parallel ViT block (N parallel attention followed by N parallel MLP)
+    Based on:
+      `Three things everyone should know about Vision Transformers` - https://arxiv.org/abs/2203.09795
+    """
+    def __init__(
+            self,
+            dim,
+            num_heads,
+            num_parallel=2,
+            mlp_ratio=4.,
+            qkv_bias=False,
+            qk_scale=False,
+            drop_ratio=0.,
+            attn_drop_ratio=0.,
+            drop_path_ratio=0.,
+            act_layer=nn.GELU,
+            norm_layer=nn.LayerNorm):
+        super().__init__()
+        self.num_parallel = num_parallel
+        self.attns = nn.ModuleList()
+        self.ffns = nn.ModuleList()
+        for _ in range(num_parallel):
+            self.attns.append(nn.Sequential(OrderedDict([
+                ('norm', norm_layer(dim)),
+                ('attn', Attention(
+                    dim, num_heads=num_heads, qkv_bias=qkv_bias, qk_scale=qk_scale,
+                    attn_drop_ratio=attn_drop_ratio, proj_drop_ratio=drop_ratio
+                )),
+                ('drop_path', DropPath(drop_path_ratio) if drop_path_ratio > 0. else nn.Identity())
+            ])))
+            self.ffns.append(nn.Sequential(OrderedDict([
+                ('norm', norm_layer(dim)),
+                ('mlp', Mlp(
+                    in_features=dim, hidden_features=int(dim * mlp_ratio),
+                    act_layer=act_layer, drop=drop_ratio,
+                )),
+                ('drop_path', DropPath(drop_path_ratio) if drop_path_ratio > 0. else nn.Identity())
+            ])))
+
+    def forward(self, x):
+        x = x + sum(attn(x) for attn in self.attns)
+        x = x + sum(ffn(x) for ffn in self.ffns)
+        return x
+
 
 def _init_vit_weights(m):
     """
@@ -318,7 +392,7 @@ class VitPatchEmbed(nn.Module):
     """
     图片转嵌入数据，由 [B, C, H, W] -> [B, HW, C]
     """
-    def __init__(self, img_size=(20,10), in_c=3, kernel_size=(5,2), embed_dim=768, padding=0, stride=1, norm_layer=None):
+    def __init__(self, img_size=(20,10), in_c=3, kernel_size=(4,4), embed_dim=768, padding=0, stride=(2,2), norm_layer=None):
         super().__init__()
         image_height, image_width = pair(img_size)
         kernel_height, kernel_width = pair(kernel_size)
@@ -348,7 +422,7 @@ class VitNet(nn.Module):
         act_layer =  nn.GELU
         # 图片转换为 patch embedding [B, C, H, W] ==> [B, num_patches, embed_dim] 
         # self.patch_embed = PatchEmbed(img_size=(20,10), patch_size=(1,10), in_c=8, embed_dim=embed_dim)
-        self.patch_embed = VitPatchEmbed(img_size=(20,10), in_c=3, embed_dim=embed_dim)
+        self.patch_embed = VitPatchEmbed(img_size=(20,10), in_c=3, kernel_size=(4,4), stride=(2,2), embed_dim=embed_dim)
         # 图片分割后的块数
         num_patches = self.patch_embed.num_patches                      # p
 
@@ -367,7 +441,7 @@ class VitNet(nn.Module):
 
         # 按照深度创建每一层的模块
         self.blocks = nn.Sequential(*[
-            Block(dim=embed_dim, num_heads=num_heads, mlp_ratio=mlp_ratio, qkv_bias=qkv_bias, qk_scale=qk_scale,
+            ParallelThingsBlock(dim=embed_dim, num_heads=num_heads, mlp_ratio=mlp_ratio, qkv_bias=qkv_bias, qk_scale=qk_scale,
                   drop_ratio=drop_ratio, attn_drop_ratio=attn_drop_ratio, drop_path_ratio=dpr[i],
                   norm_layer=norm_layer, act_layer=act_layer)
             for i in range(depth)
@@ -382,7 +456,7 @@ class VitNet(nn.Module):
         self.val_fc = nn.Linear(embed_dim, embed_dim)   # [B, 768] => [B, 768]
         self.val_fc_act = nn.GELU()
         self.val_dist = nn.Linear(embed_dim, num_quantiles)   # [B, 768] => [B, num_quantiles]
-        self.val_dist_act = nn.Tanh()
+        # self.val_dist_act = nn.Tanh()
 
         # 参数初始化, 这里需要pytorch 1.6以上版本
         # nn.init.trunc_normal_(self.pos_embed, std=0.02)
