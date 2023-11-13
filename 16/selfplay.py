@@ -240,9 +240,9 @@ class Train():
         else:
             agent.exrewardRate = 0
         agent.limitstep = random.random()<0.25
-        agent.exreward_piececount = 0 #random.randint(0,20)
+        max_emptyCount = random.randint(10,30)
         start_time = time.time()
-        print("exreward:", agent.exreward,"exrewardRate:", agent.exrewardRate ,"exreward_piececount:",agent.exreward_piececount,"isRandomNextPiece:",agent.isRandomNextPiece,"limitstep:",agent.limitstep)
+        print("exreward:", agent.exreward,"exrewardRate:", agent.exrewardRate ,"max_emptyCount:",max_emptyCount,"isRandomNextPiece:",agent.isRandomNextPiece,"limitstep:",agent.limitstep)
         piececount = agent.piececount
         mark_reward_piececount = -1
         for i in range(self.max_step_count):
@@ -283,7 +283,7 @@ class Train():
             piececount = agent.piececount
 
             # 如果游戏结束
-            if agent.terminal:
+            if agent.terminal or agent.emptyCount>max_emptyCount:
                 data["score"] = agent.score
                 data["piece_count"] = agent.piececount
                 data["piece_height"] = agent.pieceheight
