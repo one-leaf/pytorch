@@ -19,6 +19,7 @@ class Agent():
         self.isRandomNextPiece = isRandomNextPiece       
         self.must_reward_piece_count = must_reward_pieces_count
         self.nextpieces = nextpieces
+        self.is_replay= len(nextpieces)>0        
         self.reset()
 
     def reset(self):
