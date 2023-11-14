@@ -186,8 +186,8 @@ class Train():
 
             agent.print()
 
-            # 判断是否需要重新玩,如果当前小于平均的0.8，放到运行池训练
-            if agent.piececount < result["total"]["avg_piececount"]*0.7:
+            # 判断是否需要重新玩,如果当前小于平均的0.5，放到运行池训练
+            if agent.piececount < result["total"]["avg_piececount"]*0.5:
                 his_pieces = agent.piecehis
                 filename = "T{}-{}-{}.pkl".format(agent.piececount, agent.removedlines ,int(round(time.time() * 1000000)))
                 savefile = os.path.join(self.waitplaydir, filename)
@@ -582,7 +582,7 @@ class Train():
         print("saved file basename:", filetime, "length:", i+1)
 
         # 删除训练集
-        if agent.piececount/result["total"]["piececount"]<0.8:
+        if agent.piececount/result["total"]["piececount"]<0.5:
             filename = "R{}-{}-{}.pkl".format(agent.piececount, agent.score, int(round(time.time() * 1000000)))
             his_pieces_file = os.path.join(self.waitplaydir, filename)
             print("save need replay", his_pieces_file)
