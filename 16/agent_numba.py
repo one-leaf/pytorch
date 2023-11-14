@@ -196,7 +196,7 @@ def nb_get_status(piece, p_x, p_y, templatenum=5):
         for y in range(templatenum):
             if piece[y][x]==1:
                 px, py = x+p_x, y+p_y
-                if px>=0 and py>=0:
+                if px>=0 and px<10 and py>=0 and py<20:
                     status[py][px]=1
     return status                        
 
