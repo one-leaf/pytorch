@@ -664,7 +664,7 @@ class Agent():
                     line=line+str(board[y][x])+" "
             print(line)
         print(" "+" -"*boardwidth)
-        print("score:", self.score, "lines:",self.removedlines,"piececount:", self.piececount, "emptyCount:", self.emptyCount)
+        print("score:", round(self.score,2), "lines:",self.removedlines,"piececount:", self.piececount, "emptyCount:", self.emptyCount)
 
     # 统计不可消除行的数量
     def getFailLines(self):
