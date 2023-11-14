@@ -547,18 +547,21 @@ class Agent():
         
     def step(self, action):
         # 状态 0 下落过程中 1 更换方块 2 结束一局
-        
         self.steps += 1
         self.piecesteps += 1
         # self.level, self.fallfreq = self.calculate(self.score)
         
         # self.actions.append(action)
 
-        if action == KEY_LEFT:# and self.validposition(self.board, self.fallpiece, ax=-1):
-            self.fallpiece['x'] -= 1
+        if self.availables[action] == 1:
+            if action == KEY_LEFT: 
+                self.fallpiece['x'] -= 1
 
-        if action == KEY_RIGHT:# and self.validposition(self.board, self.fallpiece, ax=1):
-            self.fallpiece['x'] += 1  
+            if action == KEY_RIGHT:
+                self.fallpiece['x'] += 1  
+
+            if action == KEY_ROTATION:
+                self.fallpiece['rotation'] =  (self.fallpiece['rotation'] + 1) % len(pieces[self.fallpiece['shape']])
 
         if action == KEY_DOWN:# and self.validposition(self.board, self.fallpiece, ay=1):
             # n = self.calc_down_count(self.board, self.fallpiece)
@@ -568,10 +571,6 @@ class Agent():
                 self.downcount += 1
                 self.fallpiece['y'] += 1                          
 
-        if action == KEY_ROTATION:
-            self.fallpiece['rotation'] =  (self.fallpiece['rotation'] + 1) % len(pieces[self.fallpiece['shape']])
-            # if not self.tetromino.validposition(self.board,self.fallpiece):
-                # self.fallpiece['rotation'] = (self.fallpiece['rotation'] - 1) % len(pieces[self.fallpiece['shape']])
         isFalling=True
         if self.validposition(self.board, self.fallpiece, ay=1):
             self.fallpiece['y'] += 1
@@ -621,6 +620,7 @@ class Agent():
         if not isFalling and (not self.validposition(self.board, self.fallpiece, ay=1)):                                      
             self.terminal = True 
             self.state = 1
+            self.set_availables()
             return self.state, reward 
         
         self.set_availables()
