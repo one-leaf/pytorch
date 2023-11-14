@@ -240,10 +240,7 @@ class Train():
         else:
             agent.exrewardRate = 0
         agent.limitstep = random.random()<0.25
-        if agent.is_replay:
-            max_emptyCount = 5
-        else:    
-            max_emptyCount = random.randint(10,30)
+        max_emptyCount = random.randint(10,30)
         start_time = time.time()
         print("exreward:", agent.exreward,"exrewardRate:", agent.exrewardRate ,"max_emptyCount:",max_emptyCount,"isRandomNextPiece:",agent.isRandomNextPiece,"limitstep:",agent.limitstep)
         piececount = agent.piececount
@@ -286,7 +283,7 @@ class Train():
             piececount = agent.piececount
 
             # 如果游戏结束
-            if agent.terminal or agent.emptyCount>max_emptyCount:
+            if agent.terminal or (agent.is_replay and agent.piececount>result["total"]["avg_piececount"]):
                 data["score"] = agent.score
                 data["piece_count"] = agent.piececount
                 data["piece_height"] = agent.pieceheight
