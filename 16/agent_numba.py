@@ -370,7 +370,7 @@ class Agent():
         self.isRandomNextPiece=isRandomNextPiece
         self.pieceCount = 0
         self.piecehis=[]
-        
+        self.is_replay= len(nextPiecesList)>0        
         # 下落的方块
         self.fallpiece = self.getnewpiece()
         # 下一个待下落的方块
