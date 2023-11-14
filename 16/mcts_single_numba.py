@@ -192,15 +192,15 @@ class MCTS():
         v:float = self.Vs[s]
         ns:float = self.Ns[s]
         max_p = np.argmax(ps)
+        max_q = np.argmax(qs)
         
         game = state.game
         if game.show_mcts_process or game.state == 1 :
             if game.state == 1: game.print()
-            act = np.argmax(probs)
             print(time.strftime('%m-%d %H:%M:%S',time.localtime(time.time())), game.steps, game.fallpiece["shape"], \
                   "ns:", str(ns).rjust(4), "/", str(self.simulation_count).ljust(4), "depth:", str(self.max_depth).ljust(3), \
-                  "\t", act, self.Nsa[s], "\tQ:", round(v,2), "-->", round(qs[max_p],2), \
-                  "\tP:", round(ps[max_p],2), "-->", round(probs[max_p],2))
+                  "\tQ:", round(v,2), "-->",round(qs[max_p],2), '/', round(qs[max_q],2), \
+                  "\tP:", round(ps[max_p],2), "-->", round(probs[max_p],2),'/', round(probs[max_q],2))
         # 动作数，概率，每个动作的Q，原始概率，当前局面的v，当前局面的总探索次数
         return probs, qs, ps, v, ns
 
