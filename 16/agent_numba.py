@@ -595,12 +595,11 @@ class Agent():
             reward = lines 
             
             # 鼓励垂直下落
-            if lines>0 and action == KEY_DOWN:
+            if lines>0:
                 reward += self.downcount*0.1   
-                self.downcount = 0 
                 
             emptyCount = self.getEmptyCount()   
-            reward -= (emptyCount - self.emptyCount)
+            reward -= (emptyCount - self.emptyCount) 
             self.emptyCount  = emptyCount
             
             self.score += reward    # 一个方块1点 
