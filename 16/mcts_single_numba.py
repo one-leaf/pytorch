@@ -78,7 +78,7 @@ def selectAction(s:int, availables, _c_puct:float, Ps, Ns, Qsa, Nsa):
 def updateQN(s:int, a:int, r:float, v:float, Ns, Qsa, Nsa, actions_num):
     Nsa[s][a] += 1
     # Qsa[s][a] += (v- Qsa[s][a])/Nsa[s][a]
-    Qsa[s][a] += (r+0.99*(v- Qsa[s][a]))/Nsa[s][a]
+    Qsa[s][a] += (np.tanh(r)+0.99*(v- Qsa[s][a]))/Nsa[s][a]
     Ns[s] += 1
 
 @njit(cache=True)   
