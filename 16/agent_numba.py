@@ -412,7 +412,8 @@ class Agent():
         # 状态： 0 下落过程中 1 更换方块 2 结束一局
         self.state = 0
         # 每个方块的高度
-        self.pieces_height = []     
+        self.pieces_height = []    
+        self.piece_actions = "" 
         # 当前prices所有动作
         # self.actions=[]
         # 下一个可用步骤
@@ -579,6 +580,8 @@ class Agent():
         else:
             isFalling = False
 
+        if self.piecesteps ==1 :self.piece_actions=""
+        self.piece_actions += self.position_to_action_name(action)
         # self.fallpieceheight = 20 - self.fallpiece['y']
 
         self.set_status()
@@ -664,7 +667,7 @@ class Agent():
                     line=line+str(board[y][x])+" "
             print(line)
         print(" "+" -"*boardwidth)
-        print("score:", round(self.score,2), "lines:",self.removedlines,"piececount:", self.piececount, "emptyCount:", self.emptyCount)
+        print("score:", round(self.score,2), "lines:",self.removedlines,"piececount:", self.piececount, "emptyCount:", self.emptyCount, "actions:" ,self.piece_actions)
 
     # 统计不可消除行的数量
     def getFailLines(self):
