@@ -75,9 +75,10 @@ def selectAction(s:int, availables, _c_puct:float, Ps, Ns, Qsa, Nsa):
 @njit(cache=True)
 # njit 9.572226293848707e-06
 # 2.3297934257853874e-05
-def updateQN(s:int, a:int, v:float, Ns, Qsa, Nsa, actions_num):
+def updateQN(s:int, a:int, r:float, v:float, Ns, Qsa, Nsa, actions_num):
     Nsa[s][a] += 1
-    Qsa[s][a] += (v- Qsa[s][a])/Nsa[s][a]
+    # Qsa[s][a] += (v- Qsa[s][a])/Nsa[s][a]
+    Qsa[s][a] += (r+0.99*(v- Qsa[s][a]))/Nsa[s][a]
     Ns[s] += 1
 
 @njit(cache=True)   
@@ -231,7 +232,8 @@ class MCTS():
         # 比较 Qsa[s, a] + c_puct * Ps[s,a] * sqrt(Ns[s]) / Nsa[s, a], 选择最大的
         a = selectAction(s, state.availables(), self._c_puct, self.Ps, self.Ns, self.Qsa, self.Nsa)
         
-        _, v = state.step(a)
+        _, r = state.step(a)
+        self.depth += 1
         
         if state.terminal(): 
             # self.Es[s] = -1
@@ -239,13 +241,12 @@ class MCTS():
         else:
             # 现实奖励
             # 按照DQN，  q[s,a] += 0.1*(r+ 0.99*(max(q[s+1])-q[s,a])
-            # 目前Mcts， q[s,a] += v[s]/Nsa[s,a]
-            v = v*0.5 + self.search(state)
-            self.depth += 1
+            # 目前Mcts， q[s,a] += v[s+1]/Nsa[s,a]
+            v = self.search(state)            
             
         # 更新 Q 值 和 访问次数
-        # q[s,a] += v[s]/Nsa[s,a]
-        updateQN(s, a, v, self.Ns, self.Qsa, self.Nsa, state.actions_num)
+        # q[s,a] += (r+v[s+1]-q[s,a])/Nsa[s,a]
+        updateQN(s, a, r, v, self.Ns, self.Qsa, self.Nsa, state.actions_num)
 
         return v
 
