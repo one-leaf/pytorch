@@ -51,8 +51,8 @@ def selectAction(s:int, availables, _c_puct:float, Ps, Ns, Qsa, Nsa):
         return np.argmax(Nsa[s]+availables == 1)
     q = Qsa[s]+ _c_puct * availables * Ps[s] * sqrt(Ns[s]) / (Nsa[s]+1E-8)
     # max_q_idx = np.nanargmax(np.where(q!=0, q, np.nan))     
-    nzq_idx = np.nonzero(q)
-    max_q_idx = nzq_idx[0][np.argmax(q[nzq_idx])]
+    nz_idx = np.nonzero(availables)
+    max_q_idx = nz_idx[0][np.argmax(q[nz_idx])]
     return max_q_idx
         
     # EPS = 1e-8
@@ -196,7 +196,11 @@ class MCTS():
         v:float = self.Vs[s]
         ns:float = self.Ns[s]
         max_p = np.argmax(ps)
-        max_q = np.nanargmax(np.where(qs!=0, qs, np.nan))
+        
+        nz_idx = np.nonzero(state.availables())
+        max_q = nz_idx[0][np.argmax(qs[nz_idx])]
+        
+        # max_q = np.nanargmax(np.where(qs!=0, qs, np.nan))
         
         game = state.game
         if game.show_mcts_process or game.state == 1 :
@@ -286,7 +290,10 @@ class MCTSPlayer(object):
             depth = self.mcts.max_depth
             
             max_probs_idx = np.argmax(act_probs)    
-            max_qs_idx = np.nanargmax(np.where(act_qs!=0, act_qs, np.nan)) 
+            
+            nz_idx = np.nonzero(state.availables())
+            max_qs_idx = nz_idx[0][np.argmax(act_qs[nz_idx])]
+
             max_ps_idx = np.argmax(act_ps)
 
             if game.is_replay:
