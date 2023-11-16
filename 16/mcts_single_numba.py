@@ -50,7 +50,8 @@ def selectAction(s:int, availables, _c_puct:float, Ps, Ns, Qsa, Nsa):
     if np.min(Nsa[s][availables==1])==0:
         return np.argmax(Nsa[s]+availables == 1)
     q = Qsa[s]+ _c_puct * availables * Ps[s] * sqrt(Ns[s]) / (Nsa[s]+1E-8)
-    return np.argmax((q + 10000)*availables)
+    max_q_idx = np.nanargmax(np.where(q!=0, q, np.nan))     
+    return max_q_idx
         
     # EPS = 1e-8
     # 开销 6.048132081767674e-05 S
@@ -193,7 +194,7 @@ class MCTS():
         v:float = self.Vs[s]
         ns:float = self.Ns[s]
         max_p = np.argmax(ps)
-        max_q = np.argmax(qs)
+        max_q = np.nanargmax(np.where(qs!=0, qs, np.nan))
         
         game = state.game
         if game.show_mcts_process or game.state == 1 :
@@ -282,7 +283,7 @@ class MCTSPlayer(object):
             depth = self.mcts.max_depth
             
             max_probs_idx = np.argmax(act_probs)    
-            max_qs_idx = np.argmax((act_qs+1000)*act_qs) 
+            max_qs_idx = np.nanargmax(np.where(act_qs!=0, act_qs, np.nan)) 
             max_ps_idx = np.argmax(act_ps)
 
             if game.is_replay:
