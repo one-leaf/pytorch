@@ -50,7 +50,10 @@ def selectAction(s:int, availables, _c_puct:float, Ps, Ns, Qsa, Nsa):
     if np.min(Nsa[s][availables==1])==0:
         return np.argmax(Nsa[s]+availables == 1)
     q = Qsa[s]+ _c_puct * availables * Ps[s] * sqrt(Ns[s]) / (Nsa[s]+1E-8)
-    max_q_idx = np.nanargmax(np.where(q!=0, q, np.nan))     
+    # max_q_idx = np.nanargmax(np.where(q!=0, q, np.nan))     
+    nztheta_ind = np.nonzero(q)
+    k = np.argmin(q[nztheta_ind])
+    max_q_idx = nztheta_ind[k]
     return max_q_idx
         
     # EPS = 1e-8
