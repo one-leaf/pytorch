@@ -447,105 +447,26 @@ class Train():
         # 重新定义价值为探索深度，因此value应该是[0,-X]
         # 如何评价最后的得分？最完美的情况（填满比）
 
-        # # 整体的价值
-        # pieces_value = [0 for _ in range(piececount)]
-        # # 局部的收益
-        # pieces_score = [0 for _ in range(piececount)]
         # 奖励的位置
         pieces_reward = [0 for _ in range(piececount)]
-        # # 全局的奖励
-        # pieces_exreward = [0 for _ in range(piececount)]
-        # 奖励的位置
         pieces_steps = [0 for _ in range(piececount)]
-        # # 方块的高度
-        # pieces_height = [0 for _ in range(piececount)]
 
         # # 统计所有获得奖励的方块
         for m in range(step_count):
             pieces_steps[data["steps"][m]["piece_count"]] = m
             if data["steps"][m]["reward"]>0:
-                pieces_reward[data["steps"][m]["piece_count"]] = data["steps"][m]["reward"]
-        #         # pieces_reward[data["steps"][m]["piece_count"]] = 1
-        # last_reward = -agent.getSimpleEmptyCount()
-        # for m in range(piececount-1,-1,-1):
-        #     if pieces_reward[m]>0: 
-        #         last_reward = last_reward/2
-        #     pieces_exreward[m] = last_reward 
-
-        # # 统计方块的高度
-        # for m in range(piececount):
-        #     pieces_height[m] = data["steps"][pieces_steps[m]]["piece_height"]
-
-        # # 游戏的得分算法1，每一步都减1，如果碰到奖励，不重置步骤，最终/除以全局的奖励
-        # # 最大失分为-100
-        # # value 分布为 -100*p/(totel_p * (reward+1))
-        # # score_mask = (sum(pieces_reward)+1)*(agent.piececount+1)/100
-        # # for m in range(step_count):
-        # #     p =  data["steps"][m]["piece_count"]
-        # #     data["steps"][m]["value"]= -(p+1)/score_mask
-        # #     # if pieces_reward[p]>0 and m==pieces_steps[p] : 
-        # #     #     score_mask=score_mask-1
-        # # pieces_value = [data["steps"][pieces_steps[p]]["value"] for p in range(piececount)]
-
-
-        # # score_mask = (sum(pieces_reward)+1)*(agent.piececount+1)/100
-        # # 游戏的得分算法0 + agent.score*2.5/(agent.piececount+1) ~ -1 平均分布 
-        # begin_vaule = agent.score*2.5/(agent.piececount+1)
-        # print("begin_vaule",begin_vaule)
-        # for m in range(step_count):
-        #     p =  data["steps"][m]["piece_count"]
-        #     data["steps"][m]["value"] = begin_vaule-(m+1)*(begin_vaule+1)/step_count
-        #     data["steps"][m]["score"] = data["steps"][m]["qval"]         
-        # # for m in range(step_count):
-        # #     p =  data["steps"][m]["piece_count"]
-        # #     data["steps"][m]["value"] = -(m+1)/step_count
-        # # idx = 0
-        # # for n in range(piececount):
-        # #     if pieces_reward[n]>0:
-        # #         for m in range(idx, step_count):
-        # #             if data["steps"][m]["piece_count"]<=n:
-        # #                 data["steps"][m]["value"] += pieces_reward[n]*2.5/(n+1)
-        # #             else:
-        # #                 idx = m
-        # #                 break           
-
-        # # 如果后面没有score，其步骤概率全部降低75%，则全部标记为-1        
-        # # for m in range(step_count-1,-1,-1):
-        # #     if data["steps"][m]["reward"]>0: break
-        # #     # data["steps"][m]["value"]=-1  
-        # #     p = data["steps"][m]["move_probs"].copy()
-        # #     p[p>0]=1
-        # #     data["steps"][m]["move_probs"]=data["steps"][m]["move_probs"]*0.5+p*0.5/np.sum(p)           
+                pieces_reward[data["steps"][m]["piece_count"]] = data["steps"][m]["reward"] 
 
         pieces_value = [round(data["steps"][pieces_steps[p]]["qval"],2) for p in range(piececount)]
         pieces_probs = [round(np.max(data["steps"][pieces_steps[p]]["move_probs"]),2) for p in range(piececount)]
 
-        # 游戏的得分算法2，每一步都减1，如果碰到奖励，重置步骤，如果碰到惩罚直接加
-        # reward_mask = 0
-        # for m in range(step_count):
-        #     p =  data["steps"][m]["piece_count"]
-        #     ext_reward = pieces_exreward[p]
-        #     data["steps"][m]["score"]= -m + reward_mask + ext_reward  
-        #     if pieces_reward[p]>0 and m==pieces_steps[p] : reward_mask=m+1 
-        # pieces_score = [data["steps"][pieces_steps[p]]["score"] for p in range(piececount)]
-
         print()
-        # print("steps: ", pieces_steps)
-        # print()
         print("reward:", pieces_reward)
         print()
-        # print("exreward:", pieces_exreward)
-        # print()
-        # print("height:", pieces_height)
-        # print()
         print("value: ", pieces_value)
         print()
         print("probs: ", pieces_probs)
         print()
-
-        
-        # print("score: ", pieces_score)
-        # print()
 
         print(i,"score:",data["score"],"piece_count:",data["piece_count"],"piece_height:",data["piece_height"],"steps:",step_count)
        
