@@ -78,7 +78,7 @@ def selectAction(s:int, availables, _c_puct:float, Ps, Ns, Qsa, Nsa):
 def updateQN(s:int, a:int, r:float, v:float, Ns, Qsa, Nsa, actions_num):
     Nsa[s][a] += 1
     # Qsa[s][a] += (v- Qsa[s][a])/Nsa[s][a]
-    Qsa[s][a] += (np.tanh(r)+0.99*(v- Qsa[s][a]))/Nsa[s][a]
+    Qsa[s][a] += (r+0.99*(v- Qsa[s][a]))/Nsa[s][a]
     Ns[s] += 1
 
 @njit(cache=True)   
@@ -233,17 +233,18 @@ class MCTS():
         a = selectAction(s, state.availables(), self._c_puct, self.Ps, self.Ns, self.Qsa, self.Nsa)
         
         _, r = state.step(a)
-        self.depth += 1
-        
+        self.depth += 1        
         if state.terminal(): 
             # self.Es[s] = -1
-            v = -1 #-state.game.emptyCount*0.1
+            v = 0 #-state.game.emptyCount*0.1
             r = -1
         else:
             # 现实奖励
             # 按照DQN，  q[s,a] += 0.1*(r+ 0.99*(max(q[s+1])-q[s,a])
             # 目前Mcts， q[s,a] += v[s+1]/Nsa[s,a]
-            v = self.search(state)            
+            v = self.search(state)
+            r = np.tanh(r)
+
             
         # 更新 Q 值 和 访问次数
         # q[s,a] += (r+v[s+1]-q[s,a])/Nsa[s,a]
