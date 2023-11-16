@@ -237,7 +237,7 @@ class MCTS():
         
         if state.terminal(): 
             # self.Es[s] = -1
-            v = -1-state.game.emptyCount*0.1            
+            v = -1 #-state.game.emptyCount*0.1            
         else:
             # 现实奖励
             # 按照DQN，  q[s,a] += 0.1*(r+ 0.99*(max(q[s+1])-q[s,a])
