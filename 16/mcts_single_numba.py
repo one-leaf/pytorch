@@ -53,7 +53,7 @@ def selectAction(s:int, availables, _c_puct:float, Ps, Ns, Qsa, Nsa):
     # max_q_idx = np.nanargmax(np.where(q!=0, q, np.nan))     
     nztheta_ind = np.nonzero(q)
     k = np.argmax(q[nztheta_ind])
-    max_q_idx = nztheta_ind[k]
+    max_q_idx = nztheta_ind[0][k]
     return max_q_idx
         
     # EPS = 1e-8
