@@ -203,7 +203,7 @@ class MCTS():
             if game.state == 1: game.print()
             print(time.strftime('%m-%d %H:%M:%S',time.localtime(time.time())), game.steps, game.fallpiece["shape"], \
                   "ns:", str(ns).rjust(4), "/", str(self.simulation_count).ljust(4), "depth:", str(self.max_depth).ljust(3), \
-                  "\tQs:", qs, "\tNs:", ns, \
+                  "\tQs:", qs, \
                   "\tQ:", round(v,2), "-->",round(qs[max_p],2), '/', round(qs[max_q],2), \
                   "\tP:", round(ps[max_p],2), "-->", round(probs[max_p],2),'/', round(probs[max_q],2))
         # 动作数，概率，每个动作的Q，原始概率，当前局面的v，当前局面的总探索次数
