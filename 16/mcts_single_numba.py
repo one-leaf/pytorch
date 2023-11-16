@@ -282,7 +282,7 @@ class MCTSPlayer(object):
             depth = self.mcts.max_depth
             
             max_probs_idx = np.argmax(act_probs)    
-            max_qs_idx = np.argmax(act_qs) 
+            max_qs_idx = np.argmax((act_qs+1000)*act_qs) 
             max_ps_idx = np.argmax(act_ps)
 
             if game.is_replay:
