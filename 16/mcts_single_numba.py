@@ -94,7 +94,7 @@ def updateQN(s:int, a:int, r:float, v:float, Ns, Qsa, Nsa, actions_num):
     
     # Qsa[s][a] += (r/Nsa[s][a]+v-Qsa[s][a])/Nsa[s][a]
     Qsa[s][a] += r+(v- Qsa[s][a])/Nsa[s][a]
-    Qsa[s][a] = np.tanh(Qsa[s][a])
+    # Qsa[s][a] = np.tanh(Qsa[s][a])
     Ns[s] += 1
 
 @njit(cache=True)   
@@ -259,8 +259,8 @@ class MCTS():
         self.depth += 1        
         if state.terminal(): 
             # self.Es[s] = -1
-            v = 0 #-state.game.emptyCount*0.1
-            r = 0
+            v = -state.game.emptyCount
+            # r = 0
         else:
             # 现实奖励
             # 按照DQN，  q[s,a] += 0.1*(r+ 0.99*(max(q[s+1])-q[s,a])
