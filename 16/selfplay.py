@@ -103,11 +103,11 @@ class Train():
             result["piececount"]=[]
         if "exrewardRate" not in result:
             result["exrewardRate"]={}
-            for i in range(10):
+            for i in range(11):
                 result["exrewardRate"][str(round(i/10,1))]=30
         if "exrewardN" not in result:
             result["exrewardN"]={}
-            for i in range(10):
+            for i in range(11):
                 result["exrewardN"][str(round(i/10,1))]=0
         if "0.09" in result["exrewardRate"]:
             result["exrewardRate"]={}
