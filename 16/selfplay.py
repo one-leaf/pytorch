@@ -86,7 +86,7 @@ class Train():
         if "piececount" not in result["total"]:
             result["total"]["piececount"]=0
         if "avg_piececount" not in result["total"]:
-            result["total"]["avg_piececount"]=10            
+            result["total"]["avg_piececount"]=20            
         if "avg_reward_piececount" not in result["total"]:
             result["total"]["avg_reward_piececount"]=0            
         if "n_playout" not in result["total"]:
