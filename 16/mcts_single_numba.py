@@ -19,6 +19,7 @@ class State():
         self.search=0
         # 动作的类型数目
         self.actions_num = ACTONS_LEN
+        self.markscore = 0
         
     def step(self,act:int):
         return self.game.step(act)                      
@@ -210,9 +211,9 @@ class MCTS():
             if game.state == 1: game.print()
             print(time.strftime('%m-%d %H:%M:%S',time.localtime(time.time())), game.steps, game.fallpiece["shape"], \
                   "ns:", str(ns).rjust(4), "/", str(self.simulation_count).ljust(4), "depth:", str(self.max_depth).ljust(3), \
-                  "\tQ:", round(v,2), "-->",round(qs[max_p],2), '/', round(qs[max_q],2), \
+                #   "\tQ:", round(v,2), "-->",round(qs[max_p],2), '/', round(qs[max_q],2), \
                   "\tP:", round(ps[max_p],2), "-->", round(probs[max_p],2),'/', round(probs[max_q],2), \
-                  "\tQs:", qs)
+                  "\tQs:", qs, "markscore", state.markscore)
         # 动作数，概率，每个动作的Q，原始概率，当前局面的v，当前局面的总探索次数
         return probs, qs, ps, v, ns
 
