@@ -309,7 +309,7 @@ class MCTSPlayer(object):
             nz_idx = np.nonzero(state.availables())
             max_qs_idx = nz_idx[0][np.argmax(act_qs[nz_idx])]
             var_qs = np.var(act_qs[nz_idx])
-            print(var_qs)
+            # print(var_qs)
             max_ps_idx = np.argmax(act_ps)
 
 
