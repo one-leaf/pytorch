@@ -584,8 +584,6 @@ class Agent():
         self.piece_actions += self.position_to_action_name(action)
         # self.fallpieceheight = 20 - self.fallpiece['y']
 
-        self.set_status()
-        self.set_key()
         reward = 0
         if not isFalling:            
             self.addtoboard(self.board, self.fallpiece)            
@@ -618,6 +616,9 @@ class Agent():
             # self.actions = []
         else:
             self.state = 0
+
+        self.set_status()
+        self.set_key()
 
         if not isFalling and (not self.validposition(self.board, self.fallpiece, ay=1)):                                      
             self.terminal = True 
