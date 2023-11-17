@@ -85,7 +85,14 @@ def selectAction(s:int, availables, _c_puct:float, Ps, Ns, Qsa, Nsa):
 def updateQN(s:int, a:int, r:float, v:float, Ns, Qsa, Nsa, actions_num):
     Nsa[s][a] += 1
     # Qsa[s][a] += (v- Qsa[s][a])/Nsa[s][a]
-    Qsa[s][a] += (r+0.99*(v- Qsa[s][a]))/Nsa[s][a]
+    # Qsa[s][a] += (r+v- Qsa[s][a])/Nsa[s][a]   
+    
+    # DQN : q = r + 0.99*max(q_next)
+    # Qsa[s][a] = (Qsa[s][a]*(Nsa[s][a]-1)+v)/Nsa[s][a]
+    # b = (Qsa[s][a]*(Nsa[s][a]-1)+v -QSa[s][a]*Nsa[s][a])/Nsa[s][a]
+    # b = (v-Qsa[s][a])/Nsa[s][a]
+    
+    Qsa[s][a] += (r+v-Qsa[s][a])/Nsa[s][a]
     Ns[s] += 1
 
 @njit(cache=True)   
@@ -246,6 +253,7 @@ class MCTS():
         
         _, r = state.step(a)
         r = (state.game.score-state.markscore)*state.game.exrewardRate
+        # print(state.markscore, state.game.score, state.game.exrewardRate, r)
         self.depth += 1        
         if state.terminal(): 
             # self.Es[s] = -1
