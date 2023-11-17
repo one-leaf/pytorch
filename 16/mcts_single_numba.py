@@ -315,7 +315,7 @@ class MCTSPlayer(object):
 
             if game.is_replay:
                 idx = max_qs_idx
-            elif max_qs>-0.8:
+            elif max_qs>-0.9:
                 if max_qs_idx ==  max_ps_idx:
                     idx = max_qs_idx
                 elif random.random()<0.8:
