@@ -276,7 +276,7 @@ class Train():
                 repeat_count = 40
                 # print(_step["state"][0])
                 # print(_step["state"][-1])
-                print("#"*repeat_count, 'score:', agent.score, 'height:', agent.pieceheight, 'piece:', agent.piececount, "shape:", agent.fallpiece["shape"], \
+                print("#"*repeat_count, 'score:', agent.score, "reward:",reward, 'height:', agent.pieceheight, 'piece:', agent.piececount, \
                     'step:', agent.steps, "step time:", round((time.time()-start_time)/i,3),'reward_p:', agent.piececount-mark_reward_piececount)
                 # if agent.score>result["total"]["reward"]+20: game_stop=True
 
