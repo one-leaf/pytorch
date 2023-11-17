@@ -92,7 +92,9 @@ def updateQN(s:int, a:int, r:float, v:float, Ns, Qsa, Nsa, actions_num):
     # b = (Qsa[s][a]*(Nsa[s][a]-1)+v -QSa[s][a]*Nsa[s][a])/Nsa[s][a]
     # b = (v-Qsa[s][a])/Nsa[s][a]
     
-    Qsa[s][a] += (r+v-Qsa[s][a])/Nsa[s][a]
+    # Qsa[s][a] += (r/Nsa[s][a]+v-Qsa[s][a])/Nsa[s][a]
+    Qsa[s][a] += r+(v- Qsa[s][a])/Nsa[s][a]
+    Qsa[s][a] = np.tanh(Qsa[s][a])
     Ns[s] += 1
 
 @njit(cache=True)   
@@ -264,7 +266,7 @@ class MCTS():
             # 按照DQN，  q[s,a] += 0.1*(r+ 0.99*(max(q[s+1])-q[s,a])
             # 目前Mcts， q[s,a] += v[s+1]/Nsa[s,a]
             v = self.search(state)
-            r = np.tanh(r)
+            # r = np.tanh(r)
 
             
         # 更新 Q 值 和 访问次数
