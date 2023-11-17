@@ -232,7 +232,7 @@ class Train():
             #     p[i]=result["exrewardRate"][k] if result["exrewardRate"][k]>0 else 0.01
             # exrewardRateKey=np.random.choice(v, p=p/np.sum(p))
             # if random.random()>1/((sum(result["exrewardN"].values())+1)**0.5):
-            if random.random()>0.1:
+            if random.random()>0.1 and not agent.is_replay:
                 exrewardRateKey = max(result["exrewardRate"], key=result["exrewardRate"].get)
             else:
                 exrewardRateKey = random.choice(list(result["exrewardRate"].keys()))
