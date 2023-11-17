@@ -232,10 +232,10 @@ class Train():
             #     p[i]=result["exrewardRate"][k] if result["exrewardRate"][k]>0 else 0.01
             # exrewardRateKey=np.random.choice(v, p=p/np.sum(p))
             # if random.random()>1/((sum(result["exrewardN"].values())+1)**0.5):
-            if random.random()>0.1 and not agent.is_replay:
-                exrewardRateKey = max(result["exrewardRate"], key=result["exrewardRate"].get)
-            else:
+            if agent.is_replay:
                 exrewardRateKey = random.choice(list(result["exrewardRate"].keys()))
+            else:
+                exrewardRateKey = max(result["exrewardRate"], key=result["exrewardRate"].get)
             agent.exrewardRate = float(exrewardRateKey)    
         else:
             agent.exrewardRate = 0
@@ -283,7 +283,7 @@ class Train():
             piececount = agent.piececount
 
             # 如果游戏结束
-            if agent.terminal or (agent.is_replay and agent.piececount>result["total"]["avg_piececount"]):
+            if agent.terminal or (agent.is_replay and agent.piececount>2*result["total"]["avg_piececount"]):
                 data["score"] = agent.score
                 data["piece_count"] = agent.piececount
                 data["piece_height"] = agent.pieceheight
