@@ -41,6 +41,9 @@ class State():
         game = copy.deepcopy(self.game)
         state = State(game)
         return state
+    
+    def mark(self):
+        self.markscore=self.game.score
 
 @njit(cache=True)
 def selectAction(s:int, availables, _c_puct:float, Ps, Ns, Qsa, Nsa):
@@ -173,7 +176,7 @@ class MCTS():
         self.max_depth:int = 0
         self.depth:int = 0
         self.simulation_count = 0
-        
+        state.mark()
         for n in range(self._n_playout*2):
             self.depth = 0
             self.simulation_count = n+1
@@ -241,7 +244,7 @@ class MCTS():
         a = selectAction(s, state.availables(), self._c_puct, self.Ps, self.Ns, self.Qsa, self.Nsa)
         
         _, r = state.step(a)
-        # r *= state.game.exrewardRate
+        r = (state.game.score-state.markscore)*state.game.exrewardRate
         self.depth += 1        
         if state.terminal(): 
             # self.Es[s] = -1
