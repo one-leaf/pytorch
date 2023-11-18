@@ -206,6 +206,13 @@ def nb_getEmptyCount(board):
     d=(20-np.argmax(board,axis=0)-np.sum(board,axis=0))
     return np.sum(d[d!=20])
 
+# 统计最高位置以下的所有空的方块
+def nb_getTerminalEmptyCount(board):
+    d = np.argmax(board,axis=0)
+    max_h = 20-np.min(d[d!=0])
+    d = max_h*10-np.sum(board)
+    return d
+
 # 统计不可消除行的数量
 # @njit(cache=True)
 def nb_getFailLines(board):
@@ -328,8 +335,6 @@ def nb_getSimpleEmptyCount(board):
                 l_c = 0
                 h[x+1]=boardheight-y
         if l_c>0: c+=l_c
-
-
     return c
 
 # 统计空洞的个数
@@ -668,6 +673,10 @@ class Agent():
             print(line)
         print(" "+" -"*boardwidth)
         print("score:", round(self.score,2), "lines:",self.removedlines,"piececount:", self.piececount, "emptyCount:", self.emptyCount, "actions:" ,self.piece_actions)
+
+
+    def getTerminalEmptyCount(self):
+        return nb_getTerminalEmptyCount(self.board)
 
     # 统计不可消除行的数量
     def getFailLines(self):
