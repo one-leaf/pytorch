@@ -82,7 +82,7 @@ def selectAction(s:int, availables, _c_puct:float, Ps, Ns, Qsa, Nsa):
 @njit(cache=True)
 # njit 9.572226293848707e-06
 # 2.3297934257853874e-05
-def updateQN(s:int, a:int, r:float, v:float, Ns, Qsa, Nsa, actions_num):
+def updateQN(s:int, a:int, v:float, Ns, Qsa, Nsa, actions_num):
     Nsa[s][a] += 1
     # Qsa[s][a] += (v- Qsa[s][a])/Nsa[s][a]
     # Qsa[s][a] += (r+v- Qsa[s][a])/Nsa[s][a]   
@@ -93,7 +93,7 @@ def updateQN(s:int, a:int, r:float, v:float, Ns, Qsa, Nsa, actions_num):
     # b = (v-Qsa[s][a])/Nsa[s][a]
     
     # Qsa[s][a] += (r/Nsa[s][a]+v-Qsa[s][a])/Nsa[s][a]
-    Qsa[s][a] += r+(v- Qsa[s][a])/Nsa[s][a]
+    Qsa[s][a] += (v- Qsa[s][a])/Nsa[s][a]
     # Qsa[s][a] = np.tanh(Qsa[s][a])
     Ns[s] += 1
 
@@ -254,7 +254,7 @@ class MCTS():
         a = selectAction(s, state.availables(), self._c_puct, self.Ps, self.Ns, self.Qsa, self.Nsa)
         
         _, r = state.step(a)
-        # r = (state.game.score-state.markscore)*state.game.exrewardRate
+        r = (state.game.score-state.markscore)*state.game.exrewardRate
         # print(state.markscore, state.game.score, state.game.exrewardRate, r)
         self.depth += 1        
         if state.terminal(): 
@@ -268,10 +268,10 @@ class MCTS():
             v = self.search(state)
             # r = np.tanh(r)
 
-            
+        v += r
         # 更新 Q 值 和 访问次数
         # q[s,a] += (r+v[s+1]-q[s,a])/Nsa[s,a]
-        updateQN(s, a, r, v, self.Ns, self.Qsa, self.Nsa, state.actions_num)
+        updateQN(s, a, v, self.Ns, self.Qsa, self.Nsa, state.actions_num)
 
         return v
 
