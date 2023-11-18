@@ -259,7 +259,7 @@ class MCTS():
         self.depth += 1        
         if state.terminal(): 
             # self.Es[s] = -1
-            v = -state.game.getTerminalEmptyCount()
+            v = -1 + np.min(self.Qsa[s])
             # r = 0
         else:
             # 现实奖励
