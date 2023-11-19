@@ -257,13 +257,13 @@ class MCTS():
         a = selectAction(s, state.availables(), self._c_puct, self.Ps, self.Ns, self.Qsa, self.Nsa)
         
         _, r = state.step(a)
-        r = (state.game.score-state.markscore)*state.game.exrewardRate
+        # r = (state.game.score-state.markscore)*state.game.exrewardRate
         # print(state.markscore, state.game.score, state.game.exrewardRate, r)
         self.depth += 1        
         if state.terminal(): 
             # self.Es[s] = -1
             # v = -1 + np.min(self.Qsa[s])
-            v = -state.game.getTerminalEmptyCount()
+            v = -1
             # v = -1
             r = -1
         else:

@@ -602,7 +602,7 @@ class Agent():
                 reward += self.downcount*0.1   
                 
             emptyCount = self.getEmptyCount()   
-            reward -= (emptyCount - self.emptyCount) 
+            reward -= (emptyCount - self.emptyCount)*0.1  
             self.emptyCount  = emptyCount
             
             self.score += reward    # 一个方块1点 
