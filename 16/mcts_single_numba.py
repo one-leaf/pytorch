@@ -263,8 +263,8 @@ class MCTS():
         if state.terminal(): 
             # self.Es[s] = -1
             # v = -1 + np.min(self.Qsa[s])
-            # v = -state.game.getTerminalEmptyCount()
-            v = -1
+            v = -state.game.getTerminalEmptyCount()
+            # v = -1
             r = -1
         else:
             # 现实奖励
