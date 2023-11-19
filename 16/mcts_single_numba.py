@@ -259,8 +259,10 @@ class MCTS():
         self.depth += 1        
         if state.terminal(): 
             # self.Es[s] = -1
-            v = -1 + np.min(self.Qsa[s])
-            # r = 0
+            # v = -1 + np.min(self.Qsa[s])
+            # v = -state.game.getTerminalEmptyCount()
+            v = -1
+            r = -1
         else:
             # 现实奖励
             # 按照DQN，  q[s,a] += 0.1*(r+ 0.99*(max(q[s+1])-q[s,a])
@@ -269,7 +271,7 @@ class MCTS():
             # r = np.tanh(r)
         
         # 更新 Q 值 和 访问次数      
-        v = r + v 
+        v = r*0.01 + v*0.99 
         updateQN(s, a, v, self.Ns, self.Qsa, self.Nsa, state.actions_num)
 
         # print(v, self.Qsa[s][a], v-self.Qsa[s][a])
