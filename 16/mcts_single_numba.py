@@ -93,7 +93,10 @@ def updateQN(s:int, a:int, v:float, Ns, Qsa, Nsa, actions_num):
     # b = (v-Qsa[s][a])/Nsa[s][a]
     
     # Qsa[s][a] += (r/Nsa[s][a]+v-Qsa[s][a])/Nsa[s][a]
-    Qsa[s][a] += (v- Qsa[s][a])/Nsa[s][a]
+    # Qsa[s][a] += (v- Qsa[s][a])/Nsa[s][a]
+    delta =  (v - Qsa[s][a])/Nsa[s][a]
+    Qsa[s][a] += delta
+    
     # Qsa[s][a] = np.tanh(Qsa[s][a])
     Ns[s] += 1
 
@@ -271,7 +274,8 @@ class MCTS():
             # r = np.tanh(r)
         
         # 更新 Q 值 和 访问次数      
-        v = r*0.01 + v*0.99 
+        # v = r*0.01 + v*0.99 
+        v += r
         updateQN(s, a, v, self.Ns, self.Qsa, self.Nsa, state.actions_num)
 
         # print(v, self.Qsa[s][a], v-self.Qsa[s][a])
@@ -318,7 +322,10 @@ class MCTSPlayer(object):
 
 
             if game.is_replay:
-                idx = max_qs_idx
+                if var_qs>0.01:
+                    idx = max_qs_idx
+                else:
+                    idx = np.random.choice(range(ACTONS_LEN), p=act_probs)
             elif var_qs>0.01:
                 if max_qs_idx ==  max_ps_idx:
                     idx = max_qs_idx
