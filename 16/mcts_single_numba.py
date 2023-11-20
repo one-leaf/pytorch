@@ -265,7 +265,7 @@ class MCTS():
             # v = -1 + np.min(self.Qsa[s])
             v = -1
             # v = -1
-            # r = -1
+            r = 0
         else:
             # 现实奖励
             # 按照DQN，  q[s,a] += 0.1*(r+ 0.99*(max(q[s+1])-q[s,a])
