@@ -375,7 +375,8 @@ class Train():
                     result["exrewardN"][exrewardRateKey][1] += 1
                     _q = result["exrewardRate"][exrewardRateKey]
                     result["exrewardRate"][exrewardRateKey] = round(_q+(agent.piececount-_q)/100, 2)
-                    if exrewardRateKey == max(result["exrewardRate"], key=result["exrewardRate"].get):
+                    avg_exrewardRate = np.average([result["exrewardRate"][k] for k in result["exrewardRate"]])
+                    if result["exrewardRate"][exrewardRateKey]>avg_exrewardRate:
                         result["exrewardN"][exrewardRateKey][0] += 1
 
                 if result["total"]["pacc"]==0:
