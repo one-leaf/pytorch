@@ -283,7 +283,7 @@ class Train():
             piececount = agent.piececount
 
             # 如果游戏结束
-            if agent.terminal or (agent.is_replay and agent.piececount>2*result["total"]["avg_piececount"]):
+            if agent.terminal or (agent.is_replay and agent.piececount>5*result["total"]["avg_piececount"]):
                 data["score"] = agent.score
                 data["piece_count"] = agent.piececount
                 data["piece_height"] = agent.pieceheight
@@ -356,10 +356,11 @@ class Train():
                 ns = float(np.average(ns))
 
                 # if agent.exreward:
-                result["exrewardN"][exrewardRateKey] += 1
-                _q = result["exrewardRate"][exrewardRateKey]
-                _n = result["exrewardN"][exrewardRateKey]
-                result["exrewardRate"][exrewardRateKey] = round(_q+(agent.piececount-_q)/10, 2)
+                if agent.is_replay:
+                    result["exrewardN"][exrewardRateKey] += 1
+                    _q = result["exrewardRate"][exrewardRateKey]
+                    _n = result["exrewardN"][exrewardRateKey]
+                    result["exrewardRate"][exrewardRateKey] = round(_q+(agent.piececount-_q)/100, 2)
 
                 if result["total"]["pacc"]==0:
                     result["total"]["pacc"] = pacc
