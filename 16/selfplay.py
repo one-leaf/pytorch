@@ -114,7 +114,11 @@ class Train():
             result["exrewardN"]={}
             for i in range(11):
                 result["exrewardRate"][str(round(i/10,1))]=50
-                result["exrewardN"][str(round(i/10,1))]=0
+                # 记录输赢次数 [wins, trials]
+                result["exrewardN"][str(round(i/10,1))]=[0,0]
+        if not isinstance(result["exrewardN"]["0.0"], list):
+            for i in range(11):
+                result["exrewardN"][str(round(i/10,1))]=[0,0]                
         return result
 
     def get_equi_data(self, states, mcts_probs, values, scores):
@@ -224,6 +228,7 @@ class Train():
         agent.show_mcts_process= True
         agent.id = 0
         agent.exreward = True #random.random()>0.5
+        # agent.is_replay=True
         exrewardRateKey="0.0"
         if agent.exreward:
             # v,p = [], np.ones((len(result["exrewardRate"])))
@@ -233,7 +238,17 @@ class Train():
             # exrewardRateKey=np.random.choice(v, p=p/np.sum(p))
             # if random.random()>1/((sum(result["exrewardN"].values())+1)**0.5):
             if agent.is_replay:
-                exrewardRateKey = random.choice(list(result["exrewardRate"].keys()))
+                # Thompson Sampling
+                exrewardRateKeys = list(result["exrewardRate"].keys())
+                len_exrewardRate = len(exrewardRateKeys)
+                pbeta = [0 for _ in range(len_exrewardRate)]
+                for i in range(0, len_exrewardRate):
+                    win,trial = result["exrewardN"][exrewardRateKeys[i]]
+                    pbeta[i] = np.random.beta(win+1, trial-win+1)
+                choice = np.argmax(pbeta)
+                exrewardRateKey = exrewardRateKeys[choice]
+                
+                # exrewardRateKey = random.choice(list(result["exrewardRate"].keys()))
             else:
                 exrewardRateKey = max(result["exrewardRate"], key=result["exrewardRate"].get)
             agent.exrewardRate = float(exrewardRateKey)    
@@ -357,9 +372,10 @@ class Train():
 
                 # if agent.exreward:
                 if agent.is_replay:
-                    result["exrewardN"][exrewardRateKey] += 1
+                    result["exrewardN"][exrewardRateKey][1] += 1
+                    if exrewardRateKey == max(result["exrewardRate"], key=result["exrewardRate"].get):
+                        result["exrewardN"][exrewardRateKey][0] += 1
                     _q = result["exrewardRate"][exrewardRateKey]
-                    _n = result["exrewardN"][exrewardRateKey]
                     result["exrewardRate"][exrewardRateKey] = round(_q+(agent.piececount-_q)/100, 2)
 
                 if result["total"]["pacc"]==0:
