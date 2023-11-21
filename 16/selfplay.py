@@ -373,10 +373,10 @@ class Train():
                 # if agent.exreward:
                 if agent.is_replay:
                     result["exrewardN"][exrewardRateKey][1] += 1
-                    if exrewardRateKey == max(result["exrewardRate"], key=result["exrewardRate"].get):
-                        result["exrewardN"][exrewardRateKey][0] += 1
                     _q = result["exrewardRate"][exrewardRateKey]
                     result["exrewardRate"][exrewardRateKey] = round(_q+(agent.piececount-_q)/100, 2)
+                    if exrewardRateKey == max(result["exrewardRate"], key=result["exrewardRate"].get):
+                        result["exrewardN"][exrewardRateKey][0] += 1
 
                 if result["total"]["pacc"]==0:
                     result["total"]["pacc"] = pacc
