@@ -595,11 +595,11 @@ class Agent():
             self.need_update_status=True
             lines = self.removecompleteline(self.board)
             self.removedlines += lines
-            reward = lines 
+            reward = lines*0.1 
             
             # 鼓励垂直下落
             if lines>0:
-                reward += self.downcount*0.1   
+                reward += self.downcount*0.01   
                 
             emptyCount = self.getEmptyCount()   
             reward -= (emptyCount - self.emptyCount)*0.1  
