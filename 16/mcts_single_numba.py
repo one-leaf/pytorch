@@ -190,7 +190,7 @@ class MCTS():
         self.depth:int = 0
         self.simulation_count = 0
         state.mark()
-        for n in range(self._n_playout*2):
+        for n in range(self._n_playout):
             self.depth = 0
             self.simulation_count = n+1
             
@@ -203,7 +203,7 @@ class MCTS():
             self.search(state_) 
             
             if self.depth>self.max_depth: self.max_depth = self.depth
-            if n >= self._n_playout//2-1 and state_.game.state==1 and checkNeedExit(s, self.Nsa): break
+            # if n >= self._n_playout//2-1 and state_.game.state==1 and checkNeedExit(s, self.Nsa): break
         
         probs = getprobsFromNsa(s, temp, state.availables(), state.actions_num, self.Nsa)                       
         
