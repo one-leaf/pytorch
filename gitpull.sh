@@ -22,7 +22,7 @@ function gitpush()
             break
         fi
 
-        git config --global --unset http.https://github.com.proxy
+        # git config --global --unset http.https://github.com.proxy
 
     done
     echo `date -R`
