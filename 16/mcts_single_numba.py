@@ -320,22 +320,13 @@ class MCTSPlayer(object):
             # print(var_qs)
             max_ps_idx = np.argmax(act_ps)
 
-
-            if game.is_replay:
-                if var_qs>0.01:
+            if var_qs>0.01:
+                if game.is_replay:
                     idx = max_qs_idx
                 else:
-                    idx = np.random.choice(range(ACTONS_LEN), p=act_probs)
-            elif var_qs>0.01:
-                if max_qs_idx ==  max_ps_idx:
-                    idx = max_qs_idx
-                elif random.random()<0.8:
                     idx = max_ps_idx
-                else:
-                    idx = np.random.choice(range(ACTONS_LEN), p=act_probs)
             else:
-                idx = np.random.choice(range(ACTONS_LEN), p=act_probs)
-
+                idx = np.random.choice(range(ACTONS_LEN), p=act_probs)    
 
             # if max_qs_idx ==  max_ps_idx:
             #     idx = max_qs_idx
