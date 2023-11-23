@@ -426,14 +426,16 @@ class Agent():
         self.set_availables()
         # 显示mcts中间过程
         self.show_mcts_process = False
-        # 按下降的次数
+        # 记录下降的次数
         self.downcount=0
+        # 继续上一个方块的状态
+        self.last_reward = False
         # 盘面的状态
         self.need_update_status=True
         self.status = np.zeros((3, boardheight, boardwidth), dtype=np.int8)
         self.set_status()
         # key
-        self.set_key()   
+        self.set_key()
 
     def getpiece(self, shape=None):
         if shape==None:
@@ -600,6 +602,10 @@ class Agent():
             # 鼓励垂直下落
             if lines>0:
                 reward += self.downcount*0.01   
+            
+            if self.last_reward:
+                reward += 0.1            
+            self.last_reward = lines>0
                 
             emptyCount = self.getEmptyCount()   
             reward -= (emptyCount - self.emptyCount)*0.1  
