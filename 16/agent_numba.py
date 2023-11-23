@@ -539,7 +539,7 @@ class Agent():
         # if not self.validposition(self.board, self.fallpiece, ay = 1):
         #     acts.remove(KEY_DOWN)
 
-        if self.fallpiece['shape']=="o":
+        if self.fallpiece['shape']=="o" or (self.fallpiece['shape']=="i" and self.piecesteps==0):
             self.availables[KEY_ROTATION]=0
             # acts.remove(KEY_ROTATION)
         else:            
