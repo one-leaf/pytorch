@@ -322,10 +322,9 @@ class Train():
                 steptime = paytime/agent.steps
                 print("step pay time:", steptime)
                 result["total"]["avg_score_ex"] = result["total"]["avg_score_ex"]*0.99 + game_score*0.01 
-                if game_score>0:
-                    result["total"]["avg_reward_piececount"] = result["total"]["avg_reward_piececount"]*0.999 + (agent.piececount/game_score)*0.001
-                else:
-                    result["total"]["avg_reward_piececount"] = result["total"]["avg_reward_piececount"]*1.001
+
+                result["total"]["avg_reward_piececount"] += (game_score/agent.piececount - result["total"]["avg_reward_piececount"])/1000
+
                 mark_score = result["total"]["avg_score_ex"]
 
                 # 速度控制在消耗50行
@@ -342,7 +341,7 @@ class Train():
                 if result["total"]["step_time"]==0:
                     result["total"]["step_time"] = steptime
                 else:
-                    result["total"]["step_time"] = result["total"]["step_time"]*0.99 + steptime*0.01
+                    result["total"]["step_time"] += (steptime-result["total"]["step_time"])/100
             
                 if game_score>result["best"]["reward"]:
                     result["best"]["reward"] = game_score
@@ -353,12 +352,12 @@ class Train():
                 if result["total"]["reward"]==0:
                     result["total"]["reward"] = game_score
                 else:
-                    result["total"]["reward"] = result["total"]["reward"]*0.99 + game_score*0.01
+                    result["total"]["reward"] += (game_score-result["total"]["reward"])/100
 
                 if result["total"]["piececount"]==0:
                     result["total"]["piececount"] = agent.piececount
                 else:
-                    result["total"]["piececount"] = result["total"]["piececount"]*0.99 + agent.piececount*0.01
+                    result["total"]["piececount"] += (agent.piececount-result["total"]["piececount"])/100
 
                 # 计算 acc 看有没有收敛
                 pacc = []
