@@ -53,10 +53,12 @@ def selectAction(s:int, availables, _c_puct:float, Ps, Ns, Qsa, Nsa):
     # njit 4.298482243524901e-05 S
     if np.min(Nsa[s][availables==1])==0:
         return np.argmax(Nsa[s]+availables == 1)
-    q = Qsa[s]+ _c_puct * availables * Ps[s] * sqrt(Ns[s]) / (Nsa[s]+1E-8)
-    # max_q_idx = np.nanargmax(np.where(q!=0, q, np.nan))     
+    q = Qsa[s]+ _c_puct * availables * Ps[s] * sqrt(Ns[s]) / Nsa[s]
+    
+    # 选择最大q的
     nz_idx = np.nonzero(availables)
     max_q_idx = nz_idx[0][np.argmax(q[nz_idx])]
+
     return max_q_idx
         
     # EPS = 1e-8
