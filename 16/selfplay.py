@@ -221,9 +221,11 @@ class Train():
             if not isinstance(his_pieces[0],str): his_pieces=[]                
             print([p for p in his_pieces])
 
+            # 有历史记录的，按概率走，调整概率
             agent = Agent(isRandomNextPiece=True, nextPiecesList=his_pieces)
             agent.is_replay = False
         else:
+            # 新局按Q值走，探索
             agent = Agent(isRandomNextPiece=True, )
             agent.is_replay = True
 
