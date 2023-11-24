@@ -297,7 +297,7 @@ class Train():
             time.sleep(0.1)
 
             # 这里的奖励是消除的行数
-            if reward > 0:
+            if agent.last_reward > 0:
                 repeat_count = 40
                 # print(_step["state"][0])
                 # print(_step["state"][-1])
