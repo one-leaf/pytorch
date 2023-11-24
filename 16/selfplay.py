@@ -222,13 +222,14 @@ class Train():
             print([p for p in his_pieces])
 
             agent = Agent(isRandomNextPiece=True, nextPiecesList=his_pieces)
+            agent.is_replay = False
         else:
             agent = Agent(isRandomNextPiece=True, )
+            agent.is_replay = True
 
         agent.show_mcts_process= True
         agent.id = 0
         agent.exreward = True #random.random()>0.5
-        # agent.is_replay=True
         exrewardRateKey="0.0"
         if agent.exreward:
             # v,p = [], np.ones((len(result["exrewardRate"])))
@@ -238,6 +239,7 @@ class Train():
             # exrewardRateKey=np.random.choice(v, p=p/np.sum(p))
             # if random.random()>1/((sum(result["exrewardN"].values())+1)**0.5):
             if agent.is_replay:
+                exrewardRateKey = random.choice(list(result["exrewardRate"].keys()))
                 # Thompson Sampling
                 # exrewardRateKeys = list(result["exrewardRate"].keys())
                 # len_exrewardRate = len(exrewardRateKeys)
@@ -248,7 +250,6 @@ class Train():
                 # choice = np.argmax(pbeta)
                 # exrewardRateKey = exrewardRateKeys[choice]
                 
-                exrewardRateKey = random.choice(list(result["exrewardRate"].keys()))
             else:
                 # Thompson Sampling
                 exrewardRateKeys = list(result["exrewardRate"].keys())
