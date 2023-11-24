@@ -597,16 +597,16 @@ class Agent():
             self.need_update_status=True
             lines = self.removecompleteline(self.board)
             self.removedlines += lines
-            reward = lines 
+            reward = lines*0.1 
             
             # 鼓励垂直下落和连续多次清行
             if lines>0:
-                reward += self.downcount*0.1               
+                reward += self.downcount*0.01               
                 if self.last_reward: reward += 0.1            
             self.last_reward = lines>0
                 
             emptyCount = self.getEmptyCount()   
-            reward -= (emptyCount - self.emptyCount)*0.1  
+            reward -= (emptyCount - self.emptyCount)*0.01  
             self.emptyCount  = emptyCount
             
             self.score += reward    # 一个方块1点 
