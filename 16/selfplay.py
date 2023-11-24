@@ -183,8 +183,8 @@ class Train():
                         'step:', agent.steps, "step time:", round((time.time()-start_time)/i,3),'avg_score:', result["total"]["avg_score"])            
 
                 if agent.terminal:            
-                    result["total"]["avg_score"] = result["total"]["avg_score"]*0.999 + agent.removedlines*0.001
-                    result["total"]["avg_piececount"] = result["total"]["avg_piececount"]*0.9999 + agent.piececount*0.0001
+                    result["total"]["avg_score"] += (agent.removedlines-result["total"]["avg_score"])/1000
+                    result["total"]["avg_piececount"] += (agent.piececount-result["total"]["avg_piececount"])/1000
                     result["lastupdate"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                     break
 
