@@ -386,7 +386,7 @@ class Train():
                 if agent.is_replay:
                     result["exrewardN"][exrewardRateKey][1] += 1
                     _q = result["exrewardRate"][exrewardRateKey]
-                    result["exrewardRate"][exrewardRateKey] = round(_q+(agent.piececount-_q)/10, 2)
+                    result["exrewardRate"][exrewardRateKey] = round(_q+(agent.removedlines-_q)/10, 2)
                     avg_exrewardRate = np.average([result["exrewardRate"][k] for k in result["exrewardRate"]])
                     if result["exrewardRate"][exrewardRateKey]>avg_exrewardRate:
                         result["exrewardN"][exrewardRateKey][0] += 1
