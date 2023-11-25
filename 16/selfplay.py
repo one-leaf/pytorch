@@ -240,8 +240,8 @@ class Train():
             #     p[i]=result["exrewardRate"][k] if result["exrewardRate"][k]>0 else 0.01
             # exrewardRateKey=np.random.choice(v, p=p/np.sum(p))
             # if random.random()>1/((sum(result["exrewardN"].values())+1)**0.5):
-            if agent.is_replay:
-                exrewardRateKey = random.choice(list(result["exrewardRate"].keys()))
+            # if agent.is_replay:
+                # exrewardRateKey = random.choice(list(result["exrewardRate"].keys()))
                 # Thompson Sampling
                 # exrewardRateKeys = list(result["exrewardRate"].keys())
                 # len_exrewardRate = len(exrewardRateKeys)
@@ -252,16 +252,16 @@ class Train():
                 # choice = np.argmax(pbeta)
                 # exrewardRateKey = exrewardRateKeys[choice]
                 
-            else:
-                # Thompson Sampling
-                exrewardRateKeys = list(result["exrewardRate"].keys())
-                len_exrewardRate = len(exrewardRateKeys)
-                pbeta = [0 for _ in range(len_exrewardRate)]
-                for i in range(0, len_exrewardRate):
-                    win,trial = result["exrewardN"][exrewardRateKeys[i]]
-                    pbeta[i] = np.random.beta(win+1, trial-win+1)
-                choice = np.argmax(pbeta)
-                exrewardRateKey = exrewardRateKeys[choice]
+            # else:
+            # Thompson Sampling
+            exrewardRateKeys = list(result["exrewardRate"].keys())
+            len_exrewardRate = len(exrewardRateKeys)
+            pbeta = [0 for _ in range(len_exrewardRate)]
+            for i in range(0, len_exrewardRate):
+                win,trial = result["exrewardN"][exrewardRateKeys[i]]
+                pbeta[i] = np.random.beta(win+1, trial-win+1)
+            choice = np.argmax(pbeta)
+            exrewardRateKey = exrewardRateKeys[choice]
                 
                 # exrewardRateKey = max(result["exrewardRate"], key=result["exrewardRate"].get)
             agent.exrewardRate = float(exrewardRateKey)    
