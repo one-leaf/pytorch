@@ -676,7 +676,7 @@ class Agent():
                     line=line+str(board[y][x])+" "
             print(line)
         print(" "+" -"*boardwidth)
-        print("score:", round(self.score,2), "lines:",self.removedlines,"piececount:", self.piececount, "emptyCount:", self.emptyCount, "actions:" ,self.piece_actions)
+        print("exRate:", self.exrewardRate, "score:", round(self.score,2), "lines:",self.removedlines,"piececount:", self.piececount, "emptyCount:", self.emptyCount, "actions:" ,self.piece_actions)
 
 
     def getTerminalEmptyCount(self):
