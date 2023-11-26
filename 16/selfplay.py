@@ -388,7 +388,7 @@ class Train():
                     _q = result["exrewardRate"][exrewardRateKey]
                     result["exrewardRate"][exrewardRateKey] = round(_q+(agent.removedlines-_q)/10, 2)
                     avg_exrewardRate = np.average([result["exrewardRate"][k] for k in result["exrewardRate"]])
-                    if result["exrewardRate"][exrewardRateKey]>avg_exrewardRate:
+                    if agent.removedlines>avg_exrewardRate:
                         result["exrewardN"][exrewardRateKey][0] += 1
 
                 if result["total"]["pacc"]==0:
