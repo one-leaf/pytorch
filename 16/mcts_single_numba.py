@@ -324,8 +324,8 @@ class MCTSPlayer(object):
 
             if var_qs>0.01:
                 if game.is_replay:
-                    idx = np.random.choice(range(ACTONS_LEN), p=act_probs)
-                    # idx = max_qs_idx
+                    # idx = np.random.choice(range(ACTONS_LEN), p=act_probs)
+                    idx = max_qs_idx
                 else:
                     idx = max_ps_idx
             else:
