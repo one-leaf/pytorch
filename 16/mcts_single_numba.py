@@ -200,7 +200,6 @@ class MCTS():
             state_:State =state.clone()
             # self.c += 1
             # self.t += time.time()-t 
-
             
             self.search(state_) 
             
@@ -227,6 +226,7 @@ class MCTS():
             print(time.strftime('%m-%d %H:%M:%S',time.localtime(time.time())), game.steps, game.fallpiece["shape"], \
                   "ns:", str(ns).rjust(4), "/", str(self.simulation_count).ljust(4), "depth:", str(self.max_depth).ljust(3), \
                 #   "\tQ:", round(v,2), "-->",round(qs[max_p],2), '/', round(qs[max_q],2), \
+                  "\tV:", round(v  ,2), \
                   "\tP:", round(ps[max_p],2), "-->", round(probs[max_p],2),'/', round(probs[max_q],2), \
                   "\tQs:", qs, "var", np.var(qs[nz_idx]))
         # 动作数，概率，每个动作的Q，原始概率，当前局面的v，当前局面的总探索次数
@@ -276,6 +276,7 @@ class MCTS():
             v = self.search(state)
             # r = np.tanh(r)
         
+        r *= state.game.exrewardRate 
         # 更新 Q 值 和 访问次数      
         v = r + v*0.99 
         # v += r

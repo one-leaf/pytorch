@@ -254,14 +254,20 @@ class Train():
                 
             # else:
             # Thompson Sampling
-            exrewardRateKeys = list(result["exrewardRate"].keys())
-            len_exrewardRate = len(exrewardRateKeys)
-            pbeta = [0 for _ in range(len_exrewardRate)]
-            for i in range(0, len_exrewardRate):
-                win,trial = result["exrewardN"][exrewardRateKeys[i]]
-                pbeta[i] = np.random.beta(win+1, trial-win+1)
-            choice = np.argmax(pbeta)
-            exrewardRateKey = exrewardRateKeys[choice]
+            if random.random()>0.1:
+                exrewardRateKey = "0.1"
+            else:
+                exrewardRateKeys = list(result["exrewardRate"].keys())
+                len_exrewardRate = len(exrewardRateKeys)
+                exrewardRateKey = exrewardRateKeys[np.random.randint(0, len_exrewardRate)]
+            # exrewardRateKeys = list(result["exrewardRate"].keys())
+            # len_exrewardRate = len(exrewardRateKeys)
+            # pbeta = [0 for _ in range(len_exrewardRate)]
+            # for i in range(0, len_exrewardRate):
+            #     win,trial = result["exrewardN"][exrewardRateKeys[i]]
+            #     pbeta[i] = np.random.beta(win+1, trial-win+1)
+            # choice = np.argmax(pbeta)
+            # exrewardRateKey = exrewardRateKeys[choice]
                 
                 # exrewardRateKey = max(result["exrewardRate"], key=result["exrewardRate"].get)
             agent.exrewardRate = float(exrewardRateKey)    
