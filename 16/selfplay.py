@@ -254,12 +254,15 @@ class Train():
                 
             # else:
             # Thompson Sampling
-            if random.random()>0.1:
+            if random.random()>0.2:
                 exrewardRateKey = "0.1"
-            else:
+            elif random.random()>0.5:
                 exrewardRateKeys = list(result["exrewardRate"].keys())
                 len_exrewardRate = len(exrewardRateKeys)
                 exrewardRateKey = exrewardRateKeys[np.random.randint(0, len_exrewardRate)]
+            else:
+                exrewardRateKey = max(result["exrewardRate"], key=result["exrewardRate"].get)
+                  
             # exrewardRateKeys = list(result["exrewardRate"].keys())
             # len_exrewardRate = len(exrewardRateKeys)
             # pbeta = [0 for _ in range(len_exrewardRate)]
