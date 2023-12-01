@@ -255,7 +255,7 @@ class Train():
             # else:
             # Thompson Sampling
             if random.random()>0.2:
-                exrewardRateKey = "0.2"
+                exrewardRateKey = "0.1"
             elif random.random()>0.5:
                 exrewardRateKeys = list(result["exrewardRate"].keys())
                 len_exrewardRate = len(exrewardRateKeys)
