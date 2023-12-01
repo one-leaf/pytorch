@@ -576,7 +576,10 @@ class Agent():
             # self.fallpiece['y'] += n
             # self.downcount += n
             while self.validposition(self.board, self.fallpiece, ay=1):
-                self.downcount += 1
+                if self.downcount == 0:
+                    self.downcount = 1
+                else:
+                    self.downcount += 1/self.downcount
                 self.fallpiece['y'] += 1                          
 
         isFalling=True
@@ -602,7 +605,8 @@ class Agent():
             # 鼓励垂直下落和连续多次清行
             if lines>0:
                 reward += self.downcount*0.1               
-                if self.last_reward: reward += 0.1            
+                if self.last_reward: reward += 0.1 
+                self.downcount = 0           
             self.last_reward = lines>0
                 
             emptyCount = self.getEmptyCount()   
