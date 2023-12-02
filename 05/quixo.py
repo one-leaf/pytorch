@@ -76,14 +76,19 @@ def evaluate(board, curr_player_id):
     
     return 1
 
-# 获得可以用的坐标
+# 获得可以用的坐标,返回 row col forward
 @njit
 def get_availables_actions(board, curr_player_id):
     availables_actions=[]
     for row in range(height):
         for col in range(width):
             if (row == 0 or col==0 or row==4 or col==4) and board[row, col] != -curr_player_id:
-                availables_actions.append((row, col))
+                for forward in range(forwards_len):
+                    if row == 0 and forward == 0: continue  #w
+                    if row == 4 and forward == 1: continue  #s
+                    if col == 0 and forward == 2: continue  #a
+                    if col == 4 and forward == 3: continue  #d
+                    availables_actions.append((row, col, forward))
     return availables_actions
             
 # 移动
@@ -113,7 +118,7 @@ def step(board, curr_player_id, row, col, forward):
 # 玩家行动
 def player_move(board, curr_player_id):
     availables_actions = get_availables_actions(board, curr_player_id)
-    row=col=0
+    row=col=forward=-1
     while True:
         row = input('请输入行号(1-5):')
         if not row.isdigit():
@@ -127,23 +132,24 @@ def player_move(board, curr_player_id):
             continue
         col = int(col) -1            
         
-        if (row,col) not in availables_actions:            
+        if not any(row==_row and col==_col for (_row,_col,_forward) in availables_actions):            
             print('无效的位置，请重新输入。')
             continue
         else:
             break
         
     while True:
-        forward = input('请输入需要移动的方向(w|a|s|d):').strip().lower()
-        if forward not in forwards:
+        forward_str = input('请输入需要移动的方向(w|a|s|d):').strip().lower()
+        forward = forwards.index(forward_str)
+        if (row,col,forward) not in availables_actions:
             print('无效的方向，请重新输入。')
             continue
         else:
             break
     print("玩家:", players[curr_player_id], '坐标:' ,(row+1, col+1), '方向：', forward)    
-    step(board, curr_player_id, row, col, forwards.index(forward))
+    step(board, curr_player_id, row, col, forward)
 
-# 最大值最小值算法
+# 最大值最小值算法,采用并行计算
 # 返回格式[row, col, forward, value]
 @njit(parallel=True)
 def minimax(board, depth, curr_player_id, maximizing_player, cache):      
@@ -157,8 +163,7 @@ def minimax(board, depth, curr_player_id, maximizing_player, cache):
         for i in range(100):
             availables_actions = get_availables_actions(board, temp_user_id)
             availables_actions_len = len(availables_actions)
-            row,col = availables_actions[np.random.randint(0, availables_actions_len)]
-            forward = np.random.randint(0, 4)
+            row,col,forward = availables_actions[np.random.randint(0, availables_actions_len)]
             step(board, temp_user_id, row, col, forward)
             if check_game_over(board, cache):
                 v = evaluate(board, -curr_player_id)*100
@@ -169,14 +174,13 @@ def minimax(board, depth, curr_player_id, maximizing_player, cache):
     
     availables_actions = get_availables_actions(board, curr_player_id)
     availables_actions_len = len(availables_actions)
-    acts = np.zeros((4, availables_actions_len), dtype=np.int8)
+    acts = np.zeros((availables_actions_len), dtype=np.int8)
     
-    for i, (row, col) in enumerate(availables_actions):
-        for forward in range(4):      
-            new_board = board.copy()        
-            step(new_board, curr_player_id, row, col, forward)
-            result = minimax(new_board, depth-1, -curr_player_id, not maximizing_player, cache)
-            acts[forward, i] = result[3]    
+    for i, (row, col, forward) in enumerate(availables_actions):
+        new_board = board.copy()        
+        step(new_board, curr_player_id, row, col, forward)
+        result = minimax(new_board, depth-1, -curr_player_id, not maximizing_player, cache)
+        acts[i] = result[3]    
         
     if maximizing_player:
         vaule = np.max(acts)
@@ -184,7 +188,7 @@ def minimax(board, depth, curr_player_id, maximizing_player, cache):
         vaule = np.min(acts)
         
     p = np.where(acts==vaule)
-    (best_row, best_col), best_forward = availables_actions[p[1][0]], p[0][0]   
+    best_row, best_col, best_forward = availables_actions[p[0][0]]
    
     return np.array([best_row, best_col, best_forward, vaule], dtype=np.int32)
 
