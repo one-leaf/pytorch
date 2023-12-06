@@ -323,14 +323,18 @@ class MCTSPlayer(object):
             max_ps_idx = np.argmax(act_ps)
 
             if var_qs>0.01:
-                if game.is_replay:
-                    p = 0.75
-                    dirichlet = np.random.dirichlet(2 * np.ones(len(act_probs)))
-                    idx = np.random.choice(range(ACTONS_LEN), p=p*act_probs + (1.0-p)*dirichlet)                    
-                    # # idx = np.random.choice(range(ACTONS_LEN), p=act_probs)
-                    # idx = max_qs_idx
-                else:
-                    idx = max_ps_idx
+                p = 0.75
+                dirichlet = np.random.dirichlet(2 * np.ones(len(act_probs)))
+                idx = np.random.choice(range(ACTONS_LEN), p=p*act_probs + (1.0-p)*dirichlet)                    
+
+                # if game.is_replay:
+                #     p = 0.75
+                #     dirichlet = np.random.dirichlet(2 * np.ones(len(act_probs)))
+                #     idx = np.random.choice(range(ACTONS_LEN), p=p*act_probs + (1.0-p)*dirichlet)                    
+                #     # # idx = np.random.choice(range(ACTONS_LEN), p=act_probs)
+                #     # idx = max_qs_idx
+                # else:
+                #     idx = max_ps_idx
             else:
                 idx = np.random.choice(range(ACTONS_LEN), p=act_probs)    
 
