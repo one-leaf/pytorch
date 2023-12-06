@@ -610,7 +610,7 @@ class Agent():
             self.last_reward = lines>0
                 
             emptyCount = self.getEmptyCount()   
-            reward -= (emptyCount - self.emptyCount)*0.1  
+            reward -= (emptyCount - self.emptyCount)*0.5  
             self.emptyCount  = emptyCount
             
             self.score += reward    # 一个方块1点 
