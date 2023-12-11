@@ -302,11 +302,11 @@ class Train():
             _, reward = agent.step(action)
 
             if qval > 1:
-                avg_qval += 1
+                avg_qval += (1-state_value)**2
             elif qval < -1:
-                avg_qval -= 1
+                avg_qval += (state_value-1)**2
             else:
-                avg_qval += qval
+                avg_qval += (qval-state_value)**2
 
             _step["piece_height"] = agent.pieceheight
             _step["reward"] = reward if reward>0 else 0
@@ -358,7 +358,7 @@ class Train():
                 alpha = 0.01
                 _v = avg_qval - result["total"]["avg_qval"]
                 result["total"]["avg_qval"] += alpha * _v
-                result["total"]["exrewardRate"] = (1 - alpha) * (result["total"]["exrewardRate"] + alpha * _v * _v)
+                result["total"]["exrewardRate"] = (1 - alpha) * (result["total"]["exrewardRate"] + alpha * avg_qval)
 
 
                 mark_score = result["total"]["avg_score_ex"]
