@@ -350,10 +350,16 @@ class Train():
                 result["total"]["avg_score_ex"] += (game_score-result["total"]["avg_score_ex"])/100
                 result["total"]["avg_reward_piececount"] += (game_score/agent.piececount - result["total"]["avg_reward_piececount"])/1000
                 
-                delta = avg_qval - result["total"]["avg_qval"]
-                result["total"]["avg_qval"] += delta/100
-                delta2 = avg_qval - result["total"]["avg_qval"]
-                result["total"]["exrewardRate"] += (delta * delta2-result["total"]["exrewardRate"])/100                
+                # delta = avg_qval - result["total"]["avg_qval"]
+                # result["total"]["avg_qval"] += delta/100
+                # delta2 = avg_qval - result["total"]["avg_qval"]
+                # result["total"]["exrewardRate"] += (delta * delta2-result["total"]["exrewardRate"])/100                
+                
+                alpha = 0.01
+                _v = avg_qval - result["total"]["avg_qval"]
+                result["total"]["avg_qval"] += alpha * _v
+                result["total"]["exrewardRate"] = (1 - alpha) * (result["total"]["exrewardRate"] + alpha * _v * _v)
+
 
                 mark_score = result["total"]["avg_score_ex"]
 
