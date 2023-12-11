@@ -347,10 +347,10 @@ class Train():
                 steptime = paytime/agent.steps
                 avg_qval = avg_qval/agent.piececount
                 print("step pay time:", steptime, "avg_qval:", avg_qval)
-                result["total"]["avg_score_ex"] = result["total"]["avg_score_ex"]*0.99 + game_score*0.01                 
+                result["total"]["avg_score_ex"] += (game_score-result["total"]["avg_score_ex"])/100
                 result["total"]["avg_reward_piececount"] += (game_score/agent.piececount - result["total"]["avg_reward_piececount"])/1000
                 
-                result["total"]["avg_qval"] = result["total"]["avg_qval"]*0.99 + avg_qval*0.01 
+                result["total"]["avg_qval"] += (avg_qval-result["total"]["avg_qval"])/100
                 if result["total"]["avg_qval"]>0.2:
                     result["total"]["exrewardRate"] -= 0.01
                 elif  result["total"]["avg_qval"]<-0.2:
