@@ -351,9 +351,9 @@ class Train():
                 result["total"]["avg_reward_piececount"] += (game_score/agent.piececount - result["total"]["avg_reward_piececount"])/1000
                 
                 result["total"]["avg_qval"] += (avg_qval-result["total"]["avg_qval"])/100
-                if result["total"]["avg_qval"]>0.2:
+                if avg_qval>result["total"]["avg_qval"]:
                     result["total"]["exrewardRate"] -= 0.01
-                elif  result["total"]["avg_qval"]<-0.2:
+                elif  avg_qval<result["total"]["avg_qval"]:
                     result["total"]["exrewardRate"] += 0.01
 
 
