@@ -98,7 +98,10 @@ class Train():
         if "avg_score" not in result["total"]:
             result["total"]["avg_score"]=0  
         if "avg_score_ex" not in result["total"]:
-            result["total"]["avg_score_ex"]=0                  
+            result["total"]["avg_score_ex"]=0  
+        if "avg_qval" not in result["total"]:
+            result["total"]["avg_qval"]=0  
+            
         if "piececount" not in result:
             result["piececount"]=[]
         if "exrewardRate" not in result:
@@ -158,7 +161,6 @@ class Train():
         # 开始游戏
         policy_value_net = PolicyValueNet(GAME_WIDTH, GAME_HEIGHT, GAME_ACTIONS_NUM, model_file=model_file)
         bestmodelfile = model_file+"_best"
-
         
         game_json = os.path.join(data_dir, "result.json")
   
@@ -283,6 +285,7 @@ class Train():
         print("exreward:", agent.exreward,"exrewardRate:", agent.exrewardRate ,"max_emptyCount:",max_emptyCount,"isRandomNextPiece:",agent.isRandomNextPiece,"limitstep:",agent.limitstep)
         piececount = agent.piececount
         mark_reward_piececount = -1
+        avg_qval=0
         for i in range(self.max_step_count):
             _step={"step":i, "curr_player":agent.id}
             _step["state"] = np.copy(agent.current_state())
@@ -294,6 +297,13 @@ class Train():
             action, qval, move_probs, state_value, max_qval, acc_ps, depth, ns = player.get_action(agent, agent.id, temp=1, avg_ns=result["total"]["ns"], avg_piececount=result["total"]["piececount"]) 
 
             _, reward = agent.step(action)
+
+            if qval>1:
+                avg_qval+=1
+            elif qval<-1:
+                avg_qval-=1
+            else:
+                avg_qval+=qval
 
             _step["piece_height"] = agent.pieceheight
             _step["reward"] = reward if reward>0 else 0
@@ -334,7 +344,7 @@ class Train():
                 steptime = paytime/agent.steps
                 print("step pay time:", steptime)
                 result["total"]["avg_score_ex"] = result["total"]["avg_score_ex"]*0.99 + game_score*0.01 
-
+                result["total"]["avg_qval"] = result["total"]["avg_qval"]*0.99 + (avg_qval/agent.piececount)*0.01 
                 result["total"]["avg_reward_piececount"] += (game_score/agent.piececount - result["total"]["avg_reward_piececount"])/1000
 
                 mark_score = result["total"]["avg_score_ex"]
@@ -517,9 +527,10 @@ class Train():
             mcts_probs.append(step["move_probs"])
             values.append(step["qval"])
             scores.append(step["acc_ps"])
-        
+                
         # print([round(v,2) for v in values])
         # print([round(s,2) for s in scores])
+        
         
         assert len(states)>0
         assert len(states)==len(values)
