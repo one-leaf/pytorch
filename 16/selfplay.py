@@ -101,7 +101,8 @@ class Train():
             result["total"]["avg_score_ex"]=0  
         if "avg_qval" not in result["total"]:
             result["total"]["avg_qval"]=0  
-            
+        if "exrewardRate" not in result["total"]:
+            result["total"]["exrewardRate"]=0  
         if "piececount" not in result:
             result["piececount"]=[]
         if "exrewardRate" not in result:
@@ -256,9 +257,11 @@ class Train():
                 
             # else:
             # Thompson Sampling
-            if random.random()>0.2:
+            if random.random()>0.2:                
+                exrewardRateKeys = list(result["exrewardRate"].keys())    
+                exrewardRateKey = min(exrewardRateKeys, key=lambda x:abs(float(x)-result["total"]["exrewardRate"]))
                 # exrewardRateKey = "0.1"
-                exrewardRateKey = max(result["exrewardRate"], key=result["exrewardRate"].get)
+                # exrewardRateKey = max(result["exrewardRate"], key=result["exrewardRate"].get)
             else:
             # elif random.random()>0.5:
                 exrewardRateKeys = list(result["exrewardRate"].keys())
@@ -343,9 +346,15 @@ class Train():
                 paytime = time.time()-start_time
                 steptime = paytime/agent.steps
                 print("step pay time:", steptime)
-                result["total"]["avg_score_ex"] = result["total"]["avg_score_ex"]*0.99 + game_score*0.01 
-                result["total"]["avg_qval"] = result["total"]["avg_qval"]*0.99 + (avg_qval/agent.piececount)*0.01 
+                result["total"]["avg_score_ex"] = result["total"]["avg_score_ex"]*0.99 + game_score*0.01                 
                 result["total"]["avg_reward_piececount"] += (game_score/agent.piececount - result["total"]["avg_reward_piececount"])/1000
+                
+                result["total"]["avg_qval"] = result["total"]["avg_qval"]*0.99 + (avg_qval/agent.piececount)*0.01 
+                if result["total"]["avg_qval"]>0.2:
+                    result["total"]["exrewardRate"] -= 0.01
+                elif  result["total"]["avg_qval"]<-0.2:
+                    result["total"]["exrewardRate"] += 0.01
+
 
                 mark_score = result["total"]["avg_score_ex"]
 
