@@ -301,12 +301,12 @@ class Train():
 
             _, reward = agent.step(action)
 
-            if qval>1:
-                avg_qval+=1
-            elif qval<-1:
-                avg_qval-=1
+            if qval > 1:
+                avg_qval += 1
+            elif qval < -1:
+                avg_qval -= 1
             else:
-                avg_qval+=qval
+                avg_qval += qval
 
             _step["piece_height"] = agent.pieceheight
             _step["reward"] = reward if reward>0 else 0
