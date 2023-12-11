@@ -266,9 +266,9 @@ class MCTS():
         if state.terminal(): 
             # self.Es[s] = -1
             # v = -1 + np.min(self.Qsa[s])
-            v = -4
+            v = -2
             # v = -1
-            r = 0
+            r = -2
         else:
             # 现实奖励
             # 按照DQN，  q[s,a] += 0.1*(r+ 0.99*(max(q[s+1])-q[s,a])
@@ -280,7 +280,7 @@ class MCTS():
         if r>1: r = 1
         if r<-1: r= -1
         # 更新 Q 值 和 访问次数      
-        v = r*0.5 + v*0.5 
+        v = r*state.game.exrewardRate*0.5 + v*(1-state.game.exrewardRate*0.5) 
         # v += r
         updateQN(s, a, v, self.Ns, self.Qsa, self.Nsa, state.actions_num)
 
