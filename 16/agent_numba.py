@@ -610,9 +610,9 @@ class Agent():
                 self.downcount = 0           
             self.last_reward = removedlines>0
                 
-            emptyCount = self.getEmptyCount()   
-            reward -= (emptyCount - self.emptyCount)*0.5  
-            self.emptyCount  = emptyCount
+            # emptyCount = self.getEmptyCount()   
+            # reward -= (emptyCount - self.emptyCount)*0.5  
+            # self.emptyCount  = emptyCount
             
             self.score += reward    # 一个方块1点 
             # self.pieceheight = self.getAvgHeight()  
