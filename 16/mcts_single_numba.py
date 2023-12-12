@@ -319,7 +319,8 @@ class MCTSPlayer(object):
             
             max_probs_idx = np.argmax(act_probs)    
             
-            nz_idx = np.nonzero(state.availables())
+            availables = state.availables()
+            nz_idx = np.nonzero(availables)
             max_qs_idx = nz_idx[0][np.argmax(act_qs[nz_idx])]
             var_qs = np.var(act_qs[nz_idx])
             # print(var_qs)
@@ -337,9 +338,16 @@ class MCTSPlayer(object):
             # else:
             #     idx = np.random.choice(range(ACTONS_LEN), p=act_probs)    
 
-            p = 0.75
-            dirichlet = np.random.dirichlet(2 * np.ones(len(act_probs)))
-            idx = np.random.choice(range(ACTONS_LEN), p=p*act_probs + (1.0-p)*dirichlet)                    
+            # 如果返回都是错，不用管NS，直接用QS随机
+            
+            if var_qs<0.01:
+                idx = np.random.choice(nz_idx[0])
+            else:                    
+                p = 0.75                
+                dirichlet = np.random.dirichlet(2 * np.ones(len(nz_idx[0])))
+                dirichlet_probs = np.zeros_like(act_probs, dtype=np.float64)
+                dirichlet_probs[nz_idx] = dirichlet
+                idx = np.random.choice(range(ACTONS_LEN), p=p*act_probs + (1.0-p)*dirichlet_probs)
 
 
 
