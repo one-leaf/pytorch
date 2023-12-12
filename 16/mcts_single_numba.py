@@ -215,7 +215,7 @@ class MCTS():
         max_p = np.argmax(ps)
         
         nz_idx = np.nonzero(state.availables())
-        max_q = nz_idx[0][np.argmax(qs[nz_idx])]
+        max_q_idx = nz_idx[0][np.argmax(qs[nz_idx])]
         
         # max_q = np.nanargmax(np.where(qs!=0, qs, np.nan))
         
@@ -226,8 +226,8 @@ class MCTS():
             print(time.strftime('%m-%d %H:%M:%S',time.localtime(time.time())), game.steps, game.fallpiece["shape"], \
                   "ns:", str(ns).rjust(4), "/", str(self.simulation_count).ljust(4), "depth:", str(self.max_depth).ljust(3), \
                 #   "\tQ:", round(v,2), "-->",round(qs[max_p],2), '/', round(qs[max_q],2), \
-                  "\tV:", round(v,2), "-->", round(max_q,2), \
-                  "\tP:", round(ps[max_p],2), "-->", round(probs[max_p],2),'/', round(probs[max_q],2), \
+                  "\tV:", round(v,2), "-->", round(qs[max_q_idx],2), \
+                  "\tP:", round(ps[max_p],2), "-->", round(probs[max_p],2),'/', round(probs[max_q_idx],2), \
                   "\tQs:", qs, "var", np.var(qs[nz_idx]))
         # 动作数，概率，每个动作的Q，原始概率，当前局面的v，当前局面的总探索次数
         return probs, qs, ps, v, ns
