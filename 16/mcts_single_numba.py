@@ -340,7 +340,7 @@ class MCTSPlayer(object):
 
             # 如果返回都是错，不用管NS，直接用QS随机
             
-            if var_qs<0.01:
+            if var_qs<0.001:
                 idx = np.random.choice(nz_idx[0])
             else:                    
                 p = 0.75                
