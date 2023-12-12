@@ -595,19 +595,20 @@ class Agent():
         # self.fallpieceheight = 20 - self.fallpiece['y']
 
         reward = 0
+        removedlines = 0
         if not isFalling:            
             self.addtoboard(self.board, self.fallpiece)            
             self.need_update_status=True
-            lines = self.removecompleteline(self.board)
-            self.removedlines += lines
-            reward = lines
+            removedlines = self.removecompleteline(self.board)
+            self.removedlines += removedlines
+            reward = removedlines
             
             # 鼓励垂直下落和连续多次清行
-            if lines>0:
+            if removedlines>0:
                 reward += self.downcount*0.1               
                 if self.last_reward: reward += 0.1 
                 self.downcount = 0           
-            self.last_reward = lines>0
+            self.last_reward = removedlines>0
                 
             emptyCount = self.getEmptyCount()   
             reward -= (emptyCount - self.emptyCount)*0.5  
@@ -637,10 +638,10 @@ class Agent():
             self.terminal = True 
             self.state = 1
             self.set_availables()
-            return self.state, reward 
+            return self.state, removedlines 
         
         self.set_availables()
-        return self.state, reward
+        return self.state, removedlines
 
     def set_key(self):
         self.key = hash(self.current_state().data.tobytes())
