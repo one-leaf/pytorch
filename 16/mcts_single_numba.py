@@ -277,9 +277,9 @@ class MCTS():
             # r = np.tanh(r)
         
         # r *= state.game.exrewardRate 
-        r = np.tanh(r)
+        # r = np.tanh(r)
         # if r>1: r = 1
-        # if r<-1: r= -1
+        if r<-1: r= -1
         # 更新 Q 值 和 访问次数      
         v = r*state.game.exrewardRate*0.5 + v*(1-state.game.exrewardRate*0.5) 
         # v += r
