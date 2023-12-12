@@ -308,7 +308,7 @@ class Train():
                 avg_qval += (state_value-1)**2
             else:
                 avg_qval += (qval-state_value)**2
-            avg_state_value +=state_value 
+            avg_state_value += state_value 
 
             _step["piece_height"] = agent.pieceheight
             _step["reward"] = reward if reward>0 else 0
