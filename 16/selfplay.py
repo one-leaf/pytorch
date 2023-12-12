@@ -289,6 +289,7 @@ class Train():
         piececount = agent.piececount
         mark_reward_piececount = -1
         avg_qval=0
+        avg_state_value=0
         for i in range(self.max_step_count):
             _step={"step":i, "curr_player":agent.id}
             _step["state"] = np.copy(agent.current_state())
@@ -307,6 +308,7 @@ class Train():
                 avg_qval += (state_value-1)**2
             else:
                 avg_qval += (qval-state_value)**2
+            avg_state_value +=state_value 
 
             _step["piece_height"] = agent.pieceheight
             _step["reward"] = reward if reward>0 else 0
@@ -357,7 +359,7 @@ class Train():
                 
                 alpha = 0.01
                 _v = avg_qval - result["total"]["avg_qval"]
-                result["total"]["avg_qval"] += alpha * _v
+                result["total"]["avg_qval"] += alpha * (avg_state_value/agent.steps - result["total"]["avg_qval"])
                 result["total"]["exrewardRate"] = (1 - alpha) * (result["total"]["exrewardRate"] + alpha * avg_qval)
 
 
