@@ -260,7 +260,7 @@ class MCTS():
         a = selectAction(s, state.availables(), self._c_puct, self.Ps, self.Ns, self.Qsa, self.Nsa)
         
         _r = state.game.score
-        _, r = state.step(a)
+        state.step(a)
         r = (state.game.score-_r)*state.game.exrewardRate
         # print(state.markscore, state.game.score, state.game.exrewardRate, r)
         self.depth += 1        
