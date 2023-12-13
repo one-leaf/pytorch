@@ -101,6 +101,8 @@ class Train():
             result["total"]["avg_score_ex"]=0  
         if "avg_qval" not in result["total"]:
             result["total"]["avg_qval"]=0  
+        if "avg_state_value" not in result["total"]:
+            result["total"]["avg_state_value"]=0  
         if "exrewardRate" not in result["total"]:
             result["total"]["exrewardRate"]=0  
         if "piececount" not in result:
@@ -347,8 +349,11 @@ class Train():
 
                 paytime = time.time()-start_time
                 steptime = paytime/agent.steps
+                
                 avg_qval = avg_qval/agent.steps
-                print("step pay time:", steptime, "qval:", avg_qval, "avg_qval", result["total"]["avg_qval"])
+                avg_state_value = avg_state_value/agent.steps
+                
+                print("step pay time:", steptime, "qval:", avg_qval, "avg_state_value:", avg_state_value)
                 result["total"]["avg_score_ex"] += (game_score-result["total"]["avg_score_ex"])/100
                 result["total"]["avg_reward_piececount"] += (game_score/agent.piececount - result["total"]["avg_reward_piececount"])/1000
                 
@@ -359,7 +364,8 @@ class Train():
                 
                 alpha = 0.01
                 # _v = avg_qval - result["total"]["avg_qval"]
-                result["total"]["avg_qval"] += alpha * (avg_state_value/agent.steps - result["total"]["avg_qval"])
+                result["total"]["avg_qval"] += alpha * (avg_qval - result["total"]["avg_qval"])
+                result["total"]["avg_state_value"] += alpha * (avg_state_value - result["total"]["avg_state_value"])
                 result["total"]["exrewardRate"] = (1 - alpha) * (result["total"]["exrewardRate"] + alpha * avg_qval)
 
 
