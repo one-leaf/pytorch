@@ -259,8 +259,9 @@ class MCTS():
         # 比较 Qsa[s, a] + c_puct * Ps[s,a] * sqrt(Ns[s]) / Nsa[s, a], 选择最大的
         a = selectAction(s, state.availables(), self._c_puct, self.Ps, self.Ns, self.Qsa, self.Nsa)
         
+        _r = state.game.score
         _, r = state.step(a)
-        r = (state.game.score-state.markscore)*state.game.exrewardRate
+        r = (state.game.score-_r)*state.game.exrewardRate
         # print(state.markscore, state.game.score, state.game.exrewardRate, r)
         self.depth += 1        
         if state.terminal(): 
@@ -281,7 +282,7 @@ class MCTS():
         # if r>1: r = 1
         if r<-1: r= -1
         # 更新 Q 值 和 访问次数
-        v = r*state.game.exrewardRate + v*0.99 
+        v = r*state.game.exrewardRate + v
         # v += r
         updateQN(s, a, v, self.Ns, self.Qsa, self.Nsa, state.actions_num)
 

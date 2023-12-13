@@ -600,6 +600,7 @@ class Agent():
             self.addtoboard(self.board, self.fallpiece)            
             self.need_update_status=True
             removedlines = self.removecompleteline(self.board)
+            # if removedlines>0: print("OK!!!",removedlines)
             self.removedlines += removedlines
             reward = removedlines
             
