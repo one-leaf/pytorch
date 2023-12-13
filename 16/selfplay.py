@@ -358,7 +358,7 @@ class Train():
                 # result["total"]["exrewardRate"] += (delta * delta2-result["total"]["exrewardRate"])/100                
                 
                 alpha = 0.01
-                _v = avg_qval - result["total"]["avg_qval"]
+                # _v = avg_qval - result["total"]["avg_qval"]
                 result["total"]["avg_qval"] += alpha * (avg_state_value/agent.steps - result["total"]["avg_qval"])
                 result["total"]["exrewardRate"] = (1 - alpha) * (result["total"]["exrewardRate"] + alpha * avg_qval)
 
