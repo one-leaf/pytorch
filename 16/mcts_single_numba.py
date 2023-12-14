@@ -282,7 +282,7 @@ class MCTS():
         # if r>1: r = 1
         # if r<-1: r= -1
         # 更新 Q 值 和 访问次数
-        v = (r-0.01)*state.game.exrewardRate + v
+        v = r*state.game.exrewardRate + (v - 0.01)
         # v += r
         updateQN(s, a, v, self.Ns, self.Qsa, self.Nsa, state.actions_num)
 
