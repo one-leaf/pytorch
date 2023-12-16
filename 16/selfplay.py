@@ -109,22 +109,6 @@ class Train():
             result["piececount"]=[]
         if "exrewardRate" not in result:
             result["exrewardRate"]={}
-            for i in range(11):
-                result["exrewardRate"][str(round(i/10,1))]=30
-        if "exrewardN" not in result:
-            result["exrewardN"]={}
-            for i in range(11):
-                result["exrewardN"][str(round(i/10,1))]=0
-        if "0.09" in result["exrewardRate"]:
-            result["exrewardRate"]={}
-            result["exrewardN"]={}
-            for i in range(11):
-                result["exrewardRate"][str(round(i/10,1))]=50
-                # 记录输赢次数 [wins, trials]
-                result["exrewardN"][str(round(i/10,1))]=[0,0]
-        if not isinstance(result["exrewardN"]["0.0"], list):
-            for i in range(11):
-                result["exrewardN"][str(round(i/10,1))]=[0,0]                
         return result
 
     def get_equi_data(self, states, mcts_probs, values, scores):
@@ -259,9 +243,10 @@ class Train():
                 
             # else:
             # Thompson Sampling
-            # if random.random()>0.2:                
-            exrewardRateKeys = list(result["exrewardRate"].keys())    
-            exrewardRateKey = min(exrewardRateKeys, key=lambda x:abs(float(x)-result["total"]["exrewardRate"]))
+            # exrewardRateKeys = list(result["exrewardRate"].keys())    
+            # exrewardRateKey = min(exrewardRateKeys, key=lambda x:abs(float(x)-result["total"]["exrewardRate"]))
+            exrewardRateKey = str(round(result["total"]["exrewardRate"], 1))
+            
                 # exrewardRateKey = "0.1"
                 # exrewardRateKey = max(result["exrewardRate"], key=result["exrewardRate"].get)
             # else:
@@ -281,7 +266,7 @@ class Train():
             # exrewardRateKey = exrewardRateKeys[choice]
                 
                 # exrewardRateKey = max(result["exrewardRate"], key=result["exrewardRate"].get)
-            agent.exrewardRate = float(exrewardRateKey)    
+            agent.exrewardRate = result["total"]["exrewardRate"]  #float(exrewardRateKey)    
         else:
             agent.exrewardRate = 0
         agent.limitstep = random.random()<0.25
@@ -424,14 +409,11 @@ class Train():
                 depth = float(np.average(depth))
                 ns = float(np.average(ns))
 
-                # if agent.exreward:
-                if agent.is_replay:
-                    result["exrewardN"][exrewardRateKey][1] += 1
+                if agent.exreward and not agent.is_replay:
+                    if exrewardRateKey not in result["exrewardRate"]:
+                        result["exrewardRate"][exrewardRateKey]=0
                     _q = result["exrewardRate"][exrewardRateKey]
                     result["exrewardRate"][exrewardRateKey] = round(_q+(agent.removedlines-_q)/10, 2)
-                    avg_exrewardRate = np.average([result["exrewardRate"][k] for k in result["exrewardRate"]])
-                    if agent.removedlines>avg_exrewardRate:
-                        result["exrewardN"][exrewardRateKey][0] += 1
 
                 if result["total"]["pacc"]==0:
                     result["total"]["pacc"] = pacc
