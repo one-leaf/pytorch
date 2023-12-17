@@ -261,7 +261,7 @@ class MCTS():
         
         _r = state.game.score
         state.step(a)
-        r = (state.game.score-_r)*state.game.exrewardRate
+        r = (state.game.score-_r)
         # print(state.markscore, state.game.score, state.game.exrewardRate, r)
         self.depth += 1        
         if state.terminal(): 
