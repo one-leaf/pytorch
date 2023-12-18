@@ -123,7 +123,6 @@ class Dataset(torch.utils.data.Dataset):
                     for i in range(idx+2,20):
                         np.random.shuffle(board[i])            
 
-            # 未来的收益，评估当前局面的状态，但这个收益有点扩大了
             self.data[fn]={"value":0, "state":state, "mcts_prob": mcts_prob}
         values_items = list(values.values())
         avg_values = np.average(values_items)
