@@ -103,19 +103,8 @@ class Dataset(torch.utils.data.Dataset):
         # double_train_list=[]
         for fn in self.file_list:
             try:
-                # if cache: 
-                #     obj = cache.get(fn)
-                #     if obj!=None:
-                #         state, mcts_prob, value, score = obj
-                #     else:   
-                #         with open(fn, "rb") as f:
-                #             state, mcts_prob, value, score = pickle.load(f)
-                #             cache.add(fn, (state, mcts_prob, value, score))
-                # else:
                 with open(fn, "rb") as f:
                     state, mcts_prob, value, score = pickle.load(f)
-                    # print(state[0])
-                    # print(state[1])
             except:
                 print("filename {} error can't load".format(fn))
                 if os.path.exists(fn): os.remove(fn)
@@ -123,6 +112,14 @@ class Dataset(torch.utils.data.Dataset):
                 continue
             scores[fn]=score
             values[fn]=value
+
+            # 对背景进行 shuffle
+            board = state[1]
+            max_idx = np.argmax(board,axis=0)
+            if not 0 in max_idx:
+                idx = np.max(max_idx)
+                for i in range(idx+1,20):
+                    np.random.shuffle(board[i])            
 
             # b,h,w = state.shape
             # for j in range(h):
