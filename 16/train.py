@@ -123,23 +123,6 @@ class Dataset(torch.utils.data.Dataset):
                     for i in range(idx+2,20):
                         np.random.shuffle(board[i])            
 
-            # b,h,w = state.shape
-            # for j in range(h):
-            #     if random.random()>0.5: continue
-            #     if np.min(state[1][j]) < 0: continue
-            #     c = np.sum(state[1][j]) 
-            #     if c==0 or c==1 or c==w-1: continue
-            #     idx = random.randint(0,w-1)
-            #     if state[1][j][idx]==-1: continue
-            #     v = 0 if state[1][j][idx]==1 else 1            
-            #     for i in range(1,b):
-            #          state[i][j][idx]=v
-
-            # if score%1==0:
-            #     self.data[fn]={"value":-1/(score+1), "state":state, "mcts_prob": mcts_prob}
-            # else:
-            # self.data[fn]={"value":-1/(piececount**0.5), "state":state, "mcts_prob": mcts_prob}
-
             # 未来的收益，评估当前局面的状态，但这个收益有点扩大了
             self.data[fn]={"value":0, "state":state, "mcts_prob": mcts_prob}
         values_items = list(values.values())
