@@ -114,12 +114,14 @@ class Dataset(torch.utils.data.Dataset):
             values[fn]=value
 
             # 对背景进行 shuffle
+            # 保留最近的2行，其余扰动
             board = state[1]
             max_idx = np.argmax(board,axis=0)
             if not 0 in max_idx:
                 idx = np.max(max_idx)
-                for i in range(idx+1,20):
-                    np.random.shuffle(board[i])            
+                if idx <= 17:
+                    for i in range(idx+2,20):
+                        np.random.shuffle(board[i])            
 
             # b,h,w = state.shape
             # for j in range(h):
