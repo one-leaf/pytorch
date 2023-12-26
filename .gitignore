@@ -12,6 +12,7 @@ __pycache__/
 checkpoints/
 cache/
 outputs/
+output/
 summaries/
 logs/
 data/

@@ -135,6 +135,11 @@ class Train():
     def collect_selfplay_data(self):
         """收集自我对抗数据用于训练"""       
         print("TRAIN Self Play starting ...")
+        
+        # 这里用上一次训练的模型作为预测有助于模型稳定
+        if os.path.exists(model_file+".bak"):
+            model_file = model_file+".bak"
+        print("load model file", model_file)    
 
         if os.path.exists(model_file):
             if time.time()-os.path.getmtime(model_file)>120*60:
