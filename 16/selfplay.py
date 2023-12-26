@@ -208,11 +208,13 @@ class Train():
                 os.remove(fn)
 
             his_pieces_file = files[0]
-            with open(his_pieces_file,"rb") as fn:
-                his_pieces = pickle.load(fn)     
-            print("replay test again, load file:", his_pieces_file)
-            print("delete", his_pieces_file)
-            os.remove(his_pieces_file)
+            try:
+                with open(his_pieces_file,"rb") as fn:
+                    his_pieces = pickle.load(fn)     
+                print("replay test again, load file:", his_pieces_file)
+            finally:
+                print("delete", his_pieces_file)
+                os.remove(his_pieces_file)
             if not isinstance(his_pieces[0],str): his_pieces=[]                
             print([p for p in his_pieces])
 
