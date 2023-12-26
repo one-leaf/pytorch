@@ -137,12 +137,13 @@ class Train():
         print("TRAIN Self Play starting ...")
         
         # 这里用上一次训练的模型作为预测有助于模型稳定
+        load_model_file=model_file
         if os.path.exists(model_file+".bak"):
-            model_file = model_file+".bak"
-        print("load model file", model_file)    
+            load_model_file = model_file+".bak"
+        print("load model file", load_model_file)    
 
-        if os.path.exists(model_file):
-            if time.time()-os.path.getmtime(model_file)>120*60:
+        if os.path.exists(load_model_file):
+            if time.time()-os.path.getmtime(load_model_file)>120*60:
                 print("超过120分钟模型都没有更新了，停止训练")
                 time.sleep(60)
                 return
@@ -151,7 +152,7 @@ class Train():
         borads = []
 
         # 开始游戏
-        policy_value_net = PolicyValueNet(GAME_WIDTH, GAME_HEIGHT, GAME_ACTIONS_NUM, model_file=model_file)
+        policy_value_net = PolicyValueNet(GAME_WIDTH, GAME_HEIGHT, GAME_ACTIONS_NUM, model_file=load_model_file)
         bestmodelfile = model_file+"_best"
         
         game_json = os.path.join(data_dir, "result.json")
