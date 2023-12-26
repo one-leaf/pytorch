@@ -140,7 +140,6 @@ class Train():
         load_model_file=model_file
         if os.path.exists(model_file+".bak"):
             load_model_file = model_file+".bak"
-        print("load model file", load_model_file)    
 
         if os.path.exists(load_model_file):
             if time.time()-os.path.getmtime(load_model_file)>120*60:
