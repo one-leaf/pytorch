@@ -344,7 +344,7 @@ class MCTSPlayer(object):
             if len(nz_idx[0])==4 and var_qs<0.001:
                 idx = np.random.choice(nz_idx[0])
             else:                    
-                p = 0.9                
+                p = 0.95                
                 dirichlet = np.random.dirichlet(2 * np.ones(len(nz_idx[0])))
                 dirichlet_probs = np.zeros_like(act_probs, dtype=np.float64)
                 dirichlet_probs[nz_idx] = dirichlet
