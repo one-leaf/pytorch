@@ -330,7 +330,8 @@ class Train():
             piececount = agent.piececount
 
             # 如果游戏结束
-            if agent.terminal or (agent.is_replay and agent.piececount>5*result["total"]["avg_piececount"]):
+            paytime = time.time()-start_time
+            if agent.terminal or (paytime>3600):
                 data["score"] = agent.score
                 data["piece_count"] = agent.piececount
                 data["piece_height"] = agent.pieceheight
@@ -338,8 +339,7 @@ class Train():
 
                 game_score =  agent.removedlines 
                 result = self.read_status_file(game_json)
-
-                paytime = time.time()-start_time
+                
                 steptime = paytime/agent.steps
                 
                 avg_qval = avg_qval/agent.steps
