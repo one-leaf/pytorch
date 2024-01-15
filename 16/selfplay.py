@@ -218,12 +218,12 @@ class Train():
             print([p for p in his_pieces])
 
             # 有历史记录的，按概率走，调整概率
-            agent = Agent(isRandomNextPiece=True, nextPiecesList=his_pieces)
-            agent.is_replay = False
+            agent = Agent(isRandomNextPiece=False, nextPiecesList=his_pieces)
+            agent.is_replay = True
         else:
             # 新局按Q值走，探索
-            agent = Agent(isRandomNextPiece=True, )
-            agent.is_replay = True
+            agent = Agent(isRandomNextPiece=False, )
+            agent.is_replay = False
 
         agent.show_mcts_process= True
         agent.id = 0

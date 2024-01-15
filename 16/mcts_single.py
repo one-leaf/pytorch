@@ -78,7 +78,6 @@ class MCTS():
             if n >= 2*self._n_playout-1 and (game_.state == 1 or game_.terminal): break
             # if n >= self._n_playout-game.score : break
             # if game_.piececount - game.prev_piececount>1 and n>self._n_playout/2: break
-            # if self.depth < 200 and n < self._n_playout*10: continue 
 
             # 当前状态
             # v = self.Vs[s] if s in self.Vs else 0
@@ -97,6 +96,7 @@ class MCTS():
             # if avg_ns>0 and n>=self._n_playout/4:
             # visits_sum = sum([self.Nsa[(s, a)] if (s, a) in self.Nsa else 0 for a in available_acts])          
             # if visits_sum>=self._n_playout*10: break
+            if self.max_depth > 100 : break 
 
         test_count = n+1
         act_visits = [(a, self.Nsa[(s, a)]) if (s, a) in self.Nsa else (a, 0) for a in available_acts]
