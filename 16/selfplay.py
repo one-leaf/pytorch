@@ -329,7 +329,7 @@ class Train():
 
             piececount = agent.piececount
 
-            # 如果游戏结束
+            # 如果游戏结束或这一局已经超过了1小时
             paytime = time.time()-start_time
             if agent.terminal or (paytime>3600):
                 data["score"] = agent.score
