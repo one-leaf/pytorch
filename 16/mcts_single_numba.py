@@ -267,7 +267,7 @@ class MCTS():
         r = (state.game.score-_r)
         # print(state.markscore, state.game.score, state.game.exrewardRate, r)
         self.depth += 1        
-        if state.terminal() or (state.game.state==1 and state.markfailtop-state.game.failtop>2): 
+        if state.terminal() or (state.game.state==1 and state.game.failtop-state.markfailtop>2): 
             # self.Es[s] = -1
             # v = -1 + np.min(self.Qsa[s])
             v = -2
