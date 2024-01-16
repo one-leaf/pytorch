@@ -20,6 +20,7 @@ class State():
         # 动作的类型数目
         self.actions_num = ACTONS_LEN
         self.markscore = 0
+        self.markfailtop= 0
         
     def step(self,act:int):
         return self.game.step(act)                      
