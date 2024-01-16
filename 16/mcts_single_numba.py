@@ -40,8 +40,9 @@ class State():
     
     # 0.00022098371224809986  
     def clone(self):
-        game = copy.deepcopy(self.game)
-        state = State(game)
+        # game = copy.deepcopy(self.game)
+        # state = State(game)
+        state = copy.deepcopy(self)
         return state
     
     def mark(self):
