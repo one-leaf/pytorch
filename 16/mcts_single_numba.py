@@ -45,6 +45,7 @@ class State():
     
     def mark(self):
         self.markscore=self.game.score
+        self.markfailtop=self.game.failtop
 
 @njit(cache=True)
 def selectAction(s:int, availables, _c_puct:float, Ps, Ns, Qsa, Nsa):
@@ -266,7 +267,7 @@ class MCTS():
         r = (state.game.score-_r)
         # print(state.markscore, state.game.score, state.game.exrewardRate, r)
         self.depth += 1        
-        if state.terminal(): 
+        if state.terminal() or (state.game.state==1 and state.markfailtop-state.game.failtop>2): 
             # self.Es[s] = -1
             # v = -1 + np.min(self.Qsa[s])
             v = -2

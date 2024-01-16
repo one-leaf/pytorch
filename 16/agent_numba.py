@@ -621,7 +621,7 @@ class Agent():
             # self.heightDiff = self.getHeightDiff()
             # self.heightStd = self.getHeightStd()   
             # self.pieces_height.append(self.fallpieceheight)
-            # self.failtop = self.getFailTop()
+            self.failtop = self.getFailTop()
             self.state = 1
             self.piecesteps = 0
             self.piececount += 1 
