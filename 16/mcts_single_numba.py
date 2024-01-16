@@ -263,8 +263,12 @@ class MCTS():
         a = selectAction(s, state.availables(), self._c_puct, self.Ps, self.Ns, self.Qsa, self.Nsa)
         
         _r = state.game.score
+        _f = state.game.failtop
+        
         state.step(a)
-        r = (state.game.score-_r)
+        
+        r = (state.game.score-_r) + (_f-state.game.failtop)
+        
         # print(state.markscore, state.game.score, state.game.exrewardRate, r)
         self.depth += 1        
         if state.terminal() or (state.game.state==1 and state.game.failtop-state.markfailtop>2): 
