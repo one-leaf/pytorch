@@ -353,7 +353,7 @@ class MCTSPlayer(object):
             elif var_qs>10 and act_qs[max_qs_idx]>1:
                 idx = max_qs_idx
             else:                    
-                p = 0.95                
+                p = 0.75                
                 dirichlet = np.random.dirichlet(2 * np.ones(len(nz_idx[0])))
                 dirichlet_probs = np.zeros_like(act_probs, dtype=np.float64)
                 dirichlet_probs[nz_idx] = dirichlet
