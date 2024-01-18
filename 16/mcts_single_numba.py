@@ -350,6 +350,8 @@ class MCTSPlayer(object):
             
             if len(nz_idx[0])==4 and var_qs<0.001:
                 idx = np.random.choice(nz_idx[0])
+            elif var_qs>10 and act_qs[max_qs_idx]>1:
+                idx = max_qs_idx
             else:                    
                 p = 0.95                
                 dirichlet = np.random.dirichlet(2 * np.ones(len(nz_idx[0])))
