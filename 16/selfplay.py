@@ -509,6 +509,7 @@ class Train():
         # 如何评价最后的得分？最完美的情况（填满比）
 
         # 奖励的位置
+        piececount = data["steps"][-1]["piece_count"]+1
         pieces_reward = [0 for _ in range(piececount)]
         pieces_steps = [0 for _ in range(piececount)]
 
