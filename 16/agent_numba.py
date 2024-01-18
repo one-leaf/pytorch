@@ -648,8 +648,9 @@ class Agent():
         board = np.sum(self.status[:2],axis=0)
         h = 0
         for i, b in enumerate(board.flat):
-            h += int(b)*2**(200-i) 
-           
+            h += int(b)*2**(200-i)
+        if self.nextpiece != None:
+            h += ord(self.nextpiece['shape'])
         self.key = h
 
         # self.key = hash(self.current_state().data.tobytes())
