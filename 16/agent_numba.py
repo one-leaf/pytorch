@@ -645,7 +645,14 @@ class Agent():
         return self.state, removedlines
 
     def set_key(self):
-        self.key = hash(self.current_state().data.tobytes())
+        board = np.sum(self.status[:2],axis=0)
+        h = 0
+        for i, b in enumerate(board.flat):
+            h += int(b)*2**(200-i) 
+           
+        self.key = h
+
+        # self.key = hash(self.current_state().data.tobytes())
 
     def get_key(self):
         return self.key

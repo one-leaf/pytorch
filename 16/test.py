@@ -23,8 +23,10 @@ def run():
             # print(agent.get_availables())
             # os.system("cls")
             # print(v, agent.position_to_action_name(act), (time.time()-start_time)/agent.steps,"s", flush=True)
+            
             agent.print()
             time.sleep(0.2)
+            
             # print(agent.current_state())
             # input()
     except KeyboardInterrupt:
