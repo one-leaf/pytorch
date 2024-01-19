@@ -191,6 +191,7 @@ class Train():
                 savefile = os.path.join(self.waitplaydir, filename)
                 with open(savefile, "wb") as fn:
                     pickle.dump(his_pieces, fn)
+                print("save need replay", filename)
             
             self.save_status_file(result, game_json) 
 
@@ -563,7 +564,7 @@ class Train():
         print("saved file basename:", filetime, "length:", i+1)
 
         # 删除训练集
-        if agent.piececount/result["total"]["piececount"]<0.8:
+        if agent.piececount/result["total"]["piececount"]<0.5:
             filename = "R{}-{}-{}.pkl".format(agent.piececount, agent.score, int(round(time.time() * 1000000)))
             his_pieces_file = os.path.join(self.waitplaydir, filename)
             print("save need replay", his_pieces_file)
