@@ -350,19 +350,19 @@ class MCTSPlayer(object):
             #     idx = np.random.choice(range(ACTONS_LEN), p=act_probs)    
 
             # 如果返回都是错，不用管NS，直接用QS随机
-            
-            if len(nz_idx[0])==4 and var_qs<0.001:
-                idx = np.random.choice(nz_idx[0])
-            elif var_qs>10 and act_qs[max_qs_idx]>1:
-                idx = max_qs_idx
-            else:                    
-                p = 0.75                
-                dirichlet = np.random.dirichlet(2 * np.ones(len(nz_idx[0])))
-                dirichlet_probs = np.zeros_like(act_probs, dtype=np.float64)
-                dirichlet_probs[nz_idx] = dirichlet
-                idx = np.random.choice(range(ACTONS_LEN), p=p*act_probs + (1.0-p)*dirichlet_probs)
-
-
+            if game.id == 0:
+                idx = max_ps_idx
+            else:
+                if len(nz_idx[0])==4 and var_qs<0.001:
+                    idx = np.random.choice(nz_idx[0])
+                elif var_qs>10 and act_qs[max_qs_idx]>1:
+                    idx = max_qs_idx
+                else:                    
+                    p = 0.75                
+                    dirichlet = np.random.dirichlet(2 * np.ones(len(nz_idx[0])))
+                    dirichlet_probs = np.zeros_like(act_probs, dtype=np.float64)
+                    dirichlet_probs[nz_idx] = dirichlet
+                    idx = np.random.choice(range(ACTONS_LEN), p=p*act_probs + (1.0-p)*dirichlet_probs)
 
             # if max_qs_idx ==  max_ps_idx:
             #     idx = max_qs_idx
