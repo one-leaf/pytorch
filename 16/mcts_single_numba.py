@@ -350,7 +350,7 @@ class MCTSPlayer(object):
             #     idx = np.random.choice(range(ACTONS_LEN), p=act_probs)    
 
             # 如果返回都是错，不用管NS，直接用QS随机
-            if game.id == 0:
+            if game.steps % 2 == 0:
                 idx = max_ps_idx
             else:
                 if len(nz_idx[0])==4 and var_qs<0.001:
