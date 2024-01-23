@@ -482,9 +482,9 @@ class Agent():
         return nb_calc_down_count(board, _piece, piece['x'], piece['y'])
         
     
-    # 状态一共3层， 0 当前下落方块， 1 是背景 ，2是下一个方块
+    # 状态一共3层， 0 当前下落方块， 1 是背景 ，2下落方块的上一个动作
     def set_status(self):
-        self.status[0]=0
+        self.status[2]=self.status[0]
         if self.fallpiece != None:
             piece = self.fallpiece
             shapedraw = pieces[piece['shape']][piece['rotation']]
@@ -492,11 +492,11 @@ class Agent():
                             
         if self.need_update_status==True:
             self.status[1]=self.board
-            self.status[2]=0
-            if self.nextpiece != None:
-                piece = self.nextpiece  
-                shapedraw = pieces[piece['shape']][piece['rotation']]
-                self.status[2] = nb_get_status(shapedraw, piece['x'], piece['y'])
+            # self.status[2]=0
+            # if self.nextpiece != None:
+            #     piece = self.nextpiece  
+            #     shapedraw = pieces[piece['shape']][piece['rotation']]
+            #     self.status[2] = nb_get_status(shapedraw, piece['x'], piece['y'])
                             
             self.need_update_status=False
         
