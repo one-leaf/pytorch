@@ -579,7 +579,7 @@ class Agent():
                 if self.downcount == 0:
                     self.downcount = 1
                 else:
-                    self.downcount += 1
+                    self.downcount = self.downcount*0.9 + 1
                 self.fallpiece['y'] += 1                          
 
         isFalling=True
