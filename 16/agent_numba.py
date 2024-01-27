@@ -579,7 +579,7 @@ class Agent():
                 if self.downcount == 0:
                     self.downcount = 1
                 else:
-                    self.downcount += 1/self.downcount
+                    self.downcount += 1
                 self.fallpiece['y'] += 1                          
 
         isFalling=True
@@ -602,11 +602,11 @@ class Agent():
             removedlines = self.removecompleteline(self.board)
             # if removedlines>0: print("OK!!!",removedlines)
             self.removedlines += removedlines
-            reward = removedlines
+            reward = removedlines**2
             
             # 鼓励垂直下落和连续多次清行
             if removedlines>0:
-                reward += self.downcount*0.1               
+                reward += self.downcount*0.01               
                 if self.last_reward: reward += 0.1 
                 self.downcount = 0           
             self.last_reward = removedlines>0
