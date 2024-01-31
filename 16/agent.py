@@ -176,9 +176,7 @@ class Agent():
         self.reward = 0
         self.steps += 1
         self.piecesteps += 1
-        # self.level, self.fallfreq = self.tetromino.calculate(self.score)
-        
-        self.actions.append(action)
+        # self.level, self.fallfreq = self.tetromino.calculate(self.score)       
 
         if action == KEY_LEFT:# and self.tetromino.validposition(self.board, self.fallpiece, ax=-1):
             self.fallpiece['x'] -= 1
@@ -188,14 +186,18 @@ class Agent():
 
         if action == KEY_DOWN:# and self.tetromino.validposition(self.board, self.fallpiece, ay=1):
             n = 1
-            while self.tetromino.validposition(self.board, self.fallpiece, ay=n+1):
-                n += 1
+            if self.piecesteps>1 and self.actions[-1]==KEY_DOWN:
+                while self.tetromino.validposition(self.board, self.fallpiece, ay=n+1):
+                    n += 1
             self.fallpiece['y'] += n  
 
         if action == KEY_ROTATION:
             self.fallpiece['rotation'] =  (self.fallpiece['rotation'] + 1) % len(pieces[self.fallpiece['shape']])
             # if not self.tetromino.validposition(self.board,self.fallpiece):
                 # self.fallpiece['rotation'] = (self.fallpiece['rotation'] - 1) % len(pieces[self.fallpiece['shape']])
+                
+        self.actions.append(action)
+                
         isFalling=True
         if self.tetromino.validposition(self.board, self.fallpiece, ay=1):
             self.fallpiece['y'] += 1
