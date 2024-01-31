@@ -575,12 +575,14 @@ class Agent():
             # n = self.calc_down_count(self.board, self.fallpiece)
             # self.fallpiece['y'] += n
             # self.downcount += n
-            while self.validposition(self.board, self.fallpiece, ay=1):
-                if self.downcount == 0:
-                    self.downcount = 1
-                else:
-                    self.downcount = self.downcount*0.9 + 1
-                self.fallpiece['y'] += 1                          
+            self.fallpiece['y'] += 1
+            if self.piecesteps>1 and self.piece_actions[-1]=="D":
+                while self.validposition(self.board, self.fallpiece, ay=1):
+                    if self.downcount == 0:
+                        self.downcount = 1
+                    else:
+                        self.downcount = self.downcount*0.9 + 1
+                    self.fallpiece['y'] += 1                          
 
         isFalling=True
         if self.validposition(self.board, self.fallpiece, ay=1):
