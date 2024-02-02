@@ -674,6 +674,7 @@ class Agent():
     
     # 打印
     def print(self):
+        print("actions:" ,self.piece_actions)
         board = np.copy(self.board)
         for x in range(templatenum):
             for y in range(templatenum):
@@ -692,7 +693,7 @@ class Agent():
                     line=line+str(board[y][x])+" "
             print(line)
         print(" "+" -"*boardwidth)
-        print("exRate:", self.exrewardRate, "score:", round(self.score,2), "lines:",self.removedlines,"piececount:", self.piececount, "emptyCount:", self.emptyCount, "actions:" ,self.piece_actions)
+        print("exRate:", self.exrewardRate, "score:", round(self.score,2), "lines:",self.removedlines,"piececount:", self.piececount, "emptyCount:", self.emptyCount)
 
 
     def getTerminalEmptyCount(self):
