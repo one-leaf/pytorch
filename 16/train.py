@@ -131,6 +131,8 @@ class Dataset(torch.utils.data.Dataset):
         std_values = np.std(values_items)
 
         print("value min/avg/max/std:",[min_values, avg_values, max_values, std_values])        
+        self.avg_values = avg_values
+        self.std_values = std_values
 
         scores_items = list(scores.values())
         avg_scores = np.average(scores_items)
@@ -339,9 +341,12 @@ class Train():
                 self.lr_multiplier *= 1.5
             if self.learn_rate*self.lr_multiplier>1e-3: self.lr_multiplier = 1e-3/self.learn_rate
             if self.learn_rate*self.lr_multiplier<1e-6: self.lr_multiplier = 1e-6/self.learn_rate
-            print("kl:{} vs {} lr_multiplier:{} lr:{}".format(kl, self.kl_targ, self.lr_multiplier, self.learn_rate*self.lr_multiplier))
+            print("kl:{} vs {} lr_multiplier:{} lr:{} avg_values:{} std_values:{}".format(kl, self.kl_targ, self.lr_multiplier, self.learn_rate*self.lr_multiplier, \
+                self.dataset.avg_values, self.dataset.std_values))
             with open(train_conf_file, 'wb') as fn:
                 self.train_conf["lr_multiplier"] = self.lr_multiplier
+                self.train_conf["avg_values"] = self.dataset.avg_values
+                self.train_conf["std_values"] = self.dataset.std_values                
                 # if self.train_conf["optimizer_type"]==0 and np.average(v_loss_list)<0.1:
                 #     self.train_conf["optimizer_type"]=1
                 #     self.train_conf["lr_multiplier"]=1
