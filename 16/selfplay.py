@@ -275,6 +275,13 @@ class Train():
                 
                 # exrewardRateKey = max(result["exrewardRate"], key=result["exrewardRate"].get)
             agent.exrewardRate = result["total"]["exrewardRate"]  #float(exrewardRateKey)    
+            
+            train_conf_file=os.path.join(data_dir,"train_conf_pkl")
+            if os.path.exists(train_conf_file):
+                with open(train_conf_file, "rb") as fn:
+                    train_conf = pickle.load(fn)
+                    agent.exrewardRate = 1./train_conf["std_values"]
+            
         else:
             agent.exrewardRate = 0
         agent.limitstep = random.random()<0.25
