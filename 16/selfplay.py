@@ -366,8 +366,8 @@ class Train():
                 # _v = avg_qval - result["total"]["avg_qval"]
                 result["total"]["avg_qval"] += alpha * (avg_qval - result["total"]["avg_qval"])
                 result["total"]["avg_state_value"] += alpha * (avg_state_value - result["total"]["avg_state_value"])
-                result["total"]["exrewardRate"] = (1 - alpha) * (result["total"]["exrewardRate"] + alpha * avg_qval)
-
+                # result["total"]["exrewardRate"] = (1 - alpha) * (result["total"]["exrewardRate"] + alpha * avg_qval)
+                result["total"]["exrewardRate"] = agent.exrewardRate
 
                 mark_score = result["total"]["avg_score_ex"]
 
