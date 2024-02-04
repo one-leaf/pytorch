@@ -146,7 +146,7 @@ class Dataset(torch.utils.data.Dataset):
             # self.data[fn]["value"] = (scores[fn]-min_scores)*2/(max_scores-min_scores) - 1
             
             # 数据正规化
-            v = (values[fn]-avg_values)/std_values
+            v = values[fn]/std_values
             if v>1:
                 self.data[fn]["value"] = 1
             elif v<-1:
