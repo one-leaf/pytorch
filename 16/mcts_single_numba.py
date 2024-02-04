@@ -270,7 +270,7 @@ class MCTS():
         
         state.step(a)
         
-        r = (state.game.score-_r) + (_f-state.game.failtop)
+        r = (state.game.score-_r) + (_f-state.game.failtop) - 0.001
         
         # print(state.markscore, state.game.score, state.game.exrewardRate, r)
         self.depth += 1        
