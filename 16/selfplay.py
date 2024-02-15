@@ -161,7 +161,8 @@ class Train():
         result = self.read_status_file(game_json)     
 
         # 先运行测试
-        his_pieces = []
+        his_pieces = None
+        min_score = result["total"]["avg_score"]
         for _ in range(self.play_size):
             result = self.read_status_file(game_json)     
             agent = Agent(isRandomNextPiece=True)
@@ -185,13 +186,13 @@ class Train():
             agent.print()
 
             # 判断是否需要重新玩,如果当前小于平均的0.75，放到运行池训练
-            if agent.score < result["total"]["avg_score"]*0.75:
+            if agent.score < min_score:
                 his_pieces = agent.piecehis
-                filename = "T{}-{}-{}.pkl".format(agent.piececount, agent.removedlines ,int(round(time.time() * 1000000)))
-                savefile = os.path.join(self.waitplaydir, filename)
-                with open(savefile, "wb") as fn:
-                    pickle.dump(his_pieces, fn)
-                print("save need replay", filename)
+                # filename = "T{}-{}-{}.pkl".format(agent.piececount, agent.removedlines ,int(round(time.time() * 1000000)))
+                # savefile = os.path.join(self.waitplaydir, filename)
+                # with open(savefile, "wb") as fn:
+                #     pickle.dump(his_pieces, fn)
+                # print("save need replay", filename)
             
             self.save_status_file(result, game_json) 
 
@@ -200,25 +201,29 @@ class Train():
         # 正式运行
         player = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout)
 
-        files = glob.glob(os.path.join(self.waitplaydir, "*.pkl"))
-        if len(files)>0:
-            files = sorted(files, key=lambda x: os.path.getmtime(x))
-            while len(files)>1000:
-                fn = files.pop(0)
-                os.remove(fn)
+        # files = glob.glob(os.path.join(self.waitplaydir, "*.pkl"))
+        # if len(files)>0:
+        
+        #     files = sorted(files, key=lambda x: os.path.getmtime(x))
+        #     while len(files)>1000:
+        #         fn = files.pop(0)
+        #         os.remove(fn)
 
-            his_pieces_file = files[0]
-            try:
-                with open(his_pieces_file,"rb") as fn:
-                    his_pieces = pickle.load(fn)     
-                print("replay test again, load file:", his_pieces_file)
-            finally:
-                print("delete", his_pieces_file)
-                os.remove(his_pieces_file)
-            if not isinstance(his_pieces[0],str): his_pieces=[]                
-            print([p for p in his_pieces])
+        #     his_pieces_file = files[0]
+        #     try:
+        #         with open(his_pieces_file,"rb") as fn:
+        #             his_pieces = pickle.load(fn)     
+        #         print("replay test again, load file:", his_pieces_file)
+        #     finally:
+        #         print("delete", his_pieces_file)
+        #         os.remove(his_pieces_file)
+        #     if not isinstance(his_pieces[0],str): his_pieces=[]                
+        #     print([p for p in his_pieces])
 
-            # 有历史记录的，按概率走，调整概率
+        #     # 有历史记录的，按概率走，调整概率
+        #     agent = Agent(isRandomNextPiece=False, nextPiecesList=his_pieces)
+        #     agent.is_replay = True
+        if his_pieces!=None:
             agent = Agent(isRandomNextPiece=False, nextPiecesList=his_pieces)
             agent.is_replay = True
         else:
