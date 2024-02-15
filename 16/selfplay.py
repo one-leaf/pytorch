@@ -225,6 +225,7 @@ class Train():
         #     agent = Agent(isRandomNextPiece=False, nextPiecesList=his_pieces)
         #     agent.is_replay = True
         if his_pieces!=None:
+            print("min_score:", min_score)
             print("his_pieces:", his_pieces)
             agent = Agent(isRandomNextPiece=False, nextPiecesList=his_pieces)
             agent.is_replay = True
@@ -578,12 +579,12 @@ class Train():
         print("saved file basename:", filetime, "length:", i+1)
 
         # 删除训练集
-        if agent.piececount/result["total"]["piececount"]<0.5:
-            filename = "R{}-{}-{}.pkl".format(agent.piececount, agent.score, int(round(time.time() * 1000000)))
-            his_pieces_file = os.path.join(self.waitplaydir, filename)
-            print("save need replay", his_pieces_file)
-            with open(his_pieces_file, "wb") as fn:
-                pickle.dump(agent.piecehis, fn)
+        # if agent.piececount/result["total"]["piececount"]<0.5:
+        #     filename = "R{}-{}-{}.pkl".format(agent.piececount, agent.score, int(round(time.time() * 1000000)))
+        #     his_pieces_file = os.path.join(self.waitplaydir, filename)
+        #     print("save need replay", his_pieces_file)
+        #     with open(his_pieces_file, "wb") as fn:
+        #         pickle.dump(agent.piecehis, fn)
 
     def run(self):
         """启动训练"""
