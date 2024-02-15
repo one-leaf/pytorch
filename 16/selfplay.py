@@ -225,6 +225,7 @@ class Train():
         #     agent = Agent(isRandomNextPiece=False, nextPiecesList=his_pieces)
         #     agent.is_replay = True
         if his_pieces!=None:
+            print("his_pieces:", his_pieces)
             agent = Agent(isRandomNextPiece=False, nextPiecesList=his_pieces)
             agent.is_replay = True
         else:
