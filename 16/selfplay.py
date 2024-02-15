@@ -187,6 +187,7 @@ class Train():
 
             # 判断是否需要重新玩,如果当前小于平均的0.75，放到运行池训练
             if agent.score < min_score:
+                min_score = agent.score
                 his_pieces = agent.piecehis
                 # filename = "T{}-{}-{}.pkl".format(agent.piececount, agent.removedlines ,int(round(time.time() * 1000000)))
                 # savefile = os.path.join(self.waitplaydir, filename)
