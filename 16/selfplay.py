@@ -162,6 +162,7 @@ class Train():
 
         # 先运行测试
         his_pieces = None
+        his_pieces_len = 0
         min_score = result["total"]["avg_score"]
         for _ in range(self.play_size):
             result = self.read_status_file(game_json)     
@@ -189,6 +190,7 @@ class Train():
             if agent.score < min_score:
                 min_score = agent.score
                 his_pieces = agent.piecehis
+                his_pieces_len = len(agent.piecehis)
                 # filename = "T{}-{}-{}.pkl".format(agent.piececount, agent.removedlines ,int(round(time.time() * 1000000)))
                 # savefile = os.path.join(self.waitplaydir, filename)
                 # with open(savefile, "wb") as fn:
@@ -347,7 +349,7 @@ class Train():
 
             # 如果游戏结束或这一局已经超过了1小时
             paytime = time.time()-start_time
-            if agent.terminal or (agent.state==1 and paytime>3600) or (agent.state==1 and his_pieces!=None and agent.piececount>len(his_pieces)):
+            if agent.terminal or (agent.state==1 and paytime>3600) or (agent.state==1 and his_pieces_len>10 and agent.piececount>his_pieces_len):
                 data["score"] = agent.score
                 data["piece_count"] = agent.piececount
                 data["piece_height"] = agent.pieceheight
