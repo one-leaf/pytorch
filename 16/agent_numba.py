@@ -373,6 +373,7 @@ def nb_getEmptyCount2(board):
 class Agent():
     def __init__(self, isRandomNextPiece=False, nextPiecesList=[]):
         self.nextPieceList=nextPiecesList
+        self.next_Pieces_list_len=len(nextPiecesList)
         self.isRandomNextPiece=isRandomNextPiece
         self.pieceCount = 0
         self.piecehis=[]
@@ -693,7 +694,7 @@ class Agent():
                     line=line+str(board[y][x])+" "
             print(line)
         print(" "+" -"*boardwidth)
-        print("exRate:", self.exrewardRate, "score:", round(self.score,2), "lines:",self.removedlines,"piececount:", self.piececount, "emptyCount:", self.emptyCount)
+        print("exRate:", self.exrewardRate, "score:", round(self.score,2), "lines:",self.removedlines,"piececount:", self.piececount, "/", self.next_Pieces_list_len, "emptyCount:", self.emptyCount)
 
 
     def getTerminalEmptyCount(self):
