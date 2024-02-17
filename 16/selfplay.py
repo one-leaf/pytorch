@@ -225,7 +225,7 @@ class Train():
         #     agent = Agent(isRandomNextPiece=False, nextPiecesList=his_pieces)
         #     agent.is_replay = True
         if his_pieces!=None:
-            print("min_score:", min_score)
+            print("min_score:", min_score, "pieces_count:", len(his_pieces))
             print("his_pieces:", his_pieces)
             agent = Agent(isRandomNextPiece=False, nextPiecesList=his_pieces)
             agent.is_replay = True
