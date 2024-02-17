@@ -347,7 +347,7 @@ class Train():
 
             # 如果游戏结束或这一局已经超过了1小时
             paytime = time.time()-start_time
-            if agent.terminal or (agent.state==1 and paytime>3600) or (agent.is_replay and agent.state==1 and agent.piececount>len(agent.nextPieceList)):
+            if agent.terminal or (agent.state==1 and paytime>3600) or (agent.is_replay and agent.state==1 and agent.piececount>len(his_pieces)):
                 data["score"] = agent.score
                 data["piece_count"] = agent.piececount
                 data["piece_height"] = agent.pieceheight
