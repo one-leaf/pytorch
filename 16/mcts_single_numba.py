@@ -276,7 +276,8 @@ class MCTS():
         state.step(a)
         
         r = (state.game.score-_r) + (_c-state.game.emptyCount) - 0.001
-        
+        r = r * state.game.exrewardRate
+        if r < -2: r = -2
         # print(state.markscore, state.game.score, state.game.exrewardRate, r)
         self.depth += 1        
         if state.terminal() or (state.game.state==1 and state.game.emptyCount-state.markEmptyCount>4): 
@@ -299,7 +300,7 @@ class MCTS():
         # 更新 Q 值 和 访问次数
         # v = r + (v - 0.01)
         # v *= state.game.exrewardRate
-        v += r*state.game.exrewardRate
+        v += r
         updateQN(s, a, v, self.Ns, self.Qsa, self.Nsa, state.actions_num)
 
         # print(v, self.Qsa[s][a], v-self.Qsa[s][a])
