@@ -20,7 +20,8 @@ class State():
         # 动作的类型数目
         self.actions_num = ACTONS_LEN
         self.markscore = 0
-        self.markfailtop= 0
+        self.markfailtop = 0
+        self.markEmptyCount = 0
         
     def step(self,act:int):
         return self.game.step(act)                      
@@ -44,12 +45,14 @@ class State():
         state.search = self.search
         state.markscore = self.markscore
         state.markfailtop = self.markfailtop
+        state.markEmptyCount = self.markEmptyCount  
         return state
     
     def mark(self):
         self.markscore=self.game.score
         self.markfailtop=self.game.failtop
-
+        self.markEmptyCount=self.game.emptyCount
+        
 @njit(cache=True)
 def selectAction(s:int, availables, _c_puct:float, Ps, Ns, Qsa, Nsa):
     # 如果有一次都没有探索的，返回
@@ -268,15 +271,15 @@ class MCTS():
         a = selectAction(s, state.availables(), self._c_puct, self.Ps, self.Ns, self.Qsa, self.Nsa)
         
         _r = state.game.score
-        _f = state.game.failtop
+        _c = state.game.emptyCount
         
         state.step(a)
         
-        r = (state.game.score-_r) + (_f-state.game.failtop) - 0.001
+        r = (state.game.score-_r) + (_c-state.game.emptyCount) - 0.001
         
         # print(state.markscore, state.game.score, state.game.exrewardRate, r)
         self.depth += 1        
-        if state.terminal() or (state.game.state==1 and state.game.failtop-state.markfailtop>2): 
+        if state.terminal() or (state.game.state==1 and state.game.emptyCount-state.markEmptyCount>4): 
             # self.Es[s] = -1
             # v = -1 + np.min(self.Qsa[s])
             v = -2
