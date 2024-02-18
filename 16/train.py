@@ -146,15 +146,17 @@ class Dataset(torch.utils.data.Dataset):
             # self.data[fn]["value"] = (scores[fn]-min_scores)*2/(max_scores-min_scores) - 1
             
             # 数据正规化
-            v = values[fn]/std_values
-            if v>1:
-                self.data[fn]["value"] = 1
-            elif v<-1:
-                self.data[fn]["value"] = -1
-            else:
-                self.data[fn]["value"] = v #values[fn]
-            
-              
+            # v = values[fn]/std_values
+            # if v>1:
+            #     self.data[fn]["value"] = 1
+            # elif v<-1:
+            #     self.data[fn]["value"] = -1
+            # else:
+            #     self.data[fn]["value"] = v #values[fn]
+
+            # 数据二组化
+            self.data[fn]["value"] = 1 if values[fn]>0 else -1
+
             # self.data[fn]["value"] = scores[fn]
 
         pay_time = round(time.time()-start_time, 2)
