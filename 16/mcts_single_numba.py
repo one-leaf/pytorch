@@ -270,13 +270,13 @@ class MCTS():
         # 比较 Qsa[s, a] + c_puct * Ps[s,a] * sqrt(Ns[s]) / Nsa[s, a], 选择最大的
         a = selectAction(s, state.availables(), self._c_puct, self.Ps, self.Ns, self.Qsa, self.Nsa)
         
-        _r = state.game.score
-        _c = state.game.emptyCount
+        # _r = state.game.score
+        # _c = state.game.emptyCount
         
         state.step(a)
-        
-        r = (state.game.score-_r) + (_c-state.game.emptyCount) - 0.001
-        r = r * state.game.exrewardRate
+        r = -0.001
+        if state.game.state==1:
+            r += ((state.game.score-state.markscore) + (state.markEmptyCount-state.game.emptyCount)) * state.game.exrewardRate
         if r < -2: r = -2
         # print(state.markscore, state.game.score, state.game.exrewardRate, r)
         self.depth += 1        
