@@ -661,12 +661,7 @@ class Agent():
         key=[]
         for b in board.flat:
             key.append(str(b))
-        try:
-            keystr = int("".join(key), 2)
-        except:
-            print(self.status[0])
-            print(self.status[1])
-            raise
+        keystr = int("".join(key), 2)
         self.key = hash(keystr)
         
 
