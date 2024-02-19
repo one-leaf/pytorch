@@ -347,9 +347,9 @@ class Train():
 
             piececount = agent.piececount
 
-            # 如果游戏结束或这一局已经超过了1小时
+            # 如果游戏结束或这一局已经超过了10分钟
             paytime = time.time()-start_time
-            if agent.terminal or (agent.state==1 and paytime>3600) or (agent.state==1 and his_pieces_len>10 and agent.piececount>his_pieces_len):
+            if agent.terminal or (agent.state==1 and paytime>10*60) or (agent.state==1 and his_pieces_len>10 and agent.piececount>his_pieces_len):
                 data["score"] = agent.score
                 data["piece_count"] = agent.piececount
                 data["piece_height"] = agent.pieceheight
