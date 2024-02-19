@@ -202,7 +202,6 @@ class MCTS():
         # for n in range(self._n_playout):
         n=0
         while True:
-            self.depth = 0
             self.simulation_count = n+1
             
             # t = time.time()     
@@ -211,8 +210,8 @@ class MCTS():
             # self.t += time.time()-t 
             
             self.search(state_) 
-            
-            if self.depth>self.max_depth: self.max_depth = self.depth
+            depth = state_.steps-state.steps
+            if depth>self.max_depth: self.max_depth = depth
             # if n >= self._n_playout//2-1 and state_.game.state==1 and checkNeedExit(s, self.Nsa): break
             if n > self._n_playout and state_.game.state==1 : break 
             n += 1
@@ -279,7 +278,6 @@ class MCTS():
             r += ((state.game.score-state.markscore) + (state.markEmptyCount-state.game.emptyCount)) * state.game.exrewardRate
         if r < -2: r = -2
         # print(state.markscore, state.game.score, state.game.exrewardRate, r)
-        self.depth += 1        
         if state.terminal() or (state.game.state==1 and state.game.emptyCount-state.markEmptyCount>4): 
             # self.Es[s] = -1
             # v = -1 + np.min(self.Qsa[s])
