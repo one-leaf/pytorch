@@ -635,27 +635,40 @@ class Agent():
         else:
             self.state = 0
 
-        self.set_status()
-        self.set_key()
-
-        if not isFalling and (not self.validposition(self.board, self.fallpiece, ay=1)):                                      
+        if not isFalling and (not self.validposition(self.board, self.fallpiece, ay=0)):
             self.terminal = True 
             self.state = 1
             self.set_availables()
-            return self.state, removedlines 
-        
+            
+        self.set_status()
+        self.set_key()       
         self.set_availables()
         return self.state, removedlines
 
     def set_key(self):
-        board = np.sum(self.status[:2],axis=0)
+        if self.terminal:
+            board = self.status[1]
+        else:
+            board = np.sum(self.status[:2],axis=0)
         # h = 0
         # for i, b in enumerate(board.flat):
         #     h += int(b)*2**(200-i)
         # if self.nextpiece != None:
         #     h += ord(self.nextpiece['shape'])
         # self.key = h
-        self.key = hash(board.data.tobytes())
+        # self.key = hash(board.data.tobytes())
+        
+        key=[]
+        for b in board.flat:
+            key.append(str(b))
+        try:
+            keystr = int("".join(key), 2)
+        except:
+            print(self.status[0])
+            print(self.status[1])
+            raise
+        self.key = hash(keystr)
+        
 
     def get_key(self):
         return self.key
