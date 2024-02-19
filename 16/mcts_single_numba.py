@@ -355,14 +355,12 @@ class MCTSPlayer(object):
             # else:
             #     idx = np.random.choice(range(ACTONS_LEN), p=act_probs)    
 
-            # 如果返回都是错，不用管NS，直接用QS随机
-            if max_qs_idx==max_ps_idx:
+            # 如果探索低于20个方块，且当前概率和推定概率一致
+            if max_qs_idx==max_ps_idx and depth<20:
                 idx = max_ps_idx
             else:
                 if len(nz_idx[0])==4 and var_qs<0.001:
                     idx = np.random.choice(nz_idx[0])
-                elif var_qs>10 and act_qs[max_qs_idx]>1:
-                    idx = max_qs_idx
                 else:                    
                     p = 0.75                
                     dirichlet = np.random.dirichlet(2 * np.ones(len(nz_idx[0])))
