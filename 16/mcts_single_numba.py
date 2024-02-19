@@ -196,7 +196,6 @@ class MCTS():
         s:int = hash(state)
         
         self.max_depth:int = 0
-        self.depth:int = 0
         self.simulation_count = 0
         state.mark()
         # for n in range(self._n_playout):
