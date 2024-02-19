@@ -209,7 +209,7 @@ class MCTS():
             # self.t += time.time()-t 
             
             self.search(state_) 
-            depth = state_.steps-state.steps
+            depth = state_.game.steps-state.game.steps
             if depth>self.max_depth: self.max_depth = depth
             # if n >= self._n_playout//2-1 and state_.game.state==1 and checkNeedExit(s, self.Nsa): break
             if n > self._n_playout and state_.game.state==1 : break 
