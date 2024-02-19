@@ -290,10 +290,11 @@ class Train():
             if os.path.exists(train_conf_file):
                 with open(train_conf_file, "rb") as fn:
                     train_conf = pickle.load(fn)
-                    agent.exrewardRate = 1./train_conf["std_values"]
+                    if "std_values" in train_conf:
+                        agent.exrewardRate = 1./train_conf["std_values"]
             
         else:
-            agent.exrewardRate = 0
+            agent.exrewardRate = 1
         agent.limitstep = random.random()<0.25
         max_emptyCount = random.randint(10,30)
         start_time = time.time()

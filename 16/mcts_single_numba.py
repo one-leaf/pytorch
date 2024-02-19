@@ -5,6 +5,7 @@ import copy
 import random
 import numpy as np
 import time
+from datetime import timedelta
 from agent_numba import ACTONS_LEN
 from numba import njit
 import numba
@@ -185,6 +186,7 @@ class MCTS():
         print("create mcts, c_puct: {}, n_playout: {}".format(c_puct, n_playout))
         self.t = 0
         self.c = 1
+        self.start_time = time.time()
     
     def get_action_probs(self, state:State, temp:float=1):
         """
@@ -232,7 +234,7 @@ class MCTS():
         if game.show_mcts_process or game.state == 1 :
             if game.state == 1: game.print()
             nz_idx = np.nonzero(state.availables())
-            print(time.strftime('%m-%d %H:%M:%S',time.localtime(time.time())), game.steps, game.fallpiece["shape"], \
+            print(timedelta(seconds=round(time.time()-self.start_time)), game.steps, game.fallpiece["shape"], \
                   "ns:", str(ns).rjust(4), "/", str(self.simulation_count).ljust(4), "depth:", str(self.max_depth).ljust(3), \
                 #   "\tQ:", round(v,2), "-->",round(qs[max_p],2), '/', round(qs[max_q],2), \
                   "\tV:", round(v,2), "-->", round(qs[max_q_idx],2), \
