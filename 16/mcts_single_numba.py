@@ -274,7 +274,7 @@ class MCTS():
         # _c = state.game.emptyCount
         
         state.step(a)
-        r = -0.001
+        r = -0.01
         if state.game.state==1:
             r += ((state.game.score-state.markscore) + (state.markEmptyCount-state.game.emptyCount)) * state.game.exrewardRate
         if r < -2: r = -2
