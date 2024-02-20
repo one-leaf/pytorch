@@ -605,13 +605,15 @@ class Agent():
             removedlines = self.removecompleteline(self.board)
             # if removedlines>0: print("OK!!!",removedlines)
             self.removedlines += removedlines
-            reward = removedlines**2
+            reward = removedlines
             
-            # 鼓励垂直下落和连续多次清行
+            # 鼓励垂直下落和连续多次消行
             if removedlines>0:
-                reward += self.downcount*0.01               
-                if self.last_reward: reward += 0.1 
-                self.downcount = 0           
+                # 如果消行了，奖励加上从上一个阶段起总共下降的个数
+                reward += self.downcount*0.01
+                # 如果上一方块也消行了，奖励加1
+                if self.last_reward: reward += 1 
+                self.downcount = 0
             self.last_reward = removedlines>0
                 
             emptyCount = self.getEmptyCount()   
