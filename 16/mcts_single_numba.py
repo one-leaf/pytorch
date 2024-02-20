@@ -278,8 +278,11 @@ class MCTS():
         if state.game.state==1:
             r += ((state.game.score-state.markscore) + (state.markEmptyCount-state.game.emptyCount)) * state.game.exrewardRate
         if r < -2: r = -2
-        # print(state.markscore, state.game.score, state.game.exrewardRate, r)
-        if state.terminal() or (state.game.state==1 and state.game.emptyCount-state.markEmptyCount>4): 
+        
+        # 如果游戏接收，或者产生了4个以上的空方块，或超过了10个方块都没有消除一行
+        if state.terminal() or \
+            (state.game.state==1 and state.game.emptyCount-state.markEmptyCount>4) or \
+            (state.game.state==1 and self.game.piececount-self.game.last_reward>10): 
             # self.Es[s] = -1
             # v = -1 + np.min(self.Qsa[s])
             v = -2

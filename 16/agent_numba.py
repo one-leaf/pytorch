@@ -430,7 +430,7 @@ class Agent():
         # 记录下降的次数
         self.downcount=0
         # 继续上一个方块的状态
-        self.last_reward = False
+        self.last_reward = -1
         # 盘面的状态
         self.need_update_status=True
         self.status = np.zeros((3, boardheight, boardwidth), dtype=np.int8)
@@ -612,9 +612,9 @@ class Agent():
                 # 如果消行了，奖励加上从上一个阶段起总共下降的个数
                 reward += self.downcount*0.01
                 # 如果上一方块也消行了，奖励加1
-                if self.last_reward: reward += 1 
+                if self.piececount-self.last_reward==1: reward += 1 
                 self.downcount = 0
-            self.last_reward = removedlines>0
+                self.last_reward = self.piececount
                 
             emptyCount = self.getEmptyCount()   
             # reward -= (emptyCount - self.emptyCount)*0.5  
