@@ -358,8 +358,8 @@ class MCTSPlayer(object):
             # else:
             #     idx = np.random.choice(range(ACTONS_LEN), p=act_probs)    
 
-            # 如果探索低于20个方块，且当前概率和推定概率一致
-            if max_qs_idx==max_ps_idx and depth<20:
+            # 如果探索低于10个方块，且当前概率和推定概率一致
+            if max_qs_idx==max_ps_idx and depth<10:
                 idx = max_ps_idx
             else:
                 p = 0.75                
