@@ -637,7 +637,8 @@ class Agent():
         else:
             self.state = 0
 
-        if not isFalling and (not self.validposition(self.board, self.fallpiece, ay=0)):
+        # 这里强制10个方块内必需合成一行
+        if not isFalling and (not self.validposition(self.board, self.fallpiece, ay=0) or self.piececount-self.last_reward>10):
             self.terminal = True 
             self.state = 1
             self.set_availables()
