@@ -241,7 +241,7 @@ class MCTS():
                   "\tP:", round(ps[max_p],2), "-->", round(probs[max_p],2),'/', round(probs[max_q_idx],2), \
                   "\tQs:", qs, "var", np.var(qs[nz_idx]))
             # 如果这一局已经超过了30分钟
-            if run_time>30*60:
+            if run_time>30*60 and self.limit_depth!=10:
                 print("limit max depth to 10")
                 self.limit_depth=10
                 
