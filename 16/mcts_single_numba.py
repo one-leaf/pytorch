@@ -187,6 +187,7 @@ class MCTS():
         self.t = 0
         self.c = 1
         self.start_time = time.time()
+        self.limit_depth = 200
     
     def get_action_probs(self, state:State, temp:float=1):
         """
@@ -201,7 +202,7 @@ class MCTS():
         self.simulation_count = 0
         state.mark()
         # for n in range(self._n_playout):
-        n=0
+        n=0        
         while True:
             self.simulation_count = n+1
             
@@ -212,8 +213,9 @@ class MCTS():
             
             self.search(state_) 
             depth = state_.game.piececount-state.game.piececount
-            if depth>self.max_depth: self.max_depth = depth
+            if depth > self.max_depth: self.max_depth = depth
             # if n >= self._n_playout//2-1 and state_.game.state==1 and checkNeedExit(s, self.Nsa): break
+            if depth > self.limit_depth: break
             if n > self._n_playout and state_.game.state==1 : break 
             n += 1
 
@@ -234,12 +236,17 @@ class MCTS():
         if game.show_mcts_process or game.state == 1 :
             if game.state == 1: game.print()
             nz_idx = np.nonzero(state.availables())
-            print(timedelta(seconds=round(time.time()-self.start_time)), game.steps, game.fallpiece["shape"], \
+            run_time = round(time.time()-self.start_time)
+            print(timedelta(seconds=run_time), game.steps, game.fallpiece["shape"], \
                   "ns:", str(ns).rjust(4), "/", str(self.simulation_count).ljust(4), "depth:", str(self.max_depth).ljust(3), \
                 #   "\tQ:", round(v,2), "-->",round(qs[max_p],2), '/', round(qs[max_q],2), \
                   "\tV:", round(v,2), "-->", round(qs[max_q_idx],2), \
                   "\tP:", round(ps[max_p],2), "-->", round(probs[max_p],2),'/', round(probs[max_q_idx],2), \
                   "\tQs:", qs, "var", np.var(qs[nz_idx]))
+            # 如果这一局已经超过了30分钟
+            if run_time>30*60:
+                self.limit_depth=10
+                
         # 动作数，概率，每个动作的Q，原始概率，当前局面的v，当前局面的总探索次数
         return probs, qs, ps, v, ns
 
