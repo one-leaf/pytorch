@@ -238,7 +238,7 @@ class MCTS():
                   "ns:", str(ns).rjust(4), "/", str(self.simulation_count).ljust(4), "depth:", str(self.max_depth).ljust(3), \
                 #   "\tQ:", round(v,2), "-->",round(qs[max_p],2), '/', round(qs[max_q],2), \
                   "\tV:", round(v,2), "-->", round(qs[max_q_idx],2), \
-                  "\tP:", round(ps[max_p],2), "-->", round(probs[max_p],2),'/', round(probs[max_q_idx],2), \
+                  "\t%s:"%game.position_to_action_name(max_p), round(ps[max_p],2), "-->", round(probs[max_p],2), \
                   "\tQs:", qs, "var", np.var(qs[nz_idx]))
             # 如果这一局已经超过了30分钟
             if run_time>30*60 and self.limit_depth!=10:
