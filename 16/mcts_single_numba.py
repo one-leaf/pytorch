@@ -241,9 +241,9 @@ class MCTS():
                   "\t%s:"%game.position_to_action_name(max_p), round(ps[max_p],2), "-->", round(probs[max_p],2), \
                   "\tQs:", qs, "var", np.var(qs[nz_idx]))
             # 如果这一局已经超过了30分钟
-            if run_time>30*60 and self.limit_depth!=10:
-                print("limit max depth to 10")
-                self.limit_depth=10
+            if run_time>30*60 and self.limit_depth!=20:
+                print("limit max depth to 20")
+                self.limit_depth=20
                 
         # 动作数，概率，每个动作的Q，原始概率，当前局面的v，当前局面的总探索次数
         return probs, qs, ps, v, ns
