@@ -215,7 +215,7 @@ class MCTS():
             depth = state_.game.piececount-state.game.piececount
             if depth > self.max_depth: self.max_depth = depth
             # if n >= self._n_playout//2-1 and state_.game.state==1 and checkNeedExit(s, self.Nsa): break
-            if depth > self.limit_depth: break
+            if depth > self.limit_depth and state_.game.state==1 : break
             if n > self._n_playout and state_.game.state==1 : break 
             n += 1
 
