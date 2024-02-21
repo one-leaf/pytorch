@@ -245,6 +245,7 @@ class MCTS():
                   "\tQs:", qs, "var", np.var(qs[nz_idx]))
             # 如果这一局已经超过了30分钟
             if run_time>30*60:
+                print("limit max depth to 10")
                 self.limit_depth=10
                 
         # 动作数，概率，每个动作的Q，原始概率，当前局面的v，当前局面的总探索次数
