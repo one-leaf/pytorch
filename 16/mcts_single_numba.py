@@ -279,9 +279,9 @@ class MCTS():
         # _c = state.game.emptyCount
         
         state.step(a)
-        r = -0.01
+        r = 0
         if state.game.state==1:
-            r += ((state.game.score-state.markscore) + (state.markEmptyCount-state.game.emptyCount)) * state.game.exrewardRate
+            r += (state.game.score-state.markscore) * state.game.exrewardRate
         if r < -2: r = -2
         
         # 如果游戏结束，或超过了10个方块都没有消除一行
