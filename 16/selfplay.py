@@ -295,7 +295,7 @@ class Train():
             
         else:
             agent.exrewardRate = 1
-        agent.limitstep = random.random()<0.25
+        agent.limitstep = True
         max_emptyCount = random.randint(10,30)
         start_time = time.time()
         print("exreward:", agent.exreward,"exrewardRate:", agent.exrewardRate ,"max_emptyCount:",max_emptyCount,"isRandomNextPiece:",agent.isRandomNextPiece,"limitstep:",agent.limitstep)
