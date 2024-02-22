@@ -343,12 +343,12 @@ class MCTSPlayer(object):
             act_probs, act_qs, act_ps, state_v, state_n = self.mcts.get_action_probs(state, temp)
             depth = self.mcts.max_depth
             
-            max_probs_idx = np.argmax(act_probs)    
+            # max_probs_idx = np.argmax(act_probs)    
             
             availables = state.availables()
             nz_idx = np.nonzero(availables)
             max_qs_idx = nz_idx[0][np.argmax(act_qs[nz_idx])]
-            var_qs = np.var(act_qs[nz_idx])
+            # var_qs = np.var(act_qs[nz_idx])
             # print(var_qs)
             max_ps_idx = nz_idx[0][np.argmax(act_ps[nz_idx])]
 
