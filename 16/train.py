@@ -332,7 +332,8 @@ class Train():
                 print("value[{}] begin:{} end:{} to:{}".format(i, begin_values[i], end_values[i], test_data[2][i].numpy()))  
                 if i>=4:break
             for i in range(len(begin_values)):
-                print("probs[{}] begin:{} end:{} to:{} ".format(i, begin_act_probs[i], end_act_probs[i],test_data[1][i].numpy()))
+                idx = np.argmax(begin_act_probs[i])
+                print("probs[{}] begin:{} end:{} to:{} ".format(i, begin_act_probs[i][idx], end_act_probs[i][idx], test_data[1][i][idx].numpy()))
                 if i>=4:break
                 
             kl = np.mean(np.sum(begin_act_probs * (np.log(begin_act_probs + 1e-10) - np.log(end_act_probs + 1e-10)), axis=1))
