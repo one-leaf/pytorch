@@ -235,7 +235,7 @@ class MCTS():
             nz_idx = np.nonzero(state.availables())
             run_time = round(time.time()-self.start_time)
             print(timedelta(seconds=run_time), game.steps, game.fallpiece["shape"], \
-                  "ns:", str(ns).rjust(4), "/", str(self.simulation_count).ljust(4), "depth:", str(self.max_depth).ljust(3), \                  
+                  "ns:", str(ns).rjust(4), "/", str(self.simulation_count).ljust(4), "depth:", str(self.max_depth).ljust(3), \
                 #   "\tQ:", round(v,2), "-->",round(qs[max_p],2), '/', round(qs[max_q],2), \
                   "\tV:", round(v,2), "-->", round(qs[max_q_idx],2), \
                   "\t%s %s:"%(game.position_to_action_name(max_q_idx),game.position_to_action_name(max_p)), \
