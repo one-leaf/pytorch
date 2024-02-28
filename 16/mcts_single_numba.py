@@ -202,6 +202,7 @@ class MCTS():
         self.simulation_count = 0
         state.mark()
         # for n in range(self._n_playout):
+        self.limit_depth=30
         while True:
             self.simulation_count += 1
             
@@ -242,9 +243,9 @@ class MCTS():
                   round(ps[max_p],2), "-->", round(probs[max_p],2), \
                   "\tQs:", qs, "var", np.var(qs[nz_idx]))
             # 如果这一局已经超过了20分钟
-            if run_time>20*60 and self.limit_depth!=20:
-                print("limit max depth to 20")
-                self.limit_depth=20
+            # if run_time>20*60 and self.limit_depth!=20:
+            #     print("limit max depth to 20")
+            #     self.limit_depth=20
                 
         # 动作数，概率，每个动作的Q，原始概率，当前局面的v，当前局面的总探索次数
         return probs, qs, ps, v, ns
