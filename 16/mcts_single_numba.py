@@ -202,7 +202,7 @@ class MCTS():
         self.simulation_count = 0
         state.mark()
         # for n in range(self._n_playout):
-        self.limit_depth=30
+        self.limit_depth=20
         while True:
             self.simulation_count += 1
             
