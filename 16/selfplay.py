@@ -284,18 +284,7 @@ class Train():
             # exrewardRateKey = exrewardRateKeys[choice]
                 
                 # exrewardRateKey = max(result["exrewardRate"], key=result["exrewardRate"].get)
-            agent.exrewardRate = result["total"]["exrewardRate"]  #float(exrewardRateKey)    
-            
-            train_conf_file=os.path.join(data_dir,"train_conf_pkl")
-            if os.path.exists(train_conf_file):
-                with open(train_conf_file, "rb") as fn:
-                    train_conf = pickle.load(fn)
-                    if "avg_values" in train_conf:
-                        if train_conf["avg_values"]>0:
-                            agent.exrewardRate = 1./(train_conf["std_values"]+train_conf["avg_values"])
-                        else:
-                            agent.exrewardRate = 1./train_conf["std_values"]
-            
+            agent.exrewardRate = result["total"]["exrewardRate"]  #float(exrewardRateKey)                            
         else:
             agent.exrewardRate = 1
         agent.limitstep = True
@@ -381,7 +370,7 @@ class Train():
                 result["total"]["avg_qval"] += alpha * (avg_qval - result["total"]["avg_qval"])
                 result["total"]["avg_state_value"] += alpha * (avg_state_value - result["total"]["avg_state_value"])
                 # result["total"]["exrewardRate"] = (1 - alpha) * (result["total"]["exrewardRate"] + alpha * avg_qval)
-                result["total"]["exrewardRate"] = agent.exrewardRate
+                # result["total"]["exrewardRate"] = agent.exrewardRate
 
                 mark_score = result["total"]["avg_score_ex"]
 
@@ -501,6 +490,17 @@ class Train():
                             policy_value_net.save_model(newmodelfile)
                         if os.path.exists(bestmodelfile): os.remove(bestmodelfile)
                         if os.path.exists(newmodelfile): os.link(newmodelfile, bestmodelfile)
+
+                    # 设置 exrewardRate
+                    train_conf_file=os.path.join(data_dir,"train_conf_pkl")
+                    if os.path.exists(train_conf_file):
+                        with open(train_conf_file, "rb") as fn:
+                            train_conf = pickle.load(fn)
+                            if "avg_values" in train_conf:
+                                if train_conf["avg_values"]>0:
+                                    result["total"]["exrewardRate"] = result["total"]["exrewardRate"] * 0.99
+                                else:
+                                    result["total"]["exrewardRate"] = result["total"]["exrewardRate"] * 1.01
 
                 result["lastupdate"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 self.save_status_file(result, game_json) 
