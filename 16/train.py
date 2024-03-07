@@ -115,7 +115,7 @@ class Dataset(torch.utils.data.Dataset):
 
             # 对背景进行 shuffle
             # 保留最近的2行，其余扰动
-            if random.random()>0.5:
+            if random.random()>0.8:
                 board = state[1]
                 max_idx = np.argmax(board,axis=0)
                 if not 0 in max_idx:
