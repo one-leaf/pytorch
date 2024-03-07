@@ -115,13 +115,15 @@ class Dataset(torch.utils.data.Dataset):
 
             # 对背景进行 shuffle
             # 保留最近的2行，其余扰动
-            # board = state[1]
-            # max_idx = np.argmax(board,axis=0)
-            # if not 0 in max_idx:
-            #     idx = np.max(max_idx)
-            #     if idx <= 17:
-            #         for i in range(idx+2,20):
-            #             np.random.shuffle(board[i])            
+            if random.random()>0.5:
+                board = state[1]
+                max_idx = np.argmax(board,axis=0)
+                if not 0 in max_idx:
+                    lines = np.min(20-max_idx)
+                    if lines>2:
+                        lc = random.randint(1,lines-1)
+                        board[lc:]=board[:-lc]
+                        board[:lc]=0                         
 
             self.data[fn]={"value":0, "state":state, "mcts_prob": mcts_prob}
         values_items = list(values.values())
@@ -154,7 +156,7 @@ class Dataset(torch.utils.data.Dataset):
             # else:
             #     self.data[fn]["value"] = v #values[fn]
 
-            # 数据二组化
+            # 数据二值化
             self.data[fn]["value"] = 1 if values[fn]>0 else -1
 
             # self.data[fn]["value"] = scores[fn]
