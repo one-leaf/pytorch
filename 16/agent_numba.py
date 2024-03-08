@@ -607,16 +607,23 @@ class Agent():
             self.removedlines += removedlines
             reward = removedlines
             
-            # 鼓励垂直下落和连续多次消行
+            emptyCount = self.getEmptyCount()   
+
+            # 鼓励垂直下落和连续多次消行和消除空格
             if removedlines>0:
                 # 如果消行了，奖励加上从上一个阶段起总共下降的个数
                 reward += self.downcount*0.01
+                
+                # 如果消除空的气泡了
+                if emptyCount<self.emptyCount:
+                    reward += (self.emptyCount-emptyCount)*0.1
+                    
                 # 如果上一方块也消行了，奖励加1
                 if self.piececount-self.last_reward==1: reward += 1 
+                
                 self.downcount = 0
                 self.last_reward = self.piececount
                 
-            emptyCount = self.getEmptyCount()   
             # reward -= (emptyCount - self.emptyCount)*0.5  
             self.emptyCount  = emptyCount
             
