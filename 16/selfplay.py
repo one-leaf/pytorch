@@ -416,14 +416,14 @@ class Train():
                     pacc.append(step["acc_ps"])
                     depth.append(step["depth"])
                     ns.append(step["ns"])
-                    vacc.append(step["qval"])
+                    vacc.append(1 if step["qval"]*step["state_value"]>0 else 0)
                     # if (not winner and step["state_value"]>0) or (winner and step["state_value"]<0):
                     #     vacc.append(0)
                     # else:
                     #     vacc.append(1)
 
                 pacc = float(np.average(pacc))
-                vacc = float(np.sum([1 for v in vacc if v>0]))
+                vacc = float(np.average(vacc))
                 depth = float(np.average(depth))
                 ns = float(np.average(ns))
 
