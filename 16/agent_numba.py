@@ -616,7 +616,7 @@ class Agent():
                 
                 # 如果消除空的气泡了
                 if emptyCount<self.emptyCount:
-                    reward += (self.emptyCount-emptyCount)*0.1
+                    reward += self.emptyCount-emptyCount
                     
                 # 如果上一方块也消行了，奖励加1
                 if self.piececount-self.last_reward==1: reward += 1 
