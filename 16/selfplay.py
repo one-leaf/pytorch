@@ -107,8 +107,10 @@ class Train():
             result["total"]["exrewardRate"]=0  
         if "piececount" not in result:
             result["piececount"]=[]
-        if "exrewardRate" not in result:
-            result["exrewardRate"]={}
+        if "exrewardRate" in result:
+            del result["exrewardRate"]
+        if "update" not in result:
+            result["update"]=[]
         return result
 
     def get_equi_data(self, states, mcts_probs, values, scores):
@@ -239,51 +241,7 @@ class Train():
         agent.show_mcts_process= True
         agent.id = 0 if random.random()>0.5 else 1
         agent.exreward = True #random.random()>0.5
-        exrewardRateKey="0.0"
         if agent.exreward:
-            # v,p = [], np.ones((len(result["exrewardRate"])))
-            # for i, k in enumerate(result["exrewardRate"]):
-            #     v.append(k)
-            #     p[i]=result["exrewardRate"][k] if result["exrewardRate"][k]>0 else 0.01
-            # exrewardRateKey=np.random.choice(v, p=p/np.sum(p))
-            # if random.random()>1/((sum(result["exrewardN"].values())+1)**0.5):
-            # if agent.is_replay:
-                # exrewardRateKey = random.choice(list(result["exrewardRate"].keys()))
-                # Thompson Sampling
-                # exrewardRateKeys = list(result["exrewardRate"].keys())
-                # len_exrewardRate = len(exrewardRateKeys)
-                # pbeta = [0 for _ in range(len_exrewardRate)]
-                # for i in range(0, len_exrewardRate):
-                #     win,trial = result["exrewardN"][exrewardRateKeys[i]]
-                #     pbeta[i] = np.random.beta(win+1, trial-win+1)
-                # choice = np.argmax(pbeta)
-                # exrewardRateKey = exrewardRateKeys[choice]
-                
-            # else:
-            # Thompson Sampling
-            # exrewardRateKeys = list(result["exrewardRate"].keys())    
-            # exrewardRateKey = min(exrewardRateKeys, key=lambda x:abs(float(x)-result["total"]["exrewardRate"]))
-            exrewardRateKey = str(round(result["total"]["exrewardRate"], 1))
-            
-                # exrewardRateKey = "0.1"
-                # exrewardRateKey = max(result["exrewardRate"], key=result["exrewardRate"].get)
-            # else:
-            # # elif random.random()>0.5:
-            #     exrewardRateKeys = list(result["exrewardRate"].keys())
-            #     len_exrewardRate = len(exrewardRateKeys)
-            #     exrewardRateKey = exrewardRateKeys[np.random.randint(0, len_exrewardRate)]
-            # else:
-                  
-            # exrewardRateKeys = list(result["exrewardRate"].keys())
-            # len_exrewardRate = len(exrewardRateKeys)
-            # pbeta = [0 for _ in range(len_exrewardRate)]
-            # for i in range(0, len_exrewardRate):
-            #     win,trial = result["exrewardN"][exrewardRateKeys[i]]
-            #     pbeta[i] = np.random.beta(win+1, trial-win+1)
-            # choice = np.argmax(pbeta)
-            # exrewardRateKey = exrewardRateKeys[choice]
-                
-                # exrewardRateKey = max(result["exrewardRate"], key=result["exrewardRate"].get)
             agent.exrewardRate = result["total"]["exrewardRate"]  #float(exrewardRateKey)                            
         else:
             agent.exrewardRate = 1
@@ -359,18 +317,10 @@ class Train():
                 print("step pay time:", steptime, "qval:", avg_qval, "avg_state_value:", avg_state_value)
                 result["total"]["avg_score_ex"] += (game_score-result["total"]["avg_score_ex"])/100
                 result["total"]["avg_reward_piececount"] += (game_score/agent.piececount - result["total"]["avg_reward_piececount"])/1000
-                
-                # delta = avg_qval - result["total"]["avg_qval"]
-                # result["total"]["avg_qval"] += delta/100
-                # delta2 = avg_qval - result["total"]["avg_qval"]
-                # result["total"]["exrewardRate"] += (delta * delta2-result["total"]["exrewardRate"])/100                
-                
+                               
                 alpha = 0.01
-                # _v = avg_qval - result["total"]["avg_qval"]
                 result["total"]["avg_qval"] += alpha * (avg_qval - result["total"]["avg_qval"])
                 result["total"]["avg_state_value"] += alpha * (avg_state_value - result["total"]["avg_state_value"])
-                # result["total"]["exrewardRate"] = (1 - alpha) * (result["total"]["exrewardRate"] + alpha * avg_qval)
-                # result["total"]["exrewardRate"] = agent.exrewardRate
 
                 mark_score = result["total"]["avg_score_ex"]
 
@@ -417,21 +367,11 @@ class Train():
                     depth.append(step["depth"])
                     ns.append(step["ns"])
                     vacc.append(1 if step["qval"]*step["state_value"]>0 else 0)
-                    # if (not winner and step["state_value"]>0) or (winner and step["state_value"]<0):
-                    #     vacc.append(0)
-                    # else:
-                    #     vacc.append(1)
 
                 pacc = float(np.average(pacc))
                 vacc = float(np.average(vacc))
                 depth = float(np.average(depth))
                 ns = float(np.average(ns))
-
-                if agent.exreward and not agent.is_replay:
-                    if exrewardRateKey not in result["exrewardRate"]:
-                        result["exrewardRate"][exrewardRateKey]=0
-                    _q = result["exrewardRate"][exrewardRateKey]
-                    result["exrewardRate"][exrewardRateKey] = round(_q+(agent.removedlines-_q)/10, 2)
 
                 if result["total"]["pacc"]==0:
                     result["total"]["pacc"] = pacc
@@ -461,6 +401,11 @@ class Train():
                     result["time"].append(round(result["total"]["step_time"],1))
                     result["ns"].append(round(result["total"]["avg_piececount"],1))
                     result["piececount"].append(round(result["total"]["piececount"],1))
+                    local_time = time.localtime(start_time)
+                    current_month = local_time.tm_mon
+                    current_day = local_time.tm_mday
+
+                    result["update"].append("%d.%02d"%(current_month,current_day))
                     result["total"]["_agent"] -= 100 
 
                     while len(result["reward"])>100:
@@ -477,6 +422,8 @@ class Train():
                         result["ns"].remove(result["ns"][0])
                     while len(result["piececount"])>100:
                         result["piececount"].remove(result["piececount"][0])
+                    while len(result["update"])>100:
+                        result["update"].remove(result["update"][0])
 
                     # 保存下中间步骤的agent
                     newmodelfile = model_file+"_"+str(result["total"]["agent"])
