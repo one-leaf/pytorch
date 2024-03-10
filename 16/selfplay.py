@@ -405,7 +405,7 @@ class Train():
                     current_month = local_time.tm_mon
                     current_day = local_time.tm_mday
 
-                    result["update"].append("%d.%02d"%(current_month,current_day))
+                    result["update"].append(current_month+current_day/100.)
                     result["total"]["_agent"] -= 100 
 
                     while len(result["reward"])>100:
