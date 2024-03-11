@@ -265,12 +265,11 @@ class Train():
 
             _, reward = agent.step(action)
 
-            if qval > 1:
-                avg_qval += (1-state_value)**2
-            elif qval < -1:
-                avg_qval += (state_value-1)**2
+            if qval > 0:
+                avg_qval += 1
             else:
-                avg_qval += (qval-state_value)**2
+                avg_qval += -1
+
             avg_state_value += state_value 
 
             _step["piece_height"] = agent.pieceheight
@@ -439,15 +438,20 @@ class Train():
                         if os.path.exists(newmodelfile): os.link(newmodelfile, bestmodelfile)
 
                     # 设置 exrewardRate
-                    train_conf_file=os.path.join(data_dir,"train_conf_pkl")
-                    if os.path.exists(train_conf_file):
-                        with open(train_conf_file, "rb") as fn:
-                            train_conf = pickle.load(fn)
-                            if "avg_values" in train_conf:
-                                if train_conf["avg_values"]>0:
-                                    result["total"]["exrewardRate"] = result["total"]["exrewardRate"] * 0.99
-                                else:
-                                    result["total"]["exrewardRate"] = result["total"]["exrewardRate"] * 1.01
+                    # train_conf_file=os.path.join(data_dir,"train_conf_pkl")
+                    # if os.path.exists(train_conf_file):
+                    #     with open(train_conf_file, "rb") as fn:
+                    #         train_conf = pickle.load(fn)
+                    #         if "avg_values" in train_conf:
+                    #             if train_conf["avg_values"]>0:
+                    #                 result["total"]["exrewardRate"] = result["total"]["exrewardRate"] * 0.99
+                    #             else:
+                    #                 result["total"]["exrewardRate"] = result["total"]["exrewardRate"] * 1.01
+
+                    if result["total"]["avg_qval"]>0:
+                        result["total"]["exrewardRate"] = result["total"]["exrewardRate"] * 0.99
+                    else:
+                        result["total"]["exrewardRate"] = result["total"]["exrewardRate"] * 1.01
 
                 result["lastupdate"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 self.save_status_file(result, game_json) 
