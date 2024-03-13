@@ -321,14 +321,13 @@ class Train():
                 result["total"]["avg_qval"] += alpha * (avg_qval - result["total"]["avg_qval"])
                 result["total"]["avg_state_value"] += alpha * (avg_state_value - result["total"]["avg_state_value"])
 
-                mark_score = result["total"]["avg_score_ex"]
+                # mark_score = result["total"]["avg_score_ex"]
 
                 # 速度控制在消耗50行
-                if agent.score >= mark_score:
-                    result["total"]["n_playout"] -= 1
+                result["total"]["n_playout"] = 20
+                if agent.piececount>=his_pieces_len:
                     result["total"]["win_count"] += 1
                 else:
-                    result["total"]["n_playout"] += 1
                     result["total"]["lost_count"] += 1
                 
                 result["total"]["agent"] += 1
