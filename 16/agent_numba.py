@@ -599,6 +599,7 @@ class Agent():
 
         reward = 0
         removedlines = 0
+        putEmptyBlock = False
         if not isFalling:            
             self.addtoboard(self.board, self.fallpiece)            
             self.need_update_status=True
@@ -608,6 +609,8 @@ class Agent():
             reward = removedlines
             
             emptyCount = self.getEmptyCount()   
+            if emptyCount>self.emptyCount:
+                putEmptyBlock = True
 
             # 鼓励垂直下落和连续多次消行和消除空格
             if removedlines>0:
@@ -647,7 +650,7 @@ class Agent():
         # 这里强制10个方块内必需合成一行和空的方块不能超过2个
         if not isFalling and ( not self.validposition(self.board, self.fallpiece, ay=0) or \
                                (self.limitstep and self.piececount-self.last_reward>15) or \
-                               (self.limitstep and self.emptyCount>2) ):
+                               (self.limitstep and self.emptyCount>1 and reward==0 and putEmptyBlock) ):
             self.terminal = True 
             self.state = 1
             self.set_availables()
