@@ -206,7 +206,7 @@ def nb_get_status(piece, p_x, p_y, templatenum=5):
 def nb_getEmptyCount(board):
     d=(20-np.argmax(board,axis=0)-np.sum(board,axis=0))
     return np.sum(d[d!=20])
-
+                
 # 统计最高位置以下的所有空的方块
 def nb_getTerminalEmptyCount(board):
     d = np.argmax(board,axis=0)
@@ -633,7 +633,7 @@ class Agent():
             # self.heightDiff = self.getHeightDiff()
             # self.heightStd = self.getHeightStd()   
             # self.pieces_height.append(self.fallpieceheight)
-            self.failtop = self.getFailTop()
+            # self.failtop = self.getFailTop()
             self.state = 1
             self.piecesteps = 0
             self.piececount += 1 
