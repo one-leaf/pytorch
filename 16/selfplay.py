@@ -324,11 +324,14 @@ class Train():
                 # mark_score = result["total"]["avg_score_ex"]
 
                 # 速度控制在消耗50行
-                result["total"]["n_playout"] = 20
                 if agent.piececount>=his_pieces_len:
                     result["total"]["win_count"] += 1
                 else:
                     result["total"]["lost_count"] += 1
+                if result["total"]["win_count"]+result["total"]["lost_count"]>1000:
+                    result["total"]["win_count"] -= 1
+                    result["total"]["lost_count"] -= 1
+                result["total"]["n_playout"] = result["total"]["win_count"]/1000
                 
                 result["total"]["agent"] += 1
                 result["total"]["_agent"] += 1
