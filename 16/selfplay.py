@@ -330,8 +330,8 @@ class Train():
                     result["total"]["lost_count"] += 1
                 c = result["total"]["win_count"]+result["total"]["lost_count"]                    
                 if c>2048:
-                    result["total"]["win_count"] -= 2
-                    result["total"]["lost_count"] -= 2
+                    result["total"]["win_count"] -= 100
+                    result["total"]["lost_count"] -= 100
                 result["total"]["n_playout"] = result["total"]["win_count"]/c
                 
                 result["total"]["agent"] += 1
