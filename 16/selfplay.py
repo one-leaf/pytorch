@@ -328,10 +328,11 @@ class Train():
                     result["total"]["win_count"] += 1
                 else:
                     result["total"]["lost_count"] += 1
-                if result["total"]["win_count"]+result["total"]["lost_count"]>1000:
-                    result["total"]["win_count"] -= round(result["total"]["win_count"]/500)
-                    result["total"]["lost_count"] -= round(result["total"]["lost_count"]/500)
-                result["total"]["n_playout"] = result["total"]["win_count"]/1000
+                c = result["total"]["win_count"]+result["total"]["lost_count"]                    
+                if c>2048:
+                    result["total"]["win_count"] -= 2
+                    result["total"]["lost_count"] -= 2
+                result["total"]["n_playout"] = result["total"]["win_count"]/c
                 
                 result["total"]["agent"] += 1
                 result["total"]["_agent"] += 1
