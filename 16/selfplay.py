@@ -232,6 +232,7 @@ class Train():
         mark_reward_piececount = -1
         avg_qval=0
         avg_state_value=0
+        need_max_ps = random.random()>0.5
         for i in range(self.max_step_count):
             _step={"step":i, "curr_player":agent.id}
             _step["state"] = np.copy(agent.current_state())
@@ -240,7 +241,7 @@ class Train():
             _step["shape"] = agent.fallpiece["shape"]
             _step["pre_piece_height"] = agent.pieceheight
 
-            action, qval, move_probs, state_value, max_qval, acc_ps, depth, ns = player.get_action(agent, agent.id, temp=1, avg_ns=result["total"]["ns"], avg_piececount=result["total"]["piececount"]) 
+            action, qval, move_probs, state_value, max_qval, acc_ps, depth, ns = player.get_action(agent, temp=1, need_max_ps=need_max_ps) 
 
             _, reward = agent.step(action)
 

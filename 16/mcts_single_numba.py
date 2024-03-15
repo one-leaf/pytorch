@@ -332,7 +332,7 @@ class MCTSPlayer(object):
     def reset_player(self):
         self.mcts.reset()
 
-    def get_action(self, game, curr_player, temp=0, avg_ns=0, avg_piececount=0):        
+    def get_action(self, game, temp=0, need_max_ps=False):        
         """计算下一步走子action"""
         if not game.terminal:  # 如果游戏没有结束
             # 训练的时候 temp = 1
@@ -365,7 +365,7 @@ class MCTSPlayer(object):
             #     idx = np.random.choice(range(ACTONS_LEN), p=act_probs)    
 
             # 如果当前概率和推定概率一致,不需要随机
-            if max_qs_idx==max_ps_idx:
+            if need_max_ps or max_qs_idx==max_ps_idx:
                 idx = max_ps_idx
             else:
                 p = 0.75                
