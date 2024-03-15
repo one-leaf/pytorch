@@ -173,7 +173,7 @@ def getEmptySAV_Dict():
     )
 
 class MCTS():
-    def __init__(self, policy_value_fn, c_puct:float=5, n_playout:int=10000):
+    def __init__(self, policy_value_fn, c_puct:float=5, n_playout:int=10000, limit_depth=20):
         self._policy = policy_value_fn      # 概率估算函数
         self._c_puct:float = c_puct               # 参数
         self._n_playout:int = n_playout         # 做几次探索
@@ -187,7 +187,7 @@ class MCTS():
         self.t = 0
         self.c = 1
         self.start_time = time.time()
-        self.limit_depth = 200
+        self.limit_depth = limit_depth
     
     def get_action_probs(self, state:State, temp:float=1):
         """
@@ -202,7 +202,6 @@ class MCTS():
         self.simulation_count = 0
         state.mark()
         # for n in range(self._n_playout):
-        self.limit_depth=20
         while True:
             self.simulation_count += 1
             
@@ -321,9 +320,9 @@ class MCTSPlayer(object):
     """基于模型指导概率的MCTS + AI player"""
 
     # c_puct MCTS child权重， 用来调节MCTS搜索深度，越大搜索越深，越相信概率，越小越相信Q 的程度 默认 5
-    def __init__(self, policy_value_function, c_puct=5, n_playout=2000):
+    def __init__(self, policy_value_function, c_puct=5, n_playout=2000, limit_depth=20):
         """初始化参数"""
-        self.mcts = MCTS(policy_value_function, c_puct, n_playout)
+        self.mcts = MCTS(policy_value_function, c_puct, n_playout, limit_depth)
 
     def set_player_ind(self, p):
         """指定MCTS的playerid"""

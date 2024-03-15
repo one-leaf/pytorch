@@ -201,33 +201,12 @@ class Train():
             
             self.save_status_file(result, game_json) 
 
-        # must_reward_pieces_count = max(5,result["total"]["avg_reward_piececount"])
-        # must_reward_pieces_count = min(10,must_reward_pieces_count)
         # 正式运行
-        player = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout)
+        limit_depth=20
+        if result["total"]["depth"]>limit_depth:
+            limit_depth=result["total"]["depth"]
+        player = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout, limit_depth=limit_depth)
 
-        # files = glob.glob(os.path.join(self.waitplaydir, "*.pkl"))
-        # if len(files)>0:
-        
-        #     files = sorted(files, key=lambda x: os.path.getmtime(x))
-        #     while len(files)>1000:
-        #         fn = files.pop(0)
-        #         os.remove(fn)
-
-        #     his_pieces_file = files[0]
-        #     try:
-        #         with open(his_pieces_file,"rb") as fn:
-        #             his_pieces = pickle.load(fn)     
-        #         print("replay test again, load file:", his_pieces_file)
-        #     finally:
-        #         print("delete", his_pieces_file)
-        #         os.remove(his_pieces_file)
-        #     if not isinstance(his_pieces[0],str): his_pieces=[]                
-        #     print([p for p in his_pieces])
-
-        #     # 有历史记录的，按概率走，调整概率
-        #     agent = Agent(isRandomNextPiece=False, nextPiecesList=his_pieces)
-        #     agent.is_replay = True
         if his_pieces!=None:
             print("min_score:", min_score, "pieces_count:", len(his_pieces))
             print("his_pieces:", his_pieces)
