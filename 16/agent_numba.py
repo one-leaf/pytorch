@@ -650,7 +650,7 @@ class Agent():
         # 这里强制10个方块内必需合成一行和空的方块不能超过2个
         if not isFalling and ( not self.validposition(self.board, self.fallpiece, ay=0) or \
                                (self.limitstep and self.piececount-self.last_reward>15) or \
-                               (self.limitstep and self.emptyCount>1 and reward==0 and putEmptyBlock) ):
+                               (self.limitstep and self.piececount>2 and self.emptyCount>0 and reward==0 and putEmptyBlock) ):
             self.terminal = True 
             self.state = 1
             self.set_availables()
