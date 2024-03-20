@@ -214,7 +214,10 @@ class MCTS():
             depth = state_.game.piececount-state.game.piececount
             if depth > self.max_depth: self.max_depth = depth
             if self.simulation_count>=10 and depth>self.limit_depth and state_.game.state==1 and self.Ns[s]>=100: break
-            if self.simulation_count >= self._n_playout and state_.game.state==1 : break 
+            if state.game.piececount==0:
+                if self.simulation_count >= self._n_playout*2 and state_.game.state==1 : break 
+            else:
+                if self.simulation_count >= self._n_playout and state_.game.state==1 : break 
 
         probs = getprobsFromNsa(s, temp, state.availables(), state.actions_num, self.Nsa)                       
         
