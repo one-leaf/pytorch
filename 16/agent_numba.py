@@ -555,7 +555,7 @@ class Agent():
         # if not KEY_DOWN in acts : acts.append(KEY_DOWN)
         
     def step(self, action):
-        # 状态 0 下落过程中 1 更换方块 2 结束一局
+        # 状态 0 下落过程中 1 更换方块 2 结束一局    
         self.steps += 1
         self.piecesteps += 1
         # self.level, self.fallfreq = self.calculate(self.score)

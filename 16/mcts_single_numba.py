@@ -22,10 +22,7 @@ class State():
         self.actions_num = ACTONS_LEN
         self.markscore = 0
         self.markfailtop = 0
-        self.markEmptyCount = 0
-        
-    def step(self,act:int):
-        return self.game.step(act)                      
+        self.markEmptyCount = 0                   
         
     def terminal(self):
         return self.game.terminal
@@ -188,6 +185,7 @@ class MCTS():
         self.c = 1
         self.start_time = time.time()
         self.limit_depth = limit_depth
+        self.cache={}
     
     def get_action_probs(self, state:State, temp:float=1):
         """
@@ -281,8 +279,13 @@ class MCTS():
         
         # _r = state.game.score
         # _c = state.game.emptyCount
-        
-        state.step(a)
+        if (s,a) in self.cache:
+            state.game=self.cache[(s,a)]
+            print("cache")
+        else:
+            state.game.step(a)
+            self.cache[(s,a)]=copy.deepcopy(state.game)
+            
         r = 0
         if state.game.state==1:
             r += (state.game.score-state.markscore) * state.game.exrewardRate
