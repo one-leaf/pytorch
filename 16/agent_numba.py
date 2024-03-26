@@ -1,6 +1,5 @@
 import numpy as np
 import random
-from numba import njit,prange
 
 boxsize = 20
 boardwidth = 10
@@ -417,8 +416,6 @@ class Agent():
         self.board = self.getblankboard()
         # 状态： 0 下落过程中 1 更换方块 2 结束一局
         self.state = 0
-        # 每个方块的高度
-        self.pieces_height = []    
         self.piece_actions = "" 
         # 当前prices所有动作
         # self.actions=[]
@@ -436,8 +433,57 @@ class Agent():
         self.status = np.zeros((3, boardheight, boardwidth), dtype=np.int8)
         self.set_status()
         # key
+        self.key = 0
         self.set_key()
+        self.cache=None
 
+    def clone(self):
+        agent = Agent()
+        agent.nextPieceList=[p for p in self.nextPieceList]
+        agent.next_Pieces_list_len = self.next_Pieces_list_len
+        agent.isRandomNextPiece = self.isRandomNextPiece
+        agent.pieceCount = self.pieceCount 
+        agent.piecehis = [p for p in self.piecehis]
+        agent.fallpiece = self.clonePiece(self.fallpiece)
+        agent.nextpiece = self.clonePiece(self.nextpiece)
+        agent.terminal = self.terminal
+        agent.score = self.score
+        agent.removedlines = self.removedlines
+        agent.steps = self.steps
+        agent.piecesteps = self.piecesteps
+        agent.piececount = self.piececount
+        agent.pieceheight = self.pieceheight
+        agent.emptyCount = self.emptyCount
+        agent.heightDiff = self.heightDiff
+        agent.heightStd = self.heightStd
+        agent.failLines = self.failLines
+        agent.failtop = self.failtop
+        agent.fallpieceheight = self.fallpieceheight
+        agent.exreward = self.exreward
+        agent.exrewardRate = self.exrewardRate
+        agent.limitstep=self.limitstep
+        agent.board=np.copy(self.board)
+        agent.state=self.state
+        agent.piece_actions = self.piece_actions
+        agent.availables=np.copy(self.availables)
+        agent.show_mcts_process = self.show_mcts_process
+        agent.downcount = self.downcount
+        agent.last_reward = self.last_reward
+        agent.need_update_status = self.need_update_status
+        agent.status = np.copy(self.status)
+        agent.key = self.key
+        agent.cache = self.cache
+        return agent
+    
+    def clonePiece(self, piece):
+        if piece==None: return None
+        p={}
+        p["shape"]=piece["shape"]
+        p["rotation"]=piece["rotation"]
+        p["x"]=piece["x"]
+        p["y"]=piece["y"]
+        return p
+        
     def getpiece(self, shape=None):
         if shape==None:
             shape = random.choice(list(pieces.keys()))
@@ -485,6 +531,9 @@ class Agent():
     
     # 状态一共3层， 0 当前下落方块， 1 是背景 ，2下落方块的上一个动作
     def set_status(self):
+        # status = np.zeros((3, boardheight, boardwidth), dtype=np.int8)
+        
+        
         self.status[2]=self.status[0]
         if self.fallpiece != None:
             piece = self.fallpiece
@@ -553,62 +602,100 @@ class Agent():
             self.fallpiece['rotation'] = r
 
         # if not KEY_DOWN in acts : acts.append(KEY_DOWN)
+
+    # 设置缓存
+    def setCache(self, cache):
+        self.cache=cache
         
-    def step(self, action):
+    def step(self, action):                
         # 状态 0 下落过程中 1 更换方块 2 结束一局    
         self.steps += 1
         self.piecesteps += 1
         # self.level, self.fallfreq = self.calculate(self.score)
         
         # self.actions.append(action)
-
-        if self.availables[action] == 1:
-            if action == KEY_LEFT: 
-                self.fallpiece['x'] -= 1
-
-            if action == KEY_RIGHT:
-                self.fallpiece['x'] += 1  
-
-            if action == KEY_ROTATION:
-                self.fallpiece['rotation'] =  (self.fallpiece['rotation'] + 1) % len(pieces[self.fallpiece['shape']])
-
-        if action == KEY_DOWN:# and self.validposition(self.board, self.fallpiece, ay=1):
-            # n = self.calc_down_count(self.board, self.fallpiece)
-            # self.fallpiece['y'] += n
-            # self.downcount += n
-            self.fallpiece['y'] += 1
-            if self.piecesteps>1 and self.piece_actions[-1]=="D":
-                while self.validposition(self.board, self.fallpiece, ay=1):
-                    if self.downcount == 0:
-                        self.downcount = 1
-                    else:
-                        self.downcount = self.downcount*0.9 + 1
-                    self.fallpiece['y'] += 1                          
-
-        isFalling=True
-        if self.validposition(self.board, self.fallpiece, ay=1):
-            self.fallpiece['y'] += 1
-            if not self.validposition(self.board, self.fallpiece, ay=1):
-                isFalling = False
+        if self.cache!=None and (self.key, action, 0) in self.cache:
+            c = self.cache[(self.key, action, 0)]           
+            self.fallpiece['x'] = c["fallpiece_x"]
+            self.fallpiece['y'] = c["fallpiece_y"]
+            self.fallpiece['rotation'] = c["fallpiece_rotation"]
+            for _ in range(c["downcount"]):
+                self.downcount=self.downcount*0.9+1
+            isFalling = c["isFalling"]    
+            self.piece_actions = c["piece_actions"]   
         else:
-            isFalling = False
+            if self.availables[action] == 1:
+                if action == KEY_LEFT: 
+                    self.fallpiece['x'] -= 1
 
-        if self.piecesteps ==1 :self.piece_actions=""
-        self.piece_actions += self.position_to_action_name(action)
+                if action == KEY_RIGHT:
+                    self.fallpiece['x'] += 1  
+
+                if action == KEY_ROTATION:
+                    self.fallpiece['rotation'] =  (self.fallpiece['rotation'] + 1) % len(pieces[self.fallpiece['shape']])
+
+            _down_count = 0
+            if action == KEY_DOWN:# and self.validposition(self.board, self.fallpiece, ay=1):
+                # n = self.calc_down_count(self.board, self.fallpiece)
+                # self.fallpiece['y'] += n
+                # self.downcount += n
+                self.fallpiece['y'] += 1
+                if self.piecesteps>1 and self.piece_actions[-1]=="D":
+                    while self.validposition(self.board, self.fallpiece, ay=1):
+                        _down_count+=1
+                        self.fallpiece['y'] += 1                          
+
+                for _ in range(_down_count):
+                    self.downcount = self.downcount*0.9 + 1
+
+            isFalling=True
+            if self.validposition(self.board, self.fallpiece, ay=1):
+                self.fallpiece['y'] += 1
+                if not self.validposition(self.board, self.fallpiece, ay=1):
+                    isFalling = False
+            else:
+                isFalling = False
+
+            if self.piecesteps ==1 :self.piece_actions=""
+            self.piece_actions += self.position_to_action_name(action)
+
+            if self.cache!=None:
+                c={}
+                c["fallpiece_x"] = self.fallpiece['x'] 
+                c["fallpiece_y"] = self.fallpiece['y'] 
+                c["fallpiece_rotation"] =  self.fallpiece['rotation']
+                c["downcount"] = _down_count
+                c["isFalling"] = isFalling
+                c["piece_actions"] = self.piece_actions
+                self.cache[(self.key, action, 0)]=c
+
         # self.fallpieceheight = 20 - self.fallpiece['y']
 
         reward = 0
         removedlines = 0
         putEmptyBlock = False
-        if not isFalling:            
-            self.addtoboard(self.board, self.fallpiece)            
+        if not isFalling:    
+            if self.cache!=None and (self.key, action, 1) in self.cache:
+                c = self.cache[(self.key, action, 1)] 
+                self.board = np.copy(c["board"])
+                removedlines = c["removedlines"]
+                emptyCount = c["emptyCount"]                
+            else:
+                self.addtoboard(self.board, self.fallpiece)            
+                removedlines = self.removecompleteline(self.board)
+                emptyCount = self.getEmptyCount()   
+                if self.cache!=None:
+                    c={}
+                    c["board"] = np.copy(self.board)
+                    c["removedlines"] = removedlines
+                    c["emptyCount"] =  emptyCount
+                    self.cache[(self.key, action, 1)] = c
+                    
             self.need_update_status=True
-            removedlines = self.removecompleteline(self.board)
             # if removedlines>0: print("OK!!!",removedlines)
             self.removedlines += removedlines
             reward = removedlines
             
-            emptyCount = self.getEmptyCount()   
             if emptyCount>self.emptyCount:
                 putEmptyBlock = True
 
@@ -635,7 +722,6 @@ class Agent():
             # self.failLines = self.getFailLines()  
             # self.heightDiff = self.getHeightDiff()
             # self.heightStd = self.getHeightStd()   
-            # self.pieces_height.append(self.fallpieceheight)
             # self.failtop = self.getFailTop()
             self.state = 1
             self.piecesteps = 0
@@ -644,21 +730,25 @@ class Agent():
             self.fallpiece = self.nextpiece
             self.nextpiece = self.getnewpiece()            
             # self.actions = []
+
+            # 这里强制15个方块内必需合成一行个 和 强制第一个方块之后不能有空
+            if ( not self.validposition(self.board, self.fallpiece, ay=0) or \
+                               (self.limitstep and self.piececount-self.last_reward>15) or \
+                               (self.limitstep and putEmptyBlock and reward==0 and self.piececount>1) ):
+                self.terminal = True 
+                self.state = 1
         else:
             self.state = 0
 
-        # 这里强制15个方块内必需合成一行个
-        # 强制第一个方块
-        if not isFalling and ( not self.validposition(self.board, self.fallpiece, ay=0) or \
-                               (self.limitstep and self.piececount-self.last_reward>15) or \
-                               (self.limitstep and putEmptyBlock and reward==0 and self.piececount>1) ):
-            self.terminal = True 
-            self.state = 1
-            self.set_availables()
-            
+        self.set_availables()
         self.set_status()
         self.set_key()       
-        self.set_availables()
+        # print(self.status[2])
+        # print(self.status[0])
+        # # print(self.status[1]) 
+        # print("***********************")               
+        # if self.steps>20:
+        #     raise
         return self.state, removedlines
 
     def set_key(self):
@@ -678,12 +768,9 @@ class Agent():
         for b in board.flat:
             key.append(str(b))
         keystr = int("".join(key), 2)
-        self.key = hash(keystr)
+        # self.key = hash(keystr)
+        self.key = keystr
         
-
-    def get_key(self):
-        return self.key
-
     def is_status_optimal(self):
         return self.piececount<=self.score*2.5+self.must_reward_piece_count
 

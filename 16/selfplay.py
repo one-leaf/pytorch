@@ -217,6 +217,9 @@ class Train():
             agent = Agent(isRandomNextPiece=False, )
             agent.is_replay = False
 
+        cache = {}
+        agent.setCache(cache)
+        
         agent.show_mcts_process= True
         agent.id = 0 if random.random()>0.5 else 1
         agent.exreward = True #random.random()>0.5

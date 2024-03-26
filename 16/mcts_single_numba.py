@@ -24,12 +24,9 @@ class State():
         self.markfailtop = 0
         self.markEmptyCount = 0                   
         
-    def terminal(self):
-        return self.game.terminal
-    
     # 2.049623722920656e-06  
     def __hash__(self):
-        return self.game.get_key()
+        return self.game.key
 
     def __eq__(self, other):
         return hash(self)==hash(other)
@@ -39,7 +36,8 @@ class State():
     
     # 0.00022098371224809986  
     def clone(self):
-        state = State(copy.deepcopy(self.game))
+        # state = State(copy.deepcopy(self.game))
+        state = State(self.game.clone())
         state.search = self.search
         state.markscore = self.markscore
         state.markfailtop = self.markfailtop
@@ -185,7 +183,6 @@ class MCTS():
         self.c = 1
         self.start_time = time.time()
         self.limit_depth = limit_depth
-        self.cache={}
     
     def get_action_probs(self, state:State, temp:float=1):
         """
@@ -206,8 +203,7 @@ class MCTS():
             # t = time.time()     
             state_:State =state.clone()
             # self.c += 1
-            # self.t += time.time()-t 
-            
+            # self.t += time.time()-t             
             self.search(state_) 
             depth = state_.game.piececount-state.game.piececount
             if depth > self.max_depth: self.max_depth = depth
@@ -267,7 +263,7 @@ class MCTS():
         if s not in self.Ps:                          
             # 获得当前局面的概率 和 局面的打分, 这个已经过滤掉了不可用走法
             act_probs, v = self._policy(state.game) 
-              
+            
             expandPN(s, state.availables(), act_probs, self.Ps, self.Ns, self.Nsa, self.Qsa, state.actions_num)             
 
             self.Vs[s] = v
@@ -279,20 +275,15 @@ class MCTS():
         
         # _r = state.game.score
         # _c = state.game.emptyCount
-        if (s,a) in self.cache:
-            state.game=self.cache[(s,a)]
-            print("cache")
-        else:
-            state.game.step(a)
-            self.cache[(s,a)]=copy.deepcopy(state.game)
-            
+        state.game.step(a)
+                   
         r = 0
         if state.game.state==1:
             r += (state.game.score-state.markscore) * state.game.exrewardRate
         if r < -2: r = -2
         
         # 如果游戏结束
-        if state.terminal(): 
+        if state.game.terminal: 
             # (state.game.state==1 and state.game.emptyCount-state.markEmptyCount>4) or \
             
             # self.Es[s] = -1
