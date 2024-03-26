@@ -743,12 +743,7 @@ class Agent():
         self.set_availables()
         self.set_status()
         self.set_key()       
-        # print(self.status[2])
-        # print(self.status[0])
-        # # print(self.status[1]) 
-        # print("***********************")               
-        # if self.steps>20:
-        #     raise
+
         return self.state, removedlines
 
     def set_key(self):
