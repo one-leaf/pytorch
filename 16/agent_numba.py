@@ -419,9 +419,8 @@ class Agent():
         self.piece_actions = "" 
         # 当前prices所有动作
         # self.actions=[]
-        # 下一个可用步骤
-        self.availables=np.ones(ACTONS_LEN, dtype=np.int8)
-        self.set_availables()
+        self.cache=None
+
         # 显示mcts中间过程
         self.show_mcts_process = False
         # 记录下降的次数
@@ -435,7 +434,9 @@ class Agent():
         # key
         self.key = 0
         self.set_key()
-        self.cache=None
+        # 下一个可用步骤，设置需要在key之后
+        self.availables=np.ones(ACTONS_LEN, dtype=np.int8)
+        self.set_availables()
 
     def clone(self):
         agent = Agent()
@@ -574,6 +575,11 @@ class Agent():
     # 获取可用步骤, 保留一个旋转始终有用
     # 将单人游戏变为双人博弈，一个正常下，一个只下走，
     def set_availables(self):
+        if self.cache!=None and (self.key, 100) in self.cache:
+            c = self.cache[(self.key, 100)]
+            self.availables = np.copy(c)
+            return
+        
         # acts=[KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN]
         if not self.validposition(self.board, self.fallpiece, ax = -1):
             self.availables[KEY_LEFT]=0
@@ -603,6 +609,9 @@ class Agent():
 
         # if not KEY_DOWN in acts : acts.append(KEY_DOWN)
 
+        if self.cache!=None:
+            self.cache[(self.key, 100)]=np.copy(self.availables)
+
     # 设置缓存
     def setCache(self, cache):
         self.cache=cache
@@ -614,8 +623,8 @@ class Agent():
         # self.level, self.fallfreq = self.calculate(self.score)
         
         # self.actions.append(action)
-        if self.cache!=None and (self.key, action, 0) in self.cache:
-            c = self.cache[(self.key, action, 0)]           
+        if self.cache!=None and (self.key, action+10) in self.cache:
+            c = self.cache[(self.key, action+10)]           
             self.fallpiece['x'] = c["fallpiece_x"]
             self.fallpiece['y'] = c["fallpiece_y"]
             self.fallpiece['rotation'] = c["fallpiece_rotation"]
@@ -623,7 +632,6 @@ class Agent():
                 self.downcount=self.downcount*0.9+1
             isFalling = c["isFalling"]    
             self.piece_actions = c["piece_actions"]  
-            self.availables = np.copy(c["availables"]) 
         else:
             if self.availables[action] == 1:
                 if action == KEY_LEFT: 
@@ -660,9 +668,6 @@ class Agent():
             if self.piecesteps ==1 :self.piece_actions=""
             self.piece_actions += self.position_to_action_name(action)
 
-            if isFalling:
-                self.set_availables()
-
             if self.cache!=None:
                 c={}
                 c["fallpiece_x"] = self.fallpiece['x'] 
@@ -671,8 +676,7 @@ class Agent():
                 c["downcount"] = _down_count
                 c["isFalling"] = isFalling
                 c["piece_actions"] = self.piece_actions
-                c["availables"] = np.copy(self.availables)
-                self.cache[(self.key, action, 0)]=c
+                self.cache[(self.key, action+10)]=c
 
         # self.fallpieceheight = 20 - self.fallpiece['y']
 
@@ -681,7 +685,7 @@ class Agent():
         putEmptyBlock = False
         if not isFalling:    
             if self.cache!=None and (self.key, action, 1) in self.cache:
-                c = self.cache[(self.key, action, 1)] 
+                c = self.cache[(self.key, action+20)] 
                 self.board = np.copy(c["board"])
                 removedlines = c["removedlines"]
                 emptyCount = c["emptyCount"]                
@@ -694,7 +698,7 @@ class Agent():
                     c["board"] = np.copy(self.board)
                     c["removedlines"] = removedlines
                     c["emptyCount"] =  emptyCount
-                    self.cache[(self.key, action, 1)] = c
+                    self.cache[(self.key, action+20)] = c
                     
             self.need_update_status=True
             # if removedlines>0: print("OK!!!",removedlines)
@@ -742,13 +746,13 @@ class Agent():
                                (self.limitstep and putEmptyBlock and reward==0 and self.piececount>1) ):
                 self.terminal = True 
                 self.state = 1
-            else:
-                self.set_availables()
         else:
             self.state = 0
 
+        # 以下顺序不能变
         self.set_status()
         self.set_key()       
+        self.set_availables()
 
         return self.state, removedlines
 
