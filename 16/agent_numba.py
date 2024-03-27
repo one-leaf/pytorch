@@ -622,7 +622,8 @@ class Agent():
             for _ in range(c["downcount"]):
                 self.downcount=self.downcount*0.9+1
             isFalling = c["isFalling"]    
-            self.piece_actions = c["piece_actions"]   
+            self.piece_actions = c["piece_actions"]  
+            self.availables = np.copy(c["availables"]) 
         else:
             if self.availables[action] == 1:
                 if action == KEY_LEFT: 
@@ -659,6 +660,9 @@ class Agent():
             if self.piecesteps ==1 :self.piece_actions=""
             self.piece_actions += self.position_to_action_name(action)
 
+            if isFalling:
+                self.set_availables()
+
             if self.cache!=None:
                 c={}
                 c["fallpiece_x"] = self.fallpiece['x'] 
@@ -667,6 +671,7 @@ class Agent():
                 c["downcount"] = _down_count
                 c["isFalling"] = isFalling
                 c["piece_actions"] = self.piece_actions
+                c["availables"] = np.copy(self.availables)
                 self.cache[(self.key, action, 0)]=c
 
         # self.fallpieceheight = 20 - self.fallpiece['y']
@@ -737,10 +742,11 @@ class Agent():
                                (self.limitstep and putEmptyBlock and reward==0 and self.piececount>1) ):
                 self.terminal = True 
                 self.state = 1
+            else:
+                self.set_availables()
         else:
             self.state = 0
 
-        self.set_availables()
         self.set_status()
         self.set_key()       
 
