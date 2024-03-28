@@ -201,7 +201,7 @@ class Train():
                 #     pickle.dump(his_pieces, fn)
                 # print("save need replay", filename)
             
-        result["total"]["n_playout"] += (min_removedlines-result["total"]["avg_piececount"])/100
+        result["total"]["n_playout"] += (min_removedlines-result["total"]["n_playout"])/100
         self.save_status_file(result, game_json) 
 
 
