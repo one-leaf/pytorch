@@ -166,6 +166,7 @@ class Train():
         his_pieces = None
         his_pieces_len = 0
         min_score = result["total"]["avg_score"]
+        min_removedlines = 0
         for _ in range(self.play_size):
             result = self.read_status_file(game_json)     
             agent = Agent(isRandomNextPiece=True)
@@ -193,6 +194,7 @@ class Train():
                 min_score = agent.score
                 his_pieces = agent.piecehis
                 his_pieces_len = len(agent.piecehis)
+                min_removedlines = agent.removedlines
                 # filename = "T{}-{}-{}.pkl".format(agent.piececount, agent.removedlines ,int(round(time.time() * 1000000)))
                 # savefile = os.path.join(self.waitplaydir, filename)
                 # with open(savefile, "wb") as fn:
@@ -200,6 +202,9 @@ class Train():
                 # print("save need replay", filename)
             
             self.save_status_file(result, game_json) 
+
+        result["total"]["n_playout"] += (min_removedlines-result["total"]["avg_piececount"])/100
+
 
         # 正式运行
         limit_depth=20
@@ -312,7 +317,6 @@ class Train():
                 else:
                     result["total"]["lost_count"] += 1
                 c = result["total"]["win_count"]+result["total"]["lost_count"]                    
-                result["total"]["n_playout"] = result["total"]["win_count"]/c
                 if c>2000:
                     result["total"]["win_count"] -= round(result["total"]["win_count"]/(2*c))
                     result["total"]["lost_count"] -= round(result["total"]["lost_count"]/(2*c))
