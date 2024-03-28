@@ -178,7 +178,7 @@ class Train():
                 action = policy_value_net.policy_value_fn_best_act(agent)
                 _, reward = agent.step(action)
                 if reward > 0:
-                    print("#"*40, 'score:', agent.score, 'height:', agent.pieceheight, 'piece:', agent.piececount, "shape:", agent.fallpiece["shape"], \
+                    print("#"*40, 'score:', agent.removedlines, 'height:', agent.pieceheight, 'piece:', agent.piececount, "shape:", agent.fallpiece["shape"], \
                         'step:', agent.steps, "step time:", round((time.time()-start_time)/i,3),'avg_score:', result["total"]["avg_score"])            
 
                 if agent.terminal:            
@@ -201,9 +201,8 @@ class Train():
                 #     pickle.dump(his_pieces, fn)
                 # print("save need replay", filename)
             
-            self.save_status_file(result, game_json) 
-
         result["total"]["n_playout"] += (min_removedlines-result["total"]["avg_piececount"])/100
+        self.save_status_file(result, game_json) 
 
 
         # 正式运行
