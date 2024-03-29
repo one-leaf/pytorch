@@ -280,7 +280,7 @@ class MCTS():
         r = 0
         if state.game.state==1:
             r += (state.game.score-state.markscore) * state.game.exrewardRate
-        if r < -2: r = -2
+        if r < 0: r = 0
         
         # 如果游戏结束
         if state.game.terminal: 
@@ -288,9 +288,9 @@ class MCTS():
             
             # self.Es[s] = -1
             # v = -1 + np.min(self.Qsa[s])
-            v = -2
+            v = -1
             # v = -1
-            r = -2
+            r = 0
         else:
             # 现实奖励
             # 按照DQN，  q[s,a] += 0.1*(r+ 0.99*(max(q[s+1])-q[s,a])
@@ -298,7 +298,6 @@ class MCTS():
             v = self.search(state)
             # r = np.tanh(r)
         
-        # r *= state.game.exrewardRate 
         # r = np.tanh(r)
         # if r>1: r = 1
         # if r<-1: r= -1
