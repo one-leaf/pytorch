@@ -277,10 +277,11 @@ class MCTS():
         # _c = state.game.emptyCount
         state.game.step(a)
                    
+        # 外部奖励，最大1
         r = 0
         if state.game.state==1:
             r += (state.game.score-state.markscore) * state.game.exrewardRate
-        if r < 0: r = 0
+        if r > 1: r = 1
         
         # 如果游戏结束
         if state.game.terminal: 
