@@ -186,6 +186,8 @@ class Train():
                     result["total"]["avg_piececount"] += (agent.piececount-result["total"]["avg_piececount"])/1000
                     result["lastupdate"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                     break
+                
+            self.save_status_file(result, game_json)
 
             agent.print()
 
