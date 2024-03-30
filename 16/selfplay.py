@@ -240,7 +240,7 @@ class Train():
         mark_reward_piececount = -1
         avg_qval=0
         avg_state_value=0
-        need_max_ps = random.random()>0.5
+        need_max_ps = False # random.random()>0.5
         print("exreward:", agent.exreward,"exrewardRate:", agent.exrewardRate ,"max_emptyCount:",max_emptyCount,"isRandomNextPiece:",agent.isRandomNextPiece,"limitstep:",agent.limitstep,"need_max_ps:",need_max_ps)
         for i in range(self.max_step_count):
             _step={"step":i, "curr_player":agent.id}
