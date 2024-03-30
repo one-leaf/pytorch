@@ -740,9 +740,9 @@ class Agent():
             self.nextpiece = self.getnewpiece()            
             # self.actions = []
 
-            # 这里强制15个方块内必需合成一行个 和 强制第一个方块之后不能有空
+            # 这里强制20个方块内必需合成一行个 和 强制第一个方块之后不能有空
             if ( not self.validposition(self.board, self.fallpiece, ay=0) or \
-                               (self.limitstep and self.piececount-self.last_reward>15) or \
+                               (self.limitstep and self.piececount-self.last_reward>=20) or \
                                (self.limitstep and putEmptyBlock and reward==0 and self.piececount>1) ):
                 self.terminal = True 
                 self.state = 1
