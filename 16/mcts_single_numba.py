@@ -54,7 +54,7 @@ def selectAction(s:int, availables, _c_puct:float, Ps, Ns, Qsa, Nsa):
     # 如果有一次都没有探索的，返回
     # 开销 8.05366921094275e-05 S
     # njit 4.298482243524901e-05 S
-    if np.min(Nsa[s][availables==1])==0 or Nsa[s]==0:
+    if np.min(Nsa[s][availables==1])==0:
         return np.argmax(Nsa[s]+availables == 1)
     q = Qsa[s]+ _c_puct * availables * Ps[s] * sqrt(Ns[s]) / Nsa[s]
     
@@ -116,7 +116,7 @@ def expandPN(s:int, availables, act_probs, Ps, Ns, Nsa, Qsa, actions_num):
     probs = (act_probs*availables).astype(np.float32)
     Ps[s] = probs 
     Ns[s] = 0
-    Nsa[s] = np.zeros(actions_num, dtype=np.int64)
+    Nsa[s] = np.ones(actions_num, dtype=np.int64)
     Qsa[s] = np.zeros(actions_num, dtype=np.float32)
 
 #@njit(cache=True)
