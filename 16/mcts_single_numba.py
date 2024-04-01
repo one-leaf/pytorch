@@ -54,7 +54,7 @@ def selectAction(s:int, availables, _c_puct:float, Ps, Ns, Qsa, Nsa):
     # 如果有一次都没有探索的，返回
     # 开销 8.05366921094275e-05 S
     # njit 4.298482243524901e-05 S
-    if np.min(Nsa[s][availables==1])==0:
+    if np.min(Nsa[s][availables==1])==0 or Nsa[s]==0:
         return np.argmax(Nsa[s]+availables == 1)
     q = Qsa[s]+ _c_puct * availables * Ps[s] * sqrt(Ns[s]) / Nsa[s]
     
