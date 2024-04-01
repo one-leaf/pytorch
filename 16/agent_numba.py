@@ -699,7 +699,7 @@ class Agent():
                     c2["board"] = self.board
                     c2["removedlines"] = removedlines
                     c2["emptyCount"] =  emptyCount
-                    self.cache[(self.key, action+1000)] = c
+                    self.cache[(self.key, action+1000)] = c2
                     
             self.need_update_status=True
             # if removedlines>0: print("OK!!!",removedlines)
