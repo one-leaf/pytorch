@@ -696,7 +696,7 @@ class Agent():
                 emptyCount = self.getEmptyCount()   
                 if self.cache!=None:
                     c={}
-                    c["board"] = np.copy(self.board)
+                    c["board"] = self.board
                     c["removedlines"] = removedlines
                     c["emptyCount"] =  emptyCount
                     self.cache[(self.key, action+100+_d)] = c
