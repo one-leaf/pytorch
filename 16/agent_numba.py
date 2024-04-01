@@ -685,21 +685,21 @@ class Agent():
         removedlines = 0
         putEmptyBlock = False
         if not isFalling:    
-            if self.cache!=None and (self.key, action+100+_d) in self.cache:
-                c = self.cache[(self.key, action+100+_d)] 
-                self.board = np.copy(c["board"])
-                removedlines = c["removedlines"]
-                emptyCount = c["emptyCount"]                
+            if self.cache!=None and (self.key, action+1000+_d) in self.cache:
+                c2 = self.cache[(self.key, action+1000+_d)] 
+                self.board = np.copy(c2["board"])
+                removedlines = c2["removedlines"]
+                emptyCount = c2["emptyCount"]                
             else:
                 self.addtoboard(self.board, self.fallpiece)            
                 removedlines = self.removecompleteline(self.board)
                 emptyCount = self.getEmptyCount()   
                 if self.cache!=None:
-                    c={}
-                    c["board"] = self.board
-                    c["removedlines"] = removedlines
-                    c["emptyCount"] =  emptyCount
-                    self.cache[(self.key, action+100+_d)] = c
+                    c2={}
+                    c2["board"] = self.board
+                    c2["removedlines"] = removedlines
+                    c2["emptyCount"] =  emptyCount
+                    self.cache[(self.key, action+1000+_d)] = c
                     
             self.need_update_status=True
             # if removedlines>0: print("OK!!!",removedlines)
