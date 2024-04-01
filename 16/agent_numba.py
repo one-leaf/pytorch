@@ -631,7 +631,6 @@ class Agent():
             for _ in range(c["downcount"]):
                 self.downcount=self.downcount*0.9+1
             isFalling = c["isFalling"]    
-            self.piece_actions = c["piece_actions"]  
         else:
             if self.availables[action] == 1:
                 if action == KEY_LEFT: 
@@ -665,9 +664,6 @@ class Agent():
             else:
                 isFalling = False
 
-            if self.piecesteps ==1 :self.piece_actions=""
-            self.piece_actions += self.position_to_action_name(action)
-
             if self.cache!=None:
                 c={}
                 c["fallpiece_x"] = self.fallpiece['x'] 
@@ -675,10 +671,11 @@ class Agent():
                 c["fallpiece_rotation"] =  self.fallpiece['rotation']
                 c["downcount"] = _down_count
                 c["isFalling"] = isFalling
-                c["piece_actions"] = self.piece_actions
                 self.cache[(self.key, action+10)]=c
 
         # self.fallpieceheight = 20 - self.fallpiece['y']
+        if self.piecesteps ==1 :self.piece_actions=""
+        self.piece_actions += self.position_to_action_name(action)
 
         reward = 0
         removedlines = 0
