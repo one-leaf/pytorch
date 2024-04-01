@@ -701,10 +701,11 @@ class Agent():
                     c2["emptyCount"] =  emptyCount
                     self.cache[(self.key, action+1000)] = c2
                     
+            self.piece_actions=""
             self.need_update_status=True
             # if removedlines>0: print("OK!!!",removedlines)
             self.removedlines += removedlines
-            reward = removedlines
+            reward = removedlines            
             
             if emptyCount>self.emptyCount:
                 putEmptyBlock = True
