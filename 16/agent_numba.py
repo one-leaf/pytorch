@@ -678,7 +678,7 @@ class Agent():
                 self.cache[(self.key, action+10+_d)]=c
 
         # self.fallpieceheight = 20 - self.fallpiece['y']
-        
+        if self.piecesteps==1: self.piece_actions=""
         self.piece_actions += self.position_to_action_name(action)
 
         reward = 0
@@ -701,7 +701,6 @@ class Agent():
                     c2["emptyCount"] =  emptyCount
                     self.cache[(self.key, action+1000)] = c2
                     
-            self.piece_actions=""
             self.need_update_status=True
             # if removedlines>0: print("OK!!!",removedlines)
             self.removedlines += removedlines
