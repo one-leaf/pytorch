@@ -623,10 +623,10 @@ class Agent():
         # self.level, self.fallfreq = self.calculate(self.score)
         
         # self.actions.append(action)
-        if self.piecesteps ==1 or self.piece_actions[-1]!="D":
-            _d=10
-        else:
+        if self.piecesteps==1 or self.piece_actions[-1]!="D":
             _d=0
+        else:
+            _d=10
         if self.cache!=None and (self.key, action+10+_d) in self.cache:
             c = self.cache[(self.key, action+10+_d)]           
             self.fallpiece['x'] = c["fallpiece_x"]
