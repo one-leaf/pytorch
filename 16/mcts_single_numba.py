@@ -84,7 +84,7 @@ def selectAction(s:int, availables, _c_puct:float, Ps, Ns, Qsa, Nsa):
     #             best_act = a    
     # return best_act
 
-@njit(cache=True)
+#@njit(cache=True)
 # njit 9.572226293848707e-06
 # 2.3297934257853874e-05
 def updateQN(s:int, a:int, v:float, Ns, Qsa, Nsa, actions_num):
@@ -105,7 +105,7 @@ def updateQN(s:int, a:int, v:float, Ns, Qsa, Nsa, actions_num):
     # Qsa[s][a] = np.tanh(Qsa[s][a])
     Ns[s] += 1
 
-@njit(cache=True)   
+#@njit(cache=True)   
 # njit  0.00022558832222352673
 # 0.0001987227917925678
 def expandPN(s:int, availables, act_probs, Ps, Ns, Nsa, Qsa, actions_num):
@@ -119,7 +119,7 @@ def expandPN(s:int, availables, act_probs, Ps, Ns, Nsa, Qsa, actions_num):
     Nsa[s] = np.zeros(actions_num, dtype=np.int64)
     Qsa[s] = np.zeros(actions_num, dtype=np.float32)
 
-@njit(cache=True)
+#@njit(cache=True)
 def checkNeedExit(s:int, Nsa)->bool:
     max_v = np.max(Nsa[s])
     return max_v>0 and max_v/np.sum(Nsa[s])>0.8
