@@ -49,7 +49,7 @@ class State():
         self.markfailtop=self.game.failtop
         self.markEmptyCount=self.game.emptyCount
         
-@njit(cache=True)
+#@njit(cache=True)
 def selectAction(s:int, availables, _c_puct:float, Ps, Ns, Qsa, Nsa):
     # 如果有一次都没有探索的，返回
     # 开销 8.05366921094275e-05 S
