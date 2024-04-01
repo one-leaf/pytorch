@@ -628,7 +628,7 @@ class Agent():
         else:
             _d=0
         if self.cache!=None and (self.key, action+10+_d) in self.cache:
-            c = self.cache[(self.key, action+10)]           
+            c = self.cache[(self.key, action+10+_d)]           
             self.fallpiece['x'] = c["fallpiece_x"]
             self.fallpiece['y'] = c["fallpiece_y"]
             self.fallpiece['rotation'] = c["fallpiece_rotation"]
