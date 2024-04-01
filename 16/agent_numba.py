@@ -685,8 +685,8 @@ class Agent():
         removedlines = 0
         putEmptyBlock = False
         if not isFalling:    
-            if self.cache!=None and (self.key, action, 1) in self.cache:
-                c = self.cache[(self.key, action+100)] 
+            if self.cache!=None and (self.key, action+100+_d) in self.cache:
+                c = self.cache[(self.key, action+100+_d)] 
                 self.board = np.copy(c["board"])
                 removedlines = c["removedlines"]
                 emptyCount = c["emptyCount"]                
@@ -699,7 +699,7 @@ class Agent():
                     c["board"] = np.copy(self.board)
                     c["removedlines"] = removedlines
                     c["emptyCount"] =  emptyCount
-                    self.cache[(self.key, action+100)] = c
+                    self.cache[(self.key, action+100+_d)] = c
                     
             self.need_update_status=True
             # if removedlines>0: print("OK!!!",removedlines)
