@@ -623,14 +623,18 @@ class Agent():
         # self.level, self.fallfreq = self.calculate(self.score)
         
         # self.actions.append(action)
-        if self.cache!=None and (self.key, action+10) in self.cache:
+        if self.piecesteps ==1 or self.piece_actions[-1]!="D":
+            _d=10
+        else:
+            _d=0
+        if self.cache!=None and (self.key, action+10+_d) in self.cache:
             c = self.cache[(self.key, action+10)]           
             self.fallpiece['x'] = c["fallpiece_x"]
             self.fallpiece['y'] = c["fallpiece_y"]
             self.fallpiece['rotation'] = c["fallpiece_rotation"]
             for _ in range(c["downcount"]):
                 self.downcount=self.downcount*0.9+1
-            isFalling = c["isFalling"]    
+            isFalling = c["isFalling"]
         else:
             if self.availables[action] == 1:
                 if action == KEY_LEFT: 
@@ -671,10 +675,10 @@ class Agent():
                 c["fallpiece_rotation"] =  self.fallpiece['rotation']
                 c["downcount"] = _down_count
                 c["isFalling"] = isFalling
-                self.cache[(self.key, action+10)]=c
+                self.cache[(self.key, action+10+_d)]=c
 
         # self.fallpieceheight = 20 - self.fallpiece['y']
-        if self.piecesteps ==1 :self.piece_actions=""
+        
         self.piece_actions += self.position_to_action_name(action)
 
         reward = 0
@@ -682,7 +686,7 @@ class Agent():
         putEmptyBlock = False
         if not isFalling:    
             if self.cache!=None and (self.key, action, 1) in self.cache:
-                c = self.cache[(self.key, action+20)] 
+                c = self.cache[(self.key, action+100)] 
                 self.board = np.copy(c["board"])
                 removedlines = c["removedlines"]
                 emptyCount = c["emptyCount"]                
@@ -695,7 +699,7 @@ class Agent():
                     c["board"] = np.copy(self.board)
                     c["removedlines"] = removedlines
                     c["emptyCount"] =  emptyCount
-                    self.cache[(self.key, action+20)] = c
+                    self.cache[(self.key, action+100)] = c
                     
             self.need_update_status=True
             # if removedlines>0: print("OK!!!",removedlines)
