@@ -633,7 +633,7 @@ class Agent():
             self.fallpiece['y'] = c["fallpiece_y"]
             self.fallpiece['rotation'] = c["fallpiece_rotation"]
             for _ in range(c["downcount"]):
-                self.downcount=self.downcount*0.9+1
+                self.downcount+=1
             isFalling = c["isFalling"]
         else:
             if self.availables[action] == 1:
@@ -658,7 +658,7 @@ class Agent():
                         self.fallpiece['y'] += 1                          
 
                 for _ in range(_down_count):
-                    self.downcount = self.downcount*0.9 + 1
+                    self.downcount += 1
 
             isFalling=True
             if self.validposition(self.board, self.fallpiece, ay=1):
