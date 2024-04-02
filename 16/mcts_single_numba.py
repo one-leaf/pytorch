@@ -388,7 +388,7 @@ class MCTSPlayer(object):
 
             if idx!=max_qs_idx:
                 print("\trandom", game.position_to_action_name(max_qs_idx), "==>",  game.position_to_action_name(idx), \
-                           "train:", act_probs - act_ps)  
+                      "v:", qval, "train:", act_probs - act_ps)  
 
             acc_ps = 0 if abs(act_ps[idx]-act_probs[idx])>0.4 else 1
 
