@@ -439,10 +439,10 @@ class Train():
                     #             else:
                     #                 result["total"]["exrewardRate"] = result["total"]["exrewardRate"] * 1.01
 
-                    if result["total"]["avg_qval"]>0.1:
-                        result["total"]["exrewardRate"] = result["total"]["exrewardRate"] * 0.95
-                    elif result["total"]["avg_qval"]<-0.1:
-                        result["total"]["exrewardRate"] = result["total"]["exrewardRate"] * 1.05
+                    if result["total"]["avg_qval"]>0.2:
+                        result["total"]["exrewardRate"] = result["total"]["exrewardRate"] * 0.9
+                    elif result["total"]["avg_qval"]<-0.2:
+                        result["total"]["exrewardRate"] = result["total"]["exrewardRate"] * 1.1
 
                 result["lastupdate"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 self.save_status_file(result, game_json) 
