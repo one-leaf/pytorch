@@ -205,15 +205,18 @@ class MCTS():
             # self.c += 1
             # self.t += time.time()-t             
             self.search(state_) 
+            
             depth = state_.game.piececount-state.game.piececount
             if depth > self.max_depth: self.max_depth = depth
-            # 如果深度超过了限制，模拟次数降低
-            if depth>self.limit_depth and state_.game.state==1 and self.simulation_count>=self._n_playout/(4+depth/self.limit_depth): break
-            # 如果方块数达到目标，改为模拟次数为64
-            if state.game.piececount>state.game.next_Pieces_list_len:
-                if self.simulation_count >= self._n_playout/4 and state_.game.state==1 and self.Ns[s]>=100: break 
-            else:
-                if self.simulation_count >= self._n_playout and state_.game.state==1 : break 
+            
+            if self.Ns[s]>=self._n_playout:
+                # 如果深度超过了限制，模拟次数降低
+                if depth>self.limit_depth and state_.game.state==1 and self.simulation_count>=self._n_playout/(4+depth/self.limit_depth): break
+                # 如果方块数达到目标，改为模拟次数为64
+                # if state.game.piececount>state.game.next_Pieces_list_len:
+                #     if self.simulation_count >= self._n_playout/4 and state_.game.state==1: break 
+                # else:
+                #     if self.simulation_count >= self._n_playout and state_.game.state==1: break 
 
         probs = getprobsFromNsa(s, temp, state.availables(), state.actions_num, self.Nsa)                       
         
