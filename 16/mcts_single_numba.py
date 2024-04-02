@@ -207,7 +207,7 @@ class MCTS():
             self.search(state_) 
             depth = state_.game.piececount-state.game.piececount
             if depth > self.max_depth: self.max_depth = depth
-            if self.simulation_count>=self._n_playout/4 and depth>self.limit_depth and state_.game.state==1 and self.Ns[s]>=100: break
+            if self.simulation_count>=self._n_playout/8 and depth>self.limit_depth and state_.game.state==1 and self.Ns[s]>=100: break
             if state.game.piececount>state.game.next_Pieces_list_len:
                 if self.simulation_count >= self._n_playout/4 and state_.game.state==1 and self.Ns[s]>=100: break 
             else:
