@@ -56,7 +56,7 @@ def selectAction(s:int, availables, _c_puct:float, Ps, Ns, Qsa, Nsa):
     # njit 4.298482243524901e-05 S
     # if np.min(Nsa[s][availables==1])==0:
     #     return np.argmax(Nsa[s]+availables == 1)
-    if Nsa[s][3]==0: return 3
+    if Nsa[s][3]==1: return 3
     
     q = Qsa[s]+ _c_puct * availables * Ps[s] * sqrt(Ns[s]) / Nsa[s]
     
