@@ -376,6 +376,11 @@ class MCTSPlayer(object):
                 dirichlet_probs[nz_idx] = dirichlet
                 idx = np.random.choice(range(ACTONS_LEN), p=p*act_probs + (1.0-p)*dirichlet_probs)
 
+            # 避免左右摇摆
+            if random.random()>0.5:
+                if idx==1 and "L" in game.piece_actions and "L" != game.piece_actions[-1]: idx = 3
+                if idx==2 and "R" in game.piece_actions and "R" != game.piece_actions[-1]: idx = 3
+
             # if max_qs_idx ==  max_ps_idx:
             #     idx = max_qs_idx
             # elif random.random()>0.5:
