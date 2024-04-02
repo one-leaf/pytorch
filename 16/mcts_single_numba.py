@@ -56,6 +56,8 @@ def selectAction(s:int, availables, _c_puct:float, Ps, Ns, Qsa, Nsa):
     # njit 4.298482243524901e-05 S
     # if np.min(Nsa[s][availables==1])==0:
     #     return np.argmax(Nsa[s]+availables == 1)
+    if availables[3]==1 and Nsa[s][3]==0: return 3
+    
     q = Qsa[s]+ _c_puct * availables * Ps[s] * sqrt(Ns[s]) / Nsa[s]
     
     # 选择最大q的
@@ -374,12 +376,7 @@ class MCTSPlayer(object):
                 dirichlet = np.random.dirichlet(2 * np.ones(len(nz_idx[0])))
                 dirichlet_probs = np.zeros_like(act_probs, dtype=np.float64)
                 dirichlet_probs[nz_idx] = dirichlet
-                idx = np.random.choice(range(ACTONS_LEN), p=p*act_probs + (1.0-p)*dirichlet_probs)
-
-            # 避免左右摇摆
-            if random.random()>0.5:
-                if idx==1 and "L" in game.piece_actions and game.piece_actions[-1] not in "LDO": idx = 3
-                if idx==2 and "R" in game.piece_actions and game.piece_actions[-1] not in "RDO": idx = 3
+                idx = np.random.choice(range(ACTONS_LEN), p=p*act_probs + (1.0-p)*dirichlet_probs)           
 
             # if max_qs_idx ==  max_ps_idx:
             #     idx = max_qs_idx
