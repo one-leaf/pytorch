@@ -378,8 +378,8 @@ class MCTSPlayer(object):
 
             # 避免左右摇摆
             if random.random()>0.5:
-                if idx==1 and "L" in game.piece_actions and "L" != game.piece_actions[-1]: idx = 3
-                if idx==2 and "R" in game.piece_actions and "R" != game.piece_actions[-1]: idx = 3
+                if idx==1 and "L" in game.piece_actions and game.piece_actions[-1] not in "LDO": idx = 3
+                if idx==2 and "R" in game.piece_actions and game.piece_actions[-1] not in "RDO": idx = 3
 
             # if max_qs_idx ==  max_ps_idx:
             #     idx = max_qs_idx
