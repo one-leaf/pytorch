@@ -235,7 +235,6 @@ class MCTS():
         
         game = state.game
         if game.show_mcts_process or game.state == 1 :
-            if game.state == 1: game.print()
             nz_idx = np.nonzero(state.availables())
             run_time = round(time.time()-self.start_time)
             print(timedelta(seconds=run_time), game.steps, game.fallpiece["shape"], \
