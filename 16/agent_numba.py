@@ -371,7 +371,7 @@ def nb_getEmptyCount2(board):
 
 class Agent():
     def __init__(self, isRandomNextPiece=False, nextPiecesList=[]):
-        self.nextPieceList=nextPiecesList
+        self.nextPieceList=[p for p in nextPiecesList]
         self.next_Pieces_list_len=len(nextPiecesList)
         self.isRandomNextPiece=isRandomNextPiece
         self.pieceCount = 0
