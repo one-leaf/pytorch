@@ -180,7 +180,7 @@ class Train():
         self.save_status_file(result, game_json)         
         return min_removedlines, his_pieces, his_pieces_len
 
-    def play(self, game_json, min_removedlines, his_pieces, his_pieces_len, player):
+    def play(self, cache, game_json, min_removedlines, his_pieces, his_pieces_len, player):
         data = {"steps":[],"shapes":[],"last_state":0,"score":0,"piece_count":0}
         if his_pieces!=None:
             print("min_removedlines:", min_removedlines, "pieces_count:", len(his_pieces))
@@ -192,7 +192,6 @@ class Train():
             agent = Agent(isRandomNextPiece=False, )
             agent.is_replay = False
 
-        cache = {}
         agent.setCache(cache)
         
         agent.show_mcts_process= True
@@ -300,8 +299,10 @@ class Train():
             limit_depth=result["total"]["depth"]
         player = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout, limit_depth=limit_depth)
 
+        cache={}
+
         for _ in range(3):
-            agent, data, avg_qval, avg_state_value, start_time, paytime = self.play(game_json, min_removedlines,his_pieces,his_pieces_len,player)
+            agent, data, avg_qval, avg_state_value, start_time, paytime = self.play(cache, game_json, min_removedlines,his_pieces,his_pieces_len,player)
             
             game_score =  agent.removedlines 
             result = self.read_status_file(game_json)
