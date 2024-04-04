@@ -301,7 +301,7 @@ class Train():
 
         cache={}
 
-        for _ in range(3):
+        for _ in range(5):
             agent, data, avg_qval, avg_state_value, start_time, paytime = self.play(cache, game_json, min_removedlines,his_pieces,his_pieces_len,player)
             
             game_score =  agent.removedlines 
@@ -435,9 +435,9 @@ class Train():
                     if os.path.exists(newmodelfile): os.link(newmodelfile, bestmodelfile)
 
                 if result["total"]["avg_qval"]>0.2:
-                    result["total"]["exrewardRate"] = result["total"]["exrewardRate"] * 0.9
+                    result["total"]["exrewardRate"] = result["total"]["exrewardRate"] * 0.95
                 elif result["total"]["avg_qval"]<-0.2:
-                    result["total"]["exrewardRate"] = result["total"]["exrewardRate"] * 1.1
+                    result["total"]["exrewardRate"] = result["total"]["exrewardRate"] * 1.05
 
             result["lastupdate"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             self.save_status_file(result, game_json) 
