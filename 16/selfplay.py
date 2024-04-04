@@ -192,8 +192,8 @@ class Train():
             agent.print()
 
             # 判断是否需要重新玩,如果当前小于平均的0.75，放到运行池训练
-            if agent.score < min_score:
-                min_score = agent.score
+            if agent.removedlines < min_score:
+                min_score = agent.removedlines
                 his_pieces = agent.piecehis
                 his_pieces_len = len(agent.piecehis)
                 min_removedlines = agent.removedlines
