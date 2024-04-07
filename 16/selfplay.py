@@ -111,6 +111,10 @@ class Train():
             del result["exrewardRate"]
         if "update" not in result:
             result["update"]=[]
+        if "qval" not in result:
+            result["qval"]=[]    
+        if "ns" in result:
+            del result["ns"]
         return result
 
     def get_equi_data(self, states, mcts_probs, values, scores):
@@ -395,7 +399,7 @@ class Train():
                 result["pacc"].append(round(result["total"]["pacc"],2))
                 result["vacc"].append(round(result["total"]["vacc"],2))
                 result["time"].append(round(result["total"]["step_time"],1))
-                result["ns"].append(round(result["total"]["n_playout"],1))
+                result["qval"].append(round(result["total"]["avg_qval"],2))
                 result["piececount"].append(round(result["total"]["avg_piececount"],1))
                 local_time = time.localtime(start_time)
                 current_month = local_time.tm_mon
@@ -414,8 +418,8 @@ class Train():
                     result["vacc"].remove(result["vacc"][0])
                 while len(result["time"])>100:
                     result["time"].remove(result["time"][0])
-                while len(result["ns"])>100:
-                    result["ns"].remove(result["ns"][0])
+                while len(result["qval"])>100:
+                    result["qval"].remove(result["qval"][0])
                 while len(result["piececount"])>100:
                     result["piececount"].remove(result["piececount"][0])
                 while len(result["update"])>100:
