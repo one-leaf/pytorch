@@ -435,11 +435,11 @@ class Train():
                     if os.path.exists(newmodelfile): os.link(newmodelfile, bestmodelfile)
 
                 if result["total"]["avg_qval"]>0.2:
-                    result["total"]["exrewardRate"] = result["total"]["exrewardRate"] * 0.95
+                    result["total"]["exrewardRate"] = result["total"]["exrewardRate"] * 0.98
                 elif result["total"]["avg_qval"]>0.1:
                     result["total"]["exrewardRate"] = result["total"]["exrewardRate"] * 0.99
                 elif result["total"]["avg_qval"]<-0.2:
-                    result["total"]["exrewardRate"] = result["total"]["exrewardRate"] * 1.05
+                    result["total"]["exrewardRate"] = result["total"]["exrewardRate"] * 1.02
                 elif result["total"]["avg_qval"]<-0.1:
                     result["total"]["exrewardRate"] = result["total"]["exrewardRate"] * 1.01
 
