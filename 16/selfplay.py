@@ -389,7 +389,7 @@ class Train():
             else:
                 result["total"]["ns"] = result["total"]["ns"]*0.99 + ns*0.01   
 
-            if result["total"]["_agent"]>100:
+            if result["total"]["_agent"]>50:
                 result["reward"].append(round(result["total"]["avg_score"],2))
                 result["depth"].append(round(result["total"]["depth"],1))
                 result["pacc"].append(round(result["total"]["pacc"],2))
@@ -402,7 +402,7 @@ class Train():
                 current_day = local_time.tm_mday
 
                 result["update"].append(current_month+current_day/100.)
-                result["total"]["_agent"] -= 100 
+                result["total"]["_agent"] -= 50 
 
                 while len(result["reward"])>100:
                     result["reward"].remove(result["reward"][0])
