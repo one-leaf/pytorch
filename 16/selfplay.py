@@ -439,12 +439,7 @@ class Train():
                     if os.path.exists(newmodelfile): os.link(newmodelfile, bestmodelfile)
 
                 if len(result["qval"])>1:
-                    if result["total"]["avg_qval"]>0.1:
-                        if result["qval"][-1]>result["qval"][-2]:
-                            result["total"]["exrewardRate"] = result["total"]["exrewardRate"] * 0.99
-                    if result["total"]["avg_qval"]<-0.1:
-                        if result["qval"][-1]<result["qval"][-2]:
-                            result["total"]["exrewardRate"] = result["total"]["exrewardRate"] * 1.01
+                    result["total"]["exrewardRate"]+=(result["qval"][-2]-result["qval"][-1])*0.01
                         
             result["lastupdate"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             self.save_status_file(result, game_json) 
