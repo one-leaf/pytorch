@@ -149,7 +149,7 @@ class Train():
             agent = Agent(isRandomNextPiece=True)
             start_time = time.time()
             agent.show_mcts_process= False
-            agent.id = 0
+            # agent.id = 0
 
             for i in range(self.max_step_count):
                 action = policy_value_net.policy_value_fn_best_act(agent)
@@ -199,7 +199,7 @@ class Train():
         agent.setCache(cache)
         
         agent.show_mcts_process= True
-        agent.id = 0 if random.random()>0.5 else 1
+        # agent.id = 0 if random.random()>0.5 else 1
         agent.exreward = True #random.random()>0.5
         if agent.exreward:
             result = self.read_status_file(game_json) 
@@ -215,7 +215,7 @@ class Train():
         need_max_ps = False # random.random()>0.5
         print("exreward:", agent.exreward,"exrewardRate:", agent.exrewardRate ,"max_emptyCount:",max_emptyCount,"isRandomNextPiece:",agent.isRandomNextPiece,"limitstep:",agent.limitstep,"need_max_ps:",need_max_ps)
         for i in range(self.max_step_count):
-            _step={"step":i, "curr_player":agent.id}
+            _step={"step":i}
             _step["state"] = np.copy(agent.current_state())
             # print(_step["state"][0])           
             _step["piece_count"] = agent.piececount               
