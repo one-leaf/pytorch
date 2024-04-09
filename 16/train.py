@@ -159,7 +159,7 @@ class Dataset(torch.utils.data.Dataset):
             # 数据二值化
             # self.data[fn]["value"] = 1 if values[fn]>0 else -1
 
-            self.data[fn]["value"] = (values[fn]-std_values)/std_values
+            self.data[fn]["value"] = (values[fn]-avg_values)/std_values
             if self.data[fn]["value"]>1:  self.data[fn]["value"]= 0.9
             if self.data[fn]["value"]<-1: self.data[fn]["value"]= -0.9
 
