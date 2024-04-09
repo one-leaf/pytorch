@@ -710,7 +710,7 @@ class Agent():
                 putEmptyBlock = True
 
             # 鼓励垂直下落和连续多次消行和消除空格
-            if removedlines>0:
+            if removedlines>0 and not putEmptyBlock:
                 # 如果消行了，奖励加上从上一个阶段起总共下降的个数
                 reward += self.downcount*0.01
                 
