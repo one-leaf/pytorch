@@ -8,17 +8,21 @@ import numpy as np
 
 # hyper-params
 in_dim = 1
-hidden_dim = 500
-n_layer = 4
+# hidden_dim = 400
+hidden_dim = 256
+# n_layer = 4
+n_layer = 3
 out_dim = 1
 n_samples = 200
 eps = 1e-3
 
 x_train = 3.0 * torch.randn(n_samples, 1)
-y_train = x_train.pow(2) # use ntk approximate y=x^2
+# y_train = x_train.pow(2) # use ntk approximate y=x^2
+y_train = np.sin(x_train)
 
 x_fun = torch.linspace(-3, 3, 100)
-y_fun = x_fun.pow(2)
+# y_fun = x_fun.pow(2)
+y_fun = np.sin(x_fun)
 model = []
 model.extend([nn.Linear(in_features=in_dim, out_features=hidden_dim), nn.ReLU()])
 for i in range(n_layer-1):
@@ -26,7 +30,9 @@ for i in range(n_layer-1):
 
 model.extend([nn.Linear(in_features=hidden_dim, out_features=out_dim)])
 model = nn.Sequential(*model)
-optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
+# optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
+optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
+
 fake_loss = model(x_train).sum()
 fake_loss.backward()
 param_dim = torch.cat(
