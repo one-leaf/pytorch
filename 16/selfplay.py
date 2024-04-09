@@ -199,7 +199,7 @@ class Train():
         agent.setCache(cache)
         
         agent.show_mcts_process= True
-        # agent.id = 0 if random.random()>0.5 else 1
+        agent.id = 0 if random.random()>0.5 else 1
         agent.exreward = True #random.random()>0.5
         if agent.exreward:
             result = self.read_status_file(game_json) 
