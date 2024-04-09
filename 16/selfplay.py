@@ -442,6 +442,8 @@ class Train():
 
                 if len(result["qval"])>1:
                     result["total"]["exrewardRate"]+=(result["qval"][-2]-result["qval"][-1])*0.1
+                    if result["total"]["exrewardRate"]<0:
+                        result["total"]["exrewardRate"]=1e-4
                         
             result["lastupdate"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             self.save_status_file(result, game_json) 
