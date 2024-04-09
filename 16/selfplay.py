@@ -199,7 +199,7 @@ class Train():
         agent.setCache(cache)
         
         agent.show_mcts_process= True
-        agent.id = 0 if random.random()>0.5 else 1
+        # agent.id = 0 if random.random()>0.5 else 1
         agent.exreward = True #random.random()>0.5
         if agent.exreward:
             result = self.read_status_file(game_json) 
@@ -439,7 +439,7 @@ class Train():
                     if os.path.exists(newmodelfile): os.link(newmodelfile, bestmodelfile)
 
                 if len(result["qval"])>1:
-                    result["total"]["exrewardRate"]+=(result["qval"][-2]-result["qval"][-1])*0.01
+                    result["total"]["exrewardRate"]+=(result["qval"][-2]-result["qval"][-1])*0.1
                         
             result["lastupdate"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             self.save_status_file(result, game_json) 
