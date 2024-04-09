@@ -230,10 +230,12 @@ class Train():
 
             _, reward = agent.step(action)
 
-            if qval > 0:
-                avg_qval += 1
-            else:
-                avg_qval += -1
+            avg_qval += qval
+
+            # if qval > 0:
+            #     avg_qval += 1
+            # else:
+            #     avg_qval += -1
 
             avg_state_value += state_value 
 

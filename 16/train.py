@@ -157,9 +157,11 @@ class Dataset(torch.utils.data.Dataset):
             #     self.data[fn]["value"] = v #values[fn]
 
             # 数据二值化
-            self.data[fn]["value"] = 1 if values[fn]>0 else -1
+            # self.data[fn]["value"] = 1 if values[fn]>0 else -1
 
-            # self.data[fn]["value"] = scores[fn]
+            self.data[fn]["value"] = (values[fn]-std_values)/std_values
+            if self.data[fn]["value"]>1:  self.data[fn]["value"]= 0.9
+            if self.data[fn]["value"]<-1: self.data[fn]["value"]= -0.9
 
         pay_time = round(time.time()-start_time, 2)
         print("loaded to memory, paid time:", pay_time)
