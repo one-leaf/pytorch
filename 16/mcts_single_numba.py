@@ -313,6 +313,7 @@ class MCTS():
         v += r
         
         if v>1: v=1
+        if v<-1: v=-1
         
         updateQN(s, a, v, self.Ns, self.Qsa, self.Nsa, state.actions_num)
 
