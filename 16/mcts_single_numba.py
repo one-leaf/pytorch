@@ -287,7 +287,6 @@ class MCTS():
         r = 0
         if state.game.state==1:
             r += (state.game.score-state.markscore) * state.game.exrewardRate
-        if r > 1: r = 1
         
         # 如果游戏结束
         if state.game.terminal: 
@@ -312,6 +311,9 @@ class MCTS():
         # v = r + (v - 0.01)
         # v *= state.game.exrewardRate
         v += r
+        
+        if v>1: v=1
+        
         updateQN(s, a, v, self.Ns, self.Qsa, self.Nsa, state.actions_num)
 
         # print(v, self.Qsa[s][a], v-self.Qsa[s][a])
