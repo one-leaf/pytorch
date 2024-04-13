@@ -455,13 +455,21 @@ class Train():
                         x = np.array(x)
                         y = np.array(y)
 
-                        coefficients = np.polyfit(y, x, deg=1)
+                        # 添加一列全为1的常数列作为截距
+                        X = np.vstack([x, np.ones(len(x))]).T
+
+                        # 使用np.linalg.lstsq()进行线性回归
+                        coefficients, residuals, _, _ = np.linalg.lstsq(X, y, rcond=None)
+
                         # 提取回归系数
                         slope = coefficients[0]
                         intercept = coefficients[1]
 
                         # 计算当y等于0时对应的x值
-                        result["total"]["exrewardRate"] = -intercept / slope                        
+                        x_when_y_is_zero = -intercept / slope
+
+                        # 计算当y等于0时对应的x值
+                        result["total"]["exrewardRate"] = x_when_y_is_zero                        
                     elif len(x)>1:    
                         result["total"]["exrewardRate"]+=(y[-2]-y[-1])*0.1
                     
