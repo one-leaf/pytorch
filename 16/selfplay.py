@@ -401,7 +401,7 @@ class Train():
                 result["pacc"].append(round(result["total"]["pacc"],2))
                 result["vacc"].append(round(result["total"]["vacc"],2))
                 result["time"].append(round(result["total"]["step_time"],1))
-                result["qval"].append(round(result["total"]["avg_qval"],3))
+                result["qval"].append((round(result["total"]["exrewardRate"],4),round(result["total"]["avg_qval"],4)))
                 result["piececount"].append(round(result["total"]["avg_piececount"],1))
                 local_time = time.localtime(start_time)
                 current_month = local_time.tm_mon
@@ -440,10 +440,34 @@ class Train():
                     if os.path.exists(bestmodelfile): os.remove(bestmodelfile)
                     if os.path.exists(newmodelfile): os.link(newmodelfile, bestmodelfile)
 
-                if len(result["qval"])>1:
-                    result["total"]["exrewardRate"]+=(result["qval"][-2]-result["qval"][-1])*0.1
+                if len(result["qval"])>5:
+                    x=[]
+                    y=[]
+                    for obj in result["qval"]:
+                        if isinstance(obj, tuple):
+                            x.append(obj[0])
+                            y.append(obj[1])
+                    if len(x)>5:
+                        x = np.array(x)
+                        y = np.array(y)
+
+                        # 添加一列全为1的常数列作为截距
+                        X = np.vstack([x, np.ones(len(x))]).T
+
+                        # 使用np.linalg.lstsq()进行线性回归
+                        coefficients, residuals, _, _ = np.linalg.lstsq(X, y, rcond=None)
+
+                        # 提取回归系数
+                        slope = coefficients[0]
+                        intercept = coefficients[1]
+
+                        # 计算当y等于0时对应的x值
+                        result["total"]["exrewardRate"] = -intercept / slope                        
+                    elif len(x)>1:    
+                        result["total"]["exrewardRate"]+=(y[-2]-y[-1])*0.1
+                    
                     if result["total"]["exrewardRate"]<0:
-                        result["total"]["exrewardRate"]=1e-4
+                        result["total"]["exrewardRate"]=1e-6
                         
             result["lastupdate"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             self.save_status_file(result, game_json) 
