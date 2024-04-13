@@ -455,12 +455,7 @@ class Train():
                         x = np.array(x)
                         y = np.array(y)
 
-                        # 添加一列全为1的常数列作为截距
-                        X = np.vstack([x, np.ones(len(x))]).T
-
-                        # 使用np.linalg.lstsq()进行线性回归
-                        coefficients, residuals, _, _ = np.linalg.lstsq(X, y, rcond=None)
-
+                        coefficients = np.polyfit(y, x, deg=1)
                         # 提取回归系数
                         slope = coefficients[0]
                         intercept = coefficients[1]
