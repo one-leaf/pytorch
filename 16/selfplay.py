@@ -113,6 +113,8 @@ class Train():
             result["update"]=[]
         if "qval" not in result:
             result["qval"]=[]    
+        if "rate" not in result:
+            result["rate"]=[]    
         if "ns" in result:
             del result["ns"]
         return result
@@ -401,7 +403,8 @@ class Train():
                 result["pacc"].append(round(result["total"]["pacc"],2))
                 result["vacc"].append(round(result["total"]["vacc"],2))
                 result["time"].append(round(result["total"]["step_time"],1))
-                result["qval"].append((round(result["total"]["exrewardRate"],4),round(result["total"]["avg_qval"],4)))
+                result["qval"].append(round(result["total"]["avg_qval"],4))
+                result["rate"].append(round(result["total"]["exrewardRate"],4))
                 result["piececount"].append(round(result["total"]["avg_piececount"],1))
                 local_time = time.localtime(start_time)
                 current_month = local_time.tm_mon
@@ -422,6 +425,8 @@ class Train():
                     result["time"].remove(result["time"][0])
                 while len(result["qval"])>50:
                     result["qval"].remove(result["qval"][0])
+                while len(result["rate"])>50:
+                    result["rate"].remove(result["rate"][0])
                 while len(result["piececount"])>50:
                     result["piececount"].remove(result["piececount"][0])
                 while len(result["update"])>50:
@@ -441,12 +446,11 @@ class Train():
                     if os.path.exists(newmodelfile): os.link(newmodelfile, bestmodelfile)
 
                 if len(result["qval"])>5:
-                    x=[]
-                    y=[]
-                    for obj in result["qval"]:
-                        if isinstance(obj, tuple):
-                            x.append(obj[0])
-                            y.append(obj[1])
+                    x=[] #rate
+                    y=[] #qval
+                    for i in range(len(result["rate"])):
+                        x.append(result["rate"][i*-1-1])
+                        y.append(result["qval"][i*-1-1])
                     if len(x)>5:
                         x = np.array(x)
                         y = np.array(y)
