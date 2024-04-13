@@ -410,21 +410,21 @@ class Train():
                 result["update"].append(current_month+current_day/100.)
                 result["total"]["_agent"] -= 50 
 
-                while len(result["reward"])>100:
+                while len(result["reward"])>50:
                     result["reward"].remove(result["reward"][0])
-                while len(result["depth"])>100:
+                while len(result["depth"])>50:
                     result["depth"].remove(result["depth"][0])
-                while len(result["pacc"])>100:
+                while len(result["pacc"])>50:
                     result["pacc"].remove(result["pacc"][0])
-                while len(result["vacc"])>100:
+                while len(result["vacc"])>50:
                     result["vacc"].remove(result["vacc"][0])
-                while len(result["time"])>100:
+                while len(result["time"])>50:
                     result["time"].remove(result["time"][0])
-                while len(result["qval"])>100:
+                while len(result["qval"])>50:
                     result["qval"].remove(result["qval"][0])
-                while len(result["piececount"])>100:
+                while len(result["piececount"])>50:
                     result["piececount"].remove(result["piececount"][0])
-                while len(result["update"])>100:
+                while len(result["update"])>50:
                     result["update"].remove(result["update"][0])
 
                 # 保存下中间步骤的agent
