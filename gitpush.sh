@@ -10,7 +10,7 @@ function gitpush()
     while true
     do
         echo "***开始push本地仓库***"
-        git config --global http.https://github.com.proxy socks5://127.0.0.1:10086
+        git config --global http.https://github.com.proxy http://192.168.2.4:7890
 
         var=$(git push origin master:master 2>&1)
         if [[ $var =~ $error_str1 || $var =~ $error_str2 ]]; then 
