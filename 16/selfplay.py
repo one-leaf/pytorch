@@ -455,18 +455,24 @@ class Train():
                         x = np.array(x)
                         y = np.array(y)
 
-                        # 添加一列全为1的常数列作为截距
-                        X = np.vstack([x, np.ones(len(x))]).T
-
-                        # 使用np.linalg.lstsq()进行线性回归
-                        coefficients, residuals, _, _ = np.linalg.lstsq(X, y, rcond=None)
-
-                        # 提取回归系数
-                        slope = coefficients[0]
-                        intercept = coefficients[1]
-
-                        # 计算当y等于0时对应的x值
-                        x_when_y_is_zero = -intercept / slope
+                        # # 添加一列全为1的常数列作为截距
+                        # X = np.vstack([x, np.ones(len(x))]).T
+                        # # 使用np.linalg.lstsq()进行线性回归
+                        # coefficients, residuals, _, _ = np.linalg.lstsq(X, y, rcond=None)
+                        # # 提取回归系数
+                        # slope = coefficients[0]
+                        # intercept = coefficients[1]
+                        # # 计算当y等于0时对应的x值
+                        # x_when_y_is_zero = -intercept / slope
+                        
+                        # 计算多项式回归系数
+                        coefs = np.polyfit(x, y, 3)
+                        # 使用np.poly1d函数来生成一个多项式拟合对象
+                        poly = np.poly1d(coefs)
+                        # 求解y=0
+                        x_roots = np.roots(poly)
+                        real_roots = x_roots[np.isreal(x_roots)].real
+                        x_when_y_is_zero = real_roots[0]
 
                         # 计算当y等于0时对应的x值
                         if y[-1]>y[-2] and x_when_y_is_zero>result["total"]["exrewardRate"]:
