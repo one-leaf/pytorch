@@ -142,26 +142,27 @@ class Dataset(torch.utils.data.Dataset):
         min_scores = np.min(scores_items)
         max_scores = np.max(scores_items)
         print("score min/avg/max/std:",[min_scores, avg_scores, max_scores, std_scores])
-        # for fn in self.data:
-        #     # self.data[fn]["value"] = (values[fn] - avg_values)/(max_values-min_values) + (scores[fn]-avg_scores)/(max_scores-min_scores)            
-        #     # self.data[fn]["value"] = (values[fn]+scores[fn])*0.5 - 1 
-        #     # self.data[fn]["value"] = (scores[fn]-min_scores)*2/(max_scores-min_scores) - 1
+        for fn in self.data:
+            self.data[fn]["value"] = values[fn]
+            # self.data[fn]["value"] = (values[fn] - avg_values)/(max_values-min_values) + (scores[fn]-avg_scores)/(max_scores-min_scores)            
+            # self.data[fn]["value"] = (values[fn]+scores[fn])*0.5 - 1 
+            # self.data[fn]["value"] = (scores[fn]-min_scores)*2/(max_scores-min_scores) - 1
             
-        #     # 数据正规化
-        #     # v = values[fn]/std_values
-        #     # if v>1:
-        #     #     self.data[fn]["value"] = 1
-        #     # elif v<-1:
-        #     #     self.data[fn]["value"] = -1
-        #     # else:
-        #     #     self.data[fn]["value"] = v #values[fn]
+            # 数据正规化
+            # v = values[fn]/std_values
+            # if v>1:
+            #     self.data[fn]["value"] = 1
+            # elif v<-1:
+            #     self.data[fn]["value"] = -1
+            # else:
+            #     self.data[fn]["value"] = v #values[fn]
 
-        #     # 数据二值化
-        #     # self.data[fn]["value"] = 1 if values[fn]>0 else -1
+            # 数据二值化
+            # self.data[fn]["value"] = 1 if values[fn]>0 else -1
 
-        #     self.data[fn]["value"] = (values[fn]-avg_values)/std_values
-        #     if self.data[fn]["value"]>1:  self.data[fn]["value"]= 0.9
-        #     if self.data[fn]["value"]<-1: self.data[fn]["value"]= -0.9
+            # self.data[fn]["value"] = (values[fn]-avg_values)/std_values
+            # if self.data[fn]["value"]>1:  self.data[fn]["value"]= 0.9
+            # if self.data[fn]["value"]<-1: self.data[fn]["value"]= -0.9
 
         pay_time = round(time.time()-start_time, 2)
         print("loaded to memory, paid time:", pay_time)
