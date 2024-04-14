@@ -449,8 +449,8 @@ class Train():
                     x=[] #rate
                     y=[] #qval
                     for i in range(len(result["rate"])):
-                        x.append(result["rate"][i*-1-1])
-                        y.append(result["qval"][i*-1-1])
+                        x.insert(0,result["rate"][i*-1-1])
+                        y.insert(0,result["qval"][i*-1-1])
                     if len(x)>5:
                         x = np.array(x)
                         y = np.array(y)
