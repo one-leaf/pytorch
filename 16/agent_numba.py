@@ -535,13 +535,14 @@ class Agent():
         # status = np.zeros((3, boardheight, boardwidth), dtype=np.int8)
         
         
-        self.status[2]=self.status[0]+self.status[1]
+        self.status[2]=self.status[0]
         if self.fallpiece != None:
             piece = self.fallpiece
             shapedraw = pieces[piece['shape']][piece['rotation']]
             self.status[0] = nb_get_status(shapedraw, piece['x'], piece['y'])
                             
         if self.need_update_status==True:
+            self.status[2]+=self.status[1]
             self.status[1]=self.board
             # self.status[2]=0
             # if self.nextpiece != None:
