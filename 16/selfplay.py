@@ -475,12 +475,7 @@ class Train():
                         x_when_y_is_zero = real_roots[0]
 
                         # 计算当y等于0时对应的x值
-                        if y[-1]>y[-2] and x_when_y_is_zero>result["total"]["exrewardRate"]:
-                            result["total"]["exrewardRate"]+=(y[-2]-y[-1])*0.1
-                        elif y[-1]<y[-2] and x_when_y_is_zero<result["total"]["exrewardRate"]:
-                            result["total"]["exrewardRate"]+=(y[-2]-y[-1])*0.1
-                        else:
-                            result["total"]["exrewardRate"] = x_when_y_is_zero                        
+                        result["total"]["exrewardRate"] = x_when_y_is_zero                        
                     elif len(x)>1:    
                         result["total"]["exrewardRate"]+=(y[-2]-y[-1])*0.1
                     
