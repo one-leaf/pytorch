@@ -535,7 +535,7 @@ class Agent():
         # status = np.zeros((3, boardheight, boardwidth), dtype=np.int8)
         
         
-        self.status[2]=self.status[0]
+        self.status[2]=self.status[0]+self.status[1]
         if self.fallpiece != None:
             piece = self.fallpiece
             shapedraw = pieces[piece['shape']][piece['rotation']]

@@ -17,6 +17,8 @@ def run():
         # agent.start_play(mcts_ai_player, env)
         start_time = time.time()
         while not agent.terminal:
+            state = agent.current_state()
+            print(state)
             act = net_policy.policy_value_fn_best_act(agent)
             # agent.step(act, env)
             agent.step(act)
@@ -28,7 +30,7 @@ def run():
             time.sleep(0.2)
             
             # print(agent.current_state())
-            # input()
+            input()
     except KeyboardInterrupt:
         print('quit')
 
