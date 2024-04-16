@@ -475,7 +475,7 @@ class Train():
                         if len(real_roots)>0:
                             x_when_y_is_zero=min(real_roots)
                         else:
-                            x_when_y_is_zero=result["total"]["exrewardRate"]=1e-4
+                            x_when_y_is_zero=1e-4
                         result["total"]["exrewardRate"] = x_when_y_is_zero                        
                     elif len(x)>1:    
                         result["total"]["exrewardRate"]+=(y[-2]-y[-1])*0.1
