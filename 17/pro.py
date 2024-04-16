@@ -28,6 +28,7 @@ for episode in range(num_episodes):
 
         # Calculate the advantage
         target_value = value_model.predict(np.array([next_state]))[0][0]
+        # 计算下一步相对当前的增益
         advantage = reward + gamma * target_value - value_model.predict(np.array([current_state]))[0][0]
 
         # Calculate the old and new policy probabilities
@@ -35,7 +36,9 @@ for episode in range(num_episodes):
         new_policy_prob = policy_model.predict(np.array([next_state]))[0][action]
 
         # Calculate the ratio and the surrogate loss
+        # 下一步动作概率和当前步骤动作概率的比值
         ratio = new_policy_prob / old_policy_prob
+        # 按增益计算比值，限制比值在[1-epsilon, 1+epsilon]之间*增益 ,然后都取所有元素的最小值
         surrogate_loss = np.minimum(ratio * advantage, np.clip(ratio, 1 - epsilon, 1 + epsilon) * advantage)
 
         # Update the policy and value models

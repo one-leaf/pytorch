@@ -404,7 +404,7 @@ class Train():
                 result["vacc"].append(round(result["total"]["vacc"],2))
                 result["time"].append(round(result["total"]["step_time"],1))
                 result["qval"].append(round(result["total"]["avg_qval"],4))
-                result["rate"].append(round(result["total"]["exrewardRate"],4))
+                result["rate"].append(round(result["total"]["exrewardRate"],5))
                 result["piececount"].append(round(result["total"]["avg_piececount"],1))
                 local_time = time.localtime(start_time)
                 current_month = local_time.tm_mon

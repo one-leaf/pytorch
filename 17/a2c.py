@@ -34,13 +34,16 @@ for episode in range(num_episodes):
 
         # Calculate the advantage
         target_value = critic_model.predict(np.array([next_state]))[0][0]
+        # 下一步的奖励 + 折扣因子 * 下一步的价值 - 当前状态的价值
         advantage = reward + gamma * target_value - critic_model.predict(np.array([current_state]))[0][0]
 
         # Update the actor model
+        # 用增益来提升当前动作的概率
         action_one_hot = to_categorical(action, action_space_size)
         actor_model.train_on_batch(np.array([current_state]), advantage * action_one_hot)
 
         # Update the critic model
+        # 用下一步的奖励来提升当前状态的价值
         critic_model.train_on_batch(np.array([current_state]), reward + gamma * target_value)
 
         current_state = next_state
