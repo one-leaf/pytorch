@@ -472,10 +472,10 @@ class Train():
                         # 求解y=0
                         x_roots = np.roots(poly)
                         real_roots = x_roots[np.isreal(x_roots)].real
-                        x_when_y_is_zero =min([v for v in real_roots if v>0])
-                        # x_when_y_is_zero = real_roots[0]
-
-                        # 计算当y等于0时对应的x值
+                        if len(real_roots)>0:
+                            x_when_y_is_zero=min(real_roots)
+                        else:
+                            x_when_y_is_zero=result["total"]["exrewardRate"]=1e-4
                         result["total"]["exrewardRate"] = x_when_y_is_zero                        
                     elif len(x)>1:    
                         result["total"]["exrewardRate"]+=(y[-2]-y[-1])*0.1
