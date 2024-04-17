@@ -18,7 +18,7 @@ def run():
         start_time = time.time()
         while not agent.terminal:
             state = agent.current_state()
-            print(state)
+            # print(state)
             act = net_policy.policy_value_fn_best_act(agent)
             # agent.step(act, env)
             agent.step(act)
@@ -59,5 +59,5 @@ def test():
     print(x_when_y_is_zero)
 
 if __name__ == '__main__':
-    # run()
-    test()
+    run()
+    # test()

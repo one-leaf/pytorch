@@ -475,13 +475,13 @@ class Train():
                         if len(real_roots)>0:
                             x_when_y_is_zero=min(real_roots)
                         else:
-                            x_when_y_is_zero=1e-4
+                            x_when_y_is_zero=1e-3
                         result["total"]["exrewardRate"] = x_when_y_is_zero                        
                     elif len(x)>1:    
                         result["total"]["exrewardRate"]+=(y[-2]-y[-1])*0.1
                     
                     if result["total"]["exrewardRate"]<0:
-                        result["total"]["exrewardRate"]=1e-4
+                        result["total"]["exrewardRate"]=1e-3
                         
             result["lastupdate"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             self.save_status_file(result, game_json) 
