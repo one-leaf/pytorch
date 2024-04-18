@@ -115,8 +115,8 @@ class Train():
             result["qval"]=[]    
         if "rate" not in result:
             result["rate"]=[]    
-        if "ns" in result:
-            del result["ns"]
+        if "advantage" not in result:
+            result["advantage"]=[]    
         return result
 
     def get_equi_data(self, states, mcts_probs, values, scores):
@@ -397,7 +397,8 @@ class Train():
             else:
                 result["total"]["ns"] = result["total"]["ns"]*0.99 + ns*0.01   
 
-            if result["total"]["_agent"]>50:
+            max_list_len=50
+            if result["total"]["_agent"]>max_list_len:
                 result["reward"].append(round(result["total"]["avg_score"],2))
                 result["depth"].append(round(result["total"]["depth"],1))
                 result["pacc"].append(round(result["total"]["pacc"],2))
@@ -406,32 +407,36 @@ class Train():
                 result["qval"].append(round(result["total"]["avg_qval"],4))
                 result["rate"].append(round(result["total"]["exrewardRate"],5))
                 result["piececount"].append(round(result["total"]["avg_piececount"],1))
+                if len(result["qval"])>1:
+                    result["advantage"].append({round(result["total"]["exrewardRate"],5):round(result["total"]["avg_qval"]-result["qval"][-2],4)})
                 local_time = time.localtime(start_time)
                 current_month = local_time.tm_mon
                 current_day = local_time.tm_mday
 
                 result["update"].append(current_month+current_day/100.)
-                result["total"]["_agent"] -= 50 
+                result["total"]["_agent"] -= max_list_len 
 
-                while len(result["reward"])>50:
+                while len(result["reward"])>max_list_len:
                     result["reward"].remove(result["reward"][0])
-                while len(result["depth"])>50:
+                while len(result["depth"])>max_list_len:
                     result["depth"].remove(result["depth"][0])
-                while len(result["pacc"])>50:
+                while len(result["pacc"])>max_list_len:
                     result["pacc"].remove(result["pacc"][0])
-                while len(result["vacc"])>50:
+                while len(result["vacc"])>max_list_len:
                     result["vacc"].remove(result["vacc"][0])
-                while len(result["time"])>50:
+                while len(result["time"])>max_list_len:
                     result["time"].remove(result["time"][0])
-                while len(result["qval"])>50:
+                while len(result["qval"])>max_list_len:
                     result["qval"].remove(result["qval"][0])
-                while len(result["rate"])>50:
+                while len(result["rate"])>max_list_len:
                     result["rate"].remove(result["rate"][0])
-                while len(result["piececount"])>50:
+                while len(result["piececount"])>max_list_len:
                     result["piececount"].remove(result["piececount"][0])
-                while len(result["update"])>50:
+                while len(result["update"])>max_list_len:
                     result["update"].remove(result["update"][0])
-
+                while len(result["advantage"])>max_list_len:
+                    result["advantage"].remove(result["advantage"][0])
+                    
                 # 保存下中间步骤的agent
                 newmodelfile = model_file+"_"+str(result["total"]["agent"])
                 if not os.path.exists(newmodelfile):
