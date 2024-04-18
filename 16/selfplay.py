@@ -466,7 +466,7 @@ class Train():
                         # x_when_y_is_zero = -intercept / slope
                         
                         # 计算多项式回归系数
-                        coefs = np.polyfit(x, y, 3)
+                        coefs = np.polyfit(x, y, 1)
                         # 使用np.poly1d函数来生成一个多项式拟合对象
                         poly = np.poly1d(coefs)
                         # 求解y=0
