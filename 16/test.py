@@ -74,10 +74,10 @@ def test():
     # predicted_x = (-0.049 - c) / m
     # print(predicted_x)
 
-    coefficients = np.polyfit(y, x, deg=1)
+    coefficients = np.polyfit(y, x, deg=3)
 
     # 解方程获取目标x值
-    target_x = np.polyval(coefficients, 0.349)
+    target_x = np.polyval(coefficients, 0.00769526918807164)
     print(target_x)
     # coefs = np.polyfit(x, y, 3)
     # poly = np.poly1d(coefs)
