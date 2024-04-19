@@ -408,7 +408,7 @@ class Train():
                 result["rate"].append(round(result["total"]["exrewardRate"],5))
                 result["piececount"].append(round(result["total"]["avg_piececount"],1))
                 if len(result["qval"])>1:
-                    result["advantage"].append({round(result["total"]["exrewardRate"],5):round(result["total"]["avg_qval"]-result["qval"][-2],4)})
+                    result["advantage"].append( (round(result["total"]["exrewardRate"],5), round(result["total"]["avg_qval"]-result["qval"][-2],4)) )
                 local_time = time.localtime(start_time)
                 current_month = local_time.tm_mon
                 current_day = local_time.tm_mday
