@@ -460,6 +460,10 @@ class Train():
                         x = np.array(x)
                         y = np.array(y)
 
+                        coefficients = np.polyfit(y, x, deg=1)
+
+                        x_when_y_is_zero = np.polyval(coefficients, -1.*result["total"]["avg_qval"])
+
                         # # 添加一列全为1的常数列作为截距
                         # X = np.vstack([x, np.ones(len(x))]).T
                         # # 使用np.linalg.lstsq()进行线性回归
@@ -471,16 +475,16 @@ class Train():
                         # x_when_y_is_zero = -intercept / slope
                         
                         # 计算多项式回归系数
-                        coefs = np.polyfit(x, y, 1)
-                        # 使用np.poly1d函数来生成一个多项式拟合对象
-                        poly = np.poly1d(coefs)
-                        # 求解y=0
-                        x_roots = np.roots(poly)
-                        real_roots = x_roots[np.isreal(x_roots)].real
-                        if len(real_roots)>0:
-                            x_when_y_is_zero=min(real_roots)
-                        else:
-                            x_when_y_is_zero=1e-3
+                        # coefs = np.polyfit(x, y, 1)
+                        # # 使用np.poly1d函数来生成一个多项式拟合对象
+                        # poly = np.poly1d(coefs)
+                        # # 求解y=0
+                        # x_roots = np.roots(poly)
+                        # real_roots = x_roots[np.isreal(x_roots)].real
+                        # if len(real_roots)>0:
+                        #     x_when_y_is_zero=min(real_roots)
+                        # else:
+                        #     x_when_y_is_zero=1e-3
                         result["total"]["exrewardRate"] = x_when_y_is_zero                        
                     elif len(x)>1:    
                         result["total"]["exrewardRate"]+=(y[-2]-y[-1])*0.1
