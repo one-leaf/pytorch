@@ -453,10 +453,13 @@ class Train():
                 if len(result["qval"])>5:
                     x=[] #rate
                     y=[] #qval
-                    for i in range(len(result["rate"])):
-                        x.insert(0,result["rate"][i*-1-1])
-                        y.insert(0,result["qval"][i*-1-1])
-                    if len(x)>5:
+                    for _x,_y in result["advantage"]:
+                        x.append(_x)
+                        y.append(_y)
+                    # for i in range(len(result["rate"])):
+                    #     x.insert(0,result["rate"][i*-1-1])
+                    #     y.insert(0,result["qval"][i*-1-1])
+                    if len(x)>2:
                         x = np.array(x)
                         y = np.array(y)
 
@@ -486,8 +489,8 @@ class Train():
                         # else:
                         #     x_when_y_is_zero=1e-3
                         result["total"]["exrewardRate"] = x_when_y_is_zero                        
-                    elif len(x)>1:    
-                        result["total"]["exrewardRate"]+=(y[-2]-y[-1])*0.1
+                    elif len(result["qval"])>1:    
+                        result["total"]["exrewardRate"]+=(result["qval"][-2]-result["qval"][-1])*0.1
                     
                     if result["total"]["exrewardRate"]<0:
                         result["total"]["exrewardRate"]=1e-3
