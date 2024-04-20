@@ -414,7 +414,7 @@ class Train():
                 current_day = local_time.tm_mday
 
                 result["update"].append(current_month+current_day/100.)
-                result["total"]["_agent"] -= max_list_len 
+                result["total"]["_agent"] -= 20 
 
                 while len(result["reward"])>max_list_len:
                     result["reward"].remove(result["reward"][0])
