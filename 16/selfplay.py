@@ -397,7 +397,7 @@ class Train():
             else:
                 result["total"]["ns"] = result["total"]["ns"]*0.99 + ns*0.01   
 
-            max_list_len=50
+            max_list_len=20
             if result["total"]["_agent"]>max_list_len:
                 result["reward"].append(round(result["total"]["avg_score"],2))
                 result["depth"].append(round(result["total"]["depth"],1))

@@ -77,7 +77,7 @@ def test():
     coefficients = np.polyfit(y, x, deg=3)
 
     # 解方程获取目标x值
-    target_x = np.polyval(coefficients, 0.00769526918807164)
+    target_x = np.polyval(coefficients, -0.008142374622271024)
     print(target_x)
     # coefs = np.polyfit(x, y, 3)
     # poly = np.poly1d(coefs)
