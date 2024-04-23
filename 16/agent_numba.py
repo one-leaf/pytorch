@@ -738,6 +738,7 @@ class Agent():
             self.piecesteps = 0
             self.piececount += 1 
 
+            _fallpiece_shape = self.fallpiece['shape']
             self.fallpiece = self.nextpiece
             self.nextpiece = self.getnewpiece()            
             # self.actions = []
@@ -746,7 +747,9 @@ class Agent():
             if ( not self.validposition(self.board, self.fallpiece, ay=0) or \
                                (self.limitstep and self.piececount-self.last_reward>=20) or \
                                (self.limitstep and putEmptyBlock and reward==0 and self.piececount>5) or \
-                               (self.limitstep and putEmptyBlock and reward==0 and self.piececount<=5 and self.emptyCount>2) ):
+                               (self.limitstep and putEmptyBlock and reward==0 and self.piececount<=5 and self.emptyCount>2) or \
+                               (self.limitstep and putEmptyBlock and _fallpiece_shape in ["l","j"]) \
+                                ):
                 self.terminal = True 
                 self.state = 1
         else:
