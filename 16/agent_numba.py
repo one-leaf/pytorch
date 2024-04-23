@@ -748,7 +748,7 @@ class Agent():
                                (self.limitstep and self.piececount-self.last_reward>=20) or \
                                (self.limitstep and putEmptyBlock and reward==0 and self.piececount>5) or \
                                (self.limitstep and putEmptyBlock and reward==0 and self.piececount<=5 and self.emptyCount>2) or \
-                               (self.limitstep and putEmptyBlock and _fallpiece_shape in ["l","j"]) \
+                               (self.limitstep and putEmptyBlock and _fallpiece_shape in ["l","j","i","o","t"]) \
                                 ):
                 self.terminal = True 
                 self.state = 1
