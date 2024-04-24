@@ -186,7 +186,7 @@ class Train():
         self.save_status_file(result, game_json)         
         return min_removedlines, his_pieces, his_pieces_len
 
-    def play(self, cache, game_json, min_removedlines, his_pieces, his_pieces_len, player):
+    def play(self, cache, game_json, min_removedlines, his_pieces, his_pieces_len, player, exrewardRate):
         data = {"steps":[],"shapes":[],"last_state":0,"score":0,"piece_count":0}
         if his_pieces!=None:
             print("min_removedlines:", min_removedlines, "pieces_count:", len(his_pieces))
@@ -204,8 +204,7 @@ class Train():
         # agent.id = 0 if random.random()>0.5 else 1
         agent.exreward = True #random.random()>0.5
         if agent.exreward:
-            result = self.read_status_file(game_json) 
-            agent.exrewardRate = result["total"]["exrewardRate"]  #float(exrewardRateKey)                            
+            agent.exrewardRate = exrewardRate
         else:
             agent.exrewardRate = 1
         agent.limitstep = True
@@ -310,7 +309,10 @@ class Train():
         cache={}
 
         for _ in range(5):
-            agent, data, avg_qval, avg_state_value, start_time, paytime = self.play(cache, game_json, min_removedlines,his_pieces,his_pieces_len,player)
+            result = self.read_status_file(game_json) 
+            exrewardRate = result["total"]["exrewardRate"]
+            
+            agent, data, avg_qval, avg_state_value, start_time, paytime = self.play(cache, game_json, min_removedlines,his_pieces,his_pieces_len,player,exrewardRate)
             
             game_score =  agent.removedlines 
             result = self.read_status_file(game_json)
@@ -324,7 +326,9 @@ class Train():
             result["total"]["avg_reward_piececount"] += (game_score/agent.piececount - result["total"]["avg_reward_piececount"])/1000
                             
             alpha = 0.01
-            result["total"]["avg_qval"] += alpha * (avg_qval - result["total"]["avg_qval"])
+            if exrewardRate==result["total"]["exrewardRate"]:
+                result["total"]["avg_qval"] += alpha * (avg_qval - result["total"]["avg_qval"])
+                
             result["total"]["avg_state_value"] += alpha * (avg_state_value - result["total"]["avg_state_value"])
 
             # 速度控制在消耗50行
