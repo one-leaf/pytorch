@@ -467,7 +467,7 @@ class Train():
                         x = np.array(x)
                         y = np.array(y)
 
-                        coefficients = np.polyfit(y, x, deg=3)
+                        coefficients = np.polyfit(y, x, deg=1)
 
                         x_when_y_is_zero = np.polyval(coefficients, -1.*result["total"]["avg_qval"])
 
