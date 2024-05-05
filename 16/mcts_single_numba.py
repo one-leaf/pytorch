@@ -269,9 +269,9 @@ class MCTS():
         if s not in self.Ps:                          
             # 获得当前局面的概率 和 局面的打分, 这个已经过滤掉了不可用走法
             act_probs, v = self._policy(state.game) 
-            
             expandPN(s, state.availables(), act_probs, self.Ps, self.Ns, self.Nsa, self.Qsa, state.actions_num)             
 
+            v *= 0.99 # 测试稳定网络用
             self.Vs[s] = v
             return v
 
