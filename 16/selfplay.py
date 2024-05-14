@@ -471,11 +471,16 @@ class Train():
 
                         x_when_y_is_zero = np.polyval(coefficients, -1.*result["total"]["avg_qval"])
 
-                        if (result["total"]["avg_qval"]<0 and x_when_y_is_zero>result["total"]["exrewardRate"]) or \
-                            (result["total"]["avg_qval"]>0 and x_when_y_is_zero<result["total"]["exrewardRate"]):                            
-                            result["total"]["exrewardRate"] = x_when_y_is_zero
-                        else:
-                            result["total"]["exrewardRate"] *= 1.01  
+                        if result["total"]["avg_qval"]<0:
+                            if x_when_y_is_zero>result["total"]["exrewardRate"]:
+                                result["total"]["exrewardRate"] = x_when_y_is_zero
+                            else:
+                                result["total"]["exrewardRate"] *= 1.01  
+                        elif result["total"]["avg_qval"]>0:
+                            if x_when_y_is_zero<result["total"]["exrewardRate"]:                            
+                                result["total"]["exrewardRate"] = x_when_y_is_zero
+                            else:
+                                result["total"]["exrewardRate"] *= 0.99 
                     elif len(result["qval"])>1:    
                         result["total"]["exrewardRate"]+=(result["qval"][-2]-result["qval"][-1])*0.1
                     
