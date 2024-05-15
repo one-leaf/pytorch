@@ -486,8 +486,10 @@ class Train():
                     elif len(result["qval"])>1:    
                         result["total"]["exrewardRate"]+=(result["qval"][-2]-result["qval"][-1])*0.1
                     
-                    if result["total"]["exrewardRate"]<0:
-                        result["total"]["exrewardRate"]=5e-3 if result["total"]["avg_qval"]<0 else 3e-3
+                    if result["total"]["exrewardRate"]>0.007:
+                        result["total"]["exrewardRate"]=0.007
+                    if result["total"]["exrewardRate"]<0.002:
+                        result["total"]["exrewardRate"]=0.002
                         
             result["lastupdate"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             self.save_status_file(result, game_json) 
