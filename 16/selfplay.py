@@ -468,8 +468,10 @@ class Train():
                         y = np.array(y)
 
                         coefficients = np.polyfit(y, x, deg=1)
-
-                        x_when_y_is_zero = np.polyval(coefficients, -1.*result["total"]["avg_qval"])
+                        dst = -1 * result["total"]["avg_qval"]
+                        if dst>0.01: dst = 0.01
+                        if dst<-0.01: dst = -0.01
+                        x_when_y_is_zero = np.polyval(coefficients, dst)
                         # 如果当前平均q值小于0
                         if result["total"]["avg_qval"]<0:
                             if x_when_y_is_zero>result["total"]["exrewardRate"]:
