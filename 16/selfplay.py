@@ -488,8 +488,8 @@ class Train():
                     elif len(result["qval"])>1:    
                         result["total"]["exrewardRate"]+=(result["qval"][-2]-result["qval"][-1])*0.1
                     
-                    if result["total"]["exrewardRate"]>0.007:
-                        result["total"]["exrewardRate"]=0.007
+                    if result["total"]["exrewardRate"]>0.008:
+                        result["total"]["exrewardRate"]=0.008
                     if result["total"]["exrewardRate"]<0.002:
                         result["total"]["exrewardRate"]=0.002
                         
