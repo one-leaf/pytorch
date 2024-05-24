@@ -191,11 +191,11 @@ class Train():
         if his_pieces!=None:
             print("min_removedlines:", min_removedlines, "pieces_count:", len(his_pieces))
             print("his_pieces:", his_pieces)
-            agent = Agent(isRandomNextPiece=True, nextPiecesList=his_pieces)
+            agent = Agent(isRandomNextPiece=False, nextPiecesList=his_pieces)
             agent.is_replay = True
         else:
             # 新局按Q值走，探索
-            agent = Agent(isRandomNextPiece=True, )
+            agent = Agent(isRandomNextPiece=False, )
             agent.is_replay = False
 
         agent.setCache(cache)
