@@ -146,28 +146,32 @@ def getprobsFromNsa(s:int, temp:float, availables, actions_num, Nsa):
     return probs
 
 def getEmptySF_Dict():
-    return numba.typed.Dict.empty(
-        key_type = numba.types.int64,
-        value_type = numba.types.float32
-    )
+    return {}
+    # return numba.typed.Dict.empty(
+    #     key_type = numba.types.int64,
+    #     value_type = numba.types.float64
+    # )
     
 def getEmptySAF_Dict():
-    return numba.typed.Dict.empty(
-        key_type = numba.types.int64,
-        value_type = numba.types.float32[:]
-    )
+    return {}
+    # return numba.typed.Dict.empty(
+    #     key_type = numba.types.int64,
+    #     value_type = numba.types.float64[:]
+    # )
 
 def getEmptySV_Dict():
-    return numba.typed.Dict.empty(
-        key_type = numba.types.int64,
-        value_type = numba.types.int64
-    )
+    return {}
+    # return numba.typed.Dict.empty(
+    #     key_type = numba.types.int64,
+    #     value_type = numba.types.int64
+    # )
 
 def getEmptySAV_Dict():
-    return numba.typed.Dict.empty(
-        key_type = numba.types.int64,
-        value_type = numba.types.int64[:]
-    )
+    return {}
+    # return numba.typed.Dict.empty(
+    #     key_type = numba.types.int64,
+    #     value_type = numba.types.int64[:]
+    # )
 
 class MCTS():
     def __init__(self, policy_value_fn, c_puct:float=5, n_playout:int=10000, limit_depth=20):
