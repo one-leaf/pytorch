@@ -7,8 +7,8 @@ import numpy as np
 import time
 from datetime import timedelta
 from agent_numba import ACTONS_LEN
-from numba import njit
-import numba
+# from numba import njit
+# import numba
 
 jit_args = {'nopython': True, 'cache': True, 'fastmath': True}
 
