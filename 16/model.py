@@ -45,8 +45,9 @@ class PolicyValueNet():
         # self.print_netwark()
 
         # 前期用这个
-        self.optimizer = optim.AdamW(self.policy_value_net.parameters(), lr=1e-6, weight_decay=self.l2_const)       
-        # 后面用这个
+        # self.optimizer = optim.AdamW(self.policy_value_net.parameters(), lr=1e-6, weight_decay=self.l2_const)  
+        self.optimizer = optim.Adam(self.policy_value_net.parameters(), lr=1e-6, weight_decay=self.l2_const)  
+        # transformers use adam 
         # self.optimizer = optim.SGD(self.policy_value_net.parameters(), lr=1e-6, momentum=0.9, weight_decay=self.l2_const)
 
         # 测试失败，学不会
