@@ -308,11 +308,18 @@ class Train():
 
         cache={}
 
+        if random.random()>0.5:
+            his_pieces = None
+            his_pieces_len = 0
+
         for _ in range(5):
             result = self.read_status_file(game_json) 
             exrewardRate = result["total"]["exrewardRate"]
             
             agent, data, avg_qval, avg_state_value, start_time, paytime = self.play(cache, game_json, min_removedlines,his_pieces,his_pieces_len,player,exrewardRate)
+            
+            his_pieces =  agent.piecehis
+            his_pieces_len = len(his_pieces)
             
             game_score =  agent.removedlines 
             result = self.read_status_file(game_json)
