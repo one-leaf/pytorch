@@ -215,9 +215,11 @@ class MCTS():
             depth = state_.game.piececount-state.game.piececount
             if depth > self.max_depth: self.max_depth = depth
             if self.simulation_count>=self._n_playout: break
-            if self.Ns[s]>=self._n_playout:
-                # 如果深度超过了限制，模拟次数降低
-                if depth>self.limit_depth and state_.game.state==1 and self.simulation_count>=self._n_playout/(2**(depth/20)): break
+            if self.Ns[s]>=self._n_playout*10:
+                if state_.game.state==1:
+                    # 如果深度超过了限制，模拟次数降低
+                    if depth>self.limit_depth and self.simulation_count>=self._n_playout/(2**(depth/20)): break
+                    if np.var(self.Nsa[s])>0.18: break
                 # 如果方块数达到目标，改为模拟次数为64
                 # if state.game.piececount>state.game.next_Pieces_list_len:
                 #     if self.simulation_count >= self._n_playout/4 and state_.game.state==1: break 
