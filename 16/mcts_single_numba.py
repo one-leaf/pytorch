@@ -247,7 +247,7 @@ class MCTS():
                   "\tV:", round(v,2), "-->", round(qs[max_q_idx],2), \
                   "\t%s %s:"%(game.position_to_action_name(max_q_idx),game.position_to_action_name(max_p)), \
                   round(ps[max_p],2), "-->", round(probs[max_p],2), \
-                  "\tQs:", qs, "var", np.var(qs[nz_idx]))
+                  "\tQs:", qs, "var", np.var(probs))
             # 如果这一局已经超过了20分钟
             # if run_time>20*60 and self.limit_depth!=20:
             #     print("limit max depth to 20")
@@ -358,6 +358,11 @@ class MCTSPlayer(object):
             availables = state.availables()
             nz_idx = np.nonzero(availables)
             max_qs_idx = nz_idx[0][np.argmax(act_qs[nz_idx])]
+            
+            # 将概率转为单一
+            # act_probs = np.zeros_like(act_probs)
+            # act_probs[max_qs_idx] = 1
+            
             # var_qs = np.var(act_qs[nz_idx])
             # print(var_qs)
             max_ps_idx = nz_idx[0][np.argmax(act_ps[nz_idx])]
