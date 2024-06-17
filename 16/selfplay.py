@@ -193,10 +193,12 @@ class Train():
             print("his_pieces:", his_pieces)
             agent = Agent(isRandomNextPiece=True, nextPiecesList=his_pieces)
             agent.is_replay = True
+            agent.limitstep = True
         else:
             # 新局按Q值走，探索
             agent = Agent(isRandomNextPiece=True, )
             agent.is_replay = False
+            agent.limitstep = False
 
         agent.setCache(cache)
         
@@ -207,7 +209,7 @@ class Train():
             agent.exrewardRate = exrewardRate
         else:
             agent.exrewardRate = 1
-        agent.limitstep = True
+        
         max_emptyCount = random.randint(10,30)
         start_time = time.time()
         mark_reward_piececount = -1
