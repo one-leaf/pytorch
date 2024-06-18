@@ -254,7 +254,7 @@ class Train():
 
             data["steps"].append(_step)
 
-            time.sleep(0.1)
+            # time.sleep(0.1)
 
             # 这里的奖励是消除的行数
             if agent.state==1:
@@ -313,7 +313,7 @@ class Train():
         # if random.random()>0.2:
         his_pieces = None
         his_pieces_len = 0
-
+        min_removedlines = result["total"]["avg_score"]
         for _ in range(5):
             result = self.read_status_file(game_json) 
             exrewardRate = result["total"]["exrewardRate"]
