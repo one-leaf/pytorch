@@ -287,27 +287,22 @@ class MCTS():
         
         # _r = state.game.score
         # _c = state.game.emptyCount
-        state.game.step(a)
+        _, _r = state.game.step(a)
                    
         # 外部奖励，最大1
-        r = 0
+        v = 0
         if state.game.state==1:
-            r += (state.game.score-state.markscore) * state.game.exrewardRate
+            v += (state.game.score-state.markscore) * state.game.exrewardRate
+
+        if _r<0:
+            v -= 1
         
         # 如果游戏结束
-        if state.game.terminal: 
-            # (state.game.state==1 and state.game.emptyCount-state.markEmptyCount>4) or \
-            
-            # self.Es[s] = -1
-            # v = -1 + np.min(self.Qsa[s])
-            v = -1
-            # v = -1
-            r = 0
-        else:
+        if not state.game.terminal: 
             # 现实奖励
             # 按照DQN，  q[s,a] += 0.1*(r+ 0.99*(max(q[s+1])-q[s,a])
             # 目前Mcts， q[s,a] += v[s+1]/Nsa[s,a]
-            v = self.search(state)
+            v += self.search(state)
             # r = np.tanh(r)
         
         # r = np.tanh(r)
@@ -316,7 +311,6 @@ class MCTS():
         # 更新 Q 值 和 访问次数
         # v = r + (v - 0.01)
         # v *= state.game.exrewardRate
-        v += r
         
         if v>1: v=1
         if v<-1: v=-1
