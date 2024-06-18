@@ -30,7 +30,7 @@ class Train():
         # step -> score
         # 128  --> 0.7
         # self.n_playout = 128  # 每个动作的模拟战记录个数，影响后续 128/2 = 66；64/16 = 4个方块 的走法
-        self.play_size = 20 # 每次测试次数
+        self.play_size = 10 # 每次测试次数
         self.buffer_size = 1000000  # cache对次数
         self.epochs = 2  # 每次更新策略价值网络的训练步骤数, 推荐是5
         self.kl_targ = 0.02  # 策略价值网络KL值目标
@@ -310,9 +310,9 @@ class Train():
 
         cache={}
 
-        if random.random()>0.5:
-            his_pieces = None
-            his_pieces_len = 0
+        # if random.random()>0.2:
+        his_pieces = None
+        his_pieces_len = 0
 
         for _ in range(5):
             result = self.read_status_file(game_json) 
