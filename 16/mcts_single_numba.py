@@ -355,9 +355,9 @@ class MCTSPlayer(object):
             nz_idx = np.nonzero(availables)
             max_qs_idx = nz_idx[0][np.argmax(act_qs[nz_idx])]
             
-            # 将概率转为单一
-            # act_probs = np.zeros_like(act_probs)
-            # act_probs[max_qs_idx] = 1
+            # 将概率转为onehot
+            act_probs = np.zeros_like(act_probs)
+            act_probs[max_qs_idx] = 1
             
             # var_qs = np.var(act_qs[nz_idx])
             # print(var_qs)
