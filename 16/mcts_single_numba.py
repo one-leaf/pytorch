@@ -355,9 +355,6 @@ class MCTSPlayer(object):
             nz_idx = np.nonzero(availables)
             max_qs_idx = nz_idx[0][np.argmax(act_qs[nz_idx])]
             
-            # 将概率转为onehot
-            act_probs = np.zeros_like(act_probs)
-            act_probs[max_qs_idx] = 1
             
             # var_qs = np.var(act_qs[nz_idx])
             # print(var_qs)
@@ -405,6 +402,10 @@ class MCTSPlayer(object):
                       "v:", qval, "train:", act_probs - act_ps)  
 
             acc_ps = 0 if abs(act_ps[idx]-act_probs[idx])>0.4 else 1
+
+            # 将概率转为onehot
+            act_probs = np.zeros_like(act_probs)
+            act_probs[max_qs_idx] = 1
 
             return action, qval, act_probs, state_v, max_qval, acc_ps, depth, state_n
         else:
