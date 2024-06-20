@@ -404,8 +404,8 @@ class MCTSPlayer(object):
             acc_ps = 0 if abs(act_ps[idx]-act_probs[idx])>0.4 else 1
 
             # 将概率转为onehot
-            act_probs = np.zeros_like(act_probs)
-            act_probs[max_qs_idx] = 1
+            # act_probs = np.zeros_like(act_probs)
+            # act_probs[max_qs_idx] = 1
 
             return action, qval, act_probs, state_v, max_qval, acc_ps, depth, state_n
         else:
