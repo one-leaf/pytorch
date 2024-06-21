@@ -78,7 +78,7 @@ class Train():
                 ext = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
                 os.replace(status_file, status_file+"_"+ext) 
         if result==None:
-            result={"reward":[], "depth":[], "pacc":[], "vacc":[], "time":[], "ns":[], "piececount":[]}
+            result={"reward":[], "depth":[], "pacc":[], "vacc":[], "time":[], "piececount":[]}
         if "total" not in result:
             result["total"]={"agent":0, "pacc":0, "vacc":0, "ns":0, "reward":0, "depth":0, "step_time":0, "_agent":0}
         if "best" not in result:
@@ -104,7 +104,7 @@ class Train():
         if "avg_state_value" not in result["total"]:
             result["total"]["avg_state_value"]=0  
         if "exrewardRate" not in result["total"]:
-            result["total"]["exrewardRate"]=0  
+            result["total"]["exrewardRate"]=0.1  
         if "piececount" not in result:
             result["piececount"]=[]
         if "exrewardRate" in result:
