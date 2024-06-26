@@ -534,24 +534,26 @@ class Agent():
     def set_status(self):
         # status = np.zeros((3, boardheight, boardwidth), dtype=np.int8)
         
+        # 如果是第二步更新上一步的背景
+        if self.piecesteps == 1:
+            self.status[2] = self.board.copy()
+            
+        self.status[2] += self.status[0]
         
-        self.status[2]=self.status[0]
         if self.fallpiece != None:
             piece = self.fallpiece
             shapedraw = pieces[piece['shape']][piece['rotation']]
-            self.status[0] = nb_get_status(shapedraw, piece['x'], piece['y'])
-                            
-        if self.need_update_status==True:
-            self.status[2]+=self.status[1]
-            self.status[1]=self.board
+            self.status[0] = nb_get_status(shapedraw, piece['x'], piece['y'])        
+
+        # 如果方块落地了,更新背景                            
+        if self.piecesteps == 0:
+            self.status[1] = self.board.copy()
             # self.status[2]=0
             # if self.nextpiece != None:
             #     piece = self.nextpiece  
             #     shapedraw = pieces[piece['shape']][piece['rotation']]
             #     self.status[2] = nb_get_status(shapedraw, piece['x'], piece['y'])
-                            
-            self.need_update_status=False
-        
+                                    
         # self.status[0]=self.get_fallpiece_board()
         # self.status[2]=self.get_nextpiece_borad()
         # self.status[1]=self.board
