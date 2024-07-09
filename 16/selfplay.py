@@ -186,7 +186,7 @@ class Train():
         self.save_status_file(result, game_json)         
         return min_removedlines, his_pieces, his_pieces_len
 
-    def play(self, cache, game_json, min_removedlines, his_pieces, his_pieces_len, player, exrewardRate):
+    def play(self, cache, result, min_removedlines, his_pieces, his_pieces_len, player, exrewardRate):
         data = {"steps":[],"shapes":[],"last_state":0,"score":0,"piece_count":0}
         if his_pieces!=None:
             print("min_removedlines:", min_removedlines, "pieces_count:", len(his_pieces))
@@ -266,7 +266,7 @@ class Train():
 
             # 如果游戏结束或玩了超过2小时
             paytime = time.time()-start_time
-            if agent.terminal or (agent.state==1 and paytime>60*60*2):
+            if agent.terminal or (agent.state==1 and paytime>60*60*2) or agent.removedlines> result["total"]["avg_score"]+1:
                 data["score"] = agent.score
                 data["piece_count"] = agent.piececount
                 data["piece_height"] = agent.pieceheight
@@ -318,7 +318,7 @@ class Train():
             result = self.read_status_file(game_json) 
             exrewardRate = result["total"]["exrewardRate"]
             
-            agent, data, avg_qval, avg_state_value, start_time, paytime = self.play(cache, game_json, min_removedlines,his_pieces,his_pieces_len,player,exrewardRate)
+            agent, data, avg_qval, avg_state_value, start_time, paytime = self.play(cache, result, min_removedlines,his_pieces,his_pieces_len,player,exrewardRate)
             
             his_pieces =  agent.piecehis
             his_pieces_len = len(his_pieces)

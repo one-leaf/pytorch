@@ -19,13 +19,13 @@ def run():
         start_time = time.time()
         while not agent.terminal:
             state = agent.current_state()
-            print(state)
             act = net_policy.policy_value_fn_best_act(agent)
             # agent.step(act, env)
             agent.step(act)
             # print(agent.get_availables())
             # os.system("cls")
             # print(v, agent.position_to_action_name(act), (time.time()-start_time)/agent.steps,"s", flush=True)
+            print(state)
             
             agent.print()
             time.sleep(0.2)
