@@ -290,7 +290,7 @@ class MCTS():
         _, _r = state.game.step(a)
                    
         # 外部奖励，最大1
-        v = 0
+        v = -1e-8
         if state.game.state==1:
             v += (state.game.score-state.markscore) * state.game.exrewardRate
 
