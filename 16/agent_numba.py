@@ -205,6 +205,12 @@ def nb_get_status(piece, p_x, p_y, templatenum=5):
 def nb_getEmptyCount(board):
     d=(20-np.argmax(board,axis=0)-np.sum(board,axis=0))
     return np.sum(d[d!=20])
+
+# 统计占位的个数
+# @njit(cache=True)
+def nb_getUsedCount(board):
+    d=20-np.argmax(board,axis=0)
+    return np.sum(d[d!=20])
                 
 # 统计最高位置以下的所有空的方块
 def nb_getTerminalEmptyCount(board):
@@ -730,7 +736,9 @@ class Agent():
             # reward -= (emptyCount - self.emptyCount)*0.5  
             self.emptyCount  = emptyCount
             
-            self.score += reward    # 一个方块1点 
+            # self.score += reward    # 一个方块1点 
+            self.score = -nb_getUsedCount(self.board)    # 一个方块1点 
+
             # self.pieceheight = self.getAvgHeight()  
             # self.failLines = self.getFailLines()  
             # self.heightDiff = self.getHeightDiff()

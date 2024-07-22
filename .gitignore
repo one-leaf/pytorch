@@ -26,4 +26,5 @@ zh_fonts/
 model/
 hover_ckpt/
 landing_ckpt/
+flagged/
 .DS_Store
