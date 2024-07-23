@@ -497,8 +497,7 @@ class Train():
                     elif len(result["qval"])>1:    
                         result["total"]["exrewardRate"]+=(result["qval"][-2]-result["qval"][-1])*0.1
                     
-                    if result["total"]["exrewardRate"]<0.001:
-                        result["total"]["exrewardRate"]=0.001
+                    if result["total"]["exrewardRate"]<1e-4: result["total"]["exrewardRate"]=1e-4
                     if result["total"]["exrewardRate"]>0.1: result["total"]["exrewardRate"]=0.1
                         
             result["lastupdate"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
