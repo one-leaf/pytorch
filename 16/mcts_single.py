@@ -325,7 +325,7 @@ class MCTSPlayer(object):
             # 直接用概率最大的走法
             if max_qs_idx ==  max_ps_idx:
                 idx = max_ps_idx
-            elif random.random()>0.8:
+            elif random.random()>0.2:
                 idx = max_qs_idx
             else:
                 idx = max_ps_idx 
