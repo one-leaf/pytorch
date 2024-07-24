@@ -264,9 +264,10 @@ class Train():
                         'step:', agent.steps, "step time:", round((time.time()-start_time)/i,3),'reward_p:', agent.piececount-mark_reward_piececount)
                 agent.print()
 
-            # 如果游戏结束或玩了超过2小时
+            # 如果游戏结束或玩了超过1小时
             paytime = time.time()-start_time
-            if agent.terminal or (agent.state==1 and paytime>60*60*2) or agent.removedlines> result["total"]["avg_score"]+1:
+            if agent.terminal or (agent.state==1 and paytime>60*60) or \
+                agent.removedlines> result["total"]["avg_score"]+1 or agent.piececount-agent.last_reward>=20:
                 data["score"] = agent.score
                 data["piece_count"] = agent.piececount
                 data["piece_height"] = agent.pieceheight
