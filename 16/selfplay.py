@@ -316,7 +316,7 @@ class Train():
         his_pieces = None
         his_pieces_len = 0
         min_removedlines = result["total"]["avg_score"]
-        for _ in range(10):
+        for playcount in range(10):
             result = self.read_status_file(game_json) 
             exrewardRate = result["total"]["exrewardRate"]
             
@@ -548,17 +548,22 @@ class Train():
 
             print("TRAIN Self Play end. length: %s value sum: %s saving ..." % (len(states),sum(values)))
 
-            # 保存对抗数据到data_buffer
-            filetime = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-            # 现在第一层改为了横向，所以不能做图片左右翻转增强
-            for i, obj in enumerate(self.get_equi_data(states, mcts_probs, values, scores)):
-            # for i, obj in enumerate(zip(states, mcts_probs, values, score)):
-                filename = "{}-{}.pkl".format(filetime, i)
-                savefile = os.path.join(data_wait_dir, filename)
-                with open(savefile, "wb") as fn:
-                    pickle.dump(obj, fn)
-            print("saved file basename:", filetime, "length:", i+1)
-            print()
+
+            if playcount==0 or agent.removedlines>min_removedlines: 
+                # 保存对抗数据到data_buffer
+                filetime = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+                # 现在第一层改为了横向，所以不能做图片左右翻转增强
+                for i, obj in enumerate(self.get_equi_data(states, mcts_probs, values, scores)):
+                # for i, obj in enumerate(zip(states, mcts_probs, values, score)):
+                    filename = "{}-{}.pkl".format(filetime, i)
+                    savefile = os.path.join(data_wait_dir, filename)
+                    with open(savefile, "wb") as fn:
+                        pickle.dump(obj, fn)
+                print("saved file basename:", filetime, "length:", i+1)
+                # 游戏结束
+                if agent.removedlines>min_removedlines: break        
+            else:
+                print("need replay")
 
             # 删除训练集
             # if agent.piececount/result["total"]["piececount"]<0.5:
@@ -568,7 +573,6 @@ class Train():
             #     with open(his_pieces_file, "wb") as fn:
             #         pickle.dump(agent.piecehis, fn)
                     
-            if agent.removedlines>min_removedlines: break        
 
     def run(self):
         """启动训练"""
