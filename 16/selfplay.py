@@ -564,7 +564,7 @@ class Train():
                 if agent.removedlines>min_removedlines: break        
             else:
                 print("need replay")
-                player.mcts._n_playout=512
+            player.mcts._n_playout=512
             # 删除训练集
             # if agent.piececount/result["total"]["piececount"]<0.5:
             #     filename = "R{}-{}-{}.pkl".format(agent.piececount, agent.score, int(round(time.time() * 1000000)))
