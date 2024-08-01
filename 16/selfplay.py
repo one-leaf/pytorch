@@ -549,21 +549,19 @@ class Train():
             print("TRAIN Self Play end. length: %s value sum: %s saving ..." % (len(states),sum(values)))
 
 
-            if playcount==0 or agent.removedlines>min_removedlines: 
-                # 保存对抗数据到data_buffer
-                filetime = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-                # 现在第一层改为了横向，所以不能做图片左右翻转增强
-                for i, obj in enumerate(self.get_equi_data(states, mcts_probs, values, scores)):
-                # for i, obj in enumerate(zip(states, mcts_probs, values, score)):
-                    filename = "{}-{}.pkl".format(filetime, i)
-                    savefile = os.path.join(data_wait_dir, filename)
-                    with open(savefile, "wb") as fn:
-                        pickle.dump(obj, fn)
-                print("saved file basename:", filetime, "length:", i+1)
-                # 游戏结束
-                if agent.removedlines>min_removedlines: break        
-            else:
-                print("need replay")
+            # 保存对抗数据到data_buffer
+            filetime = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+            # 现在第一层改为了横向，所以不能做图片左右翻转增强
+            for i, obj in enumerate(self.get_equi_data(states, mcts_probs, values, scores)):
+            # for i, obj in enumerate(zip(states, mcts_probs, values, score)):
+                filename = "{}-{}.pkl".format(filetime, i)
+                savefile = os.path.join(data_wait_dir, filename)
+                with open(savefile, "wb") as fn:
+                    pickle.dump(obj, fn)
+            print("saved file basename:", filetime, "length:", i+1)
+            # 游戏结束
+            if agent.removedlines>min_removedlines: break        
+            print("need replay")
             player.mcts._n_playout=512
             # 删除训练集
             # if agent.piececount/result["total"]["piececount"]<0.5:
