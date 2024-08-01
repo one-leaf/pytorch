@@ -562,8 +562,8 @@ class Train():
             # 游戏结束
             if agent.removedlines>min_removedlines: break    
                 
-            print("need replay")
             print()
+            print(f"replay: {playcount}")
             player.mcts._n_playout=512
             # 删除训练集
             # if agent.piececount/result["total"]["piececount"]<0.5:
