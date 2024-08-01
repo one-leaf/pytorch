@@ -548,7 +548,6 @@ class Train():
 
             print("TRAIN Self Play end. length: %s value sum: %s saving ..." % (len(states),sum(values)))
 
-
             # 保存对抗数据到data_buffer
             filetime = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
             # 现在第一层改为了横向，所以不能做图片左右翻转增强
@@ -559,8 +558,10 @@ class Train():
                 with open(savefile, "wb") as fn:
                     pickle.dump(obj, fn)
             print("saved file basename:", filetime, "length:", i+1)
+            
             # 游戏结束
-            if agent.removedlines>min_removedlines: break        
+            if agent.removedlines>min_removedlines: break    
+                
             print("need replay")
             player.mcts._n_playout=512
             # 删除训练集
