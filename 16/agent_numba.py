@@ -543,6 +543,10 @@ class Agent():
         # 如果是第二步更新上一步的背景
         if self.piecesteps == 1:
             self.status[2] = self.board.copy()
+            _piece = pieces[self.nextpiece['shape']][0]
+            nb_addtoboard(self.status[2], _piece, -1, 0)
+            
+            
             
         self.status[2] += self.status[0]
         

@@ -274,10 +274,13 @@ class MCTS():
 
         # 如果当前状态没有子节点，增加子节点
         # 增加 Ps[s] Vs[s] Ns[s]
+        
+        availables = state.availables()
+        
         if s not in self.Ps:                          
             # 获得当前局面的概率 和 局面的打分, 这个已经过滤掉了不可用走法
             act_probs, v = self._policy(state.game) 
-            expandPN(s, state.availables(), act_probs, self.Ps, self.Ns, self.Nsa, self.Qsa, state.actions_num)             
+            expandPN(s, availables, act_probs, self.Ps, self.Ns, self.Nsa, self.Qsa, state.actions_num)             
 
             v *= 0.9 # 测试稳定网络用 v * 0.9 + reward ==> v ; v ==> 10 * reward
             self.Vs[s] = v
@@ -285,7 +288,13 @@ class MCTS():
 
         # 当前最佳概率和最佳动作
         # 比较 Qsa[s, a] + c_puct * Ps[s,a] * sqrt(Ns[s]) / Nsa[s, a], 选择最大的
-        a = selectAction(s, state.availables(), self._c_puct, self.Ps, self.Ns, self.Qsa, self.Nsa)
+        a = selectAction(s, availables, self._c_puct, self.Ps, self.Ns, self.Qsa, self.Nsa)
+        
+        # if availables[a]==0:
+        #     print(a, availables)
+        #     print("NS:", self.Ns, "NSA:", self.Nsa)
+        #     print("QSA:", self.Qsa, "PS:", self.Ps)
+        #     raise Exception("FUN ERROR!")
         
         # _r = state.game.score
         # _c = state.game.emptyCount
