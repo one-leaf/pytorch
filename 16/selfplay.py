@@ -386,7 +386,7 @@ class Train():
                 pacc.append(step["acc_ps"])
                 depth.append(step["depth"])
                 ns.append(step["ns"])
-                vacc.append(1 if step["qval"]*step["state_value"]>0 else 0)
+                vacc.append(np.abs(step["qval"]-step["state_value"]))
 
             pacc = float(np.average(pacc))
             vacc = float(np.average(vacc))
