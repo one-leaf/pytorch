@@ -215,7 +215,8 @@ class MCTS():
             depth = state_.game.piececount-state.game.piececount
             if depth > self.max_depth: self.max_depth = depth
             if self.simulation_count>=self._n_playout and state_.game.state==1: break
-            
+            if depth > 2 : break
+
             # 如果中途停止会造成v值不稳定，除非v是由外部控制
             # if self.Ns[s]>=self._n_playout*10:
             #     if state_.game.state==1:
