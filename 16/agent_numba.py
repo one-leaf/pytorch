@@ -435,7 +435,7 @@ class Agent():
         self.last_reward = -1
         # 盘面的状态
         self.need_update_status=True
-        self.status = np.zeros((3, boardheight, boardwidth), dtype=np.int8)
+        self.status = np.zeros((4, boardheight, boardwidth), dtype=np.int8)
         self.set_status()
         # key
         self.key = 0
@@ -534,39 +534,6 @@ class Agent():
     def calc_down_count(self,board,piece):
         _piece = pieces[piece['shape']][piece['rotation']]
         return nb_calc_down_count(board, _piece, piece['x'], piece['y'])
-        
-    
-    # 状态一共3层， 0 当前下落方块， 1 是背景 ，2下落方块的上一个动作
-    def set_status(self):
-        # status = np.zeros((3, boardheight, boardwidth), dtype=np.int8)
-        
-        # 如果是第二步更新上一步的背景
-        if self.piecesteps == 1:
-            self.status[2] = self.board.copy()
-            _piece = pieces[self.nextpiece['shape']][0]
-            nb_addtoboard(self.status[2], _piece, -1, 0)
-            
-            
-            
-        self.status[2] += self.status[0]
-        
-        if self.fallpiece != None:
-            piece = self.fallpiece
-            shapedraw = pieces[piece['shape']][piece['rotation']]
-            self.status[0] = nb_get_status(shapedraw, piece['x'], piece['y'])        
-
-        # 如果方块落地了,更新背景                            
-        if self.piecesteps == 0:
-            self.status[1] = self.board.copy()
-            # self.status[2]=0
-            # if self.nextpiece != None:
-            #     piece = self.nextpiece  
-            #     shapedraw = pieces[piece['shape']][piece['rotation']]
-            #     self.status[2] = nb_get_status(shapedraw, piece['x'], piece['y'])
-                                    
-        # self.status[0]=self.get_fallpiece_board()
-        # self.status[2]=self.get_nextpiece_borad()
-        # self.status[1]=self.board
 
     # 概率的索引位置转action
     def position_to_action(self, position):
@@ -781,24 +748,32 @@ class Agent():
 
         return self.state, removedlines
 
-    def set_key(self):
-        if self.terminal:
-            board = self.status[1]
-        else:
-            board = np.sum(self.status[:2],axis=0)
-        # h = 0
-        # for i, b in enumerate(board.flat):
-        #     h += int(b)*2**(200-i)
-        # if self.nextpiece != None:
-        #     h += ord(self.nextpiece['shape'])
-        # self.key = h
-        # self.key = hash(board.data.tobytes())
+    # 状态一共4层， 0 当前下落方块， 1 是背景 ，2下落方块的上一个动作. 3是下一个方块
+    def set_status(self):
+        # status = np.zeros((4, boardheight, boardwidth), dtype=np.int8)        
+        # 如果是第二步更新上一步的背景
+        if self.piecesteps == 1:
+            self.status[2] = self.board.copy()
+            
+        self.status[2] = self.status[2] | self.status[0]
         
+        if self.fallpiece != None:
+            piece = self.fallpiece
+            shapedraw = pieces[piece['shape']][piece['rotation']]
+            self.status[0] = nb_get_status(shapedraw, piece['x'], piece['y'])        
+
+        # 如果方块落地了,更新背景                            
+        if self.piecesteps == 0:
+            self.status[1] = self.board.copy()
+            _piece = pieces[self.nextpiece['shape']][0]
+            self.status[3] = nb_get_status(_piece, 0, 0) 
+
+    def set_key(self):
+        board = self.status[0] | self.status[1] # np.sum(self.status[:2],axis=0)        
         key=[]
         for b in board.flat:
             key.append(str(b))
         keystr = int("".join(key), 2)
-        # self.key = hash(keystr)
         self.key = keystr
         
     def is_status_optimal(self):

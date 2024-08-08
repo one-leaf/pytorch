@@ -392,7 +392,7 @@ class VitPatchEmbed(nn.Module):
     """
     图片转嵌入数据，由 [B, C, H, W] -> [B, HW, C]
     """
-    def __init__(self, img_size=(20,10), in_c=3, kernel_size=(4,4), embed_dim=768, padding=0, stride=(2,2), norm_layer=None):
+    def __init__(self, img_size=(20,10), in_c=4, kernel_size=(5,5), embed_dim=768, padding=0, stride=(5,5), norm_layer=None):
         super().__init__()
         image_height, image_width = pair(img_size)
         kernel_height, kernel_width = pair(kernel_size)
@@ -422,7 +422,7 @@ class VitNet(nn.Module):
         act_layer =  nn.GELU
         # 图片转换为 patch embedding [B, C, H, W] ==> [B, num_patches, embed_dim] 
         # self.patch_embed = PatchEmbed(img_size=(20,10), patch_size=(1,10), in_c=8, embed_dim=embed_dim)
-        self.patch_embed = VitPatchEmbed(img_size=(20,10), in_c=3, kernel_size=(4,4), stride=(2,2), embed_dim=embed_dim)
+        self.patch_embed = VitPatchEmbed(img_size=(20,10), in_c=4, kernel_size=(5,5), stride=(5,5), embed_dim=embed_dim)
         # 图片分割后的块数
         num_patches = self.patch_embed.num_patches                      # p
 
