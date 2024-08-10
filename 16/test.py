@@ -25,6 +25,7 @@ def run():
             print(agent.status[0])
             print(agent.status[1])
             print(agent.status[2])
+            print(agent.status[3])
             # print(agent.get_availables())
             # os.system("cls")
             # print(v, agent.position_to_action_name(act), (time.time()-start_time)/agent.steps,"s", flush=True)
