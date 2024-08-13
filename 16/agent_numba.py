@@ -200,6 +200,15 @@ def nb_get_status(piece, p_x, p_y, templatenum=5):
                     status[py][px]=1
     return status                        
 
+# @njit(cache=True)
+def nb_put_status(board,piece, p_x, p_y, templatenum=5):
+    for x in range(templatenum):
+        for y in range(templatenum):
+            if piece[y][x]==1:
+                px, py = x+p_x, y+p_y
+                if px>=0 and px<10 and py>=0 and py<20:
+                    board[py][px]=1
+
 # 统计为空的个数
 # @njit(cache=True)
 def nb_getEmptyCount(board):
@@ -765,8 +774,17 @@ class Agent():
         # 如果方块落地了,更新背景                            
         if self.piecesteps == 0:
             self.status[1] = self.board.copy()
-            _piece = pieces[self.nextpiece['shape']][0]
-            self.status[3] = nb_get_status(_piece, 0, 0) 
+            self.status[3] = np.zeros((boardheight, boardwidth), dtype=np.int8)  
+            piece_template = pieces[self.nextpiece['shape']]
+            for i in range(4):
+                _rotation = i%len(piece_template)
+                _piece = piece_template[_rotation]
+                nb_put_status(self.status[3], _piece, 0, i*5)
+            piece_template = pieces[self.fallpiece['shape']]
+            for i in range(4):
+                _rotation = i%len(piece_template)
+                _piece = piece_template[_rotation]
+                nb_put_status(self.status[3], _piece, 5, i*5)               
 
     def set_key(self):
         board = self.status[0] | self.status[1] # np.sum(self.status[:2],axis=0)        
