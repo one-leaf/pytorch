@@ -196,9 +196,10 @@ class MCTS():
         Returns:
             probs: a policy vector where the probability of the ith action is
                    proportional to Nsa[(s,a)]**(1./temp)
-        """       
+        """     
         s:int = hash(state)
-        
+        # print(s)
+
         self.max_depth:int = 0
         self.simulation_count = 0
         state.mark()
@@ -268,6 +269,8 @@ class MCTS():
             v: 当前局面的状态
         """
         s = hash(state)
+        # print(self.simulation_count, s)
+        # print(state.game.status[0])
          
         # 如果得分不等于0，标志探索结束
         # if s in self.Es: 

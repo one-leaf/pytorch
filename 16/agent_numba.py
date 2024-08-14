@@ -790,10 +790,8 @@ class Agent():
         board = self.status[0] | self.status[1] # np.sum(self.status[:2],axis=0)        
         key=[]
         for b in board.flat:
-            key.append(str(b))
+            key.append(b.astype(str))
         keystr = int("".join(key), 2)
-        # board = board.ravel()
-        # key = int(board.dot(1<<np.arange(board.size-1,-1,-1)))
         self.key = keystr
         
     def is_status_optimal(self):
