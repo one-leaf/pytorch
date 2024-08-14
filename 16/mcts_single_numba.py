@@ -197,7 +197,7 @@ class MCTS():
             probs: a policy vector where the probability of the ith action is
                    proportional to Nsa[(s,a)]**(1./temp)
         """     
-        s:int = hash(state)
+        s = hash(state)
         # print(s)
 
         self.max_depth:int = 0
