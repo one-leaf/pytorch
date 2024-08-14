@@ -790,7 +790,7 @@ class Agent():
         board = self.status[0] | self.status[1] # np.sum(self.status[:2],axis=0)        
         key=[]
         for b in board.flat:
-            key.append(b.astype(str))
+            key.append(str(b))
         keystr = int("".join(key), 2)
         self.key = keystr
         
