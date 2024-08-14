@@ -793,7 +793,7 @@ class Agent():
         #     key.append(str(b))
         # keystr = int("".join(key), 2)
         board = board.ravel()
-        key = board.dot(1<<np.arange(board.size-1,-1,-1))    
+        key = int(board.dot(1<<np.arange(board.size-1,-1,-1)))
         self.key = key
         
     def is_status_optimal(self):
