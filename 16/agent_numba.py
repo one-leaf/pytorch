@@ -788,13 +788,13 @@ class Agent():
 
     def set_key(self):
         board = self.status[0] | self.status[1] # np.sum(self.status[:2],axis=0)        
-        # key=[]
-        # for b in board.flat:
-        #     key.append(str(b))
-        # keystr = int("".join(key), 2)
-        board = board.ravel()
-        key = int(board.dot(1<<np.arange(board.size-1,-1,-1)))
-        self.key = key
+        key=[]
+        for b in board.flat:
+            key.append(str(b))
+        keystr = int("".join(key), 2)
+        # board = board.ravel()
+        # key = int(board.dot(1<<np.arange(board.size-1,-1,-1)))
+        self.key = keystr
         
     def is_status_optimal(self):
         return self.piececount<=self.score*2.5+self.must_reward_piece_count
