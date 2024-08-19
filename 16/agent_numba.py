@@ -612,10 +612,10 @@ class Agent():
         # self.level, self.fallfreq = self.calculate(self.score)
         
         # self.actions.append(action)
-        if self.piecesteps==1 or self.piece_actions[-1]!="D":   # 第一个动作或最后一个为D单独一类
-            _d=0
+        if self.piecesteps>1 and self.piece_actions[-1]=="D":   # 第一个动作或最后一个为D单独一类
+            _d="D"
         else:
-            _d=10
+            _d="N"
         
         action_key = f"{self.fallpiece['shape']}_{self.fallpiece['x']}_{self.fallpiece['y']}_{self.fallpiece['rotation']}_{_d}_{action}"
         if self.cache!=None and (self.key, action_key) in self.cache:
