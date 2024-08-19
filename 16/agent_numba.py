@@ -612,12 +612,12 @@ class Agent():
         # self.level, self.fallfreq = self.calculate(self.score)
         
         # self.actions.append(action)
-        # if self.piecesteps==1 or self.piece_actions[-1]!="D":
-        #     _d=0
-        # else:
-        #     _d=10
+        if self.piecesteps==1 or self.piece_actions[-1]!="D":
+            _d=0
+        else:
+            _d=10
         
-        action_key = f"{self.fallpiece['shape']}_{self.fallpiece['x']}_{self.fallpiece['y']}_{self.fallpiece['rotation']}_{action}"
+        action_key = f"{self.fallpiece['shape']}_{self.fallpiece['x']}_{self.fallpiece['y']}_{self.fallpiece['rotation']}_{_d}_{action}"
         if self.cache!=None and (self.key, action_key) in self.cache:
             c = self.cache[(self.key, action_key)]           
             self.fallpiece['x'] = c["fallpiece_x"]
