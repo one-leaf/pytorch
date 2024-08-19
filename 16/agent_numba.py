@@ -612,12 +612,14 @@ class Agent():
         # self.level, self.fallfreq = self.calculate(self.score)
         
         # self.actions.append(action)
-        if self.piecesteps==1 or self.piece_actions[-1]!="D":
-            _d=0
-        else:
-            _d=10
-        if self.cache!=None and (self.key, action+10+_d) in self.cache:
-            c = self.cache[(self.key, action+10+_d)]           
+        # if self.piecesteps==1 or self.piece_actions[-1]!="D":
+        #     _d=0
+        # else:
+        #     _d=10
+        
+        action_key = f"{self.fallpiece['shape']}_{self.fallpiece['x']}_{self.fallpiece['y']}_{self.fallpiece['rotation']}_{action}"
+        if self.cache!=None and (self.key, action_key) in self.cache:
+            c = self.cache[(self.key, action_key)]           
             self.fallpiece['x'] = c["fallpiece_x"]
             self.fallpiece['y'] = c["fallpiece_y"]
             self.fallpiece['rotation'] = c["fallpiece_rotation"]
@@ -664,7 +666,7 @@ class Agent():
                 c["fallpiece_rotation"] =  self.fallpiece['rotation']
                 c["downcount"] = _down_count
                 c["isFalling"] = isFalling
-                self.cache[(self.key, action+10+_d)]=c
+                self.cache[(self.key, action_key)]=c
 
         # self.fallpieceheight = 20 - self.fallpiece['y']
         if self.piecesteps==1: self.piece_actions=""
@@ -673,9 +675,10 @@ class Agent():
         reward = 0
         removedlines = 0
         putEmptyBlock = False
-        if not isFalling:    
-            if self.cache!=None and (self.key, action+1000) in self.cache:
-                c2 = self.cache[(self.key, action+1000)] 
+        if not isFalling:   
+            action_key = f"end_{self.fallpiece['shape']}_{self.fallpiece['x']}_{self.fallpiece['y']}_{self.fallpiece['rotation']}" 
+            if self.cache!=None and (self.key, action_key) in self.cache:
+                c2 = self.cache[(self.key, action_key)] 
                 self.board = np.copy(c2["board"])
                 removedlines = c2["removedlines"]
                 emptyCount = c2["emptyCount"]                
@@ -688,7 +691,7 @@ class Agent():
                     c2["board"] = self.board
                     c2["removedlines"] = removedlines
                     c2["emptyCount"] =  emptyCount
-                    self.cache[(self.key, action+1000)] = c2
+                    self.cache[(self.key, action_key)] = c2
                     
             self.need_update_status=True
             # if removedlines>0: print("OK!!!",removedlines)
@@ -729,7 +732,7 @@ class Agent():
             self.piecesteps = 0
             self.piececount += 1 
 
-            _fallpiece_shape = self.fallpiece['shape']
+            # _fallpiece_shape = self.fallpiece['shape']
             self.fallpiece = self.nextpiece
             self.nextpiece = self.getnewpiece()            
             # self.actions = []
