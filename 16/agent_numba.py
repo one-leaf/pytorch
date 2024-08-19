@@ -612,7 +612,7 @@ class Agent():
         # self.level, self.fallfreq = self.calculate(self.score)
         
         # self.actions.append(action)
-        if self.piecesteps==1 or self.piece_actions[-1]!="D":
+        if self.piecesteps==1 or self.piece_actions[-1]!="D":   # 第一个动作或最后一个为D单独一类
             _d=0
         else:
             _d=10
