@@ -617,7 +617,7 @@ class Agent():
         else:
             _d="N"
         
-        action_key = f"{self.fallpiece['shape']}_{self.fallpiece['x']}_{self.fallpiece['y']}_{self.fallpiece['rotation']}_{_d}_{action}"
+        action_key = f"a_{self.fallpiece['shape']}_{self.fallpiece['x']}_{self.fallpiece['y']}_{self.fallpiece['rotation']}_{_d}_{action}"
         if self.cache!=None and (self.key, action_key) in self.cache:
             c = self.cache[(self.key, action_key)]           
             self.fallpiece['x'] = c["fallpiece_x"]
@@ -676,7 +676,7 @@ class Agent():
         removedlines = 0
         putEmptyBlock = False
         if not isFalling:   
-            action_key = f"end_{self.fallpiece['shape']}_{self.fallpiece['x']}_{self.fallpiece['y']}_{self.fallpiece['rotation']}" 
+            action_key = f"b_{self.fallpiece['shape']}_{self.fallpiece['x']}_{self.fallpiece['y']}_{self.fallpiece['rotation']}" 
             if self.cache!=None and (self.key, action_key) in self.cache:
                 c2 = self.cache[(self.key, action_key)] 
                 self.board = np.copy(c2["board"])
