@@ -320,7 +320,7 @@ class MCTS():
             v += self.search(state)
             # r = np.tanh(r)
         else:
-            v = state.game.score * state.game.exrewardRate
+            v = -1#state.game.score * state.game.exrewardRate
         # r = np.tanh(r)
         # if r>1: r = 1
         # if r<-1: r= -1
