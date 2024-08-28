@@ -319,11 +319,11 @@ class MCTS():
             # 目前Mcts， q[s,a] += v[s+1]/Nsa[s,a]
             v += self.search(state)
             # r = np.tanh(r)
-        else:
-            v = -1#state.game.score * state.game.exrewardRate
+        # else:
+        #     v = -1#state.game.score * state.game.exrewardRate
         # r = np.tanh(r)
-        if v>1: v = 1
-        if v<-1: v= -1
+        # if v>1: v = 1
+        # if v<-1: v= -1
         # 更新 Q 值 和 访问次数
         # v = r + (v - 0.01)
         # v *= state.game.exrewardRate
