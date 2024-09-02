@@ -22,7 +22,8 @@ class State():
         self.actions_num = ACTONS_LEN
         self.markscore = 0
         self.markfailtop = 0
-        self.markEmptyCount = 0                   
+        self.markEmptyCount = 0  
+        self.markPiececount = 0
         
     # 2.049623722920656e-06  
     def __hash__(self):
@@ -42,12 +43,14 @@ class State():
         state.markscore = self.markscore
         state.markfailtop = self.markfailtop
         state.markEmptyCount = self.markEmptyCount  
+        state.markPiececount = self.markPiececount
         return state
     
     def mark(self):
         self.markscore=self.game.score
         self.markfailtop=self.game.failtop
         self.markEmptyCount=self.game.emptyCount
+        self.markPiececount=self.game.piececount 
         
 #@njit(cache=True)
 def selectAction(s:int, availables, _c_puct:float, Ps, Ns, Qsa, Nsa):
@@ -203,8 +206,8 @@ class MCTS():
         self.max_depth:int = 0
         self.simulation_count = 0
         state.mark()
-        # for n in range(self._n_playout):
-        while True:
+        for n in range(self._n_playout):
+        # while True:
             self.simulation_count += 1
             
             # t = time.time()     
@@ -215,8 +218,8 @@ class MCTS():
             
             depth = state_.game.piececount-state.game.piececount
             if depth > self.max_depth: self.max_depth = depth
-            if self.simulation_count>=self._n_playout and state_.game.state==1: break
-            if depth > 2 and self.Ns[s]>=self._n_playout: break
+            # if self.simulation_count>=self._n_playout and state_.game.state==1: break
+            # if depth > 2 and self.Ns[s]>=self._n_playout: break
 
             # 如果中途停止会造成v值不稳定，除非v是由外部控制
             # if self.Ns[s]>=self._n_playout*10:
@@ -308,12 +311,12 @@ class MCTS():
         v = 0
         if state.game.state==1:
             v += (state.game.score-state.markscore) * state.game.exrewardRate
-
+            # print(state.game.piececount, state.markPiececount)
         # if _r<0:
         #     v -= 1
         
         # 如果游戏结束
-        if not state.game.terminal: 
+        if not state.game.terminal and (state.game.piececount-state.markPiececount<3): 
             # 现实奖励
             # 按照DQN，  q[s,a] += 0.1*(r+ 0.99*(max(q[s+1])-q[s,a])
             # 目前Mcts， q[s,a] += v[s+1]/Nsa[s,a]
