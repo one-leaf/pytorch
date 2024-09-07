@@ -316,7 +316,7 @@ class MCTS():
         #     v -= 1
         
         # 如果游戏结束
-        if not state.game.terminal and (state.game.piececount-state.markPiececount<3): 
+        if not state.game.terminal and (state.game.piececount-state.markPiececount<2): 
             # 现实奖励
             # 按照DQN，  q[s,a] += 0.1*(r+ 0.99*(max(q[s+1])-q[s,a])
             # 目前Mcts， q[s,a] += v[s+1]/Nsa[s,a]
