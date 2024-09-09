@@ -168,7 +168,7 @@ class PolicyValueNet():
         self.policy_value_net.train()
         probs, values = self.policy_value_net(state_batch)
 
-        value_loss = self.quantile_regression_loss(values, value_batch)*10000
+        value_loss = self.quantile_regression_loss(values, value_batch)
         policy_loss = F.cross_entropy(probs, mcts_probs)
 
         loss = value_loss + policy_loss
