@@ -146,11 +146,11 @@ class PolicyValueNet():
     def quantile_regression_loss(self, quantiles, target):
         num_quantiles = quantiles.shape[1]
         tau = (torch.arange(num_quantiles).to(self.device) + 0.5) / num_quantiles                   #[b, num_quantiles]
-        target = target.unsqueeze(1)                                                #[b, 1]
-        target = target.repeat(1, num_quantiles)                                    #[b, num_quantiles]
-        weights = torch.where(quantiles > target, tau, 1 - tau)                     #[b, num_quantiles]
-        return torch.mean(weights * F.huber_loss(quantiles, target, reduction='none'))
-        # return torch.mean(weights * F.smooth_l1_loss(quantiles, target, reduction='none'))
+        newtarget = target.unsqueeze(1)                                                #[b, 1]
+        newtarget = newtarget.repeat(1, num_quantiles)                                    #[b, num_quantiles]
+        weights = torch.where(quantiles > newtarget, tau, 1 - tau)                     #[b, num_quantiles]
+        # return torch.mean(weights * F.huber_loss(quantiles, newtarget, reduction='none'))
+        return torch.mean(weights * F.smooth_l1_loss(quantiles, newtarget, reduction='none'))
 
 
     # 训练
