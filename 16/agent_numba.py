@@ -674,7 +674,6 @@ class Agent():
 
         reward = 0
         removedlines = 0
-        putEmptyBlock = False
         if not isFalling:   
             action_key = f"b_{action_key}" 
             if self.cache!=None and (self.key, action_key) in self.cache:
@@ -698,8 +697,7 @@ class Agent():
             self.removedlines += removedlines
             reward = removedlines            
             
-            if emptyCount>self.emptyCount:
-                putEmptyBlock = True
+
 
             # 鼓励垂直下落和连续多次消行和消除空格
             # if removedlines>0 and not putEmptyBlock:

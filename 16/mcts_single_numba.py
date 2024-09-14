@@ -310,7 +310,9 @@ class MCTS():
         # 外部奖励，最大1
         v = 0
         if state.game.state==1:
-            v += (state.game.score-state.markscore) * state.game.exrewardRate
+            # v += (state.game.score-state.markscore) * state.game.exrewardRate
+            v += (state.markEmptyCount-state.game.emptyCount) * state.game.exrewardRate
+            
             # print(state.game.piececount, state.markPiececount)
         # if _r<0:
         #     v -= 1
