@@ -458,6 +458,12 @@ class VitNet(nn.Module):
         self.val_dist = nn.Linear(embed_dim, num_quantiles)   # [B, 768] => [B, num_quantiles]
         # self.val_dist_act = nn.Tanh()
 
+        self.reward_fc = nn.Linear(embed_dim, embed_dim)   # [B, 768] => [B, 768]
+        self.reward_fc_act = nn.GELU()
+        self.reward_dist = nn.Linear(embed_dim, 1)   # [B, 768] => [B, 1]
+        # self.val_dist_act = nn.Tanh()
+
+
         # 参数初始化, 这里需要pytorch 1.6以上版本
         # nn.init.trunc_normal_(self.pos_embed, std=0.02)
         # nn.init.trunc_normal_(self.val_token, std=0.02)
@@ -482,8 +488,9 @@ class VitNet(nn.Module):
         # 归一化
         # x = self.norm(x)                        # [B, p+1, 768]
 
-        # act = x[:, 1:].mean(dim = 1)             # [B, 768]
-        act = x.max(dim = 1).values                 # [B, 768]
+        act = x[:, 1:].mean(dim = 1)             # [B, 768]
+        # act = x.mean(dim = 1)             # [B, 768]
+        # act = x.max(dim = 1).values        # [B, 768]
         act = self.act_fc(act)
         act = self.act_fc_act(act)
         act = self.act_dist(act)                # [B, num_classes]
@@ -495,4 +502,9 @@ class VitNet(nn.Module):
         val = self.val_dist(val)                # [B, num_quantiles]
         # val = self.val_dist_act(val)            # Tanh -> [1 ~ -1]
 
-        return act, val        
+        reward = x[:, 0]                         # [B, 768]
+        reward = self.reward_fc(reward)
+        reward = self.reward_fc_act(reward)
+        reward = self.reward_dist(reward)        # [B, 1]
+
+        return act, val, reward    # [B, num_classes], [B, num_quantiles], [B, 1]

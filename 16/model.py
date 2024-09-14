@@ -56,7 +56,7 @@ class PolicyValueNet():
         if model_file and os.path.exists(model_file):
             print("Loading model", model_file)
             net_sd = torch.load(model_file, map_location=self.device)
-            self.policy_value_net.load_state_dict(net_sd)
+            self.policy_value_net.load_state_dict(net_sd, strict=False)
         else:
             self.save_model(model_file)
         self.lr = 0
@@ -97,7 +97,7 @@ class PolicyValueNet():
 
         self.policy_value_net.eval()
         with torch.no_grad(): 
-            act_probs, value = self.policy_value_net.forward(state_batch_tensor)    #[b, num_classes] [b, num_quantiles]
+            act_probs, value, reward = self.policy_value_net.forward(state_batch_tensor)    #[b, num_classes] [b, num_quantiles]
             
         act_probs = torch.softmax(act_probs,dim=1)
         # num_quantiles = value.shape[1]
@@ -116,8 +116,9 @@ class PolicyValueNet():
         # 还原成标准的概率
         act_probs = act_probs.cpu().numpy()
         value = value.cpu().numpy()
-
-        return act_probs, value
+        reward = reward.cpu().numpy()[0]
+        
+        return act_probs, value, reward
 
     # 从当前游戏获得 ((action, act_probs),...) 的可用动作+概率和当前游戏胜率
     def policy_value_fn(self, game):
@@ -126,7 +127,7 @@ class PolicyValueNet():
         输出: 一组（动作， 概率）和游戏当前状态的胜率
         """       
         current_state = game.current_state().reshape(1, -1, self.input_height, self.input_width)
-        act_probs, value = self.policy_value(current_state)
+        act_probs, value, _ = self.policy_value(current_state)
         act_probs=act_probs[0]
         value=value[0]
         return act_probs, value
@@ -154,24 +155,25 @@ class PolicyValueNet():
 
 
     # 训练
-    def train_step(self, state_batch, mcts_probs, value_batch, lr):
+    def train_step(self, state_batch, mcts_probs, value_batch, reward_batch, lr):
         """训练一次"""
         # 输入赋值       
         state_batch = torch.FloatTensor(state_batch).to(self.device)
         mcts_probs = torch.FloatTensor(mcts_probs).to(self.device)
         value_batch = torch.FloatTensor(value_batch).to(self.device)
-
+        reward_batch = torch.FloatTensor(reward_batch).to(self.device)
         # 设置学习率
         # self.set_learning_rate(lr)
 
         # 前向传播
         self.policy_value_net.train()
-        probs, values = self.policy_value_net(state_batch)
+        probs, values, rewards = self.policy_value_net(state_batch)
 
         value_loss = self.quantile_regression_loss(values, value_batch)
         policy_loss = F.cross_entropy(probs, mcts_probs)
+        reward_loss = F.mse_loss(rewards.view(-1), reward_batch)
 
-        loss = value_loss + policy_loss
+        loss = value_loss + policy_loss + reward_loss 
 
         # 参数梯度清零
         self.optimizer.zero_grad()
@@ -180,7 +182,7 @@ class PolicyValueNet():
         # 更新参数
         self.optimizer.step()
                 
-        return loss.item(), value_loss.item(), policy_loss.item()
+        return loss.item(), value_loss.item(), policy_loss.item(), reward_loss.item()
 
     # 保存模型
     def save_model(self, model_file):
