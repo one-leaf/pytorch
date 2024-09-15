@@ -116,7 +116,7 @@ class PolicyValueNet():
         # 还原成标准的概率
         act_probs = act_probs.cpu().numpy()
         value = value.cpu().numpy()
-        reward = reward.cpu().numpy()[0]
+        reward = reward.cpu().numpy()
         
         return act_probs, value, reward
 
@@ -127,17 +127,18 @@ class PolicyValueNet():
         输出: 一组（动作， 概率）和游戏当前状态的胜率
         """       
         current_state = game.current_state().reshape(1, -1, self.input_height, self.input_width)
-        act_probs, value, _ = self.policy_value(current_state)
+        act_probs, value, reward = self.policy_value(current_state)
         act_probs=act_probs[0]
         value=value[0]
-        return act_probs, value
+        reward = reward[0]
+        return act_probs, value, reward
     
     def policy_value_fn_best_act(self, game):
         """
         输入: 游戏
         输出: 一组（动作， 概率）和游戏当前状态的胜率
         """  
-        act_probs,_ = self.policy_value_fn(game)
+        act_probs,_,_ = self.policy_value_fn(game)
         
         actions = game.availables
         idx = np.argmax(act_probs*actions)
