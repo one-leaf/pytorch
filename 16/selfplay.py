@@ -529,9 +529,16 @@ class Train():
             print("reward:", pieces_reward)
             print("value: ", pieces_value)
             print("probs: ", pieces_probs)
-            for i in range(piececount-2, -1, -1):
-                pieces_reward[i] += pieces_reward[i + 1] / 2
-            print("fixedreward:", pieces_reward)
+            # for i in range(piececount-2, -1, -1):
+            #     pieces_reward[i] += pieces_reward[i + 1] / 2
+            # print("fixedreward:", pieces_reward)
+            
+            step_reward = np.zeros(step_count)
+            for m in range(step_count):
+                if data["steps"][m]["reward"]>0:
+                    for i in range(m+1):
+                        step_reward[i] += data["steps"][m]["reward"] / (m+1)
+            # print("step_reward:", step_reward)
 
             print("steps:",step_count,"piece_count:",data["piece_count"],"score:",data["score"],"piece_height:",data["piece_height"])
         
@@ -541,7 +548,7 @@ class Train():
                 states.append(step["state"])
                 mcts_probs.append(step["move_probs"])
                 values.append(step["qval"])
-                scores.append(pieces_reward[step["piece_count"]])
+                scores.append(step_reward[step["step"]])
                     
             assert len(states)>0
             assert len(states)==len(values)
