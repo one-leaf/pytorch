@@ -250,6 +250,7 @@ class Train():
             test_batch = None
 
             net = self.policy_value_net.policy_value
+            begin_rewards=None
             begin_values=None
             begin_act_probs=None
             test_data=None
@@ -262,6 +263,10 @@ class Train():
                     act_probs, values, rewards = net(test_batch) 
                     # print("value[0] dst:{} pred_s:{}".format(test_values[:5].cpu().numpy(), values[:5]))  
                     # print("probs[0] dst:{} pred_s:{}".format(test_probs[0].cpu().numpy(), act_probs[0]))
+                    if begin_rewards is None:
+                        begin_rewards = rewards
+                    else:
+                        begin_rewards = np.concatenate((begin_rewards, rewards), axis=0)
                     if begin_values is None:
                         begin_values = values
                     else:
@@ -318,6 +323,7 @@ class Train():
 
             self.policy_value_net.save_model(model_file)
    
+            end_reward=None
             end_values=None
             end_act_probs=None
             net = self.policy_value_net.policy_value
@@ -326,6 +332,10 @@ class Train():
                 test_batch = test_batch.to(self.policy_value_net.device)
                 with torch.no_grad(): 
                     act_probs, values, rewards = net(test_batch) 
+                    if end_reward is None:
+                        end_reward=rewards
+                    else:
+                        end_reward=np.concatenate((end_reward, rewards), axis=0)
                     if end_values is None:
                         end_values=values
                     else:
@@ -334,9 +344,11 @@ class Train():
                         end_act_probs=act_probs
                     else:
                         end_act_probs=np.concatenate((end_act_probs, act_probs), axis=0)
-
             for i in range(len(begin_values)):
                 print("value[{}] begin:{} end:{} to:{}".format(i, begin_values[i], end_values[i], test_data[2][i].numpy()))  
+                if i>=4:break
+            for i in range(len(begin_values)):
+                print("reward[{}] begin:{} end:{} to:{}".format(i, begin_rewards[i], end_reward[i], test_data[3][i].numpy()))  
                 if i>=4:break
             for i in range(len(begin_values)):
                 idx = np.argmax(begin_act_probs[i])
