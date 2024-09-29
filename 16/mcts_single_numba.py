@@ -397,10 +397,10 @@ class MCTSPlayer(object):
             # 如果当前概率和推定概率一致,不需要随机
             if max_qs_idx==max_ps_idx:
                 idx = max_ps_idx
-            elif need_max_ps and game.removedlines==0:
-                idx = max_ps_idx
-            elif need_max_qs and game.removedlines==0:
-                idx = max_qs_idx
+            # elif need_max_ps and game.removedlines==0:
+            #     idx = max_ps_idx
+            # elif need_max_qs and game.removedlines==0:
+            #     idx = max_qs_idx
             else:
                 p = 0.99**game.pieceCount  # p=0.75  
                 # a=1的时候，act 机会均等，>1 强调均值， <1 强调两端
