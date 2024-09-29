@@ -313,14 +313,15 @@ class Train():
         cache={}
 
         # if random.random()>0.2:
-        his_pieces = None
-        his_pieces_len = 0
-        min_removedlines = 1# result["total"]["avg_score"]
+        if min_removedlines>0:
+            his_pieces = None
+            his_pieces_len = 0
+        #min_removedlines = 1# result["total"]["avg_score"]
         for playcount in range(10):
             result = self.read_status_file(game_json) 
             exrewardRate = result["total"]["exrewardRate"]
             
-            agent, data, avg_qval, avg_state_value, start_time, paytime = self.play(cache, result, min_removedlines,his_pieces,his_pieces_len,player,exrewardRate)
+            agent, data, avg_qval, avg_state_value, start_time, paytime = self.play(cache, result, min_removedlines, his_pieces, his_pieces_len, player, exrewardRate)
             
             his_pieces =  agent.piecehis
             his_pieces_len = len(his_pieces)
@@ -569,7 +570,7 @@ class Train():
             print("saved file basename:", filetime, "length:", i+1)
             
             # 游戏结束
-            if agent.removedlines>=min_removedlines : break    
+            if agent.removedlines>0 : break    
                 
             print()
             print(f"replay: {playcount}")
