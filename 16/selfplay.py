@@ -216,7 +216,7 @@ class Train():
         avg_qval=0
         avg_state_value=0
         need_max_ps = False # random.random()>0.5
-        print("exreward:", agent.exreward,"exrewardRate:", agent.exrewardRate ,"max_emptyCount:",max_emptyCount,"isRandomNextPiece:",agent.isRandomNextPiece,"limitstep:",agent.limitstep,"need_max_ps:",need_max_ps)
+        print("exreward:", agent.exreward,"exrewardRate:", agent.exrewardRate ,"max_emptyCount:",max_emptyCount,"isRandomNextPiece:",agent.isRandomNextPiece,"limitstep:",agent.limitstep,"max_ps:",need_max_ps,"max_qs:",agent.is_replay)
         for i in range(self.max_step_count):
             _step={"step":i}
             _step["state"] = np.copy(agent.current_state())
