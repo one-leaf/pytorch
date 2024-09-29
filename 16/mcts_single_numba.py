@@ -395,7 +395,11 @@ class MCTSPlayer(object):
             #     idx = np.random.choice(range(ACTONS_LEN), p=act_probs)    
 
             # 如果当前概率和推定概率一致,不需要随机
-            if need_max_ps or max_qs_idx==max_ps_idx:
+            if max_qs_idx==max_ps_idx:
+                idx = max_ps_idx
+            elif random.Random() > 0.99**game.pieceCount:
+                idx = np.random.choice(range(ACTONS_LEN), p=act_probs)
+            elif need_max_ps:
                 idx = max_ps_idx
             elif need_max_qs:
                 idx = max_qs_idx
@@ -408,8 +412,7 @@ class MCTSPlayer(object):
                 dirichlet = np.random.dirichlet(2 * np.ones(len(nz_idx[0])))
                 dirichlet_probs = np.zeros_like(act_probs, dtype=np.float64)
                 dirichlet_probs[nz_idx] = dirichlet
-                idx = np.random.choice(range(ACTONS_LEN), p=p*act_probs + (1.0-p)*dirichlet_probs)           
-
+                idx = np.random.choice(range(ACTONS_LEN), p=p*act_probs + (1.0-p)*dirichlet_probs)
             # if max_qs_idx ==  max_ps_idx:
             #     idx = max_qs_idx
             # elif random.random()>0.5:
