@@ -397,11 +397,9 @@ class MCTSPlayer(object):
             # 如果当前概率和推定概率一致,不需要随机
             if max_qs_idx==max_ps_idx:
                 idx = max_ps_idx
-            elif random.random() > 0.99**game.pieceCount:
-                idx = np.random.choice(range(ACTONS_LEN), p=act_probs)
-            elif need_max_ps:
+            elif need_max_ps and game.removedlines==0:
                 idx = max_ps_idx
-            elif need_max_qs:
+            elif need_max_qs and game.removedlines==0:
                 idx = max_qs_idx
             else:
                 p = 0.99**game.pieceCount  # p=0.75  
