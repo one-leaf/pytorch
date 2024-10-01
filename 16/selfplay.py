@@ -602,6 +602,8 @@ def profiler():
 
 if __name__ == '__main__':
     print('start training',datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+    np.set_printoptions(precision=2, suppress=True)
+
     training = Train()
     training.run()
     # profiler()
