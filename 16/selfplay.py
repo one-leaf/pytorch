@@ -535,10 +535,18 @@ class Train():
             # print("fixedreward:", pieces_reward)
             
             step_reward = np.zeros(step_count)
+            z_count = 0
             for m in range(step_count):
                 if data["steps"][m]["reward"]>0:
                     for i in range(m+1):
                         step_reward[i] += data["steps"][m]["reward"] / (m+1)
+                    z_count=0
+                z_count += 1     
+                
+            for m in range(step_count):
+                if step_reward[m]==0:
+                    step_reward[m]=-1/z_count
+            
             # print("step_reward:", step_reward)
 
             print("steps:",step_count,"piece_count:",data["piece_count"],"score:",data["score"],"piece_height:",data["piece_height"])
