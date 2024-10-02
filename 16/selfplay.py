@@ -524,7 +524,7 @@ class Train():
                     pieces_reward[data["steps"][m]["piece_count"]] = data["steps"][m]["reward"] 
 
             pieces_value = [round(data["steps"][pieces_steps[p]]["qval"],2) for p in range(piececount)]
-            pieces_probs = [round(np.max(data["steps"][pieces_steps[p]]["move_probs"]),2) for p in range(piececount)]
+            # pieces_probs = [round(np.max(data["steps"][pieces_steps[p]]["move_probs"]),2) for p in range(piececount)]
 
             print()
             print("reward:", pieces_reward)
