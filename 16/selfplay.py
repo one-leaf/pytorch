@@ -313,7 +313,7 @@ class Train():
         cache={}
 
         # if random.random()>0.2:
-        if min_removedlines>0:
+        if min_removedlines>0 and random.random()>0.5:
             his_pieces = None
             his_pieces_len = 0
         #min_removedlines = 1# result["total"]["avg_score"]
