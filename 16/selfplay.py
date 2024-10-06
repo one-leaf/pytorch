@@ -316,6 +316,7 @@ class Train():
         if min_removedlines>0 and random.random()>0.5:
             his_pieces = None
             his_pieces_len = 0
+            min_removedlines = 0
         #min_removedlines = 1# result["total"]["avg_score"]
         for playcount in range(10):
             result = self.read_status_file(game_json) 
@@ -578,7 +579,7 @@ class Train():
             print("saved file basename:", filetime, "length:", i+1)
             
             # 游戏结束
-            if agent.removedlines>0 : break    
+            if agent.removedlines>min_removedlines : break    
                 
             print()
             print(f"replay: {playcount}")
