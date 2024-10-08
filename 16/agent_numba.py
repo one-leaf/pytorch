@@ -131,9 +131,9 @@ pieces = {'s':stemplate,
           'j':jtemplate,
           't':ttemplate}
 
-KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN = 0, 1, 2, 3
-ACTIONS = [KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN]
-ACTIONS_NAME = ["O","L","R","D"]
+KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN, KEY_NONE = 0, 1, 2, 3, 4
+ACTIONS = [KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN, KEY_NONE]
+ACTIONS_NAME = ["O","L","R","D","N"]
 ACTONS_LEN = len(ACTIONS)
 
 # @njit(cache=True)
@@ -570,6 +570,7 @@ class Agent():
             return
         
         # acts=[KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN]
+        self.availables[KEY_NONE]=1
         if not self.validposition(self.board, self.fallpiece, ax = -1):
             self.availables[KEY_LEFT]=0
         else:

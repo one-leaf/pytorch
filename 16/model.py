@@ -36,7 +36,7 @@ class PolicyValueNet():
 
         self.l2_const = l2_const  
         # ViT-Ti : depth 12 width 192 heads 3 LR=4e-3
-        self.policy_value_net = VitNet(embed_dim=192, depth=6, num_heads=3, num_classes=4, num_quantiles=128, drop_ratio=0, drop_path_ratio=0, attn_drop_ratio=0)
+        self.policy_value_net = VitNet(embed_dim=192, depth=6, num_heads=3, num_classes=5, num_quantiles=128, drop_ratio=0, drop_path_ratio=0, attn_drop_ratio=0)
         # ViT-S : depth 12 width 386 heads 6
         # self.policy_value_net = VitNet(embed_dim=386, depth=12, num_heads=6, num_classes=4, num_quantiles=128)
         # ViT-B : depth 12 width 768 heads 12
@@ -56,7 +56,28 @@ class PolicyValueNet():
         if model_file and os.path.exists(model_file):
             print("Loading model", model_file)
             net_sd = torch.load(model_file, map_location=self.device)
-            self.policy_value_net.load_state_dict(net_sd, strict=False)
+            try:
+                self.policy_value_net.load_state_dict(net_sd, strict=False)
+            except:
+                # net_sd = {k: v for k, v in net_sd.items() if k in net_sd and 'act_dist' not in k}
+                print(net_sd["act_dist.weight"].shape)
+                print(net_sd["act_dist.bias"].shape)
+                
+                zero_col,_ = torch.min(net_sd["act_dist.weight"],dim=0)
+                zero_col=zero_col.view(1,-1)
+                print(zero_col.shape)
+                net_sd["act_dist.weight"]=torch.cat((net_sd["act_dist.weight"],zero_col))
+                
+                zero_col,_ = torch.min(net_sd["act_dist.bias"],dim=0)
+                zero_col=zero_col.view(1)
+                net_sd["act_dist.bias"]=torch.cat((net_sd["act_dist.bias"],zero_col))
+                
+                print(net_sd["act_dist.weight"].shape)
+                print(net_sd["act_dist.bias"].shape)
+                
+                model_dict = self.policy_value_net.state_dict()
+                model_dict.update(net_sd)
+                self.policy_value_net.load_state_dict(model_dict, strict=False)
         else:
             self.save_model(model_file)
         self.lr = 0
