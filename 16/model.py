@@ -56,28 +56,28 @@ class PolicyValueNet():
         if model_file and os.path.exists(model_file):
             print("Loading model", model_file)
             net_sd = torch.load(model_file, map_location=self.device)
-            try:
-                self.policy_value_net.load_state_dict(net_sd, strict=False)
-            except:
-                # net_sd = {k: v for k, v in net_sd.items() if k in net_sd and 'act_dist' not in k}
-                print(net_sd["act_dist.weight"].shape)
-                print(net_sd["act_dist.bias"].shape)
+            # try:
+            self.policy_value_net.load_state_dict(net_sd, strict=False)
+            # except:
+            #     # net_sd = {k: v for k, v in net_sd.items() if k in net_sd and 'act_dist' not in k}
+            #     print(net_sd["act_dist.weight"].shape)
+            #     print(net_sd["act_dist.bias"].shape)
                 
-                zero_col,_ = torch.min(net_sd["act_dist.weight"],dim=0)
-                zero_col=zero_col.view(1,-1)
-                print(zero_col.shape)
-                net_sd["act_dist.weight"]=torch.cat((net_sd["act_dist.weight"],zero_col))
+            #     zero_col,_ = torch.min(net_sd["act_dist.weight"],dim=0)
+            #     zero_col=zero_col.view(1,-1)
+            #     print(zero_col.shape)
+            #     net_sd["act_dist.weight"]=torch.cat((net_sd["act_dist.weight"],zero_col))
                 
-                zero_col,_ = torch.min(net_sd["act_dist.bias"],dim=0)
-                zero_col=zero_col.view(1)
-                net_sd["act_dist.bias"]=torch.cat((net_sd["act_dist.bias"],zero_col))
+            #     zero_col,_ = torch.min(net_sd["act_dist.bias"],dim=0)
+            #     zero_col=zero_col.view(1)
+            #     net_sd["act_dist.bias"]=torch.cat((net_sd["act_dist.bias"],zero_col))
                 
-                print(net_sd["act_dist.weight"].shape)
-                print(net_sd["act_dist.bias"].shape)
+            #     print(net_sd["act_dist.weight"].shape)
+            #     print(net_sd["act_dist.bias"].shape)
                 
-                model_dict = self.policy_value_net.state_dict()
-                model_dict.update(net_sd)
-                self.policy_value_net.load_state_dict(model_dict, strict=False)
+            #     model_dict = self.policy_value_net.state_dict()
+            #     model_dict.update(net_sd)
+            #     self.policy_value_net.load_state_dict(model_dict, strict=False)
         else:
             self.save_model(model_file)
         self.lr = 0
