@@ -455,13 +455,13 @@ class Train():
                     result["advantage"].remove(result["advantage"][0])
                     
                 # 保存下中间步骤的agent
-                newmodelfile = model_file+"_"+str(result["total"]["agent"])
-                if not os.path.exists(newmodelfile):
-                    policy_value_net.save_model(newmodelfile)
+                # newmodelfile = model_file+"_"+str(result["total"]["agent"])
+                # if not os.path.exists(newmodelfile):
+                #     policy_value_net.save_model(newmodelfile)
 
                 # 如果当前最佳，将模型设置为最佳模型
-                if max(result["depth"])==result["depth"][-1]:
-                    newmodelfile = model_file+"_depth_"+str(result["depth"][-1])
+                if max(result["reward"])==result["reward"][-1]:
+                    newmodelfile = model_file+"_reward_"+str(result["reward"][-1])
                     if not os.path.exists(newmodelfile):
                         policy_value_net.save_model(newmodelfile)
                     if os.path.exists(bestmodelfile): os.remove(bestmodelfile)
