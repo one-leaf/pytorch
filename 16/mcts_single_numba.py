@@ -244,7 +244,6 @@ class MCTS():
         
         nz_idx = np.nonzero(state.availables())
         max_q_idx = nz_idx[0][np.argmax(qs[nz_idx])]
-        
         # max_q = np.nanargmax(np.where(qs!=0, qs, np.nan))
         
         game = state.game
@@ -254,9 +253,9 @@ class MCTS():
             print(timedelta(seconds=run_time), game.steps, game.fallpiece["shape"], \
                   "ns:", str(nsv).rjust(4), "/", str(self.simulation_count).ljust(4), "depth:", str(self.max_depth).ljust(3), \
                 #   "\tQ:", round(v,2), "-->",round(qs[max_p],2), '/', round(qs[max_q],2), \
-                  "V:", round(v,2), "-->", round(qs[max_q_idx],2), \
+                  "V:", round(v,2), "-->", round(qs[max_p],2), \
                   "\t%s %s:"%(game.position_to_action_name(max_q_idx),game.position_to_action_name(max_p)), \
-                  round(ps[max_q_idx],2), "-->", round(probs[max_q_idx],2), \
+                  round(ps[max_p],2), "-->", round(probs[max_p],2), \
                   "\tQs:", qs, "\tNs:", ns, "\tPs:", ps)
             # 如果这一局已经超过了20分钟
             # if run_time>20*60 and self.limit_depth!=20:
