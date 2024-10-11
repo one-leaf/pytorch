@@ -215,6 +215,17 @@ def nb_getEmptyCount(board):
     d=(20-np.argmax(board,axis=0)-np.sum(board,axis=0))
     return np.sum(d[d!=20])
 
+# def nb_getEmptyCount2(board):
+#     v = 0 
+#     for i in range(boardwidth):
+#         s = 0
+#         for j in range(boardheight):
+#             if board[j][i] == 1:
+#                 s = 1
+#             else:
+#                 v += s*1.01**(19-j)
+#     return v
+
 # 统计占位的个数
 # @njit(cache=True)
 def nb_getUsedCount(board):
