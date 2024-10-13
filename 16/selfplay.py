@@ -547,6 +547,7 @@ class Train():
             for m in range(step_count):
                 if step_reward[m]==0:
                     step_reward[m]=-1/z_count
+                    # step_reward[m]=-1
             print("reward:", step_reward)
             # print("step_reward:", step_reward)
 

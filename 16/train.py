@@ -106,8 +106,9 @@ class Dataset(torch.utils.data.Dataset):
             try:
                 with open(fn, "rb") as f:
                     state, mcts_prob, value, reward = pickle.load(f)
-                    if len(mcts_prob)==4:
-                        mcts_prob = np.concatenate((mcts_prob, np.zeros(1)), axis=0)
+                    # if len(mcts_prob)==4:
+                    #     mcts_prob = np.concatenate((mcts_prob, np.zeros(1)), axis=0)
+                    if reward<0: reward=-1
             except:
                 print("filename {} error can't load".format(fn))
                 if os.path.exists(fn): os.remove(fn)
