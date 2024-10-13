@@ -375,13 +375,14 @@ class MCTSPlayer(object):
             # max_probs_idx = np.argmax(act_probs)    
             
             availables = state.availables()
-            nz_idx = np.nonzero(availables)
-            max_qs_idx = nz_idx[0][np.argmax(act_qs[nz_idx])]
+            nz_idx = np.nonzero(availables)[0]  # [0,2,3,4]
+            
+            max_qs_idx = nz_idx[np.argmax(act_qs[nz_idx])]
             
             
             # var_qs = np.var(act_qs[nz_idx])
             # print(var_qs)
-            max_ps_idx = nz_idx[0][np.argmax(act_ps[nz_idx])]
+            max_ps_idx = nz_idx[np.argmax(act_ps[nz_idx])]
 
             # if var_qs>0.01:
             #     if game.is_replay:
@@ -407,11 +408,36 @@ class MCTSPlayer(object):
                 # a=1的时候，act 机会均等，>1 强调均值， <1 强调两端
                 # 国际象棋 0.3 将棋 0.15 围棋 0.03
                 # 取值一般倾向于 a = 10/n 所以俄罗斯方块取 2
-                # a = 2                               
-                dirichlet = np.random.dirichlet(2 * np.ones(len(nz_idx[0])))
+                # a = 2       
+                        
+                # 收集当前最大概率的qs
+                _q = act_qs[max_ps_idx]
+                _qs = act_qs[nz_idx]
+                _qs_list=[]
+                _id_list=[]
+                for i, q in enumerate(_qs):
+                    if q >= _q:
+                        _qs_list.append(q)
+                        _id_list.append(nz_idx[i])
+                                        
+                fix_act_probs = np.zeros_like(act_probs, dtype=np.float64)
+                fix_act_probs[_id_list] = act_probs[_id_list]
+                
+                sum_fix_actions = sum(fix_act_probs)
+                if sum_fix_actions==0:
+                    fix_act_probs[_id_list] = 1
+                    sum_fix_actions = len(_id_list)
+                fix_act_probs = fix_act_probs/sum_fix_actions
+                
+                dirichlet = np.random.dirichlet(2 * np.ones(len(_id_list)))
                 dirichlet_probs = np.zeros_like(act_probs, dtype=np.float64)
-                dirichlet_probs[nz_idx] = dirichlet
-                idx = np.random.choice(range(ACTONS_LEN), p=p*act_probs + (1.0-p)*dirichlet_probs)
+                dirichlet_probs[_id_list] = dirichlet
+                idx = np.random.choice(range(ACTONS_LEN), p=p*fix_act_probs + (1.0-p)*dirichlet_probs)
+                
+                # dirichlet = np.random.dirichlet(2 * np.ones(len(nz_idx[0])))
+                # dirichlet_probs = np.zeros_like(act_probs, dtype=np.float64)
+                # dirichlet_probs[nz_idx] = dirichlet
+                # idx = np.random.choice(range(ACTONS_LEN), p=p*act_probs + (1.0-p)*dirichlet_probs)
             # if max_qs_idx ==  max_ps_idx:
             #     idx = max_qs_idx
             # elif random.random()>0.5:
