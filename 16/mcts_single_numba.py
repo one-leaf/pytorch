@@ -222,7 +222,7 @@ class MCTS():
             # if depth > 2 and self.Ns[s]>=self._n_playout: break
 
             # 如果中途停止会造成v值不稳定，除非v是由外部控制
-            # if self.Ns[s]>=self._n_playout*10:
+            # if self.Ns[s]>=self._n_playout*2: break
             #     if state_.game.state==1:
             #         # 如果深度超过了限制，模拟次数降低
             #         if depth>self.limit_depth and self.simulation_count>=self._n_playout/(2**(depth/20)): break
