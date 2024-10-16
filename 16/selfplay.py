@@ -528,8 +528,8 @@ class Train():
             # pieces_probs = [round(np.max(data["steps"][pieces_steps[p]]["move_probs"]),2) for p in range(piececount)]
 
             print()
-            print("reward:", pieces_reward)
-            print("value: ", pieces_value)
+            print("pieces_reward:", pieces_reward)
+            print("pieces_value: ", pieces_value)
             # print("probs: ", pieces_probs)
             # for i in range(piececount-2, -1, -1):
             #     pieces_reward[i] += pieces_reward[i + 1] / 2
@@ -548,7 +548,7 @@ class Train():
                 if step_reward[m]==0:
                     step_reward[m]=-1/z_count
                     # step_reward[m]=-1
-            print("reward:", step_reward)
+            print("step_reward:", step_reward)
             # print("step_reward:", step_reward)
 
             print("steps:",step_count,"piece_count:",data["piece_count"],"score:",data["score"],"piece_height:",data["piece_height"])
