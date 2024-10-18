@@ -102,10 +102,15 @@ class Dataset(torch.utils.data.Dataset):
         rewards={}
         values={}
         # double_train_list=[]
-        for fn in self.file_list:
+        for i,fn in enumerate(self.file_list):
             try:
                 with open(fn, "rb") as f:
                     state, mcts_prob, value, reward = pickle.load(f)
+                    if i==0:
+                        print("state shape:",state.shape)
+                        print("mcts_prob shape:",mcts_prob.shape)
+                        print("value shape:",value.shape)
+                        print("reward shape:",reward.shape)
                     # if len(mcts_prob)==4:
                     #     mcts_prob = np.concatenate((mcts_prob, np.zeros(1)), axis=0)
                     # if reward<0: reward=-1
