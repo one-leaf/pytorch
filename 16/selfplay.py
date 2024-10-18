@@ -318,7 +318,7 @@ class Train():
             his_pieces_len = 0
             min_removedlines = 0
         #min_removedlines = 1# result["total"]["avg_score"]
-        for playcount in range(3):
+        for playcount in range(2):
             result = self.read_status_file(game_json) 
             exrewardRate = result["total"]["exrewardRate"]
             
@@ -535,43 +535,49 @@ class Train():
             #     pieces_reward[i] += pieces_reward[i + 1] / 2
             # print("fixedreward:", pieces_reward)
             
-            step_reward = np.zeros(step_count)
+            # 全局评价
+            step_values = np.zeros(step_count)
             z_count = 0
             for m in range(step_count):
                 if data["steps"][m]["reward"]>0:
                     for i in range(m+1):
-                        step_reward[i] += data["steps"][m]["reward"] / (m+1)
+                        step_values[i] += data["steps"][m]["reward"] / (m+1)
                     z_count=0
-                z_count += 1     
-                
+                z_count += 1                     
             for m in range(step_count):
-                if step_reward[m]==0:
-                    step_reward[m]=-1/z_count
-                    # step_reward[m]=-1
-            print("step_reward:", step_reward)
+                if step_values[m]==0:
+                    step_values[m]=-1
+            print("step_values:", step_values)
+            
+            # 局部奖励
+            step_rewards = np.zeros(step_count)
+            for m in range(step_count-1):
+                step_rewards[m+1]=(data["steps"][m+1]["qval"]-data["steps"][m]["qval"])/abs(data["steps"][m+1]["qval"])
+            print("step_reward:", step_rewards)
+            
             # print("step_reward:", step_reward)
 
             print("steps:",step_count,"piece_count:",data["piece_count"],"score:",data["score"],"piece_height:",data["piece_height"])
         
-            states, mcts_probs, values, scores= [], [], [], []
+            states, mcts_probs, values, rewards= [], [], [], []
 
             for step in data["steps"]:
                 states.append(step["state"])
                 mcts_probs.append(step["move_probs"])
-                values.append(step["qval"])
-                scores.append(step_reward[step["step"]])
+                values.append(step_values[step["step"]])
+                rewards.append(step_rewards[step["step"]])
                     
             assert len(states)>0
             assert len(states)==len(values)
             assert len(states)==len(mcts_probs)
-            assert len(states)==len(scores)
+            assert len(states)==len(rewards)
 
             print("TRAIN Self Play end. length: %s value sum: %s saving ..." % (len(states),sum(values)))
 
             # 保存对抗数据到data_buffer
             filetime = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
             # 现在第一层改为了横向，所以不能做图片左右翻转增强
-            for i, obj in enumerate(self.get_equi_data(states, mcts_probs, values, scores)):
+            for i, obj in enumerate(self.get_equi_data(states, mcts_probs, values, rewards)):
             # for i, obj in enumerate(zip(states, mcts_probs, values, score)):
                 filename = "{}-{}.pkl".format(filetime, i)
                 savefile = os.path.join(data_wait_dir, filename)
@@ -580,10 +586,9 @@ class Train():
             print("saved file basename:", filetime, "length:", i+1)
             
             # 游戏结束
-            if agent.removedlines>min_removedlines : break    
-                
+            if agent.removedlines>min_removedlines : break                    
             print()
-            print(f"replay: {playcount}")
+            print(f"replay: {playcount+1}")
             # player.mcts._n_playout=512
             # 删除训练集
             # if agent.piececount/result["total"]["piececount"]<0.5:
