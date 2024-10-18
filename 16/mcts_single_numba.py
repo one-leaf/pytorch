@@ -290,8 +290,8 @@ class MCTS():
             expandPN(s, availables, act_probs, self.Ps, self.Ns, self.Nsa, self.Qsa, state.actions_num)             
             # v *= 0.5 # 测试稳定网络用 v * 0.5 + reward ==> v ; v ==> 2 * reward
             v = float(v+r)
-            self.Vs[s] = v
             v *= 0.5 
+            self.Vs[s] = v
             return v
 
         # 当前最佳概率和最佳动作
