@@ -106,11 +106,8 @@ class Dataset(torch.utils.data.Dataset):
             try:
                 with open(fn, "rb") as f:
                     state, mcts_prob, value, reward = pickle.load(f)
-                    if i==0:
-                        print("state shape:",state.shape)
-                        print("mcts_prob shape:",mcts_prob.shape)
-                        print("value shape:",value.shape)
-                        print("reward shape:",reward.shape)
+                    assert state.shape == (4,20,10)
+                    assert mcts_prob.shape == (5,)
                     # if len(mcts_prob)==4:
                     #     mcts_prob = np.concatenate((mcts_prob, np.zeros(1)), axis=0)
                     # if reward<0: reward=-1
