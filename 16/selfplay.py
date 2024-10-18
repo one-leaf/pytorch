@@ -318,7 +318,7 @@ class Train():
             his_pieces_len = 0
             min_removedlines = 0
         #min_removedlines = 1# result["total"]["avg_score"]
-        for playcount in range(10):
+        for playcount in range(3):
             result = self.read_status_file(game_json) 
             exrewardRate = result["total"]["exrewardRate"]
             
