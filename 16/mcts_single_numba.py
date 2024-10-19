@@ -315,13 +315,15 @@ class MCTS():
             v += (state.markEmptyCount-state.game.emptyCount) * state.game.exrewardRate
             
             # print(state.game.piececount, state.markPiececount)
-        if state.game.emptyCount - state.markEmptyCount > state.game.piececount - state.markPiececount :
-            v = -1
+        # need_break = False
+        # if state.game.emptyCount - state.markEmptyCount > state.game.piececount - state.markPiececount :
+        #     v = -1
+        #     need_break = True
         # if state.game.emptyCount == state.markEmptyCount and _r>0:
         #     v = 1
         
         # 如果游戏结束
-        if not state.game.terminal:# and _r==0 :#(state.game.piececount-state.markPiececount<=1): 
+        if not state.game.terminal:# and not need_break:# and _r==0 :#(state.game.piececount-state.markPiececount<=1): 
             # 现实奖励
             # 按照DQN，  q[s,a] += 0.1*(r+ 0.99*(max(q[s+1])-q[s,a])
             # 目前Mcts， q[s,a] += v[s+1]/Nsa[s,a]
