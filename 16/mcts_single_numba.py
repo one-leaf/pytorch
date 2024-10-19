@@ -315,8 +315,8 @@ class MCTS():
             v += (state.markEmptyCount-state.game.emptyCount) * state.game.exrewardRate
             
             # print(state.game.piececount, state.markPiececount)
-        # if state.game.emptyCount - state.markEmptyCount > state.game.piececount - state.markPiececount :
-        #     v = -1
+        if state.game.emptyCount - state.markEmptyCount > state.game.piececount - state.markPiececount :
+            v = -1
         # if state.game.emptyCount == state.markEmptyCount and _r>0:
         #     v = 1
         
