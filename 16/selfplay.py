@@ -537,16 +537,21 @@ class Train():
             
             # 全局评价
             step_values = np.zeros(step_count)
-            z_count = 0
+            # z_count = 0
+            # for m in range(step_count):
+            #     if data["steps"][m]["reward"]>0:
+            #         for i in range(m+1):
+            #             step_values[i] += data["steps"][m]["reward"] / (m+1)
+            #         z_count=0
+            #     z_count += 1                     
+            # for m in range(step_count):
+            #     if step_values[m]==0:
+            #         step_values[m]=-1/z_count
             for m in range(step_count):
-                if data["steps"][m]["reward"]>0:
-                    for i in range(m+1):
-                        step_values[i] += data["steps"][m]["reward"] / (m+1)
-                    z_count=0
-                z_count += 1                     
-            for m in range(step_count):
-                if step_values[m]==0:
-                    step_values[m]=-1/z_count
+                step_values[i] = - (m+1)/step_count
+            #     if data["steps"][m]["reward"]>0:
+            #         for i in range(m+1):
+            #             step_values[i] += data["steps"][m]["reward"] / (m+1)
             print("step_values:", step_values)
             
             # 局部奖励
