@@ -548,7 +548,7 @@ class Train():
             #     if step_values[m]==0:
             #         step_values[m]=-1/z_count
             for m in range(step_count):
-                step_values[i] = - (m+1)/step_count
+                step_values[m] = - (m+1)/step_count
             #     if data["steps"][m]["reward"]>0:
             #         for i in range(m+1):
             #             step_values[i] += data["steps"][m]["reward"] / (m+1)
