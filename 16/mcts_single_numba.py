@@ -319,8 +319,11 @@ class MCTS():
         # if state.game.emptyCount - state.markEmptyCount > state.game.piececount - state.markPiececount :
         #     v = -1
         #     need_break = True
-        # if state.game.emptyCount == state.markEmptyCount and _r>0:
-        #     v = 1
+        if _r>0:
+            if state.game.emptyCount == state.markEmptyCount:
+                v += 0.1
+            elif state.game.emptyCount > state.markEmptyCount:
+                v -= 0.1
         
         # 如果游戏结束
         if not state.game.terminal:# and not need_break:# and _r==0 :#(state.game.piececount-state.markPiececount<=1): 
