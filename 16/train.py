@@ -110,7 +110,8 @@ class Dataset(torch.utils.data.Dataset):
                     assert mcts_prob.shape == (5,) , f'error: prob shape {mcts_prob.shape}'
                     assert not np.isnan(value) , f'error: value is Nan'
                     assert not np.isnan(reward) , f'error: reward is Nan'
-                    
+                    assert not np.isinf(value) , f'error: value is Inf'
+                    assert not np.isinf(reward) , f'error: reward is Inf'
                     # if len(mcts_prob)==4:
                     #     mcts_prob = np.concatenate((mcts_prob, np.zeros(1)), axis=0)
                     # if reward<0: reward=-1
