@@ -290,8 +290,7 @@ class MCTS():
             act_probs, v, r = self._policy(state.game) 
             expandPN(s, availables, act_probs, self.Ps, self.Ns, self.Nsa, self.Qsa, state.actions_num)             
             # v *= 0.5 # 测试稳定网络用 v * 0.5 + reward ==> v ; v ==> 2 * reward
-            v = float(v+r)
-            v *= 0.5 
+            v = float(v+r)            
             self.Vs[s] = v
             return v
 
