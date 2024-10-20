@@ -108,6 +108,9 @@ class Dataset(torch.utils.data.Dataset):
                     state, mcts_prob, value, reward = pickle.load(f)
                     assert state.shape == (4,20,10) , f'error: sate shape {state.shape}'
                     assert mcts_prob.shape == (5,) , f'error: prob shape {mcts_prob.shape}'
+                    assert not np.isnan(value) , f'error: value is Nan'
+                    assert not np.isnan(reward) , f'error: reward is Nan'
+                    
                     # if len(mcts_prob)==4:
                     #     mcts_prob = np.concatenate((mcts_prob, np.zeros(1)), axis=0)
                     # if reward<0: reward=-1
