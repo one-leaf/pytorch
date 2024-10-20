@@ -546,7 +546,7 @@ class Train():
                 z_count += 1                     
             for m in range(step_count):
                 if step_values[m]==0:
-                    step_values[m]=-1
+                    step_values[m]=-1/z_count
             print("step_values:", step_values)
             
             # 局部奖励
