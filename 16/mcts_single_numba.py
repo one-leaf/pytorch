@@ -314,7 +314,7 @@ class MCTS():
             # 这种奖励会照成主动消行，而不管后续的局面
             # v += (state.game.score-state.markscore) * state.game.exrewardRate
             # 不鼓励主动消行，以局面为主
-            v += (state.markEmptyCount-state.game.emptyCount) * state.game.exrewardRate
+            # v += (state.markEmptyCount-state.game.emptyCount) * state.game.exrewardRate
             
             # print(state.game.piececount, state.markPiececount)
         # need_break = False
