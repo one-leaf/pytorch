@@ -560,10 +560,10 @@ class Train():
             # 局部奖励
             step_rewards = np.zeros(step_count,dtype=np.float64)
             for m in range(step_count-1):
-                if data["steps"][m+1]["qval"]==0:
-                    step_rewards[m+1]=0
+                if data["steps"][m]["qval"]==0:
+                    step_rewards[m]=0
                 else:
-                    step_rewards[m+1]=(data["steps"][m+1]["qval"]-data["steps"][m]["qval"])/abs(data["steps"][m+1]["qval"])
+                    step_rewards[m]=(data["steps"][m+1]["qval"]-data["steps"][m]["qval"])/abs(data["steps"][m]["qval"])
             print("step_reward:", step_rewards)
             
             # print("step_reward:", step_reward)
