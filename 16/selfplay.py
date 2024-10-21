@@ -536,7 +536,11 @@ class Train():
             # print("fixedreward:", pieces_reward)
             
             # 全局评价
-            step_values = np.zeros(step_count,dtype=np.float64)
+            # step_values = np.zeros(step_count,dtype=np.float64)
+            # for m in range(step_count):
+            #     step_values[m] = -(m+1)/step_count
+            
+            step_values = np.linspace(1, -1, step_count)
             # z_count = 0
             # for m in range(step_count):
             #     if data["steps"][m]["reward"]>0:
@@ -547,8 +551,7 @@ class Train():
             # for m in range(step_count):
             #     if step_values[m]==0:
             #         step_values[m]=-1/z_count
-            for m in range(step_count):
-                step_values[m] = -(m+1)/step_count
+            
             #     if data["steps"][m]["reward"]>0:
             #         for i in range(m+1):
             #             step_values[i] += data["steps"][m]["reward"] / (m+1)
