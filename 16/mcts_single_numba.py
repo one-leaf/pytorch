@@ -309,7 +309,7 @@ class MCTS():
         _, _r = state.game.step(a)
                    
         # 外部奖励，最大1
-        # v = 0
+        v = 0
         # if state.game.state==1:
         #     # 这种奖励会照成主动消行，而不管后续的局面
         #     # v += (state.game.score-state.markscore) * state.game.exrewardRate
