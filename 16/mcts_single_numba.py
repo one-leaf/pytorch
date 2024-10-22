@@ -318,8 +318,8 @@ class MCTS():
             
         #     # print(state.game.piececount, state.markPiececount)
         # # need_break = False
-        # # if state.game.emptyCount - state.markEmptyCount > state.game.piececount - state.markPiececount :
-        # #     v = -1
+            if state.game.emptyCount - state.markEmptyCount > state.game.piececount - state.markPiececount :
+                v = -1
         # #     need_break = True
             if _r>0:
                 if state.game.emptyCount <= state.markEmptyCount:
