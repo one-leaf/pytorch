@@ -557,9 +557,10 @@ class Train():
             #             step_values[i] += data["steps"][m]["reward"] / (m+1)
             print("step_values:", step_values)
             
-            # 局部奖励
+            # 局部奖励,如果未来变好，就增加，如果未来变差就减少
             step_rewards = np.zeros(step_count,dtype=np.float64)
             for m in range(step_count-1):
+                # step_rewards[m]=data["steps"][m]["qval"]-data["steps"][m]["state_value"]
                 if data["steps"][m]["qval"]==0:
                     step_rewards[m]=0
                 else:
