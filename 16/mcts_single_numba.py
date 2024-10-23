@@ -387,13 +387,13 @@ class MCTSPlayer(object):
             availables = state.availables()
             nz_idx = np.nonzero(availables)[0]  # [0,2,3,4]
             
-            max_qs_idx = nz_idx[np.argmax(act_qs[nz_idx])]
+            # max_qs_idx = nz_idx[np.argmax(act_qs[nz_idx])]
+            max_qs_idx = nz_idx[np.argmax(act_probs[nz_idx])]
             
             
             # var_qs = np.var(act_qs[nz_idx])
             # print(var_qs)
-            # max_ps_idx = nz_idx[np.argmax(act_ps[nz_idx])]
-            max_ps_idx = nz_idx[np.argmax(act_probs[nz_idx])]
+            max_ps_idx = nz_idx[np.argmax(act_ps[nz_idx])]
 
             # if var_qs>0.01:
             #     if game.is_replay:
