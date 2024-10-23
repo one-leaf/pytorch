@@ -229,8 +229,7 @@ class Train():
             #     need_max_ps=not need_max_ps
             #     print("switch need_max_ps to:", need_max_ps)
             need_max_ps = random.random() < agent.removedlines/100   
-            action, qval, move_probs, state_value, max_qval, acc_ps, depth, ns = \
-                player.get_action(agent, temp=1, need_max_ps=need_max_ps, need_max_qs=agent.is_replay) 
+            action, qval, move_probs, state_value, max_qval, acc_ps, depth, ns = player.get_action(agent, temp=1) 
 
             _, reward = agent.step(action)
 
@@ -318,10 +317,20 @@ class Train():
             his_pieces_len = 0
             min_removedlines = 0
         #min_removedlines = 1# result["total"]["avg_score"]
-        for playcount in range(2):
+        for playcount in range(3):
             result = self.read_status_file(game_json) 
             exrewardRate = result["total"]["exrewardRate"]
             
+            if playcount==0:
+                player.need_max_ps = False
+                player.need_max_qs = False
+            elif playcount==1:
+                player.need_max_ps = False
+                player.need_max_qs = True            
+            elif playcount==2:
+                player.need_max_ps = True
+                player.need_max_qs = False            
+                
             agent, data, avg_qval, avg_state_value, start_time, paytime = self.play(cache, result, min_removedlines, his_pieces, his_pieces_len, player, exrewardRate)
             
             his_pieces =  agent.piecehis

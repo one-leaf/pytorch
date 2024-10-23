@@ -357,9 +357,11 @@ class MCTSPlayer(object):
     """基于模型指导概率的MCTS + AI player"""
 
     # c_puct MCTS child权重， 用来调节MCTS搜索深度，越大搜索越深，越相信概率，越小越相信Q 的程度 默认 5
-    def __init__(self, policy_value_function, c_puct=5, n_playout=2000, limit_depth=20):
+    def __init__(self, policy_value_function, c_puct=5, n_playout=2000, limit_depth=20, need_max_ps=False, need_max_qs=False):
         """初始化参数"""
         self.mcts = MCTS(policy_value_function, c_puct, n_playout, limit_depth)
+        self.need_max_ps = need_max_ps
+        self.need_max_qs = need_max_qs
 
     def set_player_ind(self, p):
         """指定MCTS的playerid"""
@@ -369,7 +371,7 @@ class MCTSPlayer(object):
     def reset_player(self):
         self.mcts.reset()
 
-    def get_action(self, game, temp=0, need_max_ps=False, need_max_qs=False):        
+    def get_action(self, game, temp=0):        
         """计算下一步走子action"""
         if not game.terminal:  # 如果游戏没有结束
             # 训练的时候 temp = 1
@@ -407,10 +409,10 @@ class MCTSPlayer(object):
             # 如果当前概率和推定概率一致,不需要随机
             if max_qs_idx==max_ps_idx:
                 idx = max_ps_idx
-            # elif need_max_ps and game.removedlines==0:
-            #     idx = max_ps_idx
-            # elif need_max_qs and game.removedlines==0:
-            #     idx = max_qs_idx
+            elif self.need_max_qs:
+                idx = max_qs_idx
+            elif self.need_max_ps:
+                idx = max_ps_idx
             else:
                 p = 0.99**game.pieceCount  # p=0.75  
                 # a=1的时候，act 机会均等，>1 强调均值， <1 强调两端
