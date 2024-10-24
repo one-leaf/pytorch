@@ -187,6 +187,7 @@ class MCTS():
         self.Ps = getEmptySAF_Dict()     # 保存 动作概率 key: s, a
         # self.Es = getEmptySF_Dict()     # 保存游戏最终得分 key: s
         self.Vs = getEmptySF_Dict()     # 保存游戏局面差异奖励 key: s
+        self.Rs = getEmptySF_Dict()     # 保存游戏局面差异奖励 key: s
         print("create mcts, c_puct: {}, n_playout: {}".format(c_puct, n_playout))
         self.t = 0
         self.c = 1
@@ -240,6 +241,7 @@ class MCTS():
         ps = self.Ps[s]     
         ns = self.Nsa[s]/self.Ns[s]
         v:float = self.Vs[s] 
+        r:float = self.Rs[s] 
         nsv:float = self.Ns[s]
         max_p = np.argmax(ps)
         
@@ -254,7 +256,7 @@ class MCTS():
             print(timedelta(seconds=run_time), game.steps, game.fallpiece["shape"], \
                   "ns:", str(nsv).rjust(4), "/", str(self.simulation_count).ljust(4), "depth:", str(self.max_depth).ljust(3), \
                 #   "\tQ:", round(v,2), "-->",round(qs[max_p],2), '/', round(qs[max_q],2), \
-                  "V:", round(v,2), "-->", round(qs[max_p],2), \
+                  "v:", round(v,2), "r:", round(r,2), \
                   "\t%s %s:"%(game.position_to_action_name(max_q_idx),game.position_to_action_name(max_p)), \
                   round(ps[max_p],2), "-->", round(probs[max_p],2), \
                   "\tQs:", qs, "\tNs:", ns, "\tPs:", ps)
@@ -290,8 +292,9 @@ class MCTS():
             act_probs, v, r = self._policy(state.game) 
             expandPN(s, availables, act_probs, self.Ps, self.Ns, self.Nsa, self.Qsa, state.actions_num)             
             # v *= 0.5 # 测试稳定网络用 v * 0.5 + reward ==> v ; v ==> 2 * reward
-            v = float(v+r)            
             self.Vs[s] = v
+            self.Rs[s] = r
+            v = float(v+r)            
             return v
 
         # 当前最佳概率和最佳动作
