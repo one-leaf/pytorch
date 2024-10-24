@@ -138,7 +138,6 @@ class PolicyValueNet():
         act_probs = act_probs.cpu().numpy()
         value = value.cpu().numpy()
         reward = reward.cpu().numpy()
-        
         return act_probs, value, reward
 
     # 从当前游戏获得 ((action, act_probs),...) 的可用动作+概率和当前游戏胜率
@@ -151,7 +150,7 @@ class PolicyValueNet():
         act_probs, value, reward = self.policy_value(current_state)
         act_probs=act_probs[0]
         value=value[0]
-        reward = reward[0]
+        reward = reward[0, 0]
         return act_probs, value, reward
     
     def policy_value_fn_best_act(self, game):
