@@ -323,7 +323,7 @@ class MCTS():
         # #     need_break = True
             if _r>0:
                 if state.game.emptyCount <= state.markEmptyCount:
-                    v += 0.1
+                    v = 1
                 else:
                     v -= 0.1
         
