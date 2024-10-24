@@ -625,7 +625,7 @@ class Train():
             
             # 保存训练集
             if playcount==2:
-                filename = "R{}-{}-{}.pkl".format(agent.piececount, agent.removedlines, int(round(time.time() * 1000000)))
+                filename = "{}-{}.pkl".format("".join(agent.piecehis), len(agent.piecehis))
                 his_pieces_file = os.path.join(self.waitplaydir, filename)
                 print("save need replay", his_pieces_file)
                 with open(his_pieces_file, "wb") as fn:
