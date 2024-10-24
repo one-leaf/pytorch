@@ -4,7 +4,8 @@ from model import PolicyValueNet, data_dir, data_wait_dir, model_file
 from agent_numba import Agent, ACTIONS
 from mcts_single_numba import MCTSPlayer
 
-import time, json, datetime
+import time, json
+from datetime import datetime, timedelta
 
 from itertools import count
 import os, random, uuid, math
@@ -75,7 +76,7 @@ class Train():
                     time.sleep(10)
 
             if result==None:
-                ext = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+                ext = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
                 os.replace(status_file, status_file+"_"+ext) 
         if result==None:
             result={"reward":[], "depth":[], "pacc":[], "vacc":[], "time":[], "piececount":[]}
@@ -163,7 +164,7 @@ class Train():
                 if agent.terminal:            
                     result["total"]["avg_score"] += (agent.removedlines-result["total"]["avg_score"])/1000
                     result["total"]["avg_piececount"] += (agent.piececount-result["total"]["avg_piececount"])/1000
-                    result["lastupdate"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                    result["lastupdate"] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                     break
                 
             self.save_status_file(result, game_json)
@@ -296,7 +297,7 @@ class Train():
         
         game_json = os.path.join(data_dir, "result.json")
   
-        print('start game time:', datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+        print('start game time:', datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 
         min_removedlines, his_pieces, his_pieces_len = self.test_play(game_json, policy_value_net)
         
@@ -311,12 +312,21 @@ class Train():
 
         cache={}
 
-        # if random.random()>0.2:
-        if min_removedlines>0 and random.random()>0.5:
-            his_pieces = None
-            his_pieces_len = 0
-            min_removedlines = 0
-        #min_removedlines = 1# result["total"]["avg_score"]
+        if min_removedlines>0:
+            # 检查有没有需要重复运行的
+            listFiles = os.listdir(self.waitplaydir)
+            for f in listFiles:
+                if f.endswith(".pkl"):
+                    filename = os.path.join(self.waitplaydir, f)
+                    # 仅仅重新训练超过12小时的
+                    if time.time()-os.path.getmtime(filename)>12*60*60:                    
+                        with open(filename, "rb") as fn:
+                            his_pieces = pickle.load(fn)
+                            his_pieces_len = len(his_pieces)
+                        print("load need replay", filename)
+                        os.remove(filename)
+                        break            
+        
         for playcount in range(3):
             result = self.read_status_file(game_json) 
             exrewardRate = result["total"]["exrewardRate"]
@@ -513,7 +523,7 @@ class Train():
                     if result["total"]["exrewardRate"]<1e-6: result["total"]["exrewardRate"]=1e-6
                     if result["total"]["exrewardRate"]>0.01: result["total"]["exrewardRate"]=0.01
                         
-            result["lastupdate"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            result["lastupdate"] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             self.save_status_file(result, game_json) 
             
             step_count = len(data["steps"])
@@ -597,7 +607,7 @@ class Train():
             print("TRAIN Self Play end. length: %s value sum: %s saving ..." % (len(states),sum(values)))
 
             # 保存对抗数据到data_buffer
-            filetime = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+            filetime = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
             # 现在第一层改为了横向，所以不能做图片左右翻转增强
             for i, obj in enumerate(self.get_equi_data(states, mcts_probs, values, rewards)):
             # for i, obj in enumerate(zip(states, mcts_probs, values, score)):
@@ -612,13 +622,14 @@ class Train():
             print()
             print(f"replay: {playcount+1}")
             # player.mcts._n_playout=512
-            # 删除训练集
-            # if agent.piececount/result["total"]["piececount"]<0.5:
-            #     filename = "R{}-{}-{}.pkl".format(agent.piececount, agent.score, int(round(time.time() * 1000000)))
-            #     his_pieces_file = os.path.join(self.waitplaydir, filename)
-            #     print("save need replay", his_pieces_file)
-            #     with open(his_pieces_file, "wb") as fn:
-            #         pickle.dump(agent.piecehis, fn)
+            
+            # 保存训练集
+            if playcount==2:
+                filename = "R{}-{}-{}.pkl".format(agent.piececount, agent.removedlines, int(round(time.time() * 1000000)))
+                his_pieces_file = os.path.join(self.waitplaydir, filename)
+                print("save need replay", his_pieces_file)
+                with open(his_pieces_file, "wb") as fn:
+                    pickle.dump(agent.piecehis, fn)
                     
 
     def run(self):
@@ -638,12 +649,12 @@ def profiler():
     profiler.print_stats()
 
 if __name__ == '__main__':
-    print('start training',datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+    print('start training',datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
     np.set_printoptions(precision=2, suppress=True)
 
     training = Train()
     training.run()
     # profiler()
-    print('end training',datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+    print('end training',datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
     print("")
 
