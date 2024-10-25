@@ -411,9 +411,10 @@ class MCTSPlayer(object):
             #     idx = np.random.choice(range(ACTONS_LEN), p=act_probs)    
 
             # 如果当前概率和推定概率一致,不需要随机
-            if max_qs_idx==max_ps_idx:
-                idx = max_ps_idx
-            elif self.need_max_qs:
+            # if max_qs_idx==max_ps_idx:
+            #     idx = max_ps_idx
+            
+            if self.need_max_qs:
                 idx = max_qs_idx
             elif self.need_max_ps:
                 idx = max_ps_idx
