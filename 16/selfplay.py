@@ -145,7 +145,7 @@ class Train():
         # 先运行测试
         his_pieces = None
         his_pieces_len = 0
-        min_score = 100
+        min_pieces_count = 9999999
         min_removedlines = 0
         for _ in range(self.play_size):
             result = self.read_status_file(game_json)     
@@ -171,17 +171,12 @@ class Train():
 
             agent.print()
 
-            # 判断是否需要重新玩,如果当前小于平均的0.75，放到运行池训练
-            if agent.removedlines < min_score:
-                min_score = agent.removedlines
+            # 找到当前放置的最小方块局面，重新玩
+            if agent.piececount < min_pieces_count:
+                min_pieces_count = agent.piececount
                 his_pieces = agent.piecehis
                 his_pieces_len = len(agent.piecehis)
                 min_removedlines = agent.removedlines
-                # filename = "T{}-{}-{}.pkl".format(agent.piececount, agent.removedlines ,int(round(time.time() * 1000000)))
-                # savefile = os.path.join(self.waitplaydir, filename)
-                # with open(savefile, "wb") as fn:
-                #     pickle.dump(his_pieces, fn)
-                # print("save need replay", filename)
             
         result["total"]["n_playout"] += (min_removedlines-result["total"]["n_playout"])/100
         self.save_status_file(result, game_json)         
@@ -312,6 +307,7 @@ class Train():
 
         cache={}
 
+        # 如果有消除行，看看有没有待训练集有没有需要训练的，如果有，就用待训练否则用试玩中最差的训练
         if min_removedlines>0:
             # 检查有没有需要重复运行的
             listFiles = os.listdir(self.waitplaydir)
