@@ -576,7 +576,7 @@ class Train():
             step_rewards = np.zeros(step_count,dtype=np.float64)
             for m in range(step_count-1):
                 # step_rewards[m]=data["steps"][m]["qval"]-data["steps"][m]["state_value"]
-                if m>0 and data["steps"][m-1]["qval"]!=0:
+                if m>0:# and data["steps"][m-1]["qval"]!=0:
                     # curr_avg_qval = (data["steps"][m+1]["qval"]+data["steps"][m]["qval"]+data["steps"][m-1]["qval"])/3
                     # step_rewards[m]=(data["steps"][m+1]["qval"]-data["steps"][m-1]["qval"])/abs(curr_avg_qval)
                     # step_rewards[m]=(data["steps"][m]["qval"]-step_values[m])
