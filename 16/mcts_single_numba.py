@@ -294,7 +294,8 @@ class MCTS():
             # v *= 0.5 # 测试稳定网络用 v * 0.5 + reward ==> v ; v ==> 2 * reward
             self.Vs[s] = v
             self.Rs[s] = r
-            v = float(v+abs(v)*r)            
+            # v = float(v+abs(v)*r)            
+            v = v
             return v
 
         # 当前最佳概率和最佳动作
