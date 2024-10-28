@@ -295,7 +295,7 @@ class MCTS():
             self.Vs[s] = v
             self.Rs[s] = r
             # v = float(v+abs(v)*r)            
-            v = float(v+0.5*r)
+            v = float(v+r)
             return v
 
         # 当前最佳概率和最佳动作
