@@ -318,10 +318,10 @@ class MCTS():
         #     # 这种奖励会照成主动消行，而不管后续的局面
             # v += (state.game.score-state.markscore) * state.game.exrewardRate
         #     # 不鼓励主动消行，以局面为主
-            if state.markEmptyCount>state.game.emptyCount:
-                v += (state.markEmptyCount-state.game.emptyCount)**2 * state.game.exrewardRate
-            else:
-                v -= (state.game.emptyCount-state.markEmptyCount)**2 * state.game.exrewardRate
+            # if state.markEmptyCount>state.game.emptyCount:
+            #     v += (state.markEmptyCount-state.game.emptyCount)**2 * state.game.exrewardRate
+            # else:
+            #     v -= (state.game.emptyCount-state.markEmptyCount)**2 * state.game.exrewardRate
             
         #     # print(state.game.piececount, state.markPiececount)
             if _r>0 and state.markEmptyCount>=state.game.emptyCount:
