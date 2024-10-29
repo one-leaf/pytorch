@@ -748,7 +748,7 @@ class Agent():
             # self.actions = []
 
             # 这里强制20个方块内必需合成一行个 和 强制第5个方块之后不能有空
-            if not self.validposition(self.board, self.fallpiece, ay=0) or self.emptyCount>10:
+            if not self.validposition(self.board, self.fallpiece, ay=0) or (self.limitstep and self.emptyCount>10):
                 self.terminal = True 
                 self.state = 1
                 removedlines = -1
