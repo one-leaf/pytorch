@@ -208,7 +208,7 @@ class MCTS():
         self.simulation_count = 0
         state.mark()
         # for n in range(self._n_playout):
-        while True:
+        while not state.game.terminal:            
             self.simulation_count += 1
             
             # t = time.time()     
@@ -219,7 +219,7 @@ class MCTS():
             
             depth = state_.game.piececount-state.game.piececount
             if depth > self.max_depth: self.max_depth = depth
-            if state_.game.terminal or (self.Ns[s]>=1000 and state_.game.state==1): break
+            if self.Ns[s]>=1000 and state_.game.state==1: break
             # if self.simulation_count>=self._n_playout and state_.game.state==1: break
             # if depth > 2 and self.Ns[s]>=self._n_playout: break
 
@@ -274,6 +274,8 @@ class MCTS():
         返回:
             v: 当前局面的状态
         """        
+        if state.game.terminal: return -1
+        
         s = hash(state)
         # print(self.simulation_count, s)
         # print(state.game.status[0])
