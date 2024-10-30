@@ -208,7 +208,7 @@ class MCTS():
         self.simulation_count = 0
         state.mark()
         # for n in range(self._n_playout):
-        while not state.game.terminal:            
+        while True:            
             self.simulation_count += 1
             
             # t = time.time()     
@@ -219,7 +219,7 @@ class MCTS():
             
             depth = state_.game.piececount-state.game.piececount
             if depth > self.max_depth: self.max_depth = depth
-            if self.Ns[s]>=1000 and state_.game.state==1: break
+            if state_.game.terminal or (self.Ns[s]>=1000 and state_.game.state==1): break
             # if self.simulation_count>=self._n_playout and state_.game.state==1: break
             # if depth > 2 and self.Ns[s]>=self._n_playout: break
 
