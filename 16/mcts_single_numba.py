@@ -276,76 +276,77 @@ class MCTS():
         返回:
             v: 当前局面的状态
         """        
-        if state.game.terminal: return -1
-        
-        s = hash(state)
-        # print(self.simulation_count, s)
-        # print(state.game.status[0])
-         
-        # 如果得分不等于0，标志探索结束
-        # if s in self.Es: 
-        #     return self.Es[s]
+        if state.game.terminal: 
+            v = -1
+        else:
+            s = hash(state)
+            # print(self.simulation_count, s)
+            # print(state.game.status[0])
+            
+            # 如果得分不等于0，标志探索结束
+            # if s in self.Es: 
+            #     return self.Es[s]
 
-        # 如果当前状态没有子节点，增加子节点
-        # 增加 Ps[s] Vs[s] Ns[s]
-        
-        availables = state.availables()
-        
-        if s not in self.Ps:                          
-            # 获得当前局面的概率 和 局面的打分, 这个已经过滤掉了不可用走法
-            act_probs, v, r = self._policy(state.game) 
-            expandPN(s, availables, act_probs, self.Ps, self.Ns, self.Nsa, self.Qsa, state.actions_num)             
-            # v *= 0.5 # 测试稳定网络用 v * 0.5 + reward ==> v ; v ==> 2 * reward
-            self.Vs[s] = v
-            self.Rs[s] = r
-            # v = float(v+abs(v)*r)            
-            v = float(v+r)
-            return v
+            # 如果当前状态没有子节点，增加子节点
+            # 增加 Ps[s] Vs[s] Ns[s]
             
-        # 当前最佳概率和最佳动作
-        # 比较 Qsa[s, a] + c_puct * Ps[s,a] * sqrt(Ns[s]) / Nsa[s, a], 选择最大的
-        a = selectAction(s, availables, self._c_puct, self.Ps, self.Ns, self.Qsa, self.Nsa)
-        
-        # if availables[a]==0:
-        #     print(a, availables)
-        #     print("NS:", self.Ns, "NSA:", self.Nsa)
-        #     print("QSA:", self.Qsa, "PS:", self.Ps)
-        #     raise Exception("FUN ERROR!")
-        
-        # _r = state.game.score
-        # _c = state.game.emptyCount
-        _, _r = state.game.step(a)
-                   
-        # 外部奖励，最大1
-        v = 0
-        if state.game.state==1:
-        #     # 这种奖励会照成主动消行，而不管后续的局面
-            # v += (state.game.score-state.markscore) * state.game.exrewardRate
-        #     # 不鼓励主动消行，以局面为主
-            # if state.markEmptyCount>state.game.emptyCount:
-            #     v += (state.markEmptyCount-state.game.emptyCount)**2 * state.game.exrewardRate
-            # else:
-            #     v -= (state.game.emptyCount-state.markEmptyCount)**2 * state.game.exrewardRate
+            availables = state.availables()
             
-        #     # print(state.game.piececount, state.markPiececount)
-            if _r>0 and state.markEmptyCount>=state.game.emptyCount:
-                v = 1
+            if s not in self.Ps:                          
+                # 获得当前局面的概率 和 局面的打分, 这个已经过滤掉了不可用走法
+                act_probs, v, r = self._policy(state.game) 
+                expandPN(s, availables, act_probs, self.Ps, self.Ns, self.Nsa, self.Qsa, state.actions_num)             
+                # v *= 0.5 # 测试稳定网络用 v * 0.5 + reward ==> v ; v ==> 2 * reward
+                self.Vs[s] = v
+                self.Rs[s] = r
+                # v = float(v+abs(v)*r)            
+                v = float(v+r)
+                return v
                 
-        # 如果游戏结束
-        if not state.game.terminal:# and not need_break:# and _r==0 :#(state.game.piececount-state.markPiececount<=1): 
-            # 现实奖励
-            # 按照DQN，  q[s,a] += 0.1*(r+ 0.99*(max(q[s+1])-q[s,a])
-            # 目前Mcts， q[s,a] += v[s+1]/Nsa[s,a]
-            v += self.search(state)
+            # 当前最佳概率和最佳动作
+            # 比较 Qsa[s, a] + c_puct * Ps[s,a] * sqrt(Ns[s]) / Nsa[s, a], 选择最大的
+            a = selectAction(s, availables, self._c_puct, self.Ps, self.Ns, self.Qsa, self.Nsa)
+            
+            # if availables[a]==0:
+            #     print(a, availables)
+            #     print("NS:", self.Ns, "NSA:", self.Nsa)
+            #     print("QSA:", self.Qsa, "PS:", self.Ps)
+            #     raise Exception("FUN ERROR!")
+            
+            # _r = state.game.score
+            # _c = state.game.emptyCount
+            _, _r = state.game.step(a)
+                    
+            # 外部奖励，最大1
+            v = 0
+            if state.game.state==1:
+            #     # 这种奖励会照成主动消行，而不管后续的局面
+                # v += (state.game.score-state.markscore) * state.game.exrewardRate
+            #     # 不鼓励主动消行，以局面为主
+                # if state.markEmptyCount>state.game.emptyCount:
+                #     v += (state.markEmptyCount-state.game.emptyCount)**2 * state.game.exrewardRate
+                # else:
+                #     v -= (state.game.emptyCount-state.markEmptyCount)**2 * state.game.exrewardRate
+                
+            #     # print(state.game.piececount, state.markPiececount)
+                if _r>0 and state.markEmptyCount>=state.game.emptyCount:
+                    v = 1
+                    
+            # 如果游戏结束
+            if not state.game.terminal:# and not need_break:# and _r==0 :#(state.game.piececount-state.markPiececount<=1): 
+                # 现实奖励
+                # 按照DQN，  q[s,a] += 0.1*(r+ 0.99*(max(q[s+1])-q[s,a])
+                # 目前Mcts， q[s,a] += v[s+1]/Nsa[s,a]
+                v += self.search(state)
+                # r = np.tanh(r)
+            elif state.game.terminal:
+                v = -1 #state.game.score * state.game.exrewardRate
             # r = np.tanh(r)
-        elif state.game.terminal:
-            v = -1 #state.game.score * state.game.exrewardRate
-        # r = np.tanh(r)
-        # if v>1: v = 1
-        # if v<-1: v= -1
-        # 更新 Q 值 和 访问次数
-        # v = r + (v - 0.01)
-        # v *= state.game.exrewardRate
+            # if v>1: v = 1
+            # if v<-1: v= -1
+            # 更新 Q 值 和 访问次数
+            # v = r + (v - 0.01)
+            # v *= state.game.exrewardRate
         
         if v>1: v=1
         if v<-1: v=-1
