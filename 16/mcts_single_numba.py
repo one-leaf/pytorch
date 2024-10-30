@@ -331,14 +331,14 @@ class MCTS():
                 v = 1
                 
         # 如果游戏结束
-        if not state.game.terminal:# and not need_break:# and _r==0 :#(state.game.piececount-state.markPiececount<=1): 
+        # if not state.game.terminal:# and not need_break:# and _r==0 :#(state.game.piececount-state.markPiececount<=1): 
             # 现实奖励
             # 按照DQN，  q[s,a] += 0.1*(r+ 0.99*(max(q[s+1])-q[s,a])
             # 目前Mcts， q[s,a] += v[s+1]/Nsa[s,a]
-            v += self.search(state)
+        v += self.search(state)
             # r = np.tanh(r)
-        elif state.game.terminal:
-            v = -1 #state.game.score * state.game.exrewardRate
+        # elif state.game.terminal:
+        #     v = -1 #state.game.score * state.game.exrewardRate
         # r = np.tanh(r)
         # if v>1: v = 1
         # if v<-1: v= -1
