@@ -219,7 +219,7 @@ class MCTS():
             
             depth = state_.game.piececount-state.game.piececount
             if depth > self.max_depth: self.max_depth = depth
-            if self.Ns[s]>=1000 and state_.game.state==1: break
+            if state_.game.terminal or (self.Ns[s]>=1000 and state_.game.state==1): break
             # if self.simulation_count>=self._n_playout and state_.game.state==1: break
             # if depth > 2 and self.Ns[s]>=self._n_playout: break
 
@@ -273,7 +273,7 @@ class MCTS():
         蒙特卡洛树搜索        
         返回:
             v: 当前局面的状态
-        """
+        """        
         s = hash(state)
         # print(self.simulation_count, s)
         # print(state.game.status[0])
@@ -297,7 +297,7 @@ class MCTS():
             # v = float(v+abs(v)*r)            
             v = float(v+r)
             return v
-
+            
         # 当前最佳概率和最佳动作
         # 比较 Qsa[s, a] + c_puct * Ps[s,a] * sqrt(Ns[s]) / Nsa[s, a], 选择最大的
         a = selectAction(s, availables, self._c_puct, self.Ps, self.Ns, self.Qsa, self.Nsa)
