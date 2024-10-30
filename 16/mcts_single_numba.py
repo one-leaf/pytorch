@@ -387,8 +387,8 @@ class MCTSPlayer(object):
             availables = state.availables()
             nz_idx = np.nonzero(availables)[0]  # [0,2,3,4]
             
-            # max_qs_idx = nz_idx[np.argmax(act_qs[nz_idx])]
-            max_qs_idx = nz_idx[np.argmax(act_probs[nz_idx])]
+            max_qs_idx = nz_idx[np.argmax(act_qs[nz_idx])]
+            max_ns_idx = nz_idx[np.argmax(act_probs[nz_idx])]
             
             
             # var_qs = np.var(act_qs[nz_idx])
@@ -412,7 +412,7 @@ class MCTSPlayer(object):
             #     idx = max_ps_idx
             
             if self.need_max_qs:
-                idx = max_qs_idx
+                idx = max_ns_idx
             elif self.need_max_ps:
                 idx = max_ps_idx
             else:
