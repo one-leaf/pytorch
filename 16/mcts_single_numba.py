@@ -275,7 +275,8 @@ class MCTS():
         蒙特卡洛树搜索        
         返回:
             v: 当前局面的状态
-        """        
+        """  
+        if state.game.terminal: return -1      
         s = hash(state)
         # print(self.simulation_count, s)
         # print(state.game.status[0])
