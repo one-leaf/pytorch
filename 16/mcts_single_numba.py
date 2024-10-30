@@ -221,7 +221,7 @@ class MCTS():
             step_depth = state_.game.steps-state.game.steps
             
             if step_depth > self.max_depth[1]: self.max_depth = (depth, step_depth)
-            if (self.Ns[s]>=self._n_playout and state_.game.state==1): break
+            if self.simulation_count>=self._n_playout//8 and (self.Ns[s]>=self._n_playout and state_.game.state==1): break
             # if self.simulation_count>=self._n_playout and state_.game.state==1: break
             # if depth > 2 and self.Ns[s]>=self._n_playout: break
 
