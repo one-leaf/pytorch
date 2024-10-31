@@ -276,7 +276,7 @@ class MCTS():
         返回:
             v: 当前局面的状态
         """  
-        if state.game.terminal: return -1      
+        if state.game.terminal: return -2      
         s = hash(state)
         # print(self.simulation_count, s)
         # print(state.game.status[0])
