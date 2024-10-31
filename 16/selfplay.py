@@ -90,7 +90,7 @@ class Train():
             result["total"]["avg_piececount"]=20            
         if "avg_reward_piececount" not in result["total"]:
             result["total"]["avg_reward_piececount"]=0            
-        if "n_playout" not in result["total"]:
+        if "n_playout" not in result["total"] or result["total"]["n_playout"]<self.n_playout:
             result["total"]["n_playout"]=self.n_playout
         if "win_count" not in result["total"]:
             result["total"]["win_count"]=0            
@@ -177,8 +177,7 @@ class Train():
                 his_pieces = agent.piecehis
                 his_pieces_len = len(agent.piecehis)
                 min_removedlines = agent.removedlines
-            
-        result["total"]["n_playout"] += (min_removedlines-result["total"]["n_playout"])/100
+                    
         self.save_status_file(result, game_json)         
         return min_removedlines, his_pieces, his_pieces_len
 
@@ -303,6 +302,10 @@ class Train():
         
         if result["total"]["depth"]>limit_depth:
             limit_depth=result["total"]["depth"]
+        
+        if result["total"]["n_playout"]>self.n_playout:
+            self.n_playout = int(result["total"]["n_playout"])
+        
         player = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout, limit_depth=limit_depth)
 
         cache={}
@@ -393,6 +396,7 @@ class Train():
             else:
                 result["total"]["piececount"] += (agent.piececount-result["total"]["piececount"])/100
 
+
             # 计算 acc 看有没有收敛
             pacc = []
             vacc = []
@@ -468,6 +472,10 @@ class Train():
                     result["update"].remove(result["update"][0])
                 while len(result["advantage"])>max_list_len:
                     result["advantage"].remove(result["advantage"][0])
+                
+                # 如果每步的消耗时间小于3秒，增加探测深度    
+                if result["total"]["step_time"]<3:
+                    result["total"]["n_playout"] += 100
                     
                 # 保存下中间步骤的agent
                 # newmodelfile = model_file+"_"+str(result["total"]["agent"])
