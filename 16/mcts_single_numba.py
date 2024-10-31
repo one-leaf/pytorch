@@ -383,7 +383,7 @@ class MCTSPlayer(object):
             state = State(game)
             # 动作数概率，每个动作的Q，原始概率，当前局面的v，当前局面的总探索次数 
             act_probs, act_qs, act_ps, state_v, state_n = self.mcts.get_action_probs(state, temp)
-            depth = self.mcts.max_depth
+            depth = self.mcts.max_depth[0]
             
             # max_probs_idx = np.argmax(act_probs)    
             
