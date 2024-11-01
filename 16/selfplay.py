@@ -589,7 +589,7 @@ class Train():
                     # step_rewards[m]=(data["steps"][m+1]["qval"]-data["steps"][m-1]["qval"])/abs(curr_avg_qval)
                     # step_rewards[m]=(data["steps"][m]["qval"]-step_values[m])
                     # step_rewards[m]=(data["steps"][m]["qval"]-data["steps"][m-1]["qval"]) #/abs(data["steps"][m-1]["qval"])
-                    step_rewards[m]=((data["steps"][m+1]["qval"]-data["steps"][m-1]["qval"]))/3.
+                    step_rewards[m]=((data["steps"][m+1]["qval"]-data["steps"][m-1]["qval"]))/2.
             print("step_reward:", step_rewards)
             
             # print("step_reward:", step_reward)
