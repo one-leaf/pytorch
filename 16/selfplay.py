@@ -223,7 +223,7 @@ class Train():
             # if agent.piecesteps==0 and random.random()>0.5: 
             #     need_max_ps=not need_max_ps
             #     print("switch need_max_ps to:", need_max_ps)
-            need_max_ps = random.random() < agent.removedlines/100   
+            # need_max_ps = random.random() < agent.removedlines/100   
             action, qval, move_probs, state_value, max_qval, acc_ps, depth, ns = player.get_action(agent, temp=1) 
 
             _, reward = agent.step(action)
