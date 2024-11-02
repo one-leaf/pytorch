@@ -361,12 +361,13 @@ class MCTSPlayer(object):
     """基于模型指导概率的MCTS + AI player"""
 
     # c_puct MCTS child权重， 用来调节MCTS搜索深度，越大搜索越深，越相信概率，越小越相信Q 的程度 默认 5
-    def __init__(self, policy_value_function, c_puct=5, n_playout=2000, limit_depth=20, need_max_ps=False, need_max_qs=False):
+    def __init__(self, policy_value_function, c_puct=5, n_playout=2000, limit_depth=20, need_max_ps=False, need_max_qs=False, need_max_ns=False):
         """初始化参数"""
         self.mcts = MCTS(policy_value_function, c_puct, n_playout, limit_depth)
         self.need_max_ps = need_max_ps
         self.need_max_qs = need_max_qs
-
+        self.need_max_ns = need_max_ns
+        
     def set_player_ind(self, p):
         """指定MCTS的playerid"""
         self.player = p
@@ -415,8 +416,10 @@ class MCTSPlayer(object):
             # if max_qs_idx==max_ps_idx:
             #     idx = max_ps_idx
             
-            if self.need_max_qs:
+            if self.need_max_ns:
                 idx = max_ns_idx
+            elif self.need_max_qs:
+                idx = max_qs_idx
             elif self.need_max_ps:
                 idx = max_ps_idx
             else:
@@ -471,7 +474,7 @@ class MCTSPlayer(object):
 
             if idx!=max_ps_idx:
                 print("\trandom", game.position_to_action_name(max_ps_idx), "==>",  game.position_to_action_name(idx), \
-                      "v:", qval, "need_max_ns:", self.need_max_qs, "need_max_ps:", self.need_max_ps)  
+                      "v:", qval, "need_max_qs:", self.need_max_qs, "need_max_ns:", self.need_max_ns, "need_max_ps:", self.need_max_ps)  
 
             acc_ps = 1 if max_qs_idx==max_ps_idx else 0 # np.var(act_probs) #0 if abs(act_ps[idx]-act_probs[idx])>0.4 else 1
 
