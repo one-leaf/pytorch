@@ -305,7 +305,9 @@ class Train():
         
         if result["total"]["n_playout"]>self.n_playout:
             self.n_playout = int(result["total"]["n_playout"])
-            if self.n_playout>512: self.n_playout=512
+            if self.n_playout>512: 
+                self.n_playout=512
+                result["total"]["n_playout"]=512
         
         player = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout, limit_depth=limit_depth)
 
