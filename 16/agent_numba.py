@@ -773,19 +773,18 @@ class Agent():
     # 状态一共4层， 0 当前下落方块， 1 是背景 ，2下落方块的上一个动作. 3是下一个方块
     def set_status(self):
         # status = np.zeros((4, boardheight, boardwidth), dtype=np.int8)        
-        # 如果是第二步更新上一步的背景
-        if self.piecesteps == 1:
-            self.status[2] = self.board.copy()
-            
-        self.status[2] = self.status[2] | self.status[0]
-        
         piece = self.fallpiece
         shapedraw = pieces[piece['shape']][piece['rotation']]
         self.status[0] = nb_get_status(shapedraw, piece['x'], piece['y'])        
+        self.status[1] = self.board.copy()
 
-        # 如果方块落地了,更新背景                            
+        # 更新历史动作，仅仅限于同一个方块周期，如果是第二步更新上一步的背景
+        if self.piecesteps == 1:
+            self.status[2] = self.board.copy()            
+        self.status[2] = self.status[2] | self.status[0]
+        
+        # 如果方块落地了,更新下一个方块                            
         if self.piecesteps == 0:
-            self.status[1] = self.board.copy()
             self.status[3] = np.zeros((boardheight, boardwidth), dtype=np.int8)  
             piece_template = pieces[self.nextpiece['shape']]
             for i in range(4):
