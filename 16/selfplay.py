@@ -438,9 +438,6 @@ class Train():
             else:
                 result["total"]["ns"] = result["total"]["ns"]*0.99 + ns*0.01   
 
-            # 如果每步的消耗时间小于3秒，增加探测深度    
-            result["total"]["n_playout"] += round(3-steptime)
-
             max_list_len=50
             if result["total"]["_agent"]>20:
                 result["reward"].append(round(result["total"]["avg_score"],2))
@@ -482,7 +479,7 @@ class Train():
                     result["advantage"].remove(result["advantage"][0])
                 
                 # 如果每步的消耗时间小于3秒，增加探测深度    
-                # result["total"]["n_playout"] += round(3-result["total"]["step_time"])
+                result["total"]["n_playout"] += round(3-result["total"]["step_time"])
                     
                 # 保存下中间步骤的agent
                 # newmodelfile = model_file+"_"+str(result["total"]["agent"])
