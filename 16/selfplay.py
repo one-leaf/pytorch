@@ -26,7 +26,7 @@ class Train():
         self.learn_rate = 1e-4
         self.lr_multiplier = 1.0  # 基于KL的自适应学习率
         self.temp = 1  # MCTS的概率参数，越大越不肯定，训练时1，预测时1e-3
-        self.n_playout = 1300  # 每个动作的模拟战记录个数，影响后续 512/2 = 256；256/16 = 16个方块 的走法
+        self.n_playout = 512  # 每个动作的模拟战记录个数，影响后续 512/2 = 256；256/16 = 16个方块 的走法
         # 64/128/256/512 都不行
         # step -> score
         # 128  --> 0.7
@@ -90,7 +90,7 @@ class Train():
             result["total"]["avg_piececount"]=20            
         if "avg_reward_piececount" not in result["total"]:
             result["total"]["avg_reward_piececount"]=0            
-        if "n_playout" not in result["total"] or result["total"]["n_playout"]<self.n_playout:
+        if "n_playout" not in result["total"]:
             result["total"]["n_playout"]=self.n_playout
         if "win_count" not in result["total"]:
             result["total"]["win_count"]=0            
