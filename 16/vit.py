@@ -422,7 +422,7 @@ class VitNet(nn.Module):
         act_layer =  nn.GELU
         # 图片转换为 patch embedding [B, C, H, W] ==> [B, num_patches, embed_dim] 
         # self.patch_embed = PatchEmbed(img_size=(20,10), patch_size=(1,10), in_c=8, embed_dim=embed_dim)
-        self.patch_embed = VitPatchEmbed(img_size=(20,10), in_c=4, kernel_size=(1,10), stride=(1,1), embed_dim=embed_dim)
+        self.patch_embed = VitPatchEmbed(img_size=(20,10), in_c=4, kernel_size=(3,3), stride=(2,2), embed_dim=embed_dim)
         # 图片分割后的块数
         num_patches = self.patch_embed.num_patches                      # p
 
@@ -486,11 +486,13 @@ class VitNet(nn.Module):
         x = self.blocks(x)                    # [B, p+1, 768]
 
         # 归一化
-        # x = self.norm(x)                        # [B, p+1, 768]
+        x = self.norm(x)                        # [B, p+1, 768]
 
+        # 将模型动作和价值网络相对隔离
         act = x[:, 1:].mean(dim = 1)             # [B, 768]
         # act = x.mean(dim = 1)             # [B, 768]
         # act = x.max(dim = 1).values        # [B, 768]
+        # act = x[:, 0]                           # [B, 768]
         act = self.act_fc(act)
         act = self.act_fc_act(act)
         act = self.act_dist(act)                # [B, num_classes]
