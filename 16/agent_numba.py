@@ -575,8 +575,9 @@ class Agent():
     # 获取可用步骤, 保留一个旋转始终有用
     # 将单人游戏变为双人博弈，一个正常下，一个只下走，
     def set_availables(self):
-        if self.cache!=None and (self.key, 100) in self.cache:
-            c = self.cache[(self.key, 100)]
+        key = f'{self.key}_{self.fallpiece["shape"]}'
+        if self.cache!=None and self.key in self.cache:
+            c = self.cache[key]
             self.availables = np.copy(c)
             return
         
@@ -611,7 +612,7 @@ class Agent():
         # if not KEY_DOWN in acts : acts.append(KEY_DOWN)
 
         if self.cache!=None:
-            self.cache[(self.key, 100)]=np.copy(self.availables)
+            self.cache[key]=np.copy(self.availables)
 
     # 设置缓存
     def setCache(self, cache):
@@ -624,61 +625,37 @@ class Agent():
         # self.level, self.fallfreq = self.calculate(self.score)
         
         # self.actions.append(action)
-        if self.piecesteps>1 and self.piece_actions[-1]=="D":   # 第一个动作或最后一个为D单独一类
-            _d="D"
-        else:
-            _d="N"
-        
-        action_key = f"f_{self.fallpiece['shape']}_{self.fallpiece['x']}_{self.fallpiece['y']}_{self.fallpiece['rotation']}_{_d}_{action}"
-        if self.cache!=None and (self.key, action_key) in self.cache:
-            c = self.cache[(self.key, action_key)]           
-            self.fallpiece['x'] = c["fallpiece_x"]
-            self.fallpiece['y'] = c["fallpiece_y"]
-            self.fallpiece['rotation'] = c["fallpiece_rotation"]
-            for _ in range(c["downcount"]):
-                self.downcount+=1
-            isFalling = c["isFalling"]
-        else:
-            if self.availables[action] == 1:
-                if action == KEY_LEFT: 
-                    self.fallpiece['x'] -= 1
+        if self.availables[action] == 1:
+            if action == KEY_LEFT: 
+                self.fallpiece['x'] -= 1
 
-                if action == KEY_RIGHT:
-                    self.fallpiece['x'] += 1  
+            if action == KEY_RIGHT:
+                self.fallpiece['x'] += 1  
 
-                if action == KEY_ROTATION:
-                    self.fallpiece['rotation'] =  (self.fallpiece['rotation'] + 1) % len(pieces[self.fallpiece['shape']])
+            if action == KEY_ROTATION:
+                self.fallpiece['rotation'] =  (self.fallpiece['rotation'] + 1) % len(pieces[self.fallpiece['shape']])
 
-            _down_count = 0
-            if action == KEY_DOWN:# and self.validposition(self.board, self.fallpiece, ay=1):
-                # n = self.calc_down_count(self.board, self.fallpiece)
-                # self.fallpiece['y'] += n
-                # self.downcount += n
-                self.fallpiece['y'] += 1
-                if self.piecesteps>1 and self.piece_actions[-1]=="D":
-                    while self.validposition(self.board, self.fallpiece, ay=1):
-                        _down_count+=1
-                        self.fallpiece['y'] += 1                          
+        _down_count = 0
+        if action == KEY_DOWN:# and self.validposition(self.board, self.fallpiece, ay=1):
+            # n = self.calc_down_count(self.board, self.fallpiece)
+            # self.fallpiece['y'] += n
+            # self.downcount += n
+            self.fallpiece['y'] += 1
+            if self.piecesteps>1 and self.piece_actions[-1]=="D":
+                while self.validposition(self.board, self.fallpiece, ay=1):
+                    _down_count+=1
+                    self.fallpiece['y'] += 1                          
 
-                for _ in range(_down_count):
-                    self.downcount += 1
+            for _ in range(_down_count):
+                self.downcount += 1
 
-            isFalling=True
-            if self.validposition(self.board, self.fallpiece, ay=1):
-                self.fallpiece['y'] += 1
-                if not self.validposition(self.board, self.fallpiece, ay=1):
-                    isFalling = False
-            else:
+        isFalling=True
+        if self.validposition(self.board, self.fallpiece, ay=1):
+            self.fallpiece['y'] += 1
+            if not self.validposition(self.board, self.fallpiece, ay=1):
                 isFalling = False
-
-            if self.cache!=None:
-                c={}
-                c["fallpiece_x"] = self.fallpiece['x'] 
-                c["fallpiece_y"] = self.fallpiece['y'] 
-                c["fallpiece_rotation"] =  self.fallpiece['rotation']
-                c["downcount"] = _down_count
-                c["isFalling"] = isFalling
-                self.cache[(self.key, action_key)]=c
+        else:
+            isFalling = False
 
         # self.fallpieceheight = 20 - self.fallpiece['y']
         if self.piecesteps==1: self.piece_actions=""
@@ -687,30 +664,15 @@ class Agent():
         reward = 0
         removedlines = 0
         if not isFalling:   
-            action_key = f"b_{action_key}" 
-            if self.cache!=None and (self.key, action_key) in self.cache:
-                c2 = self.cache[(self.key, action_key)] 
-                self.board = np.copy(c2["board"])
-                removedlines = c2["removedlines"]
-                emptyCount = c2["emptyCount"]                
-            else:
-                self.addtoboard(self.board, self.fallpiece)            
-                removedlines = self.removecompleteline(self.board)
-                emptyCount = self.getEmptyCount()   
-                if self.cache!=None:
-                    c2={}
-                    c2["board"] = np.copy(self.board)
-                    c2["removedlines"] = removedlines
-                    c2["emptyCount"] =  emptyCount
-                    self.cache[(self.key, action_key)] = c2
+            self.addtoboard(self.board, self.fallpiece)            
+            removedlines = self.removecompleteline(self.board)
+            emptyCount = self.getEmptyCount()               
                     
             self.need_update_status=True
             # if removedlines>0: print("OK!!!",removedlines)
             self.removedlines += removedlines
             reward = removedlines            
             
-
-
             # 鼓励垂直下落和连续多次消行和消除空格
             # if removedlines>0 and not putEmptyBlock:
             if removedlines>0:

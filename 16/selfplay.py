@@ -310,7 +310,7 @@ class Train():
         
         player = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout, limit_depth=limit_depth)
 
-        cache=None#{}
+        cache={}
 
         # 如果有消除行，看看有没有待训练集有没有需要训练的，如果有，就用待训练否则用试玩中最差的训练
         if min_removedlines>0:
