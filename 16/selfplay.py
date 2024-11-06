@@ -303,11 +303,8 @@ class Train():
         if result["total"]["depth"]>limit_depth:
             limit_depth=result["total"]["depth"]
         
-        # if result["total"]["n_playout"]>self.n_playout:
-        # self.n_playout = int(result["total"]["n_playout"])
-        # if self.n_playout>512: 
-        #     self.n_playout=512
-        
+        self.n_playout = int(result["total"]["n_playout"])
+
         player = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout, limit_depth=limit_depth)
 
         cache={}
