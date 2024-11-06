@@ -133,7 +133,7 @@ pieces = {'s':stemplate,
 
 KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN, KEY_DROP = 0, 1, 2, 3, 4
 ACTIONS = [KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN, KEY_DROP]
-ACTIONS_NAME = ["O","L","R","D","N"]
+ACTIONS_NAME = ["O","L","R","D","B"]
 ACTONS_LEN = len(ACTIONS)
 
 # @njit(cache=True)
