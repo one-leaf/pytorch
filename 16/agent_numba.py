@@ -131,8 +131,8 @@ pieces = {'s':stemplate,
           'j':jtemplate,
           't':ttemplate}
 
-KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN, KEY_NONE = 0, 1, 2, 3, 4
-ACTIONS = [KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN, KEY_NONE]
+KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN, KEY_DROP = 0, 1, 2, 3, 4
+ACTIONS = [KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN, KEY_DROP]
 ACTIONS_NAME = ["O","L","R","D","N"]
 ACTONS_LEN = len(ACTIONS)
 
@@ -582,7 +582,6 @@ class Agent():
             return
         
         # acts=[KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN]
-        self.availables[KEY_NONE]=1
         if not self.validposition(self.board, self.fallpiece, ax = -1):
             self.availables[KEY_LEFT]=0
         else:
@@ -635,19 +634,14 @@ class Agent():
             if action == KEY_ROTATION:
                 self.fallpiece['rotation'] =  (self.fallpiece['rotation'] + 1) % len(pieces[self.fallpiece['shape']])
 
-        _down_count = 0
-        if action == KEY_DOWN:# and self.validposition(self.board, self.fallpiece, ay=1):
-            # n = self.calc_down_count(self.board, self.fallpiece)
-            # self.fallpiece['y'] += n
-            # self.downcount += n
-            self.fallpiece['y'] += 1
-            if self.piecesteps>1 and self.piece_actions[-1]=="D":
-                while self.validposition(self.board, self.fallpiece, ay=1):
-                    _down_count+=1
-                    self.fallpiece['y'] += 1                          
+            if action == KEY_DOWN: # and self.validposition(self.board, self.fallpiece, ay=1):
+                self.fallpiece['y'] += 1
 
-            for _ in range(_down_count):
-                self.downcount += 1
+            if action == KEY_DROP:
+                while True: 
+                    self.downcount += 1
+                    self.fallpiece['y'] += 1            
+                    if not self.validposition(self.board, self.fallpiece, ay=1): break
 
         isFalling=True
         if self.validposition(self.board, self.fallpiece, ay=1):
