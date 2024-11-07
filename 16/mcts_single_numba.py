@@ -206,6 +206,7 @@ class MCTS():
 
         self.max_depth:int = (0,0)
         self.simulation_count = 0
+        die_count = 0
         state.mark()
         for n in range(self._n_playout):
         # while True:            
@@ -219,7 +220,7 @@ class MCTS():
             
             depth = state_.game.piececount-state.game.piececount
             step_depth = state_.game.steps-state.game.steps
-            
+            die_count += 1 if state_.game.terminal else 0
             self.max_depth = (depth, step_depth)
             # if self.simulation_count>=64 and (self.Ns[s]>=self._n_playout and state_.game.state==1): break
             # if self.simulation_count>=self._n_playout and state_.game.state==1: break
@@ -258,7 +259,7 @@ class MCTS():
             print(timedelta(seconds=run_time), game.steps, game.fallpiece["shape"], \
                   "ns:", str(nsv).rjust(4), "/", str(self.simulation_count).ljust(4), "depth:", str(self.max_depth).ljust(3), \
                 #   "\tQ:", round(v,2), "-->",round(qs[max_p],2), '/', round(qs[max_q],2), \
-                  "v:", round(v,2), "r:", round(r,2), \
+                  "die:", die_count, "v:", round(v,2), "r:", round(r,2), \
                   "\t%s %s:"%(game.position_to_action_name(max_q_idx),game.position_to_action_name(max_p)), \
                   round(ps[max_p],2), "-->", round(probs[max_p],2), \
                   "\tQs:", qs, "\tNs:", ns, "\tPs:", ps)
@@ -276,7 +277,9 @@ class MCTS():
         返回:
             v: 当前局面的状态
         """  
-        if state.game.terminal: return -2      
+        if state.game.terminal: 
+            # state.game.print()
+            return -2      
         s = hash(state)
         # print(self.simulation_count, s)
         # print(state.game.status[0])
