@@ -475,8 +475,8 @@ class Train():
                 while len(result["advantage"])>max_list_len:
                     result["advantage"].remove(result["advantage"][0])
                 
-                # 如果每步的消耗时间小于3秒，增加探测深度    
-                result["total"]["n_playout"] += round(3-result["total"]["step_time"])
+                # 如果每步的消耗时间小于5秒，增加探测深度    
+                result["total"]["n_playout"] += round(5-result["total"]["step_time"])
                     
                 # 保存下中间步骤的agent
                 # newmodelfile = model_file+"_"+str(result["total"]["agent"])
