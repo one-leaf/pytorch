@@ -250,8 +250,11 @@ class MCTS():
         
         nz_idx = np.nonzero(state.availables())
         max_q_idx = nz_idx[0][np.argmax(qs[nz_idx])]
-        # max_q = np.nanargmax(np.where(qs!=0, qs, np.nan))
+        max_n_idx = nz_idx[0][np.argmax(probs[nz_idx])]
         
+        # max_q = np.nanargmax(np.where(qs!=0, qs, np.nan))
+        mask = "-" if max_n_idx==max_q_idx else "*"
+                
         game = state.game
         if game.show_mcts_process or game.state == 1 :
             nz_idx = np.nonzero(state.availables())
@@ -260,8 +263,7 @@ class MCTS():
                   "ns:", str(nsv).rjust(4), "/", str(self.simulation_count).ljust(4), "depth:", str(self.max_depth).ljust(3), \
                 #   "\tQ:", round(v,2), "-->",round(qs[max_p],2), '/', round(qs[max_q],2), \
                   "die:", die_count, "v:", round(v,2), "r:", round(r,2), \
-                  "\t%s:"%game.position_to_action_name(max_p), \
-                  round(ps[max_p],2), "-->", round(probs[max_p],2), \
+                  game.position_to_action_name(max_p), round(ps[max_p],2), "-->", round(probs[max_p],2), mask, \
                   "\tQs:", qs, "\tNs:", ns, "\tPs:", ps)
             # 如果这一局已经超过了20分钟
             # if run_time>20*60 and self.limit_depth!=20:
