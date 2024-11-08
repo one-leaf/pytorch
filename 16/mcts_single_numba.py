@@ -263,8 +263,8 @@ class MCTS():
                   "ns:", str(nsv).rjust(4), "/", str(self.simulation_count).ljust(4), "depth:", str(self.max_depth).ljust(3), \
                 #   "\tQ:", round(v,2), "-->",round(qs[max_p],2), '/', round(qs[max_q],2), \
                   "die:", die_count, "v:", round(v,2), "r:", round(r,2), \
-                  game.position_to_action_name(max_p), round(ps[max_p],2), "-->", round(probs[max_p],2), mask, \
-                  "\tQs:", qs, "\tNs:", ns, "\tPs:", ps)
+                  game.position_to_action_name(max_p), round(ps[max_p],2), "-->", round(probs[max_p],2), "\t", mask, \
+                  "Qs:", qs, "\tNs:", ns, "\tPs:", ps)
             # 如果这一局已经超过了20分钟
             # if run_time>20*60 and self.limit_depth!=20:
             #     print("limit max depth to 20")
