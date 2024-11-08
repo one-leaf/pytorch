@@ -624,7 +624,7 @@ class Train():
             print("saved file basename:", filetime, "length:", i+1)
             
             # 游戏结束
-            if agent.removedlines>min_removedlines : break                    
+            if agent.removedlines>min_removedlines and piececount>his_pieces_len: break                    
             print()
             print(f"replay: {playcount+1}")
             # player.mcts._n_playout=512
