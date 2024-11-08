@@ -420,15 +420,18 @@ class MCTSPlayer(object):
             # 如果当前概率和推定概率一致,不需要随机
             # if max_qs_idx==max_ps_idx:
             #     idx = max_ps_idx
-            
-            if self.need_max_ns:
-                idx = max_ns_idx
-            elif self.need_max_qs:
-                idx = max_qs_idx
-            elif self.need_max_ps:
-                idx = max_ps_idx
-            else:
-                p = 0.99**game.pieceCount  # p=0.75  
+            idx = -1
+            p = 0.998**game.pieceCount
+            if random.random()<p:
+                if self.need_max_ns:
+                    idx = max_ns_idx
+                elif self.need_max_qs:
+                    idx = max_qs_idx
+                elif self.need_max_ps:
+                    idx = max_ps_idx       
+                                 
+            if idx == -1:
+                # p=0.75  
                 # a=1的时候，act 机会均等，>1 强调均值， <1 强调两端
                 # 国际象棋 0.3 将棋 0.15 围棋 0.03
                 # 取值一般倾向于 a = 10/n 所以俄罗斯方块取 2
