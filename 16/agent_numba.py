@@ -1,5 +1,6 @@
 import numpy as np
 import random
+import time
 
 boxsize = 20
 boardwidth = 10
@@ -463,6 +464,7 @@ class Agent():
         # 下一个可用步骤，设置需要在key之后
         self.availables=np.ones(ACTONS_LEN, dtype=np.int8)
         self.set_availables()
+        self.start_time = time.time()
 
     def clone(self):
         agent = Agent()
@@ -500,6 +502,7 @@ class Agent():
         agent.status = np.copy(self.status)
         agent.key = self.key
         agent.cache = self.cache
+        agent.start_time = self.start_time
         return agent
     
     def clonePiece(self, piece):
