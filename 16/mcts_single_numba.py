@@ -483,11 +483,10 @@ class MCTSPlayer(object):
             qval = act_qs[idx]
             max_qval = np.max(act_qs)
 
-            need_max_qs = "need_max_qs" if self.need_max_qs else ""
-            need_max_ns = "need_max_ns" if self.need_max_ns else ""
-            need_max_ps = "need_max_ps" if self.need_max_ps else ""
-
             if idx!=max_ps_idx:
+                need_max_qs = "need_max_qs" if self.need_max_qs else ""
+                need_max_ns = "need_max_ns" if self.need_max_ns else ""
+                need_max_ps = "need_max_ps" if self.need_max_ps else ""
                 print("\trandom", game.position_to_action_name(max_ps_idx), "==>",  game.position_to_action_name(idx), \
                       "v:", qval, need_max_qs, need_max_ns, need_max_ps)  
             acc_ps = 1 if max_qs_idx==max_ps_idx else 0 # np.var(act_probs) #0 if abs(act_ps[idx]-act_probs[idx])>0.4 else 1
