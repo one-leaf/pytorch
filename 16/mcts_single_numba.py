@@ -422,13 +422,16 @@ class MCTSPlayer(object):
             #     idx = max_ps_idx
             idx = -1
             p = 0.998**game.pieceCount
-            if random.random()<p and time.time()-game.start_time<10*30:
+            if random.random()<p:
                 if self.need_max_ns:
                     idx = max_ns_idx
                 elif self.need_max_qs:
                     idx = max_qs_idx
                 elif self.need_max_ps:
-                    idx = max_ps_idx       
+                    idx = max_ps_idx  
+                         
+            if time.time()-game.start_time>60*60:
+                idx = max_ps_idx  
                                  
             if idx == -1:
                 # p=0.75  
