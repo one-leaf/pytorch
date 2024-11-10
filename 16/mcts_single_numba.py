@@ -341,7 +341,10 @@ class MCTS():
             # 现实奖励
             # 按照DQN，  q[s,a] += 0.1*(r+ 0.99*(max(q[s+1])-q[s,a])
             # 目前Mcts， q[s,a] += v[s+1]/Nsa[s,a]
-        v = v + self.search(state)
+        if state.game.terminal:
+            v = -2
+        else:
+            v = v + self.search(state)
             # r = np.tanh(r)
         # elif state.game.terminal:
         #     v = -1 #state.game.score * state.game.exrewardRate
