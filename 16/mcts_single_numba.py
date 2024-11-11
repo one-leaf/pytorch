@@ -432,7 +432,7 @@ class MCTSPlayer(object):
                 idx = max_ps_idx  
                          
             if time.time()-game.start_time>60*60:
-                idx = max_ps_idx  
+                idx = -1  
                                  
             if idx == -1:
                 p = 0.998**game.pieceCount
