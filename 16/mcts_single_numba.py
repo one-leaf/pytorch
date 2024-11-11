@@ -424,15 +424,15 @@ class MCTSPlayer(object):
             # if max_qs_idx==max_ps_idx:
             #     idx = max_ps_idx
             idx = -1
-            if self.need_max_ns:
-                idx = max_ns_idx
-            elif self.need_max_qs:
-                idx = max_qs_idx
-            elif self.need_max_ps:
-                idx = max_ps_idx  
-                         
-            if time.time()-game.start_time>60*60:
-                idx = -1  
+            
+            # 如果在1小时内按既定参数选择，否则概率选择
+            if time.time()-game.start_time<60*60:
+                if self.need_max_ns:
+                    idx = max_ns_idx
+                elif self.need_max_qs:
+                    idx = max_qs_idx
+                elif self.need_max_ps:
+                    idx = max_ps_idx                          
                                  
             if idx == -1:
                 p = 0.998**game.pieceCount
