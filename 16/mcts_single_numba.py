@@ -322,10 +322,10 @@ class MCTS():
         _, _r = state.game.step(a)
                 
         # 外部奖励，最大1
-        v = 0
+        r = 0
         if state.game.state==1:
         #     # 这种奖励会照成主动消行，而不管后续的局面
-            v += (state.game.score-state.markscore) * state.game.exrewardRate
+            r += (state.game.score-state.markscore) * state.game.exrewardRate
         #     # 不鼓励主动消行，以局面为主
             # if state.markEmptyCount>state.game.emptyCount:
             #     v += (state.markEmptyCount-state.game.emptyCount)**2 * state.game.exrewardRate
@@ -334,7 +334,7 @@ class MCTS():
             
         #     # print(state.game.piececount, state.markPiececount)
             if (_r>0 and state.markEmptyCount>=state.game.emptyCount):# or (state.markEmptyCount>state.game.emptyCount) :
-                v = 1
+                r = 1
                 
         # 如果游戏结束
         # if not state.game.terminal:# and not need_break:# and _r==0 :#(state.game.piececount-state.markPiececount<=1): 
@@ -344,7 +344,7 @@ class MCTS():
         if state.game.terminal:
             v = -2
         else:
-            v = v + self.search(state)
+            v = self.search(state) + r
             # r = np.tanh(r)
         # elif state.game.terminal:
         #     v = -1 #state.game.score * state.game.exrewardRate
