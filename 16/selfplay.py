@@ -562,9 +562,12 @@ class Train():
             # 全局评价
             # step_values = np.zeros(step_count,dtype=np.float64)
             # for m in range(step_count):
-            #     step_values[m] = -(m+1)/step_count
+            #     step_values[m] = -(m+1)/step_count           
+            # 用sin函数来模拟            
+            x_values = np.linspace(1/2 * np.pi, 3/2 * np.pi, step_count)  
+            step_values = np.sin(x_values)
+            # step_values = np.linspace(1, -1, step_count)
             
-            step_values = np.linspace(1, -1, step_count)
             # z_count = 0
             # for m in range(step_count):
             #     if data["steps"][m]["reward"]>0:
