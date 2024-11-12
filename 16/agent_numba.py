@@ -578,9 +578,8 @@ class Agent():
     # 获取可用步骤, 保留一个旋转始终有用
     # 将单人游戏变为双人博弈，一个正常下，一个只下走，
     def set_availables(self):
-        key = f'{self.key}'
         if self.cache!=None and self.key in self.cache:
-            c = self.cache[key]
+            c = self.cache[self.key]
             self.availables = np.copy(c)
             return
         
@@ -614,7 +613,7 @@ class Agent():
         # if not KEY_DOWN in acts : acts.append(KEY_DOWN)
 
         if self.cache!=None:
-            self.cache[key]=np.copy(self.availables)
+            self.cache[self.key]=np.copy(self.availables)
 
     # 设置缓存
     def setCache(self, cache):
