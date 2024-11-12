@@ -578,7 +578,7 @@ class Agent():
     # 获取可用步骤, 保留一个旋转始终有用
     # 将单人游戏变为双人博弈，一个正常下，一个只下走，
     def set_availables(self):
-        key = f'{self.key}_{self.fallpiece["shape"]}'
+        key = f'{self.key}'
         if self.cache!=None and self.key in self.cache:
             c = self.cache[key]
             self.availables = np.copy(c)
