@@ -191,7 +191,6 @@ class MCTS():
         print("create mcts, c_puct: {}, n_playout: {}".format(c_puct, n_playout))
         self.t = 0
         self.c = 1
-        self.start_time = time.time()
         self.limit_depth = limit_depth
     
     def get_action_probs(self, state:State, temp:float=1):
@@ -258,7 +257,7 @@ class MCTS():
         game = state.game
         if game.show_mcts_process or game.state == 1 :
             nz_idx = np.nonzero(state.availables())
-            run_time = round(time.time()-self.start_time)
+            run_time = round(time.time()-game.start_time)
             print(timedelta(seconds=run_time), game.steps, game.fallpiece["shape"], \
                   "ns:", str(nsv).rjust(4), "/", str(self.simulation_count).ljust(4), "depth:", str(self.max_depth).ljust(3), \
                 #   "\tQ:", round(v,2), "-->",round(qs[max_p],2), '/', round(qs[max_q],2), \
