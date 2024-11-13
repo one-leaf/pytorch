@@ -460,7 +460,7 @@ class VitNet(nn.Module):
         # self.val_dist_act = nn.Tanh()
 
         self.reward_fc = nn.Linear(embed_dim, embed_dim)   # [B, 768] => [B, 768]
-        self.reward_fc_act = nn.GELU()
+        self.reward_fc_act = nn.LeakyReLU()
         self.reward_dist = nn.Linear(embed_dim, 1)   # [B, 768] => [B, 1]
         self.reward_dist_act = nn.Tanh()
 
