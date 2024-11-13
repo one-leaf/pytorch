@@ -420,7 +420,7 @@ class VitNet(nn.Module):
         assert embed_dim % num_heads==0, "embed_dim must be divisible by num_heads"
 
         norm_layer = partial(nn.LayerNorm, eps=1e-6)
-        act_layer =  nn.GELU
+        act_layer =  nn.LeakyReLU
         # 图片转换为 patch embedding [B, C, H, W] ==> [B, num_patches, embed_dim] 
         # self.patch_embed = PatchEmbed(img_size=(20,10), patch_size=(1,10), in_c=8, embed_dim=embed_dim)
         self.patch_embed = VitPatchEmbed(img_size=(20,10), in_c=4, kernel_size=(3,3), stride=(2,2), padding=(1,1), embed_dim=embed_dim)
