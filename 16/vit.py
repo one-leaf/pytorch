@@ -504,8 +504,9 @@ class VitNet(nn.Module):
         val = self.val_fc_act(val)
         val = self.val_dist(val)                # [B, num_quantiles]
         # val = self.val_dist_act(val)            # Tanh -> [1 ~ -1]
-
-        reward = x[:, 0]                         # [B, 768]
+        
+        # reward = x[:, 0]
+        reward = x.max(dim = 1)[0]             # [B, 768]
         reward = self.reward_fc(reward)
         reward = self.reward_fc_act(reward)
         reward = self.reward_dist(reward)        # [B, 1]
