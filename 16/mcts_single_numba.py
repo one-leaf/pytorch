@@ -425,8 +425,8 @@ class MCTSPlayer(object):
             #     idx = max_ps_idx
             idx = -1
             
-            # 如果在1小时内按既定参数选择，否则概率选择
-            if time.time()-game.start_time<60*60:
+            # 如果在0.5小时内按既定参数选择，否则概率选择
+            if time.time()-game.start_time<30*60:
                 if self.need_max_ns:
                     idx = max_ns_idx
                 elif self.need_max_qs:
