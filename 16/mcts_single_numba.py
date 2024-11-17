@@ -426,7 +426,7 @@ class MCTSPlayer(object):
             idx = -1
             
             # 如果在10分钟内按既定参数选择，否则概率选择
-            if time.time()-game.start_time<10*60:
+            if random.random()<600/(time.time()-game.start_time):
                 if self.need_max_ns:
                     idx = max_ns_idx
                 elif self.need_max_qs:
