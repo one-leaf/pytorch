@@ -61,7 +61,7 @@ def selectAction(s:int, availables, _c_puct:float, Ps, Ns, Qsa, Nsa):
     #     return np.argmax(Nsa[s]+availables == 1)
     # if Nsa[s][3]==1: return 3
     
-    q = Qsa[s]+ _c_puct * availables * Ps[s] * sqrt(Ns[s]) / Nsa[s]
+    q = Qsa[s]+ _c_puct * availables * Ps[s] * sqrt(Ns[s]) / (Nsa[s]+1)
     
     # 选择最大q的
     nz_idx = np.nonzero(availables)
