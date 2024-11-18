@@ -121,7 +121,7 @@ def expandPN(s:int, availables, act_probs, Ps, Ns, Nsa, Qsa, actions_num):
     probs = (act_probs*availables).astype(np.float32)
     Ps[s] = probs 
     Ns[s] = 0
-    Nsa[s] = np.ones(actions_num, dtype=np.int64)
+    Nsa[s] = np.zeros(actions_num, dtype=np.int64)
     Qsa[s] = np.zeros(actions_num, dtype=np.float32)
 
 #@njit(cache=True)
