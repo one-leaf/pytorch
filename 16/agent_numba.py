@@ -1,6 +1,7 @@
 import numpy as np
 import random
 import time
+from numba import njit
 
 boxsize = 20
 boardwidth = 10
@@ -132,9 +133,9 @@ pieces = {'s':stemplate,
           'j':jtemplate,
           't':ttemplate}
 
-KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN, KEY_DROP = 0, 1, 2, 3, 4
-ACTIONS = [KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN, KEY_DROP]
-ACTIONS_NAME = ["O","L","R","D","B"]
+KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_NONE, KEY_DOWN = 0, 1, 2, 3, 4
+ACTIONS = [KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_NONE, KEY_DOWN]
+ACTIONS_NAME = ["O","L","R","N","D"]
 ACTONS_LEN = len(ACTIONS)
 
 # @njit(cache=True)
@@ -154,7 +155,7 @@ def nb_calc_down_count(board, piece, piece_x, piece_y, templatenum=5):
     count = min_y-piece_y 
     return count
 
-# @njit(cache=True)
+@njit()
 def nb_validposition(board, piece, piece_x, piece_y, ax=0, ay=0, templatenum=5, boardwidth=10, boardheight=20):
     for y in range(templatenum-1,-1,-1):
         for x in range(templatenum):
@@ -166,7 +167,7 @@ def nb_validposition(board, piece, piece_x, piece_y, ax=0, ay=0, templatenum=5, 
                     return False
     return True
 
-# @njit(cache=True)
+# @njit()
 def nb_addtoboard(board,piece,piece_x,piece_y,boardwidth=10,boardheight=20):
     for x in range(templatenum):
         for y in range(templatenum):
@@ -547,11 +548,11 @@ class Agent():
         _piece = pieces[piece['shape']][piece['rotation']]
         nb_addtoboard(board, _piece, piece['x'], piece['y'])               
         
-    def validposition(self,board,piece,ax = 0,ay = 0):
+    def validposition(self, board, piece, ax = 0, ay = 0):        
         _piece = pieces[piece['shape']][piece['rotation']]
         return nb_validposition(board, _piece, piece['x'], piece['y'], ax=ax, ay=ay)
     
-    def removecompleteline(self,board):
+    def removecompleteline(self, board):
         return nb_removecompleteline(board)
     
     def calc_down_count(self,board,piece):
@@ -583,7 +584,7 @@ class Agent():
             self.availables = np.copy(c)
             return
         
-        # acts=[KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_DOWN]
+        # acts=[KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_NONE, KEY_DOWN]
         if not self.validposition(self.board, self.fallpiece, ax = -1):
             self.availables[KEY_LEFT]=0
         else:
@@ -636,10 +637,7 @@ class Agent():
             if action == KEY_ROTATION:
                 self.fallpiece['rotation'] =  (self.fallpiece['rotation'] + 1) % len(pieces[self.fallpiece['shape']])
 
-            if action == KEY_DOWN: # and self.validposition(self.board, self.fallpiece, ay=1):
-                self.fallpiece['y'] += 1
-
-            if action == KEY_DROP:
+            if action == KEY_DOWN:
                 while True: 
                     self.downcount += 1
                     self.fallpiece['y'] += 1            

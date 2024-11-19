@@ -55,7 +55,7 @@ class PolicyValueNet():
 
         if model_file and os.path.exists(model_file):
             print("Loading model", model_file)
-            net_sd = torch.load(model_file, map_location=self.device)
+            net_sd = torch.load(model_file, map_location=self.device, weights_only=True)
             # try:
             self.policy_value_net.load_state_dict(net_sd, strict=False)
             # except:
