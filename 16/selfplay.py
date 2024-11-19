@@ -330,7 +330,7 @@ class Train():
             exrewardRate = result["total"]["exrewardRate"]
             
             if playcount==0:
-                player.need_max_ps = True
+                player.need_max_ps = False
                 player.need_max_ns = False
                 player.need_max_qs = False
             elif playcount==1:
@@ -340,7 +340,7 @@ class Train():
             elif playcount==2:
                 player.need_max_ps = False
                 player.need_max_ns = False
-                player.need_max_qs = False            
+                player.need_max_qs = True            
                 
             agent, data, avg_qval, avg_state_value, start_time, paytime = self.play(cache, result, min_removedlines, his_pieces, his_pieces_len, player, exrewardRate)
             
@@ -627,7 +627,7 @@ class Train():
             print("saved file basename:", filetime, "length:", i+1)
             
             # 游戏结束
-            if random.random()>0.1 or (agent.removedlines>min_removedlines and piececount>his_pieces_len): break
+            if (agent.removedlines>min_removedlines and piececount>his_pieces_len): break
             
             print()
             print(f"replay: {playcount+1}")
