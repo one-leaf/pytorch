@@ -376,6 +376,7 @@ class MCTSPlayer(object):
         self.need_max_ps = need_max_ps
         self.need_max_qs = need_max_qs
         self.need_max_ns = need_max_ns
+        self.n_playout = n_playout
         
     def set_player_ind(self, p):
         """指定MCTS的playerid"""
@@ -391,6 +392,10 @@ class MCTSPlayer(object):
             # 训练的时候 temp = 1
             # temp 导致 N^(1/temp) alphaezero 前 30 步设置为1 其余设置为无穷小即act_probs只取最大值
             # temp 越大导致更均匀的搜索
+            has_run_time=time.time()-game.start_time
+            self.mcts._n_playout = self.n_playout - round(has_run_time/60)
+
+
             state = State(game)
             # 动作数概率，每个动作的Q，原始概率，当前局面的v，当前局面的总探索次数 
             act_probs, act_qs, act_ps, state_v, state_n = self.mcts.get_action_probs(state, temp)
@@ -424,26 +429,24 @@ class MCTSPlayer(object):
             # 如果当前概率和推定概率一致,不需要随机
             # if max_qs_idx==max_ps_idx:
             #     idx = max_ps_idx
-            idx = -1
-            
-            # 如果在10分钟内按既定参数选择，否则概率选择
-            if random.random()<600/(time.time()-game.start_time):
-                if self.need_max_ns:
-                    if random.random()<0.25:
-                        idx = max_qs_idx
-                    else:
-                        idx = max_ns_idx
-                elif self.need_max_qs:
-                    if random.random()>=0.25:
-                        idx = max_qs_idx
-                    else:
-                        idx = max_ns_idx
-                elif self.need_max_ps:
-                    idx = max_ps_idx                          
+            idx = -1           
+
+            if self.need_max_ns:
+                if random.random()<0.25:
+                    idx = max_qs_idx
+                else:
+                    idx = max_ns_idx
+            elif self.need_max_qs:
+                if random.random()>=0.25:
+                    idx = max_qs_idx
+                else:
+                    idx = max_ns_idx
+            elif self.need_max_ps:
+                idx = max_ps_idx                          
                                  
             if idx == -1:
-                p = 0.998**game.pieceCount
-                # p=0.75  
+                # p = 0.998**game.pieceCount
+                p=0.75  
                 # a=1的时候，act 机会均等，>1 强调均值， <1 强调两端
                 # 国际象棋 0.3 将棋 0.15 围棋 0.03
                 # 取值一般倾向于 a = 10/n 所以俄罗斯方块取 2
