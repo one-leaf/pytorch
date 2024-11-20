@@ -392,6 +392,8 @@ class MCTSPlayer(object):
             # 训练的时候 temp = 1
             # temp 导致 N^(1/temp) alphaezero 前 30 步设置为1 其余设置为无穷小即act_probs只取最大值
             # temp 越大导致更均匀的搜索
+            
+            # 为了防止无休止运行，每多一分钟，探索次数减少1
             has_run_time=time.time()-game.start_time
             self.mcts._n_playout = self.n_playout - round(has_run_time/60)
 
