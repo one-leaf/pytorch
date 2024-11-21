@@ -8,7 +8,6 @@ import numpy as np
 from collections import OrderedDict
 from torchvision.models import resnet34
 from vit import VitNet
-from lion_pytorch import Lion
 
 # 定义游戏的保存文件名和路径
 model_name = "vit-ti" # "vit" # "mlp"
