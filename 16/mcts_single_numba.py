@@ -336,7 +336,6 @@ class MCTS():
             r += (state.markEmptyCount-state.game.emptyCount) * state.game.emptyCount * state.game.exrewardRate
             if (_r>0 and state.markEmptyCount>=state.game.emptyCount):# or (state.markEmptyCount>state.game.emptyCount) :
                 r = 1
-        if r<-2: r=-2        
         # 如果游戏结束
         # if not state.game.terminal:# and not need_break:# and _r==0 :#(state.game.piececount-state.markPiececount<=1): 
             # 现实奖励
@@ -346,6 +345,7 @@ class MCTS():
             v = -2
         else:
             v = self.search(state) + r
+            if v<-2: v=-1.9
             # r = np.tanh(r)
         # elif state.game.terminal:
         #     v = -1 #state.game.score * state.game.exrewardRate
@@ -357,7 +357,6 @@ class MCTS():
         # v *= state.game.exrewardRate
         
         # if v>1: v=1
-        # if v<-1: v=-1
         
         updateQN(s, a, v, self.Ns, self.Qsa, self.Nsa, state.actions_num)
 
