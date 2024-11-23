@@ -566,7 +566,15 @@ class Train():
             # 用sin函数来模拟            
             x_values = np.linspace(1/2 * np.pi, 3/2 * np.pi, step_count)  
             step_values = np.sin(x_values)
+            
+            # 如果有奖励，折没有完成消行的部分全部是-1
+            if game_score>0:
+                for m in range(step_count-1, -1, -1):
+                    if data["steps"][m]["reward"]>0: break
+                    step_values[m] = -1
+            
             # step_values = np.linspace(1, -1, step_count)
+            
             
             # z_count = 0
             # for m in range(step_count):
