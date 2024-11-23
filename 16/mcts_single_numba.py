@@ -336,7 +336,7 @@ class MCTS():
             r += (state.markEmptyCount-state.game.emptyCount) * state.game.emptyCount * state.game.exrewardRate
             if (_r>0 and state.markEmptyCount>=state.game.emptyCount):# or (state.markEmptyCount>state.game.emptyCount) :
                 r = 1
-                
+        if r<-2: r=-2        
         # 如果游戏结束
         # if not state.game.terminal:# and not need_break:# and _r==0 :#(state.game.piececount-state.markPiececount<=1): 
             # 现实奖励
