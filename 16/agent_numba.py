@@ -215,7 +215,9 @@ def nb_put_status(board,piece, p_x, p_y, templatenum=5):
 # @njit(cache=True)
 def nb_getEmptyCount(board):
     blank_line = np.zeros((boardwidth), dtype=np.int8)
+    values = np.sum(board,axis=1)
     for y in range(boardheight):
+        if values[y] == 0: continue
         for x in range(boardwidth):
             if board[y][x] > 0:
                 blank_line[x] = 1
