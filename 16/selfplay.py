@@ -560,18 +560,20 @@ class Train():
             # print("fixedreward:", pieces_reward)
             
             # 全局评价
-            # step_values = np.zeros(step_count,dtype=np.float64)
+            step_values = np.zeros(step_count,dtype=np.float16)
             # for m in range(step_count):
             #     step_values[m] = -(m+1)/step_count           
             # 用sin函数来模拟            
-            x_values = np.linspace(1/2 * np.pi, 3/2 * np.pi, step_count)  
-            step_values = np.sin(x_values)
-            
+            x_values = np.linspace(1/2 * np.pi, 3/2 * np.pi, piececount)  
+            piece_values = np.sin(x_values)
+            for m in range(step_count):
+                step_values[m] = piece_values[data["steps"][m]["piece_count"]]
+                
             # 如果有奖励，折没有完成消行的部分全部是-1
-            if game_score>0:
-                for m in range(step_count-1, -1, -1):
-                    if data["steps"][m]["reward"]>0: break
-                    step_values[m] = -1
+            # if game_score>0:
+            #     for m in range(step_count-1, -1, -1):
+            #         if data["steps"][m]["reward"]>0: break
+            #         step_values[m] = -1
             
             # step_values = np.linspace(1, -1, step_count)
             
@@ -593,7 +595,7 @@ class Train():
             print("step_values:", step_values)
             
             # 局部奖励均值,通过（未来-过去）/3, 用于 预测价值-局部奖励均值 使其网络更平稳
-            step_rewards = np.zeros(step_count,dtype=np.float64)
+            step_rewards = np.zeros(step_count,dtype=np.float16)
             for m in range(step_count-2):
                 # step_rewards[m]=data["steps"][m]["qval"]-data["steps"][m]["state_value"]
                 if m>0:# and data["steps"][m-1]["qval"]!=0:
