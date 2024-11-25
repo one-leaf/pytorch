@@ -57,11 +57,8 @@ def selectAction(s:int, availables, _c_puct:float, Ps, Ns, Qsa, Nsa):
     # 如果有一次都没有探索的，返回
     # 开销 8.05366921094275e-05 S
     # njit 4.298482243524901e-05 S
-    # if np.min(Nsa[s][availables==1])==0:
-    #     return np.argmax(Nsa[s]+availables == 1)
-    # if Nsa[s][3]==1: return 3
     
-    q = Qsa[s]+ _c_puct * availables * Ps[s] * sqrt(Ns[s]) / (Nsa[s]+1)
+    q = Qsa[s]+ _c_puct * Ps[s] * sqrt(Ns[s]) / (Nsa[s]+1)
     
     # 选择最大q的
     nz_idx = np.nonzero(availables)
@@ -94,21 +91,23 @@ def selectAction(s:int, availables, _c_puct:float, Ps, Ns, Qsa, Nsa):
 # 2.3297934257853874e-05
 def updateQN(s:int, a:int, v:float, Ns, Qsa, Nsa, actions_num):
     Nsa[s][a] += 1
+    Ns[s] += 1
     # Qsa[s][a] += (v- Qsa[s][a])/Nsa[s][a]
     # Qsa[s][a] += (r+v- Qsa[s][a])/Nsa[s][a]   
     
-    # DQN : q = r + 0.99*max(q_next)
+    # DQN : q = r + 0.999*max(q_next)
     # Qsa[s][a] = (Qsa[s][a]*(Nsa[s][a]-1)+v)/Nsa[s][a]
     # b = (Qsa[s][a]*(Nsa[s][a]-1)+v -QSa[s][a]*Nsa[s][a])/Nsa[s][a]
     # b = (v-Qsa[s][a])/Nsa[s][a]
     
-    # Qsa[s][a] += (r/Nsa[s][a]+v-Qsa[s][a])/Nsa[s][a]
-    # Qsa[s][a] += (v- Qsa[s][a])/Nsa[s][a]
+    # Qsa[s][a] = r[s][a] + gamma*(V[s+1])
+    # V[s] = sum(Qsa[s][a]*Nsa[s][a])/Ns[s]
+    # Ns[s] = Ns[s] + 1
+    
     delta =  (v - Qsa[s][a])/Nsa[s][a]
     Qsa[s][a] += delta
     
     # Qsa[s][a] = np.tanh(Qsa[s][a])
-    Ns[s] += 1
 
 #@njit(cache=True)   
 # njit  0.00022558832222352673
