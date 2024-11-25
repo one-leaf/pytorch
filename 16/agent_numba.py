@@ -211,11 +211,21 @@ def nb_put_status(board,piece, p_x, p_y, templatenum=5):
                 if px>=0 and px<10 and py>=0 and py<20:
                     board[py][px]=1
 
-# 统计为空的个数
+# 统计为空的个数 统计最高的空的高度
 # @njit(cache=True)
 def nb_getEmptyCount(board):
-    d=(20-np.argmax(board,axis=0)-np.sum(board,axis=0))
-    return np.sum(d[d!=20])
+    blank_line = np.zeros((boardwidth), dtype=np.int8)
+    for y in range(boardheight):
+        for x in range(boardwidth):
+            if board[y][x] > 0:
+                blank_line[x] = 1
+            elif blank_line[x] == 1:
+                return 20-y
+    return 0
+
+
+    #d=(20-np.argmax(board,axis=0)-np.sum(board,axis=0))
+    #return np.sum(d[d!=20])
 
 # def nb_getEmptyCount2(board):
 #     v = 0 
