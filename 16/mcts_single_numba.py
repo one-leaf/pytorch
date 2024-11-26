@@ -302,7 +302,7 @@ class MCTS():
             self.Rs[s] = r
             # v = float(v+abs(v)*r) 
             # https://arxiv.org/pdf/2405.09999 当前价值减去额外奖励的局部均值         
-            v = float(v+r)
+            v = float(v-r)
             # v = float(v)
             return v
             
