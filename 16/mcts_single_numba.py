@@ -432,15 +432,9 @@ class MCTSPlayer(object):
             idx = -1           
 
             if self.need_max_ns:
-                if random.random()<0.25:
-                    idx = max_qs_idx
-                else:
-                    idx = max_ns_idx
+                idx = max_ns_idx
             elif self.need_max_qs:
-                if random.random()>=0.25:
-                    idx = max_qs_idx
-                else:
-                    idx = max_ns_idx
+                idx = max_qs_idx
             elif self.need_max_ps:
                 idx = max_ps_idx                          
                                  
