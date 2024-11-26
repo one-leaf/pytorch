@@ -331,11 +331,11 @@ class Train():
             
             if playcount==0:
                 player.need_max_ps = False
-                player.need_max_ns = False
+                player.need_max_ns = True
                 player.need_max_qs = False
             elif playcount==1:
                 player.need_max_ps = False
-                player.need_max_ns = True
+                player.need_max_ns = False
                 player.need_max_qs = False            
             elif playcount==2:
                 player.need_max_ps = True
