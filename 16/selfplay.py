@@ -259,6 +259,9 @@ class Train():
                     print("#"*repeat_count, 'score:', agent.score, "reward:",reward, 'qval', round(qval,2), 'height:', agent.pieceheight, 'piece:', agent.piececount, \
                         'step:', agent.steps, "step time:", round((time.time()-start_time)/i,3),'reward_p:', agent.piececount-mark_reward_piececount)
                 agent.print()
+                if player.need_max_ps or player.need_max_ns:
+                    player.need_max_ps = not player.need_max_ps
+                    player.need_max_ns = not player.need_max_ns
 
             # 如果游戏结束或玩了超过1小时或10个方块都没有消除一行
             paytime = time.time()-start_time
@@ -332,16 +335,13 @@ class Train():
             
             if playcount==0:
                 player.need_max_ps = False
-                player.need_max_ns = True
-                player.need_max_qs = False
+                player.need_max_ns = False
             elif playcount==1:
                 player.need_max_ps = False
-                player.need_max_ns = False
-                player.need_max_qs = False            
+                player.need_max_ns = True
             elif playcount==2:
                 player.need_max_ps = True
                 player.need_max_ns = False
-                player.need_max_qs = False            
                 
             agent, data, avg_qval, avg_state_value, start_time, paytime = self.play(cache, result, min_removedlines, his_pieces, his_pieces_len, player, exrewardRate)
             
