@@ -44,7 +44,7 @@ class Train():
         self.c_puct = 5  
 
         self.max_step_count = 10000 
-        self.limit_steptime = 10  # 限制每一步的平均花费时间，单位秒，默认10秒
+        self.limit_steptime = 5  # 限制每一步的平均花费时间，单位秒，默认10秒
 
         # 等待训练的序列
         self.waitplaydir=os.path.join(data_dir,"play")
@@ -209,8 +209,8 @@ class Train():
         max_emptyCount = random.randint(10,30)
         start_time = time.time()
         mark_reward_piececount = -1
-        avg_qval=0
-        avg_state_value=0
+        total_qval=0
+        total_state_value=0
         need_max_ps = False # random.random()>0.5
         print("exreward:", agent.exreward,"exrewardRate:", agent.exrewardRate ,"max_emptyCount:",max_emptyCount,"isRandomNextPiece:",agent.isRandomNextPiece,"limitstep:",agent.limitstep,"max_ps:",need_max_ps,"max_qs:",agent.is_replay)
         for i in range(self.max_step_count):
@@ -229,14 +229,14 @@ class Train():
 
             _, reward = agent.step(action)
 
-            avg_qval += qval
+            total_qval += qval
 
             # if qval > 0:
             #     avg_qval += 1
             # else:
             #     avg_qval += -1
 
-            avg_state_value += state_value 
+            total_state_value += state_value 
 
             _step["piece_height"] = agent.pieceheight
             _step["reward"] = reward if reward>0 else 0
@@ -270,7 +270,7 @@ class Train():
                 data["score"] = agent.score
                 data["piece_count"] = agent.piececount
                 data["piece_height"] = agent.pieceheight
-                return agent, data, avg_qval, avg_state_value, start_time, paytime
+                return agent, data, total_qval, total_state_value, start_time, paytime
             
 
 
@@ -329,9 +329,10 @@ class Train():
                         os.remove(filename)
                         break            
         
-        for playcount in range(3):
-            result = self.read_status_file(game_json) 
-            exrewardRate = result["total"]["exrewardRate"]
+        play_data = []
+        result = self.read_status_file(game_json) 
+        exrewardRate = result["total"]["exrewardRate"]
+        for playcount in range(2):
             
             if playcount==0:
                 player.need_max_ps = False
@@ -339,322 +340,253 @@ class Train():
             elif playcount==1:
                 player.need_max_ps = True
                 player.need_max_ns = False
-            elif playcount==2:
-                player.need_max_ps = False
-                player.need_max_ns = False
                 
-            agent, data, avg_qval, avg_state_value, start_time, paytime = self.play(cache, result, min_removedlines, his_pieces, his_pieces_len, player, exrewardRate)
+            agent, data, qval, state_value, start_time, paytime = self.play(cache, result, min_removedlines, his_pieces, his_pieces_len, player, exrewardRate)
+            play_data.append({"agent":agent, "data":data, "qval":qval, "state_value":state_value, "start_time":start_time, "paytime":paytime})
             
-            # his_pieces =  agent.piecehis
-            # his_pieces_len = len(his_pieces)
-            
-            game_score =  agent.removedlines 
-            result = self.read_status_file(game_json)
-            
-            steptime = paytime/agent.steps            
-            avg_qval = avg_qval/agent.steps
-            avg_state_value = avg_state_value/agent.steps
-            
-            print("step pay time:", steptime, "qval:", avg_qval, "avg_state_value:", avg_state_value)
-            result["total"]["avg_score_ex"] += (game_score-result["total"]["avg_score_ex"])/100
-            result["total"]["avg_reward_piececount"] += (game_score/agent.piececount - result["total"]["avg_reward_piececount"])/1000
-                            
-            alpha = 0.01
-            if exrewardRate==result["total"]["exrewardRate"]:
-                result["total"]["avg_qval"] += alpha * (avg_qval - result["total"]["avg_qval"])
-                
-            result["total"]["avg_state_value"] += alpha * (avg_state_value - result["total"]["avg_state_value"])
-
-            # 速度控制在消耗50行
-            if agent.piececount>=his_pieces_len:
-                result["total"]["win_count"] += 1
-            else:
-                result["total"]["lost_count"] += 1
-            c = result["total"]["win_count"]+result["total"]["lost_count"]                    
-            if c>2000:
-                result["total"]["win_count"] -= round(result["total"]["win_count"]/(2*c))
-                result["total"]["lost_count"] -= round(result["total"]["lost_count"]/(2*c))
-            
-            result["total"]["agent"] += 1
-            result["total"]["_agent"] += 1
-
-            if result["total"]["step_time"]==0:
-                result["total"]["step_time"] = steptime
-            else:
-                result["total"]["step_time"] += (steptime-result["total"]["step_time"])/100
+        print("TRAIN Self Play ending ...")
         
-            if game_score>result["best"]["reward"]:
-                result["best"]["reward"] = game_score
-                result["best"]["agent"] = result["total"]["agent"]
-            else:
-                result["best"]["reward"] = round(result["best"]["reward"] - 0.9999,4)
+        print("agent 0 score:", play_data[0]["agent"].removedlines, "agent 1 score:", play_data[1]["agent"].removedlines)
+        print("agent 0 steps:", play_data[0]["agent"].steps, "agent 1 steps:", play_data[1]["agent"].steps)
+        print("agent 0 piececount:", play_data[0]["agent"].piececount, "agent 1 piececount:", play_data[1]["agent"].piececount)
+        print("agent 0 paytime:", play_data[0]["paytime"], "agent 1 paytime:", play_data[1]["paytime"])
+        
+        total_game_score =  play_data[0]["agent"].removedlines + play_data[1]["agent"].removedlines 
+        total_game_steps =  play_data[0]["agent"].steps + play_data[1]["agent"].steps 
+        total_game_piececount =  play_data[0]["agent"].piececount + play_data[1]["agent"].piececount 
+        total_game_paytime =  play_data[0]["paytime"] + play_data[1]["paytime"] 
+        total_game_state_value =  play_data[0]["state_value"] + play_data[1]["state_value"] 
+        total_game_qval =  play_data[0]["qval"] + play_data[1]["qval"] 
+        game_score = max(play_data[0]["agent"].removedlines, play_data[1]["agent"].removedlines)
+        win_values =[1, -1] if play_data[0]["agent"].piececount>=play_data[1]["agent"].piececount else [-1, 1]
 
-            if result["total"]["reward"]==0:
-                result["total"]["reward"] = game_score
-            else:
-                result["total"]["reward"] += (game_score-result["total"]["reward"])/100
+        result = self.read_status_file(game_json)
+        
+        steptime = total_game_paytime/total_game_steps            
+        avg_qval = total_game_qval/total_game_steps
+        avg_state_value = total_game_state_value/total_game_steps
+        
+        print("step pay time:", steptime, "qval:", avg_qval, "avg_state_value:", avg_state_value)
+        result["total"]["avg_score_ex"] += (total_game_score/2-result["total"]["avg_score_ex"])/100
+        result["total"]["avg_reward_piececount"] += (total_game_score/total_game_piececount - result["total"]["avg_reward_piececount"])/1000
+                        
+        alpha = 0.01
+        if exrewardRate==result["total"]["exrewardRate"]:
+            result["total"]["avg_qval"] += alpha * (avg_qval - result["total"]["avg_qval"])
+            
+        result["total"]["avg_state_value"] += alpha * (avg_state_value - result["total"]["avg_state_value"])
 
-            if result["total"]["piececount"]==0:
-                result["total"]["piececount"] = agent.piececount
-            else:
-                result["total"]["piececount"] += (agent.piececount-result["total"]["piececount"])/100
+        # 速度控制在消耗50行
+        if play_data[0]["agent"].piececount>=play_data[1]["agent"].piececount:
+            result["total"]["win_count"] += 1
+        else:
+            result["total"]["lost_count"] += 1
+        c = result["total"]["win_count"]+result["total"]["lost_count"]                    
+        if c>2000:
+            result["total"]["win_count"] -= round(result["total"]["win_count"]/(2*c))
+            result["total"]["lost_count"] -= round(result["total"]["lost_count"]/(2*c))
+        
+        result["total"]["agent"] += 1
+        result["total"]["_agent"] += 1
+
+        if result["total"]["step_time"]==0:
+            result["total"]["step_time"] = steptime
+        else:
+            result["total"]["step_time"] += (steptime-result["total"]["step_time"])/100
+    
+        if game_score>result["best"]["reward"]:
+            result["best"]["reward"] = game_score
+            result["best"]["agent"] = result["total"]["agent"]
+        else:
+            result["best"]["reward"] = round(result["best"]["reward"] - 0.9999,4)
+
+        if result["total"]["reward"]==0:
+            result["total"]["reward"] = game_score
+        else:
+            result["total"]["reward"] += (game_score-result["total"]["reward"])/100
+
+        if result["total"]["piececount"]==0:
+            result["total"]["piececount"] = total_game_piececount/2
+        else:
+            result["total"]["piececount"] += (total_game_piececount/2-result["total"]["piececount"])/100
 
 
-            # 计算 acc 看有没有收敛
-            pacc = []
-            vacc = []
-            depth = []
-            ns = []
+        # 计算 acc 看有没有收敛
+        pacc = []
+        vacc = []
+        depth = []
+        ns = []
+        for m, data in enumerate([play_data[0]["data"], play_data[1]["data"]]) :
             for step in data["steps"]:
                 pacc.append(step["acc_ps"])
                 depth.append(step["depth"])
                 ns.append(step["ns"])
-                vacc.append(np.abs(step["qval"]-step["state_value"]))
+                vacc.append(step["state_value"])
 
-            pacc = float(np.average(pacc))
-            vacc = float(np.average(vacc))
-            depth = float(np.average(depth))
-            ns = float(np.average(ns))
+        pacc = float(np.average(pacc))
+        vacc = float(np.average(vacc))
+        depth = float(np.average(depth))
+        ns = float(np.average(ns))
 
-            if result["total"]["pacc"]==0:
-                result["total"]["pacc"] = pacc
-            else:
-                result["total"]["pacc"] = result["total"]["pacc"]*0.99 + pacc*0.01   
+        if result["total"]["pacc"]==0:
+            result["total"]["pacc"] = pacc
+        else:
+            result["total"]["pacc"] = result["total"]["pacc"]*0.99 + pacc*0.01   
 
-            if result["total"]["vacc"]==0:
-                result["total"]["vacc"] = vacc
-            else:
-                result["total"]["vacc"] = result["total"]["vacc"]*0.99 + vacc*0.01   
+        if result["total"]["vacc"]==0:
+            result["total"]["vacc"] = vacc
+        else:
+            result["total"]["vacc"] = result["total"]["vacc"]*0.99 + vacc*0.01   
 
-            if result["total"]["depth"]==0:
-                result["total"]["depth"] = depth
-            else:
-                result["total"]["depth"] = result["total"]["depth"]*0.99 + depth*0.01   
+        if result["total"]["depth"]==0:
+            result["total"]["depth"] = depth
+        else:
+            result["total"]["depth"] = result["total"]["depth"]*0.99 + depth*0.01   
 
-            if result["total"]["ns"]==0:
-                result["total"]["ns"] = ns
-            else:
-                result["total"]["ns"] = result["total"]["ns"]*0.99 + ns*0.01   
+        if result["total"]["ns"]==0:
+            result["total"]["ns"] = ns
+        else:
+            result["total"]["ns"] = result["total"]["ns"]*0.99 + ns*0.01   
 
-            max_list_len=50
-            if result["total"]["_agent"]>20:
-                result["reward"].append(round(result["total"]["avg_score"],2))
-                result["depth"].append(round(result["total"]["depth"],1))
-                result["pacc"].append(round(result["total"]["pacc"],2))
-                result["vacc"].append(round(result["total"]["vacc"],2))
-                result["time"].append(round(result["total"]["step_time"],1))
-                result["qval"].append(round(result["total"]["avg_qval"],4))
-                result["rate"].append(round(result["total"]["exrewardRate"],5))
-                result["piececount"].append(round(result["total"]["avg_piececount"],1))
-                if len(result["qval"])>1:
-                    result["advantage"].append( (round(result["total"]["exrewardRate"],5), round(result["total"]["avg_qval"]-result["qval"][-2],4)) )
-                local_time = time.localtime(start_time)
-                current_month = local_time.tm_mon
-                current_day = local_time.tm_mday
+        max_list_len=50
+        if result["total"]["_agent"]>20:
+            result["reward"].append(round(result["total"]["avg_score"],2))
+            result["depth"].append(round(result["total"]["depth"],1))
+            result["pacc"].append(round(result["total"]["pacc"],2))
+            result["vacc"].append(round(result["total"]["vacc"],2))
+            result["time"].append(round(result["total"]["step_time"],1))
+            result["qval"].append(round(result["total"]["avg_qval"],4))
+            result["rate"].append(round(result["total"]["exrewardRate"],5))
+            result["piececount"].append(round(result["total"]["avg_piececount"],1))
+            if len(result["qval"])>1:
+                result["advantage"].append( (round(result["total"]["exrewardRate"],5), round(result["total"]["avg_qval"]-result["qval"][-2],4)) )
+            local_time = time.localtime(start_time)
+            current_month = local_time.tm_mon
+            current_day = local_time.tm_mday
 
-                result["update"].append(current_month+current_day/100.)
-                result["total"]["_agent"] -= 20 
+            result["update"].append(current_month+current_day/100.)
+            result["total"]["_agent"] -= 20 
 
-                while len(result["reward"])>max_list_len:
-                    result["reward"].remove(result["reward"][0])
-                while len(result["depth"])>max_list_len:
-                    result["depth"].remove(result["depth"][0])
-                while len(result["pacc"])>max_list_len:
-                    result["pacc"].remove(result["pacc"][0])
-                while len(result["vacc"])>max_list_len:
-                    result["vacc"].remove(result["vacc"][0])
-                while len(result["time"])>max_list_len:
-                    result["time"].remove(result["time"][0])
-                while len(result["qval"])>max_list_len:
-                    result["qval"].remove(result["qval"][0])
-                while len(result["rate"])>max_list_len:
-                    result["rate"].remove(result["rate"][0])
-                while len(result["piececount"])>max_list_len:
-                    result["piececount"].remove(result["piececount"][0])
-                while len(result["update"])>max_list_len:
-                    result["update"].remove(result["update"][0])
-                while len(result["advantage"])>max_list_len:
-                    result["advantage"].remove(result["advantage"][0])
+            while len(result["reward"])>max_list_len:
+                result["reward"].remove(result["reward"][0])
+            while len(result["depth"])>max_list_len:
+                result["depth"].remove(result["depth"][0])
+            while len(result["pacc"])>max_list_len:
+                result["pacc"].remove(result["pacc"][0])
+            while len(result["vacc"])>max_list_len:
+                result["vacc"].remove(result["vacc"][0])
+            while len(result["time"])>max_list_len:
+                result["time"].remove(result["time"][0])
+            while len(result["qval"])>max_list_len:
+                result["qval"].remove(result["qval"][0])
+            while len(result["rate"])>max_list_len:
+                result["rate"].remove(result["rate"][0])
+            while len(result["piececount"])>max_list_len:
+                result["piececount"].remove(result["piececount"][0])
+            while len(result["update"])>max_list_len:
+                result["update"].remove(result["update"][0])
+            while len(result["advantage"])>max_list_len:
+                result["advantage"].remove(result["advantage"][0])
+            
+            # 如果每步的消耗时间小于self.limit_steptime秒，增加探测深度    
+            result["total"]["n_playout"] += round(self.limit_steptime-result["total"]["step_time"])
                 
-                # 如果每步的消耗时间小于self.limit_steptime秒，增加探测深度    
-                result["total"]["n_playout"] += round(self.limit_steptime-result["total"]["step_time"])
-                    
-                # 保存下中间步骤的agent
-                # newmodelfile = model_file+"_"+str(result["total"]["agent"])
-                # if not os.path.exists(newmodelfile):
-                #     policy_value_net.save_model(newmodelfile)
+            # 保存下中间步骤的agent
+            # newmodelfile = model_file+"_"+str(result["total"]["agent"])
+            # if not os.path.exists(newmodelfile):
+            #     policy_value_net.save_model(newmodelfile)
 
-                # 如果当前最佳，将模型设置为最佳模型
-                if max(result["reward"])==result["reward"][-1]:
-                    newmodelfile = model_file+"_reward_"+str(result["reward"][-1])
-                    if not os.path.exists(newmodelfile):
-                        policy_value_net.save_model(newmodelfile)
-                    if os.path.exists(bestmodelfile): os.remove(bestmodelfile)
-                    if os.path.exists(newmodelfile): os.link(newmodelfile, bestmodelfile)
+            # 如果当前最佳，将模型设置为最佳模型
+            if max(result["reward"])==result["reward"][-1]:
+                newmodelfile = model_file+"_reward_"+str(result["reward"][-1])
+                if not os.path.exists(newmodelfile):
+                    policy_value_net.save_model(newmodelfile)
+                if os.path.exists(bestmodelfile): os.remove(bestmodelfile)
+                if os.path.exists(newmodelfile): os.link(newmodelfile, bestmodelfile)
 
-                if len(result["qval"])>5:
-                    x=[] #rate
-                    y=[] #qval
-                    for _x,_y in result["advantage"]:
-                        x.append(_x)
-                        y.append(_y)
-                    # for i in range(len(result["rate"])):
-                    #     x.insert(0,result["rate"][i*-1-1])
-                    #     y.insert(0,result["qval"][i*-1-1])
-                    if len(x)>2:
-                        x = np.array(x)
-                        y = np.array(y)
+            if len(result["qval"])>5:
+                x=[] #rate
+                y=[] #qval
+                for _x,_y in result["advantage"]:
+                    x.append(_x)
+                    y.append(_y)
+                # for i in range(len(result["rate"])):
+                #     x.insert(0,result["rate"][i*-1-1])
+                #     y.insert(0,result["qval"][i*-1-1])
+                if len(x)>2:
+                    x = np.array(x)
+                    y = np.array(y)
 
-                        coefficients = np.polyfit(y, x, deg=1)
-                        dst = -1 * result["total"]["avg_qval"]
-                        if dst>0.01: dst = 0.01
-                        if dst<-0.01: dst = -0.01
-                        x_when_y_is_zero = np.polyval(coefficients, dst)
-                        # 如果当前平均q值小于0
-                        if result["total"]["avg_qval"]<0:
-                            if x_when_y_is_zero>result["total"]["exrewardRate"]:
-                                result["total"]["exrewardRate"] = x_when_y_is_zero
-                            else:
-                                if y[-1]<0: # 如果趋势还在减少
-                                    result["total"]["exrewardRate"] *= 1.01  
-                        elif result["total"]["avg_qval"]>0:
-                            if x_when_y_is_zero<result["total"]["exrewardRate"]:                            
-                                result["total"]["exrewardRate"] = x_when_y_is_zero
-                            else:
-                                if y[-1]>0: # 如果趋势还在增加
-                                    result["total"]["exrewardRate"] *= 0.99 
-                    elif len(result["qval"])>1:    
-                        result["total"]["exrewardRate"]+=(result["qval"][-2]-result["qval"][-1])*0.1
-                    
-                    if result["total"]["exrewardRate"]<1e-6: result["total"]["exrewardRate"]=1e-6
-                    if result["total"]["exrewardRate"]>0.1: result["total"]["exrewardRate"]=0.1
+                    coefficients = np.polyfit(y, x, deg=1)
+                    dst = -1 * result["total"]["avg_qval"]
+                    if dst>0.01: dst = 0.01
+                    if dst<-0.01: dst = -0.01
+                    x_when_y_is_zero = np.polyval(coefficients, dst)
+                    # 如果当前平均q值小于0
+                    if result["total"]["avg_qval"]<0:
+                        if x_when_y_is_zero>result["total"]["exrewardRate"]:
+                            result["total"]["exrewardRate"] = x_when_y_is_zero
+                        else:
+                            if y[-1]<0: # 如果趋势还在减少
+                                result["total"]["exrewardRate"] *= 1.01  
+                    elif result["total"]["avg_qval"]>0:
+                        if x_when_y_is_zero<result["total"]["exrewardRate"]:                            
+                            result["total"]["exrewardRate"] = x_when_y_is_zero
+                        else:
+                            if y[-1]>0: # 如果趋势还在增加
+                                result["total"]["exrewardRate"] *= 0.99 
+                elif len(result["qval"])>1:    
+                    result["total"]["exrewardRate"]+=(result["qval"][-2]-result["qval"][-1])*0.1
+                
+                if result["total"]["exrewardRate"]<1e-6: result["total"]["exrewardRate"]=1e-6
+                if result["total"]["exrewardRate"]>0.1: result["total"]["exrewardRate"]=0.1
                         
-            result["lastupdate"] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-            self.save_status_file(result, game_json) 
-            
-            step_count = len(data["steps"])
+        result["lastupdate"] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        self.save_status_file(result, game_json) 
         
-            # 奖励的分配
-            # 重新定义价值为探索深度，因此value应该是[0,-X]
-            # 如何评价最后的得分？最完美的情况（填满比）
-
-            # 奖励的位置
-            piececount = data["steps"][-1]["piece_count"]+1
-            pieces_reward = [0 for _ in range(piececount)]
-            pieces_steps = [0 for _ in range(piececount)]
-
-            # # 统计所有获得奖励的方块
-            for m in range(step_count):
-                pieces_steps[data["steps"][m]["piece_count"]] = m
-                if data["steps"][m]["reward"]>0:
-                    pieces_reward[data["steps"][m]["piece_count"]] = data["steps"][m]["reward"] 
-
-            pieces_value = [round(data["steps"][pieces_steps[p]]["qval"],2) for p in range(piececount)]
-            # pieces_probs = [round(np.max(data["steps"][pieces_steps[p]]["move_probs"]),2) for p in range(piececount)]
-
-            print()
-            print("pieces_reward:", pieces_reward)
-            print("pieces_value: ", pieces_value)
-            # print("probs: ", pieces_probs)
-            # for i in range(piececount-2, -1, -1):
-            #     pieces_reward[i] += pieces_reward[i + 1] / 2
-            # print("fixedreward:", pieces_reward)
-            
-            # 全局评价
-            step_values = np.zeros(step_count,dtype=np.float16)
-            # for m in range(step_count):
-            #     step_values[m] = -(m+1)/step_count           
-            # 用sin函数来模拟            
-            x_values = np.linspace(1/2 * np.pi, 3/2 * np.pi, piececount)  
-            piece_values = np.sin(x_values)
-            for m in range(step_count):
-                step_values[m] = piece_values[data["steps"][m]["piece_count"]]
-                
-            # 如果有奖励，折没有完成消行的部分全部是-1
-            # if game_score>0:
-            #     for m in range(step_count-1, -1, -1):
-            #         if data["steps"][m]["reward"]>0: break
-            #         step_values[m] = -1
-            
-            # step_values = np.linspace(1, -1, step_count)
-            
-            
-            # z_count = 0
-            # for m in range(step_count):
-            #     if data["steps"][m]["reward"]>0:
-            #         for i in range(m+1):
-            #             step_values[i] += data["steps"][m]["reward"] / (m+1)
-            #         z_count=0
-            #     z_count += 1                     
-            # for m in range(step_count):
-            #     if step_values[m]==0:
-            #         step_values[m]=-1/z_count
-            
-            #     if data["steps"][m]["reward"]>0:
-            #         for i in range(m+1):
-            #             step_values[i] += data["steps"][m]["reward"] / (m+1)
-            print("step_values:", step_values)
-            
-            # 局部奖励均值, 计算均值Q，用于 预测价值-均值Q 使其网络更平稳
-            step_rewards = np.ones(step_count, dtype=np.float16) * avg_qval
-             
-            # 局部奖励均值,通过（未来-过去）/3, 用于 预测价值-局部奖励均值 使其网络更平稳
-            # step_rewards = np.zeros(step_count,dtype=np.float16) 
-            # for m in range(step_count-2):
-            #     # step_rewards[m]=data["steps"][m]["qval"]-data["steps"][m]["state_value"]
-            #     if m>0:# and data["steps"][m-1]["qval"]!=0:
-            #         # curr_avg_qval = (data["steps"][m+1]["qval"]+data["steps"][m]["qval"]+data["steps"][m-1]["qval"])/3
-            #         # step_rewards[m]=(data["steps"][m+1]["qval"]-data["steps"][m-1]["qval"])/abs(curr_avg_qval)
-            #         # step_rewards[m]=(data["steps"][m]["qval"]-step_values[m])
-            #         # step_rewards[m]=(data["steps"][m]["qval"]-data["steps"][m-1]["qval"]) #/abs(data["steps"][m-1]["qval"])
-            #         step_rewards[m]=((data["steps"][m+1]["qval"]-data["steps"][m-1]["qval"]))/2.
-            print("step_reward:", step_rewards)
-            
-            # print("step_reward:", step_reward)
-
-            print("steps:",step_count,"piece_count:",data["piece_count"],"score:",data["score"],"piece_height:",data["piece_height"])
+        # 全局评价
+        values = [win_values[0]]*play_data[0]["agent"].steps + \
+                        [win_values[1]]*play_data[1]["agent"].steps                        
+        print("step_values:", values)
         
-            states, mcts_probs, values, rewards= [], [], [], []
+        # 局部奖励均值, 计算均值Q，用于 预测价值-均值Q 使其网络更平稳
+        rewards = [play_data[0]["qval"]/play_data[0]["agent"].steps]*play_data[0]["agent"].steps + \
+                        [play_data[1]["qval"]/play_data[1]["agent"].steps]*play_data[1]["agent"].steps                                    
+        print("step_reward:", rewards)
+            
+        states, mcts_probs= [], []
 
+        for data in [play_data[0]["data"], play_data[1]["data"]]:
             for step in data["steps"]:
                 states.append(step["state"])
                 mcts_probs.append(step["move_probs"])
-                values.append(step_values[step["step"]])
-                rewards.append(step_rewards[step["step"]])
-                    
-            assert len(states)>0
-            assert len(states)==len(values)
-            assert len(states)==len(mcts_probs)
-            assert len(states)==len(rewards)
+                
+        assert len(states)>0
+        assert len(states)==len(values)
+        assert len(states)==len(mcts_probs)
+        assert len(states)==len(rewards)
 
-            print("TRAIN Self Play end. length: %s value sum: %s saving ..." % (len(states),sum(values)))
+        print("TRAIN Self Play end. length: %s value sum: %s saving ..." % (len(states),sum(values)))
 
-            # 保存对抗数据到data_buffer
-            filetime = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-            for i, obj in enumerate(self.get_equi_data(states, mcts_probs, values, rewards)):
-            # for i, obj in enumerate(zip(states, mcts_probs, values, rewards)):
-                filename = "{}-{}.pkl".format(filetime, i)
-                savefile = os.path.join(data_wait_dir, filename)
-                with open(savefile, "wb") as fn:
-                    pickle.dump(obj, fn)
-            print("saved file basename:", filetime, "length:", i+1)
-            
-            # 游戏结束
+        # 保存对抗数据到data_buffer
+        filetime = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        for i, obj in enumerate(self.get_equi_data(states, mcts_probs, values, rewards)):
+        # for i, obj in enumerate(zip(states, mcts_probs, values, rewards)):
+            filename = "{}-{}.pkl".format(filetime, i)
+            savefile = os.path.join(data_wait_dir, filename)
+            with open(savefile, "wb") as fn:
+                pickle.dump(obj, fn)
+        print("saved file basename:", filetime, "length:", i+1)
+        
+        # 游戏结束
 #            if random.random()>0.1 or (agent.removedlines>min_removedlines and piececount>his_pieces_len): break
-            # 如果是交换训练结束且或者消除的行数大于历史最低值并且当前方块数量大于历史最高值，则停止训练
-            if playcount==1 and (agent.removedlines>min_removedlines and piececount>his_pieces_len): break
-            
-            print()
-            print(f"replay: {playcount+1}")
-            # player.mcts._n_playout=512
-            
-            # 保存训练集
-            if playcount==2:
-                filename = "{}-{}.pkl".format("".join(agent.piecehis), len(agent.piecehis))
-                his_pieces_file = os.path.join(self.waitplaydir, filename)
-                print("save need replay", his_pieces_file)
-                with open(his_pieces_file, "wb") as fn:
-                    pickle.dump(agent.piecehis, fn)
+        # 如果是交换训练结束且或者消除的行数大于历史最低值并且当前方块数量大于历史最高值，则停止训练
+        if game_score<min_removedlines:
+            filename = "{}-{}.pkl".format("".join(agent.piecehis), len(agent.piecehis))
+            his_pieces_file = os.path.join(self.waitplaydir, filename)
+            print("save need replay", his_pieces_file)
+            with open(his_pieces_file, "wb") as fn:
+                pickle.dump(agent.piecehis, fn)
                     
 
     def run(self):
