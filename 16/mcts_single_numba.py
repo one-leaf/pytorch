@@ -301,8 +301,11 @@ class MCTS():
             self.Vs[s] = v
             self.Rs[s] = r
             # v = float(v+abs(v)*r) 
-            # https://arxiv.org/pdf/2405.09999 当前价值减去额外奖励的局部均值         
-            v = float(v-r)
+            # https://arxiv.org/pdf/2405.09999 当前价值减去额外奖励的局部均值
+            # nanmean(self.Qsa[s]) - np.nanmean(self.Qsa[s][availables==0])
+            # v = v - np.nanmean(self.Qsa[s][availables==0])
+            # 论文中V等于Q值所以需要减去额外奖励的局部均值，这里V是局面外部评价，所以改为直接加上额外奖励的局部均值，促进V趋向于Q值
+            v = float(v+r)
             # v = float(v)
             return v
             
