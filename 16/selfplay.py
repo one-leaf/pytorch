@@ -335,12 +335,12 @@ class Train():
             
             if playcount==0:
                 player.need_max_ps = False
-                player.need_max_ns = False
-            elif playcount==1:
-                player.need_max_ps = False
                 player.need_max_ns = True
-            elif playcount==2:
+            elif playcount==1:
                 player.need_max_ps = True
+                player.need_max_ns = False
+            elif playcount==2:
+                player.need_max_ps = False
                 player.need_max_ns = False
                 
             agent, data, avg_qval, avg_state_value, start_time, paytime = self.play(cache, result, min_removedlines, his_pieces, his_pieces_len, player, exrewardRate)
