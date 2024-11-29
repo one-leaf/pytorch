@@ -44,6 +44,7 @@ class Train():
         self.c_puct = 5  
 
         self.max_step_count = 10000 
+        self.limit_steptime = 10  # 限制每一步的平均花费时间，单位秒，默认10秒
 
         # 等待训练的序列
         self.waitplaydir=os.path.join(data_dir,"play")
@@ -475,8 +476,8 @@ class Train():
                 while len(result["advantage"])>max_list_len:
                     result["advantage"].remove(result["advantage"][0])
                 
-                # 如果每步的消耗时间小于5秒，增加探测深度    
-                result["total"]["n_playout"] += round(5-result["total"]["step_time"])
+                # 如果每步的消耗时间小于self.limit_steptime秒，增加探测深度    
+                result["total"]["n_playout"] += round(self.limit_steptime-result["total"]["step_time"])
                     
                 # 保存下中间步骤的agent
                 # newmodelfile = model_file+"_"+str(result["total"]["agent"])
