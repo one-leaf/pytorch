@@ -345,12 +345,7 @@ class Train():
             play_data.append({"agent":agent, "data":data, "qval":qval, "state_value":state_value, "start_time":start_time, "paytime":paytime})
             
         print("TRAIN Self Play ending ...")
-        
-        print("agent 0 score:", play_data[0]["agent"].removedlines, "agent 1 score:", play_data[1]["agent"].removedlines)
-        print("agent 0 steps:", play_data[0]["agent"].steps, "agent 1 steps:", play_data[1]["agent"].steps)
-        print("agent 0 piececount:", play_data[0]["agent"].piececount, "agent 1 piececount:", play_data[1]["agent"].piececount)
-        print("agent 0 paytime:", play_data[0]["paytime"], "agent 1 paytime:", play_data[1]["paytime"])
-        
+                
         total_game_score =  play_data[0]["agent"].removedlines + play_data[1]["agent"].removedlines 
         total_game_steps =  play_data[0]["agent"].steps + play_data[1]["agent"].steps 
         total_game_piececount =  play_data[0]["agent"].piececount + play_data[1]["agent"].piececount 
@@ -577,6 +572,11 @@ class Train():
             with open(savefile, "wb") as fn:
                 pickle.dump(obj, fn)
         print("saved file basename:", filetime, "length:", i+1)
+
+        print("agent 0 score:", play_data[0]["agent"].removedlines, "agent 1 score:", play_data[1]["agent"].removedlines)
+        print("agent 0 steps:", play_data[0]["agent"].steps, "agent 1 steps:", play_data[1]["agent"].steps)
+        print("agent 0 piececount:", play_data[0]["agent"].piececount, "agent 1 piececount:", play_data[1]["agent"].piececount)
+        print("agent 0 paytime:", play_data[0]["paytime"], "agent 1 paytime:", play_data[1]["paytime"])
         
         # 游戏结束
 #            if random.random()>0.1 or (agent.removedlines>min_removedlines and piececount>his_pieces_len): break
