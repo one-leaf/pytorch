@@ -641,7 +641,8 @@ class Train():
             
             # 游戏结束
 #            if random.random()>0.1 or (agent.removedlines>min_removedlines and piececount>his_pieces_len): break
-            if (agent.removedlines>min_removedlines and piececount>his_pieces_len): break
+            # 如果是交换训练结束且或者消除的行数大于历史最低值并且当前方块数量大于历史最高值，则停止训练
+            if playcount==1 and (agent.removedlines>min_removedlines and piececount>his_pieces_len): break
             
             print()
             print(f"replay: {playcount+1}")
