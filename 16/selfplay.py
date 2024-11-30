@@ -353,7 +353,17 @@ class Train():
         total_game_state_value =  play_data[0]["state_value"] + play_data[1]["state_value"] 
         total_game_qval =  play_data[0]["qval"] + play_data[1]["qval"] 
         game_score = max(play_data[0]["agent"].removedlines, play_data[1]["agent"].removedlines)
-        win_values =[1, -1] if play_data[0]["agent"].piececount>=play_data[1]["agent"].piececount else [-1, 1]
+        win_values =[-1, -1]
+        if play_data[0]["agent"].piececount>play_data[1]["agent"].piececount:
+            win_values[0] = 1
+        elif play_data[0]["agent"].piececount<play_data[1]["agent"].piececount:
+            win_values[1] = 1
+        else:
+            if play_data[0]["agent"].steps<play_data[1]["agent"].steps:
+                win_values[0] = 1
+            elif play_data[0]["agent"].steps>play_data[1]["agent"].steps:
+                win_values[1] = 1
+
 
         result = self.read_status_file(game_json)
         
