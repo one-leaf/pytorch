@@ -369,7 +369,8 @@ class Train():
         
         steptime = total_game_paytime/total_game_steps            
         avg_qval = total_game_qval/total_game_steps
-        avg_state_value = total_game_state_value/total_game_steps
+        # avg_state_value = total_game_state_value/total_game_steps
+        avg_state_value = abs(play_data[0]["agent"].piececount-play_data[1]["agent"].piececount)
         
         print("step pay time:", steptime, "qval:", avg_qval, "avg_state_value:", avg_state_value)
         result["total"]["avg_score_ex"] += (total_game_score/2-result["total"]["avg_score_ex"])/100
