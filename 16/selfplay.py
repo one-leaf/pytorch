@@ -358,12 +358,6 @@ class Train():
             win_values[0] = 1
         elif play_data[0]["agent"].piececount<play_data[1]["agent"].piececount:
             win_values[1] = 1
-        else:
-            if play_data[0]["agent"].steps<play_data[1]["agent"].steps:
-                win_values[0] = 1
-            elif play_data[0]["agent"].steps>play_data[1]["agent"].steps:
-                win_values[1] = 1
-
 
         result = self.read_status_file(game_json)
         
