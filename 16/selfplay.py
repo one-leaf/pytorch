@@ -343,7 +343,9 @@ class Train():
                 
             agent, data, qval, state_value, start_time, paytime = self.play(cache, result, min_removedlines, his_pieces, his_pieces_len, player, exrewardRate)
             play_data.append({"agent":agent, "data":data, "qval":qval, "state_value":state_value, "start_time":start_time, "paytime":paytime})
-            
+            his_pieces = agent.piecehis
+            his_pieces_len = len(agent.piecehis)
+                
         print("TRAIN Self Play ending ...")
                 
         total_game_score =  play_data[0]["agent"].removedlines + play_data[1]["agent"].removedlines 
