@@ -201,8 +201,12 @@ class PolicyValueNet():
         loss.backward()
         # 更新参数
         self.optimizer.step()
-                
-        return loss.item(), value_loss.item(), policy_loss.item(), reward_loss.item()
+        
+        predicted_probs = torch.argmax(probs, dim=1)
+        true_probs = torch.argmax(mcts_probs, dim=1)
+        accuracy = (predicted_probs == true_probs).float().mean()
+        return accuracy.item(), value_loss.item(), policy_loss.item(), reward_loss.item()
+        
 
     # 保存模型
     def save_model(self, model_file):
