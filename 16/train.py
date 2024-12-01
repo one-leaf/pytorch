@@ -301,7 +301,7 @@ class Train():
                 p_acc, v_loss, p_loss, r_loss = self.policy_update(data, self.epochs)
                 v_loss_list.append(v_loss)
                 if i%10 == 0:
-                    print(i,"v_loss:",v_loss,"p_loss",p_loss,"r_loss",r_loss,"p_acc",p_acc)
+                    print(i,"v_loss:",v_loss,"p_loss:",p_loss,"r_loss:",r_loss,"p_acc:",p_acc)
                     # time.sleep(0.1)
 
                 if math.isnan(v_loss): 
