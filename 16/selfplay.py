@@ -107,12 +107,6 @@ class Train():
             result["total"]["exrewardRate"]=0.1  
         if "piececount" not in result:
             result["piececount"]=[]
-        if "exrewardRate" in result:
-            del result["exrewardRate"]
-        if "win_count" in result["total"]:
-            del result["total"]["win_count"]
-        if "lost_count" in result["total"]:
-            del result["total"]["lost_count"]
         if "update" not in result:
             result["update"]=[]
         if "qval" not in result:
