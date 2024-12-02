@@ -324,7 +324,7 @@ class MCTS():
                 
         # 外部奖励，最大1
         r = 0
-        if state.game.state==1:
+        if state.game.state==1 and state.game.piececount<20:
             # 这种奖励会照成主动消行，而不管后续的局面
             # r += (state.game.score-state.markscore) * state.game.exrewardRate
         #     # 不鼓励主动消行，以局面为主
