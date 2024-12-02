@@ -380,11 +380,6 @@ class Train():
             result["total"]["win_lost_tie"][1] += 1
         if win_values[0]==-1 and win_values[1]==-1:
             result["total"]["win_lost_tie"][2] += 1
-            
-        c = result["total"]["win_count"]+result["total"]["lost_count"]                    
-        if c>2000:
-            result["total"]["win_count"] -= round(result["total"]["win_count"]/(2*c))
-            result["total"]["lost_count"] -= round(result["total"]["lost_count"]/(2*c))
         
         result["total"]["agent"] += 1
         result["total"]["_agent"] += 1
