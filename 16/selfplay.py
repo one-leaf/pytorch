@@ -93,10 +93,8 @@ class Train():
             result["total"]["avg_reward_piececount"]=0            
         if "n_playout" not in result["total"]:
             result["total"]["n_playout"]=self.n_playout
-        if "win_count" not in result["total"]:
-            result["total"]["win_count"]=0            
-        if "lost_count" not in result["total"]:
-            result["total"]["lost_count"]=0           
+        if "win_lost_tie" not in result["total"]:
+            result["total"]["win_lost_tie"]=[0,0,0]            
         if "avg_score" not in result["total"]:
             result["total"]["avg_score"]=0  
         if "avg_score_ex" not in result["total"]:
@@ -111,6 +109,10 @@ class Train():
             result["piececount"]=[]
         if "exrewardRate" in result:
             del result["exrewardRate"]
+        if "win_count" in result["total"]:
+            del result["total"]["win_count"]
+        if "lost_count" in result["total"]:
+            del result["total"]["lost_count"]
         if "update" not in result:
             result["update"]=[]
         if "qval" not in result:
@@ -378,10 +380,13 @@ class Train():
         result["total"]["avg_state_value"] += alpha * (avg_state_value - result["total"]["avg_state_value"])
 
         # 速度控制在消耗50行
-        if play_data[0]["agent"].piececount>=play_data[1]["agent"].piececount:
-            result["total"]["win_count"] += 1
-        else:
-            result["total"]["lost_count"] += 1
+        if win_values[0]==1:
+            result["total"]["win_lost_tie"][0] += 1
+        if win_values[1]==1:
+            result["total"]["win_lost_tie"][1] += 1
+        if win_values[0]==-1 and win_values[1]==-1:
+            result["total"]["win_lost_tie"][2] += 1
+            
         c = result["total"]["win_count"]+result["total"]["lost_count"]                    
         if c>2000:
             result["total"]["win_count"] -= round(result["total"]["win_count"]/(2*c))
