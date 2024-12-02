@@ -585,7 +585,9 @@ class Train():
             with open(savefile, "wb") as fn:
                 pickle.dump(obj, fn)
         print("saved file basename:", filetime, "length:", i+1)
-
+        print()
+        play_data[0]["agent"].print()
+        play_data[1]["agent"].print()
         print("agent 0 score:", play_data[0]["agent"].removedlines, "agent 1 score:", play_data[1]["agent"].removedlines)
         print("agent 0 steps:", play_data[0]["agent"].steps, "agent 1 steps:", play_data[1]["agent"].steps)
         print("agent 0 piececount:", play_data[0]["agent"].piececount, "agent 1 piececount:", play_data[1]["agent"].piececount)
