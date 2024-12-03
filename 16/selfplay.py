@@ -309,8 +309,11 @@ class Train():
 
         cache={}
 
+        if random.random()<0.5:
+            his_pieces = []
+            his_pieces_len = 0
         # 如果有消除行，看看有没有待训练集有没有需要训练的，如果有，就用待训练否则用试玩中最差的训练
-        if min_removedlines>0:
+        elif min_removedlines>0:
             # 检查有没有需要重复运行的
             listFiles = os.listdir(self.waitplaydir)
             for f in listFiles:
@@ -328,6 +331,8 @@ class Train():
         play_data = []
         result = self.read_status_file(game_json) 
         exrewardRate = result["total"]["exrewardRate"]
+
+            
         for playcount in range(2):
             
             if playcount==0:
