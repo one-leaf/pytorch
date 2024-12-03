@@ -22,7 +22,7 @@ model_file =  os.path.join(model_dir, 'model.pth')
 
 
 class PolicyValueNet():
-    def __init__(self, input_width, input_height, output_size, model_file=None, device=None, l2_const=5e-5):
+    def __init__(self, input_width, input_height, output_size, model_file=None, device=None, l2_const=1e-4):
         self.input_width = input_width
         self.input_height = input_height
         self.input_size = input_width * input_height
@@ -35,7 +35,7 @@ class PolicyValueNet():
 
         self.l2_const = l2_const  
         # ViT-Ti : depth 12 width 192 heads 3 LR=4e-3
-        self.policy_value_net = VitNet(embed_dim=192, depth=6, num_heads=3, num_classes=5, num_quantiles=128, drop_ratio=0, drop_path_ratio=0, attn_drop_ratio=0)
+        self.policy_value_net = VitNet(embed_dim=192, depth=6, num_heads=3, num_classes=5, num_quantiles=128, drop_ratio=0.1, drop_path_ratio=0.1, attn_drop_ratio=0.1)
         # ViT-S : depth 12 width 386 heads 6
         # self.policy_value_net = VitNet(embed_dim=386, depth=12, num_heads=6, num_classes=4, num_quantiles=128)
         # ViT-B : depth 12 width 768 heads 12

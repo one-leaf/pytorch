@@ -398,7 +398,13 @@ class VitPatchEmbed(nn.Module):
         kernel_height, kernel_width = pair(kernel_size)
         padding_height, padding_width = pair(padding) 
         stride_height, stride_width = pair(stride) 
-        self.proj = nn.Conv2d(in_c, embed_dim, kernel_size=kernel_size, stride=stride, padding=padding, bias=False)
+        self.proj_init = nn.Conv2d(in_c, in_c, kernel_size=1, stride=1, padding=0, bias=False)
+        self.proj1 = nn.Conv2d(in_c, in_c, kernel_size=1, stride=1, padding=0, bias=False)
+        self.proj2 = nn.Conv2d(in_c, in_c, kernel_size=3, stride=1, padding=1, bias=False)
+        self.proj3 = nn.Conv2d(in_c, in_c, kernel_size=5, stride=1, padding=2, bias=False)
+        self.proj4 = nn.Conv2d(in_c, in_c, kernel_size=7, stride=1, padding=3, bias=False)
+        self.proj_end = nn.Conv2d(in_c, in_c, kernel_size=1, stride=1, padding=0, bias=False)
+        self.proj = nn.Conv2d(in_c, embed_dim, kernel_size=kernel_size, stride=stride, padding=padding, bias=False)        
         self.norm = norm_layer(embed_dim) if norm_layer else nn.Identity()
         self.num_patches = ((image_height-kernel_height+2*padding_height)//stride_height+1) * ((image_width-kernel_width+2*padding_width)//stride_width+1)
         print("sequence length:",self.num_patches)
@@ -407,7 +413,15 @@ class VitPatchEmbed(nn.Module):
         # B, C, H, W = x.shape
         # flatten: [B, C, H, W] -> [B, C, HW]
         # transpose: [B, C, HW] -> [B, HW, C]
+        x  = self.proj_init(x)
+        x1 = self.proj1(x)
+        x2 = self.proj2(x)
+        x3 = self.proj3(x)
+        x4 = self.proj4(x)
+        x = x + x1 + x2 + x3 + x4
+        x = self.proj_end(x)
         x = self.proj(x)
+        
         x = x.flatten(2).transpose(1, 2)
         x = self.norm(x)
         return x
