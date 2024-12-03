@@ -191,6 +191,7 @@ class MCTS():
         self.t = 0
         self.c = 1
         self.limit_depth = limit_depth
+        self.extra_reward = False
     
     def get_action_probs(self, state:State, temp:float=1):
         """
@@ -201,6 +202,8 @@ class MCTS():
         """     
         s = hash(state)
         # print(s)
+
+        self.extra_reward = state.game.piececount<15
 
         self.max_depth:int = (0,0)
         self.simulation_count = 0
@@ -324,7 +327,7 @@ class MCTS():
                 
         # 外部奖励，最大1
         r = 0
-        if state.game.state==1 and state.game.piececount<15:
+        if state.game.state==1 and self.extra_reward:
             # 这种奖励会照成主动消行，而不管后续的局面
             # r += (state.game.score-state.markscore) * state.game.exrewardRate
         #     # 不鼓励主动消行，以局面为主
