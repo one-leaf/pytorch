@@ -392,12 +392,13 @@ class VitPatchEmbed(nn.Module):
     """
     图片转嵌入数据，由 [B, C, H, W] -> [B, HW, C]
     """
-    def __init__(self, img_size=(20,10), in_c=4, kernel_size=(5,5), embed_dim=768, padding=0, stride=(5,5), norm_layer=None):
+    def __init__(self, img_size=(20,10), in_c=4, kernel_size=(5,5), embed_dim=768, padding=0, stride=(5,5), norm_layer=None, drop_ratio=0):
         super().__init__()
         image_height, image_width = pair(img_size)
         kernel_height, kernel_width = pair(kernel_size)
         padding_height, padding_width = pair(padding) 
         stride_height, stride_width = pair(stride) 
+        self.dropout = nn.Dropout(p=drop_ratio)
         self.proj_init = nn.Conv2d(in_c, in_c, kernel_size=1, stride=1, padding=0, bias=False)
         self.proj1 = nn.Conv2d(in_c, in_c, kernel_size=1, stride=1, padding=0, bias=False)
         self.proj2 = nn.Conv2d(in_c, in_c, kernel_size=3, stride=1, padding=1, bias=False)
@@ -414,14 +415,26 @@ class VitPatchEmbed(nn.Module):
         # flatten: [B, C, H, W] -> [B, C, HW]
         # transpose: [B, C, HW] -> [B, HW, C]
         x  = self.proj_init(x)
+
         x1 = self.proj1(x)
-        x2 = self.proj2(x)
-        x3 = self.proj3(x)
-        x4 = self.proj4(x)
-        x = x + x1 + x2 + x3 + x4
-        x = self.proj_end(x)
-        x = self.out(x)
+        x1 = self.dropout(x1)
         
+        x2 = self.proj2(x)
+        x2 = self.dropout(x2)
+        
+        x3 = self.proj3(x)
+        x3 = self.dropout(x3)
+        
+        x4 = self.proj4(x)
+        x4 = self.dropout(x4)
+        
+        x = x + x1 + x2 + x3 + x4
+
+        x = self.proj_end(x)
+        
+        x = self.out(x)
+        x = self.dropout(x)
+                
         x = x.flatten(2).transpose(1, 2)
         x = self.norm(x)
         return x
@@ -437,7 +450,7 @@ class VitNet(nn.Module):
         act_layer =  nn.GELU
         # 图片转换为 patch embedding [B, C, H, W] ==> [B, num_patches, embed_dim] 
         # self.patch_embed = PatchEmbed(img_size=(20,10), patch_size=(1,10), in_c=8, embed_dim=embed_dim)
-        self.patch_embed = VitPatchEmbed(img_size=(20,10), in_c=4, kernel_size=(2,2), stride=(2,2), padding=(0,0), embed_dim=embed_dim)
+        self.patch_embed = VitPatchEmbed(img_size=(20,10), in_c=4, kernel_size=(2,2), stride=(2,2), padding=(0,0), embed_dim=embed_dim, drop_ratio=drop_ratio)
         # 图片分割后的块数
         num_patches = self.patch_embed.num_patches                      # p
 
