@@ -341,7 +341,7 @@ class MCTS():
             if r>0:
                 r = 1-1/(1+r)
             else:
-                r = -1+1/(-1+r)
+                r = -1-1/(-1+r)
                 
             if (_r>0 and state.markEmptyCount==state.game.emptyCount):# or (state.markEmptyCount>state.game.emptyCount) :
                 r = 1
