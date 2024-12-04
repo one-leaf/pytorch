@@ -113,8 +113,8 @@ class Train():
             result["qval"]=[]    
         if "rate" not in result:
             result["rate"]=[]    
-        # if "advantage" in result:
-        #     del result["advantage"]
+        if "advantage" in result:
+            del result["advantage"]
         return result
 
     def get_equi_data(self, states, mcts_probs, values, scores):
