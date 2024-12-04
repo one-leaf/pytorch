@@ -506,42 +506,42 @@ class Train():
                 if os.path.exists(bestmodelfile): os.remove(bestmodelfile)
                 if os.path.exists(newmodelfile): os.link(newmodelfile, bestmodelfile)
 
-            if len(result["qval"])>5:
-                x=[] #rate
-                y=[] #qval
-                for _x,_y in result["advantage"]:
-                    x.append(_x)
-                    y.append(_y)
-                # for i in range(len(result["rate"])):
-                #     x.insert(0,result["rate"][i*-1-1])
-                #     y.insert(0,result["qval"][i*-1-1])
-                if len(x)>2:
-                    x = np.array(x)
-                    y = np.array(y)
+            # if len(result["qval"])>5:
+            #     x=[] #rate
+            #     y=[] #qval
+            #     for _x,_y in result["advantage"]:
+            #         x.append(_x)
+            #         y.append(_y)
+            #     # for i in range(len(result["rate"])):
+            #     #     x.insert(0,result["rate"][i*-1-1])
+            #     #     y.insert(0,result["qval"][i*-1-1])
+            #     if len(x)>2:
+            #         x = np.array(x)
+            #         y = np.array(y)
 
-                    coefficients = np.polyfit(y, x, deg=1)
-                    dst = -1 * result["total"]["avg_qval"]
-                    if dst>0.01: dst = 0.01
-                    if dst<-0.01: dst = -0.01
-                    x_when_y_is_zero = np.polyval(coefficients, dst)
-                    # 如果当前平均q值小于0
-                    if result["total"]["avg_qval"]<0:
-                        if x_when_y_is_zero>result["total"]["exrewardRate"]:
-                            result["total"]["exrewardRate"] = x_when_y_is_zero
-                        else:
-                            if y[-1]<0: # 如果趋势还在减少
-                                result["total"]["exrewardRate"] *= 1.01  
-                    elif result["total"]["avg_qval"]>0:
-                        if x_when_y_is_zero<result["total"]["exrewardRate"]:                            
-                            result["total"]["exrewardRate"] = x_when_y_is_zero
-                        else:
-                            if y[-1]>0: # 如果趋势还在增加
-                                result["total"]["exrewardRate"] *= 0.99 
-                elif len(result["qval"])>1:    
-                    result["total"]["exrewardRate"]+=(result["qval"][-2]-result["qval"][-1])*0.1
+            #         coefficients = np.polyfit(y, x, deg=1)
+            #         dst = -1 * result["total"]["avg_qval"]
+            #         if dst>0.01: dst = 0.01
+            #         if dst<-0.01: dst = -0.01
+            #         x_when_y_is_zero = np.polyval(coefficients, dst)
+            #         # 如果当前平均q值小于0
+            #         if result["total"]["avg_qval"]<0:
+            #             if x_when_y_is_zero>result["total"]["exrewardRate"]:
+            #                 result["total"]["exrewardRate"] = x_when_y_is_zero
+            #             else:
+            #                 if y[-1]<0: # 如果趋势还在减少
+            #                     result["total"]["exrewardRate"] *= 1.01  
+            #         elif result["total"]["avg_qval"]>0:
+            #             if x_when_y_is_zero<result["total"]["exrewardRate"]:                            
+            #                 result["total"]["exrewardRate"] = x_when_y_is_zero
+            #             else:
+            #                 if y[-1]>0: # 如果趋势还在增加
+            #                     result["total"]["exrewardRate"] *= 0.99 
+            #     elif len(result["qval"])>1:    
+            #         result["total"]["exrewardRate"]+=(result["qval"][-2]-result["qval"][-1])*0.1
                 
-                if result["total"]["exrewardRate"]<1e-6: result["total"]["exrewardRate"]=1e-6
-                if result["total"]["exrewardRate"]>0.1: result["total"]["exrewardRate"]=0.1
+            #     if result["total"]["exrewardRate"]<1e-6: result["total"]["exrewardRate"]=1e-6
+            #     if result["total"]["exrewardRate"]>0.1: result["total"]["exrewardRate"]=0.1
                         
         result["lastupdate"] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         self.save_status_file(result, game_json) 
