@@ -670,7 +670,7 @@ class Agent():
         if not isFalling:   
             self.addtoboard(self.board, self.fallpiece)            
             removedlines = self.removecompleteline(self.board)
-            emptyCount = self.getEmptyCount()               
+            # emptyCount = self.getEmptyCount()               
                     
             self.need_update_status=True
             # if removedlines>0: print("OK!!!",removedlines)
@@ -684,8 +684,8 @@ class Agent():
                 reward += self.downcount*0.01
                 
                 # 如果消除空的气泡了
-                if emptyCount<self.emptyCount:
-                    reward += self.emptyCount-emptyCount
+                # if emptyCount<self.emptyCount:
+                #     reward += self.emptyCount-emptyCount
                     
                 # 如果上一方块也消行了，奖励加1
                 if self.piececount-self.last_reward==1: reward += 1 
@@ -694,7 +694,7 @@ class Agent():
                 self.last_reward = self.piececount
                 
             # reward -= (emptyCount - self.emptyCount)*0.5  
-            self.emptyCount  = emptyCount
+            # self.emptyCount  = emptyCount
             
             # self.score += reward    # 一个方块1点 
             self.score = -nb_getUsedCount(self.board)    # 一个方块1点 
