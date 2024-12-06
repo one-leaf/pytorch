@@ -1,3 +1,4 @@
+import hashlib
 import numpy as np
 import random
 import time
@@ -764,14 +765,17 @@ class Agent():
                 nb_put_status(self.status[3], _piece, 5, i*5)               
 
     def set_key(self):
-        board = self.status[0] | self.status[1] # np.sum(self.status[:2],axis=0)        
-        key = np.packbits(board).tobytes()
-        key = int.from_bytes(key, byteorder='big')  # 转换为整数
-
+        # board = self.status[0] | self.status[1] # np.sum(self.status[:2],axis=0)        
+        # key = np.packbits(board).tobytes()
+        # key = int.from_bytes(key, byteorder='big')  # 转换为整数
+        
         # keylist=[]
         # for b in board.flat:
         #     keylist.append(str(b))
         # key = int("".join(keylist), 2)
+        bytes = self.status[:2].tobytes()
+        key = hashlib.md5(bytes).hexdigest()
+        key = int(key, 16)
         self.key = key
         
     def is_status_optimal(self):
