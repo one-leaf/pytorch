@@ -489,7 +489,7 @@ class VitNet(nn.Module):
         self.reward_fc = nn.Linear(embed_dim, embed_dim)   # [B, 768] => [B, 768]
         self.reward_fc_act = nn.LeakyReLU()
         self.reward_dist = nn.Linear(embed_dim, 1)   # [B, 768] => [B, 1]
-        # self.reward_dist_act = nn.Tanh()
+        self.reward_dist_act = nn.Tanh()
 
 
         # 参数初始化, 这里需要pytorch 1.6以上版本
@@ -537,6 +537,6 @@ class VitNet(nn.Module):
         reward = self.reward_fc(reward)
         reward = self.reward_fc_act(reward)
         reward = self.reward_dist(reward)        # [B, 1]
-        # reward = self.reward_dist_act(reward) 
+        reward = self.reward_dist_act(reward) 
         
         return act, val, reward    # [B, num_classes], [B, num_quantiles], [B, 1]
