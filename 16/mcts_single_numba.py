@@ -307,7 +307,7 @@ class MCTS():
             # https://arxiv.org/pdf/2405.09999 当前价值减去Q值的均值
             # nanmean(self.Qsa[s]) - np.nanmean(self.Qsa[s][availables==0])
             # v = v - np.nanmean(self.Qsa[s][availables==0])
-            v = float(v-r)
+            v = float(v-r/2)
             # v = float(v)
             return v
             
