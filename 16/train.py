@@ -363,8 +363,6 @@ class Train():
                 idx = np.argmax(begin_act_probs[i])
                 print("probs[{}] begin:{} end:{} to:{} ".format(i, begin_act_probs[i][idx], end_act_probs[i][idx], test_data[1][i].numpy()[idx]))
                 if i>=4:break
-            # begin_act_probs = np.nan_to_num(begin_act_probs)
-            # end_act_probs   = np.nan_to_num(end_act_probs)
             kl = np.mean(np.sum(begin_act_probs * (np.log(begin_act_probs + 1e-8) - np.log(end_act_probs + 1e-8)), axis=1))
             if np.isnan(kl):
                 print(begin_act_probs)
