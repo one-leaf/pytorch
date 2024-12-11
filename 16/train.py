@@ -354,9 +354,9 @@ class Train():
                     else:
                         end_act_probs=np.concatenate((end_act_probs, act_probs), axis=0)
 
-            begin_act_probs_e = np.exp(begin_act_probs)+1e-40
+            begin_act_probs_e = np.exp(begin_act_probs-np.max(begin_act_probs))
             begin_act_probs = begin_act_probs_e/np.sum(begin_act_probs_e, axis=1, keepdims=True)
-            end_act_probs_e = np.exp(end_act_probs)+1e-40
+            end_act_probs_e = np.exp(end_act_probs-np.max(end_act_probs))
             end_act_probs = end_act_probs_e/np.sum(end_act_probs_e, axis=1, keepdims=True)
             
             for i in range(len(begin_values)):

@@ -9,6 +9,7 @@ from datetime import timedelta
 from agent_numba import ACTONS_LEN
 # from numba import njit
 # import numba
+import torch
 
 jit_args = {'nopython': True, 'cache': True, 'fastmath': True}
 
@@ -113,19 +114,12 @@ def updateQN(s:int, a:int, v:float, Ns, Qsa, Nsa, actions_num):
 # njit  0.00022558832222352673
 # 0.0001987227917925678
 def expandPN(s:int, availables, act_probs, Ps, Ns, Nsa, Qsa, actions_num):
-    # probs = np.zeros(actions_num, dtype=np.float32)
-    # for i in range(len(availables)):
-    #     if availables[i]==0: continue
-    #     probs[i]=act_probs[i]
-    _act_probs = np.clip(act_probs, -np.inf, 80)
-    _p = np.exp(_act_probs*availables)
+    _p = np.exp((act_probs-np.max(act_probs))*availables)
     _p_sum = np.sum(_p)
     if _p_sum == 0:
-        print("modle return error probs:", act_probs, "availables:", availables)
         probs = availables/np.sum(availables)
     else:
         probs = _p/_p_sum
-    # probs = (act_probs*availables/np.sum(act_probs*availables)).astype(np.float32)
     Ps[s] = probs 
     Ns[s] = 0
     Nsa[s] = np.zeros(actions_num, dtype=np.int64)
