@@ -365,9 +365,9 @@ class Train():
                 if i>=4:break
             # kl = np.mean(np.sum(begin_act_probs * (np.log(begin_act_probs) - np.log(end_act_probs)), axis=1))
             begin_act_probs_e = np.exp(begin_act_probs)
-            begin_act_probs = begin_act_probs_e/np.sum(begin_act_probs_e, axis=1)
+            begin_act_probs = begin_act_probs_e/np.sum(begin_act_probs_e, axis=1, keepdims=True)
             end_act_probs_e = np.exp(end_act_probs)
-            end_act_probs = end_act_probs_e/np.sum(end_act_probs_e, axis=1)
+            end_act_probs = end_act_probs_e/np.sum(end_act_probs_e, axis=1, keepdims=True)
             kl = np.mean(np.sum(begin_act_probs * (np.log(begin_act_probs/end_act_probs)), axis=1))
             if np.isnan(kl):
                 print("kl error, is nan")
