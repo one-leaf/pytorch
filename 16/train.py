@@ -370,11 +370,13 @@ class Train():
                 print("kl error")
                 print("act_probs, kl:",kl)
                 kl = 0
-                
-            if kl > self.kl_targ * 2 and self.lr_multiplier > 0.01:
+            if kl == 0:
+                pass                
+            elif kl > self.kl_targ * 2 and self.lr_multiplier > 0.01:
                 self.lr_multiplier /= 1.5
             elif kl < self.kl_targ / 2 and self.lr_multiplier < 100:
                 self.lr_multiplier *= 1.5
+                
             if self.learn_rate*self.lr_multiplier>1e-3: self.lr_multiplier = 1e-3/self.learn_rate
             if self.learn_rate*self.lr_multiplier<1e-6: self.lr_multiplier = 1e-6/self.learn_rate
             print("kl:{} vs {} lr_multiplier:{} lr:{} avg_values:{} std_values:{}".format(kl, self.kl_targ, self.lr_multiplier, self.learn_rate*self.lr_multiplier, \
