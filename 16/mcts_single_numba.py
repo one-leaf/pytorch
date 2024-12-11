@@ -117,7 +117,9 @@ def expandPN(s:int, availables, act_probs, Ps, Ns, Nsa, Qsa, actions_num):
     # for i in range(len(availables)):
     #     if availables[i]==0: continue
     #     probs[i]=act_probs[i]
-    probs = (act_probs*availables).astype(np.float32)
+    _p = np.exp(act_probs*availables)
+    probs = _p/np.sum(_p)
+    # probs = (act_probs*availables/np.sum(act_probs*availables)).astype(np.float32)
     Ps[s] = probs 
     Ns[s] = 0
     Nsa[s] = np.zeros(actions_num, dtype=np.int64)
@@ -434,7 +436,7 @@ class MCTSPlayer(object):
                 idx = np.random.choice(range(ACTONS_LEN), p=act_probs)
             elif self.need_max_ps:
                 # idx = max_ps_idx                          
-                idx = np.random.choice(range(ACTONS_LEN), p=act_ps/np.sum(act_ps))           
+                idx = np.random.choice(range(ACTONS_LEN), p=act_ps)           
             if availables[idx]==0: idx = -1
             
             

@@ -119,7 +119,7 @@ class PolicyValueNet():
         with torch.no_grad(): 
             act_probs, value, reward = self.policy_value_net.forward(state_batch_tensor)    #[b, num_classes] [b, num_quantiles]
             
-        act_probs = torch.softmax(act_probs,dim=1)
+        # act_probs = torch.softmax(act_probs,dim=1)
         # num_quantiles = value.shape[1]
         
         # alphatensor 0.75 取尾端，偏向负值用于探索
