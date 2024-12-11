@@ -121,7 +121,7 @@ def expandPN(s:int, availables, act_probs, Ps, Ns, Nsa, Qsa, actions_num):
     _p = np.exp(_act_probs*availables)
     _p_sum = np.sum(_p)
     if _p_sum == 0:
-        print("modle return error probs:", act_probs)
+        print("modle return error probs:", act_probs, "availables:", availables)
         probs = availables/np.sum(availables)
     else:
         probs = _p/_p_sum
