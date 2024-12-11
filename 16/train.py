@@ -363,8 +363,9 @@ class Train():
                 idx = np.argmax(begin_act_probs[i])
                 print("probs[{}] begin:{} end:{} to:{} ".format(i, begin_act_probs[i][idx], end_act_probs[i][idx], test_data[1][i].numpy()[idx]))
                 if i>=4:break
-                
-            kl = np.mean(np.sum(begin_act_probs * (np.log(begin_act_probs + 1e-6) - np.log(end_act_probs + 1e-6)), axis=1))
+            begin_act_probs = np.nan_to_num(begin_act_probs)
+            end_act_probs   = np.nan_to_num(end_act_probs)
+            kl = np.mean(np.sum(begin_act_probs * (np.log(begin_act_probs + 1e-8) - np.log(end_act_probs + 1e-8)), axis=1))
             print("act_probs, kl:",kl)
             if kl > self.kl_targ * 2 and self.lr_multiplier > 0.01:
                 self.lr_multiplier /= 1.5
