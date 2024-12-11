@@ -118,7 +118,11 @@ def expandPN(s:int, availables, act_probs, Ps, Ns, Nsa, Qsa, actions_num):
     #     if availables[i]==0: continue
     #     probs[i]=act_probs[i]
     _p = np.exp(act_probs*availables)
-    probs = _p/np.sum(_p)
+    _p_sum = np.sum(_p)
+    if _p_sum == 0:
+        probs = availables/np.sum(availables)
+    else:
+        probs = _p/_p_sum
     # probs = (act_probs*availables/np.sum(act_probs*availables)).astype(np.float32)
     Ps[s] = probs 
     Ns[s] = 0
