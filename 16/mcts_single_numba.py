@@ -117,6 +117,7 @@ def expandPN(s:int, availables, act_probs, Ps, Ns, Nsa, Qsa, actions_num):
     # for i in range(len(availables)):
     #     if availables[i]==0: continue
     #     probs[i]=act_probs[i]
+    act_probs = np.clip(act_probs, -np.inf, 500)
     _p = np.exp(act_probs*availables)
     _p_sum = np.sum(_p)
     if _p_sum == 0:
