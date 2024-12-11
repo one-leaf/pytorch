@@ -348,7 +348,7 @@ class Train():
                     if end_values is None:
                         end_values=values
                     else:
-                        end_values=np.concatenate((end_values, values), axis=0)
+                        end_values=np.concatenate((end_values, values), axis=0)                    
                     if end_act_probs is None:
                         end_act_probs=act_probs
                     else:
@@ -363,7 +363,10 @@ class Train():
                 idx = np.argmax(begin_act_probs[i])
                 print("probs[{}] begin:{} end:{} to:{} ".format(i, begin_act_probs[i][idx], end_act_probs[i][idx], test_data[1][i].numpy()[idx]))
                 if i>=4:break
-            kl = np.mean(np.sum(begin_act_probs * (np.log(begin_act_probs) - np.log(end_act_probs)), axis=1))
+            # kl = np.mean(np.sum(begin_act_probs * (np.log(begin_act_probs) - np.log(end_act_probs)), axis=1))
+            begin_act_probs = begin_act_probs/np.sum(begin_act_probs, axis=1, keepdims=True)
+            end_act_probs = end_act_probs/np.sum(end_act_probs, axis=1, keepdims=True)
+            kl = np.mean(np.sum(begin_act_probs * (np.log(begin_act_probs/end_act_probs)), axis=1))
             if np.isnan(kl):
                 print("kl error, is nan")
                 print("act_probs, kl:",kl)
