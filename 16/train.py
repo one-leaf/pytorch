@@ -262,6 +262,7 @@ class Train():
             begin_rewards=None
             begin_values=None
             begin_act_probs=None
+            begin_accuracy=[]
             test_data=None
             for i, data in enumerate(testing_loader):
                 test_batch, test_probs, test_values, test_rewards = data
@@ -284,6 +285,7 @@ class Train():
                         begin_act_probs = act_probs
                     else:
                         begin_act_probs = np.concatenate((begin_act_probs, act_probs), axis=0)
+                    begin_accuracy.append(np.mean(np.argmax(act_probs, axis=1)==np.argmax(test_probs, axis=1)))
                     # begin_values.append(values[:5])
                     # begin_act_probs.append(act_probs[0])
             self.train_conf = {"lr_multiplier":1,"optimizer_type":0}
@@ -335,6 +337,7 @@ class Train():
             end_reward=None
             end_values=None
             end_act_probs=None
+            end_accuracy=[]
             net = self.policy_value_net.policy_value
             for i, data in enumerate(testing_loader):
                 test_batch, test_probs, test_values, test_rewards = data
@@ -353,11 +356,14 @@ class Train():
                         end_act_probs=act_probs
                     else:
                         end_act_probs=np.concatenate((end_act_probs, act_probs), axis=0)
+                    end_accuracy.append(np.mean(np.argmax(act_probs, axis=1)==np.argmax(test_probs, axis=1)))
 
             begin_act_probs_e = np.exp(begin_act_probs-np.max(begin_act_probs, axis=1, keepdims=True))
             begin_act_probs = begin_act_probs_e/np.sum(begin_act_probs_e, axis=1, keepdims=True)
             end_act_probs_e = np.exp(end_act_probs-np.max(end_act_probs, axis=1, keepdims=True))
             end_act_probs = end_act_probs_e/np.sum(end_act_probs_e, axis=1, keepdims=True)
+            
+            print("begin_accuracy:", np.mean(begin_accuracy), "end_accuracy:", np.mean(end_accuracy))
             
             for i in range(len(begin_values)):
                 print("value[{}] begin:{} end:{} to:{}".format(i, begin_values[i], end_values[i], test_data[2][i].numpy()))  
