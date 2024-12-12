@@ -364,9 +364,7 @@ class Train():
             end_act_probs_e = np.exp(end_act_probs-np.max(end_act_probs, axis=1, keepdims=True))
             end_act_probs = end_act_probs_e/np.sum(end_act_probs_e, axis=1, keepdims=True)
             
-            print("begin_accuracy:", begin_accuracy)
-            print("end_accuracy:", end_accuracy)
-            print("begin_accuracy:", np.mean(begin_accuracy), "end_accuracy:", np.mean(end_accuracy))
+            print("probs begin_accuracy:", np.mean(begin_accuracy), "end_accuracy:", np.mean(end_accuracy))
             
             for i in range(len(begin_values)):
                 print("value[{}] begin:{} end:{} to:{}".format(i, begin_values[i], end_values[i], test_data[2][i].numpy()))  
