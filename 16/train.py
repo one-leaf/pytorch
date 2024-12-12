@@ -283,7 +283,7 @@ class Train():
                         begin_values = np.concatenate((begin_values, values), axis=0)
                     if begin_act_probs is None:
                         begin_act_probs = act_probs
-                        begin_accuracy = np.argmax(act_probs, axis=1)==np.argmax(test_probs, axis=1)
+                        begin_accuracy = np.argmax(np.array(act_probs), axis=1)==np.argmax(test_probs, axis=1)
                         print("begin_accuracy:", np.argmax(act_probs, axis=1))
                         print("begin_accuracy:", np.argmax(test_probs, axis=1))
                         print("begin_accuracy:", begin_accuracy)
