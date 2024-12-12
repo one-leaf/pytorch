@@ -285,7 +285,7 @@ class Train():
                         begin_act_probs = act_probs
                         begin_accuracy = np.argmax(act_probs, axis=1)==np.argmax(test_probs, axis=1)
                         print("begin_accuracy:", np.argmax(act_probs, axis=1))
-                        print("begin_accuracy:", np.argmax(test_probs, axis=1)
+                        print("begin_accuracy:", np.argmax(test_probs, axis=1))
                         print("begin_accuracy:", begin_accuracy)
                     else:
                         begin_act_probs = np.concatenate((begin_act_probs, act_probs), axis=0)
