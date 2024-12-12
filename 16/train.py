@@ -262,7 +262,7 @@ class Train():
             begin_rewards=None
             begin_values=None
             begin_act_probs=None
-            begin_accuracy=[]
+            begin_accuracy=None
             test_data=None
             for i, data in enumerate(testing_loader):
                 test_batch, test_probs, test_values, test_rewards = data
@@ -283,9 +283,10 @@ class Train():
                         begin_values = np.concatenate((begin_values, values), axis=0)
                     if begin_act_probs is None:
                         begin_act_probs = act_probs
+                        begin_accuracy = np.argmax(act_probs, axis=1)==np.argmax(test_probs, axis=1)
                     else:
                         begin_act_probs = np.concatenate((begin_act_probs, act_probs), axis=0)
-                    begin_accuracy.append(np.mean(np.argmax(act_probs, axis=1)==np.argmax(test_probs, axis=1)))
+                        begin_accuracy = np.concatenate((begin_accuracy, np.argmax(act_probs, axis=1)==np.argmax(test_probs, axis=1)), axis=0)
                     # begin_values.append(values[:5])
                     # begin_act_probs.append(act_probs[0])
             self.train_conf = {"lr_multiplier":1,"optimizer_type":0}
@@ -337,7 +338,7 @@ class Train():
             end_reward=None
             end_values=None
             end_act_probs=None
-            end_accuracy=[]
+            end_accuracy=None
             net = self.policy_value_net.policy_value
             for i, data in enumerate(testing_loader):
                 test_batch, test_probs, test_values, test_rewards = data
@@ -354,9 +355,10 @@ class Train():
                         end_values=np.concatenate((end_values, values), axis=0)                    
                     if end_act_probs is None:
                         end_act_probs=act_probs
+                        end_accuracy=np.argmax(act_probs, axis=1)==np.argmax(test_probs, axis=1)
                     else:
                         end_act_probs=np.concatenate((end_act_probs, act_probs), axis=0)
-                    end_accuracy.append(np.mean(np.argmax(act_probs, axis=1)==np.argmax(test_probs, axis=1)))
+                        end_accuracy=np.concatenate((end_accuracy, np.argmax(act_probs, axis=1)==np.argmax(test_probs, axis=1)), axis=0)
 
             begin_act_probs_e = np.exp(begin_act_probs-np.max(begin_act_probs, axis=1, keepdims=True))
             begin_act_probs = begin_act_probs_e/np.sum(begin_act_probs_e, axis=1, keepdims=True)
