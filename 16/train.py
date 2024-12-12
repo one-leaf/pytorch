@@ -284,14 +284,10 @@ class Train():
                     if begin_act_probs is None:
                         begin_act_probs = act_probs
                         begin_accuracy = np.argmax(act_probs, axis=1) == np.argmax(test_probs.cpu().numpy(), axis=1)
-                        print("begin_accuracy:", type(np.argmax(act_probs, axis=1)), type(np.argmax(test_probs.cpu().numpy(), axis=1)))
-                        # print("begin_accuracy:", np.argmax(test_probs, axis=1))
-                        print("begin_accuracy:", begin_accuracy)
                     else:
                         begin_act_probs = np.concatenate((begin_act_probs, act_probs), axis=0)
                         begin_accuracy = np.concatenate((begin_accuracy, np.argmax(act_probs, axis=1)==np.argmax(test_probs.cpu().numpy(), axis=1)), axis=0)
-                    # begin_values.append(values[:5])
-                    # begin_act_probs.append(act_probs[0])
+
             self.train_conf = {"lr_multiplier":1,"optimizer_type":0}
             train_conf_file=os.path.join(data_dir,"train_conf_pkl")
             if os.path.exists(train_conf_file):
