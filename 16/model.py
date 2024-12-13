@@ -160,11 +160,12 @@ class PolicyValueNet():
                     s_list.append(game.current_state().copy())
                     if len(k_list) == 32:
                         break
-            current_state = np.array(s_list)
-            current_state = current_state.reshape(len(k_list), self.input_channels, self.input_height, self.input_width)
-            act_probs, value, reward = self.policy_value(current_state)
-            for i in range(len(k_list)):
-                self.cache[k_list[i]] = (act_probs[i], value[i], reward[i,0])
+            if len(k_list) > 0:
+                # current_state = np.array(s_list)
+                # current_state = current_state.reshape(len(k_list), self.input_channels, self.input_height, self.input_width)
+                act_probs, value, reward = self.policy_value(s_list)
+                for i in range(len(k_list)):
+                    self.cache[k_list[i]] = (act_probs[i], value[i], reward[i,0])
             return None, None, None
         
         key = game.key
