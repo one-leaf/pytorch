@@ -162,7 +162,7 @@ class PolicyValueNet():
                         break
             if len(k_list) > 0:
                 current_state = np.array(s_list)
-                act_probs, value, reward = self.policy_value(s_list)
+                act_probs, value, reward = self.policy_value(current_state)
                 for i in range(len(k_list)):
                     self.cache[k_list[i]] = (act_probs[i], value[i], reward[i,0])
             return None, None, None
