@@ -441,7 +441,7 @@ class VitPatchEmbed(nn.Module):
 
 class VitNet(nn.Module):
     def __init__(self,  embed_dim=768, drop_ratio=0.1, drop_path_ratio=0.1, depth=12, num_heads=12, 
-                        mlp_ratio=4.0, qkv_bias=True, qk_scale=None, attn_drop_ratio=0.3, num_classes=1000, num_quantiles=64):
+                        mlp_ratio=4.0, qkv_bias=True, qk_scale=None, attn_drop_ratio=0.3, num_classes=1000, num_quantiles=64, num_channels=4):
         super(VitNet, self).__init__()
 
         assert embed_dim % num_heads==0, "embed_dim must be divisible by num_heads"
@@ -450,7 +450,7 @@ class VitNet(nn.Module):
         act_layer =  nn.GELU
         # 图片转换为 patch embedding [B, C, H, W] ==> [B, num_patches, embed_dim] 
         # self.patch_embed = PatchEmbed(img_size=(20,10), patch_size=(1,10), in_c=8, embed_dim=embed_dim)
-        self.patch_embed = VitPatchEmbed(img_size=(20,10), in_c=4, kernel_size=(2,2), stride=(2,2), padding=(0,0), embed_dim=embed_dim, drop_ratio=drop_ratio)
+        self.patch_embed = VitPatchEmbed(img_size=(20,10), in_c=num_channels, kernel_size=(2,2), stride=(2,2), padding=(0,0), embed_dim=embed_dim, drop_ratio=drop_ratio)
         # 图片分割后的块数
         num_patches = self.patch_embed.num_patches                      # p
 
