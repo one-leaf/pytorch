@@ -160,6 +160,7 @@ class PolicyValueNet():
                     if len(k_list) == 32:
                         break
             current_state = np.array(s_list)
+            current_state = current_state.reshape(len(k_list), -1, self.input_height, self.input_width)
             act_probs, value, reward = self.policy_value(current_state)
             for i in range(len(k_list)):
                 self.cache[k_list[i]] = (act_probs[i], value[i], reward[i,0])
