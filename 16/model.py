@@ -158,7 +158,7 @@ class PolicyValueNet():
                 if key not in self.cache:
                     k_list.append(key)
                     s_list.append(game.current_state().copy())
-                    if len(k_list) == 32:
+                    if len(k_list) == 64:
                         break
             if len(k_list) > 0:
                 current_state = np.array(s_list)
