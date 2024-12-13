@@ -773,7 +773,8 @@ class Agent():
         # for b in board.flat:
         #     keylist.append(str(b))
         # key = int("".join(keylist), 2)
-        bytes = self.status[:2].tobytes()
+        # bytes = self.status[:2].tobytes()
+        bytes = self.status.tobytes()
         key = hashlib.md5(bytes).hexdigest()
         key = int(key, 16)
         self.key = key
