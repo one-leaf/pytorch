@@ -8,6 +8,7 @@ import numpy as np
 from collections import OrderedDict
 from torchvision.models import resnet34
 from vit import VitNet
+import random
 
 # 定义游戏的保存文件名和路径
 model_name = "vit-ti" # "vit" # "mlp"
@@ -80,6 +81,7 @@ class PolicyValueNet():
         else:
             self.save_model(model_file)
         self.lr = 0
+        self.cache = {}
 
     def set_optimizer(self, type_id):
         if type_id==0:
@@ -140,16 +142,41 @@ class PolicyValueNet():
         return act_probs, value, reward
 
     # 从当前游戏获得 ((action, act_probs),...) 的可用动作+概率和当前游戏胜率
-    def policy_value_fn(self, game):
+    def policy_value_fn(self, game, only_Cache_Next=False):
         """
         输入: 游戏
         输出: 一组（动作， 概率）和游戏当前状态的胜率
-        """       
+        """     
+        if only_Cache_Next:
+            k_list = []
+            s_list = []
+            while not game.terminal:
+                nz_idx = np.nonzero(game.availables)[0]
+                game.step(random.choice(nz_idx))
+                key = game.key
+                if key not in self.cache:
+                    k_list.append(key)
+                    s_list.append(game.current_state().copy())
+                    if len(k_list) == 16:
+                        break
+            current_state = np.array(s_list)
+            act_probs, value, reward = self.policy_value(current_state)
+            for i in range(len(k_list)):
+                self.cache[k_list[i]] = (act_probs[i], value[i], reward[i,0])
+            return None, None, None
+        
+        key = game.key
+        if key in self.cache:
+            act_probs, value, reward = self.cache[key]
+            return act_probs, value, reward
+        
         current_state = game.current_state().reshape(1, -1, self.input_height, self.input_width)
         act_probs, value, reward = self.policy_value(current_state)
         act_probs=act_probs[0]
         value=value[0]
         reward = reward[0, 0]
+        
+        self.cache[key] = (act_probs, value, reward)
         return act_probs, value, reward
     
     def policy_value_fn_best_act(self, game):
