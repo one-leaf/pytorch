@@ -162,7 +162,6 @@ class PolicyValueNet():
                         break
             if len(k_list) > 0:
                 current_state = np.array(s_list)
-                # current_state = current_state.reshape(len(k_list), self.input_channels, self.input_height, self.input_width)
                 act_probs, value, reward = self.policy_value(s_list)
                 for i in range(len(k_list)):
                     self.cache[k_list[i]] = (act_probs[i], value[i], reward[i,0])
@@ -173,7 +172,7 @@ class PolicyValueNet():
             act_probs, value, reward = self.cache[key]
             return act_probs, value, reward
         
-        current_state = game.current_state().reshape(1, self.input_channels, self.input_height, self.input_width)
+        current_state = np.array([game.current_state()])#game.current_state().reshape(1, self.input_channels, self.input_height, self.input_width)
         act_probs, value, reward = self.policy_value(current_state)
         act_probs=act_probs[0]
         value=value[0]
