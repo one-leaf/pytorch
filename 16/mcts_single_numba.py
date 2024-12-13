@@ -212,12 +212,14 @@ class MCTS():
         self.simulation_count = 0
         die_count = 0
         state.mark()
+
+        state_ = None
         for n in range(self._n_playout):
         # while True:            
             self.simulation_count += 1
             
             # t = time.time()     
-            state_:State =state.clone()
+            state_:State = state.clone()
             # self.c += 1
             # self.t += time.time()-t             
             self.search(state_) 
@@ -227,7 +229,7 @@ class MCTS():
             die_count += 1 if state_.game.terminal else 0
             self.max_depth = (depth, step_depth)
                         
-            self._policy(state_.game, only_Cache_Next=True) 
+        self._policy(state_.game, only_Cache_Next=True) 
             # if self.simulation_count>=64 and (self.Ns[s]>=self._n_playout and state_.game.state==1): break
             # if self.simulation_count>=self._n_playout and state_.game.state==1: break
             # if depth > 2 and self.Ns[s]>=self._n_playout: break
