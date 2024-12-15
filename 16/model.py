@@ -154,7 +154,7 @@ class PolicyValueNet():
             while not game.terminal:
                 nz_idx = np.nonzero(game.availables)[0]
                 game.step(random.choice(nz_idx))
-                key = game.key
+                key = game.full_key
                 if key not in self.cache:
                     k_list.append(key)
                     s_list.append(game.current_state().copy())
@@ -167,7 +167,7 @@ class PolicyValueNet():
                     self.cache[k_list[i]] = (act_probs[i], value[i], reward[i,0])
             return None, None, None
         
-        key = game.key
+        key = game.full_key
         if key in self.cache:
             act_probs, value, reward = self.cache[key]
             return act_probs, value, reward

@@ -472,6 +472,7 @@ class Agent():
         self.set_status()
         # key
         self.key = 0
+        self.full_key = 0
         self.set_key()
         # 下一个可用步骤，设置需要在key之后
         self.availables=np.ones(ACTONS_LEN, dtype=np.int8)
@@ -513,6 +514,7 @@ class Agent():
         agent.need_update_status = self.need_update_status
         agent.status = np.copy(self.status)
         agent.key = self.key
+        agent.full_key = self.full_key        
         agent.cache = self.cache
         agent.start_time = self.start_time
         return agent
@@ -742,14 +744,13 @@ class Agent():
         # status = np.zeros((4, boardheight, boardwidth), dtype=np.int8)        
         piece = self.fallpiece
         shapedraw = pieces[piece['shape']][piece['rotation']]
-        self.status[2] = self.status[0].copy()
         self.status[0] = nb_get_status(shapedraw, piece['x'], piece['y'])        
         self.status[1] = self.board.copy()
 
         # 更新历史动作，仅仅限于同一个方块周期，如果是第二步更新上一步的背景
-        # if self.piecesteps == 1:
-        #     self.status[2] = self.board.copy()            
-        # self.status[2] = self.status[2] | self.status[0]
+        if self.piecesteps == 1:
+            self.status[2] = self.board.copy()            
+        self.status[2] = self.status[2] | self.status[0]
         
         # 如果方块落地了,更新下一个方块                            
         if self.piecesteps == 0:
@@ -774,11 +775,15 @@ class Agent():
         # for b in board.flat:
         #     keylist.append(str(b))
         # key = int("".join(keylist), 2)
-        # bytes = self.status[:2].tobytes()
-        bytes = self.status.tobytes()
+        bytes = self.status[[0,1,3]].tobytes()
         key = hashlib.md5(bytes).hexdigest()
         key = int(key, 16)
         self.key = key
+        
+        bytes = self.status.tobytes()
+        key = hashlib.md5(bytes).hexdigest()
+        key = int(key, 16)
+        self.full_key = key
         
     def is_status_optimal(self):
         return self.piececount<=self.score*2.5+self.must_reward_piece_count
