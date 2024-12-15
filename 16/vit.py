@@ -415,6 +415,7 @@ class VitPatchEmbed(nn.Module):
         # flatten: [B, C, H, W] -> [B, C, HW]
         # transpose: [B, C, HW] -> [B, HW, C]
         x  = self.proj_init(x)
+        x  = self.dropout(x)
 
         x1 = self.proj1(x)
         x1 = self.dropout(x1)
@@ -431,6 +432,7 @@ class VitPatchEmbed(nn.Module):
         x = x + x1 + x2 + x3 + x4
 
         x = self.proj_end(x)
+        x = self.dropout(x)
         
         x = self.out(x)
         x = self.dropout(x)
