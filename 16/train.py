@@ -209,7 +209,7 @@ class Dataset(torch.utils.data.Dataset):
 
 class Train():
     def __init__(self):
-        self.batch_size = 1024     # 每批训练的样本，早期用小，防止局部最小值，后期用大，网络平稳 32 64 128 256 512
+        self.batch_size = 32     # 每批训练的样本，早期用小，防止局部最小值，后期用大，网络平稳 32 64 128 256 512
 
         # training params
         self.learn_rate = 4e-3
