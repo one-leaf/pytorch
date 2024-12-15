@@ -134,6 +134,8 @@ pieces = {'s':stemplate,
           'j':jtemplate,
           't':ttemplate}
 
+pieces_type = list(pieces.keys())
+
 KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_NONE, KEY_DOWN = 0, 1, 2, 3, 4
 ACTIONS = [KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_NONE, KEY_DOWN]
 ACTIONS_NAME = ["O","L","R","N","D"]
@@ -775,6 +777,17 @@ class Agent():
         # for b in board.flat:
         #     keylist.append(str(b))
         # key = int("".join(keylist), 2)
+        
+        # board = self.status[1]
+        # key = np.packbits(board).tobytes()
+        # key = int.from_bytes(key, byteorder='big')
+        # key = key*10 + pieces_type.index(self.fallpiece['shape'])
+        # key = key*10 + self.fallpiece['rotation']
+        # key = key*10 + self.fallpiece['x']
+        # key = key*20 + self.fallpiece['y']
+        # key = key*10 + pieces_type.index(self.nextpiece['shape'])
+        # self.key = key
+                
         bytes = self.status[[0,1,3]].tobytes()
         key = hashlib.md5(bytes).hexdigest()
         key = int(key, 16)
