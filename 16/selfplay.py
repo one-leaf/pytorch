@@ -191,16 +191,17 @@ class Train():
             agent = Agent(isRandomNextPiece=False, )
             agent.is_replay = False
             agent.limitstep = False
-
+            
+        agent.exreward = True
         agent.setCache(cache)
         
         agent.show_mcts_process= True
         # agent.id = 0 if random.random()>0.5 else 1
-        agent.exreward = True #random.random()>0.5
-        if agent.exreward:
-            agent.exrewardRate = exrewardRate
-        else:
-            agent.exrewardRate = 1
+        # agent.exreward = True #random.random()>0.5
+        # if agent.exreward:
+        #     agent.exrewardRate = exrewardRate
+        # else:
+        #     agent.exrewardRate = 1
         
         max_emptyCount = random.randint(10,30)
         start_time = time.time()
@@ -208,7 +209,7 @@ class Train():
         total_qval=0
         total_state_value=0
         need_max_ps = False # random.random()>0.5
-        print("exreward:", agent.exreward,"exrewardRate:", agent.exrewardRate ,"max_emptyCount:",max_emptyCount,"isRandomNextPiece:",agent.isRandomNextPiece,"limitstep:",agent.limitstep,"max_ps:",need_max_ps,"max_qs:",agent.is_replay)
+        print("exreward:", agent.exreward,"max_emptyCount:",max_emptyCount,"isRandomNextPiece:",agent.isRandomNextPiece,"limitstep:",agent.limitstep,"max_ps:",need_max_ps,"max_qs:",agent.is_replay)
         for i in range(self.max_step_count):
             _step={"step":i}
             _step["state"] = np.copy(agent.current_state())
@@ -331,7 +332,6 @@ class Train():
         play_data = []
         result = self.read_status_file(game_json) 
         exrewardRate = result["total"]["exrewardRate"]
-
             
         for playcount in range(2):
             
