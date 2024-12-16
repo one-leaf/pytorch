@@ -746,7 +746,7 @@ class Agent():
         # status = np.zeros((4, boardheight, boardwidth), dtype=np.int8)        
         piece = self.fallpiece
         shapedraw = pieces[piece['shape']][piece['rotation']]
-        self.status[2] = self.status[0]+self.status[1]
+        self.status[2] = self.status[0] | self.status[1]
         self.status[0] = nb_get_status(shapedraw, piece['x'], piece['y'])        
 
         # 更新历史动作，仅仅限于同一个方块周期，如果是第二步更新上一步的背景
