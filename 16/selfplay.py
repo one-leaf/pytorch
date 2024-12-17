@@ -334,7 +334,7 @@ class Train():
         exrewardRate = result["total"]["exrewardRate"]
             
         for playcount in range(2):
-            
+            player.set_player_id(playcount)
             if playcount==0:
                 player.need_max_ps = False
                 player.need_max_ns = True

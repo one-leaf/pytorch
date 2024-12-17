@@ -396,8 +396,10 @@ class MCTSPlayer(object):
         self.need_max_ps = need_max_ps
         self.need_max_ns = need_max_ns
         self.n_playout = n_playout
+        self.player = -1
+        self.cache = {}
         
-    def set_player_ind(self, p):
+    def set_player_id(self, p):
         """指定MCTS的playerid"""
         self.player = p
         self.mcts.lable = "AI(%s)"%p
@@ -425,6 +427,11 @@ class MCTSPlayer(object):
             # max_probs_idx = np.argmax(act_probs)    
             
             availables = state.availables()
+
+            if self.player==1 and hash(state) in self.cache:
+                action = self.cache[hash(state)]
+                availables[action]=0       
+                
             nz_idx = np.nonzero(availables)[0]  # [0,2,3,4]
             
             # Qs
@@ -437,16 +444,15 @@ class MCTSPlayer(object):
             max_ps_idx = nz_idx[np.argmax(act_ps[nz_idx])]
 
             idx = -1           
-
+            
             if self.need_max_ns:
                 # idx = max_ns_idx
                 idx = np.random.choice(range(ACTONS_LEN), p=act_probs)
             elif self.need_max_ps:
                 # idx = max_ps_idx                          
                 idx = np.random.choice(range(ACTONS_LEN), p=act_ps)           
-            if availables[idx]==0: idx = -1
-            
-            
+            if availables[idx]==0: idx = -1                               
+                            
             if idx == -1:
                 # a=1的时候，act 机会均等，>1 强调均值， <1 强调两端
                 # 国际象棋 0.3 将棋 0.15 围棋 0.03
@@ -456,6 +462,8 @@ class MCTSPlayer(object):
                 dirichlet = np.random.dirichlet(2 * np.ones(len(nz_idx)))
                 dirichlet_probs = np.zeros_like(act_probs, dtype=np.float64)
                 dirichlet_probs[nz_idx] = dirichlet
+                act_probs = act_probs * availables
+                act_probs = act_probs / np.sum(act_probs)
                 idx = np.random.choice(range(ACTONS_LEN), p=p*act_probs + (1.0-p)*dirichlet_probs)
                   
 
@@ -473,6 +481,8 @@ class MCTSPlayer(object):
             # 将概率转为onehot
             # act_probs = np.zeros_like(act_probs)
             # act_probs[max_qs_idx] = 1
+            if self.player==0:
+                self.cache[hash(state)] = action
 
             return action, qval, act_probs, state_v, max_qval, acc_ps, depth, state_n
         else:
