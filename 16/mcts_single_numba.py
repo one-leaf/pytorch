@@ -309,13 +309,13 @@ class MCTS():
             expandPN(s, availables, act_probs, self.Ps, self.Ns, self.Nsa, self.Qsa, state.actions_num)             
             # v *= 0.5 # 测试稳定网络用 v * 0.5 + reward ==> v ; v ==> 2 * reward
             self.Vs[s] = v
-            self.Rs[s] = r/2
+            self.Rs[s] = r
             # v = float(v+abs(v)*r) 
             # https://arxiv.org/pdf/2405.09999 当前价值减去Q值的均值
             # nanmean(self.Qsa[s]) - np.nanmean(self.Qsa[s][availables==0])
             # v = v - np.nanmean(self.Qsa[s][availables==0])
             # v = float(v-r/10)
-            v = float(v-r/2)
+            v = float((v-r)/2)
             # v = float(v)
             return v
             
