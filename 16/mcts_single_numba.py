@@ -214,8 +214,8 @@ class MCTS():
         state.mark()
 
         state_ = None
-        for n in range(self._n_playout):
-        # while True:            
+        # for n in range(self._n_playout):
+        while True:            
             self.simulation_count += 1
             
             # t = time.time()     
@@ -228,6 +228,8 @@ class MCTS():
             step_depth = state_.game.steps-state.game.steps
             die_count += 1 if state_.game.terminal else 0
             self.max_depth = (depth, step_depth)
+            if self.simulation_count>=self._n_playout and state_.game.state==1: break
+            
         if state.game.exreward and die_count>0: state.game.exreward = False            
         self._policy(state_.game, only_Cache_Next=True) 
             # if self.simulation_count>=64 and (self.Ns[s]>=self._n_playout and state_.game.state==1): break
