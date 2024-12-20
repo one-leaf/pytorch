@@ -244,7 +244,7 @@ class Train():
             print("end data loader")
 
             try:
-                self.policy_value_net = PolicyValueNet(GAME_WIDTH, GAME_HEIGHT, GAME_ACTIONS_NUM, model_file=model_file)
+                self.policy_value_net = PolicyValueNet(GAME_WIDTH, GAME_HEIGHT, GAME_ACTIONS_NUM, model_file=model_file, l2_const=1e-4)
             except Exception as e:
                 print(str(e))
                 time.sleep(60)
