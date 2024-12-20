@@ -44,7 +44,7 @@ class Train():
         self.c_puct = 5  
 
         self.max_step_count = 10000 
-        self.limit_steptime = 8  # 限制每一步的平均花费时间，单位秒，默认10秒
+        self.limit_steptime = 5  # 限制每一步的平均花费时间，单位秒，默认10秒
 
         # 等待训练的序列
         self.waitplaydir=os.path.join(data_dir,"play")
