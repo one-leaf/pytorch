@@ -451,8 +451,8 @@ class MCTSPlayer(object):
                 # idx = max_ns_idx
                 idx = np.random.choice(range(ACTONS_LEN), p=act_probs)
             elif self.need_max_ps:
-                # idx = max_ps_idx                          
-                idx = np.random.choice(range(ACTONS_LEN), p=act_ps)           
+                idx = max_ps_idx                          
+                # idx = np.random.choice(range(ACTONS_LEN), p=act_ps)           
             if availables[idx]==0: idx = -1                               
                             
             if idx == -1:
