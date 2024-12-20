@@ -365,8 +365,10 @@ class MCTS():
             # 目前Mcts， q[s,a] += v[s+1]/Nsa[s,a]
         if state.game.terminal:
             v = -2
+        elif r != 0:
+            v = r
         else:
-            v = self.search(state) + r
+            v = self.search(state)
 #            if not self.extra_reward and v<-2: v=-1.99
             
             # r = np.tanh(r)
