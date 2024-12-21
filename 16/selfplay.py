@@ -256,7 +256,7 @@ class Train():
                     print("#"*repeat_count, 'score:', agent.score, "reward:",reward, 'qval', round(qval,2), 'height:', agent.pieceheight, 'piece:', agent.piececount, \
                         'step:', agent.steps, "step time:", round((time.time()-start_time)/i,3),'reward_p:', agent.piececount-mark_reward_piececount)
                 agent.print()
-                if player.need_max_ps or player.need_max_ns:
+                if agent.piececount%2==0 and (player.need_max_ps or player.need_max_ns):
                     player.need_max_ps = not player.need_max_ps
                     player.need_max_ns = not player.need_max_ns
 
