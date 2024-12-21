@@ -117,10 +117,9 @@ def expandPN(s:int, availables, act_probs, Ps, Ns, Nsa, Qsa, actions_num):
     _p = np.exp((act_probs-np.max(act_probs)))
     _p[availables==0]=0
     _p_sum = np.sum(_p)
-    if _p_sum == 0:
-        probs = availables/np.sum(availables)
-    else:
-        probs = _p/_p_sum
+    probs = availables/np.sum(availables)
+    if _p_sum > 0:        
+        probs = probs*0.1 + _p*0.9/_p_sum
     Ps[s] = probs 
     Ns[s] = 0
     Nsa[s] = np.zeros(actions_num, dtype=np.int64)
@@ -306,7 +305,7 @@ class MCTS():
         availables = state.availables()
         
         if s not in self.Ps:                          
-            # 获得当前局面的概率 和 局面的打分, 这个已经过滤掉了不可用走法
+            # 获得当前局面的概率 和 局面的打分
             act_probs, v, r = self._policy(state.game) 
             expandPN(s, availables, act_probs, self.Ps, self.Ns, self.Nsa, self.Qsa, state.actions_num)             
             # v *= 0.5 # 测试稳定网络用 v * 0.5 + reward ==> v ; v ==> 2 * reward
