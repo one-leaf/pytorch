@@ -244,8 +244,23 @@ def nb_getEmptyCount(board):
 # 统计占位的个数
 # @njit(cache=True)
 def nb_getUsedCount(board):
-    d=20-np.argmax(board,axis=0)
-    return np.sum(d[d!=20])
+    d=np.argmax(board,axis=0)
+    d[d==0]=20
+    d = 20 - d
+    
+    s = 0
+    c = d[1]-d[0]
+    if c>3:
+        s += c-3
+    c = d[8]-d[9]
+    if c>3:
+        s += c-3
+    for i in range(8):    
+        c = min(d[i],d[i+2])-d[i+1]
+        if c>3:
+            s += c-3
+        
+    return np.sum(d)+s
                 
 # 统计最高位置以下的所有空的方块
 def nb_getTerminalEmptyCount(board):
