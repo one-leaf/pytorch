@@ -515,7 +515,7 @@ class VitNet(nn.Module):
         # x 到达每一层的模块，包含了按照深度，由小到大的Dropout
         x = self.blocks(x)                    # [B, p+1, 768]
 
-        # 归一化,加了这个训练不出来
+        # 归一化
         x = self.norm(x)                        # [B, p+1, 768]
 
         # 将模型动作和价值网络相对隔离
