@@ -486,7 +486,7 @@ class VitNet(nn.Module):
         self.val_fc = nn.Linear(embed_dim, embed_dim)   # [B, 768] => [B, 768]
         self.val_fc_act = nn.LeakyReLU()
         self.val_dist = nn.Linear(embed_dim, num_quantiles)   # [B, 768] => [B, num_quantiles]
-        # self.val_dist_act = nn.Tanh()
+        self.val_dist_act = nn.Tanh()
 
         self.reward_fc = nn.Linear(embed_dim, embed_dim)   # [B, 768] => [B, 768]
         self.reward_fc_act = nn.LeakyReLU()
@@ -531,7 +531,7 @@ class VitNet(nn.Module):
         val = self.val_fc(mean_x)
         val = self.val_fc_act(val)
         val = self.val_dist(val)                # [B, num_quantiles]
-        # val = self.val_dist_act(val)            # Tanh -> [1 ~ -1]
+        val = self.val_dist_act(val)            # Tanh -> [1 ~ -1]
                       
         # reward = x[:, 0]
         reward = self.reward_fc(mean_x)
