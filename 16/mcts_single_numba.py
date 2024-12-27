@@ -316,7 +316,7 @@ class MCTS():
             # nanmean(self.Qsa[s]) - np.nanmean(self.Qsa[s][availables==0])
             # v = v - np.nanmean(self.Qsa[s][availables==0])
             # v = float(v-r/10)
-            v = float((v-r)/2)
+            v = float(v-r)
             # v = float(v)
             return v
             
