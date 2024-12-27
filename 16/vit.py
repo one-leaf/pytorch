@@ -516,27 +516,25 @@ class VitNet(nn.Module):
         x = self.blocks(x)                    # [B, p+1, 768]
 
         # 归一化,加了这个训练不出来
-        # x = self.norm(x)                        # [B, p+1, 768]
+        x = self.norm(x)                        # [B, p+1, 768]
 
         # 将模型动作和价值网络相对隔离
-        act = x[:, 1:].mean(dim = 1)             # [B, 768]
-        # act = x.mean(dim = 1)             # [B, 768]
-        # act = x.max(dim = 1).values        # [B, 768]
-        # act = x[:, 0]                           # [B, 768]
+        act = x[:, 0]                           # [B, 768]
         act = self.act_fc(act)
         act = self.act_fc_act(act)
         act = self.act_dist(act)                # [B, num_classes]
         # act = self.act_dist_act(act)
 
-        val = x[:, 0]                           # [B, 768]
-        val = self.val_fc(val)
+        # val = x[:, 0]                            # [B, 768]
+        mean_x = x[:, 1:].mean(dim = 1)             # [B, 768]   
+
+        val = self.val_fc(mean_x)
         val = self.val_fc_act(val)
         val = self.val_dist(val)                # [B, num_quantiles]
         # val = self.val_dist_act(val)            # Tanh -> [1 ~ -1]
-        
+                      
         # reward = x[:, 0]
-        reward = x.mean(dim = 1)             # [B, 768]
-        reward = self.reward_fc(reward)
+        reward = self.reward_fc(mean_x)
         reward = self.reward_fc_act(reward)
         reward = self.reward_dist(reward)        # [B, 1]
         reward = self.reward_dist_act(reward) 
