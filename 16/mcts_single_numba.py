@@ -441,7 +441,7 @@ class MCTSPlayer(object):
             max_qs_idx = nz_idx[np.argmax(act_qs[nz_idx])]
             
             # NS
-            # max_ns_idx = nz_idx[np.argmax(act_probs[nz_idx])]
+            max_ns_idx = nz_idx[np.argmax(act_probs[nz_idx])]
             
             # PS            
             max_ps_idx = nz_idx[np.argmax(act_ps[nz_idx])]
@@ -479,7 +479,7 @@ class MCTSPlayer(object):
                 need_max_ps = "need_max_ps" if self.need_max_ps else ""
                 print("\trandom", game.position_to_action_name(max_ps_idx), "==>",  game.position_to_action_name(idx), \
                       "v:", qval, need_max_ns, need_max_ps)  
-            acc_ps = 1 if max_qs_idx==max_ps_idx else 0 # np.var(act_probs) #0 if abs(act_ps[idx]-act_probs[idx])>0.4 else 1
+            acc_ps = 1 if max_ns_idx==max_ps_idx else 0 # np.var(act_probs) #0 if abs(act_ps[idx]-act_probs[idx])>0.4 else 1
 
             # 将概率转为onehot
             # act_probs = np.zeros_like(act_probs)
