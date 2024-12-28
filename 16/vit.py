@@ -456,10 +456,14 @@ class VitNet(nn.Module):
         # 图片分割后的块数
         num_patches = self.patch_embed.num_patches                      # p
 
+        # 动作
+        self.act_token = nn.Parameter(torch.zeros(1, 1, embed_dim))    # [1, 1, 768]
         # 价值
         self.val_token = nn.Parameter(torch.zeros(1, 1, embed_dim))    # [1, 1, 768]
+        # Q值平均
+        self.q_token = nn.Parameter(torch.zeros(1, 1, embed_dim))    # [1, 1, 768]
         # 位置层
-        self.pos_embed = nn.Parameter(torch.zeros(1, num_patches + 1, embed_dim)) # [1, p+1, 768]
+        self.pos_embed = nn.Parameter(torch.zeros(1, num_patches + 3, embed_dim)) # [1, p+1, 768]
         
         # 输入损失
         self.pos_drop = nn.Dropout(p=drop_ratio)
@@ -490,11 +494,11 @@ class VitNet(nn.Module):
         self.val_dist = nn.Linear(embed_dim, num_quantiles)   # [B, 768] => [B, num_quantiles]
         self.val_dist_act = nn.Tanh()
 
-        self.reward_fc = nn.Linear(embed_dim, embed_dim)   # [B, 768] => [B, 768]
-        self.norm_reward = norm_layer(embed_dim)        
-        self.reward_fc_act = nn.GELU()
-        self.reward_dist = nn.Linear(embed_dim, 1)   # [B, 768] => [B, 1]
-        self.reward_dist_act = nn.Tanh()
+        self.q_fc = nn.Linear(embed_dim, embed_dim)   # [B, 768] => [B, 768]
+        self.norm_q = norm_layer(embed_dim)        
+        self.q_fc_act = nn.GELU()
+        self.q_dist = nn.Linear(embed_dim, 1)   # [B, 768] => [B, 1]
+        self.q_dist_act = nn.Tanh()
 
 
         # 参数初始化, 这里需要pytorch 1.6以上版本
@@ -510,40 +514,41 @@ class VitNet(nn.Module):
         x = self.patch_embed(x)  # [B, 50, 768]
         # [1, 1, 768] -> [B, 1, 768] 这里每一个B的 token 都是一样的，并没有复制 token 到每一个B
         val_token = self.val_token.expand(x.shape[0], -1, -1)
-        x = torch.cat((val_token, x), dim=1)    # [B, p+1, 768]
+        act_token = self.val_token.expand(x.shape[0], -1, -1)
+        q_token = self.q_token.expand(x.shape[0], -1, -1)
+        
+        x = torch.cat((act_token, val_token, q_token, x), dim=1)    # [B, p+3, 768]
 
         # x 加上位置层，并且Dropout
-        x = self.pos_drop(x + self.pos_embed)       # [B, p+1, 768]
+        x = self.pos_drop(x + self.pos_embed)       # [B, p+3, 768]
 
         # x 到达每一层的模块，包含了按照深度，由小到大的Dropout
-        x = self.blocks(x)                    # [B, p+1, 768]
+        x = self.blocks(x)                    # [B, p+31, 768]
 
         # 归一化
-        x = self.norm(x)                        # [B, p+1, 768]
+        x = self.norm(x)                        # [B, p+3, 768]
 
         # 将模型动作和价值网络相对隔离
-        act = x[:, 0]                           # [B, 768]
-        act = self.act_fc(act)
+        act = self.act_fc(x[:, 0])
         act = self.norm_act(act)
         act = self.act_fc_act(act)
         act = self.act_dist(act)                # [B, num_classes]
         # act = self.act_dist_act(act)
 
-        # val = x[:, 0]                            # [B, 768]
-        head = x[:, 1]             # [B, 768]   
+        # val = x[:, 1]                            # [B, 768]
         # mean_x = x[:, 1:].mean(dim = 1)             # [B, 768]   
 
-        val = self.val_fc(head)
+        val = self.val_fc(x[:, 1])
         val = self.norm_val(val)
         val = self.val_fc_act(val)
         val = self.val_dist(val)                # [B, num_quantiles]
         val = self.val_dist_act(val)            # Tanh -> [1 ~ -1]
                       
-        # reward = x[:, 0]
-        reward = self.reward_fc(head)
-        reward = self.norm_reward(reward)
-        reward = self.reward_fc_act(reward)
-        reward = self.reward_dist(reward)        # [B, 1]
-        reward = self.reward_dist_act(reward) 
+        # q = x[:, 2]
+        q = self.q_fc(x[:, 2])
+        q = self.norm_q(q)
+        q = self.q_fc_act(q)
+        q = self.q_dist(q)        # [B, 1]
+        q = self.q_dist_act(q) 
         
-        return act, val, reward    # [B, num_classes], [B, num_quantiles], [B, 1]
+        return act, val, q    # [B, num_classes], [B, num_quantiles], [B, 1]
