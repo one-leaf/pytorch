@@ -479,17 +479,20 @@ class VitNet(nn.Module):
         self.norm = norm_layer(embed_dim)
 
         self.act_fc = nn.Linear(embed_dim, embed_dim)  # [B, 768] => [B, 768]
-        self.act_fc_act = nn.LeakyReLU()
+        self.norm_act = norm_layer(embed_dim)
+        self.act_fc_act = nn.GELU()
         self.act_dist = nn.Linear(embed_dim, num_classes)  # [B, 768] => [B, 5]
         # self.act_dist_act = nn.Softmax(dim=1)
 
         self.val_fc = nn.Linear(embed_dim, embed_dim)   # [B, 768] => [B, 768]
-        self.val_fc_act = nn.LeakyReLU()
+        self.norm_val = norm_layer(embed_dim)
+        self.val_fc_act = nn.GELU()
         self.val_dist = nn.Linear(embed_dim, num_quantiles)   # [B, 768] => [B, num_quantiles]
         self.val_dist_act = nn.Tanh()
 
         self.reward_fc = nn.Linear(embed_dim, embed_dim)   # [B, 768] => [B, 768]
-        self.reward_fc_act = nn.LeakyReLU()
+        self.norm_reward = norm_layer(embed_dim)        
+        self.reward_fc_act = nn.GELU()
         self.reward_dist = nn.Linear(embed_dim, 1)   # [B, 768] => [B, 1]
         self.reward_dist_act = nn.Tanh()
 
@@ -521,20 +524,24 @@ class VitNet(nn.Module):
         # 将模型动作和价值网络相对隔离
         act = x[:, 0]                           # [B, 768]
         act = self.act_fc(act)
+        act = self.norm_act(act)
         act = self.act_fc_act(act)
         act = self.act_dist(act)                # [B, num_classes]
         # act = self.act_dist_act(act)
 
         # val = x[:, 0]                            # [B, 768]
-        mean_x = x[:, 1:].mean(dim = 1)             # [B, 768]   
+        head = x[:, 1]             # [B, 768]   
+        # mean_x = x[:, 1:].mean(dim = 1)             # [B, 768]   
 
-        val = self.val_fc(mean_x)
+        val = self.val_fc(head)
+        val = self.norm_val(val)
         val = self.val_fc_act(val)
         val = self.val_dist(val)                # [B, num_quantiles]
         val = self.val_dist_act(val)            # Tanh -> [1 ~ -1]
                       
         # reward = x[:, 0]
-        reward = self.reward_fc(mean_x)
+        reward = self.reward_fc(head)
+        reward = self.norm_reward(reward)
         reward = self.reward_fc_act(reward)
         reward = self.reward_dist(reward)        # [B, 1]
         reward = self.reward_dist_act(reward) 
