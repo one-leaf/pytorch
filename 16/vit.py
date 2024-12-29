@@ -528,7 +528,7 @@ class VitNet(nn.Module):
         x = self.blocks(x)                    # [B, p+3, 768]
 
         # 归一化
-        # x = self.norm(x)                        # [B, p+3, 768]
+        x = self.norm(x)                        # [B, p+3, 768]
 
         # 将模型动作和价值网络相对隔离
         act = self.act_fc(x[:, 0])
