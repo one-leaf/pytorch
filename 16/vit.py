@@ -514,7 +514,7 @@ class VitNet(nn.Module):
         x = self.patch_embed(x)  # [B, 50, 768]
         # [1, 1, 768] -> [B, 1, 768] 这里每一个B的 token 都是一样的，并没有复制 token 到每一个B
         val_token = self.val_token.expand(x.shape[0], -1, -1)
-        act_token = self.val_token.expand(x.shape[0], -1, -1)
+        act_token = self.act_token.expand(x.shape[0], -1, -1)
         q_token = self.q_token.expand(x.shape[0], -1, -1)
         
         x = torch.cat((act_token, val_token, q_token, x), dim=1)    # [B, p+3, 768]
