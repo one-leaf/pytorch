@@ -80,6 +80,7 @@ class PolicyValueNet():
             #     model_dict.update(net_sd)
             #     self.policy_value_net.load_state_dict(model_dict, strict=False)
         else:
+            print("initializing new model", model_file)
             self.save_model(model_file)
         self.lr = 0
         self.cache = {}
