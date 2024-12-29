@@ -216,14 +216,14 @@ class PolicyValueNet():
 
         # 前向传播
         self.policy_value_net.train()
-        probs, values, rewards = self.policy_value_net(state_batch)
+        probs, values, qvals = self.policy_value_net(state_batch)
 
         value_loss = self.quantile_regression_loss(values, value_batch)
         policy_loss = F.cross_entropy(probs, mcts_probs)
-        reward_loss = F.mse_loss(rewards.view(-1), reward_batch)
+        qval_loss = F.mse_loss(qvals.view(-1), reward_batch)
 
-        # loss = policy_loss + value_loss/(value_loss/policy_loss).detach() + reward_loss/(reward_loss/policy_loss).detach() 
-        loss = policy_loss + value_loss + reward_loss 
+        # loss = policy_loss + value_loss/(value_loss/policy_loss).detach() + qval_loss/(qval_loss/policy_loss).detach() 
+        loss = policy_loss + (value_loss + qval_loss)*0.1 
         # 参数梯度清零
         self.optimizer.zero_grad()
         # 反向传播并计算梯度
@@ -234,7 +234,7 @@ class PolicyValueNet():
         predicted_probs = torch.argmax(probs, dim=1)
         true_probs = torch.argmax(mcts_probs, dim=1)
         accuracy = (predicted_probs == true_probs).float().mean()
-        return accuracy.item(), value_loss.item(), policy_loss.item(), reward_loss.item()
+        return accuracy.item(), value_loss.item(), policy_loss.item(), qval_loss.item()
         
 
     # 保存模型

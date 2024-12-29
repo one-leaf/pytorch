@@ -300,14 +300,14 @@ class Train():
             self.policy_value_net.set_learning_rate(self.learn_rate*self.lr_multiplier)
             for i, data in enumerate(training_loader):  # 计划训练批次
                 # 使用对抗数据重新训练策略价值网络模型
-                p_acc, v_loss, p_loss, r_loss = self.policy_update(data, self.epochs)
+                p_acc, v_loss, p_loss, q_loss = self.policy_update(data, self.epochs)
                 v_loss_list.append(v_loss)
                 if i%10 == 0:
-                    print(i,"v_loss:",v_loss,"p_loss:",p_loss,"r_loss:",r_loss,"p_acc:",p_acc)
+                    print(i,"p_loss:",p_loss,"v_loss:",v_loss,"q_loss:",q_loss,"p_acc:",p_acc)
                     # time.sleep(0.1)
 
-                if math.isnan(v_loss): 
-                    print("v_loss is nan!")
+                if math.isnan(v_loss) or math.isnan(q_loss): 
+                    print("v_loss or q_loss is nan!")
                     return
 
                 # if i%10 == 0:
@@ -370,7 +370,7 @@ class Train():
                 print("value[{}] begin:{} end:{} to:{}".format(i, begin_values[i], end_values[i], test_data[2][i].numpy()))  
                 if i>=4:break
             for i in range(len(begin_values)):
-                print("reward[{}] begin:{} end:{} to:{}".format(i, begin_rewards[i], end_reward[i], test_data[3][i].numpy()))  
+                print("qval[{}] begin:{} end:{} to:{}".format(i, begin_rewards[i], end_reward[i], test_data[3][i].numpy()))  
                 if i>=4:break
             for i in range(len(begin_values)):
                 idx = np.argmax(begin_act_probs[i])
