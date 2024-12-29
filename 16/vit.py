@@ -463,7 +463,7 @@ class VitNet(nn.Module):
         # Q值平均
         self.q_token = nn.Parameter(torch.zeros(1, 1, embed_dim))    # [1, 1, 768]
         # 位置层
-        self.pos_embed = nn.Parameter(torch.zeros(1, num_patches + 3, embed_dim)) # [1, p+1, 768]
+        self.pos_embed = nn.Parameter(torch.zeros(1, num_patches + 3, embed_dim)) # [1, p+3, 768]
         
         # 输入损失
         self.pos_drop = nn.Dropout(p=drop_ratio)
@@ -525,7 +525,7 @@ class VitNet(nn.Module):
         x = self.pos_drop(x + self.pos_embed)       # [B, p+3, 768]
 
         # x 到达每一层的模块，包含了按照深度，由小到大的Dropout
-        x = self.blocks(x)                    # [B, p+31, 768]
+        x = self.blocks(x)                    # [B, p+3, 768]
 
         # 归一化
         x = self.norm(x)                        # [B, p+3, 768]
