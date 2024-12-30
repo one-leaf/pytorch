@@ -259,6 +259,9 @@ class Train():
                 if agent.piececount%2==0 and (player.need_max_ps or player.need_max_ns):
                     player.need_max_ps = not player.need_max_ps
                     player.need_max_ns = not player.need_max_ns
+                    
+                if not os.path.exists(self.waitplaydir):
+                    raise Exception("waitplaydir not exists")
 
             # 如果游戏结束或玩了超过1小时或10个方块都没有消除一行
             paytime = time.time()-start_time
