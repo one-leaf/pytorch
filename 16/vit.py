@@ -534,6 +534,9 @@ class VitNet(nn.Module):
         x = self.norm(x)                        # [B, p+3, 768]
 
         # 将模型动作和价值网络相对隔离
+        act = x[:, 0]   
+        mean_act = x[:, 3:].mean(dim = 1)        # [B, 768]
+        act = (act + mean_act)/2                 # [B, 768]
         act = self.act_fc(x[:, 0])
         act = self.norm_act(act)
         act = self.act_fc_act(act)
