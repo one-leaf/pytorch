@@ -503,7 +503,7 @@ class VitNet(nn.Module):
         self.q_dist = nn.Linear(embed_dim, 1)   # [B, 768] => [B, 1]
         self.q_dist_act = nn.Tanh()
 
-
+    def init_weights(self):
         # 参数初始化, 这里需要pytorch 1.6以上版本
         # nn.init.trunc_normal_(self.pos_embed, std=0.02)
         # nn.init.trunc_normal_(self.val_token, std=0.02)

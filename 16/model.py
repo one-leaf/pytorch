@@ -81,6 +81,7 @@ class PolicyValueNet():
             #     self.policy_value_net.load_state_dict(model_dict, strict=False)
         else:
             print("Initializing new model", model_file)
+            self.policy_value_net.init_weights()
             self.save_model(model_file)
         self.lr = 0
         self.cache = {}
@@ -224,7 +225,7 @@ class PolicyValueNet():
         qval_loss = F.mse_loss(qvals.view(-1), reward_batch)
 
         # loss = policy_loss + value_loss/(value_loss/policy_loss).detach() + qval_loss/(qval_loss/policy_loss).detach() 
-        loss = policy_loss #+ (value_loss + qval_loss)*0.01 
+        loss = policy_loss + (value_loss + qval_loss)*0.1 
         # 参数梯度清零
         self.optimizer.zero_grad()
         # 反向传播并计算梯度
