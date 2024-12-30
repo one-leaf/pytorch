@@ -364,8 +364,6 @@ class Train():
             end_act_probs_e = np.exp(end_act_probs-np.max(end_act_probs, axis=1, keepdims=True))
             end_act_probs = end_act_probs_e/np.sum(end_act_probs_e, axis=1, keepdims=True)
             
-            print("probs begin_accuracy:", np.mean(begin_accuracy), "end_accuracy:", np.mean(end_accuracy))
-            
             for i in range(len(begin_values)):
                 print("value[{}] begin:{} end:{} to:{}".format(i, begin_values[i], end_values[i], test_data[2][i].numpy()))  
                 if i>=4:break
@@ -376,6 +374,8 @@ class Train():
                 idx = np.argmax(begin_act_probs[i])
                 print("probs[{}] begin:{} end:{} to:{} ".format(i, begin_act_probs[i][idx], end_act_probs[i][idx], test_data[1][i].numpy()[idx]))
                 if i>=4:break
+
+            print("probs begin_accuracy:", np.mean(begin_accuracy), "end_accuracy:", np.mean(end_accuracy))
             # kl = np.mean(np.sum(begin_act_probs * (np.log(begin_act_probs) - np.log(end_act_probs)), axis=1))
             kl = np.mean(np.sum(begin_act_probs * (np.log(begin_act_probs/end_act_probs)), axis=1))
             if np.isnan(kl):
