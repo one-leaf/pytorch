@@ -429,7 +429,7 @@ class VitPatchEmbed(nn.Module):
         x4 = self.proj4(x)
         x4 = self.dropout(x4)
         
-        x = x + x1 + x2 + x3 + x4
+        x = (x + x1 + x2 + x3 + x4)/5
 
         x = self.proj_end(x)
         x = self.dropout(x)
