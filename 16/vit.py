@@ -535,7 +535,7 @@ class VitNet(nn.Module):
 
         # 将模型动作和价值网络相对隔离
         act = self.act_fc(x[:, 0])
-        # act = self.norm_act(act)
+        act = self.norm_act(act)
         act = self.act_fc_act(act)
         act = self.act_dist(act)                # [B, num_classes]
         # act = self.act_dist_act(act)
@@ -544,14 +544,14 @@ class VitNet(nn.Module):
         # mean_x = x[:, 1:].mean(dim = 1)             # [B, 768]   
 
         val = self.val_fc(x[:, 1])
-        # val = self.norm_val(val)
+        val = self.norm_val(val)
         val = self.val_fc_act(val)
         val = self.val_dist(val)                # [B, num_quantiles]
         val = self.val_dist_act(val)            # Tanh -> [1 ~ -1]
                       
         # q = x[:, 2]
         q = self.q_fc(x[:, 2])
-        # q = self.norm_q(q)
+        q = self.norm_q(q)
         q = self.q_fc_act(q)
         q = self.q_dist(q)        # [B, 1]
         q = self.q_dist_act(q) 
