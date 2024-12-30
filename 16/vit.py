@@ -545,15 +545,15 @@ class VitNet(nn.Module):
 
         # val = x[:, 1]                            # [B, 768]
         # mean_x = x[:, 1:].mean(dim = 1)             # [B, 768]   
-
-        val = self.val_fc(x[:, 1])
+        val = x[:, 1]
+        val = self.val_fc(val)
         val = self.norm_val(val)
         val = self.val_fc_act(val)
         val = self.val_dist(val)                # [B, num_quantiles]
         val = self.val_dist_act(val)            # Tanh -> [1 ~ -1]
                       
-        # q = x[:, 2]
-        q = self.q_fc(x[:, 2])
+        q = x[:, 2]
+        q = self.q_fc(q)
         q = self.norm_q(q)
         q = self.q_fc_act(q)
         q = self.q_dist(q)        # [B, 1]
