@@ -224,7 +224,7 @@ class PolicyValueNet():
         qval_loss = F.mse_loss(qvals.view(-1), reward_batch)
 
         # loss = policy_loss + value_loss/(value_loss/policy_loss).detach() + qval_loss/(qval_loss/policy_loss).detach() 
-        loss = policy_loss + (value_loss + qval_loss)*0.01 
+        loss = policy_loss #+ (value_loss + qval_loss)*0.01 
         # 参数梯度清零
         self.optimizer.zero_grad()
         # 反向传播并计算梯度
