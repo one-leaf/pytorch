@@ -522,7 +522,7 @@ class VitNet(nn.Module):
         val_token = self.val_token.expand(x.shape[0], -1, -1)
         q_token = self.q_token.expand(x.shape[0], -1, -1)
         
-        x = torch.cat([act_token, val_token, q_token, x], dim=1)    # [B, p+3, 768]
+        x = torch.cat((act_token, val_token, q_token, x), dim=1)    # [B, p+3, 768]
 
         # x 加上位置层，并且Dropout
         x = self.pos_drop(x + self.pos_embed)       # [B, p+3, 768]
