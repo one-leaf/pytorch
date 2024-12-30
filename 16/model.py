@@ -204,7 +204,6 @@ class PolicyValueNet():
         # return torch.mean(weights * F.huber_loss(quantiles, newtarget, reduction='none'))
         return torch.mean(weights * F.smooth_l1_loss(quantiles, newtarget, reduction='none'))
 
-
     # 训练
     def train_step(self, state_batch, mcts_probs, value_batch, reward_batch, lr):
         """训练一次"""
