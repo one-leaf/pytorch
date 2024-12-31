@@ -209,6 +209,7 @@ class Train():
         total_qval=0
         total_state_value=0
         need_max_ps = False # random.random()>0.5
+        exreward_end_piececount = 0
         print("exreward:", agent.exreward,"max_emptyCount:",max_emptyCount,"isRandomNextPiece:",agent.isRandomNextPiece,"limitstep:",agent.limitstep,"max_ps:",need_max_ps,"max_qs:",agent.is_replay)
         for i in range(self.max_step_count):
             _step={"step":i}
@@ -259,6 +260,8 @@ class Train():
                 if agent.piececount%2==0 and (player.need_max_ps or player.need_max_ns):
                     player.need_max_ps = not player.need_max_ps
                     player.need_max_ns = not player.need_max_ns
+                
+                if not agent.exreward: exreward_end_piececount = agent.piececount
                     
                 if not os.path.exists(self.waitplaydir):
                     raise Exception("waitplaydir not exists")
@@ -270,7 +273,7 @@ class Train():
                 data["score"] = agent.score
                 data["piece_count"] = agent.piececount
                 data["piece_height"] = agent.pieceheight
-                return agent, data, total_qval, total_state_value, start_time, paytime
+                return agent, data, total_qval, total_state_value, exreward_end_piececount, start_time, paytime
             
 
 
@@ -335,7 +338,7 @@ class Train():
         play_data = []
         result = self.read_status_file(game_json) 
         exrewardRate = result["total"]["exrewardRate"]
-            
+        exreward_end_piececounts = []    
         for playcount in range(2):
             player.set_player_id(playcount)
             if playcount==0:
@@ -345,10 +348,11 @@ class Train():
                 player.need_max_ps = True
                 player.need_max_ns = False
                 
-            agent, data, qval, state_value, start_time, paytime = self.play(cache, result, min_removedlines, his_pieces, his_pieces_len, player, exrewardRate)
+            agent, data, qval, state_value, exreward_end_piececount, start_time, paytime = self.play(cache, result, min_removedlines, his_pieces, his_pieces_len, player, exrewardRate)
             play_data.append({"agent":agent, "data":data, "qval":qval, "state_value":state_value, "start_time":start_time, "paytime":paytime})
             his_pieces = agent.piecehis
             his_pieces_len = len(agent.piecehis)
+            exreward_end_piececounts.append(exreward_end_piececount)
                 
         print("TRAIN Self Play ending ...")
                 
@@ -363,6 +367,10 @@ class Train():
         if play_data[0]["agent"].piececount>play_data[1]["agent"].piececount:
             win_values[0] = 1
         elif play_data[0]["agent"].piececount<play_data[1]["agent"].piececount:
+            win_values[1] = 1
+        elif exreward_end_piececounts[0]<exreward_end_piececounts[1]:
+            win_values[0] = 1
+        elif exreward_end_piececounts[0]>exreward_end_piececounts[1]:
             win_values[1] = 1
 
         result = self.read_status_file(game_json)
