@@ -368,9 +368,9 @@ class Train():
             win_values[0] = 1
         elif play_data[0]["agent"].piececount<play_data[1]["agent"].piececount:
             win_values[1] = 1
-        elif exreward_end_piececounts[0]<exreward_end_piececounts[1]:
-            win_values[0] = 1
         elif exreward_end_piececounts[0]>exreward_end_piececounts[1]:
+            win_values[0] = 1
+        elif exreward_end_piececounts[0]<exreward_end_piececounts[1]:
             win_values[1] = 1
 
         result = self.read_status_file(game_json)
