@@ -160,15 +160,23 @@ def nb_calc_down_count(board, piece, piece_x, piece_y, templatenum=5):
 
 # @njit()
 def nb_validposition(board, piece, piece_x, piece_y, ax=0, ay=0, templatenum=5, boardwidth=10, boardheight=20):
-    for y in range(templatenum-1,-1,-1):
+    oneboard = np.ones((boardheight+6, boardwidth+12), dtype=np.int8)
+    oneboard[0:-6,6:-6]=0
+    oneboard[0:-6,6:-6] += board   
+    for y in range(templatenum):
         for x in range(templatenum):
-            if piece[y][x]!=0: 
-                _x = x + piece_x + ax
-                _y = y + piece_y + ay
-                if _y<0: continue
-                if _x<0 or _x>=boardwidth or _y>=boardheight or board[_y][_x]!=0:
-                    return False
-    return True
+            oneboard[y+piece_y+ay][6+x+piece_x+ax] += piece[y][x]
+    return not np.any(oneboard[0:-5,5:-5] > 1)
+    
+    # for y in range(templatenum-1,-1,-1):
+    #     for x in range(templatenum):
+    #         if piece[y][x]!=0: 
+    #             _x = x + piece_x + ax
+    #             _y = y + piece_y + ay
+    #             if _y<0: continue
+    #             if _x<0 or _x>=boardwidth or _y>=boardheight or board[_y][_x]!=0:
+    #                 return False
+    # return True
 
 # @njit()
 def nb_addtoboard(board,piece,piece_x,piece_y,boardwidth=10,boardheight=20):
