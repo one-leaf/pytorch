@@ -522,7 +522,7 @@ class VitNet(nn.Module):
         val_token = self.val_token.expand(x.shape[0], -1, -1)
         q_token = self.q_token.expand(x.shape[0], -1, -1)
         
-        x = torch.cat((act_token, val_token, x, q_token), dim=1)    # [B, p+3, 768]
+        x = torch.cat((act_token, x, val_token, q_token), dim=1)    # [B, p+3, 768]
         # x 加上位置层，并且Dropout
         x = self.pos_drop(x + self.pos_embed)       # [B, p+3, 768]
 
@@ -536,27 +536,27 @@ class VitNet(nn.Module):
         # print(x[:, 0])
         # mean_act = x[:, 3:].mean(dim = 1)        # [B, 768]
         # act = (act + mean_act)/2                 # [B, 768]
-        act = self.act_fc(act)
+        # act = self.act_fc(act)
         # act = self.norm_act(act)
-        act = self.act_fc_act(act)
+        # act = self.act_fc_act(act)
         act = self.act_dist(act)                # [B, num_classes]
         # act = self.act_dist_act(act)
         # print(x[:, 0])
 
         # val = x[:, 1]                            # [B, 768]
         # mean_x = x[:, 1:].mean(dim = 1)             # [B, 768]   
-        val = x[:, 1]
-        val = self.val_fc(val)
+        val = x[:, -2]
+        # val = self.val_fc(val)
         # val = self.norm_val(val)
-        val = self.val_fc_act(val)
+        # val = self.val_fc_act(val)
         val = self.val_dist(val)                # [B, num_quantiles]
         val = self.val_dist_act(val)            # Tanh -> [1 ~ -1]
                       
         q = x[:, -1]
-        q = self.q_fc(q)
+        # q = self.q_fc(q)
         # q = self.norm_q(q)
-        q = self.q_fc_act(q)
-        q = self.q_dist(q)        # [B, 1]
-        q = self.q_dist_act(q) 
+        # q = self.q_fc_act(q)
+        q = self.q_dist(q)                      # [B, 1]
+        q = self.q_dist_act(q)                  # Tanh -> [1 ~ -1]
         
         return act, val, q    # [B, num_classes], [B, num_quantiles], [B, 1]
