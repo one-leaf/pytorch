@@ -404,8 +404,8 @@ class VitPatchEmbed(nn.Module):
         self.proj2 = nn.Conv2d(in_c, in_c, kernel_size=3, stride=1, padding=1, bias=False)
         self.proj3 = nn.Conv2d(in_c, in_c, kernel_size=5, stride=1, padding=2, bias=False)
         self.proj4 = nn.Conv2d(in_c, in_c, kernel_size=7, stride=1, padding=3, bias=False)
-        self.proj_end = nn.Conv2d(in_c, in_c, kernel_size=1, stride=1, padding=0, bias=False)
-        self.out = nn.Conv2d(in_c, embed_dim, kernel_size=kernel_size, stride=stride, padding=padding, bias=False)        
+        self.proj_end = nn.Conv2d(in_c*5, in_c*5, kernel_size=1, stride=1, padding=0, bias=False)
+        self.out = nn.Conv2d(in_c*5, embed_dim, kernel_size=kernel_size, stride=stride, padding=padding, bias=False)        
         self.norm = norm_layer(embed_dim) if norm_layer else nn.Identity()
         self.num_patches = ((image_height-kernel_height+2*padding_height)//stride_height+1) * ((image_width-kernel_width+2*padding_width)//stride_width+1)
         print("sequence length:",self.num_patches)
@@ -429,7 +429,7 @@ class VitPatchEmbed(nn.Module):
         x4 = self.proj4(x)
         x4 = self.dropout(x4)
         
-        x = (x + x1 + x2 + x3 + x4)/5
+        x = torch.cat((x , x1 , x2 , x3 , x4), dim=1)   # [B, 5*C, H, W]
 
         x = self.proj_end(x)
         x = self.dropout(x)
