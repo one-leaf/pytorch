@@ -482,24 +482,24 @@ class VitNet(nn.Module):
         ])
         self.norm = norm_layer(embed_dim)
 
-        self.act_fc = nn.Linear(embed_dim, embed_dim)  # [B, 768] => [B, 768]
+        # self.act_fc = nn.Linear(embed_dim, embed_dim)  # [B, 768] => [B, 768]
         # self.norm_act = norm_layer(embed_dim)
         # self.act_fc_act = nn.GELU()
-        self.act_fc_act = nn.LeakyReLU()  
+        # self.act_fc_act = nn.LeakyReLU()  
         self.act_dist = nn.Linear(embed_dim, num_classes)  # [B, 768] => [B, 5]
         # self.act_dist_act = nn.Softmax(dim=1)
 
-        self.val_fc = nn.Linear(embed_dim, embed_dim)   # [B, 768] => [B, 768]
+        # self.val_fc = nn.Linear(embed_dim, embed_dim)   # [B, 768] => [B, 768]
         # self.norm_val = norm_layer(embed_dim)
         # self.val_fc_act = nn.GELU()
-        self.val_fc_act = nn.LeakyReLU() 
+        # self.val_fc_act = nn.LeakyReLU() 
         self.val_dist = nn.Linear(embed_dim, num_quantiles)   # [B, 768] => [B, num_quantiles]
         self.val_dist_act = nn.Tanh()
 
-        self.q_fc = nn.Linear(embed_dim, embed_dim)   # [B, 768] => [B, 768]
+        # self.q_fc = nn.Linear(embed_dim, embed_dim)   # [B, 768] => [B, 768]
         # self.norm_q = norm_layer(embed_dim)  
         # self.q_fc_act = nn.GELU()      
-        self.q_fc_act = nn.LeakyReLU() 
+        # self.q_fc_act = nn.LeakyReLU() 
         self.q_dist = nn.Linear(embed_dim, 1)   # [B, 768] => [B, 1]
         self.q_dist_act = nn.Tanh()
 
