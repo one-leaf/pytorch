@@ -122,6 +122,7 @@ class Train():
         if "avg_reward_piececount" in result["total"]: del result["total"]["avg_reward_piececount"]
         if "avg_qval" in result["total"]: del result["total"]["avg_qval"]
         if "piececount" in result["total"]: del result["total"]["piececount"]
+        if "avg_state_value" in result["total"]: del result["total"]["avg_state_value"]
         
         return result
 
