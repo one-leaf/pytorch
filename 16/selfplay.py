@@ -117,6 +117,11 @@ class Train():
             result["qval"]=[]    
         if "advantage" in result:
             del result["advantage"]
+        if "avg_score_ex" in result["total"]: del result["total"]["avg_score_ex"]
+        if "exrewardRate" in result["total"]: del result["total"]["exrewardRate"]
+        if "avg_reward_piececount" in result["total"]: del result["total"]["avg_reward_piececount"]
+        if "avg_qval" in result["total"]: del result["total"]["avg_qval"]
+        
         return result
 
     def get_equi_data(self, states, mcts_probs, values, scores):
@@ -465,7 +470,7 @@ class Train():
             result["pacc"].append(round(result["total"]["pacc"],2))
             result["vacc"].append(round(result["total"]["vacc"],2))
             result["time"].append(round(result["total"]["step_time"],1))
-            result["qval"].append(round(result["total"]["avg_qval"],4))
+            result["qval"].append(round(result["total"]["qval"],4))
             result["piececount"].append(round(result["total"]["avg_piececount"],1))
             local_time = time.localtime(start_time)
             current_month = local_time.tm_mon
