@@ -82,37 +82,39 @@ class Train():
         if result==None:
             result={"reward":[], "depth":[], "pacc":[], "vacc":[], "time":[], "piececount":[]}
         if "total" not in result:
-            result["total"]={"agent":0, "pacc":0, "vacc":0, "ns":0, "reward":0, "depth":0, "step_time":0, "_agent":0}
+            result["total"]={"agent":0, "pacc":0, "vacc":0, "ns":0, "depth":0, "step_time":0, "_agent":0}
         if "best" not in result:
             result["best"]={"reward":0, "agent":0}
-        if "piececount" not in result["total"]:
-            result["total"]["piececount"]=0
         if "avg_piececount" not in result["total"]:
-            result["total"]["avg_piececount"]=20            
-        if "avg_reward_piececount" not in result["total"]:
-            result["total"]["avg_reward_piececount"]=0            
+            result["total"]["avg_piececount"]=20                      
+        if "min_piececount" not in result["total"]:
+            result["total"]["min_piececount"]=20                      
+        if "max_piececount" not in result["total"]:
+            result["total"]["max_piececount"]=20                      
         if "n_playout" not in result["total"]:
             result["total"]["n_playout"]=self.n_playout
         if "win_lost_tie" not in result["total"]:
             result["total"]["win_lost_tie"]=[0,0,0]            
+        if "max_score" not in result["total"]:
+            result["total"]["max_score"]=0  
+        if "min_score" not in result["total"]:
+            result["total"]["min_score"]=0  
         if "avg_score" not in result["total"]:
             result["total"]["avg_score"]=0  
-        if "avg_score_ex" not in result["total"]:
-            result["total"]["avg_score_ex"]=0  
-        if "avg_qval" not in result["total"]:
-            result["total"]["avg_qval"]=0  
-        if "avg_state_value" not in result["total"]:
-            result["total"]["avg_state_value"]=0  
-        if "exrewardRate" not in result["total"]:
-            result["total"]["exrewardRate"]=0.1  
+        if "score_mcts" not in result["total"]:
+            result["total"]["score_mcts"]=0  
+        if "piececount_mcts" not in result["total"]:
+            result["total"]["piececount_mcts"]=0
+        if "qval" not in result["total"]:
+            result["total"]["qval"]=0  
+        if "state_value" not in result["total"]:
+            result["total"]["state_value"]=0  
         if "piececount" not in result:
             result["piececount"]=[]
         if "update" not in result:
             result["update"]=[]
         if "qval" not in result:
             result["qval"]=[]    
-        if "rate" not in result:
-            result["rate"]=[]    
         if "advantage" in result:
             del result["advantage"]
         return result
@@ -140,10 +142,12 @@ class Train():
 
     def test_play(self,game_json,policy_value_net):
         # 先运行测试
-        his_pieces = None
-        his_pieces_len = 0
-        min_pieces_count = 9999999
-        min_removedlines = 0
+        min_his_pieces = None
+        min_his_pieces_len = 0
+        min_pieces_count = -1
+        min_removedlines = -1
+        max_pieces_count = -1
+        max_removedlines = -1
         for _ in range(self.play_size):
             result = self.read_status_file(game_json)     
             agent = Agent(isRandomNextPiece=True)
@@ -159,8 +163,8 @@ class Train():
                         'step:', agent.steps, "step time:", round((time.time()-start_time)/i,3),'avg_score:', result["total"]["avg_score"])            
 
                 if agent.terminal:            
-                    result["total"]["avg_score"] += (agent.removedlines-result["total"]["avg_score"])/1000
-                    result["total"]["avg_piececount"] += (agent.piececount-result["total"]["avg_piececount"])/1000
+                    result["total"]["avg_score"] += (agent.removedlines-result["total"]["avg_score"])/100
+                    result["total"]["avg_piececount"] += (agent.piececount-result["total"]["avg_piececount"])/100
                     result["lastupdate"] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                     break
                 
@@ -169,16 +173,32 @@ class Train():
             agent.print()
 
             # 找到当前放置的最小方块局面，重新玩
-            if agent.piececount < min_pieces_count:
+            if min_pieces_count==-1 or agent.piececount < min_pieces_count:
                 min_pieces_count = agent.piececount
-                his_pieces = agent.piecehis
-                his_pieces_len = len(agent.piecehis)
+                min_his_pieces = agent.piecehis
+                min_his_pieces_len = len(agent.piecehis)
                 min_removedlines = agent.removedlines
-                    
-        self.save_status_file(result, game_json)         
-        return min_removedlines, his_pieces, his_pieces_len
+            if max_pieces_count==-1 or agent.piececount > max_pieces_count:         
+                max_pieces_count = agent.piececount
+                max_removedlines = agent.removedlines
+        
+        result["total"]["max_score"] += (max_removedlines-result["total"]["max_score"])/100
+        result["total"]["max_piececount"] += (max_pieces_count-result["total"]["max_piececount"])/100
+        result["total"]["min_score"] += (min_removedlines-result["total"]["min_score"])/100
+        result["total"]["min_piececount"] += (min_pieces_count-result["total"]["min_piececount"])/100        
+        
+        self.save_status_file(result, game_json)  
+        
+        if min_removedlines<result["total"]["min_score"]:
+            filename = "{}-{}.pkl".format("".join(min_his_pieces), min_his_pieces_len)
+            his_pieces_file = os.path.join(self.waitplaydir, filename)
+            print("save need replay", his_pieces_file)
+            with open(his_pieces_file, "wb") as fn:
+                pickle.dump(min_his_pieces, fn)
+                               
+        return min_removedlines, min_his_pieces, min_his_pieces_len
 
-    def play(self, cache, result, min_removedlines, his_pieces, his_pieces_len, player, exrewardRate):
+    def play(self, cache, result, min_removedlines, his_pieces, his_pieces_len, player):
         data = {"steps":[],"shapes":[],"last_state":0,"score":0,"piece_count":0}
         if his_pieces!=None:
             print("min_removedlines:", min_removedlines, "pieces_count:", len(his_pieces))
@@ -196,12 +216,6 @@ class Train():
         agent.setCache(cache)
         
         agent.show_mcts_process= True
-        # agent.id = 0 if random.random()>0.5 else 1
-        # agent.exreward = True #random.random()>0.5
-        # if agent.exreward:
-        #     agent.exrewardRate = exrewardRate
-        # else:
-        #     agent.exrewardRate = 1
         
         max_emptyCount = random.randint(10,30)
         start_time = time.time()
@@ -320,7 +334,7 @@ class Train():
             his_pieces = []
             his_pieces_len = 0
         # 如果有消除行，看看有没有待训练集有没有需要训练的，如果有，就用待训练否则用试玩中最差的训练
-        elif min_removedlines>0:
+        elif min_removedlines>result["total"]["min_score"]:
             # 检查有没有需要重复运行的
             listFiles = os.listdir(self.waitplaydir)
             for f in listFiles:
@@ -337,7 +351,6 @@ class Train():
         
         play_data = []
         result = self.read_status_file(game_json) 
-        exrewardRate = result["total"]["exrewardRate"]
         exreward_end_piececounts = []    
         for playcount in range(2):
             player.set_player_id(playcount)
@@ -348,7 +361,7 @@ class Train():
                 player.need_max_ps = True
                 player.need_max_ns = False
                 
-            agent, data, qval, state_value, exreward_end_piececount, start_time, paytime = self.play(cache, result, min_removedlines, his_pieces, his_pieces_len, player, exrewardRate)
+            agent, data, qval, state_value, exreward_end_piececount, start_time, paytime = self.play(cache, result, min_removedlines, his_pieces, his_pieces_len, player)
             play_data.append({"agent":agent, "data":data, "qval":qval, "state_value":state_value, "start_time":start_time, "paytime":paytime})
             his_pieces = agent.piecehis
             his_pieces_len = len(agent.piecehis)
@@ -380,14 +393,13 @@ class Train():
         avg_state_value = total_game_state_value/total_game_steps
         
         print("step pay time:", steptime, "qval:", avg_qval, "avg_state_value:", avg_state_value)
-        result["total"]["avg_score_ex"] += (total_game_score/2-result["total"]["avg_score_ex"])/100
-        result["total"]["avg_reward_piececount"] += (total_game_score/total_game_piececount - result["total"]["avg_reward_piececount"])/1000
                         
         alpha = 0.01
-        if exrewardRate==result["total"]["exrewardRate"]:
-            result["total"]["avg_qval"] += alpha * (avg_qval - result["total"]["avg_qval"])
-            
-        result["total"]["avg_state_value"] += alpha * (avg_state_value - result["total"]["avg_state_value"])
+        result["total"]["score_mcts"] += alpha * (total_game_score/2-result["total"]["score_mcts"])
+        result["total"]["piececount_mcts"] += alpha * (total_game_piececount/2-result["total"]["piececount_mcts"])        
+        result["total"]["qval"] += alpha * (avg_qval - result["total"]["qval"])            
+        result["total"]["state_value"] += alpha * (avg_state_value - result["total"]["state_value"])
+        result["total"]["step_time"] += alpha * (steptime-result["total"]["step_time"])
 
         # 速度控制在消耗50行
         if win_values[0]==1:
@@ -400,27 +412,12 @@ class Train():
         result["total"]["agent"] += 1
         result["total"]["_agent"] += 1
 
-        if result["total"]["step_time"]==0:
-            result["total"]["step_time"] = steptime
-        else:
-            result["total"]["step_time"] += (steptime-result["total"]["step_time"])/100
     
         if game_score>result["best"]["reward"]:
             result["best"]["reward"] = game_score
             result["best"]["agent"] = result["total"]["agent"]
         else:
             result["best"]["reward"] = round(result["best"]["reward"] - 0.9999,4)
-
-        if result["total"]["reward"]==0:
-            result["total"]["reward"] = game_score
-        else:
-            result["total"]["reward"] += (game_score-result["total"]["reward"])/100
-
-        if result["total"]["piececount"]==0:
-            result["total"]["piececount"] = total_game_piececount/2
-        else:
-            result["total"]["piececount"] += (total_game_piececount/2-result["total"]["piececount"])/100
-
 
         # 计算 acc 看有没有收敛
         pacc = []
@@ -469,7 +466,6 @@ class Train():
             result["vacc"].append(round(result["total"]["vacc"],2))
             result["time"].append(round(result["total"]["step_time"],1))
             result["qval"].append(round(result["total"]["avg_qval"],4))
-            result["rate"].append(round(result["total"]["exrewardRate"],5))
             result["piececount"].append(round(result["total"]["avg_piececount"],1))
             local_time = time.localtime(start_time)
             current_month = local_time.tm_mon
@@ -490,8 +486,6 @@ class Train():
                 result["time"].remove(result["time"][0])
             while len(result["qval"])>max_list_len:
                 result["qval"].remove(result["qval"][0])
-            while len(result["rate"])>max_list_len:
-                result["rate"].remove(result["rate"][0])
             while len(result["piececount"])>max_list_len:
                 result["piececount"].remove(result["piececount"][0])
             while len(result["update"])>max_list_len:
@@ -557,16 +551,6 @@ class Train():
         print("agent 0 piececount:", play_data[0]["agent"].piececount, "agent 1 piececount:", play_data[1]["agent"].piececount)
         print("agent 0 paytime:", play_data[0]["paytime"], "agent 1 paytime:", play_data[1]["paytime"])
         
-        # 游戏结束
-#            if random.random()>0.1 or (agent.removedlines>min_removedlines and piececount>his_pieces_len): break
-        # 如果是交换训练结束且或者消除的行数大于历史最低值并且当前方块数量大于历史最高值，则停止训练
-        if game_score<min_removedlines:
-            filename = "{}-{}.pkl".format("".join(agent.piecehis), len(agent.piecehis))
-            his_pieces_file = os.path.join(self.waitplaydir, filename)
-            print("save need replay", his_pieces_file)
-            with open(his_pieces_file, "wb") as fn:
-                pickle.dump(agent.piecehis, fn)
-                    
 
     def run(self):
         """启动训练"""
