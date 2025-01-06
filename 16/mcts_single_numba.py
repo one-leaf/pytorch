@@ -119,7 +119,7 @@ def expandPN(s:int, availables, act_probs, Ps, Ns, Nsa, Qsa, actions_num):
     _p_sum = np.sum(_p)
     probs = availables/np.sum(availables)
     if _p_sum > 0:        
-        probs = probs*0.01 + _p*0.99/_p_sum
+        probs = probs*0.1 + _p*0.9/_p_sum
     Ps[s] = probs 
     Ns[s] = 0
     Nsa[s] = np.zeros(actions_num, dtype=np.int64)
