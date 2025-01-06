@@ -336,11 +336,7 @@ class Train():
 
         cache={}
 
-        if random.random()<0.5:
-            his_pieces = []
-            his_pieces_len = 0
-        # 如果有消除行，看看有没有待训练集有没有需要训练的，如果有，就用待训练否则用试玩中最差的训练
-        elif min_removedlines>result["total"]["min_score"]:
+        if min_removedlines>result["total"]["min_score"]:
             # 检查有没有需要重复运行的
             listFiles = [f for f in os.listdir(self.waitplaydir) if f.endswith(".pkl")]
             if listFiles:
@@ -351,6 +347,9 @@ class Train():
                     his_pieces_len = len(his_pieces)
                 print("load need replay", filename)
                 os.remove(filename)
+        else:
+            his_pieces = []
+            his_pieces_len = 0
         
         play_data = []
         result = self.read_status_file(game_json) 
