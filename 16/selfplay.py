@@ -346,8 +346,8 @@ class Train():
             for f in listFiles:
                 if f.endswith(".pkl"):
                     filename = os.path.join(self.waitplaydir, f)
-                    # 仅仅重新训练超过12小时的
-                    if time.time()-os.path.getmtime(filename)>12*60*60:                    
+                    # 仅仅重新训练超过1小时的
+                    if time.time()-os.path.getmtime(filename)>60*60:                    
                         with open(filename, "rb") as fn:
                             his_pieces = pickle.load(fn)
                             his_pieces_len = len(his_pieces)
