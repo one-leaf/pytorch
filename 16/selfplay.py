@@ -105,6 +105,10 @@ class Train():
             result["total"]["score_mcts"]=0  
         if "piececount_mcts" not in result["total"]:
             result["total"]["piececount_mcts"]=0
+        if "piececount0_mcts" not in result["total"]:
+            result["total"]["piececount0_mcts"]=0
+        if "piececount1_mcts" not in result["total"]:
+            result["total"]["piececount1_mcts"]=0
         if "qval" not in result["total"]:
             result["total"]["qval"]=0  
         if "state_value" not in result["total"]:
@@ -374,6 +378,7 @@ class Train():
         total_game_score =  play_data[0]["agent"].removedlines + play_data[1]["agent"].removedlines 
         total_game_steps =  play_data[0]["agent"].steps + play_data[1]["agent"].steps 
         total_game_piececount =  play_data[0]["agent"].piececount + play_data[1]["agent"].piececount 
+        total_game_exreward_end_piececounts =  exreward_end_piececounts[0] + exreward_end_piececounts[1] 
         total_game_paytime =  play_data[0]["paytime"] + play_data[1]["paytime"] 
         total_game_state_value =  play_data[0]["state_value"] + play_data[1]["state_value"] 
         total_game_qval =  play_data[0]["qval"] + play_data[1]["qval"] 
@@ -398,7 +403,9 @@ class Train():
                         
         alpha = 0.01
         result["total"]["score_mcts"] += alpha * (total_game_score/2-result["total"]["score_mcts"])
-        result["total"]["piececount_mcts"] += alpha * (total_game_piececount/2-result["total"]["piececount_mcts"])        
+        result["total"]["piececount_mcts"] += alpha * (total_game_piececount/2-result["total"]["piececount_mcts"])   
+        result["total"]["piececount0_mcts"] += alpha * total_game_exreward_end_piececounts/2
+        result["total"]["piececount1_mcts"] += alpha * (total_game_piececount-total_game_exreward_end_piececounts)/2    
         result["total"]["qval"] += alpha * (avg_qval - result["total"]["qval"])            
         result["total"]["state_value"] += alpha * (avg_state_value - result["total"]["state_value"])
         result["total"]["step_time"] += alpha * (steptime-result["total"]["step_time"])
