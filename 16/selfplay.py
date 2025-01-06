@@ -342,18 +342,15 @@ class Train():
         # 如果有消除行，看看有没有待训练集有没有需要训练的，如果有，就用待训练否则用试玩中最差的训练
         elif min_removedlines>result["total"]["min_score"]:
             # 检查有没有需要重复运行的
-            listFiles = os.listdir(self.waitplaydir)
-            for f in listFiles:
-                if f.endswith(".pkl"):
-                    filename = os.path.join(self.waitplaydir, f)
-                    # 仅仅重新训练超过1小时的
-                    if time.time()-os.path.getmtime(filename)>60*60:                    
-                        with open(filename, "rb") as fn:
-                            his_pieces = pickle.load(fn)
-                            his_pieces_len = len(his_pieces)
-                        print("load need replay", filename)
-                        os.remove(filename)
-                        break            
+            listFiles = [f for f in os.listdir(self.waitplaydir) if f.endswith(".pkl")]
+            if listFiles:
+                earliest_file = min(listFiles, key=lambda f: os.path.getctime(os.path.join(self.waitplaydir, f)))
+                filename = os.path.join(self.waitplaydir, earliest_file)
+                with open(filename, "rb") as fn:
+                    his_pieces = pickle.load(fn)
+                    his_pieces_len = len(his_pieces)
+                print("load need replay", filename)
+                os.remove(filename)
         
         play_data = []
         result = self.read_status_file(game_json) 
