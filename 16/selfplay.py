@@ -285,7 +285,7 @@ class Train():
                     player.need_max_ps = not player.need_max_ps
                     player.need_max_ns = not player.need_max_ns
                 
-                if not agent.exreward: exreward_end_piececount = agent.piececount
+                if agent.exreward: exreward_end_piececount = agent.piececount
                     
                 if not os.path.exists(self.waitplaydir):
                     raise Exception("waitplaydir not exists")
