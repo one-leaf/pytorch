@@ -115,14 +115,13 @@ class Train():
             result["update"]=[]
         if "qval" not in result:
             result["qval"]=[]    
-        if "advantage" in result:
-            del result["advantage"]
-        if "avg_score_ex" in result["total"]: del result["total"]["avg_score_ex"]
-        if "exrewardRate" in result["total"]: del result["total"]["exrewardRate"]
-        if "avg_reward_piececount" in result["total"]: del result["total"]["avg_reward_piececount"]
-        if "avg_qval" in result["total"]: del result["total"]["avg_qval"]
-        if "piececount" in result["total"]: del result["total"]["piececount"]
-        if "avg_state_value" in result["total"]: del result["total"]["avg_state_value"]
+        # if "advantage" in result: del result["advantage"]
+        # if "avg_score_ex" in result["total"]: del result["total"]["avg_score_ex"]
+        # if "exrewardRate" in result["total"]: del result["total"]["exrewardRate"]
+        # if "avg_reward_piececount" in result["total"]: del result["total"]["avg_reward_piececount"]
+        # if "avg_qval" in result["total"]: del result["total"]["avg_qval"]
+        # if "piececount" in result["total"]: del result["total"]["piececount"]
+        # if "avg_state_value" in result["total"]: del result["total"]["avg_state_value"]
         
         return result
 
@@ -196,7 +195,7 @@ class Train():
         
         self.save_status_file(result, game_json)  
         
-        if min_removedlines<result["total"]["min_score"]:
+        if min_pieces_count<result["total"]["min_piececount"]:
             filename = "{}-{}.pkl".format("".join(min_his_pieces), min_his_pieces_len)
             his_pieces_file = os.path.join(self.waitplaydir, filename)
             print("save need replay", his_pieces_file)
