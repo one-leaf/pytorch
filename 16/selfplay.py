@@ -404,8 +404,8 @@ class Train():
         alpha = 0.01
         result["total"]["score_mcts"] += alpha * (total_game_score/2-result["total"]["score_mcts"])
         result["total"]["piececount_mcts"] += alpha * (total_game_piececount/2-result["total"]["piececount_mcts"])   
-        result["total"]["piececount0_mcts"] += alpha * total_game_exreward_end_piececounts/2
-        result["total"]["piececount1_mcts"] += alpha * (total_game_piececount-total_game_exreward_end_piececounts)/2    
+        result["total"]["piececount0_mcts"] += alpha * (total_game_exreward_end_piececounts/2-result["total"]["piececount0_mcts"])
+        result["total"]["piececount1_mcts"] += alpha * ((total_game_piececount-total_game_exreward_end_piececounts)/2 - result["total"]["piececount1_mcts"])    
         result["total"]["qval"] += alpha * (avg_qval - result["total"]["qval"])            
         result["total"]["state_value"] += alpha * (avg_state_value - result["total"]["state_value"])
         result["total"]["step_time"] += alpha * (steptime-result["total"]["step_time"])
