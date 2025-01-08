@@ -115,6 +115,10 @@ class Train():
             result["total"]["state_value"]=0  
         if "piececount" not in result:
             result["piececount"]=[]
+        if "piececount0_mcts" not in result:
+            result["piececount0_mcts"]=[]
+        if "piececount1_mcts" not in result:
+            result["piececount1_mcts"]=[]
         if "update" not in result:
             result["update"]=[]
         if "qval" not in result:
@@ -475,6 +479,9 @@ class Train():
             result["time"].append(round(result["total"]["step_time"],1))
             result["qval"].append(round(result["total"]["qval"],4))
             result["piececount"].append(round(result["total"]["avg_piececount"],1))
+            result["piececount0_mcts"].append(round(result["total"]["piececount0_mcts"],1))
+            result["piececount1_mcts"].append(round(result["total"]["piececount1_mcts"],1))
+            
             local_time = time.localtime(start_time)
             current_month = local_time.tm_mon
             current_day = local_time.tm_mday
@@ -496,6 +503,10 @@ class Train():
                 result["qval"].remove(result["qval"][0])
             while len(result["piececount"])>max_list_len:
                 result["piececount"].remove(result["piececount"][0])
+            while len(result["piececount0_mcts"])>max_list_len:
+                result["piececount0_mcts"].remove(result["piececount0_mcts"][0])
+            while len(result["piececount1_mcts"])>max_list_len:
+                result["piececount1_mcts"].remove(result["piececount1_mcts"][0])
             while len(result["update"])>max_list_len:
                 result["update"].remove(result["update"][0])
             
