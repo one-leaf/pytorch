@@ -191,20 +191,19 @@ class Train():
             if max_pieces_count==-1 or agent.piececount > max_pieces_count:         
                 max_pieces_count = agent.piececount
                 max_removedlines = agent.removedlines
+
+            if agent.piececount<result["total"]["min_piececount"]:
+                filename = "{}-{}.pkl".format("".join(min_his_pieces), min_his_pieces_len)
+                his_pieces_file = os.path.join(self.waitplaydir, filename)
+                print("save need replay", his_pieces_file)
+                with open(his_pieces_file, "wb") as fn:
+                    pickle.dump(min_his_pieces, fn)
         
         result["total"]["max_score"] += (max_removedlines-result["total"]["max_score"])/100
         result["total"]["max_piececount"] += (max_pieces_count-result["total"]["max_piececount"])/100
         result["total"]["min_score"] += (min_removedlines-result["total"]["min_score"])/100
-        result["total"]["min_piececount"] += (min_pieces_count-result["total"]["min_piececount"])/100        
-        
-        self.save_status_file(result, game_json)  
-        
-        if min_pieces_count<result["total"]["min_piececount"]:
-            filename = "{}-{}.pkl".format("".join(min_his_pieces), min_his_pieces_len)
-            his_pieces_file = os.path.join(self.waitplaydir, filename)
-            print("save need replay", his_pieces_file)
-            with open(his_pieces_file, "wb") as fn:
-                pickle.dump(min_his_pieces, fn)
+        result["total"]["min_piececount"] += (min_pieces_count-result["total"]["min_piececount"])/100                
+        self.save_status_file(result, game_json)          
                                
         return min_removedlines, min_his_pieces, min_his_pieces_len
 
