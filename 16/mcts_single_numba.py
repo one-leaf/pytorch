@@ -366,7 +366,7 @@ class MCTS():
             v = -2
         elif r < 0 and state.game.piececount - state.markPiececount >1:
             v = r
-        elif v > 0 and state.game.piececount - state.markPiececount >10:
+        elif r > 0 and state.game.piececount - state.markPiececount >10:
             v = r
         else:
             v = self.search(state) 
