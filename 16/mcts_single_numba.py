@@ -366,6 +366,8 @@ class MCTS():
             v = -2
         elif r < 0 and state.game.piececount - state.markPiececount >1:
             v = r
+        elif v > 0 and random.random()<0.5:
+            v = r
         else:
             v = self.search(state) 
 #            if not self.extra_reward and v<-2: v=-1.99
