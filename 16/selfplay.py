@@ -261,8 +261,9 @@ class Train():
             _, reward = agent.step(action)
 
             total_qval += qval
-            max_qval = max(max_qval, qval)
-            min_qval = min(min_qval, qval)    
+            if agent.exreward:            
+                max_qval = max(max_qval, qval)
+                min_qval = min(min_qval, qval)    
             # if qval > 0:
             #     avg_qval += 1
             # else:
