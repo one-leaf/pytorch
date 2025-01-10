@@ -193,6 +193,7 @@ class MCTS():
         self.t = 0
         self.c = 1
         self.limit_depth = limit_depth
+        self.qs_fix = 1
         # self.extra_reward = False
     
     def get_action_probs(self, state:State, temp:float=1):
@@ -365,7 +366,9 @@ class MCTS():
         if state.game.terminal:
             v = -2
         elif r != 0 and state.game.piececount - state.markPiececount >= 8:
-            v = r/8
+            if r>self.qs_fix:
+                self.qs_fix = self.qs_fix*0.09+r*0.01
+            v = r/self.qs_fix
         else:
             v = self.search(state) 
 #            if not self.extra_reward and v<-2: v=-1.99
