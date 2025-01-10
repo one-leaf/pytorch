@@ -367,7 +367,7 @@ class MCTS():
             v = -2
         elif r != 0 and state.game.piececount - state.markPiececount >= 8:
             if r>self.qs_fix:
-                self.qs_fix = self.qs_fix*0.99+r*0.01
+                self.qs_fix = self.qs_fix*0.9+r*0.1
             v = r/self.qs_fix
         else:
             v = self.search(state) 
