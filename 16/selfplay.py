@@ -325,10 +325,11 @@ class Train():
         
         game_json = os.path.join(data_dir, "result.json")
   
-        print('start game time:', datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+        print('start test time:', datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 
         min_removedlines, his_pieces, his_pieces_len = self.test_play(game_json, policy_value_net)
         
+        print('end test time:', datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 
         # 正式运行
         limit_depth=20
@@ -588,11 +589,11 @@ def profiler():
     profiler.print_stats()
 
 if __name__ == '__main__':
-    print('start training',datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+    print('start playing',datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
     np.set_printoptions(precision=2, suppress=True)
 
     training = Train()
     training.run()
     # profiler()
-    print('end training',datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+    print('end playing',datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
     print("")
