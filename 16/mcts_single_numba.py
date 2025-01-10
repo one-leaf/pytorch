@@ -473,7 +473,6 @@ class MCTSPlayer(object):
 
             action = idx
             qval = act_qs[idx]
-            max_qval = np.max(act_qs)
 
             if idx!=max_ps_idx:
                 need_max_ns = "need_max_ns" if self.need_max_ns else ""
@@ -488,7 +487,7 @@ class MCTSPlayer(object):
             if self.player==0:
                 self.cache[hash(state)] = action
 
-            return action, qval, act_probs, state_v, max_qval, acc_ps, depth, state_n
+            return action, qval, act_probs, state_v, acc_ps, depth, state_n
         else:
             print("WARNING: game is terminal")
 
