@@ -585,7 +585,7 @@ class Train():
         print("agent 0 steps:", play_data[0]["agent"].steps, "agent 1 steps:", play_data[1]["agent"].steps)
         print("agent 0 piececount:", play_data[0]["agent"].piececount, "agent 1 piececount:", play_data[1]["agent"].piececount)
         print("agent 0 paytime:", play_data[0]["paytime"], "agent 1 paytime:", play_data[1]["paytime"])
-        
+        print("max_game_qval:", max_game_qval, "min_game_qval:", min_game_qval, "avg_qval:", avg_qval)
 
     def run(self):
         """启动训练"""
