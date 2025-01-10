@@ -42,7 +42,7 @@ class Train():
         # MCTS child权重， 用来调节MCTS搜索深度，越大搜索越深，越相信概率，越小越相信Q 的程度 默认 5
         # 由于value完全用结果胜负来拟合，所以value不稳，只能靠概率p拟合，最后带动value来拟合
         self.c_puct = 10  
-
+        self.q_puct = 1
         self.max_step_count = 10000 
         self.limit_steptime = 3  # 限制每一步的平均花费时间，单位秒，默认10秒
 
@@ -347,7 +347,10 @@ class Train():
         
         self.n_playout = int(result["total"]["n_playout"])
 
-        player = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout, limit_depth=limit_depth)
+        if result["total"]["max_qval"]-result["total"]["min_qval"]>1 and result["total"]["avg_qval"]>0:
+            self.q_puct = 1+(result["total"]["max_qval"]-result["total"]["min_qval"])*result["total"]["avg_qval"]
+
+        player = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=self.c_puct, q_puct=self.q_puct, n_playout=self.n_playout, limit_depth=limit_depth)
 
         cache={}
 
