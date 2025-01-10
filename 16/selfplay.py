@@ -111,6 +111,10 @@ class Train():
             result["total"]["piececount1_mcts"]=0
         if "qval" not in result["total"]:
             result["total"]["qval"]=0  
+        if "max_qval" not in result["total"]:
+            result["total"]["max_qval"]=0  
+        if "min_qval" not in result["total"]:
+            result["total"]["min_qval"]=0  
         if "state_value" not in result["total"]:
             result["total"]["state_value"]=0  
         if "piececount" not in result:
@@ -234,6 +238,8 @@ class Train():
         start_time = time.time()
         mark_reward_piececount = -1
         total_qval=0
+        max_qval=0
+        min_qval=0
         total_state_value=0
         need_max_ps = False # random.random()>0.5
         exreward_end_piececount = 0
@@ -255,7 +261,8 @@ class Train():
             _, reward = agent.step(action)
 
             total_qval += qval
-
+            max_qval = max(max_qval, qval)
+            min_qval = min(min_qval, qval)    
             # if qval > 0:
             #     avg_qval += 1
             # else:
@@ -300,7 +307,7 @@ class Train():
                 data["score"] = agent.score
                 data["piece_count"] = agent.piececount
                 data["piece_height"] = agent.pieceheight
-                return agent, data, total_qval, total_state_value, exreward_end_piececount, start_time, paytime
+                return agent, data, total_qval, total_state_value, exreward_end_piececount, max_qval, min_qval, start_time, paytime
             
 
 
@@ -371,8 +378,8 @@ class Train():
                 player.need_max_ps = True
                 player.need_max_ns = False
                 
-            agent, data, qval, state_value, exreward_end_piececount, start_time, paytime = self.play(cache, result, min_removedlines, his_pieces, his_pieces_len, player)
-            play_data.append({"agent":agent, "data":data, "qval":qval, "state_value":state_value, "start_time":start_time, "paytime":paytime})
+            agent, data, qval, state_value, exreward_end_piececount, max_qval, min_qval, start_time, paytime = self.play(cache, result, min_removedlines, his_pieces, his_pieces_len, player)
+            play_data.append({"agent":agent, "data":data, "qval":qval, "max_qval":max_qval, "min_qval":min_qval, "state_value":state_value, "start_time":start_time, "paytime":paytime})
             his_pieces = agent.piecehis
             his_pieces_len = len(agent.piecehis)
             exreward_end_piececounts.append(exreward_end_piececount)
@@ -386,6 +393,8 @@ class Train():
         total_game_paytime =  play_data[0]["paytime"] + play_data[1]["paytime"] 
         total_game_state_value =  play_data[0]["state_value"] + play_data[1]["state_value"] 
         total_game_qval =  play_data[0]["qval"] + play_data[1]["qval"] 
+        max_game_qval = max(play_data[0]["max_qval"], play_data[1]["max_qval"])
+        min_game_qval = min(play_data[0]["min_qval"], play_data[1]["min_qval"])
         game_score = max(play_data[0]["agent"].removedlines, play_data[1]["agent"].removedlines)
         win_values =[-1, -1]
         if play_data[0]["agent"].piececount>play_data[1]["agent"].piececount:
@@ -411,6 +420,8 @@ class Train():
         result["total"]["piececount0_mcts"] += alpha * (total_game_exreward_end_piececounts/2-result["total"]["piececount0_mcts"])
         result["total"]["piececount1_mcts"] += alpha * ((total_game_piececount-total_game_exreward_end_piececounts)/2 - result["total"]["piececount1_mcts"])    
         result["total"]["qval"] += alpha * (avg_qval - result["total"]["qval"])            
+        result["total"]["max_qval"] += alpha * (max_game_qval - result["total"]["max_qval"])            
+        result["total"]["min_qval"] += alpha * (min_game_qval - result["total"]["min_qval"])
         result["total"]["state_value"] += alpha * (avg_state_value - result["total"]["state_value"])
         result["total"]["step_time"] += alpha * (steptime-result["total"]["step_time"])
 
