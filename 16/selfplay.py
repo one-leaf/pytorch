@@ -117,6 +117,8 @@ class Train():
             result["total"]["min_qval"]=0  
         if "state_value" not in result["total"]:
             result["total"]["state_value"]=0  
+        if  "q_puct" not in result["total"]:
+            result["total"]["q_puct"]=1
         if "piececount" not in result:
             result["piececount"]=[]
         if "piececount0_mcts" not in result:
@@ -126,7 +128,9 @@ class Train():
         if "update" not in result:
             result["update"]=[]
         if "qval" not in result:
-            result["qval"]=[]    
+            result["qval"]=[]  
+        if "q_puct" not in result:
+            result["q_puct"]=[]
         # if "advantage" in result: del result["advantage"]
         # if "avg_score_ex" in result["total"]: del result["total"]["avg_score_ex"]
         # if "exrewardRate" in result["total"]: del result["total"]["exrewardRate"]
@@ -428,7 +432,8 @@ class Train():
         result["total"]["min_qval"] += alpha * (min_game_qval - result["total"]["min_qval"])
         result["total"]["state_value"] += alpha * (avg_state_value - result["total"]["state_value"])
         result["total"]["step_time"] += alpha * (steptime-result["total"]["step_time"])
-
+        result["total"]["q_puct"] += alpha * (self.q_puct-result["total"]["q_puct"])
+        
         # 速度控制在消耗50行
         if win_values[0]==1:
             result["total"]["win_lost_tie"][0] += 1
@@ -497,6 +502,7 @@ class Train():
             result["piececount"].append(round(result["total"]["avg_piececount"],1))
             result["piececount0_mcts"].append(round(result["total"]["piececount0_mcts"],1))
             result["piececount1_mcts"].append(round(result["total"]["piececount1_mcts"],1))
+            result["q_puct"].append(round(result["total"]["q_puct"],2))
             
             local_time = time.localtime(start_time)
             current_month = local_time.tm_mon
