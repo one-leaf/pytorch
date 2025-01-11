@@ -352,9 +352,7 @@ class Train():
         
         self.n_playout = int(result["total"]["n_playout"])
 
-        if result["total"]["max_qval"]-result["total"]["min_qval"]>2 and result["total"]["qval"]>0:
-            self.q_puct = (result["total"]["max_qval"]-result["total"]["min_qval"])*result["total"]["qval"]*0.5
-            print("fix q_puct:", self.q_puct)
+        self.q_puct = result["total"]["q_puct"]
         player = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=self.c_puct, q_puct=self.q_puct, n_playout=self.n_playout, limit_depth=limit_depth)
 
         cache={}
@@ -432,7 +430,13 @@ class Train():
         result["total"]["min_qval"] += alpha * (min_game_qval - result["total"]["min_qval"])
         result["total"]["state_value"] += alpha * (avg_state_value - result["total"]["state_value"])
         result["total"]["step_time"] += alpha * (steptime-result["total"]["step_time"])
-        result["total"]["q_puct"] += alpha * (self.q_puct-result["total"]["q_puct"])
+
+        if result["total"]["max_qval"]-result["total"]["min_qval"]>2 and result["total"]["qval"]>0:
+            q_puct = (result["total"]["max_qval"]-result["total"]["min_qval"])*result["total"]["qval"]*0.5
+            result["total"]["q_puct"] += alpha * (q_puct-result["total"]["q_puct"])
+            print("fix q_puct:", self.q_puct)
+        else:
+            result["total"]["q_puct"] = 1
         
         # 速度控制在消耗50行
         if win_values[0]==1:
