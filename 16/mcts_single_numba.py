@@ -366,7 +366,7 @@ class MCTS():
         if state.game.terminal:
             v = -2
         elif r != 0 and state.game.piececount%2 ==0:# (state.game.piececount - state.markPiececount)==2:
-            v = r/self.q_puct + self.search(state) 
+            v = r/self.q_puct #+ self.search(state) 
         else:
             v = self.search(state) 
 #            if not self.extra_reward and v<-2: v=-1.99
