@@ -118,7 +118,7 @@ def expandPN(s:int, availables, act_probs, Ps, Ns, Nsa, Qsa, actions_num):
     _p[availables==0]=0
     _p_sum = np.sum(_p)
     probs = availables/np.sum(availables)
-    if _p_sum > 0:        
+    if _p_sum > 0 and np.max(_p/_p_sum)>0.95:        
         probs = probs*0.1 + _p*0.9/_p_sum
     Ps[s] = probs 
     Ns[s] = 0
@@ -365,7 +365,7 @@ class MCTS():
             # 目前Mcts， q[s,a] += v[s+1]/Nsa[s,a]
         if state.game.terminal:
             v = -2
-        elif r != 0 and state.game.piececount%2 ==0:# (state.game.piececount - state.markPiececount)>=2:
+        elif r != 0 and state.game.piececount%4 ==0:# (state.game.piececount - state.markPiececount)>=2:
             v = r/self.q_puct #+ self.search(state) 
         else:
             v = self.search(state) 
