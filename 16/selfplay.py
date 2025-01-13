@@ -357,7 +357,7 @@ class Train():
 
         cache={}
 
-        if min_removedlines>result["total"]["min_score"]:
+        if True: #min_removedlines>result["total"]["min_score"]:
             # 检查有没有需要重复运行的
             listFiles = [f for f in os.listdir(self.waitplaydir) if f.endswith(".pkl")]
             if listFiles:
@@ -368,9 +368,9 @@ class Train():
                     his_pieces_len = len(his_pieces)
                 print("load need replay", filename)
                 os.remove(filename)
-        else:
-            his_pieces = []
-            his_pieces_len = 0
+        # else:
+        #     his_pieces = []
+        #     his_pieces_len = 0
         
         play_data = []
         result = self.read_status_file(game_json) 
