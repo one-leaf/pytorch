@@ -357,20 +357,19 @@ class Train():
 
         cache={}
 
-        if True: #min_removedlines>result["total"]["min_score"]:
-            # 检查有没有需要重复运行的
-            listFiles = [f for f in os.listdir(self.waitplaydir) if f.endswith(".pkl")]
-            if listFiles:
-                earliest_file = min(listFiles, key=lambda f: os.path.getctime(os.path.join(self.waitplaydir, f)))
-                filename = os.path.join(self.waitplaydir, earliest_file)
-                with open(filename, "rb") as fn:
-                    his_pieces = pickle.load(fn)
-                    his_pieces_len = len(his_pieces)
-                print("load need replay", filename)
-                os.remove(filename)
-        # else:
-        #     his_pieces = []
-        #     his_pieces_len = 0
+        # 检查有没有需要重复运行的
+        listFiles = [f for f in os.listdir(self.waitplaydir) if f.endswith(".pkl")]
+        if listFiles:
+            earliest_file = min(listFiles, key=lambda f: os.path.getctime(os.path.join(self.waitplaydir, f)))
+            filename = os.path.join(self.waitplaydir, earliest_file)
+            with open(filename, "rb") as fn:
+                his_pieces = pickle.load(fn)
+                his_pieces_len = len(his_pieces)
+            print("load need replay", filename)
+            os.remove(filename)
+        else:
+            his_pieces = []
+            his_pieces_len = 0
         
         play_data = []
         result = self.read_status_file(game_json) 
