@@ -375,8 +375,8 @@ class MCTS():
         # elif state.game.terminal:
         #     v = -1 #state.game.score * state.game.exrewardRate
         # r = np.tanh(r)
-        # if v>1: v = 1
-        # if v<-1: v= -1
+        if v>1: v = 1
+        if v<-1: v= -1
         # 更新 Q 值 和 访问次数
         # v = r + (v - 0.01)
         # v *= state.game.exrewardRate
