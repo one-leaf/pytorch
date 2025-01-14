@@ -526,6 +526,8 @@ class Train():
                 result["time"].remove(result["time"][0])
             while len(result["qval"])>max_list_len:
                 result["qval"].remove(result["qval"][0])
+            while len(result["q_puct"])>max_list_len:
+                result["q_puct"].remove(result["q_puct"][0])
             while len(result["piececount"])>max_list_len:
                 result["piececount"].remove(result["piececount"][0])
             while len(result["piececount0_mcts"])>max_list_len:
