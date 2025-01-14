@@ -215,7 +215,9 @@ class MCTS():
         self.max_depth:int = (0,0)
         self.simulation_count = 0
         die_count = 0
-        state.mark()
+        
+        if state.game.piececount%4 ==0:
+            state.mark()
 
         state_ = None
         # while True:            
