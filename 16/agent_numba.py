@@ -725,7 +725,7 @@ class Agent():
             # self.emptyCount  = emptyCount
             
             # self.score += reward    # 一个方块1点 
-            self.score = -nb_getUsedCount(self.board)/4 + self.piececount/4   # 一个方块1点 
+            self.score = -nb_getUsedCount(self.board)/4 + self.piececount/2   # 一个方块1点 
 
             # self.pieceheight = self.getAvgHeight()  
             # self.failLines = self.getFailLines()  
