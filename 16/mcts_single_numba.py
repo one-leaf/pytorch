@@ -198,7 +198,9 @@ class MCTS():
         self.c = 1
         self.limit_depth = limit_depth
         self.q_puct = q_puct
+        self.reward_piececount = 5      # 放置几个方块数后奖励一次
         # self.extra_reward = False
+        
     
     def get_action_probs(self, state:State, temp:float=1):
         """
@@ -216,7 +218,7 @@ class MCTS():
         self.simulation_count = 0
         die_count = 0
         
-        if state.game.piececount%4 ==0:
+        if state.game.piececount%self.reward_piececount ==0:
             state.mark()
 
         state_ = None
@@ -371,7 +373,7 @@ class MCTS():
             # 目前Mcts， q[s,a] += v[s+1]/Nsa[s,a]
         if state.game.terminal:
             v = -2
-        elif r != 0 and state.game.piececount%4 ==0:# (state.game.piececount - state.markPiececount)>=2:
+        elif r != 0 and state.game.piececount%self.reward_piececount ==0:# (state.game.piececount - state.markPiececount)>=2:
             v = r/self.q_puct #+ self.search(state) 
         else:
             v = self.search(state) 
