@@ -50,6 +50,8 @@ class Train():
         self.waitplaydir=os.path.join(data_dir,"play")
         if not os.path.exists(self.waitplaydir): os.makedirs(self.waitplaydir)
 
+        self.stop_mark_file = os.path.join(self.waitplaydir,"stop")
+
 
     def save_status_file(self, result, status_file):
         with open(status_file+"_pkl", 'wb') as fn:
@@ -302,8 +304,9 @@ class Train():
                 
                 if agent.exreward: exreward_end_piececount = agent.piececount
                     
-                if not os.path.exists(self.waitplaydir):
-                    raise Exception("waitplaydir not exists")
+                if os.path.exists(self.stop_mark_file):
+                    time.sleep(60)
+                    raise Exception("find stop mark file")
 
             # 如果游戏结束或玩了超过1小时或10个方块都没有消除一行
             paytime = time.time()-start_time
