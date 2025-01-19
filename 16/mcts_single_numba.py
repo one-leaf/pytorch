@@ -378,7 +378,7 @@ class MCTS():
             if r < 0 :
                 v = (r/self.reward_piececount)/self.q_puct #+ self.search(state) 
             else:
-                v = r/self.reward_piececount + self.search(state)
+                v = (r/self.reward_piececount)/self.q_puct + self.search(state)
         else:
             v = self.search(state) 
 #            if not self.extra_reward and v<-2: v=-1.99
