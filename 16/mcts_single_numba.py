@@ -374,10 +374,13 @@ class MCTS():
         if state.game.terminal:
             v = -2
         # elif r != 0 and state.game.piececount%self.reward_piececount ==0:# (state.game.piececount - state.markPiececount)>=self.reward_piececount:
-        elif r < 0 and state.game.piececount%self.reward_piececount ==0:#(state.game.piececount - state.markPiececount)>=self.reward_piececount:
-            v = (r/self.reward_piececount)/self.q_puct #+ self.search(state) 
+        elif state.game.piececount%self.reward_piececount ==0:#(state.game.piececount - state.markPiececount)>=self.reward_piececount:
+            if r < 0 :
+                v = (r/self.reward_piececount)/self.q_puct #+ self.search(state) 
+            else:
+                v = r + self.search(state)
         else:
-            v = r + self.search(state) 
+            v = self.search(state) 
 #            if not self.extra_reward and v<-2: v=-1.99
             
             # r = np.tanh(r)
