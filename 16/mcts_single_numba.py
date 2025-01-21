@@ -350,7 +350,7 @@ class MCTS():
         r = 0
         if state.game.state==1 and state.game.exreward:
             # 这种奖励会照成主动消行，而不管后续的局面
-            r = (state.game.score-state.markscore)/(state.game.steps-self.markSteps)
+            r = (state.game.score-state.markscore)/(state.game.steps-state.markSteps)
         #     # 不鼓励主动消行，以局面为主
             # if state.markEmptyCount>state.game.emptyCount:
             #     v += (state.markEmptyCount-state.game.emptyCount)**2 * state.game.exrewardRate
