@@ -25,6 +25,7 @@ class State():
         self.markfailtop = 0
         self.markEmptyCount = 0  
         self.markPiececount = 0
+        self.markSteps = 0
         
     # 2.049623722920656e-06  
     def __hash__(self):
@@ -45,6 +46,7 @@ class State():
         state.markfailtop = self.markfailtop
         state.markEmptyCount = self.markEmptyCount  
         state.markPiececount = self.markPiececount
+        state.markSteps = self.markSteps
         return state
     
     def mark(self):
@@ -52,6 +54,7 @@ class State():
         self.markfailtop=self.game.failtop
         self.markEmptyCount=self.game.emptyCount
         self.markPiececount=self.game.piececount 
+        self.markSteps=self.game.steps
         
 #@njit(cache=True)
 def selectAction(s:int, availables, _c_puct:float, Ps, Ns, Qsa, Nsa):
@@ -347,7 +350,7 @@ class MCTS():
         r = 0
         if state.game.state==1 and state.game.exreward:
             # 这种奖励会照成主动消行，而不管后续的局面
-            r = state.game.score-state.markscore
+            r = (state.game.score-state.markscore)/(state.game.steps-self.markSteps)
         #     # 不鼓励主动消行，以局面为主
             # if state.markEmptyCount>state.game.emptyCount:
             #     v += (state.markEmptyCount-state.game.emptyCount)**2 * state.game.exrewardRate
@@ -376,9 +379,9 @@ class MCTS():
         # elif r != 0 and state.game.piececount%self.reward_piececount ==0:# (state.game.piececount - state.markPiececount)>=self.reward_piececount:
         elif state.game.piececount%self.reward_piececount ==0:#(state.game.piececount - state.markPiececount)>=self.reward_piececount:
             if r < 0 :
-                v = (r/self.reward_piececount)/self.q_puct #+ self.search(state) 
+                v = r/self.q_puct #+ self.search(state) 
             else:
-                v = (r/self.reward_piececount)/self.q_puct + self.search(state)
+                v = r/self.q_puct + self.search(state)
         else:
             v = self.search(state) 
 #            if not self.extra_reward and v<-2: v=-1.99
