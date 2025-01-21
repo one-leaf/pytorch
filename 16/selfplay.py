@@ -433,7 +433,7 @@ class Train():
         result["total"]["state_value"] += alpha * (avg_state_value - result["total"]["state_value"])
         result["total"]["step_time"] += alpha * (steptime-result["total"]["step_time"])
 
-        if result["total"]["max_qval"]-result["total"]["min_qval"]>2 and result["total"]["qval"]>0:
+        if result["total"]["max_qval"]-result["total"]["min_qval"]>2 and result["total"]["qval"]>0.5:
             q_puct = (result["total"]["max_qval"]-result["total"]["min_qval"])*result["total"]["qval"]*0.5
             result["total"]["q_puct"] += alpha * (q_puct-result["total"]["q_puct"])
             print("fix q_puct:", self.q_puct)
