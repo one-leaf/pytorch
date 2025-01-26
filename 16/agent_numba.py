@@ -456,7 +456,7 @@ class Agent():
         self.piecesteps = 0
         # 方块的数量
         self.piececount = 0
-        # 方块的平均高度
+        # 方块的最高高度
         self.pieceheight = 0
         # 方块空洞数量
         self.emptyCount = 0
@@ -727,7 +727,7 @@ class Agent():
             # self.score += reward    # 一个方块1点 
             self.score = -nb_getUsedCount(self.board)/4 #+ self.piececount + 1  # 一个方块1点 
 
-            # self.pieceheight = self.getAvgHeight()  
+            self.pieceheight = self.getMaxHeight()  
             # self.failLines = self.getFailLines()  
             # self.heightDiff = self.getHeightDiff()
             # self.heightStd = self.getHeightStd()   

@@ -302,6 +302,8 @@ class Train():
                     player.need_max_ps = not player.need_max_ps
                     player.need_max_ns = not player.need_max_ns
                 
+                if agent.pieceheight>10: agent.exreward = False
+                
                 if agent.exreward: exreward_end_piececount = agent.piececount
                     
                 if os.path.exists(self.stop_mark_file):

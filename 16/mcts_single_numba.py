@@ -241,7 +241,7 @@ class MCTS():
             self.max_depth = (depth, step_depth)
             # if self.simulation_count>=self._n_playout and state_.game.state==1: break
             
-        if state.game.exreward and die_count>0: state.game.exreward = False            
+        # if state.game.exreward and die_count>0: state.game.exreward = False            
         self._policy(state_.game, only_Cache_Next=True) 
             # if self.simulation_count>=64 and (self.Ns[s]>=self._n_playout and state_.game.state==1): break
             # if self.simulation_count>=self._n_playout and state_.game.state==1: break
