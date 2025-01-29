@@ -201,7 +201,7 @@ class MCTS():
         self.c = 1
         self.limit_depth = limit_depth
         self.q_puct = q_puct
-        self.reward_piececount = 1      # 放置几个方块数后奖励一次
+        self.reward_piececount = 2      # 放置几个方块数后奖励一次
         # self.extra_reward = False
         
     
@@ -378,10 +378,10 @@ class MCTS():
             v = -2
         # elif r != 0 and state.game.piececount%self.reward_piececount ==0:# (state.game.piececount - state.markPiececount)>=self.reward_piececount:
         elif state.game.piececount%self.reward_piececount ==0:#(state.game.piececount - state.markPiececount)>=self.reward_piececount:
-            if r < 0 :
+            if r != 0 :
                 v = r/self.q_puct #+ self.search(state) 
             else:
-                v = r/self.q_puct + self.search(state)
+                v = self.search(state)
         else:
             v = self.search(state) 
 #            if not self.extra_reward and v<-2: v=-1.99
