@@ -201,7 +201,7 @@ class MCTS():
         self.c = 1
         self.limit_depth = limit_depth
         self.q_puct = q_puct
-        self.reward_piececount = 2      # 放置几个方块数后奖励一次
+        self.reward_piececount = 1      # 放置几个方块数后奖励一次
         # self.extra_reward = False
         
     
