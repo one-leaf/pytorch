@@ -379,12 +379,13 @@ class MCTS():
         # elif r != 0 and state.game.piececount%self.reward_piececount ==0:# (state.game.piececount - state.markPiececount)>=self.reward_piececount:
         elif state.game.piececount%self.reward_piececount ==0:#(state.game.piececount - state.markPiececount)>=self.reward_piececount:
             if r != 0 :
-                if r < 0:
-                    # v = r/self.q_puct #+ self.search(state) 
-                    v = r
-                else:
-                    # v = r/self.q_puct + self.search(state) 
-                    v = r + self.search(state)                     
+                # if r < 0:
+                #     # v = r/self.q_puct #+ self.search(state) 
+                #     v = r
+                # else:
+                #     # v = r/self.q_puct + self.search(state) 
+                #     v = r + self.search(state)  
+                v = r                   
             else:
                 v = self.search(state)
         else:
