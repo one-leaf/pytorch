@@ -574,8 +574,8 @@ class Train():
         print("step_values:", values)
         
         # 局部奖励均值, 计算均值Q/标准差Q，用于 预测价值-均值Q 使其网络更平稳
-        rewards = [play_data[0]["qval"]/(play_data[0]["agent"].steps*play_data[0]["std_qval"])]*play_data[0]["agent"].steps + \
-                        [play_data[1]["qval"]/(play_data[1]["agent"].steps*play_data[1]["std_qval"])]*play_data[1]["agent"].steps                                    
+        rewards = [play_data[0]["qval"]/play_data[0]["agent"].steps]*play_data[0]["agent"].steps + \
+                        [play_data[1]["qval"]/play_data[1]["agent"].steps]*play_data[1]["agent"].steps                                    
         print("step_reward:", rewards)
             
         states, mcts_probs= [], []
