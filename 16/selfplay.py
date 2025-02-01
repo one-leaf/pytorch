@@ -361,6 +361,7 @@ class Train():
         self.n_playout = int(result["total"]["n_playout"])
 
         self.q_puct = result["total"]["q_puct"]
+        print("q_puct:", self.q_puct)   
         player = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=self.c_puct, q_puct=self.q_puct, n_playout=self.n_playout, limit_depth=limit_depth)
 
         cache={}
