@@ -390,7 +390,8 @@ class MCTS():
                 v = self.search(state)
         else:
             v = self.search(state) 
-#            if not self.extra_reward and v<-2: v=-1.99
+            
+        if state.game.exreward: v = v/self.q_puct  
             
             # r = np.tanh(r)
         # elif state.game.terminal:
