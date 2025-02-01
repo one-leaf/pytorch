@@ -442,6 +442,7 @@ class Train():
 
         q_puct = std_game_qval
         result["total"]["q_puct"] += alpha * (q_puct-result["total"]["q_puct"])
+        if result["total"]["q_puct"]>10: result["total"]["q_puct"]=10
         # if result["total"]["max_qval"]-result["total"]["min_qval"]>2 and result["total"]["qval"]>0.5:
         #     q_puct = (result["total"]["max_qval"]-result["total"]["min_qval"])*result["total"]["qval"]*0.5
         #     result["total"]["q_puct"] += alpha * (q_puct-result["total"]["q_puct"])
