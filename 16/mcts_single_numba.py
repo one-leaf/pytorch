@@ -391,7 +391,10 @@ class MCTS():
         else:
             v = self.search(state) 
             
-        if state.game.exreward: v = v/self.q_puct  
+        if state.game.exreward: 
+            v = v/self.q_puct  
+            if v>2: v=2
+            if v<-2: v=-2
             
             # r = np.tanh(r)
         # elif state.game.terminal:
