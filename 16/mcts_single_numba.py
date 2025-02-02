@@ -331,6 +331,7 @@ class MCTS():
             # v = float(v-r/10)
             # v = float(v-r)
             v = float(v)
+            v = (v-self.q_avg)/self.q_puct  
             return v
             
         # 当前最佳概率和最佳动作
@@ -354,8 +355,9 @@ class MCTS():
         if state.game.state==1 and state.game.exreward and state.game.piececount%self.reward_piececount == 0:
             # 这种奖励会照成主动消行，而不管后续的局面
             r = (state.game.score-state.markscore)/(state.game.steps-state.markSteps)
-            v = r + self.search(state)
-            v = (v-self.q_avg)/self.q_puct  
+            # v = r + self.search(state)
+            # v = (v-self.q_avg)/self.q_puct  
+            v = (r-self.q_avg)/self.q_puct + self.search(state)
 
         #     # 不鼓励主动消行，以局面为主
             # if state.markEmptyCount>state.game.emptyCount:
@@ -383,7 +385,7 @@ class MCTS():
         # elif r != 0 and state.game.piececount%self.reward_piececount ==0:# (state.game.piececount - state.markPiececount)>=self.reward_piececount:
         else:
             v = self.search(state) 
-            v = (v-self.q_avg)/self.q_puct  
+            
             
         # if state.game.exreward: 
         # v = (v-self.q_avg)/self.q_puct  
