@@ -420,9 +420,9 @@ class MCTSPlayer(object):
     """基于模型指导概率的MCTS + AI player"""
 
     # c_puct MCTS child权重， 用来调节MCTS搜索深度，越大搜索越深，越相信概率，越小越相信Q 的程度 默认 5
-    def __init__(self, policy_value_function, c_puct=5, q_puct=1, n_playout=2000, limit_depth=20, need_max_ps=False, need_max_ns=False):
+    def __init__(self, policy_value_function, c_puct=5, q_puct=1, q_avg=0, n_playout=2000, limit_depth=20, need_max_ps=False, need_max_ns=False):
         """初始化参数"""
-        self.mcts = MCTS(policy_value_function, c_puct, q_puct, n_playout, limit_depth)
+        self.mcts = MCTS(policy_value_function, c_puct, q_puct, q_avg, n_playout, limit_depth)
         self.need_max_ps = need_max_ps
         self.need_max_ns = need_max_ns
         self.n_playout = n_playout
