@@ -185,7 +185,7 @@ def getEmptySAV_Dict():
     # )
 
 class MCTS():
-    def __init__(self, policy_value_fn, c_puct:float=5, q_puct=1, n_playout:int=10000, limit_depth=20):
+    def __init__(self, policy_value_fn, c_puct:float=5, q_puct=1, q_avg=0, n_playout:int=10000, limit_depth=20):
         self._policy = policy_value_fn      # 概率估算函数
         self._c_puct:float = c_puct               # 参数
         self._n_playout:int = n_playout         # 做几次探索
@@ -201,6 +201,7 @@ class MCTS():
         self.c = 1
         self.limit_depth = limit_depth
         self.q_puct = q_puct
+        self.q_avg = q_avg
         self.reward_piececount = 2      # 放置几个方块数后奖励一次
         # self.extra_reward = False
         
@@ -328,8 +329,8 @@ class MCTS():
             # nanmean(self.Qsa[s]) - np.nanmean(self.Qsa[s][availables==0])
             # v = v - np.nanmean(self.Qsa[s][availables==0])
             # v = float(v-r/10)
-            v = float(v-r)
-            # v = float(v)
+            # v = float(v-r)
+            v = float(v)
             return v
             
         # 当前最佳概率和最佳动作
@@ -392,7 +393,7 @@ class MCTS():
             v = self.search(state) 
             
         # if state.game.exreward: 
-        v = v/self.q_puct  
+        v = (v-self.q_avg)/self.q_puct  
         if v>2: v=2
         if v<-2: v=-2
             

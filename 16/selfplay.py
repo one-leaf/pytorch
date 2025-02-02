@@ -361,8 +361,15 @@ class Train():
         self.n_playout = int(result["total"]["n_playout"])
 
         self.q_puct = result["total"]["q_puct"]
+        self.q_avg = result["total"]["qval"]
+        
+        if self.q_puct>10: self.q_puct=10   
+        if self.q_puct<0.1: self.q_puct=0.1
+        if self.q_avg>1: self.q_avg=1
+        if self.q_avg<-1: self.q_avg=-1       
+        
         print("q_puct:", self.q_puct)   
-        player = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=self.c_puct, q_puct=self.q_puct, n_playout=self.n_playout, limit_depth=limit_depth)
+        player = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=self.c_puct, q_puct=self.q_puct, q_avg=self.q_avg n_playout=self.n_playout, limit_depth=limit_depth)
 
         cache={}
 
@@ -443,7 +450,7 @@ class Train():
 
         q_puct = std_game_qval
         result["total"]["q_puct"] += alpha * (q_puct-result["total"]["q_puct"])
-        if result["total"]["q_puct"]>10: result["total"]["q_puct"]=10
+
         # if result["total"]["max_qval"]-result["total"]["min_qval"]>2 and result["total"]["qval"]>0.5:
         #     q_puct = (result["total"]["max_qval"]-result["total"]["min_qval"])*result["total"]["qval"]*0.5
         #     result["total"]["q_puct"] += alpha * (q_puct-result["total"]["q_puct"])
