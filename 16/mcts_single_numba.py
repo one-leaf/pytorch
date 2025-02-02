@@ -349,9 +349,15 @@ class MCTS():
                 
         # 外部奖励，最大1
         r = 0
+        if state.game.terminal:
+            v = -2
         if state.game.state==1 and state.game.exreward:
             # 这种奖励会照成主动消行，而不管后续的局面
             r = (state.game.score-state.markscore)/(state.game.steps-state.markSteps)
+            v = r + self.search(state)
+            v = (v-self.q_avg)/self.q_puct  
+            if v>2: v=2
+            if v<-2: v=-2
         #     # 不鼓励主动消行，以局面为主
             # if state.markEmptyCount>state.game.emptyCount:
             #     v += (state.markEmptyCount-state.game.emptyCount)**2 * state.game.exrewardRate
@@ -375,27 +381,15 @@ class MCTS():
             # 现实奖励
             # 按照DQN，  q[s,a] += 0.1*(r+ 0.99*(max(q[s+1])-q[s,a])
             # 目前Mcts， q[s,a] += v[s+1]/Nsa[s,a]
-        if state.game.terminal:
-            v = -2
         # elif r != 0 and state.game.piececount%self.reward_piececount ==0:# (state.game.piececount - state.markPiececount)>=self.reward_piececount:
-        elif state.game.piececount%self.reward_piececount ==0:#(state.game.piececount - state.markPiececount)>=self.reward_piececount:
-            if r != 0 :
-                # if r < 0:
-                #     # v = r/self.q_puct #+ self.search(state) 
-                #     v = r
-                # else:
-                #     # v = r/self.q_puct + self.search(state) 
-                #     v = r + self.search(state)  
-                v = r                   
-            else:
-                v = self.search(state)
         else:
             v = self.search(state) 
+            v = (v-self.q_avg)/self.q_puct  
             
         # if state.game.exreward: 
-        v = (v-self.q_avg)/self.q_puct  
-        if v>2: v=2
-        if v<-2: v=-2
+        # v = (v-self.q_avg)/self.q_puct  
+        # if v>2: v=2
+        # if v<-2: v=-2
             
             # r = np.tanh(r)
         # elif state.game.terminal:
