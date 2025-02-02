@@ -365,8 +365,8 @@ class Train():
         self.q_puct = result["total"]["q_puct"]
         self.q_avg = result["total"]["qval"]
         
-        if self.q_puct>10: self.q_puct=10   
-        if self.q_puct<0.1: self.q_puct=0.1
+        if self.q_puct>2: self.q_puct=2   
+        if self.q_puct<0.5: self.q_puct=0.5
         if self.q_avg>1: self.q_avg=1
         if self.q_avg<-1: self.q_avg=-1       
         
