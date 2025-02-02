@@ -369,7 +369,7 @@ class Train():
         if self.q_avg<-1: self.q_avg=-1       
         
         print("q_puct:", self.q_puct)   
-        player = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=self.c_puct, q_puct=self.q_puct, q_avg=self.q_avg n_playout=self.n_playout, limit_depth=limit_depth)
+        player = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=self.c_puct, q_puct=self.q_puct, q_avg=self.q_avg, n_playout=self.n_playout, limit_depth=limit_depth)
 
         cache={}
 
