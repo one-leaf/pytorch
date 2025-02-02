@@ -320,6 +320,8 @@ class Train():
                 data["piece_count"] = agent.piececount
                 data["piece_height"] = agent.pieceheight
                 std_qval = np.std(qval_list)
+                if std_qval>100:
+                    print("std_qval:", std_qval, qval_list)
                 return agent, data, total_qval, total_state_value, exreward_end_piececount, max_qval, min_qval, std_qval, start_time, paytime
             
 
