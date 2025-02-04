@@ -578,7 +578,8 @@ class Train():
                         
         result["lastupdate"] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         self.save_status_file(result, game_json)         
-            
+        avg_qval = [play_data[0]["qval"]/play_data[0]["agent"].steps, play_data[1]["qval"]/play_data[1]["agent"].steps]
+        std_qval = [play_data[0]["std_qval"], play_data[1]["std_qval"]]    
         states, mcts_probs, values= [], [], []
 
         for i, data in enumerate([play_data[0]["data"], play_data[1]["data"]]):
