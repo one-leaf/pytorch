@@ -357,7 +357,10 @@ class MCTS():
             r = (state.game.score-state.markscore)/(state.game.steps-state.markSteps)
             # v = r + self.search(state)
             # v = (v-self.q_avg)/self.q_puct  
-            v = (r-self.q_avg)/self.q_puct #+ self.search(state)
+            if r!=0:
+                v = (r-self.q_avg)/self.q_puct #+ self.search(state)
+            else:
+                v = self.search(state)
 
         #     # 不鼓励主动消行，以局面为主
             # if state.markEmptyCount>state.game.emptyCount:
