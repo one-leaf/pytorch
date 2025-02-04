@@ -460,10 +460,8 @@ class VitNet(nn.Module):
         self.act_token = nn.Parameter(torch.zeros(1, 1, embed_dim))    # [1, 1, 768]
         # 价值
         self.val_token = nn.Parameter(torch.zeros(1, 1, embed_dim))    # [1, 1, 768]
-        # Q值平均
-        self.q_token = nn.Parameter(torch.zeros(1, 1, embed_dim))    # [1, 1, 768]
         # 位置层
-        self.pos_embed = nn.Parameter(torch.zeros(1, num_patches + 3, embed_dim)) # [1, p+3, 768]
+        self.pos_embed = nn.Parameter(torch.zeros(1, num_patches + 2, embed_dim)) # [1, p+2, 768]
         
         # 输入损失
         self.pos_drop = nn.Dropout(p=drop_ratio)
@@ -496,13 +494,6 @@ class VitNet(nn.Module):
         self.val_dist = nn.Linear(embed_dim, num_quantiles)   # [B, 768] => [B, num_quantiles]
         self.val_dist_act = nn.Tanh()
 
-        # self.q_fc = nn.Linear(embed_dim, embed_dim)   # [B, 768] => [B, 768]
-        # self.norm_q = norm_layer(embed_dim)  
-        # self.q_fc_act = nn.GELU()      
-        # self.q_fc_act = nn.LeakyReLU() 
-        self.q_dist = nn.Linear(embed_dim, 1)   # [B, 768] => [B, 1]
-        self.q_dist_act = nn.Tanh()
-
     def init_weights(self):
         # 参数初始化, 这里需要pytorch 1.6以上版本
         # nn.init.trunc_normal_(self.pos_embed, std=0.02)
@@ -510,7 +501,6 @@ class VitNet(nn.Module):
         nn.init.normal_(self.pos_embed, std=0.02)
         nn.init.normal_(self.act_token, std=0.02)
         nn.init.normal_(self.val_token, std=0.02)
-        nn.init.normal_(self.q_token, std=0.02)
         self.apply(_init_vit_weights)
 
     def forward(self, x):
@@ -520,9 +510,8 @@ class VitNet(nn.Module):
         # [1, 1, 768] -> [B, 1, 768] 这里每一个B的 token 都是一样的，并没有复制 token 到每一个B
         act_token = self.act_token.expand(x.shape[0], -1, -1)
         val_token = self.val_token.expand(x.shape[0], -1, -1)
-        q_token = self.q_token.expand(x.shape[0], -1, -1)
         
-        x = torch.cat((act_token, x, val_token, q_token), dim=1)    # [B, p+3, 768]
+        x = torch.cat((act_token, x, val_token), dim=1)    # [B, p+3, 768]
         # x 加上位置层，并且Dropout
         x = self.pos_drop(x + self.pos_embed)       # [B, p+3, 768]
 
@@ -545,18 +534,12 @@ class VitNet(nn.Module):
 
         # val = x[:, 1]                            # [B, 768]
         # mean_x = x[:, 1:].mean(dim = 1)             # [B, 768]   
-        val = x[:, -2]
+        val = x[:, -1]
         # val = self.val_fc(val)
         # val = self.norm_val(val)
         # val = self.val_fc_act(val)
         val = self.val_dist(val)                # [B, num_quantiles]
         val = self.val_dist_act(val)            # Tanh -> [1 ~ -1]
                       
-        q = x[:, -1]
-        # q = self.q_fc(q)
-        # q = self.norm_q(q)
-        # q = self.q_fc_act(q)
-        q = self.q_dist(q)                      # [B, 1]
-        q = self.q_dist_act(q)                  # Tanh -> [1 ~ -1]
         
-        return act, val, q    # [B, num_classes], [B, num_quantiles], [B, 1]
+        return act, val    # [B, num_classes], [B, num_quantiles], [B, 1]

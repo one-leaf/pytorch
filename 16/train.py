@@ -61,8 +61,7 @@ class Dataset(torch.utils.data.Dataset):
         state = torch.from_numpy(data["state"]).float()
         mcts_prob = torch.from_numpy(data["mcts_prob"]).float()
         value = torch.as_tensor(data["value"]).float()
-        reward = torch.as_tensor(data["reward"]).float()
-        return state, mcts_prob, value, reward
+        return state, mcts_prob, value
 
     def load_game_files(self):
         print("start load files name ... ")
@@ -99,29 +98,23 @@ class Dataset(torch.utils.data.Dataset):
         # scores=[]
         print("start load data to memory ...")
         start_time = time.time()
-        rewards={}
         values={}
         # double_train_list=[]
         for i,fn in enumerate(self.file_list):
             try:
                 with open(fn, "rb") as f:
-                    state, mcts_prob, value, reward = pickle.load(f)
+                    state, mcts_prob, value = pickle.load(f)
                     assert state.shape == (4,20,10) , f'error: sate shape {state.shape}'
                     assert mcts_prob.shape == (5,) , f'error: prob shape {mcts_prob.shape}'
                     assert not np.isnan(value) , f'error: value is Nan'
-                    assert not np.isnan(reward) , f'error: reward is Nan'
                     assert not np.isinf(value) , f'error: value is Inf'
-                    assert not np.isinf(reward) , f'error: reward is Inf'
                     # if len(mcts_prob)==4:
                     #     mcts_prob = np.concatenate((mcts_prob, np.zeros(1)), axis=0)
-                    if reward<-1: reward=-1
-                    if reward>1: reward=1
             except:
                 print("filename {} error can't load".format(fn))
                 if os.path.exists(fn): os.remove(fn)
                 self.file_list.remove(fn)
                 continue
-            rewards[fn]=reward
             values[fn]=value
 
             # 对背景进行 shuffle
@@ -136,7 +129,7 @@ class Dataset(torch.utils.data.Dataset):
             #             board[lc:]=board[:-lc]
             #             board[:lc]=0                         
 
-            self.data[fn]={"value":0, "reward":0, "state":state, "mcts_prob": mcts_prob}
+            self.data[fn]={"value":0, "state":state, "mcts_prob": mcts_prob}
         values_items = list(values.values())
         avg_values = np.average(values_items)
         min_values = np.min(values_items)
@@ -147,15 +140,8 @@ class Dataset(torch.utils.data.Dataset):
         self.avg_values = avg_values
         self.std_values = std_values
 
-        rewards_items = list(rewards.values())
-        avg_rewards = np.average(rewards_items)
-        std_rewards = np.std(rewards_items)
-        min_rewards = np.min(rewards_items)
-        max_rewards = np.max(rewards_items)
-        print("reward min/avg/max/std:",[min_rewards, avg_rewards, max_rewards, std_rewards])
         for fn in self.data:
             self.data[fn]["value"] = values[fn]
-            self.data[fn]["reward"] = rewards[fn]
             # self.data[fn]["value"] = (values[fn] - avg_values)/(max_values-min_values) + (scores[fn]-avg_scores)/(max_scores-min_scores)            
             # self.data[fn]["value"] = (values[fn]+scores[fn])*0.5 - 1 
             # self.data[fn]["value"] = (scores[fn]-min_scores)*2/(max_scores-min_scores) - 1
@@ -230,9 +216,9 @@ class Train():
         state_batch, mcts_probs_batch, values_batch, reward_batch = sample_data
         # 训练策略价值网络
         # for i in range(epochs):
-        p_acc, v_loss, p_loss, r_loss = self.policy_value_net.train_step(state_batch, mcts_probs_batch, values_batch, reward_batch, self.learn_rate * self.lr_multiplier)
+        p_acc, v_loss, p_loss = self.policy_value_net.train_step(state_batch, mcts_probs_batch, values_batch, reward_batch, self.learn_rate * self.lr_multiplier)
          
-        return p_acc, v_loss, p_loss, r_loss
+        return p_acc, v_loss, p_loss
 
     def run(self):
         """启动训练"""
@@ -259,24 +245,19 @@ class Train():
             test_batch = None
 
             net = self.policy_value_net.policy_value
-            begin_rewards=None
             begin_values=None
             begin_act_probs=None
             begin_accuracy=None
             test_data=None
             for i, data in enumerate(testing_loader):
-                test_batch, test_probs, test_values, test_rewards = data
-                if test_data==None: test_data=[test_batch, test_probs, test_values, test_rewards]
+                test_batch, test_probs, test_values = data
+                if test_data==None: test_data=[test_batch, test_probs, test_values]
                 test_batch = test_batch.to(self.policy_value_net.device)
                 # test_values = test_values.to(self.policy_value_net.device)
                 with torch.no_grad(): 
-                    act_probs, values, rewards = net(test_batch) 
+                    act_probs, values = net(test_batch) 
                     # print("value[0] dst:{} pred_s:{}".format(test_values[:5].cpu().numpy(), values[:5]))  
                     # print("probs[0] dst:{} pred_s:{}".format(test_probs[0].cpu().numpy(), act_probs[0]))
-                    if begin_rewards is None:
-                        begin_rewards = rewards
-                    else:
-                        begin_rewards = np.concatenate((begin_rewards, rewards), axis=0)
                     if begin_values is None:
                         begin_values = values
                     else:
@@ -300,14 +281,14 @@ class Train():
             self.policy_value_net.set_learning_rate(self.learn_rate*self.lr_multiplier)
             for i, data in enumerate(training_loader):  # 计划训练批次
                 # 使用对抗数据重新训练策略价值网络模型
-                p_acc, v_loss, p_loss, q_loss = self.policy_update(data, self.epochs)
+                p_acc, v_loss, p_loss = self.policy_update(data, self.epochs)
                 v_loss_list.append(v_loss)
                 if i%10 == 0:
-                    print(i,"p_loss:",p_loss,"v_loss:",v_loss,"q_loss:",q_loss,"p_acc:",p_acc)
+                    print(i,"p_loss:",p_loss,"v_loss:",v_loss,"p_acc:",p_acc)
                     # time.sleep(0.1)
 
-                if math.isnan(v_loss) or math.isnan(q_loss): 
-                    print("v_loss or q_loss is nan!")
+                if math.isnan(v_loss) : 
+                    print("v_loss is nan!")
                     return
 
                 # if i%10 == 0:
@@ -334,20 +315,15 @@ class Train():
 
             self.policy_value_net.save_model(model_file)
    
-            end_reward=None
             end_values=None
             end_act_probs=None
             end_accuracy=None
             net = self.policy_value_net.policy_value
             for i, data in enumerate(testing_loader):
-                test_batch, test_probs, test_values, test_rewards = data
+                test_batch, test_probs, test_values = data
                 test_batch = test_batch.to(self.policy_value_net.device)
                 with torch.no_grad(): 
-                    act_probs, values, rewards = net(test_batch) 
-                    if end_reward is None:
-                        end_reward=rewards
-                    else:
-                        end_reward=np.concatenate((end_reward, rewards), axis=0)
+                    act_probs, values = net(test_batch)                 
                     if end_values is None:
                         end_values=values
                     else:
@@ -366,9 +342,6 @@ class Train():
             
             for i in range(len(begin_values)):
                 print("value[{}] begin:{} end:{} to:{}".format(i, begin_values[i], end_values[i], test_data[2][i].numpy()))  
-                if i>=4:break
-            for i in range(len(begin_values)):
-                print("qval[{}] begin:{} end:{} to:{}".format(i, begin_rewards[i], end_reward[i], test_data[3][i].numpy()))  
                 if i>=4:break
             for i in range(len(begin_values)):
                 idx = np.argmax(begin_act_probs[i])

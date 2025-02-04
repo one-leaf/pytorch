@@ -143,19 +143,19 @@ class Train():
         
         return result
 
-    def get_equi_data(self, states, mcts_probs, values, scores):
+    def get_equi_data(self, states, mcts_probs, values):
         """
         通过翻转增加数据集
         play_data: [(state, mcts_prob, values, score), ..., ...]
         """
         extend_data = []
         for i in range(len(states)):
-            state, mcts_prob, value, score=states[i], mcts_probs[i], values[i], scores[i]
-            extend_data.append((state, mcts_prob, value, score))
+            state, mcts_prob, value=states[i], mcts_probs[i], values[i]
+            extend_data.append((state, mcts_prob, value))
             if mcts_prob[0]<0.2 and np.max(mcts_prob)>0.8: # 如果旋转的概率的不大，就做翻转
                 equi_state = np.array([np.fliplr(s) for s in state])
                 equi_mcts_prob = mcts_prob[[0,2,1,3,4]]
-                extend_data.append((equi_state, equi_mcts_prob, value, score))
+                extend_data.append((equi_state, equi_mcts_prob, value))
             # if i==0:
             #     print("state:",state)
             #     print("mcts_prob:",mcts_prob)
@@ -577,35 +577,27 @@ class Train():
                 if os.path.exists(newmodelfile): os.link(newmodelfile, bestmodelfile)
                         
         result["lastupdate"] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        self.save_status_file(result, game_json) 
-        
-        # 全局评价
-        values = [win_values[0]]*play_data[0]["agent"].steps + \
-                        [win_values[1]]*play_data[1]["agent"].steps                        
-        print("step_values:", values)
-        
-        # 局部奖励均值, 计算均值Q/标准差Q，用于 预测价值-均值Q 使其网络更平稳
-        rewards = [play_data[0]["qval"]/play_data[0]["agent"].steps]*play_data[0]["agent"].steps + \
-                        [play_data[1]["qval"]/play_data[1]["agent"].steps]*play_data[1]["agent"].steps                                    
-        print("step_reward:", rewards)
+        self.save_status_file(result, game_json)         
             
-        states, mcts_probs= [], []
+        states, mcts_probs, values= [], [], []
 
-        for data in [play_data[0]["data"], play_data[1]["data"]]:
+        for i, data in enumerate([play_data[0]["data"], play_data[1]["data"]]):
             for step in data["steps"]:
                 states.append(step["state"])
                 mcts_probs.append(step["move_probs"])
+                values.append((step["qval"]-avg_qval[i])/std_qval[i])
                 
+        print("step_values:", values)
+
         assert len(states)>0
         assert len(states)==len(values)
         assert len(states)==len(mcts_probs)
-        assert len(states)==len(rewards)
-
+        
         print("TRAIN Self Play end. length: %s value sum: %s saving ..." % (len(states),sum(values)))
 
         # 保存对抗数据到data_buffer
         filetime = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        for i, obj in enumerate(self.get_equi_data(states, mcts_probs, values, rewards)):
+        for i, obj in enumerate(self.get_equi_data(states, mcts_probs, values)):
         # for i, obj in enumerate(zip(states, mcts_probs, values, rewards)):
             filename = "{}-{}.pkl".format(filetime, i)
             savefile = os.path.join(data_wait_dir, filename)

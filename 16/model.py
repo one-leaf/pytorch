@@ -122,7 +122,7 @@ class PolicyValueNet():
 
         self.policy_value_net.eval()
         with torch.no_grad(): 
-            act_probs, value, reward = self.policy_value_net.forward(state_batch_tensor)    #[b, num_classes] [b, num_quantiles]
+            act_probs, value = self.policy_value_net.forward(state_batch_tensor)    #[b, num_classes] [b, num_quantiles]
             
         # act_probs = torch.softmax(act_probs,dim=1)
         # num_quantiles = value.shape[1]
@@ -141,8 +141,7 @@ class PolicyValueNet():
         # 还原成标准的概率
         act_probs = act_probs.cpu().numpy()
         value = value.cpu().numpy()
-        reward = reward.cpu().numpy()
-        return act_probs, value, reward
+        return act_probs, value
 
     # 从当前游戏获得 ((action, act_probs),...) 的可用动作+概率和当前游戏胜率
     def policy_value_fn(self, game, only_Cache_Next=False):
@@ -164,31 +163,30 @@ class PolicyValueNet():
                         break
             if len(k_list) > 0:
                 current_state = np.array(s_list)
-                act_probs, value, reward = self.policy_value(current_state)
+                act_probs, value = self.policy_value(current_state)
                 for i in range(len(k_list)):
-                    self.cache[k_list[i]] = (act_probs[i], value[i], reward[i,0])
-            return None, None, None
+                    self.cache[k_list[i]] = (act_probs[i], value[i])
+            return None, None
         
         key = game.full_key
         if key in self.cache:
-            act_probs, value, reward = self.cache[key]
-            return act_probs, value, reward
+            act_probs, value = self.cache[key]
+            return act_probs, value
         
         current_state = np.array([game.current_state()])#game.current_state().reshape(1, self.input_channels, self.input_height, self.input_width)
-        act_probs, value, reward = self.policy_value(current_state)
+        act_probs, value = self.policy_value(current_state)
         act_probs=act_probs[0]
         value=value[0]
-        reward = reward[0, 0]
         
-        self.cache[key] = (act_probs, value, reward)
-        return act_probs, value, reward
+        self.cache[key] = (act_probs, value)
+        return act_probs, value
     
     def policy_value_fn_best_act(self, game):
         """
         输入: 游戏
         输出: 一组（动作， 概率）和游戏当前状态的胜率
         """  
-        act_probs,_,_ = self.policy_value_fn(game)
+        act_probs,_ = self.policy_value_fn(game)
         
         actions = game.availables
         idx = np.argmax(act_probs*actions)
@@ -205,13 +203,12 @@ class PolicyValueNet():
         return torch.mean(weights * F.smooth_l1_loss(quantiles, newtarget, reduction='none'))
 
     # 训练
-    def train_step(self, state_batch, mcts_probs, value_batch, reward_batch, lr):
+    def train_step(self, state_batch, mcts_probs, value_batch, lr):
         """训练一次"""
         # 输入赋值       
         state_batch = torch.FloatTensor(state_batch).to(self.device)
         mcts_probs = torch.FloatTensor(mcts_probs).to(self.device)
         value_batch = torch.FloatTensor(value_batch).to(self.device)
-        reward_batch = torch.FloatTensor(reward_batch).to(self.device)
         # 设置学习率
         # self.set_learning_rate(lr)
 
@@ -221,7 +218,6 @@ class PolicyValueNet():
 
         value_loss = self.quantile_regression_loss(values, value_batch)
         policy_loss = F.cross_entropy(probs, mcts_probs)
-        qval_loss = F.mse_loss(qvals.view(-1), reward_batch)
 
         # loss = policy_loss + value_loss/(value_loss/policy_loss).detach() + qval_loss/(qval_loss/policy_loss).detach() 
         # loss = policy_loss + (value_loss + qval_loss)*0.01 
@@ -237,7 +233,7 @@ class PolicyValueNet():
         predicted_probs = torch.argmax(probs, dim=1)
         true_probs = torch.argmax(mcts_probs, dim=1)
         accuracy = (predicted_probs == true_probs).float().mean()
-        return accuracy.item(), value_loss.item(), policy_loss.item(), qval_loss.item()
+        return accuracy.item(), value_loss.item(), policy_loss.item()
         
 
     # 保存模型

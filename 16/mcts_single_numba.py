@@ -195,7 +195,6 @@ class MCTS():
         self.Ps = getEmptySAF_Dict()     # 保存 动作概率 key: s, a
         # self.Es = getEmptySF_Dict()     # 保存游戏最终得分 key: s
         self.Vs = getEmptySF_Dict()     # 保存游戏局面差异奖励 key: s
-        self.Rs = getEmptySF_Dict()     # 保存游戏局面差异奖励 key: s
         print("create mcts, c_puct: {}, n_playout: {}".format(c_puct, n_playout))
         self.t = 0
         self.c = 1
@@ -266,7 +265,6 @@ class MCTS():
         ps = self.Ps[s]     
         ns = self.Nsa[s]/self.Ns[s]
         v:float = self.Vs[s] 
-        r:float = self.Rs[s] 
         nsv:float = self.Ns[s]
         max_p = np.argmax(ps)
         
@@ -284,7 +282,7 @@ class MCTS():
             print(timedelta(seconds=run_time), game.steps, game.fallpiece["shape"], \
                   "ns:", str(nsv).rjust(4), "/", str(self.simulation_count).ljust(4), "depth:", str(self.max_depth).ljust(3), \
                 #   "\tQ:", round(v,2), "-->",round(qs[max_p],2), '/', round(qs[max_q],2), \
-                  "end:", die_count, "v:", round(v,2), "q:", round(r,2), \
+                  "end:", die_count, "v:", round(v,2), \
                   game.position_to_action_name(max_p), round(ps[max_p],2), "-->", round(probs[max_p],2), "\t", mask, \
                   "Qs:", qs, "\tNs:", ns, "\tPs:", ps)
             # 如果这一局已经超过了20分钟
@@ -319,11 +317,10 @@ class MCTS():
         
         if s not in self.Ps:                          
             # 获得当前局面的概率 和 局面的打分
-            act_probs, v, r = self._policy(state.game) 
+            act_probs, v = self._policy(state.game) 
             expandPN(s, availables, act_probs, self.Ps, self.Ns, self.Nsa, self.Qsa, state.actions_num)             
             # v *= 0.5 # 测试稳定网络用 v * 0.5 + reward ==> v ; v ==> 2 * reward
             self.Vs[s] = v
-            self.Rs[s] = r
             # v = float(v+abs(v)*r) 
             # https://arxiv.org/pdf/2405.09999 当前价值减去Q值的均值
             # nanmean(self.Qsa[s]) - np.nanmean(self.Qsa[s][availables==0])
@@ -331,7 +328,7 @@ class MCTS():
             # v = float(v-r/10)
             # v = float(v-r)
             v = float(v)
-            v = (v-self.q_avg)/self.q_puct  
+            # v = (v-self.q_avg)/self.q_puct  
             return v
             
         # 当前最佳概率和最佳动作
@@ -358,7 +355,8 @@ class MCTS():
             # v = r + self.search(state)
             # v = (v-self.q_avg)/self.q_puct  
             if r!=0:
-                v = (r-self.q_avg)/self.q_puct #+ self.search(state)
+                # v = (r-self.q_avg)/self.q_puct #+ self.search(state)
+                v = r
             else:
                 v = self.search(state)
 
