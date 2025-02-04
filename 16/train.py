@@ -213,10 +213,10 @@ class Train():
         """更新策略价值网络policy-value"""
         # 训练策略价值网络
         # 随机抽取data_buffer中的对抗数据
-        state_batch, mcts_probs_batch, values_batch, reward_batch = sample_data
+        state_batch, mcts_probs_batch, values_batch = sample_data
         # 训练策略价值网络
         # for i in range(epochs):
-        p_acc, v_loss, p_loss = self.policy_value_net.train_step(state_batch, mcts_probs_batch, values_batch, reward_batch, self.learn_rate * self.lr_multiplier)
+        p_acc, v_loss, p_loss = self.policy_value_net.train_step(state_batch, mcts_probs_batch, values_batch, self.learn_rate * self.lr_multiplier)
          
         return p_acc, v_loss, p_loss
 

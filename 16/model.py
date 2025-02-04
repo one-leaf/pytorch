@@ -214,7 +214,7 @@ class PolicyValueNet():
 
         # 前向传播
         self.policy_value_net.train()
-        probs, values, qvals = self.policy_value_net(state_batch)
+        probs, values = self.policy_value_net(state_batch)
 
         value_loss = self.quantile_regression_loss(values, value_batch)
         policy_loss = F.cross_entropy(probs, mcts_probs)
