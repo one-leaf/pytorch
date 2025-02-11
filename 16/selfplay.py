@@ -586,7 +586,7 @@ class Train():
             for step in data["steps"]:
                 states.append(step["state"])
                 mcts_probs.append(step["move_probs"])
-                values.append((step["qval"]-avg_qval[i])/std_qval[i]+0.1*win_values[i])
+                values.append((step["qval"]+0.1*win_values[i]-avg_qval[i])/std_qval[i])
                 
         print("step_values:", values)
 
