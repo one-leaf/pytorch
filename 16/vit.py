@@ -492,7 +492,7 @@ class VitNet(nn.Module):
         # self.val_fc_act = nn.GELU()
         # self.val_fc_act = nn.LeakyReLU() 
         self.val_dist = nn.Linear(embed_dim, num_quantiles)   # [B, 768] => [B, num_quantiles]
-        self.val_dist_act = nn.Tanh()
+        # self.val_dist_act = nn.Tanh()
 
     def init_weights(self):
         # 参数初始化, 这里需要pytorch 1.6以上版本
@@ -539,7 +539,7 @@ class VitNet(nn.Module):
         # val = self.norm_val(val)
         # val = self.val_fc_act(val)
         val = self.val_dist(val)                # [B, num_quantiles]
-        val = self.val_dist_act(val)            # Tanh -> [1 ~ -1]
+        # val = self.val_dist_act(val)            # Tanh -> [1 ~ -1]
                       
         
         return act, val    # [B, num_classes], [B, num_quantiles], [B, 1]
