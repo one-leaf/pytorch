@@ -518,7 +518,7 @@ class Train():
             result["total"]["ns"] = result["total"]["ns"]*0.99 + ns*0.01   
 
         max_list_len=30
-        if result["total"]["_agent"]>20:
+        if result["total"]["_agent"]>10:
             result["reward"].append(round(result["total"]["avg_score"],2))
             result["depth"].append(round(result["total"]["depth"],1))
             result["pacc"].append(round(result["total"]["pacc"],2))
