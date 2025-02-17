@@ -341,17 +341,19 @@ class MCTS():
         #     print("QSA:", self.Qsa, "PS:", self.Ps)
         #     raise Exception("FUN ERROR!")
         
-        # _r = state.game.score
-        # _c = state.game.emptyCount
+        _r = state.game.score
+        _s = state.game.piecesteps
+        
         _, _r = state.game.step(a)
                 
         # 外部奖励，最大1
         r = 0
         if state.game.terminal:
             v = -2
-        if state.game.state==1 and state.game.exreward and state.game.piececount - state.markPiececount >= self.reward_piececount:
+        if state.game.state==1 and state.game.exreward:# and state.game.piececount - state.markPiececount >= self.reward_piececount:
             # 这种奖励会照成主动消行，而不管后续的局面
-            r = (state.game.score-state.markscore)/(state.game.steps-state.markSteps)
+            # r = (state.game.score-state.markscore)/(state.game.steps-state.markSteps)
+            r = (state.game.score-_r)/(_s+1)
             # v = r + self.search(state)
             # v = (v-self.q_avg)/self.q_puct  
             # if r!=0:
