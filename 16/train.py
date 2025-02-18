@@ -175,6 +175,11 @@ class Dataset(torch.utils.data.Dataset):
         # 等待1秒钟，防止有数据还在写入
         time.sleep(1)
         i = -1
+        if len(model_file)<self.max_keep_size//5:
+            print("SLEEP 60s for watting data")            
+            time.sleep(60)
+            raise Exception("NEED SOME NEW DATA TO TRAIN")
+        
         for i, fn in enumerate(movefiles):
             filename = os.path.basename(fn)
             savefile = os.path.join(self.data_dir, filename)
@@ -182,13 +187,9 @@ class Dataset(torch.utils.data.Dataset):
             os.rename(fn, savefile)
             if len(self.newsample)<self.test_size:
                 self.newsample.append(savefile)
-            if (i>=99 and i>len(movefiles)*0.1) or i>=self.max_keep_size//2: break       
-            if i>=self.max_keep_size//10: break       
+            if i>=self.max_keep_size//5: break       
         print("mv %s/%s files to train"%(i+1,len(movefiles)))
-        if i==-1 :
-            print("SLEEP 60s for watting data")
-            time.sleep(60)
-            raise Exception("NEED SOME NEW DATA TO TRAIN")
+            
          
     def curr_size(self):
         return len(self.file_list)      
