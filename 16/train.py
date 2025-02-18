@@ -171,8 +171,8 @@ class Dataset(torch.utils.data.Dataset):
         # 等待1秒钟，防止有数据还在写入
         time.sleep(1)
         i = -1
-        if len(model_file)<self.max_keep_size//5:
-            print("SLEEP 60s for watting data, current model file count:",len(model_file),"need:",self.max_keep_size//5)            
+        if len(movefiles)<self.max_keep_size//5:
+            print("SLEEP 60s for watting data, current model file count:",len(movefiles),"need:",self.max_keep_size//5)            
             time.sleep(60)
             raise Exception("NEED SOME NEW DATA TO TRAIN")
         
