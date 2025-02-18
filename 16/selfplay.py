@@ -583,7 +583,7 @@ class Train():
         states, mcts_probs, values= [], [], []
 
         for i, data in enumerate([play_data[0]["data"], play_data[1]["data"]]):
-            v = 0.1*win_values[i]
+            v = 0.2*win_values[i]
             for step in data["steps"]:
                 states.append(step["state"])
                 mcts_probs.append(step["move_probs"])
