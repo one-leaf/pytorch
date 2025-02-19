@@ -474,11 +474,13 @@ class Train():
         if game_score>result["best"]["reward"]:
             result["best"]["reward"] = game_score
             result["best"]["agent"] = result["total"]["agent"]
-        else:
+        elif result["best"]["reward"]>1:
             if isinstance(result["best"]["reward"], int):
                 result["best"]["reward"] += result["best"]["reward"]*0.00001
             result["best"]["reward"] -= 1 
-
+        else:
+            result["best"]["reward"] = 0
+            
         # 计算 acc 看有没有收敛
         pacc = []
         # vacc = []
