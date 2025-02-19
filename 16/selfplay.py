@@ -476,7 +476,7 @@ class Train():
             result["best"]["agent"] = result["total"]["agent"]
         else:
             if isinstance(result["best"]["reward"], int):
-                result["best"]["reward"] += result["best"]["reward"]*0.0001
+                result["best"]["reward"] += float(f"0.{result["best"]["reward"]}")
             if result["best"]["reward"]>1:
                 result["best"]["reward"] -= 1 
             
