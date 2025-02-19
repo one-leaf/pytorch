@@ -470,13 +470,14 @@ class Train():
         
         result["total"]["agent"] += 1
         result["total"]["_agent"] += 1
-
     
         if game_score>result["best"]["reward"]:
             result["best"]["reward"] = game_score
             result["best"]["agent"] = result["total"]["agent"]
         else:
-            result["best"]["reward"] = round(result["best"]["reward"] - 0.9999,4)
+            if isinstance(result["best"]["reward"], int):
+                result["best"]["reward"] += result["best"]["reward"]*0.00001
+            result["best"]["reward"] -= 1 
 
         # 计算 acc 看有没有收敛
         pacc = []
