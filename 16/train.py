@@ -28,12 +28,13 @@ GAME_WIDTH, GAME_HEIGHT = 10, 20
 
 
 class Dataset(torch.utils.data.Dataset):
-    def __init__(self, data_dir, max_keep_size, test_size):
+    def __init__(self, data_dir, max_keep_size, test_size, epochs=5):
         # 训练数据存放路径
         self.data_dir = data_dir                
         # 训练数据最大保存个数
         self.max_keep_size = max_keep_size
         self.test_size = test_size
+        self.epoch = epochs
         self.file_list = [] # deque(maxlen=max_keep_size)    
         self.newsample = []
         self.data={}
@@ -138,29 +139,9 @@ class Dataset(torch.utils.data.Dataset):
 
         for fn in self.data:
             self.data[fn]["value"] = values[fn]
-            # self.data[fn]["value"] = (values[fn] - avg_values)/(max_values-min_values) + (scores[fn]-avg_scores)/(max_scores-min_scores)            
-            # self.data[fn]["value"] = (values[fn]+scores[fn])*0.5 - 1 
-            # self.data[fn]["value"] = (scores[fn]-min_scores)*2/(max_scores-min_scores) - 1
-            
-            # 数据正规化
-            # v = values[fn]/std_values
-            # if v>1:
-            #     self.data[fn]["value"] = 1
-            # elif v<-1:
-            #     self.data[fn]["value"] = -1
-            # else:
-            #     self.data[fn]["value"] = v #values[fn]
-
-            # 数据二值化
-            # self.data[fn]["value"] = 1 if values[fn]>0 else -1
-
-            # self.data[fn]["value"] = (values[fn]-avg_values)/std_values
-            # if self.data[fn]["value"]>1:  self.data[fn]["value"]= 0.9
-            # if self.data[fn]["value"]<-1: self.data[fn]["value"]= -0.9
 
         pay_time = round(time.time()-start_time, 2)
         print("loaded to memory, paid time:", pay_time)
-        # print("piececount avg:", avg_piececount, "var:", var_piececount,"min:", min_piececount,"max:", max_piececount)
         print("load data end")
 
 
@@ -171,7 +152,7 @@ class Dataset(torch.utils.data.Dataset):
         # 等待1秒钟，防止有数据还在写入
         time.sleep(1)
         i = -1
-        if len(movefiles)<self.max_keep_size//5:
+        if len(movefiles)<self.max_keep_size//self.epoch:
             print("SLEEP 60s for watting data, current model file count:",len(movefiles),"need:",self.max_keep_size//5)            
             time.sleep(60)
             raise Exception("NEED SOME NEW DATA TO TRAIN")
@@ -183,7 +164,7 @@ class Dataset(torch.utils.data.Dataset):
             os.rename(fn, savefile)
             if len(self.newsample)<self.test_size:
                 self.newsample.append(savefile)
-            if i>=self.max_keep_size//5: break       
+            if i>=self.max_keep_size//self.epoch: break       
         print("mv %s/%s files to train"%(i+1,len(movefiles)))
             
          
@@ -201,7 +182,7 @@ class Train():
         self.n_playout = 256  # 每个动作的模拟战记录个数
         self.play_batch_size = 1 # 每次自学习次数
         self.buffer_size = 25600  # cache对次数 # 51200 6:30 收集
-        self.epochs = 1  # 每次更新策略价值网络的训练步骤数, 推荐是5
+        self.epochs = 5  # 每次更新策略价值网络的训练步骤数, 推荐是5
         self.kl_targ = 0.02  # 策略价值网络KL值目标        
         self.c_puct = 2  # MCTS child权重， 用来调节MCTS中 探索/乐观 的程度 默认 5
    
@@ -212,7 +193,6 @@ class Train():
         # 随机抽取data_buffer中的对抗数据
         state_batch, mcts_probs_batch, values_batch = sample_data
         # 训练策略价值网络
-        # for i in range(epochs):
         p_acc, v_loss, p_loss = self.policy_value_net.train_step(state_batch, mcts_probs_batch, values_batch, self.learn_rate * self.lr_multiplier)
          
         return p_acc, v_loss, p_loss
@@ -221,7 +201,7 @@ class Train():
         """启动训练"""
         try:
             print("start data loader")
-            self.dataset = Dataset(data_dir, self.buffer_size, self.batch_size*5)
+            self.dataset = Dataset(data_dir, self.buffer_size, self.batch_size*5, epochs=self.epochs)
             self.testdataset = copy.copy(self.dataset)
             self.testdataset.test=True
             print("end data loader")
@@ -231,7 +211,6 @@ class Train():
             except Exception as e:
                 print(str(e))
                 time.sleep(60)
-                # os.rename(model_file, model_file+"_err")
                 return
             self.policy_value_net.save_model(model_file+".bak")           
 
@@ -250,11 +229,8 @@ class Train():
                 test_batch, test_probs, test_values = data
                 if test_data==None: test_data=[test_batch, test_probs, test_values]
                 test_batch = test_batch.to(self.policy_value_net.device)
-                # test_values = test_values.to(self.policy_value_net.device)
                 with torch.no_grad(): 
                     act_probs, values = net(test_batch) 
-                    # print("value[0] dst:{} pred_s:{}".format(test_values[:5].cpu().numpy(), values[:5]))  
-                    # print("probs[0] dst:{} pred_s:{}".format(test_probs[0].cpu().numpy(), act_probs[0]))
                     if begin_values is None:
                         begin_values = values
                     else:
@@ -287,28 +263,6 @@ class Train():
                 if math.isnan(v_loss) : 
                     print("v_loss is nan!")
                     return
-
-                # if i%10 == 0:
-                #     print(("TRAIN idx {} : {} / {} v_loss:{:.5f}, p_loss:{:.5f}")\
-                #         .format(i, i*self.batch_size, dataset_len, v_loss, p_loss))
-
-                #     # 动态调整学习率
-                #     if old_probs is None:
-                #         test_batch, test_probs, test_values = data
-                #         old_probs, old_value = self.policy_value_net.policy_value(test_batch) 
-                #     else:
-                #         new_probs, new_value = self.policy_value_net.policy_value(test_batch)
-                #         kl = np.mean(np.sum(old_probs * (np.log(old_probs + 1e-10) - np.log(new_probs + 1e-10)), axis=1))
-                        
-                #         old_probs = None
-                        
-                #         if kl > self.kl_targ * 2 and self.lr_multiplier > 0.1:
-                #             self.lr_multiplier /= 1.5
-                #         elif kl < self.kl_targ / 2 and self.lr_multiplier < 10:
-                #             self.lr_multiplier *= 1.5
-                #         else:
-                #             continue
-                #         print("kl:{} vs {} lr_multiplier:{} lr:{}".format(kl, self.kl_targ, self.lr_multiplier, self.learn_rate*self.lr_multiplier))
 
             self.policy_value_net.save_model(model_file)
    
@@ -365,12 +319,6 @@ class Train():
                 self.train_conf["lr_multiplier"] = self.lr_multiplier
                 self.train_conf["avg_values"] = self.dataset.avg_values
                 self.train_conf["std_values"] = self.dataset.std_values                
-                # if self.train_conf["optimizer_type"]==0 and np.average(v_loss_list)<0.1:
-                #     self.train_conf["optimizer_type"]=1
-                #     self.train_conf["lr_multiplier"]=1
-                # if self.train_conf["optimizer_type"]==1 and np.average(v_loss_list)>0.2:
-                #     self.train_conf["optimizer_type"]=0
-                #     self.train_conf["lr_multiplier"]=1
                 pickle.dump(self.train_conf, fn)
 
 
@@ -378,8 +326,6 @@ class Train():
             print('quit')
 
 if __name__ == '__main__':
-    # train
-    # logging.basicConfig(format='%(asctime)s %(message)s', level=logging.DEBUG)
     os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
     print('start training',datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
     training = Train()
