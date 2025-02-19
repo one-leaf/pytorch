@@ -478,7 +478,7 @@ class Train():
             if isinstance(result["best"]["reward"], int):
                 result["best"]["reward"] += float(f'0.{result["best"]["reward"]}')
             if result["best"]["reward"]>1:
-                result["best"]["reward"] -= 1 
+                result["best"]["reward"] = round(result["best"]["reward"]-1,10) 
             
         # 计算 acc 看有没有收敛
         pacc = []
