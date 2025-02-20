@@ -353,7 +353,7 @@ class MCTS():
         if state.game.state==1 and state.game.exreward:# and state.game.piececount - state.markPiececount >= self.reward_piececount:
             # 这种奖励会照成主动消行，而不管后续的局面
             # r = (state.game.score-state.markscore)/(state.game.steps-state.markSteps)
-            r = (state.game.score-_r+1)/(_s+1)
+            r = (state.game.score-_r+1)#/(_s+1)
             # v = r + self.search(state)
             # v = (v-self.q_avg)/self.q_puct  
             # if r!=0:
