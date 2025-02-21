@@ -590,7 +590,7 @@ class Train():
             for step in data["steps"]:
                 states.append(step["state"])
                 mcts_probs.append(step["move_probs"])
-                if step["qval"]>0:
+                if win_values[i]<0:
                     values.append((step["qval"]+v-avg_qval[i])/std_qval[i])
                 else:
                     values.append((step["qval"]-avg_qval[i])/std_qval[i])
