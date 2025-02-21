@@ -586,7 +586,7 @@ class Train():
         states, mcts_probs, values= [], [], []
 
         for i, data in enumerate([play_data[0]["data"], play_data[1]["data"]]):     
-            if vacc>result["total"]["vacc"]):
+            if vacc>result["total"]["vacc"]:
                 v = win_values[i] * min((vacc-result["total"]["vacc"])/(result["total"]["vacc"]),1)       
             else:
                 v = 0
