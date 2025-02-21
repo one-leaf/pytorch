@@ -585,8 +585,8 @@ class Train():
         std_qval = [play_data[0]["std_qval"], play_data[1]["std_qval"]]    
         states, mcts_probs, values= [], [], []
 
-        for i, data in enumerate([play_data[0]["data"], play_data[1]["data"]]):
-            v = 0.2*win_values[i]
+        for i, data in enumerate([play_data[0]["data"], play_data[1]["data"]]):            
+            v = win_values[i] * min(vacc/result["total"]["vacc"],1)
             for step in data["steps"]:
                 states.append(step["state"])
                 mcts_probs.append(step["move_probs"])
