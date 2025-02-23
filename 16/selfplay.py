@@ -50,7 +50,7 @@ class Train():
         self.waitplaydir=os.path.join(data_dir,"play")
         if not os.path.exists(self.waitplaydir): os.makedirs(self.waitplaydir)
 
-        self.stop_mark_file = os.path.join(self.waitplaydir,"stop")
+        self.stop_mark_file = os.path.join(self.waitplaydir,"../stop")
 
 
     def save_status_file(self, result, status_file):
