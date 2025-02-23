@@ -361,7 +361,7 @@ class MCTS():
             #     v = r
             # else:
             #     v = self.search(state)
-            v = r + self.search(state)
+            v = self.search(state) + r
         #     # 不鼓励主动消行，以局面为主
             # if state.markEmptyCount>state.game.emptyCount:
             #     v += (state.markEmptyCount-state.game.emptyCount)**2 * state.game.exrewardRate
