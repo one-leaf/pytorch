@@ -221,8 +221,8 @@ class MCTS():
         self.simulation_count = 0
         die_count = 0
         
-        if state.game.piececount%self.reward_piececount ==0:
-            state.mark()
+        # if state.game.piececount%self.reward_piececount ==0:
+        state.mark()
 
         state_ = None
         # while True:            
@@ -353,7 +353,8 @@ class MCTS():
         if state.game.state==1 and state.game.exreward:# and state.game.piececount - state.markPiececount >= self.reward_piececount:
             # 这种奖励会照成主动消行，而不管后续的局面
             # r = (state.game.score-state.markscore)/(state.game.steps-state.markSteps)
-            r = (state.game.score-_r)#/(_s+1)
+            r = (state.game.score-state.markscore)
+            # r = (state.game.score-_r)#/(_s+1)
             # v = r + self.search(state)
             # v = (v-self.q_avg)/self.q_puct  
             # if r!=0:
@@ -364,7 +365,7 @@ class MCTS():
             if r>0:
                 return r
             else:
-                v = self.search(state) + r
+                v = self.search(state) #+ r
         #     # 不鼓励主动消行，以局面为主
             # if state.markEmptyCount>state.game.emptyCount:
             #     v += (state.markEmptyCount-state.game.emptyCount)**2 * state.game.exrewardRate
