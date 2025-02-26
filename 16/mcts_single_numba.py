@@ -263,7 +263,7 @@ class MCTS():
         
         qs = self.Qsa[s] 
         ps = self.Ps[s]     
-        ns = self.Nsa[s]/self.Ns[s]
+        ns = self.Nsa[s]/(self.Ns[s]+1)
         v:float = self.Vs[s] 
         nsv:float = self.Ns[s]
         max_p = np.argmax(ps)
@@ -447,8 +447,8 @@ class MCTSPlayer(object):
             # temp 越大导致更均匀的搜索
             
             # 为了防止无休止运行，每多一分钟，探索次数减少1
-            has_run_time=time.time()-game.start_time
-            self.mcts._n_playout = self.n_playout - round(has_run_time/60)
+            # has_run_time=time.time()-game.start_time
+            # self.mcts._n_playout = self.n_playout - round(has_run_time/60)
 
 
             state = State(game)
