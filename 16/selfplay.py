@@ -47,7 +47,7 @@ class Train():
         self.limit_steptime = 1  # 限制每一步的平均花费时间，单位秒，默认1秒
 
         # 等待训练的序列
-        self.waitplaydir=os.path.join(data_dir,"play")
+        self.waitplaydir=os.path.join(data_dir,"replay")
         if not os.path.exists(self.waitplaydir): os.makedirs(self.waitplaydir)
 
         self.stop_mark_file = os.path.join(self.waitplaydir,"../stop")
