@@ -447,7 +447,7 @@ class MCTSPlayer(object):
             # temp 越大导致更均匀的搜索
             
             # 为了防止无休止运行，每多一分钟，探索次数减少1
-            # has_run_time=time.time()-game.start_time
+            has_run_time=time.time()-game.start_time
             # self.mcts._n_playout = self.n_playout - round(has_run_time/60)
 
 
@@ -479,7 +479,7 @@ class MCTSPlayer(object):
             
             if self.need_max_ns or state.game.exreward == False:
                 # idx = max_ns_idx
-                idx = np.random.choice(range(ACTONS_LEN), p=act_probs)
+                idx = -1#np.random.choice(range(ACTONS_LEN), p=act_probs)
             elif self.need_max_ps:
                 idx = max_ps_idx                          
                 # idx = np.random.choice(range(ACTONS_LEN), p=act_ps)           
@@ -490,7 +490,7 @@ class MCTSPlayer(object):
                 # 国际象棋 0.3 将棋 0.15 围棋 0.03
                 # 取值一般倾向于 a = 10/n 所以俄罗斯方块取 2
                 # a = 2       
-                p=0.75  
+                p=0.75 * (0.999**(has_run_time//60)) 
                 dirichlet = np.random.dirichlet(2 * np.ones(len(nz_idx)))
                 dirichlet_probs = np.zeros_like(act_probs, dtype=np.float64)
                 dirichlet_probs[nz_idx] = dirichlet
