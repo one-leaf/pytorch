@@ -235,7 +235,7 @@ class Train():
             agent.is_replay = False
             agent.limitstep = False
             
-        agent.exreward = False #True
+        agent.exreward = True
         agent.setCache(cache)
         
         agent.show_mcts_process= True
@@ -304,7 +304,7 @@ class Train():
                     player.need_max_ps = not player.need_max_ps
                     player.need_max_ns = not player.need_max_ns
                 
-                if agent.pieceheight>9: agent.exreward = False
+                if agent.pieceheight>8: agent.exreward = False
                 
                 if agent.exreward: exreward_end_piececount = agent.piececount
                     
