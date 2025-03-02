@@ -235,7 +235,7 @@ class Train():
             agent.is_replay = False
             agent.limitstep = False
             
-        agent.exreward = True
+        agent.exreward = False
         agent.setCache(cache)
         
         agent.show_mcts_process= True

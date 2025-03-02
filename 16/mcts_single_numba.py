@@ -479,7 +479,7 @@ class MCTSPlayer(object):
             
             if self.need_max_ns or state.game.exreward == False:
                 # idx = max_ns_idx
-                idx = -1#np.random.choice(range(ACTONS_LEN), p=act_probs)
+                idx = np.random.choice(range(ACTONS_LEN), p=act_probs)
             elif self.need_max_ps:
                 idx = max_ps_idx                          
                 # idx = np.random.choice(range(ACTONS_LEN), p=act_ps)           
