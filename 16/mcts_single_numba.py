@@ -487,7 +487,7 @@ class MCTSPlayer(object):
                 idx = max_ps_idx                          
                 # idx = np.random.choice(range(ACTONS_LEN), p=act_ps)           
             if availables[idx]==0: idx = -1                               
-                            
+            p = 0                
             if idx == -1:
                 # a=1的时候，act 机会均等，>1 强调均值， <1 强调两端
                 # 国际象棋 0.3 将棋 0.15 围棋 0.03
@@ -509,7 +509,7 @@ class MCTSPlayer(object):
                 need_max_ns = "need_max_ns" if self.need_max_ns else ""
                 need_max_ps = "need_max_ps" if self.need_max_ps else ""
                 print("\trandom", game.position_to_action_name(max_ps_idx), "==>",  game.position_to_action_name(idx), \
-                      "v:", qval, need_max_ns, need_max_ps)  
+                      "v:", qval, "p:", p, need_max_ns, need_max_ps)  
             acc_ps = 1 if max_ns_idx==max_ps_idx else 0 # np.var(act_probs) #0 if abs(act_ps[idx]-act_probs[idx])>0.4 else 1
 
             # 将概率转为onehot
