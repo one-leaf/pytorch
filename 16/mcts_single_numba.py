@@ -479,10 +479,10 @@ class MCTSPlayer(object):
             
             if self.need_max_ns or state.game.exreward == False:
                 # idx = max_ns_idx
-                if has_run_time < 3600:
-                    idx = np.random.choice(range(ACTONS_LEN), p=act_probs)
-                else:
-                    idx = -1
+                # if has_run_time < 3600:
+                #     idx = np.random.choice(range(ACTONS_LEN), p=act_probs)
+                # else:
+                idx = -1
             elif self.need_max_ps:
                 idx = max_ps_idx                          
                 # idx = np.random.choice(range(ACTONS_LEN), p=act_ps)           
@@ -493,7 +493,7 @@ class MCTSPlayer(object):
                 # 国际象棋 0.3 将棋 0.15 围棋 0.03
                 # 取值一般倾向于 a = 10/n 所以俄罗斯方块取 2
                 # a = 2       
-                p=0.75 
+                p=0.999**(has_run_time//60) 
                 dirichlet = np.random.dirichlet(2 * np.ones(len(nz_idx)))
                 dirichlet_probs = np.zeros_like(act_probs, dtype=np.float64)
                 dirichlet_probs[nz_idx] = dirichlet
