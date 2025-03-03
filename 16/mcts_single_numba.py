@@ -121,11 +121,11 @@ def expandPN(s:int, availables, act_probs, Ps, Ns, Nsa, Qsa, actions_num):
     _p[availables==0]=0
     _p_sum = np.sum(_p)
     if _p_sum > 0:
-        if np.max(_p/_p_sum)>0.95:        
-            probs = availables/np.sum(availables)
-            Ps[s] = probs*0.05 + _p*0.95/_p_sum
-        else:
-            Ps[s] = _p/_p_sum
+        # if np.max(_p/_p_sum)>0.95:        
+        #     probs = availables/np.sum(availables)
+        #     Ps[s] = probs*0.05 + _p*0.95/_p_sum
+        # else:
+        Ps[s] = _p/_p_sum
     else:
         Ps[s] = availables/np.sum(availables) 
     Ns[s] = 0
