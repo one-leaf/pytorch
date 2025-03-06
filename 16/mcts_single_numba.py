@@ -301,7 +301,7 @@ class MCTS():
         """  
         if state.game.terminal: 
             # state.game.print()
-            return -2      
+            return -10      
         s = hash(state)
         # print(self.simulation_count, s)
         # print(state.game.status[0])
