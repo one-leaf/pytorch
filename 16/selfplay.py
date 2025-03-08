@@ -565,8 +565,8 @@ class Train():
             
             # 如果每步的消耗时间小于self.limit_steptime秒，增加探测深度    
             result["total"]["n_playout"] += round(self.limit_steptime-result["total"]["step_time"])
-                
-            # 保存下中间步骤的agent
+            if result["total"]["n_playout"] < 64: result["total"]["n_playout"] = 64     
+            # 保存下中间步骤的agent1
             # newmodelfile = model_file+"_"+str(result["total"]["agent"])
             # if not os.path.exists(newmodelfile):
             #     policy_value_net.save_model(newmodelfile)
