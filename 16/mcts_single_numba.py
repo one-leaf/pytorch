@@ -301,7 +301,7 @@ class MCTS():
         """  
         if state.game.terminal: 
             # state.game.print()
-            return -10      
+            return -5      
         s = hash(state)
         # print(self.simulation_count, s)
         # print(state.game.status[0])
@@ -349,7 +349,7 @@ class MCTS():
         # 外部奖励，最大1
         r = 0
         if state.game.terminal:
-            v = -10
+            v = -5
         if state.game.state==1 and state.game.exreward:# and state.game.piececount - state.markPiececount >= self.reward_piececount:
             # 这种奖励会照成主动消行，而不管后续的局面
             # r = (state.game.score-state.markscore)/(state.game.steps-state.markSteps)
