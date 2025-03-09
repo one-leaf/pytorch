@@ -127,6 +127,8 @@ class Train():
                 print("save need replay", his_pieces_file)
                 with open(his_pieces_file, "wb") as fn:
                     pickle.dump(min_his_pieces, fn)
+                    
+        result = read_status_file()
         
         set_status_total_value(result, "max_score", max_removedlines, 1/100)
         set_status_total_value(result, "max_piececount", max_pieces_count, 1/100)
