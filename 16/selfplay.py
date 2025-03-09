@@ -344,14 +344,14 @@ class Train():
         elif exreward_end_piececounts[0]<exreward_end_piececounts[1]:
             win_values[1] = 1
 
-        result = read_status_file()
         
         steptime = total_game_paytime/total_game_steps            
         avg_qval = total_game_qval/total_game_steps
         avg_state_value = total_game_state_value/total_game_steps
         
         print("step pay time:", steptime, "qval:", avg_qval, "avg_state_value:", avg_state_value)
-                        
+        
+        result = read_status_file()                       
         alpha = 0.01
         set_status_total_value(result, "score_mcts", total_game_score/2, alpha)
         set_status_total_value(result, "piececount_mcts", total_game_piececount/2, alpha)
@@ -390,6 +390,8 @@ class Train():
                 result["best"]["reward"] += float(f'0.{result["best"]["reward"]}')
             if result["best"]["reward"]>1:
                 result["best"]["reward"] = round(result["best"]["reward"]-1,10) 
+    
+        save_status_file(result)     
             
         # 计算 acc 看有没有收敛
         pacc = []
@@ -409,7 +411,8 @@ class Train():
 
         depth = float(np.average(depth))
         ns = float(np.average(ns))
-
+        
+        result = read_status_file()                       
         set_status_total_value(result, "pacc", pacc, alpha)
         set_status_total_value(result, "vacc", vacc, alpha)
         set_status_total_value(result, "depth", depth, alpha)
