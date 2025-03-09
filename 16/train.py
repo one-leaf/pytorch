@@ -316,7 +316,7 @@ class Train():
             print("kl:{} vs {} lr_multiplier:{} lr:{} avg_values:{} std_values:{}".format(kl, self.kl_targ, self.lr_multiplier, self.learn_rate*self.lr_multiplier, \
                 self.dataset.avg_values, self.dataset.std_values))
             status = read_status_file()
-            status["total"]["lr_multiplier"] = self.lr_multiplier 
+            status["total"]["lr_multiplier"] = round(self.lr_multiplier,8) 
             status["kl"].append(round(kl,6))               
             save_status_file(status)    
             
