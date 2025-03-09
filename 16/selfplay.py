@@ -101,12 +101,13 @@ class Train():
                         'step:', agent.steps, "step time:", round((time.time()-start_time)/i,3),'avg_score:', result["total"]["avg_score"])            
 
                 if agent.terminal: 
+                    result = read_status_file()
                     set_status_total_value(result, "avg_score", agent.removedlines, 1/1000)
                     set_status_total_value(result, "avg_piececount", agent.piececount, 1/1000)
+                    save_status_file(result)
                     result["lastupdate"] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                     break
                 
-            save_status_file(result)
 
             agent.print()
 
