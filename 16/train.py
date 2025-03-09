@@ -302,8 +302,9 @@ class Train():
             kl = np.mean(np.sum(begin_act_probs * (np.log(begin_act_probs/end_act_probs)), axis=1))
             if np.isnan(kl):
                 kl = 0
-            if kl == 0:
-                pass                
+            if kl < 1e-5:
+                self.lr_multiplier = 1
+                self.learn_rate = 1e-6                
             elif kl > self.kl_targ * 2 and self.lr_multiplier > 0.01:
                 self.lr_multiplier /= 1.5
             elif kl < self.kl_targ / 2 and self.lr_multiplier < 100:
