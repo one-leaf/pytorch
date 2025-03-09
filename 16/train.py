@@ -303,7 +303,7 @@ class Train():
             if np.isnan(kl):
                 kl = 0
             if kl < 1e-5:
-                self.lr_multiplier = 1
+                self.lr_multiplier = self.learn_rate1/1e-6
                 self.learn_rate = 1e-6                
             elif kl > self.kl_targ * 2 and self.lr_multiplier > 0.01:
                 self.lr_multiplier /= 1.5
