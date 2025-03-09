@@ -86,7 +86,7 @@ class Train():
         min_removedlines = -1
         max_pieces_count = -1
         max_removedlines = -1
-        result = read_status_file()
+
         for _ in range(self.play_size):
             agent = Agent(isRandomNextPiece=True)
             start_time = time.time()
@@ -120,7 +120,8 @@ class Train():
             if max_pieces_count==-1 or agent.piececount > max_pieces_count:         
                 max_pieces_count = agent.piececount
                 max_removedlines = agent.removedlines
-
+                
+            result = read_status_file()
             if agent.piececount<result["total"]["min_piececount"]:
                 filename = "{}-{}.pkl".format("".join(min_his_pieces), min_his_pieces_len)
                 his_pieces_file = os.path.join(self.waitplaydir, filename)
