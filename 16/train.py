@@ -315,7 +315,7 @@ class Train():
                 self.dataset.avg_values, self.dataset.std_values))
             status = read_status_file()
             status["total"]["lr_multiplier"] = self.lr_multiplier 
-            status["kl"].append(kl)               
+            status["kl"].append(round(kl,4))               
             save_status_file(status)    
             
         except KeyboardInterrupt:
