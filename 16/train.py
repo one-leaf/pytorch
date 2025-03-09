@@ -10,6 +10,7 @@ import copy, math
 
 import numpy as np
 import torch
+from status import save_status_file, read_status_file
 
 # 添加 cache 反而更慢
 # try:
@@ -241,16 +242,13 @@ class Train():
                     else:
                         begin_act_probs = np.concatenate((begin_act_probs, act_probs), axis=0)
                         begin_accuracy = np.concatenate((begin_accuracy, np.argmax(act_probs, axis=1)==np.argmax(test_probs.cpu().numpy(), axis=1)), axis=0)
+            status = read_status_file()
+            self.lr_multiplier = status["total"]["lr_multiplier"]
+            self.optimizer_type = status["total"]["optimizer_type"]
+            print("lr_multiplier:", self.lr_multiplier, "learn_rate:", self.learn_rate*self.lr_multiplier)
 
-            self.train_conf = {"lr_multiplier":1,"optimizer_type":0}
-            train_conf_file=os.path.join(data_dir,"train_conf_pkl")
-            if os.path.exists(train_conf_file):
-                with open(train_conf_file, "rb") as fn:
-                    self.train_conf = pickle.load(fn)
-                    self.lr_multiplier = self.train_conf["lr_multiplier"]
-                    print("lr_multiplier:", self.lr_multiplier, "learn_rate:", self.learn_rate*self.lr_multiplier)
             v_loss_list=[]
-            self.policy_value_net.set_optimizer(self.train_conf["optimizer_type"])
+            self.policy_value_net.set_optimizer(self.optimizer_type)
             self.policy_value_net.set_learning_rate(self.learn_rate*self.lr_multiplier)
             for i, data in enumerate(training_loader):  # 计划训练批次
                 # 使用对抗数据重新训练策略价值网络模型
@@ -315,13 +313,11 @@ class Train():
             if self.learn_rate*self.lr_multiplier<1e-6: self.lr_multiplier = 1e-6/self.learn_rate
             print("kl:{} vs {} lr_multiplier:{} lr:{} avg_values:{} std_values:{}".format(kl, self.kl_targ, self.lr_multiplier, self.learn_rate*self.lr_multiplier, \
                 self.dataset.avg_values, self.dataset.std_values))
-            with open(train_conf_file, 'wb') as fn:
-                self.train_conf["lr_multiplier"] = self.lr_multiplier
-                self.train_conf["avg_values"] = self.dataset.avg_values
-                self.train_conf["std_values"] = self.dataset.std_values                
-                pickle.dump(self.train_conf, fn)
-
-
+            status = read_status_file()
+            status["total"]["lr_multiplier"] = self.lr_multiplier 
+            status["kl"].append(kl)               
+            save_status_file(status)    
+            
         except KeyboardInterrupt:
             print('quit')
 

@@ -13,6 +13,8 @@ import os, random, uuid, math
 import numpy as np
 import copy
 
+from status import save_status_file, read_status_file, set_status_total_value
+
 # 定义游戏的动作
 GAME_ACTIONS_NUM = len(ACTIONS) 
 GAME_WIDTH, GAME_HEIGHT = 10, 20
@@ -53,95 +55,7 @@ class Train():
         self.stop_mark_file = os.path.join(self.waitplaydir,"../stop")
 
 
-    def save_status_file(self, result, status_file):
-        with open(status_file+"_pkl", 'wb') as fn:
-            pickle.dump(result, fn)
-        with open(status_file, 'w') as f:
-            json.dump(result, f, ensure_ascii=False)
-
-
-    def read_status_file(self, status_file):
-        # 获取历史训练数据
-        result=None
-        if os.path.exists(status_file):
-            for i in range(5):
-                try:
-                    with open(status_file, "rb") as fn:
-                        result = json.load(fn)
-                    break
-                except Exception as e:
-                    time.sleep(10)
-                try:
-                    with open(status_file+"_pkl", "rb") as fn:
-                        result = pickle.load(fn)
-                    break
-                except Exception as e:
-                    time.sleep(10)
-
-            if result==None:
-                ext = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
-                os.replace(status_file, status_file+"_"+ext) 
-        if result==None:
-            result={"reward":[], "depth":[], "pacc":[], "vacc":[], "time":[], "piececount":[]}
-        if "total" not in result:
-            result["total"]={"agent":0, "pacc":0, "vacc":0, "ns":0, "depth":0, "step_time":0, "_agent":0}
-        if "best" not in result:
-            result["best"]={"reward":0, "agent":0}
-        if "avg_piececount" not in result["total"]:
-            result["total"]["avg_piececount"]=20                      
-        if "min_piececount" not in result["total"]:
-            result["total"]["min_piececount"]=20                      
-        if "max_piececount" not in result["total"]:
-            result["total"]["max_piececount"]=20                      
-        if "n_playout" not in result["total"]:
-            result["total"]["n_playout"]=self.n_playout
-        if "win_lost_tie" not in result["total"]:
-            result["total"]["win_lost_tie"]=[0,0,0]            
-        if "max_score" not in result["total"]:
-            result["total"]["max_score"]=0  
-        if "min_score" not in result["total"]:
-            result["total"]["min_score"]=0  
-        if "avg_score" not in result["total"]:
-            result["total"]["avg_score"]=0  
-        if "score_mcts" not in result["total"]:
-            result["total"]["score_mcts"]=0  
-        if "piececount_mcts" not in result["total"]:
-            result["total"]["piececount_mcts"]=0
-        if "piececount0_mcts" not in result["total"]:
-            result["total"]["piececount0_mcts"]=0
-        if "piececount1_mcts" not in result["total"]:
-            result["total"]["piececount1_mcts"]=0
-        if "qval" not in result["total"]:
-            result["total"]["qval"]=0  
-        if "max_qval" not in result["total"]:
-            result["total"]["max_qval"]=0  
-        if "min_qval" not in result["total"]:
-            result["total"]["min_qval"]=0  
-        if "state_value" not in result["total"]:
-            result["total"]["state_value"]=0  
-        if  "q_puct" not in result["total"]:
-            result["total"]["q_puct"]=1
-        if "piececount" not in result:
-            result["piececount"]=[]
-        if "piececount0_mcts" not in result:
-            result["piececount0_mcts"]=[]
-        if "piececount1_mcts" not in result:
-            result["piececount1_mcts"]=[]
-        if "update" not in result:
-            result["update"]=[]
-        if "qval" not in result:
-            result["qval"]=[]  
-        if "q_puct" not in result:
-            result["q_puct"]=[]
-        # if "advantage" in result: del result["advantage"]
-        # if "avg_score_ex" in result["total"]: del result["total"]["avg_score_ex"]
-        # if "exrewardRate" in result["total"]: del result["total"]["exrewardRate"]
-        # if "avg_reward_piececount" in result["total"]: del result["total"]["avg_reward_piececount"]
-        # if "avg_qval" in result["total"]: del result["total"]["avg_qval"]
-        # if "piececount" in result["total"]: del result["total"]["piececount"]
-        # if "avg_state_value" in result["total"]: del result["total"]["avg_state_value"]
-        
-        return result
+    
 
     def get_equi_data(self, states, mcts_probs, values):
         """
@@ -164,7 +78,7 @@ class Train():
             #     print("value:",value)
         return extend_data
 
-    def test_play(self,game_json,policy_value_net):
+    def test_play(self,policy_value_net):
         # 先运行测试
         min_his_pieces = None
         min_his_pieces_len = 0
@@ -173,7 +87,7 @@ class Train():
         max_pieces_count = -1
         max_removedlines = -1
         for _ in range(self.play_size):
-            result = self.read_status_file(game_json)     
+            result = read_status_file()     
             agent = Agent(isRandomNextPiece=True)
             start_time = time.time()
             agent.show_mcts_process= False
@@ -186,13 +100,13 @@ class Train():
                     print("#"*40, 'score:', agent.removedlines, 'height:', agent.pieceheight, 'piece:', agent.piececount, "shape:", agent.fallpiece["shape"], \
                         'step:', agent.steps, "step time:", round((time.time()-start_time)/i,3),'avg_score:', result["total"]["avg_score"])            
 
-                if agent.terminal:            
-                    result["total"]["avg_score"] += (agent.removedlines-result["total"]["avg_score"])/1000
-                    result["total"]["avg_piececount"] += (agent.piececount-result["total"]["avg_piececount"])/1000
+                if agent.terminal: 
+                    set_status_total_value(result, "avg_score", agent.removedlines, 1/1000)
+                    set_status_total_value(result, "avg_piececount", agent.piececount, 1/1000)
                     result["lastupdate"] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                     break
                 
-            self.save_status_file(result, game_json)
+            save_status_file(result)
 
             agent.print()
 
@@ -213,11 +127,12 @@ class Train():
                 with open(his_pieces_file, "wb") as fn:
                     pickle.dump(min_his_pieces, fn)
         
-        result["total"]["max_score"] += (max_removedlines-result["total"]["max_score"])/100
-        result["total"]["max_piececount"] += (max_pieces_count-result["total"]["max_piececount"])/100
-        result["total"]["min_score"] += (min_removedlines-result["total"]["min_score"])/100
-        result["total"]["min_piececount"] += (min_pieces_count-result["total"]["min_piececount"])/100                
-        self.save_status_file(result, game_json)          
+        set_status_total_value(result, "max_score", max_removedlines, 1/100)
+        set_status_total_value(result, "max_piececount", max_pieces_count, 1/100)
+        set_status_total_value(result, "min_score", min_removedlines, 1/100)
+        set_status_total_value(result, "min_piececount", min_pieces_count, 1/100)
+              
+        save_status_file(result)          
                                
         return min_removedlines, min_his_pieces, min_his_pieces_len
 
@@ -344,18 +259,16 @@ class Train():
         # 开始游戏
         policy_value_net = PolicyValueNet(GAME_WIDTH, GAME_HEIGHT, GAME_ACTIONS_NUM, model_file=load_model_file)
         bestmodelfile = model_file+"_best"
-        
-        game_json = os.path.join(data_dir, "result.json")
-  
+          
         print('start test time:', datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 
-        min_removedlines, his_pieces, his_pieces_len = self.test_play(game_json, policy_value_net)
+        min_removedlines, his_pieces, his_pieces_len = self.test_play(policy_value_net)
         
         print('end test time:', datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 
         # 正式运行
         limit_depth=20
-        result = self.read_status_file(game_json) 
+        result = read_status_file() 
         
         if result["total"]["depth"]>limit_depth:
             limit_depth=result["total"]["depth"]
@@ -390,7 +303,7 @@ class Train():
             his_pieces_len = 0
         
         play_data = []
-        result = self.read_status_file(game_json) 
+        result = read_status_file() 
         exreward_end_piececounts = []    
         for playcount in range(2):
             player.set_player_id(playcount)
@@ -431,7 +344,7 @@ class Train():
         elif exreward_end_piececounts[0]<exreward_end_piececounts[1]:
             win_values[1] = 1
 
-        result = self.read_status_file(game_json)
+        result = read_status_file()
         
         steptime = total_game_paytime/total_game_steps            
         avg_qval = total_game_qval/total_game_steps
@@ -440,18 +353,16 @@ class Train():
         print("step pay time:", steptime, "qval:", avg_qval, "avg_state_value:", avg_state_value)
                         
         alpha = 0.01
-        result["total"]["score_mcts"] += alpha * (total_game_score/2-result["total"]["score_mcts"])
-        result["total"]["piececount_mcts"] += alpha * (total_game_piececount/2-result["total"]["piececount_mcts"])   
-        result["total"]["piececount0_mcts"] += alpha * (total_game_exreward_end_piececounts/2-result["total"]["piececount0_mcts"])
-        result["total"]["piececount1_mcts"] += alpha * ((total_game_piececount-total_game_exreward_end_piececounts)/2 - result["total"]["piececount1_mcts"])    
-        result["total"]["qval"] += alpha * (avg_qval - result["total"]["qval"])            
-        result["total"]["max_qval"] += alpha * (max_game_qval - result["total"]["max_qval"])            
-        result["total"]["min_qval"] += alpha * (min_game_qval - result["total"]["min_qval"])
-        result["total"]["state_value"] += alpha * (avg_state_value - result["total"]["state_value"])
-        result["total"]["step_time"] += alpha * (steptime-result["total"]["step_time"])
-
-        q_puct = std_game_qval
-        result["total"]["q_puct"] += alpha * (q_puct-result["total"]["q_puct"])
+        set_status_total_value(result, "score_mcts", total_game_score/2, alpha)
+        set_status_total_value(result, "piececount_mcts", total_game_piececount/2, alpha)
+        set_status_total_value(result, "piececount0_mcts", total_game_exreward_end_piececounts/2, alpha)
+        set_status_total_value(result, "piececount1_mcts", (total_game_piececount-total_game_exreward_end_piececounts)/2, alpha)
+        set_status_total_value(result, "qval", avg_qval, alpha)
+        set_status_total_value(result, "max_qval", max_game_qval, alpha)
+        set_status_total_value(result, "min_qval", min_game_qval, alpha)
+        set_status_total_value(result, "state_value", avg_state_value, alpha)
+        set_status_total_value(result, "step_time", steptime, alpha)
+        set_status_total_value(result, "q_puct", std_game_qval, alpha)
 
         # if result["total"]["max_qval"]-result["total"]["min_qval"]>2 and result["total"]["qval"]>0.5:
         #     q_puct = (result["total"]["max_qval"]-result["total"]["min_qval"])*result["total"]["qval"]*0.5
@@ -499,27 +410,11 @@ class Train():
         depth = float(np.average(depth))
         ns = float(np.average(ns))
 
-        if result["total"]["pacc"]==0:
-            result["total"]["pacc"] = pacc
-        else:
-            result["total"]["pacc"] = result["total"]["pacc"]*0.99 + pacc*0.01   
+        set_status_total_value(result, "pacc", pacc, alpha)
+        set_status_total_value(result, "vacc", vacc, alpha)
+        set_status_total_value(result, "depth", depth, alpha)
+        set_status_total_value(result, "ns", ns, alpha)  
 
-        if result["total"]["vacc"]==0:
-            result["total"]["vacc"] = vacc
-        else:
-            result["total"]["vacc"] = result["total"]["vacc"]*0.99 + vacc*0.01   
-
-        if result["total"]["depth"]==0:
-            result["total"]["depth"] = depth
-        else:
-            result["total"]["depth"] = result["total"]["depth"]*0.99 + depth*0.01   
-
-        if result["total"]["ns"]==0:
-            result["total"]["ns"] = ns
-        else:
-            result["total"]["ns"] = result["total"]["ns"]*0.99 + ns*0.01   
-
-        max_list_len=30
         update_agent_count = 20
         if result["total"]["_agent"]>update_agent_count:
             result["reward"].append(round(result["total"]["avg_score"],2))
@@ -538,30 +433,7 @@ class Train():
             current_day = local_time.tm_mday
 
             result["update"].append(current_day)
-            result["total"]["_agent"] -= update_agent_count 
-
-            while len(result["reward"])>max_list_len:
-                result["reward"].remove(result["reward"][0])
-            while len(result["depth"])>max_list_len:
-                result["depth"].remove(result["depth"][0])
-            while len(result["pacc"])>max_list_len:
-                result["pacc"].remove(result["pacc"][0])
-            while len(result["vacc"])>max_list_len:
-                result["vacc"].remove(result["vacc"][0])
-            while len(result["time"])>max_list_len:
-                result["time"].remove(result["time"][0])
-            while len(result["qval"])>max_list_len:
-                result["qval"].remove(result["qval"][0])
-            while len(result["q_puct"])>max_list_len:
-                result["q_puct"].remove(result["q_puct"][0])
-            while len(result["piececount"])>max_list_len:
-                result["piececount"].remove(result["piececount"][0])
-            while len(result["piececount0_mcts"])>max_list_len:
-                result["piececount0_mcts"].remove(result["piececount0_mcts"][0])
-            while len(result["piececount1_mcts"])>max_list_len:
-                result["piececount1_mcts"].remove(result["piececount1_mcts"][0])
-            while len(result["update"])>max_list_len:
-                result["update"].remove(result["update"][0])
+            result["total"]["_agent"] -= update_agent_count           
             
             # 如果每步的消耗时间小于self.limit_steptime秒，增加探测深度    
             result["total"]["n_playout"] += round(self.limit_steptime-result["total"]["step_time"])
@@ -580,7 +452,7 @@ class Train():
                 if os.path.exists(newmodelfile): os.link(newmodelfile, bestmodelfile)
                         
         result["lastupdate"] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        self.save_status_file(result, game_json)         
+        save_status_file(result)         
         avg_qval = [play_data[0]["qval"]/play_data[0]["agent"].steps, play_data[1]["qval"]/play_data[1]["agent"].steps]
         std_qval = [play_data[0]["std_qval"], play_data[1]["std_qval"]]    
         states, mcts_probs, values= [], [], []
