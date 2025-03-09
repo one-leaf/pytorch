@@ -86,8 +86,8 @@ class Train():
         min_removedlines = -1
         max_pieces_count = -1
         max_removedlines = -1
+        result = read_status_file()
         for _ in range(self.play_size):
-            result = read_status_file()     
             agent = Agent(isRandomNextPiece=True)
             start_time = time.time()
             agent.show_mcts_process= False
@@ -98,7 +98,7 @@ class Train():
                 _, reward = agent.step(action)
                 if reward > 0:
                     print("#"*40, 'score:', agent.removedlines, 'height:', agent.pieceheight, 'piece:', agent.piececount, "shape:", agent.fallpiece["shape"], \
-                        'step:', agent.steps, "step time:", round((time.time()-start_time)/i,3),'avg_score:', result["total"]["avg_score"])            
+                        'step:', agent.steps, "step time:", round((time.time()-start_time)/i,3))            
 
                 if agent.terminal: 
                     result = read_status_file()
