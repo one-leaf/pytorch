@@ -165,7 +165,7 @@ class Dataset(torch.utils.data.Dataset):
             savefile = os.path.join(self.data_dir, filename)
             if os.path.exists(savefile): os.remove(savefile)
             os.rename(fn, savefile)
-            if len(self.newsample)<self.test_size:
+            if self.test_size==-1 or len(self.newsample)<self.test_size:
                 self.newsample.append(savefile)
             if i>=self.max_keep_size//self.epoch: break       
         print("mv %s/%s files to train"%(i+1,len(movefiles)))
@@ -204,7 +204,7 @@ class Train():
         """启动训练"""
         try:
             print("start data loader")
-            self.dataset = Dataset(data_dir, self.buffer_size, self.batch_size*5, epochs=self.epochs)
+            self.dataset = Dataset(data_dir, self.buffer_size, -1, epochs=self.epochs)
             self.testdataset = copy.copy(self.dataset)
             self.testdataset.test=True
             print("end data loader")
