@@ -122,7 +122,7 @@ class Train():
                 max_removedlines = agent.removedlines
                 
             result = read_status_file()
-            if agent.piececount<result["total"]["min_piececount"]:
+            if agent.piececount<result["total"]["avg_piececount"]:
                 filename = "{}-{}.pkl".format("".join(min_his_pieces), min_his_pieces_len)
                 his_pieces_file = os.path.join(self.waitplaydir, filename)
                 print("save need replay", his_pieces_file)
