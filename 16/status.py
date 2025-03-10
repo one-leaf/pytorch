@@ -92,6 +92,8 @@ def read_status_file():
         result["total"]["lr_multiplier"]=1
     if "optimizer_type" not in result["total"]:
         result["total"]["optimizer_type"]=0
+    if "kl" not in result["total"]:
+        result["total"]["kl"]=1e-2
     # if "advantage" in result: del result["advantage"]
     # if "avg_score_ex" in result["total"]: del result["total"]["avg_score_ex"]
     # if "exrewardRate" in result["total"]: del result["total"]["exrewardRate"]

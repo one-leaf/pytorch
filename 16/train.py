@@ -10,7 +10,7 @@ import copy, math
 
 import numpy as np
 import torch
-from status import save_status_file, read_status_file
+from status import save_status_file, read_status_file, set_status_total_value
 
 # 添加 cache 反而更慢
 # try:
@@ -304,21 +304,26 @@ class Train():
             kl = np.mean(np.sum(begin_act_probs * (np.log(begin_act_probs/end_act_probs)), axis=1))
             if np.isnan(kl):
                 kl = 0
-            if kl < 1e-5:
-                self.lr_multiplier = 1e-6/self.learn_rate
-            elif kl > self.kl_targ * 2 and self.lr_multiplier > 0.01:
-                self.lr_multiplier /= 1.5
-            elif kl < self.kl_targ / 2 and self.lr_multiplier < 100:
-                self.lr_multiplier *= 1.5
                 
+            status = read_status_file()
+            set_status_total_value(status, "kl", kl, 0.1)
+            total_kl = status["total"]["kl"]
+
+            if total_kl < 1e-5:
+                self.lr_multiplier = 1e-6/self.learn_rate
+            elif total_kl > self.kl_targ * 2 and self.lr_multiplier > 0.01:
+                self.lr_multiplier /= 1.5
+            elif total_kl < self.kl_targ / 2 and self.lr_multiplier < 100:
+                self.lr_multiplier *= 1.5
             if self.learn_rate*self.lr_multiplier>1e-3: self.lr_multiplier = 1e-3/self.learn_rate
             if self.learn_rate*self.lr_multiplier<1e-6: self.lr_multiplier = 1e-6/self.learn_rate
-            print("kl:{} vs {} lr_multiplier:{} lr:{} avg_values:{} std_values:{}".format(kl, self.kl_targ, self.lr_multiplier, self.learn_rate*self.lr_multiplier, \
-                self.dataset.avg_values, self.dataset.std_values))
-            status = read_status_file()
+            
             status["total"]["lr_multiplier"] = float(self.lr_multiplier) 
             status["kl"].append(round(float(kl),6))               
             save_status_file(status)    
+
+            print("kl:{} vs {} lr_multiplier:{} lr:{} avg_values:{} std_values:{}".format(kl, self.kl_targ, self.lr_multiplier, self.learn_rate*self.lr_multiplier, \
+                self.dataset.avg_values, self.dataset.std_values))
             
         except KeyboardInterrupt:
             print('quit')
