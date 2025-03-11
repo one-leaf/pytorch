@@ -295,7 +295,9 @@ class Train():
         # 检查有没有需要重复运行的
         listFiles = [f for f in os.listdir(self.waitplaydir) if f.endswith(".pkl")]
         if listFiles:
-            earliest_file = min(listFiles, key=lambda f: os.path.getctime(os.path.join(self.waitplaydir, f)))
+            # earliest_file = min(listFiles, key=lambda f: os.path.getctime(os.path.join(self.waitplaydir, f)))
+            earliest_file = min(listFiles, key=lambda x: len(x))
+            
             filename = os.path.join(self.waitplaydir, earliest_file)
             with open(filename, "rb") as fn:
                 his_pieces = pickle.load(fn)
