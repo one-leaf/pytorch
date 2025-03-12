@@ -48,7 +48,6 @@ def read_status_file():
     add_prop(state, "pacc")
     add_prop(state, "vdiff")
     add_prop(state, "step_time")
-    add_prop(state, "ns")
     add_prop(state, "piececount")    
       
     add_total_prop(state, "min_piececount")    

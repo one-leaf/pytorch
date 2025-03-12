@@ -199,7 +199,6 @@ class Train():
             _step["qval"] = qval
             _step["acc_ps"] = acc_ps
             _step["depth"] = depth
-            _step["ns"] = ns
             _step["score"] = agent.score
 
             data["steps"].append(_step)
@@ -374,24 +373,20 @@ class Train():
         # 计算 acc 看有没有收敛
         pacc = []
         depth = []
-        ns = []
         for m, data in enumerate([play_data[0]["data"], play_data[1]["data"]]) :
             for step in data["steps"]:
                 pacc.append(step["acc_ps"])
                 depth.append(step["depth"])
-                ns.append(step["ns"])
 
         pacc = float(np.average(pacc))
         vdiff = abs(play_data[0]["agent"].piececount-play_data[1]["agent"].piececount)
 
         depth = float(np.average(depth))
-        ns = float(np.average(ns))
         
         state = read_status_file()                       
         set_status_total_value(state, "pacc", pacc, alpha)
         set_status_total_value(state, "vdiff", vdiff, alpha)
         set_status_total_value(state, "depth", depth, alpha)
-        set_status_total_value(state, "ns", ns, alpha)  
 
         update_agent_count = 20
         if state["total"]["_agent"]>update_agent_count:
