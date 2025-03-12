@@ -57,6 +57,9 @@ def read_status_file():
             lock_file(f, exclusive=False)
             try:
                 state = json.load(f)
+            except Exception as e:
+                print(e)
+                raise e
             finally:
                 unlock_file(f)                    
     if state==None:
