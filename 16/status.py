@@ -56,14 +56,11 @@ def read_status_file():
     state=None
     if os.path.exists(status_file):
         with open(status_file, "r") as f:
-            lock_file(f, exclusive=False)
             try:
                 state = json.load(f)
             except Exception as e:
                 shutil.copy(status_file_bak, status_file)
-                raise e
-            finally:
-                unlock_file(f)                    
+                raise e                  
     if state==None:
         state={"total":{"agent":0, "_agent":0}}
     if "best" not in state:
