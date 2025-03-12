@@ -407,7 +407,7 @@ class Train():
             result["depth"].append(round(result["total"]["depth"],1))
             result["pacc"].append(round(result["total"]["pacc"],2))
             result["vdiff"].append(round(result["total"]["vdiff"],2))
-            result["time"].append(round(result["total"]["step_time"],1))
+            result["step_time"].append(round(result["total"]["step_time"],1))
             result["q_avg"].append(round(result["total"]["q_avg"],4))
             result["piececount"].append(round(result["total"]["avg_piececount"],1))
             result["piececount_mcts"].append(round(result["total"]["piececount_mcts"],1))
