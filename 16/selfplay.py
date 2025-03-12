@@ -95,8 +95,8 @@ class Train():
 
             for i in range(self.max_step_count):
                 action = policy_value_net.policy_value_fn_best_act(agent)
-                _, reward = agent.step(action)
-                if reward > 0:
+                _, score = agent.step(action)
+                if score > 0:
                     print("#"*40, 'score:', agent.removedlines, 'height:', agent.pieceheight, 'piece:', agent.piececount, "shape:", agent.fallpiece["shape"], \
                         'step:', agent.steps, "step time:", round((time.time()-start_time)/i,3))            
 
@@ -154,21 +154,19 @@ class Train():
             agent.is_replay = False
             agent.limitstep = False
             
-        agent.exreward = False
         agent.setCache(cache)
         
         agent.show_mcts_process= True
         
         max_emptyCount = random.randint(10,30)
         start_time = time.time()
-        mark_reward_piececount = -1
         total_qval=0
         max_qval=0
         min_qval=0
         qval_list=[]
         total_state_value=0
         need_max_ps = False # random.random()>0.5
-        print("exreward:", agent.exreward,"max_emptyCount:",max_emptyCount,"isRandomNextPiece:",agent.isRandomNextPiece,"limitstep:",agent.limitstep,"max_ps:",need_max_ps,"max_qs:",agent.is_replay)
+        print("max_emptyCount:",max_emptyCount,"isRandomNextPiece:",agent.isRandomNextPiece,"limitstep:",agent.limitstep,"max_ps:",need_max_ps,"max_qs:",agent.is_replay)
         for i in range(self.max_step_count):
             _step={"step":i}
             _step["state"] = np.copy(agent.current_state())
@@ -183,12 +181,9 @@ class Train():
             # need_max_ps = random.random() < agent.removedlines/100   
             action, qval, move_probs, state_value, acc_ps, depth, ns = player.get_action(agent, temp=1) 
 
-            _, reward = agent.step(action)
+            _, score = agent.step(action)
 
-            total_qval += qval
-            if agent.exreward:            
-                max_qval = max(max_qval, qval)
-                min_qval = min(min_qval, qval)    
+            total_qval += qval 
             qval_list.append(qval)
             # if qval > 0:
             #     avg_qval += 1
@@ -198,7 +193,7 @@ class Train():
             total_state_value += state_value 
 
             _step["piece_height"] = agent.pieceheight
-            _step["reward"] = reward if reward>0 else 0
+            _step["score"] = score if score>0 else 0
             _step["move_probs"] = move_probs
             _step["state_value"] = state_value
             _step["qval"] = qval
@@ -213,17 +208,15 @@ class Train():
 
             # 这里的奖励是消除的行数
             if agent.state==1:
-                if reward > 0:
+                if score > 0:
                     repeat_count = 40
-                    print("#"*repeat_count, 'score:', agent.score, "reward:",reward, 'qval', round(qval,2), 'height:', agent.pieceheight, 'piece:', agent.piececount, \
-                        'step:', agent.steps, "step time:", round((time.time()-start_time)/i,3),'reward_p:', agent.piececount-mark_reward_piececount)
+                    print("#"*repeat_count, 'score:', agent.score, "score:",score, 'qval', round(qval,2), 'height:', agent.pieceheight, 'piece:', agent.piececount, \
+                        'step:', agent.steps, "step time:", round((time.time()-start_time)/i,3))
                 agent.print()
                 if agent.piececount%2==0 and (player.need_max_ps or player.need_max_ns):
                     player.need_max_ps = not player.need_max_ps
                     player.need_max_ns = not player.need_max_ns
-                
-                if agent.pieceheight>8: agent.exreward = False
-                                    
+                                                    
                 if os.path.exists(self.stop_mark_file):
                     time.sleep(60)
                     raise Exception("find stop mark file")
@@ -367,14 +360,14 @@ class Train():
         result["total"]["agent"] += 1
         result["total"]["_agent"] += 1
     
-        if game_score>result["best"]["reward"]:
-            result["best"]["reward"] = game_score
+        if game_score>result["best"]["score"]:
+            result["best"]["score"] = game_score
             result["best"]["agent"] = result["total"]["agent"]
         else:
-            if isinstance(result["best"]["reward"], int):
-                result["best"]["reward"] += float(f'0.{result["best"]["reward"]}')
-            if result["best"]["reward"]>1:
-                result["best"]["reward"] = round(result["best"]["reward"]-1,10) 
+            if isinstance(result["best"]["score"], int):
+                result["best"]["score"] += float(f'0.{result["best"]["score"]}')
+            if result["best"]["score"]>1:
+                result["best"]["score"] = round(result["best"]["score"]-1,10) 
     
         save_status_file(result)     
             
@@ -402,7 +395,7 @@ class Train():
 
         update_agent_count = 20
         if result["total"]["_agent"]>update_agent_count:
-            result["reward"].append(round(result["total"]["avg_score"],2))
+            result["score"].append(round(result["total"]["avg_score"],2))
             result["depth"].append(round(result["total"]["depth"],1))
             result["pacc"].append(round(result["total"]["pacc"],2))
             result["vdiff"].append(round(result["total"]["vdiff"],2))
@@ -428,8 +421,8 @@ class Train():
             #     policy_value_net.save_model(newmodelfile)
 
             # 如果当前最佳，将模型设置为最佳模型
-            if max(result["reward"])==result["reward"][-1]:
-                newmodelfile = model_file+"_reward_"+str(result["reward"][-1])
+            if max(result["score"])==result["score"][-1]:
+                newmodelfile = model_file+"_score_"+str(result["score"][-1])
                 if not os.path.exists(newmodelfile):
                     policy_value_net.save_model(newmodelfile)
                 if os.path.exists(bestmodelfile): os.remove(bestmodelfile)
