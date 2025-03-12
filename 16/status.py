@@ -1,4 +1,4 @@
-import json,os,time
+import json,os,time,shutil
 
 
 if os.name == 'posix':
@@ -11,6 +11,7 @@ curr_dir = os.path.dirname(os.path.abspath(__file__))
 model_dir = os.path.join(curr_dir, 'model', model_name)
 if not os.path.exists(model_dir): os.makedirs(model_dir)
 status_file = os.path.join(model_dir, 'status.json')
+status_file_bak = os.path.join(model_dir, 'status_bak.json')
 
 def lock_file(f, exclusive=True):
     """
@@ -37,6 +38,7 @@ def save_status_file(state):
     with open(status_file, 'w') as f:
         lock_file(f, exclusive=True)
         json.dump(state, f, ensure_ascii=False, indent=4)
+        shutil.copy(status_file, status_file_bak)
         unlock_file(f)
 
 def add_prop(state, key, default=0):
@@ -58,7 +60,7 @@ def read_status_file():
             try:
                 state = json.load(f)
             except Exception as e:
-                print(e)
+                shutil.copy(status_file_bak, status_file)
                 raise e
             finally:
                 unlock_file(f)                    
