@@ -35,9 +35,9 @@ def read_status_file():
             ext = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
             os.replace(status_file, status_file+"_"+ext) 
     if result==None:
-        result={"reward":[], "depth":[], "pacc":[], "vacc":[], "time":[], "piececount":[]}
+        result={"reward":[], "depth":[], "pacc":[], "vdiff":[], "time":[], "piececount":[]}
     if "total" not in result:
-        result["total"]={"agent":0, "pacc":0, "vacc":0, "ns":0, "depth":0, "step_time":0, "_agent":0}
+        result["total"]={"agent":0, "pacc":0, "vdiff":0, "ns":0, "depth":0, "step_time":0, "_agent":0}
     if "best" not in result:
         result["best"]={"reward":0, "agent":0}
     if "avg_piececount" not in result["total"]:
@@ -60,32 +60,24 @@ def read_status_file():
         result["total"]["score_mcts"]=0  
     if "piececount_mcts" not in result["total"]:
         result["total"]["piececount_mcts"]=0
-    if "piececount0_mcts" not in result["total"]:
-        result["total"]["piececount0_mcts"]=0
-    if "piececount1_mcts" not in result["total"]:
-        result["total"]["piececount1_mcts"]=0
-    if "qval" not in result["total"]:
-        result["total"]["qval"]=0  
+    if "q_avg" not in result["total"]:
+        result["total"]["q_avg"]=0  
     if "max_qval" not in result["total"]:
         result["total"]["max_qval"]=0  
     if "min_qval" not in result["total"]:
         result["total"]["min_qval"]=0  
     if "state_value" not in result["total"]:
         result["total"]["state_value"]=0  
-    if  "q_puct" not in result["total"]:
-        result["total"]["q_puct"]=1
+    if  "q_std" not in result["total"]:
+        result["total"]["q_std"]=1
     if "piececount" not in result:
         result["piececount"]=[]
-    if "piececount0_mcts" not in result:
-        result["piececount0_mcts"]=[]
-    if "piececount1_mcts" not in result:
-        result["piececount1_mcts"]=[]
-    if "update" not in result:
-        result["update"]=[]
-    if "qval" not in result:
-        result["qval"]=[]  
-    if "q_puct" not in result:
-        result["q_puct"]=[]
+    if "piececount_mcts" not in result:
+        result["piececount_mcts"]=[]
+    if "q_avg" not in result:
+        result["q_avg"]=[]  
+    if "q_std" not in result:
+        result["q_std"]=[]
     if "kl" not in result:
         result["kl"]=[]
     if "lr_multiplier" not in result["total"]:
@@ -94,13 +86,24 @@ def read_status_file():
         result["total"]["optimizer_type"]=0
     if "kl" not in result["total"]:
         result["total"]["kl"]=1e-2
-    # if "advantage" in result: del result["advantage"]
+    if "piececount0_mcts" in result: del result["piececount0_mcts"]
+    if "piececount0_mcts" in result["total"]: del result["total"]["piececount0_mcts"]
+    if "piececount1_mcts" in result: del result["piececount1_mcts"]
+    if "piececount1_mcts" in result["total"]: del result["total"]["piececount1_mcts"]
+    if "qval" in result: del result["qval"]
+    if "qval" in result["total"]: del result["total"]["qval"]
+    if "q_puct" in result: del result["q_puct"]
+    if "q_puct" in result["total"]: del result["total"]["q_puct"]
+    if "vacc" in result: del result["vacc"]
+    if "vacc" in result["total"]: del result["total"]["vacc"]
     # if "avg_score_ex" in result["total"]: del result["total"]["avg_score_ex"]
     # if "exrewardRate" in result["total"]: del result["total"]["exrewardRate"]
     # if "avg_reward_piececount" in result["total"]: del result["total"]["avg_reward_piececount"]
     # if "avg_qval" in result["total"]: del result["total"]["avg_qval"]
     # if "piececount" in result["total"]: del result["total"]["piececount"]
     # if "avg_state_value" in result["total"]: del result["total"]["avg_state_value"]
+    if "update" not in result:
+        result["update"]=[]
     
     for key in result:
         if isinstance(result[key],list) and len(result[key])>30:            

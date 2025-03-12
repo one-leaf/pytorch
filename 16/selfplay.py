@@ -44,7 +44,7 @@ class Train():
         # MCTS child权重， 用来调节MCTS搜索深度，越大搜索越深，越相信概率，越小越相信Q 的程度 默认 5
         # 由于value完全用结果胜负来拟合，所以value不稳，只能靠概率p拟合，最后带动value来拟合
         self.c_puct = 5  
-        self.q_puct = 1
+        self.q_std = 1
         self.max_step_count = 10000 
         self.limit_steptime = 1  # 限制每一步的平均花费时间，单位秒，默认1秒
 
@@ -168,7 +168,6 @@ class Train():
         qval_list=[]
         total_state_value=0
         need_max_ps = False # random.random()>0.5
-        exreward_end_piececount = 0
         print("exreward:", agent.exreward,"max_emptyCount:",max_emptyCount,"isRandomNextPiece:",agent.isRandomNextPiece,"limitstep:",agent.limitstep,"max_ps:",need_max_ps,"max_qs:",agent.is_replay)
         for i in range(self.max_step_count):
             _step={"step":i}
@@ -224,9 +223,7 @@ class Train():
                     player.need_max_ns = not player.need_max_ns
                 
                 if agent.pieceheight>8: agent.exreward = False
-                
-                if agent.exreward: exreward_end_piececount = agent.piececount
-                    
+                                    
                 if os.path.exists(self.stop_mark_file):
                     time.sleep(60)
                     raise Exception("find stop mark file")
@@ -241,7 +238,7 @@ class Train():
                 std_qval = np.std(qval_list)
                 if std_qval>100:
                     print("std_qval:", std_qval, qval_list)
-                return agent, data, total_qval, total_state_value, exreward_end_piececount, max_qval, min_qval, std_qval, start_time, paytime
+                return agent, data, total_qval, total_state_value, max_qval, min_qval, std_qval, start_time, paytime
             
 
 
@@ -279,16 +276,16 @@ class Train():
         
         self.n_playout = int(result["total"]["n_playout"])
 
-        self.q_puct = result["total"]["q_puct"]
-        self.q_avg = result["total"]["qval"]
+        self.q_std = result["total"]["q_std"]
+        self.q_avg = result["total"]["q_avg"]
         
-        if self.q_puct>2: self.q_puct=2   
-        if self.q_puct<0.5: self.q_puct=0.5
+        if self.q_std>2: self.q_std=2   
+        if self.q_std<0.5: self.q_std=0.5
         if self.q_avg>1: self.q_avg=1
         if self.q_avg<-1: self.q_avg=-1       
         
-        print("q_puct:", self.q_puct)   
-        player = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=self.c_puct, q_puct=self.q_puct, q_avg=self.q_avg, n_playout=self.n_playout, limit_depth=limit_depth)
+        print("q_std:", self.q_std)   
+        player = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout, limit_depth=limit_depth)
 
         cache={}
 
@@ -310,7 +307,6 @@ class Train():
         
         play_data = []
         result = read_status_file() 
-        exreward_end_piececounts = []    
         for playcount in range(2):
             player.set_player_id(playcount)
             if playcount==0:
@@ -320,18 +316,16 @@ class Train():
                 player.need_max_ps = True
                 player.need_max_ns = False
                 
-            agent, data, qval, state_value, exreward_end_piececount, max_qval, min_qval, std_qval, start_time, paytime = self.play(cache, result, min_removedlines, his_pieces, his_pieces_len, player)
+            agent, data, qval, state_value, max_qval, min_qval, std_qval, start_time, paytime = self.play(cache, result, min_removedlines, his_pieces, his_pieces_len, player)
             play_data.append({"agent":agent, "data":data, "qval":qval, "max_qval":max_qval, "min_qval":min_qval, "std_qval":std_qval, "state_value":state_value, "start_time":start_time, "paytime":paytime})
             his_pieces = agent.piecehis
             his_pieces_len = len(agent.piecehis)
-            exreward_end_piececounts.append(exreward_end_piececount)
                 
         print("TRAIN Self Play ending ...")
                 
         total_game_score =  play_data[0]["agent"].removedlines + play_data[1]["agent"].removedlines 
         total_game_steps =  play_data[0]["agent"].steps + play_data[1]["agent"].steps 
         total_game_piececount =  play_data[0]["agent"].piececount + play_data[1]["agent"].piececount 
-        total_game_exreward_end_piececounts =  exreward_end_piececounts[0] + exreward_end_piececounts[1] 
         total_game_paytime =  play_data[0]["paytime"] + play_data[1]["paytime"] 
         total_game_state_value =  play_data[0]["state_value"] + play_data[1]["state_value"] 
         total_game_qval =  play_data[0]["qval"] + play_data[1]["qval"] 
@@ -345,11 +339,6 @@ class Train():
             win_values[0] = 1
         elif play_data[0]["agent"].piececount<play_data[1]["agent"].piececount:
             win_values[1] = 1
-        elif exreward_end_piececounts[0]>exreward_end_piececounts[1]:
-            win_values[0] = 1
-        elif exreward_end_piececounts[0]<exreward_end_piececounts[1]:
-            win_values[1] = 1
-
         
         steptime = total_game_paytime/total_game_steps            
         avg_qval = total_game_qval/total_game_steps
@@ -361,21 +350,12 @@ class Train():
         alpha = 0.01
         set_status_total_value(result, "score_mcts", total_game_score/2, alpha)
         set_status_total_value(result, "piececount_mcts", total_game_piececount/2, alpha)
-        set_status_total_value(result, "piececount0_mcts", total_game_exreward_end_piececounts/2, alpha)
-        set_status_total_value(result, "piececount1_mcts", (total_game_piececount-total_game_exreward_end_piececounts)/2, alpha)
-        set_status_total_value(result, "qval", avg_qval, alpha)
+        set_status_total_value(result, "q_avg", avg_qval, alpha)
         set_status_total_value(result, "max_qval", max_game_qval, alpha)
         set_status_total_value(result, "min_qval", min_game_qval, alpha)
         set_status_total_value(result, "state_value", avg_state_value, alpha)
         set_status_total_value(result, "step_time", steptime, alpha)
-        set_status_total_value(result, "q_puct", std_game_qval, alpha)
-
-        # if result["total"]["max_qval"]-result["total"]["min_qval"]>2 and result["total"]["qval"]>0.5:
-        #     q_puct = (result["total"]["max_qval"]-result["total"]["min_qval"])*result["total"]["qval"]*0.5
-        #     result["total"]["q_puct"] += alpha * (q_puct-result["total"]["q_puct"])
-        #     print("fix q_puct:", self.q_puct)
-        # else:
-        #     result["total"]["q_puct"] = 1
+        set_status_total_value(result, "q_std", std_game_qval, alpha)
         
         # 速度控制在消耗50行
         if win_values[0]==1:
@@ -401,7 +381,6 @@ class Train():
             
         # 计算 acc 看有没有收敛
         pacc = []
-        # vacc = []
         depth = []
         ns = []
         for m, data in enumerate([play_data[0]["data"], play_data[1]["data"]]) :
@@ -409,18 +388,16 @@ class Train():
                 pacc.append(step["acc_ps"])
                 depth.append(step["depth"])
                 ns.append(step["ns"])
-                # vacc.append(step["state_value"])
 
         pacc = float(np.average(pacc))
-        # vacc = float(np.average(vacc))
-        vacc = abs(play_data[0]["agent"].piececount-play_data[1]["agent"].piececount)
+        vdiff = abs(play_data[0]["agent"].piececount-play_data[1]["agent"].piececount)
 
         depth = float(np.average(depth))
         ns = float(np.average(ns))
         
         result = read_status_file()                       
         set_status_total_value(result, "pacc", pacc, alpha)
-        set_status_total_value(result, "vacc", vacc, alpha)
+        set_status_total_value(result, "vdiff", vdiff, alpha)
         set_status_total_value(result, "depth", depth, alpha)
         set_status_total_value(result, "ns", ns, alpha)  
 
@@ -429,13 +406,12 @@ class Train():
             result["reward"].append(round(result["total"]["avg_score"],2))
             result["depth"].append(round(result["total"]["depth"],1))
             result["pacc"].append(round(result["total"]["pacc"],2))
-            result["vacc"].append(round(result["total"]["vacc"],2))
+            result["vdiff"].append(round(result["total"]["vdiff"],2))
             result["time"].append(round(result["total"]["step_time"],1))
-            result["qval"].append(round(result["total"]["qval"],4))
+            result["q_avg"].append(round(result["total"]["q_avg"],4))
             result["piececount"].append(round(result["total"]["avg_piececount"],1))
-            result["piececount0_mcts"].append(round(result["total"]["piececount0_mcts"],1))
-            result["piececount1_mcts"].append(round(result["total"]["piececount1_mcts"],1))
-            result["q_puct"].append(round(result["total"]["q_puct"],2))
+            result["piececount_mcts"].append(round(result["total"]["piececount_mcts"],1))
+            result["q_std"].append(round(result["total"]["q_std"],2))
             
             local_time = time.localtime(start_time)
             current_month = local_time.tm_mon
@@ -467,13 +443,12 @@ class Train():
         states, mcts_probs, values= [], [], []
 
         for i, data in enumerate([play_data[0]["data"], play_data[1]["data"]]):     
-            # if vacc>result["total"]["vacc"]:
             if win_values[i]<0:
-                v = (win_values[i] * vacc)/play_data[i]["agent"].piececount
-                # v = win_values[i] * min((vacc-result["total"]["vacc"])/(result["total"]["vacc"]),1)   
+                v = (win_values[i] * vdiff)/play_data[i]["agent"].piececount
                 if v<-1: v=-1    
             else:
                 v = 0
+                
             for step in data["steps"]:
                 states.append(step["state"])
                 mcts_probs.append(step["move_probs"])
@@ -506,7 +481,7 @@ class Train():
         print("agent 0 steps:", play_data[0]["agent"].steps, "agent 1 steps:", play_data[1]["agent"].steps)
         print("agent 0 piececount:", play_data[0]["agent"].piececount, "agent 1 piececount:", play_data[1]["agent"].piececount)
         print("agent 0 paytime:", play_data[0]["paytime"], "agent 1 paytime:", play_data[1]["paytime"])
-        print("max_game_qval:", max_game_qval, "min_game_qval:", min_game_qval, "avg_qval:", avg_qval, "std_qval:", std_qval)
+        print("max_game_qval:", max_game_qval, "min_game_qval:", min_game_qval, "q_avg:", avg_qval, "std_qval:", std_qval)
 
     def run(self):
         """启动训练"""

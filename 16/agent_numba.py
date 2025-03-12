@@ -470,10 +470,6 @@ class Agent():
         self.failtop = 0
         # 当前方块的高度
         self.fallpieceheight = 0
-        # mcts的额外奖励
-        self.exreward=False
-        # mcts的额外奖励因子
-        self.exrewardRate=0 
         # 限制步骤
         self.limitstep=False
         # 面板
@@ -526,8 +522,6 @@ class Agent():
         agent.failLines = self.failLines
         agent.failtop = self.failtop
         agent.fallpieceheight = self.fallpieceheight
-        agent.exreward = self.exreward
-        agent.exrewardRate = self.exrewardRate
         agent.limitstep=self.limitstep
         agent.board=np.copy(self.board)
         agent.state=self.state
@@ -855,8 +849,8 @@ class Agent():
                     line=line+str(board[y][x])+" "
             print(line)
         print(" "+" -"*boardwidth)
-        print("exreward:", self.exreward, "score:", round(self.score,2), "lines:",self.removedlines,\
-            "piececount:", self.piececount, "/", self.next_Pieces_list_len, "emptyCount:", self.emptyCount, "rewardlimit:", self.piececount-self.last_reward)
+        print("score:", round(self.score,2), "lines:",self.removedlines, "piececount:", self.piececount, "/", \
+            self.next_Pieces_list_len, "emptyCount:", self.emptyCount, "rewardlimit:", self.piececount-self.last_reward)
 
 
     def getTerminalEmptyCount(self):
