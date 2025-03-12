@@ -38,8 +38,8 @@ def save_status_file(state):
     with open(status_file, 'w') as f:
         lock_file(f, exclusive=True)
         json.dump(state, f, ensure_ascii=False, indent=4)
-        shutil.copy(status_file, status_file_bak)
         unlock_file(f)
+    shutil.copy(status_file, status_file_bak)
 
 def add_prop(state, key, default=0):
     if key not in state:
