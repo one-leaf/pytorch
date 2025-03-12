@@ -55,12 +55,12 @@ def read_status_file():
     # 获取历史训练数据
     state=None
     if os.path.exists(status_file):
-        with open(status_file, "r") as f:
-            try:
+        try:
+            with open(status_file, "r") as f:
                 state = json.load(f)
-            except Exception as e:
-                shutil.copy(status_file_bak, status_file)
-                raise e                  
+        except Exception as e:
+            shutil.copy(status_file_bak, status_file)
+            raise e                  
     if state==None:
         state={"total":{"agent":0, "_agent":0}}
     if "best" not in state:
