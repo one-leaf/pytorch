@@ -395,6 +395,8 @@ class Train():
             state["vdiff"].append(round(state["total"]["vdiff"],2))
             state["step_time"].append(round(state["total"]["step_time"],1))
             state["q_avg"].append(round(state["total"]["q_avg"],4))
+            state["q_max"].append(round(state["total"]["q_max"],4))
+            state["q_min"].append(round(state["total"]["q_min"],4))
             state["piececount"].append(round(state["total"]["piececount"],1))
             state["piececount_mcts"].append(round(state["total"]["piececount_mcts"],1))
             state["q_std"].append(round(state["total"]["q_std"],2))
