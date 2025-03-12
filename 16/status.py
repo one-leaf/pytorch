@@ -12,6 +12,7 @@ model_dir = os.path.join(curr_dir, 'model', model_name)
 if not os.path.exists(model_dir): os.makedirs(model_dir)
 status_file = os.path.join(model_dir, 'status.json')
 status_file_bak = os.path.join(model_dir, 'status_bak.json')
+status_file_tmp = os.path.join(model_dir, 'status_tmp.json')
 
 def lock_file(f, exclusive=True):
     """
@@ -35,11 +36,12 @@ def unlock_file(f):
         pass
 
 def save_status_file(state):   
-    with open(status_file, 'w') as f:
+    with open(status_file_tmp, 'w') as f:
         lock_file(f, exclusive=True)
         json.dump(state, f, ensure_ascii=False, indent=4)
         unlock_file(f)
-
+    shutil.move(status_file_tmp, status_file)
+    
 def add_prop(state, key, default=0):
     if key not in state:
         state[key]=[]
