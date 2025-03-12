@@ -1,16 +1,43 @@
-import pickle,json,os,time
-from datetime import datetime
+import json,os,time
+
+
+if os.name == 'posix':
+    import fcntl
+elif os.name == 'nt':
+    pass
 
 model_name = "vit-ti" # "vit" # "mlp"
 curr_dir = os.path.dirname(os.path.abspath(__file__))
 model_dir = os.path.join(curr_dir, 'model', model_name)
 if not os.path.exists(model_dir): os.makedirs(model_dir)
 status_file = os.path.join(model_dir, 'status.json')
-LOCK_FILE = status_file + '.lock'
+
+def lock_file(f, exclusive=True):
+    """
+    给文件对象 f 加锁。
+    - POSIX 系统使用 fcntl.flock。
+    - Windows 系统使用 msvcrt.locking。
+    """
+    if os.name == 'posix':
+        lock_type = fcntl.LOCK_EX if exclusive else fcntl.LOCK_SH
+        fcntl.flock(f.fileno(), lock_type)
+    elif os.name == 'nt':
+        pass
+
+def unlock_file(f):
+    """
+    解锁文件对象 f。
+    """
+    if os.name == 'posix':
+        fcntl.flock(f.fileno(), fcntl.LOCK_UN)
+    elif os.name == 'nt':
+        pass
 
 def save_status_file(state):   
     with open(status_file, 'w') as f:
+        lock_file(f, exclusive=True)
         json.dump(state, f, ensure_ascii=False, indent=4)
+        unlock_file(f)
 
 def add_prop(state, key, default=0):
     if key not in state:
@@ -26,13 +53,12 @@ def read_status_file():
     # 获取历史训练数据
     state=None
     if os.path.exists(status_file):
-        for i in range(5):
+        with open(status_file, "r") as f:
+            lock_file(f, exclusive=False)
             try:
-                with open(status_file, "rb") as fn:
-                    state = json.load(fn)
-                break
-            except Exception as e:
-                time.sleep(10)                    
+                state = json.load(f)
+            finally:
+                unlock_file(f)                    
     if state==None:
         state={"total":{"agent":0, "_agent":0}}
     if "best" not in state:
