@@ -102,8 +102,8 @@ class Train():
 
                 if agent.terminal: 
                     state = read_status_file()
-                    set_status_total_value(state, "avg_score", agent.removedlines, 1/1000)
-                    set_status_total_value(state, "avg_piececount", agent.piececount, 1/1000)
+                    set_status_total_value(state, "score", agent.removedlines, 1/1000)
+                    set_status_total_value(state, "piececount", agent.piececount, 1/1000)
                     save_status_file(state)
                     state["lastupdate"] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                     break
@@ -122,7 +122,7 @@ class Train():
                 max_removedlines = agent.removedlines
                 
             state = read_status_file()
-            if agent.piececount<(state["total"]["avg_piececount"]+state["total"]["min_piececount"])/2:
+            if agent.piececount<(state["total"]["piececount"]+state["total"]["min_piececount"])/2:
                 filename = "{}-{}.pkl".format("".join(min_his_pieces), min_his_pieces_len)
                 his_pieces_file = os.path.join(self.waitplaydir, filename)
                 print("save need replay", his_pieces_file)
@@ -395,13 +395,14 @@ class Train():
 
         update_agent_count = 20
         if state["total"]["_agent"]>update_agent_count:
-            state["score"].append(round(state["total"]["avg_score"],2))
+            state["score"].append(round(state["total"]["score"],2))
+            state["score_mcts"].append(round(state["total"]["score_mcts"],2))
             state["depth"].append(round(state["total"]["depth"],1))
             state["pacc"].append(round(state["total"]["pacc"],2))
             state["vdiff"].append(round(state["total"]["vdiff"],2))
             state["step_time"].append(round(state["total"]["step_time"],1))
             state["q_avg"].append(round(state["total"]["q_avg"],4))
-            state["piececount"].append(round(state["total"]["avg_piececount"],1))
+            state["piececount"].append(round(state["total"]["piececount"],1))
             state["piececount_mcts"].append(round(state["total"]["piececount_mcts"],1))
             state["q_std"].append(round(state["total"]["q_std"],2))
             
