@@ -161,8 +161,7 @@ class Train():
         max_emptyCount = random.randint(10,30)
         start_time = time.time()
         total_qval=0
-        max_qval=0
-        min_qval=0
+        avg_qval=0
         qval_list=[]
         total_state_value=0
         need_max_ps = False # random.random()>0.5
@@ -228,9 +227,8 @@ class Train():
                 data["piece_count"] = agent.piececount
                 data["piece_height"] = agent.pieceheight
                 std_qval = np.std(qval_list)
-                if std_qval>100:
-                    print("std_qval:", std_qval, qval_list)
-                return agent, data, total_qval, total_state_value, max_qval, min_qval, std_qval, start_time, paytime
+                avg_qval = np.average(qval_list)                                   
+                return agent, data, total_qval, total_state_value, avg_qval, std_qval, start_time, paytime
             
 
 
@@ -308,8 +306,8 @@ class Train():
                 player.need_max_ps = True
                 player.need_max_ns = False
                 
-            agent, data, qval, state_value, max_qval, min_qval, std_qval, start_time, paytime = self.play(cache, state, min_removedlines, his_pieces, his_pieces_len, player)
-            play_data.append({"agent":agent, "data":data, "qval":qval, "max_qval":max_qval, "min_qval":min_qval, "std_qval":std_qval, "state_value":state_value, "start_time":start_time, "paytime":paytime})
+            agent, data, qval, state_value, q_avg, std_qval, start_time, paytime = self.play(cache, state, min_removedlines, his_pieces, his_pieces_len, player)
+            play_data.append({"agent":agent, "data":data, "qval":qval, "avg_qval":q_avg, "std_qval":std_qval, "state_value":state_value, "start_time":start_time, "paytime":paytime})
             his_pieces = agent.piecehis
             his_pieces_len = len(agent.piecehis)
                 
@@ -321,8 +319,8 @@ class Train():
         total_game_paytime =  play_data[0]["paytime"] + play_data[1]["paytime"] 
         total_game_state_value =  play_data[0]["state_value"] + play_data[1]["state_value"] 
         total_game_qval =  play_data[0]["qval"] + play_data[1]["qval"] 
-        max_game_qval = max(play_data[0]["max_qval"], play_data[1]["max_qval"])
-        min_game_qval = min(play_data[0]["min_qval"], play_data[1]["min_qval"])
+        max_game_qval = max(play_data[0]["avg_qval"], play_data[1]["avg_qval"])
+        min_game_qval = min(play_data[0]["avg_qval"], play_data[1]["avg_qval"])
         std_game_qval = (play_data[0]["std_qval"] + play_data[1]["std_qval"])/2
 
         game_score = max(play_data[0]["agent"].removedlines, play_data[1]["agent"].removedlines)
@@ -343,8 +341,8 @@ class Train():
         set_status_total_value(state, "score_mcts", total_game_score/2, alpha)
         set_status_total_value(state, "piececount_mcts", total_game_piececount/2, alpha)
         set_status_total_value(state, "q_avg", avg_qval, alpha)
-        set_status_total_value(state, "max_qval", max_game_qval, alpha)
-        set_status_total_value(state, "min_qval", min_game_qval, alpha)
+        set_status_total_value(state, "q_max", max_game_qval, alpha)
+        set_status_total_value(state, "q_min", min_game_qval, alpha)
         set_status_total_value(state, "step_time", steptime, alpha)
         set_status_total_value(state, "q_std", std_game_qval, alpha)
         
@@ -426,7 +424,7 @@ class Train():
                         
         state["lastupdate"] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         save_status_file(state)         
-        avg_qval = [play_data[0]["qval"]/play_data[0]["agent"].steps, play_data[1]["qval"]/play_data[1]["agent"].steps]
+        avg_qval = [play_data[0]["avg_qval"], play_data[1]["avg_qval"]]
         std_qval = [play_data[0]["std_qval"], play_data[1]["std_qval"]]    
         states, mcts_probs, values= [], [], []
 
