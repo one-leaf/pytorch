@@ -1,93 +1,87 @@
 import pickle,json,os,time
 from datetime import datetime
+from filelock import FileLock
 
 model_name = "vit-ti" # "vit" # "mlp"
 curr_dir = os.path.dirname(os.path.abspath(__file__))
 model_dir = os.path.join(curr_dir, 'model', model_name)
 if not os.path.exists(model_dir): os.makedirs(model_dir)
 status_file = os.path.join(model_dir, 'status.json')
+LOCK_FILE = status_file + '.lock'
 
-def save_status_file(result):
-    with open(status_file+"_pkl", 'wb') as fn:
-        pickle.dump(result, fn)
-    with open(status_file, 'w') as f:
-        json.dump(result, f, ensure_ascii=False)
+def save_status_file(state):
+    lock = FileLock(LOCK_FILE, timeout=10)
+    with lock:    
+        with open(status_file, 'w') as f:
+            json.dump(state, f, ensure_ascii=False, indent=4)
 
-def add_prop(result, key, default=0):
-    if key not in result:
-        result[key]=[]
-    if key not in result["total"]:
-        result["total"][key]=default
+def add_prop(state, key, default=0):
+    if key not in state:
+        state[key]=[]
+    if key not in state["total"]:
+        state["total"][key]=default
 
-def add_total_prop(result, key, default=0):
-    if key not in result["total"]:
-        result["total"][key]=default
+def add_total_prop(state, key, default=0):
+    if key not in state["total"]:
+        state["total"][key]=default
 
 def read_status_file():
     # 获取历史训练数据
-    result=None
-    if os.path.exists(status_file):
-        for i in range(5):
-            try:
-                with open(status_file, "rb") as fn:
-                    result = json.load(fn)
-                break
-            except Exception as e:
-                time.sleep(10)
-            try:
-                with open(status_file+"_pkl", "rb") as fn:
-                    result = pickle.load(fn)
-                break
-            except Exception as e:
-                time.sleep(10)
-
-        if result==None:
-            ext = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
-            os.replace(status_file, status_file+"_"+ext) 
-    if result==None:
-        result={"total":{"agent":0, "_agent":0}}
-    if "best" not in result:
-        result["best"]={"score":0, "agent":0}
+    state=None
+    lock = FileLock(LOCK_FILE, timeout=10)
+    with lock:    
+        if os.path.exists(status_file):
+            for i in range(5):
+                try:
+                    with open(status_file, "rb") as fn:
+                        state = json.load(fn)
+                    break
+                except Exception as e:
+                    time.sleep(10)                    
+    if state==None:
+        state={"total":{"agent":0, "_agent":0}}
+    if "best" not in state:
+        state["best"]={"score":0, "agent":0}
         
-    add_prop(result, "score")
-    add_prop(result, "depth")
-    add_prop(result, "pacc")
-    add_prop(result, "vdiff")
-    add_prop(result, "step_time")
-    add_prop(result, "ns")
-    add_prop(result, "piececount")    
-    add_prop(result, "avg_piececount")    
-    add_prop(result, "min_piececount")    
-    add_prop(result, "max_piececount")  
+    add_prop(state, "score")
+    add_prop(state, "depth")
+    add_prop(state, "pacc")
+    add_prop(state, "vdiff")
+    add_prop(state, "step_time")
+    add_prop(state, "ns")
+    add_prop(state, "piececount")    
+    add_prop(state, "avg_piececount")    
+    add_prop(state, "min_piececount")    
+    add_prop(state, "max_piececount")  
       
-    add_total_prop(result, "n_playout", 64)
-    add_total_prop(result, "win_lost_tie", [0,0,0])    
+    add_total_prop(state, "n_playout", 64)
+    add_total_prop(state, "win_lost_tie", [0,0,0])    
         
-    add_prop(result, "max_score")
-    add_prop(result, "min_score")
-    add_prop(result, "avg_score")
-    add_prop(result, "score_mcts")
-    add_prop(result, "piececount_mcts")
-    add_prop(result, "q_avg")
-    add_prop(result, "max_qval")
-    add_prop(result, "min_qval")
-    add_prop(result, "q_std")
-    add_prop(result, "kl", 1e-2)
-    add_total_prop(result, "lr_multiplier", 1)    
-    add_total_prop(result, "optimizer_type", 0)    
+    add_prop(state, "max_score")
+    add_prop(state, "min_score")
+    add_prop(state, "avg_score")
+    add_prop(state, "score_mcts")
+    add_prop(state, "piececount_mcts")
+    add_prop(state, "q_avg")
+    add_prop(state, "max_qval")
+    add_prop(state, "min_qval")
+    add_prop(state, "q_std")
+    add_prop(state, "kl", 1e-2)
+    add_total_prop(state, "lr_multiplier", 1)    
+    add_total_prop(state, "optimizer_type", 0)    
 
-    if "update" not in result:
-        result["update"]=[]
+    if "update" not in state:
+        state["update"]=[]
     
-    for key in result:
-        if isinstance(result[key],list) and len(result[key])>30:            
-            result[key]=result[key][-30:]
+    for key in state:
+        if isinstance(state[key],list) and len(state[key])>30:            
+            state[key]=state[key][-30:]
     
-    return result
+    return state
 
-def set_status_total_value(result, key, value, rate=1/1000):
-    if result["total"][key]==0:
-        result["total"][key] = value
+def set_status_total_value(state, key, value, rate=1/1000):
+    if state["total"][key]==0:
+        state["total"][key] = value
     else:
-        result["total"][key] += (value-result["total"][key]) * rate
+        state["total"][key] += (value-state["total"][key]) * rate
     
