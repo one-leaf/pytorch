@@ -353,7 +353,6 @@ class Train():
         set_status_total_value(result, "q_avg", avg_qval, alpha)
         set_status_total_value(result, "max_qval", max_game_qval, alpha)
         set_status_total_value(result, "min_qval", min_game_qval, alpha)
-        set_status_total_value(result, "state_value", avg_state_value, alpha)
         set_status_total_value(result, "step_time", steptime, alpha)
         set_status_total_value(result, "q_std", std_game_qval, alpha)
         
