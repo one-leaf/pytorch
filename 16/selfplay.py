@@ -226,8 +226,8 @@ class Train():
                 data["score"] = agent.score
                 data["piece_count"] = agent.piececount
                 data["piece_height"] = agent.pieceheight
-                std_qval = np.std(qval_list)
-                avg_qval = np.average(qval_list)                                   
+                std_qval = float(np.std(qval_list))
+                avg_qval = float(np.average(qval_list))                                   
                 return agent, data, total_qval, total_state_value, avg_qval, std_qval, start_time, paytime
             
 
