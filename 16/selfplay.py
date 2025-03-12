@@ -229,8 +229,6 @@ class Train():
                 std_qval = float(np.std(qval_list))
                 avg_qval = float(np.average(qval_list))                                   
                 return agent, data, total_qval, total_state_value, avg_qval, std_qval, start_time, paytime
-            
-
 
     def collect_selfplay_data(self):
         """收集自我对抗数据用于训练"""       
