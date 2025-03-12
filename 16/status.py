@@ -1,6 +1,5 @@
 import pickle,json,os,time
 from datetime import datetime
-from filelock import FileLock
 
 model_name = "vit-ti" # "vit" # "mlp"
 curr_dir = os.path.dirname(os.path.abspath(__file__))
@@ -9,11 +8,9 @@ if not os.path.exists(model_dir): os.makedirs(model_dir)
 status_file = os.path.join(model_dir, 'status.json')
 LOCK_FILE = status_file + '.lock'
 
-def save_status_file(state):
-    lock = FileLock(LOCK_FILE, timeout=10)
-    with lock:    
-        with open(status_file, 'w') as f:
-            json.dump(state, f, ensure_ascii=False, indent=4)
+def save_status_file(state):   
+    with open(status_file, 'w') as f:
+        json.dump(state, f, ensure_ascii=False, indent=4)
 
 def add_prop(state, key, default=0):
     if key not in state:
@@ -28,16 +25,14 @@ def add_total_prop(state, key, default=0):
 def read_status_file():
     # 获取历史训练数据
     state=None
-    lock = FileLock(LOCK_FILE, timeout=10)
-    with lock:    
-        if os.path.exists(status_file):
-            for i in range(5):
-                try:
-                    with open(status_file, "rb") as fn:
-                        state = json.load(fn)
-                    break
-                except Exception as e:
-                    time.sleep(10)                    
+    if os.path.exists(status_file):
+        for i in range(5):
+            try:
+                with open(status_file, "rb") as fn:
+                    state = json.load(fn)
+                break
+            except Exception as e:
+                time.sleep(10)                    
     if state==None:
         state={"total":{"agent":0, "_agent":0}}
     if "best" not in state:
