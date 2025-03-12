@@ -48,6 +48,7 @@ def read_status_file():
         result={"total":{"agent":0, "_agent":0}}
     if "best" not in result:
         result["best"]={"score":0, "agent":0}
+        
     add_prop(result, "score")
     add_prop(result, "depth")
     add_prop(result, "pacc")
