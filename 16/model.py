@@ -57,8 +57,12 @@ class PolicyValueNet():
         if model_file and os.path.exists(model_file):
             print("Loading model", model_file)
             net_sd = torch.load(model_file, map_location=self.device)
+            print("Load model", model_file, "success")
             # try:
+            print("Loading weight")
             self.policy_value_net.load_state_dict(net_sd, strict=False)
+            print("Load weight success")
+
             # except:
             #     # net_sd = {k: v for k, v in net_sd.items() if k in net_sd and 'act_dist' not in k}
             #     print(net_sd["act_dist.weight"].shape)
