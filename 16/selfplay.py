@@ -87,12 +87,16 @@ class Train():
         max_pieces_count = -1
         max_removedlines = -1
 
+        state = read_status_file()
+        limit_score = state["total"]["score"]*2
+        limit_piececount = (state["total"]["piececount"]+state["total"]["min_piececount"])/2
         for _ in range(self.play_size):
             agent = Agent(isRandomNextPiece=True)
             start_time = time.time()
             agent.show_mcts_process= False
             # agent.id = 0
-
+            
+            
             for i in range(self.max_step_count):
                 action = policy_value_net.policy_value_fn_best_act(agent)
                 _, score = agent.step(action)
@@ -100,7 +104,7 @@ class Train():
                     print("#"*40, 'score:', agent.removedlines, 'height:', agent.pieceheight, 'piece:', agent.piececount, "shape:", agent.fallpiece["shape"], \
                         'step:', agent.steps, "step time:", round((time.time()-start_time)/i,3))            
 
-                if agent.terminal: 
+                if agent.terminal or agent.removedlines > limit_score: 
                     state = read_status_file()
                     set_status_total_value(state, "score", agent.removedlines, 1/1000)
                     set_status_total_value(state, "piececount", agent.piececount, 1/1000)
@@ -121,8 +125,7 @@ class Train():
                 max_pieces_count = agent.piececount
                 max_removedlines = agent.removedlines
                 
-            state = read_status_file()
-            if agent.piececount<(state["total"]["piececount"]+state["total"]["min_piececount"])/2:
+            if agent.piececount<limit_piececount:
                 filename = "{}-{}.pkl".format("".join(min_his_pieces), min_his_pieces_len)
                 his_pieces_file = os.path.join(self.waitplaydir, filename)
                 print("save need replay", his_pieces_file)
