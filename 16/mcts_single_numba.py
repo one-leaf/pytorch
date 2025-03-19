@@ -349,7 +349,7 @@ class MCTSPlayer(object):
                 # 国际象棋 0.3 将棋 0.15 围棋 0.03
                 # 取值一般倾向于 a = 10/n 所以俄罗斯方块取 2
                 # a = 2       
-                p=0.999**(has_run_time//60) 
+                p=0.999**(has_run_time//90) 
                 dirichlet = np.random.dirichlet(2 * np.ones(len(nz_idx)))
                 dirichlet_probs = np.zeros_like(act_probs, dtype=np.float64)
                 dirichlet_probs[nz_idx] = dirichlet
