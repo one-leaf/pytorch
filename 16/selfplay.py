@@ -433,9 +433,7 @@ class Train():
 
         for i, data in enumerate([play_data[0]["data"], play_data[1]["data"]]):     
             if win_values[i]<0:
-                v = (win_values[i] * vdiff)/total_game_piececount
-            else:
-                v = 0
+                v = -vdiff/total_game_piececount
                 
             for step in data["steps"]:
                 states.append(step["state"])
