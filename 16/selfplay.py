@@ -433,8 +433,7 @@ class Train():
 
         for i, data in enumerate([play_data[0]["data"], play_data[1]["data"]]):     
             if win_values[i]<0:
-                v = (win_values[i] * vdiff)/play_data[i]["agent"].piececount
-                if v<-1: v=-1    
+                v = (win_values[i] * vdiff)/total_game_piececount
             else:
                 v = 0
                 
