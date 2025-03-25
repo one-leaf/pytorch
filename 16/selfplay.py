@@ -393,17 +393,17 @@ class Train():
 
         update_agent_count = 20
         if state["total"]["_agent"]>update_agent_count:
-            state["score"].append(round(state["total"]["score"],2))
-            state["score_mcts"].append(round(state["total"]["score_mcts"],2))
+            state["score"].append(round(state["total"]["score"],1))
+            state["score_mcts"].append(round(state["total"]["score_mcts"],1))
             state["depth"].append(round(state["total"]["depth"],1))
             state["pacc"].append(round(state["total"]["pacc"],2))
-            state["vdiff"].append(round(state["total"]["vdiff"],2))
+            state["vdiff"].append(round(state["total"]["vdiff"],1))
             state["step_time"].append(round(state["total"]["step_time"],1))
-            state["q_avg"].append(round(state["total"]["q_avg"],4))
-            state["q_max"].append(round(state["total"]["q_max"],4))
-            state["q_min"].append(round(state["total"]["q_min"],4))
-            state["piececount"].append(round(state["total"]["piececount"],1))
-            state["piececount_mcts"].append(round(state["total"]["piececount_mcts"],1))
+            state["q_avg"].append(round(state["total"]["q_avg"],2))
+            state["q_max"].append(round(state["total"]["q_max"],2))
+            state["q_min"].append(round(state["total"]["q_min"],2))
+            state["piececount"].append(round(state["total"]["piececount"],0))
+            state["piececount_mcts"].append(round(state["total"]["piececount_mcts"],0))
             state["q_std"].append(round(state["total"]["q_std"],2))
             
             local_time = time.localtime(start_time)
