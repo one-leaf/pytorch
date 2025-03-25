@@ -405,6 +405,7 @@ class Train():
             state["piececount"].append(round(state["total"]["piececount"],0))
             state["piececount_mcts"].append(round(state["total"]["piececount_mcts"],0))
             state["q_std"].append(round(state["total"]["q_std"],2))
+            state["min_score"].append(round(state["total"]["min_score"],1))
             
             local_time = time.localtime(start_time)
             current_month = local_time.tm_mon
