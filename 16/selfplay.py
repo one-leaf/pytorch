@@ -402,8 +402,8 @@ class Train():
             state["q_avg"].append(round(state["total"]["q_avg"],2))
             state["q_max"].append(round(state["total"]["q_max"],2))
             state["q_min"].append(round(state["total"]["q_min"],2))
-            state["piececount"].append(round(state["total"]["piececount"],0))
-            state["piececount_mcts"].append(round(state["total"]["piececount_mcts"],0))
+            state["piececount"].append(round(state["total"]["piececount"]))
+            state["piececount_mcts"].append(round(state["total"]["piececount_mcts"]))
             state["q_std"].append(round(state["total"]["q_std"],2))
             state["min_score"].append(round(state["total"]["min_score"],1))
             
