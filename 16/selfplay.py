@@ -393,11 +393,11 @@ class Train():
 
         update_agent_count = 20
         if state["total"]["_agent"]>update_agent_count:
-            state["score"].append(round(state["total"]["score"],1))
-            state["score_mcts"].append(round(state["total"]["score_mcts"],1))
+            state["score"].append(round(state["total"]["score"]))
+            state["score_mcts"].append(round(state["total"]["score_mcts"]))
             state["depth"].append(round(state["total"]["depth"],1))
             state["pacc"].append(round(state["total"]["pacc"],2))
-            state["vdiff"].append(round(state["total"]["vdiff"],1))
+            state["vdiff"].append(round(state["total"]["vdiff"]))
             state["step_time"].append(round(state["total"]["step_time"],1))
             state["q_avg"].append(round(state["total"]["q_avg"],2))
             state["q_max"].append(round(state["total"]["q_max"],2))
@@ -405,7 +405,7 @@ class Train():
             state["piececount"].append(round(state["total"]["piececount"]))
             state["piececount_mcts"].append(round(state["total"]["piececount_mcts"]))
             state["q_std"].append(round(state["total"]["q_std"],2))
-            state["min_score"].append(round(state["total"]["min_score"],1))
+            state["min_score"].append(round(state["total"]["min_score"]))
             
             local_time = time.localtime(start_time)
             current_month = local_time.tm_mon
