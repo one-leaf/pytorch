@@ -29,7 +29,7 @@ class Train():
         self.lr_multiplier = 1.0  # 基于KL的自适应学习率
         self.temp = 1  # MCTS的概率参数，越大越不肯定，训练时1，预测时1e-3
         self.n_playout = 64  # 每个动作的模拟战记录个数，影响后续 512/2 = 256；256/16 = 16个方块 的走法
-        self.min_n_playout = 72  # 最小的模拟战记录个数
+        self.min_n_playout = 128  # 最小的模拟战记录个数
         # 64/128/256/512 都不行
         # step -> score
         # 128  --> 0.7
