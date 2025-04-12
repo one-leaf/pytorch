@@ -440,7 +440,7 @@ class Train():
         for i, data in enumerate([play_data[0]["data"], play_data[1]["data"]]):     
             if win_values[i]<0:
                 # v = -vdiff/total_game_piececount
-                v = 0    
+                v = -0.1    
             for step in data["steps"]:
                 states.append(step["state"])
                 mcts_probs.append(step["move_probs"])
