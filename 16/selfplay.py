@@ -416,8 +416,21 @@ class Train():
             state["total"]["_agent"] -= update_agent_count           
             
             # 如果每步的消耗时间小于self.limit_steptime秒，增加探测深度    
-            state["total"]["n_playout"] += round(self.limit_steptime-state["total"]["step_time"])
-            if state["total"]["n_playout"] < self.min_n_playout: state["total"]["n_playout"] = self.min_n_playout     
+            need_adjust = True
+            if len(state["score"])>=5:
+                x = np.arange(5)
+                slope, intercept = np.polyfit(x, state["score"][-5:], 1)
+                eps = 1e-6
+                if slope > eps:
+                    print("score 趋势:", slope, "正在上升")
+                    need_adjust = False
+                elif slope < -eps:
+                    print("score 趋势:", slope, "正在下降")
+                else:
+                    print("score 趋势:", slope, "没有变化")
+            if need_adjust:        
+                state["total"]["n_playout"] += round(self.limit_steptime-state["total"]["step_time"])
+                if state["total"]["n_playout"] < self.min_n_playout: state["total"]["n_playout"] = self.min_n_playout     
             # 保存下中间步骤的agent1
             # newmodelfile = model_file+"_"+str(state["total"]["agent"])
             # if not os.path.exists(newmodelfile):
