@@ -127,7 +127,7 @@ class Train():
                 max_removedlines = agent.removedlines
                 
             if agent.piececount<limit_piececount:
-                filename = "{}-{}.pkl".format("".join(min_his_pieces), min_his_pieces_len)
+                filename = "{:05d}-{}.pkl".format(min_his_pieces_len, "".join(min_his_pieces)[:50])
                 his_pieces_file = os.path.join(self.waitplaydir, filename)
                 print("save need replay", his_pieces_file)
                 with open(his_pieces_file, "wb") as fn:
@@ -285,7 +285,7 @@ class Train():
         listFiles = [f for f in os.listdir(self.waitplaydir) if f.endswith(".pkl")]
         if listFiles and random.random()>0.75:
             # earliest_file = min(listFiles, key=lambda f: os.path.getctime(os.path.join(self.waitplaydir, f)))
-            earliest_files = sorted(listFiles, key=lambda x: len(x))
+            earliest_files = sorted(listFiles, key=lambda x: x.split("-")[0])
             
             while len(earliest_files)>200:
                 newmodelfile = earliest_files.pop()
