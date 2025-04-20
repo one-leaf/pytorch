@@ -127,7 +127,7 @@ class Train():
                 max_removedlines = agent.removedlines
                 
             if agent.piececount<limit_piececount:
-                filename = "{:05d}-{}.pkl".format(min_his_pieces_len, "".join(min_his_pieces)[:50])
+                filename = "{:05d}-{}-{}.pkl".format(min_his_pieces_len, min_removedlines, "".join(min_his_pieces)[:50])
                 his_pieces_file = os.path.join(self.waitplaydir, filename)
                 print("save need replay", his_pieces_file)
                 with open(his_pieces_file, "wb") as fn:
