@@ -285,7 +285,7 @@ class Train():
         listFiles = [f for f in os.listdir(self.waitplaydir) if f.endswith(".pkl")]
         if listFiles and random.random()>0.75:
             # earliest_file = min(listFiles, key=lambda f: os.path.getctime(os.path.join(self.waitplaydir, f)))
-            earliest_files = sorted(listFiles, key=lambda x: x.split("-")[0])
+            earliest_files = sorted(listFiles)
             
             while len(earliest_files)>200:
                 newmodelfile = earliest_files.pop()
