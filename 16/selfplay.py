@@ -428,11 +428,11 @@ class Train():
                     # 如果奖励在下降，适当增加探索深度
                     state["total"]["n_playout"] += 1
                     if state["total"]["n_playout"] < self.min_n_playout: state["total"]["n_playout"] = self.min_n_playout                         
-                else:
-                    print("score 趋势:", slope, "没有变化")
-                    # 如果没有变化，适当降低探索深度
-                    state["total"]["n_playout"] += round(self.limit_steptime-state["total"]["step_time"])
-                    if state["total"]["n_playout"] < self.min_n_playout: state["total"]["n_playout"] = self.min_n_playout   
+                # else:
+                #     print("score 趋势:", slope, "没有变化")
+                #     # 如果没有变化，适当降低探索深度
+                #     state["total"]["n_playout"] += round(self.limit_steptime-state["total"]["step_time"])
+                #     if state["total"]["n_playout"] < self.min_n_playout: state["total"]["n_playout"] = self.min_n_playout   
                       
             # 保存下中间步骤的agent1
             # newmodelfile = model_file+"_"+str(state["total"]["agent"])
