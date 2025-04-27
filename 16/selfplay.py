@@ -90,7 +90,7 @@ class Train():
 
         state = read_status_file()
         limit_score = state["total"]["score"]*2
-        limit_piececount = (state["total"]["piececount"]+state["total"]["min_piececount"])/2
+        limit_piececount = state["total"]["min_piececount"] # (state["total"]["piececount"]+state["total"]["min_piececount"])/2        
         for _ in range(self.play_size):
             agent = Agent(isRandomNextPiece=True)
             start_time = time.time()
@@ -283,7 +283,7 @@ class Train():
 
         # 检查有没有需要重复运行的
         listFiles = [f for f in os.listdir(self.waitplaydir) if f.endswith(".pkl")]
-        if listFiles and random.random()>0.75:
+        if listFiles: # and random.random()>0.75:
             # earliest_file = min(listFiles, key=lambda f: os.path.getctime(os.path.join(self.waitplaydir, f)))
             earliest_files = sorted(listFiles)
             
