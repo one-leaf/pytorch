@@ -280,7 +280,7 @@ class MCTSPlayer(object):
     """基于模型指导概率的MCTS + AI player"""
 
     # c_puct MCTS child权重， 用来调节MCTS搜索深度，越大搜索越深，越相信概率，越小越相信Q 的程度 默认 5
-    def __init__(self, policy_value_function, c_puct=5, n_playout=2000, limit_depth=20, min_score=0, need_max_ps=False, need_max_ns=False):
+    def __init__(self, policy_value_function, c_puct=5, n_playout=2000, limit_depth=20, min_score=20, need_max_ps=False, need_max_ns=False):
         """初始化参数"""
         self.mcts = MCTS(policy_value_function, c_puct, n_playout, limit_depth)
         self.need_max_ps = need_max_ps
@@ -307,7 +307,7 @@ class MCTSPlayer(object):
             # temp 越大导致更均匀的搜索
             
             # 为了防止无休止运行，runtime超过了60分钟，采用随机75%选择
-            if  self.min_score > 0 and game.score <= self.min_score:
+            if  game.score <= self.min_score:
                 self.start_time = time.time() # 重新开始计时
 
             has_run_time=time.time()-self.start_time
@@ -354,7 +354,7 @@ class MCTSPlayer(object):
                 # 国际象棋 0.3 将棋 0.15 围棋 0.03
                 # 取值一般倾向于 a = 10/n 所以俄罗斯方块取 2
                 # a = 2       
-                p=0.999**(has_run_time//10)     # 每10秒减少0.1的概率
+                p=0.999**has_run_time     # 每1秒减少0.1的概率
                 dirichlet = np.random.dirichlet(2 * np.ones(len(nz_idx)))
                 dirichlet_probs = np.zeros_like(act_probs, dtype=np.float64)
                 dirichlet_probs[nz_idx] = dirichlet
