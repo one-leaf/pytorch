@@ -308,7 +308,7 @@ class MCTSPlayer(object):
             # temp 越大导致更均匀的搜索
             
             # 为了防止无休止运行，runtime超过了60分钟，采用随机75%选择
-            if  game.score <= self.min_score:
+            if  game.removedlines <= self.min_score:
                 self.start_time = time.time() # 重新开始计时
 
             has_run_time=time.time()-self.start_time
