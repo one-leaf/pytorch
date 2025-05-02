@@ -290,6 +290,7 @@ class MCTSPlayer(object):
         self.min_score = min_score
         self.cache = {}
         self.start_time = time.time()
+        print("create mcts player, c_puct: {}, n_playout: {}, min_score: {}".format(c_puct, n_playout, min_score))
         
     def set_player_id(self, p):
         """指定MCTS的playerid"""
