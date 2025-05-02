@@ -220,6 +220,7 @@ class Train():
                     player.need_max_ns = not player.need_max_ns
                                                     
                 if os.path.exists(self.stop_mark_file):
+                    print("stop mark file found, exit after waiting 60s")
                     time.sleep(60)
                     raise Exception("find stop mark file")
 
