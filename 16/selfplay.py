@@ -310,9 +310,12 @@ class Train():
             if his_pieces_len > 0 and playcount==0:
                 player.need_max_ps = True
                 player.need_max_ns = False
-            else:
+            elif his_pieces_len > 0 and playcount>0:
                 player.need_max_ps = False
                 player.need_max_ns = True
+            else:
+                player.need_max_ps = False
+                player.need_max_ns = False
                 
             agent, data, qval, state_value, avg_qval, std_qval, start_time, paytime = self.play(cache, state, min_removedlines, his_pieces, his_pieces_len, player)
             play_data.append({"agent":agent, "data":data, "qval":qval, "avg_qval":avg_qval, "std_qval":std_qval, "state_value":state_value, "start_time":start_time, "paytime":paytime})
