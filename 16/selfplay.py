@@ -217,9 +217,9 @@ class Train():
                     print("#"*repeat_count, 'score:', agent.score, "score:",score, 'qval', round(qval,2), 'height:', agent.pieceheight, 'piece:', agent.piececount, \
                         'step:', agent.steps, "step time:", round((time.time()-start_time)/i,3))
                 agent.print()
-                if agent.piececount%2==0 and (player.need_max_ps or player.need_max_ns):
-                    player.need_max_ps = not player.need_max_ps
-                    player.need_max_ns = not player.need_max_ns
+                # if agent.piececount%2==0 and (player.need_max_ps or player.need_max_ns):
+                #     player.need_max_ps = not player.need_max_ps
+                #     player.need_max_ns = not player.need_max_ns
                                                     
                 if os.path.exists(self.stop_mark_file):
                     print("stop mark file found, exit after waiting 60s")
@@ -308,12 +308,12 @@ class Train():
         state = read_status_file() 
         for playcount in range(self.play_count):
             player.set_player_id(playcount)
-            if his_pieces_len == 0:
-                player.need_max_ps = False
-                player.need_max_ns = True
-            else:
+            if his_pieces_len > 0 and playcount==0:
                 player.need_max_ps = True
                 player.need_max_ns = False
+            else:
+                player.need_max_ps = False
+                player.need_max_ns = True
                 
             agent, data, qval, state_value, avg_qval, std_qval, start_time, paytime = self.play(cache, state, min_removedlines, his_pieces, his_pieces_len, player)
             play_data.append({"agent":agent, "data":data, "qval":qval, "avg_qval":avg_qval, "std_qval":std_qval, "state_value":state_value, "start_time":start_time, "paytime":paytime})
