@@ -36,7 +36,7 @@ class Train():
         # 128  --> 0.7
         # self.n_playout = 128  # 每个动作的模拟战记录个数，影响后续 128/2 = 66；64/16 = 4个方块 的走法
         self.test_count = 20 # 每次测试次数
-        self.play_count = 1 # 每次运行次数
+        self.play_count = 2 # 每次运行次数
         self.buffer_size = 1000000  # cache对次数
         self.epochs = 2  # 每次更新策略价值网络的训练步骤数, 推荐是5
         self.kl_targ = 0.02  # 策略价值网络KL值目标
@@ -319,6 +319,12 @@ class Train():
             play_data.append({"agent":agent, "data":data, "qval":qval, "avg_qval":avg_qval, "std_qval":std_qval, "state_value":state_value, "start_time":start_time, "paytime":paytime})
             his_pieces = agent.piecehis
             his_pieces_len = len(agent.piecehis)
+            
+            # 如果游戏达到了最小的消除行数，样本有效，直接结束
+            if agent.removedlines>state["total"]["min_score"]:
+                self.play_count = playcount+1
+                break
+            
                 
         print("TRAIN Self Play ending ...")
                 
@@ -357,12 +363,10 @@ class Train():
         set_status_total_value(state, "step_time", steptime, alpha)
         set_status_total_value(state, "q_std", std_game_qval, alpha)
         
-        # 速度控制在消耗50行
-        if self.play_count>1:
-            if win_values[0]==1:
-                state["total"]["win_lost_tie"][0] += 1
-            if win_values[1]==1:
-                state["total"]["win_lost_tie"][1] += 1
+        if self.play_count==1:
+            state["total"]["win_lost_tie"][0] += 1
+        elif self.play_count>1:
+            state["total"]["win_lost_tie"][1] += 1
             if win_values[0]==-1 and win_values[1]==-1:
                 state["total"]["win_lost_tie"][2] += 1
         
