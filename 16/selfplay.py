@@ -29,7 +29,8 @@ class Train():
         self.lr_multiplier = 1.0  # 基于KL的自适应学习率
         self.temp = 1  # MCTS的概率参数，越大越不肯定，训练时1，预测时1e-3
         self.n_playout = 64  # 每个动作的模拟战记录个数，影响后续 512/2 = 256；256/16 = 16个方块 的走法
-        self.min_n_playout = 32  # 最小的模拟战记录个数
+        self.min_n_playout = 64   # 最小的模拟战记录个数
+        self.max_n_playout = 128  # 最大1的模拟战记录个数
         # 64/128/256/512 都不行
         # step -> score
         # 128  --> 0.7
@@ -427,12 +428,14 @@ class Train():
                 eps = 1e-6
                 if slope > eps:
                     print("score 趋势:", slope, "正在上升")
-                    # 什么都不用做
+                    state["total"]["n_playout"] -= 1
                 elif slope < -eps:
                     print("score 趋势:", slope, "正在下降")
                     # 如果奖励在下降，适当增加探索深度
                     state["total"]["n_playout"] += 1
-                    if state["total"]["n_playout"] < self.min_n_playout: state["total"]["n_playout"] = self.min_n_playout                         
+                if state["total"]["n_playout"] < self.min_n_playout: state["total"]["n_playout"] = self.min_n_playout 
+                if state["total"]["n_playout"] > self.max_n_playout: state["total"]["n_playout"] = self.max_n_playout                         
+                        
                 # else:
                 #     print("score 趋势:", slope, "没有变化")
                 #     # 如果没有变化，适当降低探索深度
