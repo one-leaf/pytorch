@@ -308,7 +308,7 @@ class Train():
         state = read_status_file() 
         for playcount in range(self.play_count):
             player.set_player_id(playcount)
-            if random.random()>0.5:
+            if his_pieces_len == 0:
                 player.need_max_ps = False
                 player.need_max_ns = True
             else:
