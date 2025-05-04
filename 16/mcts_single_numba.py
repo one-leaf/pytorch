@@ -348,7 +348,12 @@ class MCTSPlayer(object):
             elif self.need_max_ps:
                 idx = max_ps_idx                          
                 # idx = np.random.choice(range(ACTONS_LEN), p=act_ps)           
-            if availables[idx]==0: idx = -1                               
+            
+            # 如果Down+None的概率和为1， 则选择Down
+            if act_probs[-1]+act_probs[-2]==1:
+                idx = len(act_probs)-1
+            if availables[idx]==0: idx = -1      
+                                         
             p = 0                
             if idx == -1:
                 # a=1的时候，act 机会均等，>1 强调均值， <1 强调两端
@@ -369,7 +374,6 @@ class MCTSPlayer(object):
                     
                 idx = np.random.choice(range(ACTONS_LEN), p=p*act_probs + (1.0-p)*dirichlet_probs)
                   
-
             action = idx
             qval = act_qs[idx]
 
