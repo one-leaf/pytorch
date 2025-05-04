@@ -246,8 +246,8 @@ class Train():
             load_model_file = model_file+".bak"
 
         if os.path.exists(load_model_file):
-            if time.time()-os.path.getmtime(load_model_file)>120*60:
-                print("超过120分钟模型都没有更新了，停止训练")
+            if time.time()-os.path.getmtime(load_model_file)>60*60*3:
+                print("超过3小时模型都没有更新了，停止训练")
                 time.sleep(60)
                 return
 
