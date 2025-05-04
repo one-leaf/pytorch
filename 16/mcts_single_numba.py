@@ -350,7 +350,7 @@ class MCTSPlayer(object):
                 # idx = np.random.choice(range(ACTONS_LEN), p=act_ps)           
             
             # 如果Down+None的概率和为1， 则选择Down
-            if round(act_probs[0]+act_probs[1]+act_probs[2],2)==0:
+            if round(act_probs[0]+act_probs[1]+act_probs[2],2)<0.01:
                 idx = 4
             if availables[idx]==0: idx = -1      
                                          
