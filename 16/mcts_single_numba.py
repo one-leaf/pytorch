@@ -360,8 +360,13 @@ class MCTSPlayer(object):
                 dirichlet = np.random.dirichlet(2 * np.ones(len(nz_idx)))
                 dirichlet_probs = np.zeros_like(act_probs, dtype=np.float64)
                 dirichlet_probs[nz_idx] = dirichlet
+                
                 act_probs = act_probs * availables
-                act_probs = act_probs / np.sum(act_probs)
+                if np.sum(act_probs) == 0:
+                    act_probs[nz_idx] = 1.0 / len(nz_idx)
+                else:
+                    act_probs = act_probs / np.sum(act_probs)
+                    
                 idx = np.random.choice(range(ACTONS_LEN), p=p*act_probs + (1.0-p)*dirichlet_probs)
                   
 
