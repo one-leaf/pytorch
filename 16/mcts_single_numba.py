@@ -355,7 +355,7 @@ class MCTSPlayer(object):
             if availables[idx]==0: idx = -1      
                                          
             p = 0                
-            if idx == -1:
+            if idx == -1  or game.removedlines > self.min_score:
                 # a=1的时候，act 机会均等，>1 强调均值， <1 强调两端
                 # 国际象棋 0.3 将棋 0.15 围棋 0.03
                 # 取值一般倾向于 a = 10/n 所以俄罗斯方块取 2
