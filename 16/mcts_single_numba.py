@@ -356,6 +356,7 @@ class MCTSPlayer(object):
                 # 取值一般倾向于 a = 10/n 所以俄罗斯方块取 2
                 # a = 2       
                 p=0.999**has_run_time     # 每1秒减少0.1的概率
+                if p<0.1: p=0.1
                 dirichlet = np.random.dirichlet(2 * np.ones(len(nz_idx)))
                 dirichlet_probs = np.zeros_like(act_probs, dtype=np.float64)
                 dirichlet_probs[nz_idx] = dirichlet
