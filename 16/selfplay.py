@@ -92,7 +92,8 @@ class Train():
 
         state = read_status_file()
         limit_score = state["total"]["score"]*2
-        limit_piececount = state["total"]["min_piececount"] # (state["total"]["piececount"]+state["total"]["min_piececount"])/2        
+        limit_piececount = state["total"]["min_piececount"] # (state["total"]["piececount"]+state["total"]["min_piececount"])/2     
+        no_terminal=0   
         for _ in range(self.test_count):
             agent = Agent(isRandomNextPiece=True)
             start_time = time.time()
@@ -113,6 +114,8 @@ class Train():
                     set_status_total_value(state, "piececount", agent.piececount, 1/1000)
                     save_status_file(state)
                     state["lastupdate"] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                    if not agent.terminal: no_terminal += 1
+ 
                     break
                 
 
@@ -141,6 +144,7 @@ class Train():
         set_status_total_value(state, "max_piececount", max_pieces_count, 1/100)
         set_status_total_value(state, "min_score", min_removedlines, 1/100)
         set_status_total_value(state, "min_piececount", min_pieces_count, 1/100)
+        set_status_total_value(state, "no_terminal_rate", no_terminal/self.max_step_count, 1/100)
               
         save_status_file(state)          
                                
@@ -420,6 +424,7 @@ class Train():
             state["piececount_mcts"].append(round(state["total"]["piececount_mcts"]))
             state["q_std"].append(round(state["total"]["q_std"],2))
             state["min_score"].append(round(state["total"]["min_score"]))
+            state["no_terminal_rate"].append(round(state["total"]["no_terminal_rate"],2))
             
             local_time = time.localtime(start_time)
             current_month = local_time.tm_mon
