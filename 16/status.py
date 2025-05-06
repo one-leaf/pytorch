@@ -80,7 +80,8 @@ def read_status_file():
     add_total_prop(state, "n_playout", 64)
     add_total_prop(state, "win_lost_tie", [0,0,0])    
     add_total_prop(state, "max_score")
-    add_total_prop(state, "no_terminal_rate", 0)
+    
+    add_prop(state, "no_terminal_rate", 0)
     add_prop(state, "min_score")
     
     add_prop(state, "score_mcts")
