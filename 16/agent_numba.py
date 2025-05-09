@@ -849,7 +849,7 @@ class Agent():
                     line=line+str(board[y][x])+" "
             print(line)
         print(" "+" -"*boardwidth)
-        print("score:", round(self.score,2), "lines:",self.removedlines, "piececount:", self.piececount, "/", \
+        print("pieceheight:", self.pieceheight, "lines:",self.removedlines, "piececount:", self.piececount, "/", \
             self.next_Pieces_list_len, "emptyCount:", self.emptyCount, "rewardlimit:", self.piececount-self.last_reward)
 
 
