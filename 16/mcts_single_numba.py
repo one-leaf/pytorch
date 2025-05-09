@@ -114,7 +114,7 @@ def expandPN(s:int, availables, act_probs, Ps, Ns, Nsa, Qsa, actions_num):
         Ps[s] = availables/np.sum(availables) 
     Ns[s] = 0
     Nsa[s] = np.zeros(actions_num, dtype=np.int64)
-    Qsa[s] = np.zeros(actions_num, dtype=np.float32)
+    Qsa[s] = np.zeros(actions_num, dtype=np.float64)
 
 #@njit(cache=True)
 def checkNeedExit(s:int, Nsa)->bool:
@@ -126,7 +126,7 @@ def checkNeedExit(s:int, Nsa)->bool:
 # 0.0007797207943228788
 def getprobsFromNsa(s:int, temp:float, availables, actions_num, Nsa):
     if temp == 0:
-        probs = np.zeros(actions_num, dtype=np.float32)    
+        probs = np.zeros(actions_num, dtype=np.float64)    
         probs[np.argmax(Nsa[s])] = 1        
     else:
         m_sum = np.sum(Nsa[s])
@@ -201,6 +201,7 @@ class MCTS():
 
         state_ = None
 
+        ig_probs = False
         for n in range(self._n_playout):
             self.simulation_count += 1
 
@@ -212,9 +213,17 @@ class MCTS():
             die_count += 1 if state_.game.terminal else 0
             self.max_depth = (depth, step_depth)
 
+            if state_.game.pieceheight<8 and max(self.Ps[s])>0.99:
+                # 只要有一个动作的概率大于0.99， 就不需要继续搜索了
+                ig_probs = True
+                break
+
         self._policy(state_.game, only_Cache_Next=True) 
 
-        probs = getprobsFromNsa(s, temp, state.availables(), state.actions_num, self.Nsa)                       
+        if ig_probs:
+            probs = self.Ps[s]
+        else:
+            probs = getprobsFromNsa(s, temp, state.availables(), state.actions_num, self.Nsa)                       
         
         qs = self.Qsa[s] 
         ps = self.Ps[s]     
@@ -372,7 +381,9 @@ class MCTSPlayer(object):
                 else:
                     act_probs = act_probs / np.sum(act_probs)
                     
-                idx = np.random.choice(range(ACTONS_LEN), p=p*act_probs + (1.0-p)*dirichlet_probs)
+                _p = p*act_probs + (1.0-p)*dirichlet_probs
+                _p = _p / np.sum(_p) 
+                idx = np.random.choice(range(ACTONS_LEN), p=_p)
                   
             action = idx
             qval = act_qs[idx]
