@@ -213,7 +213,7 @@ class MCTS():
             die_count += 1 if state_.game.terminal else 0
             self.max_depth = (depth, step_depth)
 
-            if state.game.pieceheight<8 and max(self.Ps[s])>0.99:
+            if state.game.pieceheight<8 and max(self.Ps[s])>0.99 and min(self.Qsa[s])>0:
                 # 只要有一个动作的概率大于0.99， 就不需要继续搜索了
                 ig_probs = True
                 break
@@ -359,8 +359,11 @@ class MCTSPlayer(object):
                 # idx = np.random.choice(range(ACTONS_LEN), p=act_ps)           
             
             # 如果Down+None的概率和为1， 则选择Down
-            if round(act_probs[0]+act_probs[1]+act_probs[2],2)<0.01:
+            if sum(act_probs[0:2])<0.01:
                 idx = 4
+                act_probs[3]=0.01
+                act_probs[4]=1-sum(act_probs[0:3])
+                
             if availables[idx]==0: idx = -1      
                                          
             p = 0                
