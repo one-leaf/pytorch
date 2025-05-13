@@ -289,7 +289,7 @@ class Train():
 
         # 检查有没有需要重复运行的
         listFiles = [f for f in os.listdir(self.waitplaydir) if f.endswith(".pkl")]
-        if listFiles and random.random()>0.50:
+        if listFiles and random.random()>0.20:
             # earliest_file = min(listFiles, key=lambda f: os.path.getctime(os.path.join(self.waitplaydir, f)))
             earliest_files = sorted(listFiles)
             
