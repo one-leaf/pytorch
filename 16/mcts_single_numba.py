@@ -213,8 +213,8 @@ class MCTS():
             die_count += 1 if state_.game.terminal else 0
             self.max_depth = (depth, step_depth)
 
-            if state.game.pieceheight<8 and max(self.Ps[s])>0.99 and min(self.Qsa[s])>=0:
-                # 只要有一个动作的概率大于0.99， 就不需要继续搜索了
+            if min(self.Qsa[s])>=0:
+                # 如果当前都为正数，就不再搜索了
                 ig_probs = True
                 break
 
