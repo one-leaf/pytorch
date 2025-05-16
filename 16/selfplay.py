@@ -131,7 +131,7 @@ class Train():
                 max_pieces_count = agent.piececount
                 max_removedlines = agent.removedlines
                 
-            if agent.piececount<limit_piececount:
+            if agent.piececount<limit_piececount*0.8:
                 filename = "{:05d}-{:05d}-{}.pkl".format(min_his_pieces_len, min_removedlines, "".join(min_his_pieces)[:50])
                 his_pieces_file = os.path.join(self.waitplaydir, filename)
                 print("save need replay", his_pieces_file)
@@ -289,7 +289,7 @@ class Train():
 
         # 检查有没有需要重复运行的
         listFiles = [f for f in os.listdir(self.waitplaydir) if f.endswith(".pkl")]
-        if listFiles and random.random()>0.20:
+        if listFiles :#and random.random()>0.20:
             # earliest_file = min(listFiles, key=lambda f: os.path.getctime(os.path.join(self.waitplaydir, f)))
             earliest_files = sorted(listFiles)
             
