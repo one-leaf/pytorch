@@ -387,7 +387,7 @@ class MCTSPlayer(object):
                 # _p = p*act_probs + (1.0-p)*dirichlet_probs
                 # _p = _p / np.sum(_p) 
                 # idx = np.random.choice(range(ACTONS_LEN), p=_p)
-                idx = np.random.choice(range(ACTONS_LEN), p=act_ps)
+                idx = max_ps_idx
                   
             action = idx
             qval = act_qs[idx]
