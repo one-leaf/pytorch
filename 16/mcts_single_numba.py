@@ -372,21 +372,22 @@ class MCTSPlayer(object):
                 # 国际象棋 0.3 将棋 0.15 围棋 0.03
                 # 取值一般倾向于 a = 10/n 所以俄罗斯方块取 2
                 # a = 2       
-                p=0.999**has_run_time     # 每1秒减少0.1的概率
-                if p<0.1: p=0.1
-                dirichlet = np.random.dirichlet(2 * np.ones(len(nz_idx)))
-                dirichlet_probs = np.zeros_like(act_probs, dtype=np.float64)
-                dirichlet_probs[nz_idx] = dirichlet
+                # p=0.999**has_run_time     # 每1秒减少0.1的概率
+                # if p<0.1: p=0.1
+                # dirichlet = np.random.dirichlet(2 * np.ones(len(nz_idx)))
+                # dirichlet_probs = np.zeros_like(act_probs, dtype=np.float64)
+                # dirichlet_probs[nz_idx] = dirichlet
                 
-                act_probs = act_probs * availables
-                if np.sum(act_probs) == 0:
-                    act_probs[nz_idx] = 1.0 / len(nz_idx)
-                else:
-                    act_probs = act_probs / np.sum(act_probs)
+                # act_probs = act_probs * availables
+                # if np.sum(act_probs) == 0:
+                #     act_probs[nz_idx] = 1.0 / len(nz_idx)
+                # else:
+                #     act_probs = act_probs / np.sum(act_probs)
                     
-                _p = p*act_probs + (1.0-p)*dirichlet_probs
-                _p = _p / np.sum(_p) 
-                idx = np.random.choice(range(ACTONS_LEN), p=_p)
+                # _p = p*act_probs + (1.0-p)*dirichlet_probs
+                # _p = _p / np.sum(_p) 
+                # idx = np.random.choice(range(ACTONS_LEN), p=_p)
+                idx = np.random.choice(range(ACTONS_LEN), p=act_ps)
                   
             action = idx
             qval = act_qs[idx]
