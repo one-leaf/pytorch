@@ -373,9 +373,7 @@ class Train():
         set_status_total_value(state, "q_min", min_game_qval, alpha)
         set_status_total_value(state, "step_time", steptime, alpha)
         set_status_total_value(state, "q_std", std_game_qval, alpha)
-        
-
-        
+                
         state["total"]["agent"] += 1
         state["total"]["_agent"] += 1
     
