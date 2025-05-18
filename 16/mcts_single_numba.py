@@ -366,9 +366,10 @@ class MCTSPlayer(object):
             
             # 如果有左右来回移动的动作   
             if ("R" in game.piece_actions and idx == 1) or ("L" in game.piece_actions and idx == 2):
-                avg_ps = (act_probs[1]+act_probs[2])/2
+                avg_ps = (act_probs[1]+act_probs[2]+act_probs[4])/3
                 act_probs[1] = avg_ps
                 act_probs[2] = avg_ps
+                act_probs[4] = 1-sum(act_probs[0:4])
                      
             if availables[idx]==0: idx = -1      
                                          
