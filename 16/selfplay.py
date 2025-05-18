@@ -312,11 +312,11 @@ class Train():
         for playcount in range(self.play_count):
             player.set_player_id(playcount)
             if his_pieces_len > 0 and playcount==0:
-                player.need_max_ps = True
-                player.need_max_ns = False
-            elif his_pieces_len > 0 and playcount>0:
                 player.need_max_ps = False
                 player.need_max_ns = True
+            elif his_pieces_len > 0 and playcount>0:
+                player.need_max_ps = True
+                player.need_max_ns = False
             else:
                 player.need_max_ps = False
                 player.need_max_ns = False
