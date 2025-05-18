@@ -347,10 +347,15 @@ class Train():
         game_score = max([play_data[i]["agent"].removedlines for i in range(self.play_count)])
         win_values =[-1 for i in range(self.play_count)]
         for i in range(self.play_count):
-            if play_data[i]["agent"].removedlines==game_score:
+            if not play_data[i]["agent"].terminal:
                 win_values[i] = 1
-                break
-        
+                state["total"]["win_lost_tie"][0] += 1
+            else:
+                state["total"]["win_lost_tie"][1] += 1    
+
+        if self.play_count>1:
+            state["total"]["win_lost_tie"][2] += 1
+                
         steptime = total_game_paytime/total_game_steps            
         avg_qval = total_game_qval/total_game_steps
         avg_state_value = total_game_state_value/total_game_steps
@@ -369,12 +374,7 @@ class Train():
         set_status_total_value(state, "step_time", steptime, alpha)
         set_status_total_value(state, "q_std", std_game_qval, alpha)
         
-        if self.play_count==1:
-            state["total"]["win_lost_tie"][0] += 1
-        elif self.play_count>1:
-            state["total"]["win_lost_tie"][1] += 1
-            if win_values[0]==-1 and win_values[1]==-1:
-                state["total"]["win_lost_tie"][2] += 1
+
         
         state["total"]["agent"] += 1
         state["total"]["_agent"] += 1
