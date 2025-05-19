@@ -106,8 +106,7 @@ class Dataset(torch.utils.data.Dataset):
                     assert mcts_prob.shape == (5,) , f'error: prob shape {mcts_prob.shape}'
                     assert not np.isnan(value) , f'error: value is Nan'
                     assert not np.isinf(value) , f'error: value is Inf'
-                    if value>1: value=1-1e-6
-                    if value<-1: value=-1+1e-6
+
                     # if len(mcts_prob)==4:
                     #     mcts_prob = np.concatenate((mcts_prob, np.zeros(1)), axis=0)
             except:
@@ -138,7 +137,10 @@ class Dataset(torch.utils.data.Dataset):
         std_values = np.std(values_items)
 
         for fn in self.data:
-            self.data[fn]["value"] = (self.data[fn]["value"]-avg_values)/std_values
+            value = (self.data[fn]["value"]-avg_values)/std_values
+            if value>1: value=1-1e-6
+            if value<-1: value=-1+1e-6
+            self.data[fn]["value"] = value
 
         print("value min/avg/max/std:",[min_values, avg_values, max_values, std_values])        
         self.avg_values = avg_values
