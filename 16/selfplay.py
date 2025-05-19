@@ -349,12 +349,6 @@ class Train():
         for i in range(self.play_count):
             if not play_data[i]["agent"].terminal:
                 win_values[i] = 1
-                state["total"]["win_lost_tie"][0] += 1
-            else:
-                state["total"]["win_lost_tie"][1] += 1    
-
-        if self.play_count>1:
-            state["total"]["win_lost_tie"][2] += 1
                 
         steptime = total_game_paytime/total_game_steps            
         avg_qval = total_game_qval/total_game_steps
@@ -365,6 +359,15 @@ class Train():
         print("step pay time:", steptime, "qval:", avg_qval, "avg_state_value:", avg_state_value)
         
         state = read_status_file()                       
+
+        for i in range(self.play_count):
+            if not play_data[i]["agent"].terminal:
+                state["total"]["win_lost_tie"][0] += 1
+            else:
+                state["total"]["win_lost_tie"][1] += 1    
+        if self.play_count>1:
+            state["total"]["win_lost_tie"][2] += 1
+
         alpha = 0.01
         set_status_total_value(state, "score_mcts", avg_game_score, alpha)
         set_status_total_value(state, "piececount_mcts", avg_game_piececount, alpha)
