@@ -482,9 +482,11 @@ class Train():
                 states.append(step["state"])
                 mcts_probs.append(step["move_probs"])
                 if win_values[i]<0:
-                    values.append((step["qval"]+v-avg_qval_list[i])/std_qval_list[i])
+                    values.append((step["qval"]+v))
+                    # values.append((step["qval"]+v-avg_qval_list[i])/std_qval_list[i])
                 else:
-                    values.append((step["qval"]-avg_qval_list[i])/std_qval_list[i])
+                    values.append((step["qval"]))
+                    # values.append((step["qval"]-avg_qval_list[i])/std_qval_list[i])
                 
         print("step_values:", values)
 

@@ -130,11 +130,15 @@ class Dataset(torch.utils.data.Dataset):
             #             board[:lc]=0                         
 
             self.data[fn]={"value":0, "state":state, "mcts_prob": mcts_prob}
+                        
         values_items = list(values.values())
         avg_values = np.average(values_items)
         min_values = np.min(values_items)
         max_values = np.max(values_items)
         std_values = np.std(values_items)
+
+        for fn in self.data:
+            self.data[fn]["value"] = (self.data[fn]["value"]-avg_values)/std_values
 
         print("value min/avg/max/std:",[min_values, avg_values, max_values, std_values])        
         self.avg_values = avg_values
@@ -184,7 +188,7 @@ class Train():
         self.temp = 1  # MCTS的概率参数，越大越不肯定，训练时1，预测时1e-3
         self.n_playout = 256  # 每个动作的模拟战记录个数
         self.play_batch_size = 1 # 每次自学习次数
-        self.buffer_size = 25600  # cache对次数 # 51200 6:30 收集
+        self.buffer_size = 102400  # cache对次数 # 102400 6:30 收集
         self.epochs = 5  # 每次更新策略价值网络的训练步骤数, 推荐是5
         self.kl_targ = 1e-4  # 策略价值网络KL值目标        
         self.c_puct = 2  # MCTS child权重， 用来调节MCTS中 探索/乐观 的程度 默认 5
