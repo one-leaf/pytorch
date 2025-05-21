@@ -52,7 +52,7 @@ def add_total_prop(state, key, default=0):
     if key not in state["total"]:
         state["total"][key]=default
 
-def read_status_file():
+def read_status_file(max_keep=30):
     # 获取历史训练数据
     state=None
     if os.path.exists(status_file):
@@ -98,9 +98,12 @@ def read_status_file():
         state["update"]=[]
     
     for key in state:
-        if isinstance(state[key],list) and len(state[key])>30:            
-            state[key]=state[key][-30:]
-    
+        if isinstance(state[key],list) and len(state[key])>max_keep: 
+            while len(state[key])>max_keep:
+                if state[key][0] == max(state[key]) and key not in ["update"]:
+                    state[key].pop(0)
+                else:
+                    state[key].pop(1)    
     return state
 
 def set_status_total_value(state, key, value, rate=1/1000):
