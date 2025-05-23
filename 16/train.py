@@ -136,11 +136,11 @@ class Dataset(torch.utils.data.Dataset):
         max_values = np.max(values_items)
         std_values = np.std(values_items)
 
-        for fn in self.data:
-            value = (self.data[fn]["value"]-avg_values)/std_values
+        for fn in values:
+            value = (values[fn]-avg_values)/std_values
             if value>1: value=1-1e-6
             if value<-1: value=-1+1e-6
-            self.data[fn]["value"] = value
+            values[fn] = value
 
         print("value min/avg/max/std:",[min_values, avg_values, max_values, std_values])        
         self.avg_values = avg_values
