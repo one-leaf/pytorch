@@ -100,11 +100,15 @@ def updateQN(s:int, a:int, v:float, Ns, Qsa, Nsa, actions_num):
 #@njit(cache=True)   
 # njit  0.00022558832222352673
 # 0.0001987227917925678
-def expandPN(s:int, availables, act_probs, Ps, Ns, Nsa, Qsa, actions_num):
+def expandPN(s:int, availables, act_probs, v, Ps, Ns, Nsa, Qsa, actions_num):
     _p = np.exp((act_probs-np.max(act_probs)))
+    
     _p[availables==0]=0
     _p_sum = np.sum(_p)
-    if _p_sum > 0:
+    if _p_sum > 0:     
+        if v<0 and np.max(_p/_p_sum)>0.99:             
+            _p[availables==1] += 0.002 
+            _p_sum = np.sum(_p)
         # if np.max(_p/_p_sum)>0.95:        
         #     probs = availables/np.sum(availables)
         #     Ps[s] = probs*0.05 + _p*0.95/_p_sum
@@ -268,7 +272,7 @@ class MCTS():
         if s not in self.Ps:                          
             # 获得当前局面的概率 和 局面的打分
             act_probs, v = self._policy(state.game) 
-            expandPN(s, availables, act_probs, self.Ps, self.Ns, self.Nsa, self.Qsa, state.actions_num)             
+            expandPN(s, availables, act_probs, v, self.Ps, self.Ns, self.Nsa, self.Qsa, state.actions_num)             
             self.Vs[s] = v
             v = float(v)
             return v
