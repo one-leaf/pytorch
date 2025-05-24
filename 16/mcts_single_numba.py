@@ -231,7 +231,7 @@ class MCTS():
         
         qs = self.Qsa[s] 
         ps = self.Ps[s]     
-        ns = self.Nsa[s]/(self.Ns[s]+1)
+        ns = self.Nsa[s]#/(self.Ns[s]+1)
         v:float = self.Vs[s] 
         nsv:float = self.Ns[s]
         max_p = np.argmax(ps)
