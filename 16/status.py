@@ -99,13 +99,13 @@ def read_status_file(max_keep=30):
     
     for key in state:
         if isinstance(state[key],list) and len(state[key])>max_keep: 
+            max_v = max(state[key])
+            min_v = min(state[key])
             while len(state[key])>max_keep:
-                idx = 0
-                if state[key][idx] == max(state[key]) and key not in ["update"]:
-                    idx += 1
-                if state[key][idx] == min(state[key]) and key not in ["update"]:
-                    idx += 1
-                state[key].pop(idx)    
+                state[key].pop(0)  
+            if key not in ["update"]:
+                state[key][0] = max_v
+                state[key][1] = min_v 
     return state
 
 def set_status_total_value(state, key, value, rate=1/1000):
