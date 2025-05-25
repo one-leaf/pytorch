@@ -101,9 +101,10 @@ def read_status_file(max_keep=30):
         if isinstance(state[key],list) and len(state[key])>max_keep: 
             max_v = max(state[key])
             min_v = min(state[key])
+            need_keep = key not in ["update"] and max_v==state[key][0]
             while len(state[key])>max_keep:
                 state[key].pop(0)  
-            if key not in ["update"]:
+            if need_keep:
                 state[key][0] = max_v
                 state[key][1] = min_v 
     return state
