@@ -240,7 +240,7 @@ class MCTS():
         max_q_idx = nz_idx[0][np.argmax(qs[nz_idx])]
         max_n_idx = nz_idx[0][np.argmax(probs[nz_idx])]
         
-        mask = "-" if max_n_idx==max_q_idx else "*"
+        mask = "-" if max_n_idx==max_q_idx else "?"
                 
         game = state.game
         if game.show_mcts_process or game.state == 1 :
@@ -249,7 +249,7 @@ class MCTS():
             print(timedelta(seconds=run_time), game.steps, game.fallpiece["shape"], \
                   "ns:", str(nsv).rjust(4), "/", str(self.simulation_count).ljust(4), "depth:", str(self.max_depth).ljust(3), \
                   "end:", die_count, "v:", round(v,2), "-->", round(qs[max_p],2), "\t", \
-                  game.position_to_action_name(max_p), mask, \
+                  mask, game.position_to_action_name(max_p), \
                   "Qs:", qs, "\tNs:", ns, "\tPs:", ps)
                 
         # 动作数，概率，每个动作的Q，原始概率，当前局面的v，当前局面的总探索次数
