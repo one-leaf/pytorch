@@ -248,7 +248,7 @@ class MCTS():
             run_time = round(time.time()-game.start_time)
             print(timedelta(seconds=run_time), game.steps, game.fallpiece["shape"], \
                   "ns:", str(nsv).rjust(4), "/", str(self.simulation_count).ljust(4), "depth:", str(self.max_depth).ljust(3), \
-                  "end:", die_count, "v:", round(v,2), "-->", qs[max_p], \
+                  "end:", die_count, "v:", round(v,2), "-->", round(qs[max_p],2), \
                   game.position_to_action_name(max_p), "\t", mask, \
                   "Qs:", qs, "\tNs:", ns, "\tPs:", ps)
                 
