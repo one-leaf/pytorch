@@ -318,7 +318,7 @@ class Train():
                 player.need_max_ps = True
                 player.need_max_ns = False
             else:
-                player.need_max_ps = False
+                player.need_max_ps = True
                 player.need_max_ns = False
                 
             agent, data, qval, state_value, avg_qval, std_qval, start_time, paytime = self.play(cache, state, min_removedlines, his_pieces, his_pieces_len, player)
