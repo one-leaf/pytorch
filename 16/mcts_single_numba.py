@@ -320,11 +320,11 @@ class MCTSPlayer(object):
             # temp 导致 N^(1/temp) alphaezero 前 30 步设置为1 其余设置为无穷小即act_probs只取最大值
             # temp 越大导致更均匀的搜索
             
-            # 为了防止无休止运行，runtime超过了60分钟，采用随机75%选择
-            if  game.removedlines <= self.min_score:
-                self.start_time = time.time() # 重新开始计时
+            # 为了防止无休止运行，runtime超过了30分钟，采用随机75%选择
+            # if  game.removedlines <= self.min_score:
+            #     self.start_time = time.time() # 重新开始计时
 
-            has_run_time=time.time()-self.start_time
+            # has_run_time=time.time()-self.start_time
 
             state = State(game)
             # 动作数概率，每个动作的Q，原始概率，当前局面的v，当前局面的总探索次数 
@@ -382,7 +382,7 @@ class MCTSPlayer(object):
                 idx = max_ps_idx     
                       
             p = 0     
-            if idx == -1:    
+            if idx == -1 or game.removedlines > self.min_score:    
                 # a=1的时候，act 机会均等，>1 强调均值， <1 强调两端
                 # 国际象棋 0.3 将棋 0.15 围棋 0.03
                 # 取值一般倾向于 a = 10/n 所以俄罗斯方块取 2
