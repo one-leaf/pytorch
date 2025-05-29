@@ -285,6 +285,9 @@ class MCTS():
         # 外部奖励，最大1
         v = self.search(state) 
         
+        if state.game.state==1:
+            v += 0.1
+            
         updateQN(s, a, v, self.Ns, self.Qsa, self.Nsa, state.actions_num)
         
         return v
