@@ -282,9 +282,9 @@ class MCTS():
         a = selectAction(s, availables, self._c_puct, self.Ps, self.Ns, self.Qsa, self.Nsa)
         state.game.step(a)
                 
-        # 外部奖励，最大1
         v = self.search(state) 
         
+        # 外部奖励，放的方块越多越好
         if state.game.state==1:
             v += 0.1
             
