@@ -352,7 +352,7 @@ class Train():
         game_score = max([play_data[i]["agent"].removedlines for i in range(self.play_count)])
         win_values =[-1 for i in range(self.play_count)]
         for i in range(self.play_count):
-            if not play_data[i]["agent"].terminal:
+            if play_data[i]["agent"].removedlines > state["total"]["min_score"]:
                 win_values[i] = 1
                 
         steptime = total_game_paytime/total_game_steps            
