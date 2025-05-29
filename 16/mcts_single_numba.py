@@ -366,10 +366,10 @@ class MCTSPlayer(object):
                 # idx = np.random.choice(range(ACTONS_LEN), p=act_ps)           
             
             # 如果Down+None的概率和为1， 则选择Down
-            if sum(act_probs[0:3])<0.01:
-                idx = 4
-                act_probs[3]=0.01
-                act_probs[4]=1-sum(act_probs[0:4])
+            # if sum(act_probs[0:3])<0.01:
+            #     idx = 4
+            #     act_probs[3]=0.01
+            #     act_probs[4]=1-sum(act_probs[0:4])
             
             # 如果有左右来回移动的动作   
             # if ("R" in game.piece_actions and idx == 1) or ("L" in game.piece_actions and idx == 2):
