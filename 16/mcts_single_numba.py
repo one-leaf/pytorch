@@ -392,7 +392,7 @@ class MCTSPlayer(object):
                 # a = 2       
                 # p=0.999**has_run_time     # 每1秒减少0.1的概率
                 # if p<0.1: p=0.1
-                p = 0.75
+                p = 0.9
                 dirichlet = np.random.dirichlet(2 * np.ones(len(nz_idx)))
                 dirichlet_probs = np.zeros_like(act_probs, dtype=np.float64)
                 dirichlet_probs[nz_idx] = dirichlet
