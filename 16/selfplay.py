@@ -228,10 +228,10 @@ class Train():
                     time.sleep(60)
                     raise Exception("find stop mark file")
 
-            # 如果游戏结束或玩了超过1小时
+            # 如果游戏结束或玩了超过2小时
             paytime = time.time()-start_time
                 # (agent.removedlines > state["total"]["avg_score"]+1)  or \
-            if agent.terminal or (agent.state==1 and paytime>60*60*1):
+            if agent.terminal or (agent.state==1 and paytime>60*60*2):
                 data["score"] = agent.score
                 data["piece_count"] = agent.piececount
                 data["piece_height"] = agent.pieceheight
