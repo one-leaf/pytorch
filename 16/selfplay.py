@@ -491,7 +491,7 @@ class Train():
                     # values.append((step["qval"]+v))
                     values.append((step["qval"]+v-avg_qval_list[i])/std_qval_list[i])
                 else:
-                    values.append((step["qval"]))
+                    # values.append((step["qval"]))
                     values.append((step["qval"]-avg_qval_list[i])/std_qval_list[i])
                 
         print("step_values:", values)
