@@ -830,7 +830,8 @@ class Agent():
     
     # 打印
     def print(self):
-        print("actions:" ,self.piece_actions)
+        # print("actions:" ,self.piece_actions)
+        print("")
         board = np.copy(self.board)
         for x in range(templatenum):
             for y in range(templatenum):
