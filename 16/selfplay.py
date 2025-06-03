@@ -176,7 +176,7 @@ class Train():
         qval_list=[]
         total_state_value=0
         print("max_emptyCount:",max_emptyCount,"isRandomNextPiece:",agent.isRandomNextPiece,"limitstep:",agent.limitstep,"max_ps:",player.need_max_ps,"max_qs:",agent.is_replay)
-        for i in range(self.max_step_count):
+        for i in count():
             _step={"step":i}
             _step["state"] = np.copy(agent.current_state())
             # print(_step["state"][0])           
