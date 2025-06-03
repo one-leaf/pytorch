@@ -105,7 +105,7 @@ class Train():
                 action = policy_value_net.policy_value_fn_best_act(agent)
                 _, score = agent.step(action)
                 if score > 0:
-                    print(('piece:', agent.piececount, 'score:', agent.removedlines, 'height:', agent.pieceheight,), end=' ')
+                    print(agent.pieceheight, end=' ')
                     # print("#"*40, 'score:', agent.removedlines, 'height:', agent.pieceheight, 'piece:', agent.piececount, "shape:", agent.fallpiece["shape"], \
                     #     'step:', agent.steps, "step time:", round((time.time()-start_time)/i,3))            
 
