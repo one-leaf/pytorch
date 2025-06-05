@@ -206,6 +206,7 @@ class MCTS():
         state_ = None
 
         ig_probs = False
+        self._n_playout = 8
         for n in range(self._n_playout):
             self.simulation_count += 1
 
@@ -217,10 +218,10 @@ class MCTS():
             die_count += 1 if state_.game.terminal else 0
             self.max_depth = (depth, step_depth)
 
-            if min(self.Qsa[s])>=0 and n>=7:
-                # 如果当前都为正数，就不再搜索了
-                ig_probs = True
-                break
+            # if min(self.Qsa[s])>=0 and n>=7:
+            #     # 如果当前都为正数，就不再搜索了
+            #     ig_probs = True
+            #     break
 
         self._policy(state_.game, only_Cache_Next=True) 
 
