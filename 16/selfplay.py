@@ -490,14 +490,14 @@ class Train():
                 mcts_probs.append(step["move_probs"])
                 if win_values[i]<0:
                     # values.append((step["qval"]+v))
-                    if not step["ig_probs"]: 
+                    if not step["ig_probs"] or play_data[i]["agent"].terminal: 
                         values.append((step["qval"]-avg_qval_list[i])/std_qval_list[i])
                     else:
                         values.append(step["qval"])
                     # values.append((step["qval"]+v-avg_qval_list[i])/std_qval_list[i])
                 else:
                     # values.append((step["qval"]))
-                    if not step["ig_probs"]: 
+                    if not step["ig_probs"] or play_data[i]["agent"].terminal: 
                         values.append((step["qval"]-avg_qval_list[i])/std_qval_list[i])
                     else:
                         values.append(step["qval"])    
