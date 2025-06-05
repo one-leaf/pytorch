@@ -253,7 +253,7 @@ class MCTS():
                   "Qs:", qs, "\tNs:", ns, "\tPs:", ps)
                 
         # 动作数，概率，每个动作的Q，原始概率，当前局面的v，当前局面的总探索次数
-        return probs, qs, ps, v, ns
+        return probs, qs, ps, v, ig_probs
 
     def search(self, state:State):
         """
@@ -331,7 +331,7 @@ class MCTSPlayer(object):
 
             state = State(game)
             # 动作数概率，每个动作的Q，原始概率，当前局面的v，当前局面的总探索次数 
-            act_probs, act_qs, act_ps, state_v, state_n = self.mcts.get_action_probs(state, temp)
+            act_probs, act_qs, act_ps, state_v, ig_probs = self.mcts.get_action_probs(state, temp)
             depth = self.mcts.max_depth[0]
             
             # max_probs_idx = np.argmax(act_probs)    
@@ -424,7 +424,7 @@ class MCTSPlayer(object):
             if self.player==0:
                 self.cache[hash(state)] = action
 
-            return action, qval, act_probs, state_v, acc_ps, depth, state_n
+            return action, qval, act_probs, state_v, acc_ps, depth, ig_probs
         else:
             print("WARNING: game is terminal")
 

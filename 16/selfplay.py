@@ -188,7 +188,7 @@ class Train():
             #     need_max_ps=not need_max_ps
             #     print("switch need_max_ps to:", need_max_ps)
             # need_max_ps = random.random() < agent.removedlines/100   
-            action, qval, move_probs, state_value, acc_ps, depth, ns = player.get_action(agent, temp=1) 
+            action, qval, move_probs, state_value, acc_ps, depth, ig_probs = player.get_action(agent, temp=1) 
 
             _, score = agent.step(action)
 
@@ -208,7 +208,8 @@ class Train():
             _step["qval"] = qval
             _step["acc_ps"] = acc_ps
             _step["depth"] = depth
-
+            _step["ig_probs"] = ig_probs
+            
             data["steps"].append(_step)
 
             # time.sleep(0.1)
@@ -489,14 +490,14 @@ class Train():
                 mcts_probs.append(step["move_probs"])
                 if win_values[i]<0:
                     # values.append((step["qval"]+v))
-                    if play_data[i]["agent"].terminal: 
+                    if not step["ig_probs"]: 
                         values.append((step["qval"]-avg_qval_list[i])/std_qval_list[i])
                     else:
                         values.append(step["qval"])
                     # values.append((step["qval"]+v-avg_qval_list[i])/std_qval_list[i])
                 else:
                     # values.append((step["qval"]))
-                    if play_data[i]["agent"].terminal: 
+                    if not step["ig_probs"]: 
                         values.append((step["qval"]-avg_qval_list[i])/std_qval_list[i])
                     else:
                         values.append(step["qval"])    
