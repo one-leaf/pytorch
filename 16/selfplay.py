@@ -249,7 +249,7 @@ class Train():
                     for i in range(len(data["steps"])-1,-1,-1):
                         # if data["steps"][i]["score"]>0: break
                         
-                        data["steps"][i]["qval"] -= 1/(agent.piececount-data["steps"][i]["piece_count"]+1)
+                        data["steps"][i]["qval"] -= 0.9**(agent.piececount-data["steps"][i]["piece_count"])
 
                 data["score"] = agent.removedlines
                 data["piece_count"] = agent.piececount
