@@ -235,14 +235,6 @@ class Train():
                 # (agent.removedlines > state["total"]["avg_score"]+1)  or \
 
             if agent.terminal or (agent.state==1 and paytime>60*60):
-                if agent.piececount<self.min_piececount:
-                    min_his_pieces = agent.piecehis
-                    min_his_pieces_len = len(agent.piecehis)                    
-                    filename = "{:05d}-{:05d}-{}.pkl".format(min_his_pieces_len, min_removedlines, "".join(min_his_pieces)[:50])
-                    his_pieces_file = os.path.join(self.waitplaydir, filename)
-                    print("save need replay", his_pieces_file)
-                    with open(his_pieces_file, "wb") as fn:
-                        pickle.dump(min_his_pieces, fn)
 
                 # 修复Q值，将最后都无法消行的全部设置为-1
                 if agent.terminal:
@@ -330,6 +322,7 @@ class Train():
         
         play_data = []
         state = read_status_file() 
+        need_replay = True
         for playcount in range(self.play_count):
             player.set_player_id(playcount)
             if his_pieces_len > 0 and playcount==0:
@@ -356,10 +349,18 @@ class Train():
             # 如果游戏达到了最小的消除行数，样本有效，直接结束
             if agent.removedlines>state["total"]["min_score"]:
                 self.play_count = playcount+1
+                need_replay = False
                 break
-            
-                
+                            
         print("TRAIN Self Play ending ...")
+        if need_replay:
+            min_his_pieces = play_data[-1]["agent"].piecehis
+            min_his_pieces_len = len(play_data[-1]["agent"].piecehis)                    
+            filename = "{:05d}-{:05d}-{}.pkl".format(min_his_pieces_len, min_removedlines, "".join(min_his_pieces)[:50])
+            his_pieces_file = os.path.join(self.waitplaydir, filename)
+            print("save need replay", his_pieces_file)
+            with open(his_pieces_file, "wb") as fn:
+                pickle.dump(min_his_pieces, fn)            
                 
         total_game_score =  sum([play_data[i]["agent"].removedlines for i in range(self.play_count)]) 
         total_game_steps =  sum([play_data[i]["agent"].steps for i in range(self.play_count)])  
