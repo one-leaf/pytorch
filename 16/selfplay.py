@@ -194,7 +194,6 @@ class Train():
             _, score = agent.step(action)
 
             total_qval += qval 
-            qval_list.append(qval)
             # if qval > 0:
             #     avg_qval += 1
             # else:
@@ -254,6 +253,8 @@ class Train():
                 data["score"] = agent.removedlines
                 data["piece_count"] = agent.piececount
                 data["piece_height"] = agent.pieceheight
+                
+                qval_list = [step["qval"] for step in data["steps"]]
                 std_qval = float(np.std(qval_list))
                 avg_qval = float(np.average(qval_list))                                   
                 return agent, data, total_qval, total_state_value, avg_qval, std_qval, start_time, paytime
