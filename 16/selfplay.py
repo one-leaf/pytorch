@@ -245,7 +245,13 @@ class Train():
                     with open(his_pieces_file, "wb") as fn:
                         pickle.dump(min_his_pieces, fn)
 
-                data["score"] = agent.score
+                # 修复Q值，将最后都无法消行的全部设置为-1
+                if agent.terminal:
+                    for i in range(len(data["steps"])-1,-1,-1):
+                        if data["steps"][i]["score"]>0: break
+                        data["steps"][i]["qval"] = -1
+
+                data["score"] = agent.removedlines
                 data["piece_count"] = agent.piececount
                 data["piece_height"] = agent.pieceheight
                 std_qval = float(np.std(qval_list))
@@ -336,10 +342,10 @@ class Train():
                 
             agent, data, qval, state_value, avg_qval, std_qval, start_time, paytime = self.play(cache, state, min_removedlines, his_pieces, his_pieces_len, player)
             
-            # 修复Q值，将最后都无法消行的全部设置为-1
-            for i in range(len(data["steps"])-1,-1,-1):
-                if data["steps"][i]["score"]>0: break
-                data["steps"][i]["qval"] = -1
+            # # 修复Q值，将最后都无法消行的全部设置为-1
+            # for i in range(len(data["steps"])-1,-1,-1):
+            #     if data["steps"][i]["score"]>0: break
+            #     data["steps"][i]["qval"] = -1
             
             play_data.append({"agent":agent, "data":data, "qval":qval, "avg_qval":avg_qval, "std_qval":std_qval, "state_value":state_value, "start_time":start_time, "paytime":paytime})
             his_pieces = agent.piecehis
