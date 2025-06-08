@@ -247,8 +247,9 @@ class Train():
                 # 修复Q值，将最后都无法消行的全部设置为-1
                 if agent.terminal:
                     for i in range(len(data["steps"])-1,-1,-1):
-                        if data["steps"][i]["score"]>0: break
-                        data["steps"][i]["qval"] = -1
+                        # if data["steps"][i]["score"]>0: break
+                        
+                        data["steps"][i]["qval"] -= 1/(agent.piececount-data["steps"][i]["piece_count"]+1)
 
                 data["score"] = agent.removedlines
                 data["piece_count"] = agent.piececount
