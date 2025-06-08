@@ -51,6 +51,7 @@ class Train():
         self.max_step_count = 10000 
         self.limit_steptime = 1  # 限制每一步的平均花费时间，单位秒，默认1秒
 
+        self.min_piececount = 20  # 限制每局的方块数，少于这个数就认为是失败局面，默认20个方块
         # 等待训练的序列
         self.waitplaydir=os.path.join(data_dir,"replay")
         if not os.path.exists(self.waitplaydir): os.makedirs(self.waitplaydir)
@@ -92,7 +93,7 @@ class Train():
 
         state = read_status_file()
         limit_score = state["total"]["score"]*2
-        limit_piececount = state["total"]["min_piececount"] # (state["total"]["piececount"]+state["total"]["min_piececount"])/2     
+        self.min_piececount = state["total"]["min_piececount"] # (state["total"]["piececount"]+state["total"]["min_piececount"])/2     
         no_terminal=0   
         for _ in range(self.test_count):
             agent = Agent(isRandomNextPiece=True)
@@ -132,7 +133,7 @@ class Train():
                 max_pieces_count = agent.piececount
                 max_removedlines = agent.removedlines
                 
-            if agent.piececount<limit_piececount*0.8:
+            if agent.piececount<self.min_piececount:
                 filename = "{:05d}-{:05d}-{}.pkl".format(min_his_pieces_len, min_removedlines, "".join(min_his_pieces)[:50])
                 his_pieces_file = os.path.join(self.waitplaydir, filename)
                 print("save need replay", his_pieces_file)
@@ -233,13 +234,24 @@ class Train():
             # 如果游戏结束或玩了超过2小时
             paytime = time.time()-start_time
                 # (agent.removedlines > state["total"]["avg_score"]+1)  or \
-            if agent.terminal or (agent.state==1 and paytime>60*60*2):
+
+            if agent.terminal or (agent.state==1 and paytime>60*60):
+                if agent.piececount<self.min_piececount:
+                    min_his_pieces = agent.piecehis
+                    min_his_pieces_len = len(agent.piecehis)                    
+                    filename = "{:05d}-{:05d}-{}.pkl".format(min_his_pieces_len, min_removedlines, "".join(min_his_pieces)[:50])
+                    his_pieces_file = os.path.join(self.waitplaydir, filename)
+                    print("save need replay", his_pieces_file)
+                    with open(his_pieces_file, "wb") as fn:
+                        pickle.dump(min_his_pieces, fn)
+
                 data["score"] = agent.score
                 data["piece_count"] = agent.piececount
                 data["piece_height"] = agent.pieceheight
                 std_qval = float(np.std(qval_list))
                 avg_qval = float(np.average(qval_list))                                   
                 return agent, data, total_qval, total_state_value, avg_qval, std_qval, start_time, paytime
+
 
     def collect_selfplay_data(self):
         """收集自我对抗数据用于训练"""       
@@ -291,12 +303,12 @@ class Train():
         # 检查有没有需要重复运行的
         listFiles = [f for f in os.listdir(self.waitplaydir) if f.endswith(".pkl")]
         if listFiles :#and random.random()>0.20:
-            # earliest_file = min(listFiles, key=lambda f: os.path.getctime(os.path.join(self.waitplaydir, f)))
-            earliest_files = sorted(listFiles)
+            earliest_files = sorted(listFiles, key=lambda f: os.path.getctime(os.path.join(self.waitplaydir, f)))
+            # earliest_files = sorted(listFiles)
             
-            while len(earliest_files)>200:
-                newmodelfile = earliest_files.pop()
-                os.remove(os.path.join(self.waitplaydir, newmodelfile))
+            # while len(earliest_files)>200:
+            #     newmodelfile = earliest_files.pop()
+            #     os.remove(os.path.join(self.waitplaydir, newmodelfile))
                 
             filename = os.path.join(self.waitplaydir, earliest_files[0])
             with open(filename, "rb") as fn:
