@@ -241,11 +241,12 @@ class Train():
                     score_count = 0
                     for i in range(len(data["steps"])-1,-1,-1):
                         if data["steps"][i]["score"]>0: score_count += 1
-                        # if score_count>5: break
+                        if score_count>10: break
                         if score_count == 0:
                             data["steps"][i]["qval"] = -1
                         else:
-                            data["steps"][i]["qval"] -= 1/score_count
+                            v = data["steps"][i]["qval"] - 1/score_count
+                            data["steps"][i]["qval"] = max(-1/score_count, v)
                         # data["steps"][i]["qval"] -= 0.9**(agent.piececount-data["steps"][i]["piece_count"])
 
                 data["score"] = agent.removedlines
