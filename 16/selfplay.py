@@ -523,7 +523,7 @@ class Train():
                     else:
                         values.append(step["qval"])    
                 
-        print("step_values:", values)
+        print("step_values:", np.array(values))
 
         assert len(states)>0
         assert len(states)==len(values)
