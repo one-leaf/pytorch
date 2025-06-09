@@ -250,8 +250,12 @@ class Train():
                 qval_list = [step["qval"] for step in data["steps"]]
                 std_qval = float(np.std(qval_list))
                 avg_qval = float(np.average(qval_list))
-                     
-                print("step_values:", (np.array(qval_list)-avg_qval)/std_qval)
+                
+                print_v = (np.array(qval_list)-avg_qval)/std_qval     
+                
+                print(print_v[:100])
+                print("...")
+                print(print_v[-100:])
                 
                 return agent, data, total_qval, total_state_value, avg_qval, std_qval, start_time, paytime
 
