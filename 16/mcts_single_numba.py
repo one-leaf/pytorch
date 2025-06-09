@@ -263,7 +263,7 @@ class MCTS():
             v: 当前局面的状态
         """  
         if state.game.terminal: 
-            return -2      
+            return -1      
         s = hash(state)
 
         # 如果当前状态没有子节点，增加子节点
@@ -289,6 +289,7 @@ class MCTS():
         if state.game.state==1:
             v += 0.01
         if v>1: v=1    
+        if v<-1: v=-1    
         updateQN(s, a, v, self.Ns, self.Qsa, self.Nsa, state.actions_num)
         
         return v
