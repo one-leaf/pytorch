@@ -46,7 +46,7 @@ class Train():
         # aplhatensor 是 5
         # MCTS child权重， 用来调节MCTS搜索深度，越大搜索越深，越相信概率，越小越相信Q 的程度 默认 5
         # 由于value完全用结果胜负来拟合，所以value不稳，只能靠概率p拟合，最后带动value来拟合
-        self.c_puct = 5  
+        self.c_puct = 4  
         self.q_std = 1
         self.max_step_count = 10000 
         self.limit_steptime = 1  # 限制每一步的平均花费时间，单位秒，默认1秒
