@@ -340,9 +340,10 @@ class MCTSPlayer(object):
             
             availables = state.availables()
 
-            if self.player==1 and hash(state) in self.cache:
+            if  hash(state) in self.cache :
                 action = self.cache[hash(state)]
-                availables[action]=0       
+                if action < len(availables)-1:
+                    availables[action]=0       
                 
             nz_idx = np.nonzero(availables)[0]  # [0,2,3,4]
             
