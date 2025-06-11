@@ -424,8 +424,7 @@ class MCTSPlayer(object):
             # 将概率转为onehot
             # act_probs = np.zeros_like(act_probs)
             # act_probs[max_qs_idx] = 1
-            if self.player==0:
-                self.cache[hash(state)] = action
+            self.cache[hash(state)] = action
 
             return action, qval, act_probs, state_v, acc_ps, depth, ig_probs
         else:
