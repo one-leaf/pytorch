@@ -256,7 +256,7 @@ class Train():
                 
                 qval_list = [step["qval"] for step in data["steps"]]
                 while len(qval_list)<self.play_size:
-                    qval_list.append(0) 
+                    qval_list.insert(0,0) 
                 std_qval = float(np.std(qval_list))
                 avg_qval = float(np.average(qval_list))
                 
