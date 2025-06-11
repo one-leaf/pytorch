@@ -38,7 +38,8 @@ class Train():
         # self.n_playout = 128  # 每个动作的模拟战记录个数，影响后续 128/2 = 66；64/16 = 4个方块 的走法
         self.test_count = 10 # 每次测试次数
         self.play_count = 2 # 每次运行次数
-        self.buffer_size = 1000000  # cache对次数
+        self.buffer_size = 51200  # cache对次数
+        self.play_size = 512  # 每次训练的样本数
         self.epochs = 2  # 每次更新策略价值网络的训练步骤数, 推荐是5
         self.kl_targ = 0.02  # 策略价值网络KL值目标
         self.best_win_ratio = 0.0
@@ -154,7 +155,7 @@ class Train():
         return min_removedlines, min_his_pieces, min_his_pieces_len
 
     def play(self, cache, state, min_removedlines, his_pieces, his_pieces_len, player):
-        data = {"steps":deque(maxlen=500),"last_state":0,"score":0,"piece_count":0}
+        data = {"steps":deque(maxlen=self.play_size),"last_state":0,"score":0,"piece_count":0}
         if his_pieces!=None:
             print("min_removedlines:", min_removedlines, "pieces_count:", len(his_pieces))
             print("his_pieces:", his_pieces)
@@ -254,6 +255,8 @@ class Train():
                 data["piece_height"] = agent.pieceheight
                 
                 qval_list = [step["qval"] for step in data["steps"]]
+                while len(qval_list)<self.play_size:
+                    qval_list.append(0) 
                 std_qval = float(np.std(qval_list))
                 avg_qval = float(np.average(qval_list))
                 
