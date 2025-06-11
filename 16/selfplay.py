@@ -545,7 +545,7 @@ class Train():
         k=3        
         clipped = np.clip(values, -k, k)
         values = clipped/k
-        
+        values = values - np.mean(values)
         assert len(states)>0
         assert len(states)==len(values)
         assert len(states)==len(mcts_probs)
