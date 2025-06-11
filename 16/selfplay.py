@@ -329,11 +329,13 @@ class Train():
             #     os.remove(os.path.join(self.waitplaydir, newmodelfile))
                 
             filename = os.path.join(self.waitplaydir, earliest_files[0])
-            with open(filename, "rb") as fn:
-                his_pieces = pickle.load(fn)
-                his_pieces_len = len(his_pieces)
-            print("load need replay", filename)
-            os.remove(filename)
+            try:
+                with open(filename, "rb") as fn:
+                    his_pieces = pickle.load(fn)
+                    his_pieces_len = len(his_pieces)
+                print("load need replay", filename)
+            finally:
+                os.remove(filename)
         else:
             his_pieces = []
             his_pieces_len = 0
