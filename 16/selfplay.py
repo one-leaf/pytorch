@@ -367,7 +367,7 @@ class Train():
             his_pieces_len = len(agent.piecehis)
             
             # 如果游戏达到了最小的消除行数，样本有效，直接结束
-            if agent.removedlines>=round(state["total"]["min_score"]):
+            if agent.removedlines>=state["total"]["min_score"]:
                 self.play_count = playcount+1
                 need_replay = False
                 break
