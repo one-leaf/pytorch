@@ -595,7 +595,6 @@ if __name__ == '__main__':
     print('start playing',datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
     np.set_printoptions(precision=2, suppress=True)
     training = Train()
-    print("start playing", i+1, datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
     time.sleep(1)
     training.run()
     # profiler()
