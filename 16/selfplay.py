@@ -3,6 +3,7 @@ import os, glob, pickle
 from model import PolicyValueNet, data_dir, data_wait_dir, model_file
 from agent_numba import Agent, ACTIONS
 from mcts_single_numba import MCTSPlayer
+from collections import deque
 
 import time, json
 from datetime import datetime, timedelta
@@ -153,7 +154,7 @@ class Train():
         return min_removedlines, min_his_pieces, min_his_pieces_len
 
     def play(self, cache, state, min_removedlines, his_pieces, his_pieces_len, player):
-        data = {"steps":[],"shapes":[],"last_state":0,"score":0,"piece_count":0}
+        data = {"steps":deque(maxlen=500),"last_state":0,"score":0,"piece_count":0}
         if his_pieces!=None:
             print("min_removedlines:", min_removedlines, "pieces_count:", len(his_pieces))
             print("his_pieces:", his_pieces)
@@ -258,9 +259,10 @@ class Train():
                 
                 print_v = (np.array(qval_list)-avg_qval)/std_qval     
                 
-                print(print_v[:200])
-                print("...")
-                print(print_v[-200:])
+                # print(print_v[:200])
+                # print("...")
+                # print(print_v[-200:])
+                print(print_v)
                 
                 return agent, data, total_qval, total_state_value, avg_qval, std_qval, start_time, paytime
 
