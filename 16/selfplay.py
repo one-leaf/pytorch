@@ -574,7 +574,11 @@ class Train():
     def run(self):
         """启动训练"""
         try:
-            self.collect_selfplay_data()    
+            t = time.time()
+            for i in range(10):
+                self.collect_selfplay_data()    
+                if (time.time()-t) > 30*60: break
+                
         except KeyboardInterrupt:
             print('quit')
 
@@ -590,8 +594,9 @@ def profiler():
 if __name__ == '__main__':
     print('start playing',datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
     np.set_printoptions(precision=2, suppress=True)
-
     training = Train()
+    print("start playing", i+1, datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+    time.sleep(1)
     training.run()
     # profiler()
     print('end playing',datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
