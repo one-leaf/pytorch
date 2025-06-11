@@ -6,6 +6,7 @@ def remove_data():
     for root, dirs, files in os.walk(data_dir, topdown=False):
         for name in files:
             if name.endswith(".pkl"):
+                print(f"Removing file: {os.path.join(root, name)}")
                 os.remove(os.path.join(root, name))
                 
 if __name__ == "__main__":
