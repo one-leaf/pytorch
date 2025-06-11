@@ -369,12 +369,11 @@ class Train():
             # 如果游戏达到了最小的消除行数，样本有效，直接结束
             if agent.removedlines>=state["total"]["min_score"]:
                 self.play_count = playcount+1
-                if state["total"]["min_score"]<1:
-                    need_replay = False
+                need_replay = False
                 break
                             
         print("TRAIN Self Play ending ...")
-        if need_replay:
+        if need_replay and state["total"]["min_score"]>1:
             min_his_pieces = play_data[-1]["agent"].piecehis
             min_his_pieces_len = len(play_data[-1]["agent"].piecehis)                    
             filename = "{:05d}-{:05d}-{}.pkl".format(min_his_pieces_len, min_removedlines, "".join(min_his_pieces)[:50])
