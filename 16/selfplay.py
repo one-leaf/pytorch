@@ -255,8 +255,9 @@ class Train():
                 data["piece_height"] = agent.pieceheight
                 
                 qval_list = [step["qval"] for step in data["steps"]]
+                avg_first = np.average(qval_list)
                 while len(qval_list)<self.play_size:
-                    qval_list.insert(0,0) 
+                    qval_list.insert(0,avg_first) 
                 std_qval = float(np.std(qval_list))
                 avg_qval = float(np.average(qval_list))
                 
