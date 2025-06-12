@@ -137,10 +137,11 @@ class Dataset(torch.utils.data.Dataset):
         std_values = np.std(values_items)
 
         for fn in values:
-            # value = (values[fn]-avg_values)/std_values
+            value = values[fn]
             if value>=1: value=1-1e-6
             if value<=-1: value=-1+1e-6
             values[fn] = value
+
 
         print("value min/avg/max/std:",[min_values, avg_values, max_values, std_values])        
         self.avg_values = avg_values
@@ -302,9 +303,12 @@ class Train():
             # for i in range(len(begin_values)):
                 # print("value[{}] begin:{} end:{} to:{}".format(i, begin_values[i], end_values[i], test_data[2][i].numpy()))  
                 # if i>=4:break
-            print(test_data[2].numpy()[:20])    
-            print(begin_values[:20])
-            print(end_values[:20])
+            print("样本：")
+            print(test_data[2].numpy()[:24])    
+            print("初始：")
+            print(begin_values[:24])
+            print("结束：")
+            print(end_values[:24])
             for i in range(len(begin_values)):
                 idx = np.argmax(begin_act_probs[i])
                 print("probs[{}] begin:{} end:{} to:{} ".format(i, begin_act_probs[i][idx], end_act_probs[i][idx], test_data[1][i].numpy()[idx]))
