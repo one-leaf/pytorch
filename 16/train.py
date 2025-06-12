@@ -303,7 +303,7 @@ class Train():
             # for i in range(len(begin_values)):
                 # print("value[{}] begin:{} end:{} to:{}".format(i, begin_values[i], end_values[i], test_data[2][i].numpy()))  
                 # if i>=4:break
-            print("样本：")
+            print("目标：")
             print(test_data[2].numpy()[:24])    
             print("初始：")
             print(begin_values[:24])
