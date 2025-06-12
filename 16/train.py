@@ -176,7 +176,7 @@ class Dataset(torch.utils.data.Dataset):
                 self.newsample.append(savefile)
             if i>=self.max_keep_size//self.epoch: break     
             
-        random.shuffle(self.newsample)  
+        # random.shuffle(self.newsample)  
         print("mv %s/%s files to train"%(i+1,len(movefiles)))
             
          
