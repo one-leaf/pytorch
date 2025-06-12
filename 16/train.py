@@ -299,9 +299,12 @@ class Train():
             end_act_probs_e = np.exp(end_act_probs-np.max(end_act_probs, axis=1, keepdims=True))
             end_act_probs = end_act_probs_e/np.sum(end_act_probs_e, axis=1, keepdims=True)
             
-            for i in range(len(begin_values)):
-                print("value[{}] begin:{} end:{} to:{}".format(i, begin_values[i], end_values[i], test_data[2][i].numpy()))  
-                if i>=4:break
+            # for i in range(len(begin_values)):
+                # print("value[{}] begin:{} end:{} to:{}".format(i, begin_values[i], end_values[i], test_data[2][i].numpy()))  
+                # if i>=4:break
+            print(test_data[2].numpy()[:20])    
+            print(begin_values[:20])
+            print(end_values[:20])
             for i in range(len(begin_values)):
                 idx = np.argmax(begin_act_probs[i])
                 print("probs[{}] begin:{} end:{} to:{} ".format(i, begin_act_probs[i][idx], end_act_probs[i][idx], test_data[1][i].numpy()[idx]))
