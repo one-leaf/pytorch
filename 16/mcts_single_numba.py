@@ -401,13 +401,13 @@ class MCTSPlayer(object):
                 dirichlet_probs = np.zeros_like(act_probs, dtype=np.float64)
                 dirichlet_probs[nz_idx] = dirichlet
                 
-                act_probs = act_probs * availables
-                if np.sum(act_probs) == 0:
-                    act_probs[nz_idx] = 1.0 / len(nz_idx)
+                _act_probs = act_probs * availables
+                if np.sum(_act_probs) == 0:
+                    _act_probs[nz_idx] = 1.0 / len(nz_idx)
                 else:
-                    act_probs = act_probs / np.sum(act_probs)
+                    _act_probs = _act_probs / np.sum(_act_probs)
                     
-                _p = p*act_probs + (1.0-p)*dirichlet_probs
+                _p = p*_act_probs + (1.0-p)*dirichlet_probs
                 _p = _p / np.sum(_p) 
                 idx = np.random.choice(range(ACTONS_LEN), p=_p)
                 
