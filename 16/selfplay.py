@@ -529,20 +529,23 @@ class Train():
             for step in play_data[i]["data"]["steps"]:
                 states.append(step["state"])
                 mcts_probs.append(step["move_probs"])
-                if win_values[i]<0:
-                    # values.append((step["qval"]+v))
-                    if not step["ig_probs"] or play_data[i]["agent"].terminal: 
-                        values.append((step["qval"]-avg_qval_list[i])/std_qval_list[i])
-                    else:
-                        values.append(step["qval"])
-                    # values.append((step["qval"]+v-avg_qval_list[i])/std_qval_list[i])
-                else:
-                    # values.append((step["qval"]))
-                    if not step["ig_probs"] or play_data[i]["agent"].terminal: 
-                        values.append((step["qval"]-avg_qval_list[i])/std_qval_list[i])
-                    else:
-                        values.append(step["qval"])    
-        k=3        
+                values.append(step["qval"]) 
+                # if win_values[i]<0:
+                #     # values.append((step["qval"]+v))
+                #     if not step["ig_probs"] or play_data[i]["agent"].terminal: 
+                #         values.append((step["qval"]-avg_qval_list[i])/std_qval_list[i])
+                #     else:
+                #         values.append(step["qval"])
+                #     # values.append((step["qval"]+v-avg_qval_list[i])/std_qval_list[i])
+                # else:
+                #     # values.append((step["qval"]))
+                #     if not step["ig_probs"] or play_data[i]["agent"].terminal: 
+                #         values.append((step["qval"]-avg_qval_list[i])/std_qval_list[i])
+                #     else:
+                #         values.append(step["qval"])    
+        k=3
+        values = np.array(values, dtype=np.float32)
+        values = values/np.std(values)
         clipped = np.clip(values, -k, k)
         values = clipped/k
         values = values - np.mean(values)
