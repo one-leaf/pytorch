@@ -261,12 +261,12 @@ class Train():
                 std_qval = float(np.std(qval_list))
                 avg_qval = float(np.average(qval_list))
                 
-                print_v = (np.array(qval_list)-avg_qval)/std_qval     
+                # print_v = (np.array(qval_list)-avg_qval)/std_qval     
                 
                 # print(print_v[:200])
                 # print("...")
                 # print(print_v[-200:])
-                print(print_v)
+                print(qval_list)
                 
                 return agent, data, total_qval, total_state_value, avg_qval, std_qval, start_time, paytime
 
