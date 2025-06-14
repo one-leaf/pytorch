@@ -544,7 +544,7 @@ class Train():
                 #     else:
                 #         values.append(step["qval"])    
         k=3
-        values = np.array(values, dtype=np.float32)
+        values = np.array(values, dtype=np.float16)
         values = values/np.std(values)
         clipped = np.clip(values, -k, k)
         values = clipped/k
