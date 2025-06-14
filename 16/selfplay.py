@@ -266,7 +266,7 @@ class Train():
                 # print(print_v[:200])
                 # print("...")
                 # print(print_v[-200:])
-                print(qval_list)
+                print(np.array(qval_list))
                 
                 return agent, data, total_qval, total_state_value, avg_qval, std_qval, start_time, paytime
 
