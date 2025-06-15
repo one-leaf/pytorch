@@ -529,7 +529,7 @@ class Train():
             for step in play_data[i]["data"]["steps"]:
                 states.append(step["state"])
                 mcts_probs.append(step["move_probs"])
-                values.append(step["qval"]) 
+                values.append(step["qval"]+play_data[i]["agent"].piececount/total_game_piececount) 
                 # if win_values[i]<0:
                 #     # values.append((step["qval"]+v))
                 #     if not step["ig_probs"] or play_data[i]["agent"].terminal: 
@@ -543,12 +543,18 @@ class Train():
                 #         values.append((step["qval"]-avg_qval_list[i])/std_qval_list[i])
                 #     else:
                 #         values.append(step["qval"])    
-        k=3
         values = np.array(values, dtype=np.float16)
-        values = values/np.std(values)
-        clipped = np.clip(values, -k, k)
-        values = clipped/k
-        values = values - np.mean(values)
+        # 计算均值和标准差
+        mean_val = np.mean(values)
+        std_val = np.std(values)
+        # 标准化
+        normalized = (values - mean_val) / std_val
+        # 裁剪到 [-1, 1]
+        values = np.clip(normalized, -1, 1)    
+        # values = values/np.std(values)
+        # clipped = np.clip(values, -k, k)
+        # values = clipped/k
+        # values = values - np.mean(values)
         assert len(states)>0
         assert len(states)==len(values)
         assert len(states)==len(mcts_probs)
