@@ -92,8 +92,8 @@ def updateQN(s:int, a:int, v:float, Ns, Qsa, Nsa, actions_num):
     # V[s] = sum(Qsa[s][a]*Nsa[s][a])/Ns[s]
     # Ns[s] = Ns[s] + 1
     
-    # Q[t+1] = Q[t] - (Q[t] - G[t])/t     
-    delta =  (Qsa[s][a]-v)/Nsa[s][a]
+    # Q[t+1] = Q[t] - a(Q[t] - v[t])   a=1/t     
+    delta =  (Qsa[s][a]-v)/(Nsa[s][a]**0.5)
     Qsa[s][a] -= delta
     
     # Qsa[s][a] = np.tanh(Qsa[s][a])
