@@ -218,7 +218,7 @@ class MCTS():
             die_count += 1 if state_.game.terminal else 0
             self.max_depth = (depth, step_depth)
 
-            if depth>50 and self.Ns[s]>200 :
+            if depth>=50 and self.Ns[s]>=200 :
                 # 如果当前都为正数，就不再搜索了
                 ig_probs = True
                 break
