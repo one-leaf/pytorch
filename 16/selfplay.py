@@ -155,7 +155,8 @@ class Train():
         return min_removedlines, min_his_pieces, min_his_pieces_len
 
     def play(self, cache, state, min_removedlines, his_pieces, his_pieces_len, player):
-        data = {"steps":deque(maxlen=self.play_size),"last_state":0,"score":0,"piece_count":0}
+        # data = {"steps":deque(maxlen=self.play_size),"last_state":0,"score":0,"piece_count":0}
+        data = {"steps":[],"last_state":0,"score":0,"piece_count":0}
         if his_pieces!=None:
             print("min_removedlines:", min_removedlines, "pieces_count:", len(his_pieces))
             print("his_pieces:", his_pieces)
@@ -255,9 +256,9 @@ class Train():
                 data["piece_height"] = agent.pieceheight
                 
                 qval_list = [step["qval"] for step in data["steps"]]
-                avg_first = np.average(qval_list)
-                while len(qval_list)<self.play_size:
-                    qval_list.insert(0,avg_first) 
+                # avg_first = np.average(qval_list)
+                # while len(qval_list)<self.play_size:
+                #     qval_list.insert(0,avg_first) 
                 std_qval = float(np.std(qval_list))
                 avg_qval = float(np.average(qval_list))
                 
