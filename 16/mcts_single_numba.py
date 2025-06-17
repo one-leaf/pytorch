@@ -207,7 +207,7 @@ class MCTS():
         state_ = None
 
         ig_probs = False
-        self._n_playout = 256
+        self._n_playout = 256    # 最少256次，概率才会比较准确
         for n in range(self._n_playout):
             self.simulation_count += 1
 
