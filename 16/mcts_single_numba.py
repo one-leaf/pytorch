@@ -207,7 +207,7 @@ class MCTS():
         state_ = None
 
         ig_probs = False
-        self._n_playout = 128
+        self._n_playout = 256
         for n in range(self._n_playout):
             self.simulation_count += 1
 
