@@ -366,8 +366,8 @@ class MCTSPlayer(object):
                 # else:
                 idx = np.random.choice(range(ACTONS_LEN), p=act_probs)
             elif self.need_max_ps:
-                idx = max_ps_idx                          
-                # idx = np.random.choice(range(ACTONS_LEN), p=act_ps)           
+                # idx = max_ps_idx                          
+                idx = np.random.choice(range(ACTONS_LEN), p=act_ps)           
             
             # 如果Down+None的概率和为1， 则选择Down
             # if sum(act_probs[0:3])<0.01:

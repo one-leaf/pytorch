@@ -179,6 +179,7 @@ class Train():
         avg_qval=0
         qval_list=[]
         total_state_value=0
+        player.need_max_ps = not player.need_max_ns
         print("max_emptyCount:",max_emptyCount,"isRandomNextPiece:",agent.isRandomNextPiece,"limitstep:",agent.limitstep,"max_ps:",player.need_max_ps,"max_qs:",agent.is_replay)
         for i in count():
             _step={"step":i}
@@ -225,8 +226,8 @@ class Train():
                         'step:', agent.steps, "step time:", round((time.time()-start_time)/i,3))
                 agent.print()
                 # if agent.piececount%2==0 and (player.need_max_ps or player.need_max_ns):
-                #     player.need_max_ps = not player.need_max_ps
-                #     player.need_max_ns = not player.need_max_ns
+                player.need_max_ps = not player.need_max_ps
+                player.need_max_ns = not player.need_max_ns
                                                     
                 if os.path.exists(self.stop_mark_file):
                     print("stop mark file found, exit after waiting 60s")
