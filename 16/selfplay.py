@@ -369,7 +369,7 @@ class Train():
             his_pieces_len = len(agent.piecehis)
             
             # 如果游戏达到了最小的消除行数，样本有效，直接结束
-            if agent.piececount>=state["total"]["min_piececount"]:
+            if agent.piececount>state["total"]["min_piececount"]:
                 self.play_count = playcount+1
                 need_replay = False
                 break
@@ -525,9 +525,9 @@ class Train():
         states, mcts_probs, values= [], [], []
 
         for i in range(self.play_count):
-            if win_values[i]<0:
-                # v = -vdiff/total_game_piececount
-                v = -0.1    
+            # if win_values[i]<0:
+            #     # v = -vdiff/total_game_piececount
+            #     v = -0.1    
             for step in play_data[i]["data"]["steps"]:
                 states.append(step["state"])
                 mcts_probs.append(step["move_probs"])
