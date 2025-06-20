@@ -84,7 +84,7 @@ class Train():
             #     print("value:",value)
         return extend_data
 
-    def test_play(self,policy_value_net):
+    def test_play(self,policy_value_net,test_count=None):
         # 先运行测试
         min_his_pieces = None
         min_his_pieces_len = 0
@@ -97,7 +97,9 @@ class Train():
         limit_score = state["total"]["score"]*2
         self.min_piececount = state["total"]["min_piececount"] # (state["total"]["piececount"]+state["total"]["min_piececount"])/2     
         no_terminal=0   
-        for _ in range(self.test_count):
+        if test_count==None:
+            test_count = self.test_count
+        for _ in range(test_count):
             agent = Agent(isRandomNextPiece=True)
             start_time = time.time()
             agent.show_mcts_process= False
@@ -164,15 +166,18 @@ class Train():
             agent = Agent(isRandomNextPiece=False, nextPiecesList=his_pieces)
             agent.is_replay = True
             agent.limitstep = True
-            if his_pieces_len > 50:
-                for i in range(his_pieces_len-50):
-                    action = player.mcts._policy.policy_value_fn_best_act(agent)
-                    agent.step(action)
         else:
+            min_removedlines, his_pieces, his_pieces_len = self.test_play(player.mcts._policy, test_count=-1)
             # 新局按Q值走，探索
-            agent = Agent(isRandomNextPiece=False, )
+            agent = Agent(isRandomNextPiece=False, nextPiecesList=his_pieces )
             agent.is_replay = False
             agent.limitstep = False
+
+        if his_pieces_len > 50:
+            for i in range(his_pieces_len-50):
+                action = player.mcts._policy.policy_value_fn_best_act(agent)
+                agent.step(action)
+
             
         agent.setCache(cache)
         
