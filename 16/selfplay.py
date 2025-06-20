@@ -157,7 +157,7 @@ class Train():
                                
         return min_removedlines, min_his_pieces, min_his_pieces_len
 
-    def play(self, cache, state, min_removedlines, his_pieces, his_pieces_len, player):
+    def play(self, cache, state, min_removedlines, his_pieces, his_pieces_len, player, policy_value_net):
         # data = {"steps":deque(maxlen=self.play_size),"last_state":0,"score":0,"piece_count":0}
         data = {"steps":[],"last_state":0,"score":0,"piece_count":0}
         if his_pieces_len>0:
@@ -167,7 +167,7 @@ class Train():
             agent.is_replay = True
             agent.limitstep = True
         else:
-            min_removedlines, his_pieces, his_pieces_len = self.test_play(player.mcts._policy, test_count=1)
+            min_removedlines, his_pieces, his_pieces_len = self.test_play(policy_value_net, test_count=1)
             # 新局按Q值走，探索
             agent = Agent(isRandomNextPiece=False, nextPiecesList=his_pieces )
             agent.is_replay = False
@@ -175,7 +175,7 @@ class Train():
 
         if his_pieces_len > 50:
             for i in range(his_pieces_len-50):
-                action = player.mcts._policy.policy_value_fn_best_act(agent)
+                action = policy_value_net.policy_value_fn_best_act(agent)
                 agent.step(action)
 
             
@@ -367,7 +367,7 @@ class Train():
                 player.need_max_ps = True
                 player.need_max_ns = False
                 
-            agent, data, qval, state_value, avg_qval, std_qval, start_time, paytime = self.play(cache, state, min_removedlines, his_pieces, his_pieces_len, player)
+            agent, data, qval, state_value, avg_qval, std_qval, start_time, paytime = self.play(cache, state, min_removedlines, his_pieces, his_pieces_len, player, policy_value_net)
             
             # # 修复Q值，将最后都无法消行的全部设置为-1
             # for i in range(len(data["steps"])-1,-1,-1):
