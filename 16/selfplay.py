@@ -116,7 +116,7 @@ class Train():
                     state = read_status_file()
                     set_status_total_value(state, "score", agent.removedlines, 1/1000)
                     set_status_total_value(state, "piececount", agent.piececount, 1/1000)
-                    set_status_total_value(state, "n_ratio", n_count/agent.piececount, 1/1000)
+                    set_status_total_value(state, "n_ratio", n_count/i, 1/1000)
                     save_status_file(state)
                     state["lastupdate"] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                     if not agent.terminal: no_terminal += 1
