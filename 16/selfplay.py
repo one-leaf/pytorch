@@ -164,6 +164,10 @@ class Train():
             agent = Agent(isRandomNextPiece=False, nextPiecesList=his_pieces)
             agent.is_replay = True
             agent.limitstep = True
+            if his_pieces_len > 50:
+                for i in range(his_pieces_len-50):
+                    action = player.mcts._policy.policy_value_fn_best_act(agent)
+                    agent.step(action)
         else:
             # 新局按Q值走，探索
             agent = Agent(isRandomNextPiece=False, )
