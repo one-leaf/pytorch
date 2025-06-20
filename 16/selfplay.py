@@ -103,7 +103,7 @@ class Train():
             agent.show_mcts_process= False
             # agent.id = 0
             
-            
+            n_count = 0
             for i in range(self.max_step_count):
                 action = policy_value_net.policy_value_fn_best_act(agent)
                 _, score = agent.step(action)
@@ -111,11 +111,12 @@ class Train():
                     print(agent.pieceheight, end=' ')
                     # print("#"*40, 'score:', agent.removedlines, 'height:', agent.pieceheight, 'piece:', agent.piececount, "shape:", agent.fallpiece["shape"], \
                     #     'step:', agent.steps, "step time:", round((time.time()-start_time)/i,3))            
-
+                if action == 3: n_count += 1
                 if agent.terminal or agent.removedlines > limit_score: 
                     state = read_status_file()
                     set_status_total_value(state, "score", agent.removedlines, 1/1000)
                     set_status_total_value(state, "piececount", agent.piececount, 1/1000)
+                    set_status_total_value(state, "n_ratio", n_count/agent.piececount, 1/1000)
                     save_status_file(state)
                     state["lastupdate"] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                     if not agent.terminal: no_terminal += 1
@@ -476,6 +477,7 @@ class Train():
             state["q_std"].append(round(state["total"]["q_std"],2))
             state["min_score"].append(round(state["total"]["min_score"]))
             state["no_terminal_rate"].append(round(state["total"]["no_terminal_rate"],2))
+            state["n_ratio"].append(round(state["total"]["n_ratio"],2))
             
             local_time = time.localtime(start_time)
             current_month = local_time.tm_mon
