@@ -160,14 +160,14 @@ class Train():
     def play(self, cache, state, min_removedlines, his_pieces, his_pieces_len, player):
         # data = {"steps":deque(maxlen=self.play_size),"last_state":0,"score":0,"piece_count":0}
         data = {"steps":[],"last_state":0,"score":0,"piece_count":0}
-        if his_pieces!=None:
+        if his_pieces_len>0:
             print("min_removedlines:", min_removedlines, "pieces_count:", len(his_pieces))
             print("his_pieces:", his_pieces)
             agent = Agent(isRandomNextPiece=False, nextPiecesList=his_pieces)
             agent.is_replay = True
             agent.limitstep = True
         else:
-            min_removedlines, his_pieces, his_pieces_len = self.test_play(player.mcts._policy, test_count=-1)
+            min_removedlines, his_pieces, his_pieces_len = self.test_play(player.mcts._policy, test_count=1)
             # 新局按Q值走，探索
             agent = Agent(isRandomNextPiece=False, nextPiecesList=his_pieces )
             agent.is_replay = False
