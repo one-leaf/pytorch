@@ -187,10 +187,14 @@ class Train():
         agent.limitstep = False
 
         if his_pieces_len > 50:
-            for i in range(his_pieces_len-50):
+            for i in count():
                 action = policy_value_net.policy_value_fn_best_act(agent)
                 agent.step(action)
-
+                if agent.piececount >= his_pieces_len-50 :
+                    break
+                if agent.terminal:
+                    raise Exception("agent terminal, cancel play")
+                
         agent.removedlines=0    
         agent.setCache(cache)
         
