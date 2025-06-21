@@ -194,6 +194,7 @@ class Train():
                     break
                 if agent.terminal:
                     raise Exception("agent terminal, cancel play")
+        agent.print()    
                 
         agent.removedlines=0    
         agent.setCache(cache)
