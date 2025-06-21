@@ -171,8 +171,11 @@ class Train():
         for i in count():
             action = policy_value_net.policy_value_fn_best_act(agent)
             _, score = agent.step(action)
-            if agent.terminal or agent.removedlines > 500:
+            if agent.terminal:
                 break
+            if agent.removedlines > 1000:
+                raise Exception("removedlines too large, cancel play")
+            
         agent.print()    
         print("agent.piececount:", agent.piececount, "agent.removedlines:", agent.removedlines)
         his_pieces = agent.piecehis
