@@ -167,7 +167,18 @@ class Train():
             agent.is_replay = True
             agent.limitstep = True
         else:
-            min_removedlines, his_pieces, his_pieces_len = self.test_play(policy_value_net, test_count=1)
+            agent = Agent(isRandomNextPiece=True)
+            agent.show_mcts_process= False
+            for i in count():
+                action = policy_value_net.policy_value_fn_best_act(agent)
+                _, score = agent.step(action)
+                if agent.terminal or agent.removedlines > 500:
+                    break
+            agent.print()    
+            print("agent.piececount:", agent.piececount, "agent.removedlines:", agent.removedlines)
+            his_pieces = agent.piecehis
+            his_pieces_len = len(his_pieces)
+
             # 新局按Q值走，探索
             agent = Agent(isRandomNextPiece=False, nextPiecesList=his_pieces )
             agent.is_replay = False
