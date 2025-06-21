@@ -191,7 +191,7 @@ class Train():
                 action = policy_value_net.policy_value_fn_best_act(agent)
                 agent.step(action)
 
-            
+        agent.removedlines=0    
         agent.setCache(cache)
         
         agent.show_mcts_process= True
