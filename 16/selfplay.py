@@ -196,7 +196,7 @@ class Train():
                     raise Exception("agent terminal, cancel play")
         agent.print()    
                 
-        agent.removedlines=0    
+        agent.removedlines=0  
         agent.setCache(cache)
         
         agent.show_mcts_process= True
@@ -207,6 +207,7 @@ class Train():
         avg_qval=0
         qval_list=[]
         total_state_value=0
+        start_piececount = agent.piececount
         player.need_max_ps = not player.need_max_ns
         print("max_emptyCount:",max_emptyCount,"isRandomNextPiece:",agent.isRandomNextPiece,"limitstep:",agent.limitstep,"max_ps:",player.need_max_ps,"max_qs:",agent.is_replay)
         for i in count():
@@ -250,7 +251,7 @@ class Train():
             if agent.state==1:
                 if score > 0:
                     repeat_count = 40
-                    print("#"*repeat_count, 'score:', agent.score, "score:",score, 'qval', round(qval,2), 'height:', agent.pieceheight, 'piece:', agent.piececount, \
+                    print("#"*repeat_count,  "score:",score, 'qval', round(qval,2), 'height:', agent.pieceheight, 'piece:', agent.piececount-start_piececount, \
                         'step:', agent.steps, "step time:", round((time.time()-start_time)/i,3))
                 agent.print()
                 # if agent.piececount%2==0 and (player.need_max_ps or player.need_max_ns):
