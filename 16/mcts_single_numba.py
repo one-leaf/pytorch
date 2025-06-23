@@ -357,6 +357,7 @@ class MCTSPlayer(object):
             # PS            
             max_ps_idx = nz_idx[np.argmax(act_ps[nz_idx])]
 
+            print("max_qs_idx:", max_qs_idx, "max_ns_idx:", max_ns_idx, "max_ps_idx:", max_ps_idx, "availables:", availables, "act_probs:", act_probs, "act_ps:", act_ps, "act_qs:", act_qs )
             idx = -1           
             
             if self.need_max_ns:
