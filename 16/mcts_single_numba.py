@@ -220,16 +220,11 @@ class MCTS():
             self.max_depth = (depth, step_depth)
 
             if self.Ns[s]>=1000 :
-                # 如果当前都为正数，就不再搜索了
-                ig_probs = True
                 break
 
         self._policy(state_.game, only_Cache_Next=True) 
 
-        if ig_probs:
-            probs = self.Ps[s]
-        else:
-            probs = getprobsFromNsa(s, temp, state.availables(), state.actions_num, self.Nsa)                       
+        probs = getprobsFromNsa(s, temp, state.availables(), state.actions_num, self.Nsa)                       
         
         qs = self.Qsa[s] 
         ps = self.Ps[s]     
