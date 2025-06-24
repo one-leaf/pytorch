@@ -412,13 +412,16 @@ class MCTSPlayer(object):
             action = idx
             qval = act_qs[idx]
 
-            # if idx!=max_ps_idx:
+            if idx!=max_ns_idx:
+                print("          random {} ==> {} v: {} == {} p: {} == {}".format(game.position_to_action_name(max_ns_idx), \
+                    game.position_to_action_name(idx), act_qs[max_ns_idx], act_qs[idx], act_probs[max_ns_idx], act_probs[idx]))
             #     need_max_ns = "need_max_ns" if self.need_max_ns else ""
             #     need_max_ps = "need_max_ps" if self.need_max_ps else ""
             #     print("\trandom", game.position_to_action_name(max_ps_idx), "==>",  game.position_to_action_name(idx), \
             #           "v:", qval, "p:", p, need_max_ns, need_max_ps, "PS:", act_ps[max_ps_idx], "==>", act_probs[max_ps_idx])  
             if max_ps_idx!=max_ns_idx:
-                print("          act_ps: {}, act_probs: {}, old: {}, new: {}".format(act_ps[max_ps_idx], act_probs[max_ps_idx], game.position_to_action_name(max_ps_idx), game.position_to_action_name(max_ns_idx)))
+                print("          act_ps: {}, act_probs: {}, old: {}, new: {}".format(act_ps[max_ps_idx], act_probs[max_ps_idx], \
+                    game.position_to_action_name(max_ps_idx), game.position_to_action_name(max_ns_idx)))
             acc_ps = 1 if max_ns_idx==max_ps_idx else 0 # np.var(act_probs) #0 if abs(act_ps[idx]-act_probs[idx])>0.4 else 1
 
             # 将概率转为onehot
