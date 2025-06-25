@@ -414,7 +414,7 @@ class Train():
                 
         total_game_score =  sum([play_data[i]["data"]["score"] for i in range(self.play_count)]) 
         total_game_steps =  sum([play_data[i]["data"]["steps_count"] for i in range(self.play_count)])  
-        total_game_piececount =  sum([play_data[i]["data"]["piece_count"]t for i in range(self.play_count)]) 
+        total_game_piececount =  sum([play_data[i]["data"]["piece_count"] for i in range(self.play_count)]) 
         total_game_paytime =  sum([play_data[i]["paytime"] for i in range(self.play_count)])  
         total_game_state_value =  sum([play_data[i]["state_value"] for i in range(self.play_count)])
         total_game_qval =  sum([play_data[i]["qval"] for i in range(self.play_count)]) 
