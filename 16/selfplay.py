@@ -422,10 +422,10 @@ class Train():
         min_game_qval = min([play_data[i]["avg_qval"] for i in range(self.play_count)]) 
         std_game_qval = sum([play_data[i]["std_qval"] for i in range(self.play_count)]) / self.play_count
 
-        game_score = max([play_data[i]["agent"].removedlines for i in range(self.play_count)])
+        game_score = max([play_data[i]["data"]["score"] for i in range(self.play_count)])
         win_values =[-1 for i in range(self.play_count)]
         for i in range(self.play_count):
-            if play_data[i]["agent"].removedlines > state["total"]["min_score"]:
+            if play_data[i]["data"]["score"] > state["total"]["min_score"]:
                 win_values[i] = 1
                 
         steptime = total_game_paytime/total_game_steps            
