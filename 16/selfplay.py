@@ -281,7 +281,6 @@ class Train():
 
                 data["score"] = agent.removedlines
                 data["piece_count"] = agent.piececount - start_piececount
-                data["piece_height"] = agent.pieceheight
                 data["steps_count"] =  agent.steps - start_stepscount
 
                 qval_list = [step["qval"] for step in data["steps"]]
@@ -479,7 +478,7 @@ class Train():
                 depth.append(step["depth"])
 
         pacc = float(np.average(pacc))
-        vdiff = sum([abs(play_data[i]["agent"].piececount-avg_game_piececount) for i in range(self.play_count)]) / self.play_count
+        vdiff = sum([abs(play_data[i]["data"]["piece_count"]-avg_game_piececount) for i in range(self.play_count)]) / self.play_count
 
         depth = float(np.average(depth))
         
@@ -620,9 +619,9 @@ class Train():
         #     play_data[i]["agent"].print()
         #     print()
         print("win_values:", win_values)
-        print("score:", [play_data[i]["agent"].removedlines for i in range(self.play_count)])
-        print("steps:", [play_data[i]["agent"].steps for i in range(self.play_count)])
-        print("piececount:", [play_data[i]["agent"].piececount for i in range(self.play_count)])
+        print("score:", [play_data[i]["data"]["score"] for i in range(self.play_count)])
+        print("steps:", [play_data[i]["data"]["steps_count"] for i in range(self.play_count)])
+        print("piececount:", [play_data[i]["data"]["piece_count"] for i in range(self.play_count)])
         print("paytime:", [play_data[i]["paytime"] for i in range(self.play_count)])
         print("max_game_qval:", max_game_qval, "min_game_qval:", min_game_qval, "q_avg:", avg_qval_list, "std_qval:", std_qval_list)
 
