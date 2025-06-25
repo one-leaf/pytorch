@@ -553,37 +553,46 @@ class Train():
         std_qval_list = [play_data[i]["std_qval"] for i in range(self.play_count)]    
         states, mcts_probs, values= [], [], []
 
+        max_count = 512 
+        _temp_values = deque(maxlen=max_count)
         for i in range(self.play_count):
-            # if win_values[i]<0:
-            #     # v = -vdiff/total_game_piececount
-            #     v = -0.1    
-            for step in play_data[i]["data"]["steps"]:
-                states.append(step["state"])
-                mcts_probs.append(step["move_probs"])
-                values.append(step["qval"]+play_data[i]["agent"].piececount/total_game_piececount) 
-                # if win_values[i]<0:
-                #     # values.append((step["qval"]+v))
-                #     if not step["ig_probs"] or play_data[i]["agent"].terminal: 
-                #         values.append((step["qval"]-avg_qval_list[i])/std_qval_list[i])
-                #     else:
-                #         values.append(step["qval"])
-                #     # values.append((step["qval"]+v-avg_qval_list[i])/std_qval_list[i])
-                # else:
-                #     # values.append((step["qval"]))
-                #     if not step["ig_probs"] or play_data[i]["agent"].terminal: 
-                #         values.append((step["qval"]-avg_qval_list[i])/std_qval_list[i])
-                #     else:
-                #         values.append(step["qval"])    
-        values = np.array(values, dtype=np.float16)
-        # 计算均值和标准差
-        mean_val = np.mean(values)
-        std_val = np.std(values)
-        # 标准化
-        normalized = (values - mean_val) / std_val
-        # 裁剪到 [-1, 1]
-        values = np.clip(normalized, -1, 1)    
+            # 如果当前局面有足够的步数，跳过
+            len_steps = len(play_data[i]["data"]["steps"])
+            if len_steps>=max_count:
+                for k in range(max_count-1, -1, -1):
+                    _temp_values.append(step["qval"]) 
+                mean_val = np.mean(_temp_values)
+                std_val = np.std(_temp_values)
+                    
+                for k in range(len_steps-max_count, len_steps):
+                    step = play_data[i]["data"]["steps"][k]
+                    states.append(step["state"])
+                    mcts_probs.append(step["move_probs"])
+                    values.append((step["qval"]-mean_val)/std_val)
+            else: 
+                # 如果当前局面步数不够，全部补充1到max_count计算方差
+                for k in range(max_count-len_steps):
+                    _temp_values.append(1)
+                for step in play_data[i]["data"]["steps"]:
+                    _temp_values.append(step["qval"])
+                mean_val = np.mean(_temp_values)
+                std_val = np.std(_temp_values)                
+                for step in play_data[i]["data"]["steps"]:                    
+                    states.append(step["state"])
+                    mcts_probs.append(step["move_probs"])
+                    values.append((step["qval"]-mean_val)/std_val)
+                    
+                    # values.append(step["qval"]+play_data[i]["agent"].piececount/total_game_piececount) 
+        # values = np.array(values, dtype=np.float16)
+        # # 计算均值和标准差
+        # mean_val = np.mean(values)
+        # std_val = np.std(values)
+        # # 标准化
+        # normalized = (values - mean_val) / std_val
+        # # 裁剪到 [-1, 1]
+        # values = np.clip(normalized, -1, 1)    
         # values = values/np.std(values)
-        # clipped = np.clip(values, -k, k)
+        values = np.clip(values, -1, 1)
         # values = clipped/k
         # values = values - np.mean(values)
         assert len(states)>0
