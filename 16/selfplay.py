@@ -205,6 +205,7 @@ class Train():
         qval_list=[]
         total_state_value=0
         start_piececount = agent.piececount
+        start_stepscount = agent.steps
         player.need_max_ps = not player.need_max_ns
         print("max_emptyCount:",max_emptyCount,"isRandomNextPiece:",agent.isRandomNextPiece,"limitstep:",agent.limitstep,"max_ps:",player.need_max_ps,"max_qs:",agent.is_replay)
         for i in count():
@@ -279,9 +280,10 @@ class Train():
                 #         # data["steps"][i]["qval"] -= 0.9**(agent.piececount-data["steps"][i]["piece_count"])
 
                 data["score"] = agent.removedlines
-                data["piece_count"] = agent.piececount
+                data["piece_count"] = agent.piececount - start_piececount
                 data["piece_height"] = agent.pieceheight
-                
+                data["steps_count"] =  agent.steps - start_stepscount
+
                 qval_list = [step["qval"] for step in data["steps"]]
                 # avg_first = np.average(qval_list)
                 # while len(qval_list)<self.play_size:
@@ -410,9 +412,9 @@ class Train():
             with open(his_pieces_file, "wb") as fn:
                 pickle.dump(min_his_pieces, fn)            
                 
-        total_game_score =  sum([play_data[i]["agent"].removedlines for i in range(self.play_count)]) 
-        total_game_steps =  sum([play_data[i]["agent"].steps for i in range(self.play_count)])  
-        total_game_piececount =  sum([play_data[i]["agent"].piececount for i in range(self.play_count)]) 
+        total_game_score =  sum([play_data[i]["data"]["score"] for i in range(self.play_count)]) 
+        total_game_steps =  sum([play_data[i]["data"]["steps_count"] for i in range(self.play_count)])  
+        total_game_piececount =  sum([play_data[i]["data"]["piece_count"]t for i in range(self.play_count)]) 
         total_game_paytime =  sum([play_data[i]["paytime"] for i in range(self.play_count)])  
         total_game_state_value =  sum([play_data[i]["state_value"] for i in range(self.play_count)])
         total_game_qval =  sum([play_data[i]["qval"] for i in range(self.play_count)]) 
