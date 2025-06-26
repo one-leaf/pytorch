@@ -155,11 +155,11 @@ class Train():
                                
         return min_removedlines, min_his_pieces, min_his_pieces_len
 
-    def play(self, cache, state, min_removedlines, his_pieces, his_pieces_len, player, policy_value_net):
+    def play(self, cache, state, sample_depth, his_pieces, his_pieces_len, player, policy_value_net):
         # data = {"steps":deque(maxlen=self.play_size),"last_state":0,"score":0,"piece_count":0}
         data = {"steps":[],"last_state":0,"score":0,"piece_count":0}
         if his_pieces_len>0:
-            print("min_removedlines:", min_removedlines, "pieces_count:", len(his_pieces))
+            print("sample_depth:", sample_depth, "pieces_count:", len(his_pieces))
             print("his_pieces:", his_pieces)
             agent = Agent(isRandomNextPiece=False, nextPiecesList=his_pieces)
         else:
@@ -184,11 +184,11 @@ class Train():
         agent.is_replay = False
         agent.limitstep = False
 
-        if his_pieces_len > 50:
+        if his_pieces_len > sample_depth:
             for i in count():
                 action = policy_value_net.policy_value_fn_best_act(agent)
                 agent.step(action)
-                if agent.piececount >= his_pieces_len-50 :
+                if agent.piececount >= his_pieces_len-sample_depth :
                     break
                 if agent.terminal:
                     raise Exception("agent terminal, cancel play")
