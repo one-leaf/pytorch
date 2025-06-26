@@ -561,6 +561,7 @@ class Train():
             len_steps = len(play_data[i]["data"]["steps"])
             if len_steps>=max_count:
                 for k in range(max_count-1, -1, -1):
+                    step = play_data[i]["data"]["steps"][k]
                     _temp_values.append(step["qval"]) 
                 mean_val = np.mean(_temp_values)
                 std_val = np.std(_temp_values)
