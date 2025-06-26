@@ -94,6 +94,7 @@ def read_status_file(max_keep=30):
     add_total_prop(state, "lr_multiplier", 1)    
     add_total_prop(state, "optimizer_type", 0)    
     add_prop(state, "steps_mcts", 0)    
+    add_total_prop(state, "sample_depth", 50)    
 
     if "update" not in state:
         state["update"]=[]

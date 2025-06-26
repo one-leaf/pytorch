@@ -49,6 +49,7 @@ class Train():
         # MCTS child权重， 用来调节MCTS搜索深度，越大搜索越深，越相信概率，越小越相信Q 的程度 默认 5
         # 由于value完全用结果胜负来拟合，所以value不稳，只能靠概率p拟合，最后带动value来拟合
         self.c_puct = 1  
+        self.sample_count = 512  # 每次采样的样本数
         self.q_std = 1
         self.max_step_count = 10000 
         self.limit_steptime = 1  # 限制每一步的平均花费时间，单位秒，默认1秒
@@ -333,6 +334,7 @@ class Train():
             limit_depth=state["total"]["depth"]
         
         # self.n_playout = int(state["total"]["n_playout"])
+        sample_depth = int(state["total"]["sample_depth"])
 
         self.q_std = state["total"]["q_std"]
         self.q_avg = state["total"]["q_avg"]
@@ -384,7 +386,7 @@ class Train():
                 player.need_max_ps = True
                 player.need_max_ns = False
                 
-            agent, data, qval, state_value, avg_qval, std_qval, start_time, paytime = self.play(cache, state, min_removedlines, his_pieces, his_pieces_len, player, policy_value_net)
+            agent, data, qval, state_value, avg_qval, std_qval, start_time, paytime = self.play(cache, state, sample_depth, his_pieces, his_pieces_len, player, policy_value_net)
             
             # # 修复Q值，将最后都无法消行的全部设置为-1
             # for i in range(len(data["steps"])-1,-1,-1):
@@ -513,7 +515,7 @@ class Train():
 
             state["update"].append(current_day)
             state["total"]["_agent"] -= update_agent_count           
-            
+            state["total"]["sample_depth"] += (self.sample_count-state["total"]["steps_mcts"])*0.01
             # 如果每步的消耗时间小于self.limit_steptime秒，增加探测深度    
             # if len(state["score"])>=5:
             #     x = np.arange(5)
@@ -554,26 +556,25 @@ class Train():
         std_qval_list = [play_data[i]["std_qval"] for i in range(self.play_count)]    
         states, mcts_probs, values= [], [], []
 
-        max_count = 512 
-        _temp_values = deque(maxlen=max_count)
+        _temp_values = deque(maxlen=self.sample_count)
         for i in range(self.play_count):
             # 如果当前局面有足够的步数，跳过
             len_steps = len(play_data[i]["data"]["steps"])
-            if len_steps>=max_count:
-                for k in range(len_steps-max_count, len_steps):
+            if len_steps>=self.sample_count:
+                for k in range(len_steps-self.sample_count, len_steps):
                     step = play_data[i]["data"]["steps"][k]
                     _temp_values.append(step["qval"]) 
                 mean_val = np.mean(_temp_values)
                 std_val = np.std(_temp_values)
                     
-                for k in range(len_steps-max_count, len_steps):
+                for k in range(len_steps-self.sample_count, len_steps):
                     step = play_data[i]["data"]["steps"][k]
                     states.append(step["state"])
                     mcts_probs.append(step["move_probs"])
                     values.append((step["qval"]-mean_val)/std_val)
             else: 
-                # 如果当前局面步数不够，全部补充1到max_count计算方差
-                for k in range(max_count-len_steps):
+                # 如果当前局面步数不够，全部补充1到 self.sample_count 计算方差
+                for k in range(self.sample_count-len_steps):
                     _temp_values.append(1)
                 for step in play_data[i]["data"]["steps"]:
                     _temp_values.append(step["qval"])
