@@ -560,7 +560,7 @@ class Train():
             # 如果当前局面有足够的步数，跳过
             len_steps = len(play_data[i]["data"]["steps"])
             if len_steps>=max_count:
-                for k in range(max_count-1, -1, -1):
+                for k in range(len_steps-max_count, len_steps):
                     step = play_data[i]["data"]["steps"][k]
                     _temp_values.append(step["qval"]) 
                 mean_val = np.mean(_temp_values)
