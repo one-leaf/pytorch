@@ -282,10 +282,10 @@ class MCTS():
         v = self.search(state) 
         
         # 外部奖励，放的方块越多越好
-        if state.game.state==1:
-            v += 0.01
-        if v>2: v=2    
-        if v<-2: v=-2    
+        # if state.game.state==1:
+        #     v += 0.01
+        # if v>2: v=2    
+        # if v<-2: v=-2    
         updateQN(s, a, v, self.Ns, self.Qsa, self.Nsa, state.actions_num)
         
         return v
