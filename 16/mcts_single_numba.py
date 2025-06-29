@@ -355,15 +355,15 @@ class MCTSPlayer(object):
             # print("       max_qs_idx:", max_qs_idx, "max_ns_idx:", max_ns_idx, "max_ps_idx:", max_ps_idx, "act_probs:", act_probs, "act_ps:", act_ps, "act_qs:", act_qs )
             idx = -1           
             
-            if self.need_max_ns:
-                # idx = max_ns_idx
-                # if has_run_time < 3600:
-                #     idx = np.random.choice(range(ACTONS_LEN), p=act_probs)
-                # else:
-                idx = np.random.choice(range(ACTONS_LEN), p=act_probs)
-            elif self.need_max_ps:
-                idx = max_ps_idx                          
-                # idx = np.random.choice(range(ACTONS_LEN), p=act_ps)           
+            # if self.need_max_ns:
+            #     # idx = max_ns_idx
+            #     # if has_run_time < 3600:
+            #     #     idx = np.random.choice(range(ACTONS_LEN), p=act_probs)
+            #     # else:
+            #     idx = np.random.choice(range(ACTONS_LEN), p=act_probs)
+            # elif self.need_max_ps:
+            #     idx = max_ps_idx                          
+            #     # idx = np.random.choice(range(ACTONS_LEN), p=act_ps)           
             
             # 如果Down+None的概率和为1， 则选择Down
             # if sum(act_probs[0:3])<0.01:
@@ -393,7 +393,8 @@ class MCTSPlayer(object):
                 # a = 2       
                 # p=0.999**(time.time()-game.start_time)/60     # 每1秒减少0.1的概率
                 # if p<0.1: p=0.1
-                p = 0.99**game.removedlines
+                # p = 0.99**game.removedlines
+                p = 0.9
                 dirichlet = np.random.dirichlet(2 * np.ones(len(nz_idx)))
                 dirichlet_probs = np.zeros_like(act_probs, dtype=np.float64)
                 dirichlet_probs[nz_idx] = dirichlet
