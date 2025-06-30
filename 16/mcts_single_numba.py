@@ -395,7 +395,7 @@ class MCTSPlayer(object):
                 # p=0.999**(time.time()-game.start_time)/60     # 每1秒减少0.1的概率
                 # if p<0.1: p=0.1
                 # p = 0.99**game.removedlines
-                if game.pieceCount < game.next_Pieces_list_len:
+                if game.steps < 512:
                     p = 0.99
                 else:
                     p = 0.8

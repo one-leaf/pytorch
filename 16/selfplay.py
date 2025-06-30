@@ -205,8 +205,8 @@ class Train():
         avg_qval=0
         qval_list=[]
         total_state_value=0
-        start_piececount = agent.piececount
-        start_stepscount = agent.steps
+        agent.piececount = 0
+        agent.steps = 0
         player.need_max_ps = not player.need_max_ns
         print("max_emptyCount:",max_emptyCount,"isRandomNextPiece:",agent.isRandomNextPiece,"limitstep:",agent.limitstep,"max_ps:",player.need_max_ps,"max_qs:",agent.is_replay)
         for i in count():
@@ -250,7 +250,7 @@ class Train():
             if agent.state==1:
                 if score > 0:
                     repeat_count = 40
-                    print("#"*repeat_count,  "score:",score, 'qval', round(qval,2), 'height:', agent.pieceheight, 'piece:', agent.piececount-start_piececount, \
+                    print("#"*repeat_count,  "score:",score, 'qval', round(qval,2), 'height:', agent.pieceheight, 'piece:', agent.piececount, \
                         'step:', agent.steps, "step time:", round((time.time()-start_time)/(i+1),3))
                 agent.print()
                 # if agent.piececount%2==0 and (player.need_max_ps or player.need_max_ns):
@@ -281,8 +281,8 @@ class Train():
                 #         # data["steps"][i]["qval"] -= 0.9**(agent.piececount-data["steps"][i]["piece_count"])
 
                 data["score"] = agent.removedlines
-                data["piece_count"] = agent.piececount - start_piececount
-                data["steps_count"] =  agent.steps - start_stepscount
+                data["piece_count"] = agent.piececount
+                data["steps_count"] =  agent.steps
 
                 qval_list = [step["qval"] for step in data["steps"]]
                 # avg_first = np.average(qval_list)
