@@ -384,7 +384,8 @@ class MCTSPlayer(object):
             # if game.removedlines > self.min_score: 
             #     idx = max_ps_idx     
                       
-            p = 0     
+            p = 0
+            _p = []     
             # if idx == -1 or min(act_qs)<0:    
             if idx == -1 or min(act_qs)>=0 :
                 # a=1的时候，act 机会均等，>1 强调均值， <1 强调两端
@@ -417,8 +418,8 @@ class MCTSPlayer(object):
             qval = act_qs[idx]
 
             if idx!=max_ns_idx:
-                print("          random: {} ==> {} v: {} ==> {} p: {} ==> {}".format(game.position_to_action_name(max_ns_idx), \
-                    game.position_to_action_name(idx), act_qs[max_ns_idx], act_qs[idx], act_probs[max_ns_idx], act_probs[idx]))
+                print("          random: {} ==> {} v: {} ==> {} p: {} ==> {} probs: {}".format(game.position_to_action_name(max_ns_idx), \
+                    game.position_to_action_name(idx), act_qs[max_ns_idx], act_qs[idx], act_probs[max_ns_idx], act_probs[idx], _p))
             #     need_max_ns = "need_max_ns" if self.need_max_ns else ""
             #     need_max_ps = "need_max_ps" if self.need_max_ps else ""
             #     print("\trandom", game.position_to_action_name(max_ps_idx), "==>",  game.position_to_action_name(idx), \
