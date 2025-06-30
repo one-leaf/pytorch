@@ -850,11 +850,11 @@ class Agent():
                     line=line+str(board[y][x])+" "
             print(line)
         print(" "+" -"*boardwidth)
-        print("pieceheight:", self.pieceheight, "lines:",self.removedlines, "piececount:", self.piececount, "/", \
+        print("pieceheight:", self.pieceheight, "lines:",self.removedlines, "piececount:", self.piececount, "piecehis:", len(self.piecehis), "/", \
             self.next_Pieces_list_len, "emptyCount:", self.emptyCount, "rewardlimit:", self.piececount-self.last_reward)
 
 
-    def getTerminalEmptyCount(self):
+    def getTerminalEmptyCount(self):    
         return nb_getTerminalEmptyCount(self.board)
 
     # 统计不可消除行的数量
