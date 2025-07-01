@@ -294,11 +294,12 @@ class MCTSPlayer(object):
     """基于模型指导概率的MCTS + AI player"""
 
     # c_puct MCTS child权重， 用来调节MCTS搜索深度，越大搜索越深，越相信概率，越小越相信Q 的程度 默认 5
-    def __init__(self, policy_value_function, c_puct=5, n_playout=2000, limit_depth=20, min_score=20, need_max_ps=False, need_max_ns=False):
+    def __init__(self, policy_value_function, c_puct=5, n_playout=2000, limit_count=512, min_score=20, need_max_ps=False, need_max_ns=False):
         """初始化参数"""
-        self.mcts = MCTS(policy_value_function, c_puct, n_playout, limit_depth)
+        self.mcts = MCTS(policy_value_function, c_puct, n_playout)
         self.need_max_ps = need_max_ps
         self.need_max_ns = need_max_ns
+        self.limit_count = limit_count
         self.n_playout = n_playout
         self.player = -1
         self.min_score = min_score
@@ -395,7 +396,7 @@ class MCTSPlayer(object):
                 # p=0.999**(time.time()-game.start_time)/60     # 每1秒减少0.1的概率
                 # if p<0.1: p=0.1
                 # p = 0.99**game.removedlines
-                if game.steps < 512:
+                if game.steps < self.limit_count:
                     p = 0.99
                 else:
                     p = 0.8

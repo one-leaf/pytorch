@@ -155,11 +155,11 @@ class Train():
                                
         return min_removedlines, min_his_pieces, min_his_pieces_len
 
-    def play(self, cache, state, sample_depth, his_pieces, his_pieces_len, player, policy_value_net):
+    def play(self, cache, state, sample_count, his_pieces, his_pieces_len, player, policy_value_net):
         # data = {"steps":deque(maxlen=self.play_size),"last_state":0,"score":0,"piece_count":0}
         data = {"steps":[],"last_state":0,"score":0,"piece_count":0}
         if his_pieces_len>0:
-            print("sample_depth:", sample_depth, "pieces_count:", len(his_pieces))
+            print("sample_count:", sample_count, "pieces_count:", len(his_pieces))
             print("his_pieces:", his_pieces)
             agent = Agent(isRandomNextPiece=False, nextPiecesList=his_pieces)
         else:
@@ -178,22 +178,23 @@ class Train():
         print("agent.piececount:", agent.piececount, "agent.removedlines:", agent.removedlines)
         his_pieces = agent.piecehis
         his_pieces_len = len(his_pieces)
+        his_steps = agent.steps
 
         # 新局按Q值走，探索
         agent = Agent(isRandomNextPiece=False, nextPiecesList=his_pieces )
         agent.is_replay = False
         agent.limitstep = False
 
-        if his_pieces_len > sample_depth:
-            for i in count():
+        if his_steps > sample_count:
+            for i in range(his_steps-sample_count):
                 action = policy_value_net.policy_value_fn_best_act(agent)
-                agent.step(action)
-                if agent.piececount >= his_pieces_len-sample_depth :
-                    break
+                agent.step(action)        
                 if agent.terminal:
                     raise Exception("agent terminal, cancel play")
         agent.print()    
                 
+        agent.piececount = 0
+        agent.steps = 0
         agent.removedlines=0  
         agent.setCache(cache)
         
@@ -205,8 +206,7 @@ class Train():
         avg_qval=0
         qval_list=[]
         total_state_value=0
-        agent.piececount = 0
-        agent.steps = 0
+
         player.need_max_ps = not player.need_max_ns
         print("max_emptyCount:",max_emptyCount,"isRandomNextPiece:",agent.isRandomNextPiece,"limitstep:",agent.limitstep,"max_ps:",player.need_max_ps,"max_qs:",agent.is_replay)
         for i in count():
@@ -327,14 +327,11 @@ class Train():
         print('end test time:', datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 
         # 正式运行
-        limit_depth=20
         state = read_status_file() 
         
-        if state["total"]["depth"]>limit_depth:
-            limit_depth=state["total"]["depth"]
         
         # self.n_playout = int(state["total"]["n_playout"])
-        sample_depth = int(state["total"]["sample_depth"])
+        self.sample_count = int(state["total"]["steps_mcts"])
 
         self.q_std = state["total"]["q_std"]
         self.q_avg = state["total"]["q_avg"]
@@ -345,7 +342,7 @@ class Train():
         if self.q_avg<-1: self.q_avg=-1       
         
         print("q_std:", self.q_std)   
-        player = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout, limit_depth=limit_depth, min_score=state["total"]["min_score"])
+        player = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout, limit_count=self.sample_count, min_score=state["total"]["min_score"])
 
         cache={}
 
@@ -515,7 +512,7 @@ class Train():
 
             state["update"].append(current_day)
             state["total"]["_agent"] -= update_agent_count           
-            state["total"]["sample_depth"] += (self.sample_count-state["total"]["steps_mcts"])*0.01
+            # state["total"]["sample_depth"] += (self.sample_count-state["total"]["steps_mcts"])*0.01
             # 如果每步的消耗时间小于self.limit_steptime秒，增加探测深度    
             # if len(state["score"])>=5:
             #     x = np.arange(5)
