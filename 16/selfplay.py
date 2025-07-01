@@ -383,7 +383,7 @@ class Train():
                 player.need_max_ps = True
                 player.need_max_ns = False
                 
-            agent, data, qval, state_value, avg_qval, std_qval, start_time, paytime = self.play(cache, state, sample_depth, his_pieces, his_pieces_len, player, policy_value_net)
+            agent, data, qval, state_value, avg_qval, std_qval, start_time, paytime = self.play(cache, state, self.sample_count, his_pieces, his_pieces_len, player, policy_value_net)
             
             # # 修复Q值，将最后都无法消行的全部设置为-1
             # for i in range(len(data["steps"])-1,-1,-1):
