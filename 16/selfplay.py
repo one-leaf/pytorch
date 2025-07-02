@@ -149,7 +149,7 @@ class Train():
         set_status_total_value(state, "max_piececount", max_pieces_count, 1/100)
         set_status_total_value(state, "min_score", min_removedlines, 1/100)
         set_status_total_value(state, "min_piececount", min_pieces_count, 1/100)
-        set_status_total_value(state, "no_terminal_rate", no_terminal/self.max_step_count, 1/100)
+        set_status_total_value(state, "no_terminal_rate", no_terminal/test_count, 1/100)
               
         save_status_file(state)          
                                
