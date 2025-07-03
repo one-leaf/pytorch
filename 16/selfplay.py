@@ -175,7 +175,7 @@ class Train():
                 raise Exception("removedlines too large, cancel play")
             
         agent.print()    
-        print("agent.piececount:", agent.piececount, "agent.removedlines:", agent.removedlines)
+        print("agent.steps:", agent.steps, "agent.piececount:", agent.piececount, "agent.removedlines:", agent.removedlines)
         his_pieces = agent.piecehis
         his_pieces_len = len(his_pieces)
         his_steps = agent.steps
