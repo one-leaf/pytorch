@@ -332,6 +332,10 @@ class Train():
         
         # self.n_playout = int(state["total"]["n_playout"])
         self.sample_count = int(state["total"]["steps_mcts"])
+        increments = [state["steps_mcts"][i] - state["steps_mcts"][i - 1] for i in range(1, len(state["steps_mcts"]))]
+        if len(increments) > 0:
+            self.sample_count -= int(np.mean(increments))
+        if self.sample_count < 512: self.sample_count = 512
 
         self.q_std = state["total"]["q_std"]
         self.q_avg = state["total"]["q_avg"]
