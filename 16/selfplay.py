@@ -331,7 +331,7 @@ class Train():
         
         
         # self.n_playout = int(state["total"]["n_playout"])
-        self.sample_count = int(state["total"]["steps_mcts"])       
+        self.sample_count = 1024 #int(state["total"]["steps_mcts"])       
         if self.sample_count < 512: self.sample_count = 512
 
         self.q_std = state["total"]["q_std"]
@@ -453,10 +453,10 @@ class Train():
         set_status_total_value(state, "q_min", min_game_qval, alpha)
         set_status_total_value(state, "step_time", steptime, alpha)
         set_status_total_value(state, "q_std", std_game_qval, alpha)
-        increments = [state["steps_mcts"][i] - state["steps_mcts"][i - 1] for i in range(1, len(state["steps_mcts"]))]
-        avg_increments = np.mean(increments) if len(increments)>0 else 0    
-   
-        set_status_total_value(state, "steps_mcts", total_game_steps/self.play_count - avg_increments, alpha)
+        # increments = [state["steps_mcts"][i] - state["steps_mcts"][i - 1] for i in range(1, len(state["steps_mcts"]))]
+        # avg_increments = np.mean(increments) if len(increments)>0 else 0       
+        # set_status_total_value(state, "steps_mcts", total_game_steps/self.play_count - avg_increments, alpha)
+        set_status_total_value(state, "steps_mcts", total_game_steps/self.play_count, alpha)
                 
         state["total"]["agent"] += 1
         state["total"]["_agent"] += 1
