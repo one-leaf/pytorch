@@ -331,7 +331,7 @@ class Train():
         
         
         # self.n_playout = int(state["total"]["n_playout"])
-        self.sample_count = 1024 #int(state["total"]["steps_mcts"])       
+        self.sample_count = 1100 #int(state["total"]["steps_mcts"])       
         if self.sample_count < 512: self.sample_count = 512
 
         self.q_std = state["total"]["q_std"]
