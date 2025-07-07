@@ -384,11 +384,13 @@ class MCTSPlayer(object):
             # 如果执行的还不错，就用最大概率去执行                             
             # if game.removedlines > self.min_score: 
             #     idx = max_ps_idx     
-                      
+            if game.steps < self.limit_count:
+                idx = max_ns_idx
+                
             p = 0
             _p = []     
             # if idx == -1 or min(act_qs)<0:    
-            if idx == -1 or min(act_qs)>=0 :
+            if idx == -1 : # or min(act_qs)>=0 :
                 # a=1的时候，act 机会均等，>1 强调均值， <1 强调两端
                 # 国际象棋 0.3 将棋 0.15 围棋 0.03
                 # 取值一般倾向于 a = 10/n 所以俄罗斯方块取 2
@@ -396,10 +398,10 @@ class MCTSPlayer(object):
                 # p=0.999**(time.time()-game.start_time)/60     # 每1秒减少0.1的概率
                 # if p<0.1: p=0.1
                 # p = 0.99**game.removedlines
-                if game.steps < self.limit_count:
-                    p = 0.99
-                else:
-                    p = 0.8
+                # if game.steps < self.limit_count:
+                #     p = 0.99
+                # else:
+                p = 0.8
                 dirichlet = np.random.dirichlet(2 * np.ones(len(nz_idx)))
                 dirichlet_probs = np.zeros_like(act_probs, dtype=np.float64)
                 dirichlet_probs[nz_idx] = dirichlet
