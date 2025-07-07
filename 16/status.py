@@ -74,6 +74,7 @@ def read_status_file(max_keep=30):
     add_prop(state, "vdiff")
     add_prop(state, "step_time")
     add_prop(state, "piececount")    
+    add_prop(state, "steps")    
       
     add_total_prop(state, "min_piececount")    
     add_total_prop(state, "max_piececount")  

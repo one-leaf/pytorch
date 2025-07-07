@@ -113,16 +113,18 @@ class Train():
                     print(agent.pieceheight, end=' ')
                     # print("#"*40, 'score:', agent.removedlines, 'height:', agent.pieceheight, 'piece:', agent.piececount, "shape:", agent.fallpiece["shape"], \
                     #     'step:', agent.steps, "step time:", round((time.time()-start_time)/i,3))            
-                if agent.terminal or agent.removedlines > limit_score: 
+                if agent.terminal : 
                     state = read_status_file()
                     set_status_total_value(state, "score", agent.removedlines, 1/1000)
                     set_status_total_value(state, "piececount", agent.piececount, 1/1000)
+                    set_status_total_value(state, "steps", agent.steps, 1/1000)
                     save_status_file(state)
-                    state["lastupdate"] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                    if not agent.terminal: no_terminal += 1
- 
+                    state["lastupdate"] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')  
                     break
                 
+                if agent.removedlines > limit_score :
+                    no_terminal += 1
+                    break
 
             agent.print()
 
@@ -508,6 +510,7 @@ class Train():
             state["min_score"].append(round(state["total"]["min_score"]))
             state["no_terminal_rate"].append(round(state["total"]["no_terminal_rate"],2))
             state["steps_mcts"].append(round(state["total"]["steps_mcts"]))
+            state["steps"].append(round(state["total"]["steps"]))
             
             
             local_time = time.localtime(start_time)
