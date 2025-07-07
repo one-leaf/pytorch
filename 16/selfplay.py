@@ -606,6 +606,7 @@ class Train():
         assert len(states)==len(values)
         assert len(states)==len(mcts_probs)
         print(values[:100])
+        print(values[len(values)//2-50:100])
         print(values[-100:])
         
         print("TRAIN Self Play end. length: %s value sum: %s saving ..." % (len(states),sum(values)))
