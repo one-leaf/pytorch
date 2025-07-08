@@ -605,11 +605,13 @@ class Train():
         assert len(states)>0
         assert len(states)==len(values)
         assert len(states)==len(mcts_probs)
+        
+        states_len = len(states)
         print(values[:100])
-        print(values[len(values)//2-50:100])
+        print(values[states_len//2-50:states_len//2+50])
         print(values[-100:])
         
-        print("TRAIN Self Play end. length: %s value sum: %s saving ..." % (len(states),sum(values)))
+        print("TRAIN Self Play end. length: %s value sum: %s saving ..." % (states_len,sum(values)))
 
         # 保存对抗数据到data_buffer
         filetime = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
