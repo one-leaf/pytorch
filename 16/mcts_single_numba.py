@@ -384,7 +384,8 @@ class MCTSPlayer(object):
             # 如果执行的还不错，就用最大概率去执行                             
             # if game.removedlines > self.min_score: 
             #     idx = max_ps_idx     
-            if game.steps < self.limit_count//2:
+            # if game.steps < self.limit_count//2:
+            if game.next_Pieces_list_len >= len(game.piecehis):
                 idx = max_ns_idx
                 
             p = 0
