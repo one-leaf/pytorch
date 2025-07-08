@@ -268,7 +268,7 @@ class Train():
             paytime = time.time()-start_time
                 # (agent.removedlines > state["total"]["avg_score"]+1)  or \
 
-            if agent.terminal or (agent.state==1 and paytime>60*60):
+            if agent.terminal:
 
                 # # 修复Q值，将最后都无法消行的全部设置为-1
                 # if agent.terminal:
@@ -333,7 +333,7 @@ class Train():
         
         
         # self.n_playout = int(state["total"]["n_playout"])
-        self.sample_count = int(state["total"]["steps"]//2)       
+        self.sample_count = int(state["total"]["steps"]//5)       
         if self.sample_count < 512: self.sample_count = 512
 
         self.q_std = state["total"]["q_std"]
