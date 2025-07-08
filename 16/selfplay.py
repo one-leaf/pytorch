@@ -613,8 +613,8 @@ class Train():
 
         # 保存对抗数据到data_buffer
         filetime = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        for i, obj in enumerate(self.get_equi_data(states, mcts_probs, values)):
-        # for i, obj in enumerate(zip(states, mcts_probs, values, rewards)):
+        # for i, obj in enumerate(self.get_equi_data(states, mcts_probs, values)):
+        for i, obj in enumerate(zip(states, mcts_probs, values)):
             filename = "{}-{}.pkl".format(filetime, i)
             savefile = os.path.join(data_wait_dir, filename)
             with open(savefile, "wb") as fn:
