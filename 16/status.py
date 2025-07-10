@@ -88,8 +88,6 @@ def read_status_file(max_keep=30):
     add_prop(state, "score_mcts")
     add_prop(state, "piececount_mcts")
     add_prop(state, "q_avg")
-    add_prop(state, "q_max")
-    add_prop(state, "q_min")
     add_prop(state, "q_std")
     add_prop(state, "kl", 1e-2)
     add_total_prop(state, "lr_multiplier", 1)    

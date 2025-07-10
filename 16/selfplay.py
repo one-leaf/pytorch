@@ -451,8 +451,6 @@ class Train():
         set_status_total_value(state, "score_mcts", avg_game_score, alpha)
         set_status_total_value(state, "piececount_mcts", avg_game_piececount, alpha)
         set_status_total_value(state, "q_avg", avg_qval, alpha)
-        set_status_total_value(state, "q_max", max_game_qval, alpha)
-        set_status_total_value(state, "q_min", min_game_qval, alpha)
         set_status_total_value(state, "step_time", steptime, alpha)
         set_status_total_value(state, "q_std", std_game_qval, alpha)
         # increments = [state["steps_mcts"][i] - state["steps_mcts"][i - 1] for i in range(1, len(state["steps_mcts"]))]
@@ -502,8 +500,6 @@ class Train():
             state["vdiff"].append(round(state["total"]["vdiff"]))
             state["step_time"].append(round(state["total"]["step_time"],1))
             state["q_avg"].append(round(state["total"]["q_avg"],2))
-            state["q_max"].append(round(state["total"]["q_max"],2))
-            state["q_min"].append(round(state["total"]["q_min"],2))
             state["piececount"].append(round(state["total"]["piececount"]))
             state["piececount_mcts"].append(round(state["total"]["piececount_mcts"]))
             state["q_std"].append(round(state["total"]["q_std"],2))
