@@ -851,7 +851,7 @@ class Agent():
             print(line)
         print(" "+" -"*boardwidth)
         print("pieceheight:", self.pieceheight, "lines:",self.removedlines, "piececount:", self.piececount, "piecehis:", len(self.piecehis), "/", \
-            self.next_Pieces_list_len, "emptyCount:", self.emptyCount, "rewardlimit:", self.piececount-self.last_reward)
+            self.next_Pieces_list_len, "steps:", self.steps, "rewardlimit:", self.piececount-self.last_reward)
 
 
     def getTerminalEmptyCount(self):    
