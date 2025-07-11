@@ -481,7 +481,7 @@ class Train():
                 depth.append(step["depth"])
 
         pacc = float(np.average(pacc))
-        vdiff = sum([abs(play_data[i]["data"]["piece_count"]-avg_game_piececount) for i in range(self.play_count)]) / self.play_count
+        vdiff = sum([abs(play_data[i]["data"]["steps_count"]/self.sample_count) for i in range(self.play_count)]) / self.play_count
 
         depth = float(np.average(depth))
         
@@ -497,7 +497,7 @@ class Train():
             state["score_mcts"].append(round(state["total"]["score_mcts"]))
             state["depth"].append(round(state["total"]["depth"],1))
             state["pacc"].append(round(state["total"]["pacc"],2))
-            state["vdiff"].append(round(state["total"]["vdiff"]))
+            state["vdiff"].append(round(state["total"]["vdiff"],2))
             state["step_time"].append(round(state["total"]["step_time"],1))
             state["q_avg"].append(round(state["total"]["q_avg"],2))
             state["piececount"].append(round(state["total"]["piececount"]))
