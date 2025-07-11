@@ -606,6 +606,7 @@ class Train():
         print(values[:100])
         print(values[states_len//2-50:states_len//2+50])
         print(values[-100:])
+        print("avg_values:", np.mean(values), "std_values:", np.std(values))
         
         print("TRAIN Self Play end. length: %s value sum: %s saving ..." % (states_len,sum(values)))
 
