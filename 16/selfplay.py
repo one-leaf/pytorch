@@ -487,8 +487,7 @@ class Train():
         
         state = read_status_file()                       
         set_status_total_value(state, "pacc", pacc, alpha)
-        if vdiff>0:
-            set_status_total_value(state, "vdiff", vdiff, alpha)
+        set_status_total_value(state, "vdiff", vdiff, alpha)
         set_status_total_value(state, "depth", depth, alpha)
 
         update_agent_count = 20
