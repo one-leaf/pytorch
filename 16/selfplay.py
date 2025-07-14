@@ -334,6 +334,8 @@ class Train():
         
         # self.n_playout = int(state["total"]["n_playout"])
         self.sample_count = int(state["total"]["steps"]//5)       
+        # self.sample_count = int(state["total"]["sample_count"])
+        # if 
         if self.sample_count < 512: self.sample_count = 512
 
         self.q_std = state["total"]["q_std"]
@@ -481,7 +483,7 @@ class Train():
                 depth.append(step["depth"])
 
         pacc = float(np.average(pacc))
-        vdiff = sum([abs(play_data[i]["data"]["steps_count"]/self.sample_count) for i in range(self.play_count)]) / self.play_count
+        vdiff = sum([1 if play_data[i]["data"]["steps_count"]>self.sample_count else -1 for i in range(self.play_count)]) / self.play_count
 
         depth = float(np.average(depth))
         
