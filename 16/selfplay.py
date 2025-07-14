@@ -400,7 +400,7 @@ class Train():
             his_pieces_len = len(agent.piecehis)
             
             # 如果游戏达到了最小的消除行数，样本有效，直接结束
-            if agent.steps > self.sample_count:
+            if his_pieces_len > agent.next_Pieces_list_len:
                 self.play_count = playcount+1
                 need_replay = False
                 break
