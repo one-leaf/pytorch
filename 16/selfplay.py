@@ -560,13 +560,15 @@ class Train():
             # 如果当前局面有足够的步数，跳过
             len_steps = len(play_data[i]["data"]["steps"])
             if len_steps>=self.sample_count:
-                for k in range(len_steps-self.sample_count, len_steps):
+                # for k in range(len_steps-self.sample_count, len_steps):
+                for k in range(len_steps):
                     step = play_data[i]["data"]["steps"][k]
                     _temp_values.append(step["qval"]) 
                 mean_val = np.mean(_temp_values)
                 std_val = np.std(_temp_values)
                     
-                for k in range(len_steps-self.sample_count, len_steps):
+                # for k in range(len_steps-self.sample_count, len_steps):
+                for k in range(len_steps):
                     step = play_data[i]["data"]["steps"][k]
                     states.append(step["state"])
                     mcts_probs.append(step["move_probs"])
