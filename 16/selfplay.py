@@ -336,7 +336,7 @@ class Train():
         self.sample_count = int(state["total"]["steps"]//5)       
         # self.sample_count = int(state["total"]["sample_count"])
         # if 
-        if self.sample_count < 520: self.sample_count = 520
+        # if self.sample_count < 520: self.sample_count = 520
 
         self.q_std = state["total"]["q_std"]
         self.q_avg = state["total"]["q_avg"]
