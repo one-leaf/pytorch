@@ -338,7 +338,7 @@ class Train():
         # self.n_playout = int(state["total"]["n_playout"])
         # self.sample_count = int(state["total"]["steps"]//5)       
         self.sample_count = state["total"]["sample_count"]
-        self.sample_count -= state["total"]["vdiff"]*10
+        self.sample_count += (0.9-state["total"]["vdiff"])*10
         # if self.sample_count < 520: self.sample_count = 520
         self.sample_count = int(self.sample_count)
         
