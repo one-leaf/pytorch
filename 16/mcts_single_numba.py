@@ -403,7 +403,7 @@ class MCTSPlayer(object):
                 #     p = 0.99
                 # else:
                 if game.piececount%2==0:
-                    p = 0.85
+                    p = 0.9
                 else:
                     p = 1
                 dirichlet = np.random.dirichlet(2 * np.ones(len(nz_idx)))
