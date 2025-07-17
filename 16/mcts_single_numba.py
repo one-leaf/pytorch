@@ -405,7 +405,7 @@ class MCTSPlayer(object):
                 if game.piececount%2==0:
                     p = 0.85
                 else:
-                    p = 0.99
+                    p = 1
                 dirichlet = np.random.dirichlet(2 * np.ones(len(nz_idx)))
                 dirichlet_probs = np.zeros_like(act_probs, dtype=np.float64)
                 dirichlet_probs[nz_idx] = dirichlet
