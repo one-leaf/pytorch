@@ -490,13 +490,16 @@ class Train():
         pacc = float(np.average(pacc))
         vdiff = sum([1 if play_data[i]["data"]["steps_count"]>self.sample_count else -1 for i in range(self.play_count)]) / self.play_count
 
+        rate_mcts = sum([1 if len(play_data[i]["agent"].piecehis) > play_data[i]["agent"].next_Pieces_list_len else -1 for i in range(self.play_count)]) / self.play_count
+ 
         depth = float(np.average(depth))
         
         state = read_status_file()                       
         set_status_total_value(state, "pacc", pacc, alpha)
         set_status_total_value(state, "vdiff", vdiff, alpha)
         set_status_total_value(state, "depth", depth, alpha)
-
+        set_status_total_value(state, "rate_mcts", rate_mcts, alpha)
+        
         update_agent_count = 20
         if state["total"]["_agent"]>update_agent_count:
             state["score"].append(round(state["total"]["score"]))
@@ -514,7 +517,7 @@ class Train():
             state["steps_mcts"].append(round(state["total"]["steps_mcts"]))
             state["steps"].append(round(state["total"]["steps"]))
             state["sample_count"].append(round(state["total"]["sample_count"]))
-            
+            state["rate_mcts"].append(round(state["total"]["rate_mcts"],2))
             
             local_time = time.localtime(start_time)
             current_month = local_time.tm_mon
