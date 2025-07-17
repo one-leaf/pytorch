@@ -93,8 +93,8 @@ def updateQN(s:int, a:int, v:float, Ns, Qsa, Nsa, actions_num):
     # Ns[s] = Ns[s] + 1
     
     # Q[t+1] = Q[t] - a(Q[t] - v[t])   a=1/t     
-    # Qsa[s][a] += (v - Qsa[s][a])/Nsa[s][a]  # 棋类博弈使用
-    Qsa[s][a] += (v - Qsa[s][a])/sqrt(Nsa[s][a])
+    Qsa[s][a] += (v - Qsa[s][a])/Nsa[s][a]  # 棋类博弈使用
+    # Qsa[s][a] += (v - Qsa[s][a])/sqrt(Nsa[s][a])
     
     # Qsa[s][a] = np.tanh(Qsa[s][a])
 
