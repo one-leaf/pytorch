@@ -572,6 +572,14 @@ class Train():
         std_qval_list = [play_data[i]["std_qval"] for i in range(self.play_count)]    
         states, mcts_probs, values= [], [], []
 
+        # 将Q值转为优势A
+        for i in range(self.play_count):
+            len_steps = len(play_data[i]["data"]["steps"])
+            for k in range(len_steps -1):
+                step = play_data[i]["data"]["steps"][k]
+                step["qval"] = play_data[i]["data"]["steps"][k+1]["qval"] - step["qval"]
+            play_data[i]["data"]["steps"][-1]["qval"]=-1                
+
         _temp_values = deque(maxlen=self.sample_count)
         for i in range(self.play_count):
             # 如果当前局面有足够的步数，跳过
