@@ -123,6 +123,12 @@ class Train():
                     break
                 
                 if agent.removedlines > limit_score :
+                    state = read_status_file()
+                    set_status_total_value(state, "score", agent.removedlines, 1/1000)
+                    set_status_total_value(state, "piececount", agent.piececount, 1/1000)
+                    set_status_total_value(state, "steps", agent.steps, 1/1000)
+                    save_status_file(state)
+                    state["lastupdate"] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')  
                     no_terminal += 1
                     break
 
