@@ -346,6 +346,8 @@ class Train():
         self.sample_count = state["total"]["sample_count"]
         self.sample_count += (0.9-state["total"]["vdiff"])*10
         # if self.sample_count < 520: self.sample_count = 520
+        if self.sample_count > state["total"]["steps_mcts"]:
+            self.sample_count = state["total"]["steps_mcts"]
         self.sample_count = int(self.sample_count)
         
         self.q_std = state["total"]["q_std"]
