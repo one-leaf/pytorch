@@ -385,8 +385,8 @@ class MCTSPlayer(object):
             # if game.removedlines > self.min_score: 
             #     idx = max_ps_idx     
             # if game.steps < self.limit_count//2:
-            # if game.next_Pieces_list_len >= len(game.piecehis):
-            #     idx = max_ns_idx
+            if game.next_Pieces_list_len >= len(game.piecehis):
+                idx = max_ns_idx
                 
             p = 0
             _p = []     
