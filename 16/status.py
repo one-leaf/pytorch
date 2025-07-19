@@ -41,7 +41,7 @@ def save_status_file(state):
         json.dump(state, f, ensure_ascii=False, indent=4)
         # unlock_file(f)
     shutil.move(temp_file.name, status_file)
-    os.chmod(temp_file.name, 0o644)
+    os.chmod(status_file, 0o644)
 
 def add_prop(state, key, default=0):
     if key not in state:
