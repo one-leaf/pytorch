@@ -219,7 +219,7 @@ class MCTS():
             die_count += 1 if state_.game.terminal else 0
             self.max_depth = (depth, step_depth)
 
-            if self.Ns[s]>=1000 :
+            if self.Ns[s]>=self._n_playout*2 :
                 break
 
         self._policy(state_.game, only_Cache_Next=True) 
