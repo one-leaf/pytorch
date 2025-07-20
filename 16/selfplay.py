@@ -193,7 +193,7 @@ class Train():
         agent.is_replay = False
         agent.limitstep = False
 
-        if his_steps > sample_count//2:
+        if his_steps > sample_count:
             while True:
                 action = policy_value_net.policy_value_fn_best_act(agent)
                 agent.step(action)        
