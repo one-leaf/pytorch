@@ -197,7 +197,7 @@ class Train():
             while True:
                 action = policy_value_net.policy_value_fn_best_act(agent)
                 agent.step(action)        
-                if agent.steps > (his_steps-sample_count//2) and agent.state==1:
+                if agent.steps > (his_steps-sample_count) and agent.state==1:
                     break
                 if agent.terminal:
                     raise Exception("agent terminal, cancel play")
@@ -342,13 +342,13 @@ class Train():
         
         
         # self.n_playout = int(state["total"]["n_playout"])
-        self.sample_count = int((state["total"]["steps"]+state["total"]["steps_mcts"])//2)       
-        # self.sample_count = state["total"]["sample_count"]
+        # self.sample_count = int((state["total"]["steps"]+state["total"]["steps_mcts"])//2)       
+        self.sample_count = state["total"]["steps_mcts"]
         # self.sample_count += (0.9-state["total"]["vdiff"])*10
         # if self.sample_count < 520: self.sample_count = 520
         # if self.sample_count > state["total"]["steps_mcts"]:
         #     self.sample_count = state["total"]["steps_mcts"]
-        # self.sample_count = int(self.sample_count)
+        self.sample_count = int(self.sample_count)
         
         self.q_std = state["total"]["q_std"]
         self.q_avg = state["total"]["q_avg"]
