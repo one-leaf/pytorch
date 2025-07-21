@@ -420,7 +420,7 @@ class MCTSPlayer(object):
                 _p = _p / np.sum(_p) 
                 idx = np.random.choice(range(ACTONS_LEN), p=_p)
            
-            if idx == 3 and random.random()>0.5: # None
+            if (idx == 3 or idx == 0) and random.random()>0.5: # None
                 idx =  random.choice(nz_idx)
                   
             action = idx
