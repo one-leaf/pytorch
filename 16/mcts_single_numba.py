@@ -385,11 +385,11 @@ class MCTSPlayer(object):
             # if game.removedlines > self.min_score: 
             #     idx = max_ps_idx     
             # if game.steps < self.limit_count//2:
-            # if game.next_Pieces_list_len >= len(game.piecehis):
-            #     if self.player==1:
-            #         idx = max_ns_idx
-            #     elif self.player==2:
-            #         idx = max_qs_idx
+            if game.next_Pieces_list_len >= len(game.piecehis):
+                if self.player==1:
+                    idx = max_ns_idx
+                elif self.player==2:
+                    idx = max_qs_idx
                 
             p = 0
             _p = []     
@@ -408,7 +408,7 @@ class MCTSPlayer(object):
                 if game.piececount%2==0:
                     p = 0.9
                 else:
-                    p = 1
+                    p = 0.7
                 dirichlet = np.random.dirichlet(2 * np.ones(len(nz_idx)))
                 dirichlet_probs = np.zeros_like(act_probs, dtype=np.float64)
                 dirichlet_probs[nz_idx] = dirichlet
