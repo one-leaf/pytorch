@@ -388,7 +388,7 @@ class MCTSPlayer(object):
             if game.next_Pieces_list_len >= len(game.piecehis):
                 if self.player==1:
                     idx = max_ns_idx
-                else:
+                elif self.player==2:
                     idx = max_qs_idx
                 
             p = 0
