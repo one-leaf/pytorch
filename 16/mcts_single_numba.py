@@ -419,7 +419,9 @@ class MCTSPlayer(object):
                 _p = p*_act_probs + (1.0-p)*dirichlet_probs
                 _p = _p / np.sum(_p) 
                 idx = np.random.choice(range(ACTONS_LEN), p=_p)
-                
+           
+            if idx == 3 and random.random()>0.5: # None
+                idx =  random.choice(nz_idx)
                   
             action = idx
             qval = act_qs[idx]
