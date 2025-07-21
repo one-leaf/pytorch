@@ -50,7 +50,6 @@ class Train():
         # 由于value完全用结果胜负来拟合，所以value不稳，只能靠概率p拟合，最后带动value来拟合
         self.c_puct = 1  
         self.sample_count = 512  # 每次采样的样本数
-        self.q_std = 1
         self.max_step_count = 10000 
         self.limit_steptime = 1  # 限制每一步的平均花费时间，单位秒，默认1秒
 
@@ -352,17 +351,9 @@ class Train():
         # if self.sample_count < 520: self.sample_count = 520
         # if self.sample_count > state["total"]["steps_mcts"]:
         #     self.sample_count = state["total"]["steps_mcts"]
-        self.sample_count = int(self.sample_count)
-        
-        self.q_std = state["total"]["q_std"]
-        self.q_avg = state["total"]["q_avg"]
-        
-        if self.q_std>2: self.q_std=2   
-        if self.q_std<0.5: self.q_std=0.5
-        if self.q_avg>1: self.q_avg=1
-        if self.q_avg<-1: self.q_avg=-1       
-        
+        self.sample_count = int(self.sample_count)          
         print("sample_count:", self.sample_count)   
+        
         player = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout, limit_count=self.sample_count, min_score=state["total"]["min_score"])
 
         cache={}
