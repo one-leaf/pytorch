@@ -277,9 +277,10 @@ class MCTS():
         # 当前最佳概率和最佳动作
         # 比较 Qsa[s, a] + c_puct * Ps[s,a] * sqrt(Ns[s]) / Nsa[s, a], 选择最大的
         a = selectAction(s, availables, self._c_puct, self.Ps, self.Ns, self.Qsa, self.Nsa)
-        state.game.step(a)
+        
+        _state, _removedlines = state.game.step(a)
                 
-        v = self.search(state) 
+        v = self.search(state) + _removedlines*0.01  # 每消除一行奖励0.01，奖励越多，分数越高
         
         # 外部奖励，放的方块越多越好
         # if state.game.state==1:
