@@ -217,7 +217,7 @@ class Train():
         qval_list=[]
         total_state_value=0
         find_end_steps = 0
-
+        has_find_end = False
         player.need_max_ps = not player.need_max_ns
         print("max_emptyCount:",max_emptyCount,"isRandomNextPiece:",agent.isRandomNextPiece,"limitstep:",agent.limitstep,"max_ps:",player.need_max_ps,"max_qs:",agent.is_replay)
         for i in count():
@@ -255,7 +255,8 @@ class Train():
             
             data["steps"].append(_step)
 
-            if find_end: find_end_steps += 1
+            if find_end: has_find_end = True
+            if has_find_end: find_end_steps += 1
             # time.sleep(0.1)
 
             # 这里的奖励是消除的行数
