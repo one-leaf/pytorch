@@ -206,7 +206,7 @@ class MCTS():
 
         state_ = None
 
-        ig_probs = False
+        find_end = False
         # self._n_playout = 256    # 最少256次，概率才会比较准确
         for n in range(self._n_playout):
             self.simulation_count += 1
@@ -216,7 +216,10 @@ class MCTS():
             
             depth = state_.game.piececount-state.game.piececount
             step_depth = state_.game.steps-state.game.steps
-            die_count += 1 if state_.game.terminal else 0
+            if state_.game.terminal:
+                die_count += 1 
+                find_end = True
+                
             self.max_depth = (depth, step_depth)
 
             if self._n_playout>100 and self.Ns[s]>=self._n_playout*2 :
@@ -250,7 +253,7 @@ class MCTS():
                   "Qs:", qs, "\tNs:", ns, "\tPs:", ps)
                 
         # 动作数，概率，每个动作的Q，原始概率，当前局面的v，当前局面的总探索次数
-        return probs, qs, ps, v, ig_probs
+        return probs, qs, ps, v, find_end
 
     def search(self, state:State):
         """
@@ -337,7 +340,7 @@ class MCTSPlayer(object):
 
             state = State(game)
             # 动作数概率，每个动作的Q，原始概率，当前局面的v，当前局面的总探索次数 
-            act_probs, act_qs, act_ps, state_v, ig_probs = self.mcts.get_action_probs(state, temp)
+            act_probs, act_qs, act_ps, state_v, find_end = self.mcts.get_action_probs(state, temp)
             depth = self.mcts.max_depth[0]
             
             # max_probs_idx = np.argmax(act_probs)    
@@ -455,7 +458,7 @@ class MCTSPlayer(object):
             # act_probs[max_qs_idx] = 1
             self.cache[hash(state)] = action
 
-            return action, qval, act_probs, state_v, acc_ps, depth, ig_probs
+            return action, qval, act_probs, state_v, acc_ps, depth, find_end
         else:
             print("WARNING: game is terminal")
 

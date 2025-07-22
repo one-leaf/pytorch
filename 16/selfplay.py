@@ -216,6 +216,7 @@ class Train():
         avg_qval=0
         qval_list=[]
         total_state_value=0
+        find_end_steps = 0
 
         player.need_max_ps = not player.need_max_ns
         print("max_emptyCount:",max_emptyCount,"isRandomNextPiece:",agent.isRandomNextPiece,"limitstep:",agent.limitstep,"max_ps:",player.need_max_ps,"max_qs:",agent.is_replay)
@@ -231,7 +232,7 @@ class Train():
             #     need_max_ps=not need_max_ps
             #     print("switch need_max_ps to:", need_max_ps)
             # need_max_ps = random.random() < agent.removedlines/100   
-            action, qval, move_probs, state_value, acc_ps, depth, ig_probs = player.get_action(agent, temp=1) 
+            action, qval, move_probs, state_value, acc_ps, depth, find_end = player.get_action(agent, temp=1) 
 
             _, score = agent.step(action)
 
@@ -250,10 +251,11 @@ class Train():
             _step["qval"] = qval
             _step["acc_ps"] = acc_ps
             _step["depth"] = depth
-            _step["ig_probs"] = ig_probs
+            _step["find_end"] = find_end
             
             data["steps"].append(_step)
 
+            if find_end: find_end_steps += 1
             # time.sleep(0.1)
 
             # 这里的奖励是消除的行数
@@ -293,7 +295,8 @@ class Train():
                 data["score"] = agent.removedlines
                 data["piece_count"] = agent.piececount
                 data["steps_count"] =  agent.steps
-
+                data["find_end_steps"] = find_end_steps
+                
                 qval_list = [step["qval"] for step in data["steps"]]
                 # avg_first = np.average(qval_list)
                 # while len(qval_list)<self.play_size:
@@ -432,6 +435,7 @@ class Train():
         max_game_qval = max([play_data[i]["avg_qval"] for i in range(self.play_count)]) 
         min_game_qval = min([play_data[i]["avg_qval"] for i in range(self.play_count)]) 
         std_game_qval = sum([play_data[i]["std_qval"] for i in range(self.play_count)]) / self.play_count
+        find_end_steps = sum([play_data[i]["data"]["find_end_steps"] for i in range(self.play_count)]) / self.play_count
 
         game_score = max([play_data[i]["data"]["score"] for i in range(self.play_count)])
         win_values =[-1 for i in range(self.play_count)]
@@ -468,6 +472,7 @@ class Train():
         # set_status_total_value(state, "steps_mcts", total_game_steps/self.play_count - avg_increments, alpha)
         set_status_total_value(state, "steps_mcts", total_game_steps/self.play_count, alpha)
         set_status_total_value(state, "sample_count", self.sample_count, alpha)
+        set_status_total_value(state, "find_end_steps", find_end_steps, alpha)
                 
         state["total"]["agent"] += 1
         state["total"]["_agent"] += 1
@@ -522,6 +527,7 @@ class Train():
             state["steps"].append(round(state["total"]["steps"]))
             state["sample_count"].append(round(state["total"]["sample_count"]))
             state["rate_mcts"].append(round(state["total"]["rate_mcts"],2))
+            state["find_end_steps"].append(round(state["total"]["find_end_steps"]))
             
             local_time = time.localtime(start_time)
             current_month = local_time.tm_mon

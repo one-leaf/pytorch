@@ -96,6 +96,8 @@ def read_status_file(max_keep=30):
     add_prop(state, "sample_count", 512)    
     add_prop(state, "steps_mcts", 0)    
     add_prop(state, "rate_mcts", 0)    
+    add_prop(state, "find_end_steps", 0)    
+    
 
     if "update" not in state:
         state["update"]=[]
