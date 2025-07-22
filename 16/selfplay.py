@@ -196,7 +196,7 @@ class Train():
             while True:
                 action = policy_value_net.policy_value_fn_best_act(agent)
                 agent.step(action)        
-                if agent.steps > (his_steps-sample_count//2) and agent.state==1:
+                if agent.steps > (his_steps-sample_count) and agent.state==1:
                     break
                 if agent.terminal:
                     raise Exception("agent terminal, cancel play")
