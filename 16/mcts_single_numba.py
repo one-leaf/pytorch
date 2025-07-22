@@ -280,7 +280,8 @@ class MCTS():
         
         _state, _removedlines = state.game.step(a)
                 
-        v = self.search(state) + _removedlines*0.01  # 每消除一行奖励0.01，奖励越多，分数越高
+        v = self.search(state) 
+        # v += _removedlines*0.01  # 每消除一行奖励0.01，奖励越多，分数越高
         
         # 外部奖励，放的方块越多越好
         # if state.game.state==1:
