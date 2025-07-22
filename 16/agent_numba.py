@@ -692,7 +692,7 @@ class Agent():
         if not isFalling:   
             self.addtoboard(self.board, self.fallpiece)            
             removedlines = self.removecompleteline(self.board)
-            # emptyCount = self.getEmptyCount()               
+            emptyCount = self.getEmptyCount()               
                     
             self.need_update_status=True
             # if removedlines>0: print("OK!!!",removedlines)
@@ -716,7 +716,7 @@ class Agent():
                 self.last_reward = self.piececount
                 
             # reward -= (emptyCount - self.emptyCount)*0.5  
-            # self.emptyCount  = emptyCount
+            self.emptyCount  = emptyCount
             
             # self.score += reward    # 一个方块1点 
             # self.score = -nb_getUsedCount(self.board)/4 #+ self.piececount + 1  # 一个方块1点 
