@@ -346,9 +346,9 @@ class Train():
         # self.n_playout = int(state["total"]["n_playout"])
         # self.sample_count = int((state["total"]["steps"]+state["total"]["steps_mcts"])//2)       
         
-        self.sample_count = state["total"]["sample_count"]
-        if self.sample_count < state["total"]["steps_mcts"]:
-            self.sample_count = state["total"]["steps_mcts"]
+        self.sample_count = state["total"]["find_end_steps"]*2
+        # if self.sample_count < state["total"]["steps_mcts"]:
+        #     self.sample_count = state["total"]["steps_mcts"]
             
         # self.sample_count += (0.9-state["total"]["vdiff"])*10
         # if self.sample_count < 520: self.sample_count = 520
@@ -471,7 +471,6 @@ class Train():
         # avg_increments = np.mean(increments) if len(increments)>0 else 0       
         # set_status_total_value(state, "steps_mcts", total_game_steps/self.play_count - avg_increments, alpha)
         set_status_total_value(state, "steps_mcts", total_game_steps/self.play_count, alpha)
-        set_status_total_value(state, "sample_count", self.sample_count, alpha)
         set_status_total_value(state, "find_end_steps", find_end_steps, alpha)
                 
         state["total"]["agent"] += 1
@@ -525,7 +524,6 @@ class Train():
             state["no_terminal_rate"].append(round(state["total"]["no_terminal_rate"],2))
             state["steps_mcts"].append(round(state["total"]["steps_mcts"]))
             state["steps"].append(round(state["total"]["steps"]))
-            state["sample_count"].append(round(state["total"]["sample_count"]))
             state["rate_mcts"].append(round(state["total"]["rate_mcts"],2))
             state["find_end_steps"].append(round(state["total"]["find_end_steps"]))
             
