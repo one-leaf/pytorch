@@ -586,18 +586,15 @@ class Train():
         # 2 用 Q_t+1 - Q_t 转为优势A
         for i in range(self.play_count):
             len_steps = len(play_data[i]["data"]["steps"])
-            data = [play_data[i]["data"]["steps"][k]["qval"] for k in range(len_steps)]
-            # data.append(-2) 
+            # data = [play_data[i]["data"]["steps"][k]["qval"] for k in range(len_steps)]
             
             for k in range(len_steps):
                 step = play_data[i]["data"]["steps"][k]
-                step["qval"] = np.mean(data[k:k+20]) 
-                # if k==len_steps-1:
-                #     step["qval"] = -1
-                # else:
-                #     step["qval"] = play_data[i]["data"]["steps"][k+1]["qval"] - step["qval"]
-            
-
+                # step["qval"] = np.mean(data[k:k+20]) 
+                if k==len_steps-1:
+                    step["qval"] = -1
+                else:
+                    step["qval"] = play_data[i]["data"]["steps"][k+1]["qval"] - step["qval"]           
 
         _temp_values = deque(maxlen=self.sample_count)
         for i in range(self.play_count):
@@ -608,8 +605,10 @@ class Train():
                 for k in range(len_steps):
                     step = play_data[i]["data"]["steps"][k]
                     _temp_values.append(step["qval"]) 
-                mean_val = np.mean(_temp_values)
-                std_val = np.std(_temp_values)
+                # mean_val = np.mean(_temp_values)
+                # std_val = np.std(_temp_values)
+                mean_val = 0
+                std_val = 1
                     
                 # for k in range(len_steps-self.sample_count, len_steps):
                 for k in range(len_steps):
@@ -623,8 +622,10 @@ class Train():
                     _temp_values.append(1)
                 for step in play_data[i]["data"]["steps"]:
                     _temp_values.append(step["qval"])
-                mean_val = np.mean(_temp_values)
-                std_val = np.std(_temp_values)                
+                # mean_val = np.mean(_temp_values)
+                # std_val = np.std(_temp_values)                
+                mean_val = 0
+                std_val = 1
                 for step in play_data[i]["data"]["steps"]:                    
                     states.append(step["state"])
                     mcts_probs.append(step["move_probs"])
