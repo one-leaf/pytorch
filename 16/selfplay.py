@@ -586,12 +586,16 @@ class Train():
         # 2 用 Q_t+1 - Q_t 转为优势A
         for i in range(self.play_count):
             len_steps = len(play_data[i]["data"]["steps"])
+            data = [play_data[i]["data"]["steps"][k]["qval"] for k in range(len_steps)]
+            data.append(-2) 
+            
             for k in range(len_steps):
                 step = play_data[i]["data"]["steps"][k]
-                if k==len_steps-1:
-                    step["qval"] = -1
-                else:
-                    step["qval"] = play_data[i]["data"]["steps"][k+1]["qval"] - step["qval"]
+                step["qval"] = np.mean(data[k:]) - step["qval"]
+                # if k==len_steps-1:
+                #     step["qval"] = -1
+                # else:
+                #     step["qval"] = play_data[i]["data"]["steps"][k+1]["qval"] - step["qval"]
             
 
 
