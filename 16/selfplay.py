@@ -587,7 +587,7 @@ class Train():
         for i in range(self.play_count):
             len_steps = len(play_data[i]["data"]["steps"])
             data = [play_data[i]["data"]["steps"][k]["qval"] for k in range(len_steps)]
-            data.append(-2) 
+            # data.append(-2) 
             
             for k in range(len_steps):
                 step = play_data[i]["data"]["steps"][k]
