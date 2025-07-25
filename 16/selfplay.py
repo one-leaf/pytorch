@@ -605,8 +605,8 @@ class Train():
                 for k in range(len_steps):
                     step = play_data[i]["data"]["steps"][k]
                     _temp_values.append(step["qval"]) 
-                # mean_val = np.mean(_temp_values)
-                # std_val = np.std(_temp_values)
+                mean_val = np.mean(_temp_values)
+                std_val = np.std(_temp_values)
                 mean_val = 0
                 std_val = 1
                     
@@ -622,8 +622,8 @@ class Train():
                     _temp_values.append(1)
                 for step in play_data[i]["data"]["steps"]:
                     _temp_values.append(step["qval"])
-                # mean_val = np.mean(_temp_values)
-                # std_val = np.std(_temp_values)                
+                mean_val = np.mean(_temp_values)
+                std_val = np.std(_temp_values)                
                 mean_val = 0
                 std_val = 1
                 for step in play_data[i]["data"]["steps"]:                    
