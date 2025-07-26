@@ -459,10 +459,10 @@ class MCTSPlayer(object):
 
 
             # 将 act_probs 概率的标准差改为1
-            std_act_probs = np.std(act_probs)
+            std_act_probs = np.std(act_probs[nz_idx])
             if std_act_probs >1:
-                avg_probs = np.mean(act_probs) 
-                act_probs = (act_probs-avg_probs) / std_act_probs + avg_probs
+                avg_probs = np.mean(act_probs[nz_idx]) 
+                act_probs[nz_idx] = (act_probs[nz_idx]-avg_probs) / std_act_probs + avg_probs
                 act_probs = np.maximum(act_probs, 0)  # 保证概率不小于0
                 act_probs = act_probs / np.sum(act_probs)
             
