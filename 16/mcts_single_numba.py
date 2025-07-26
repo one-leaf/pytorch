@@ -457,6 +457,14 @@ class MCTSPlayer(object):
             # act_probs[max_qs_idx] = 1
             self.cache[hash(state)] = action
 
+
+            # 将 act_probs 概率的标准差改为1
+            std_act_probs = np.std(act_probs)
+            if std_act_probs >1: 
+                act_probs = act_probs / std_act_probs
+                act_probs = act_probs / np.sum(act_probs)
+            
+            # if game.removedlines < 13:
             return action, qval, act_probs, state_v, acc_ps, depth, find_end
         else:
             print("WARNING: game is terminal")
