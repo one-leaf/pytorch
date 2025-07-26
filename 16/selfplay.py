@@ -590,7 +590,7 @@ class Train():
             
             for k in range(len_steps):
                 step = play_data[i]["data"]["steps"][k]
-                step["qval"] = (np.mean(data[k:k+10]) - step["qval"])/(step["qval"]+1e-6)
+                step["qval"] = (np.mean(data[k:k+8]) - step["qval"])
                 # if k==len_steps-1:
                 #     step["qval"] = -1
                 # else:
