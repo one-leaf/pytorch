@@ -107,9 +107,9 @@ def expandPN(s:int, availables, act_probs, v, Ps, Ns, Nsa, Qsa, actions_num):
     _p[availables==0]=0
     _p_sum = np.sum(_p)
     if _p_sum > 0:     
-        if v<0 and np.max(_p/_p_sum)>0.99:             
-            _p[availables==1] += 0.002 
-            _p_sum = np.sum(_p)
+        # if v<0 and np.max(_p/_p_sum)>0.99:             
+        #     _p[availables==1] += 0.002 
+        #     _p_sum = np.sum(_p)
         # if np.max(_p/_p_sum)>0.95:        
         #     probs = availables/np.sum(availables)
         #     Ps[s] = probs*0.05 + _p*0.95/_p_sum
@@ -460,8 +460,10 @@ class MCTSPlayer(object):
 
             # 将 act_probs 概率的标准差改为1
             std_act_probs = np.std(act_probs)
-            if std_act_probs >1: 
-                act_probs = act_probs / std_act_probs
+            if std_act_probs >1:
+                avg_probs = np.mean(act_probs) 
+                act_probs = (act_probs-avg_probs) / std_act_probs + avg_probs
+                act_probs = np.maximum(act_probs, 0)  # 保证概率不小于0
                 act_probs = act_probs / np.sum(act_probs)
             
             # if game.removedlines < 13:
