@@ -607,8 +607,8 @@ class Train():
                     _temp_values.append(step["qval"]) 
                 mean_val = np.mean(_temp_values)
                 std_val = np.std(_temp_values)
-                mean_val = 0
-                std_val = 1
+                # mean_val = 0
+                # std_val = 1
                     
                 # for k in range(len_steps-self.sample_count, len_steps):
                 for k in range(len_steps):
@@ -624,8 +624,8 @@ class Train():
                     _temp_values.append(step["qval"])
                 mean_val = np.mean(_temp_values)
                 std_val = np.std(_temp_values)                
-                mean_val = 0
-                std_val = 1
+                # mean_val = 0
+                # std_val = 1
                 for step in play_data[i]["data"]["steps"]:                    
                     states.append(step["state"])
                     mcts_probs.append(step["move_probs"])
