@@ -395,8 +395,8 @@ class MCTSPlayer(object):
             #     idx = max_ps_idx     
             # if game.steps < self.limit_count//2:
             if game.next_Pieces_list_len >= len(game.piecehis):
-                if self.player>0:
-                    if random.random() < 0.75:
+                if self.player==0:
+                    if random.random() < 0.9:
                         idx = max_ns_idx
                     else:
                         idx = max_qs_idx
