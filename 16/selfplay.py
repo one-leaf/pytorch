@@ -582,6 +582,7 @@ class Train():
             len_steps = len(play_data[i]["data"]["steps"])
             mean_val = np.mean([play_data[i]["data"]["steps"][k]["qval"] for k in range(len_steps)])
             std_val = np.std([play_data[i]["data"]["steps"][k]["qval"] for k in range(len_steps)])
+            std_val = std_val * (state["total"]["steps_mcts"] / len_steps)
             for k in range(len_steps):
                 step = play_data[i]["data"]["steps"][k]
                 # step["qval"] = step["qval"] - step["state_value"]
