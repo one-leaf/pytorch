@@ -577,11 +577,19 @@ class Train():
 
         # 将Q值转为优势A
         # 1 用 Q - state_value 转为优势A
+        # 1 用 A_i = (Q_i - mean(Q))/std(Q) 转为优势A
         for i in range(self.play_count):
             len_steps = len(play_data[i]["data"]["steps"])
+            mean_val = np.mean([play_data[i]["data"]["steps"][k]["qval"] for k in range(len_steps)])
+            std_val = np.std([play_data[i]["data"]["steps"][k]["qval"] for k in range(len_steps)])
             for k in range(len_steps):
                 step = play_data[i]["data"]["steps"][k]
-                step["qval"] = step["qval"] - step["state_value"]
+                # step["qval"] = step["qval"] - step["state_value"]
+                step["qval"] = (step["qval"] - mean_val) / std_val
+                
+                states.append(step["state"])
+                mcts_probs.append(step["move_probs"])
+                values.append(step["qval"])
 
         # 2 用 Q_t+1 - Q_t 转为优势A
         # for i in range(self.play_count):
@@ -596,40 +604,40 @@ class Train():
                 # else:
                 #     step["qval"] = play_data[i]["data"]["steps"][k+1]["qval"] - step["qval"]           
 
-        _temp_values = deque(maxlen=self.sample_count)
-        for i in range(self.play_count):
-            # 如果当前局面有足够的步数，跳过
-            len_steps = len(play_data[i]["data"]["steps"])
-            if len_steps>=self.sample_count:
-                # for k in range(len_steps-self.sample_count, len_steps):
-                for k in range(len_steps):
-                    step = play_data[i]["data"]["steps"][k]
-                    _temp_values.append(step["qval"]) 
-                mean_val = np.mean(_temp_values)
-                std_val = np.std(_temp_values)
-                # mean_val = 0
-                # std_val = 1
+        # _temp_values = deque(maxlen=self.sample_count)
+        # for i in range(self.play_count):
+        #     # 如果当前局面有足够的步数，跳过
+        #     len_steps = len(play_data[i]["data"]["steps"])
+        #     if len_steps>=self.sample_count:
+        #         # for k in range(len_steps-self.sample_count, len_steps):
+        #         for k in range(len_steps):
+        #             step = play_data[i]["data"]["steps"][k]
+        #             _temp_values.append(step["qval"]) 
+        #         mean_val = np.mean(_temp_values)
+        #         std_val = np.std(_temp_values)
+        #         # mean_val = 0
+        #         # std_val = 1
                     
-                # for k in range(len_steps-self.sample_count, len_steps):
-                for k in range(len_steps):
-                    step = play_data[i]["data"]["steps"][k]
-                    states.append(step["state"])
-                    mcts_probs.append(step["move_probs"])
-                    values.append((step["qval"]-mean_val)/std_val)
-            else: 
-                # 如果当前局面步数不够，全部补充1到 self.sample_count 计算方差
-                for k in range(self.sample_count-len_steps):
-                    _temp_values.append(1)
-                for step in play_data[i]["data"]["steps"]:
-                    _temp_values.append(step["qval"])
-                mean_val = np.mean(_temp_values)
-                std_val = np.std(_temp_values)                
-                # mean_val = 0
-                # std_val = 1
-                for step in play_data[i]["data"]["steps"]:                    
-                    states.append(step["state"])
-                    mcts_probs.append(step["move_probs"])
-                    values.append((step["qval"]-mean_val)/std_val)
+        #         # for k in range(len_steps-self.sample_count, len_steps):
+        #         for k in range(len_steps):
+        #             step = play_data[i]["data"]["steps"][k]
+        #             states.append(step["state"])
+        #             mcts_probs.append(step["move_probs"])
+        #             values.append((step["qval"]-mean_val)/std_val)
+        #     else: 
+        #         # 如果当前局面步数不够，全部补充1到 self.sample_count 计算方差
+        #         for k in range(self.sample_count-len_steps):
+        #             _temp_values.append(1)
+        #         for step in play_data[i]["data"]["steps"]:
+        #             _temp_values.append(step["qval"])
+        #         mean_val = np.mean(_temp_values)
+        #         std_val = np.std(_temp_values)                
+        #         # mean_val = 0
+        #         # std_val = 1
+        #         for step in play_data[i]["data"]["steps"]:                    
+        #             states.append(step["state"])
+        #             mcts_probs.append(step["move_probs"])
+        #             values.append((step["qval"]-mean_val)/std_val)
                     
                     # values.append(step["qval"]+play_data[i]["agent"].piececount/total_game_piececount) 
         # values = np.array(values, dtype=np.float16)
@@ -642,8 +650,7 @@ class Train():
         # values = np.clip(normalized, -1, 1)    
         # values = values/np.std(values)
         values = np.clip(values, -1, 1)
-        # values = clipped/k
-        # values = values - np.mean(values)
+
         assert len(states)>0
         assert len(states)==len(values)
         assert len(states)==len(mcts_probs)
