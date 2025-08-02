@@ -287,7 +287,7 @@ class MCTS():
                 
         v = self.search(state) 
 
-        v += _removedlines*0.1   # 每消除一行奖励0.1，奖励越多，分数越高                
+        v += _removedlines   # 每消除一行奖励0.1，奖励越多，分数越高                
         # v -= min(1, _emptyCount)*0.01       # 每多一个空洞扣0.01
         
         # 外部奖励，放的方块越多越好
