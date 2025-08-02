@@ -398,7 +398,7 @@ class MCTSPlayer(object):
             # if game.steps < self.limit_count//2:
             if self.player==0:
                 if game.next_Pieces_list_len*2 >= len(game.piecehis):
-                    if random.random() < 0.9:
+                    if random.random() < 0.99:
                         idx = max_ns_idx
                     else:
                         idx = max_qs_idx
@@ -421,7 +421,7 @@ class MCTSPlayer(object):
                 #     p = 0.9
                 # else:
                 #     p = 0.99
-                p=0.99
+                p=0.9
                 dirichlet = np.random.dirichlet(2 * np.ones(len(nz_idx)))
                 dirichlet_probs = np.zeros_like(act_probs, dtype=np.float64)
                 dirichlet_probs[nz_idx] = dirichlet
