@@ -592,7 +592,9 @@ class Train():
                 if len(data)>0: 
                     mean_val.append(np.mean(data))
                     std_val.append(np.std(data))
-                     
+                    
+            print(i, "mean_val:", mean_val)
+            print(i, "std_val:", std_val)         
             
             for k in range(len_steps):
                 step = play_data[i]["data"]["steps"][k]
