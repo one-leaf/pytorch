@@ -578,17 +578,30 @@ class Train():
         # 将Q值转为优势A
         # 1 用 Q_i = (Q_i - mean(Q))/std(Q) 转为均衡Q
         # 2 用 A_i = Q_i+1 - Q_i 转为优势 A
+        
+        split_step_count = self.n_playout
         for i in range(self.play_count):
             len_steps = len(play_data[i]["data"]["steps"])
-            mean_val = np.mean([play_data[i]["data"]["steps"][k]["qval"] for k in range(len_steps)])
-            std_val = np.std([play_data[i]["data"]["steps"][k]["qval"] for k in range(len_steps)])
+            # mean_val = np.mean([play_data[i]["data"]["steps"][k]["qval"] for k in range(len_steps)])
+            # std_val = np.std([play_data[i]["data"]["steps"][k]["qval"] for k in range(len_steps)])
             # std_val = std_val * (state["total"]["steps_mcts"] / len_steps)
+            mean_val = []
+            std_val = []
+            for k in range(len_steps//split_step_count):
+                data = [play_data[i]["data"]["steps"][k*split_step_count+j]["qval"] for j in range(split_step_count) if k*split_step_count+j<len_steps]
+                if len(data)>0: 
+                    mean_val.append(np.mean(data))
+                    std_val.append(np.std(data))
+                     
+            
             for k in range(len_steps):
                 step = play_data[i]["data"]["steps"][k]
+                _mean_val = mean_val[k//split_step_count] if k//split_step_count<len(mean_val) else 0
+                _std_val = std_val[k//split_step_count] if k//split_step_count<len(std_val) else 1                
                 # step["qval"] = step["qval"] - step["state_value"]
-                step["qval"] = (step["qval"] - mean_val) / std_val
-                if k > 0:
-                    values[-1] = step["qval"] - values[-1]                                
+                step["qval"] = (step["qval"] - _mean_val) / _std_val
+                # if k > 0:
+                #     values[-1] = step["qval"] - values[-1]                                
                 states.append(step["state"])
                 mcts_probs.append(step["move_probs"])
                 values.append(step["qval"])
