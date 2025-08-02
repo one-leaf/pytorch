@@ -614,6 +614,9 @@ class Train():
                 mcts_probs.append(step["move_probs"])
                 values.append(step["qval"])
 
+            for i in range(len(mean_val)):
+                print(values[i*split_step_count:(i+1)*split_step_count])
+                
         # 2 用 Q_t+1 - Q_t 转为优势A
         # for i in range(self.play_count):
         #     len_steps = len(play_data[i]["data"]["steps"])
@@ -679,8 +682,6 @@ class Train():
         assert len(states)==len(mcts_probs)
         
         states_len = len(states)
-        for i in range(len(mean_val)):
-            print(values[i*split_step_count:(i+1)*split_step_count])
             
         print("avg_values:", np.mean(values), "std_values:", np.std(values))
         
