@@ -582,7 +582,7 @@ class Train():
             len_steps = len(play_data[i]["data"]["steps"])
             mean_val = np.mean([play_data[i]["data"]["steps"][k]["qval"] for k in range(len_steps)])
             std_val = np.std([play_data[i]["data"]["steps"][k]["qval"] for k in range(len_steps)])
-            std_val = std_val * (state["total"]["steps_mcts"] / len_steps)
+            # std_val = std_val * (state["total"]["steps_mcts"] / len_steps)
             for k in range(len_steps):
                 step = play_data[i]["data"]["steps"][k]
                 # step["qval"] = step["qval"] - step["state_value"]
@@ -667,8 +667,8 @@ class Train():
 
         # 保存对抗数据到data_buffer
         filetime = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        # for i, obj in enumerate(self.get_equi_data(states, mcts_probs, values)):
-        for i, obj in enumerate(zip(states, mcts_probs, values)):
+        for i, obj in enumerate(self.get_equi_data(states, mcts_probs, values)):
+        # for i, obj in enumerate(zip(states, mcts_probs, values)):
             filename = "{}-{}.pkl".format(filetime, i)
             savefile = os.path.join(data_wait_dir, filename)
             with open(savefile, "wb") as fn:
