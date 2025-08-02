@@ -594,8 +594,10 @@ class Train():
             for k in range(c):
                 data = [play_data[i]["data"]["steps"][k*split_step_count+j]["qval"] for j in range(split_step_count) if k*split_step_count+j<len_steps]
                 if len(data)>0: 
-                    mean_val.append(np.mean(data))
-                    std_val.append(np.std(data))
+                    mean_val.append(np.mean(data)) 
+                    _std = np.std(data)
+                    if _std==0: _std = 1
+                    std_val.append(_std)
                     
             print(i, "mean_val:", mean_val)
             print(i, "std_val:", std_val)         
