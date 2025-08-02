@@ -615,7 +615,7 @@ class Train():
                 values.append(step["qval"])
 
             for i in range(len(mean_val)):
-                print(values[i*split_step_count:(i+1)*split_step_count])
+                print(np.array(values[i*split_step_count:(i+1)*split_step_count]))
                 
         # 2 用 Q_t+1 - Q_t 转为优势A
         # for i in range(self.play_count):
