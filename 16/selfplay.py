@@ -587,7 +587,11 @@ class Train():
             # std_val = std_val * (state["total"]["steps_mcts"] / len_steps)
             mean_val = []
             std_val = []
-            for k in range(len_steps//split_step_count):
+            c = len_steps//split_step_count 
+            if len_steps%split_step_count>0: 
+                c += 1
+                
+            for k in range(c):
                 data = [play_data[i]["data"]["steps"][k*split_step_count+j]["qval"] for j in range(split_step_count) if k*split_step_count+j<len_steps]
                 if len(data)>0: 
                     mean_val.append(np.mean(data))
