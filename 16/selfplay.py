@@ -677,9 +677,9 @@ class Train():
         assert len(states)==len(mcts_probs)
         
         states_len = len(states)
-        print(values[:100])
-        print(values[states_len//2-50:states_len//2+50])
-        print(values[-100:])
+        for i in range(len(mean_val)):
+            print(values[i*split_step_count:(i+1)*split_step_count])
+            
         print("avg_values:", np.mean(values), "std_values:", np.std(values))
         
         print("TRAIN Self Play end. length: %s value sum: %s saving ..." % (states_len,sum(values)))
