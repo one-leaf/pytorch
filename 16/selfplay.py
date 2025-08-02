@@ -192,20 +192,20 @@ class Train():
         agent.is_replay = False
         agent.limitstep = False
 
-        if his_steps > sample_count:
-            while True:
-                action = policy_value_net.policy_value_fn_best_act(agent)
-                agent.step(action)        
-                if agent.steps > (his_steps-sample_count) and agent.state==1:
-                    break
-                if agent.terminal:
-                    raise Exception("agent terminal, cancel play")
+        # if his_steps > sample_count:
+        #     while True:
+        #         action = policy_value_net.policy_value_fn_best_act(agent)
+        #         agent.step(action)        
+        #         if agent.steps > (his_steps-sample_count) and agent.state==1:
+        #             break
+        #         if agent.terminal:
+        #             raise Exception("agent terminal, cancel play")
                 
-        agent.print()    
+        # agent.print()    
                 
-        agent.piececount = 0
-        agent.steps = 0
-        agent.removedlines=0  
+        # agent.piececount = 0
+        # agent.steps = 0
+        # agent.removedlines=0  
         agent.setCache(cache)
         
         agent.show_mcts_process= True
