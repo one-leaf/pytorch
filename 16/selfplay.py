@@ -588,9 +588,10 @@ class Train():
             mean_val = []
             std_val = []
             c = len_steps//split_step_count 
-                
-            for k in range(c):
-                if k==c-1:
+            c_mod = 1 if len_steps%split_step_count>0 else 0
+            
+            for k in range(c+c_mod):
+                if k==c and c_mod==1:
                     data = [play_data[i]["data"]["steps"][k*split_step_count+j]["qval"] for j in range(split_step_count+len_steps%split_step_count)]
                 else:
                     data = [play_data[i]["data"]["steps"][k*split_step_count+j]["qval"] for j in range(split_step_count)]
@@ -598,6 +599,7 @@ class Train():
                 _std = np.std(data)
                 if _std==0: _std = 1
                 std_val.append(_std)
+                if k==c-1 and c_mod==1: break
                     
             print(i, "mean_val:", mean_val)
             print(i, "std_val:", std_val)         
@@ -605,7 +607,7 @@ class Train():
             for k in range(len_steps):
                 step = play_data[i]["data"]["steps"][k]
                 j = k//split_step_count
-                if j>=c: j = c-1
+                if j>=len(mean_val): j = -1
                 _mean_val = mean_val[j]
                 _std_val = std_val[j]               
                 # step["qval"] = step["qval"] - step["state_value"]
