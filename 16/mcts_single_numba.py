@@ -405,7 +405,7 @@ class MCTSPlayer(object):
             elif self.player==1:
                 if len(game.piecehis) < 2*game.next_Pieces_list_len:
                     if random.random() < 0.99:
-                        idx = max_qs_idx    
+                        idx = max_ps_idx    
                     else:
                         idx = max_ns_idx
                         
