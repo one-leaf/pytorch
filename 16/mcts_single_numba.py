@@ -402,7 +402,13 @@ class MCTSPlayer(object):
                         idx = max_ns_idx
                     else:
                         idx = max_qs_idx
-                
+            elif self.player==1:
+                if len(game.piecehis) < 2*game.next_Pieces_list_len:
+                    if random.random() < 0.99:
+                        idx = max_qs_idx    
+                    else:
+                        idx = max_ns_idx
+                        
             p = 0
             _p = []     
             # if idx == -1 or min(act_qs)<0:    
