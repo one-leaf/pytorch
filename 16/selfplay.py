@@ -623,6 +623,7 @@ class Train():
                     print(np.array(values[k*split_step_count:len_steps]))
                 else:
                     print(np.array(values[k*split_step_count:(k+1)*split_step_count]))
+                if k>=c-1 and c_mod==1: break
                 
         # 2 用 Q_t+1 - Q_t 转为优势A
         # for i in range(self.play_count):
