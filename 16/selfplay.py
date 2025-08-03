@@ -618,7 +618,7 @@ class Train():
 
             for i in range(c):
                 if i==c-1:
-                    print("values:", np.array(values[i*split_step_count:len_steps]))
+                    print(np.array(values[i*split_step_count:len_steps]))
                 else:
                     print(np.array(values[i*split_step_count:(i+1)*split_step_count]))
                 
