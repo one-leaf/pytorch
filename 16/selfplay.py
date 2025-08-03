@@ -605,7 +605,7 @@ class Train():
             for k in range(len_steps):
                 step = play_data[i]["data"]["steps"][k]
                 j = k//split_step_count
-                if j>=c: j = c-1
+                if j>=c: j = -1
                 _mean_val = mean_val[j]
                 _std_val = std_val[j]               
                 # step["qval"] = step["qval"] - step["state_value"]
