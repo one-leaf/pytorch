@@ -616,11 +616,11 @@ class Train():
                 mcts_probs.append(step["move_probs"])
                 values.append(step["qval"])
 
-            for i in range(c):
-                if i==c-1:
-                    print(np.array(values[i*split_step_count:len_steps]))
+            for k in range(c):
+                if k==c-1:
+                    print(np.array(values[k*split_step_count:len_steps]))
                 else:
-                    print(np.array(values[i*split_step_count:(i+1)*split_step_count]))
+                    print(np.array(values[k*split_step_count:(k+1)*split_step_count]))
                 
         # 2 用 Q_t+1 - Q_t 转为优势A
         # for i in range(self.play_count):
