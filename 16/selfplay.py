@@ -580,6 +580,7 @@ class Train():
         # 2 用 A_i = Q_i+1 - Q_i 转为优势 A
         
         split_step_count = self.n_playout
+        mark_no = 0
         for i in range(self.play_count):
             len_steps = len(play_data[i]["data"]["steps"])
             # mean_val = np.mean([play_data[i]["data"]["steps"][k]["qval"] for k in range(len_steps)])
@@ -618,12 +619,15 @@ class Train():
                 mcts_probs.append(step["move_probs"])
                 values.append(step["qval"])
 
+
             for k in range(c+c_mod):
                 if k>=c-1 and c_mod==1:
-                    print(np.array(values[k*split_step_count:len_steps]))
+                    print(np.array(values[k*split_step_count+mark_no:len_steps+mark_no]))
                 else:
-                    print(np.array(values[k*split_step_count:(k+1)*split_step_count]))
+                    print(np.array(values[k*split_step_count+mark_no:(k+1)*split_step_count+mark_no]))
                 if k>=c-1 and c_mod==1: break
+                
+            mark_no += len_steps
                 
         # 2 用 Q_t+1 - Q_t 转为优势A
         # for i in range(self.play_count):
