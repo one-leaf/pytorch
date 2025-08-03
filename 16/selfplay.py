@@ -591,15 +591,15 @@ class Train():
             c_mod = 1 if len_steps%split_step_count>0 else 0
             
             for k in range(c+c_mod):
-                if k==c:
-                    data = [play_data[i]["data"]["steps"][k*split_step_count+j]["qval"] for j in range(split_step_count+len_steps%split_step_count)]
+                if k>=c-1 and c_mod==1:
+                    data = [play_data[i]["data"]["steps"][k*split_step_count+j]["qval"] for j in range(len_steps-k*split_step_count)]
                 else:
                     data = [play_data[i]["data"]["steps"][k*split_step_count+j]["qval"] for j in range(split_step_count)]
                 mean_val.append(np.mean(data)) 
                 _std = np.std(data)
                 if _std==0: _std = 1
                 std_val.append(_std)
-                if k==c: break
+                if k>=c-1 and c_mod==1: break
                     
             print(i, "mean_val:", mean_val)
             print(i, "std_val:", std_val)         
@@ -618,8 +618,8 @@ class Train():
                 mcts_probs.append(step["move_probs"])
                 values.append(step["qval"])
 
-            for k in range(c):
-                if k==c-1:
+            for k in range(c+c_mod):
+                if k>=c-1 and c_mod==1:
                     print(np.array(values[k*split_step_count:len_steps]))
                 else:
                     print(np.array(values[k*split_step_count:(k+1)*split_step_count]))
