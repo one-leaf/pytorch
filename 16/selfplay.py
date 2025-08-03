@@ -588,24 +588,26 @@ class Train():
             mean_val = []
             std_val = []
             c = len_steps//split_step_count 
-            if len_steps%split_step_count>0: 
-                c += 1
+            # if len_steps%split_step_count>0: 
+            #     c += 1
                 
             for k in range(c):
-                data = [play_data[i]["data"]["steps"][k*split_step_count+j]["qval"] for j in range(split_step_count) if k*split_step_count+j<len_steps]
-                if len(data)>0: 
-                    mean_val.append(np.mean(data)) 
-                    _std = np.std(data)
-                    if _std==0: _std = 1
-                    std_val.append(_std)
+                if k==c-1:
+                    data = [play_data[i]["data"]["steps"][k*split_step_count+j]["qval"] for j in range(split_step_count+len_steps%split_step_count)]
+                else:
+                    data = [play_data[i]["data"]["steps"][k*split_step_count+j]["qval"] for j in range(split_step_count)]
+                mean_val.append(np.mean(data)) 
+                _std = np.std(data)
+                if _std==0: _std = 1
+                std_val.append(_std)
                     
             print(i, "mean_val:", mean_val)
             print(i, "std_val:", std_val)         
             
             for k in range(len_steps):
                 step = play_data[i]["data"]["steps"][k]
-                _mean_val = mean_val[k//split_step_count] if k//split_step_count<len(mean_val) else 0
-                _std_val = std_val[k//split_step_count] if k//split_step_count<len(std_val) else 1                
+                _mean_val = mean_val[k//split_step_count]
+                _std_val = std_val[k//split_step_count]               
                 # step["qval"] = step["qval"] - step["state_value"]
                 step["qval"] = (step["qval"] - _mean_val) / _std_val
                 # if k > 0:
@@ -614,8 +616,11 @@ class Train():
                 mcts_probs.append(step["move_probs"])
                 values.append(step["qval"])
 
-            for i in range(len(mean_val)):
-                print(np.array(values[i*split_step_count:(i+1)*split_step_count]))
+            for i in range(c):
+                if i==c-1:
+                    print("values:", np.array(values[i*split_step_count:len_steps]))
+                else:
+                    print(np.array(values[i*split_step_count:(i+1)*split_step_count]))
                 
         # 2 用 Q_t+1 - Q_t 转为优势A
         # for i in range(self.play_count):
