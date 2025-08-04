@@ -54,8 +54,20 @@ class Solver:
             self.counts[k] += 1
             self.actions.append(k)
             self.update_regret(k)
+            
+def plot_results(solvers, solver_names):
+    """生成累积懊悔随时间变化的图像。输入solvers是一个列表,列表中的每个元素是一种特定的策略。
+    而solver_names也是一个列表,存储每个策略的名称"""
+    for idx, solver in enumerate(solvers):
+        time_list = range(len(solver.regrets))
+        plt.plot(time_list, solver.regrets, label=solver_names[idx])
+    plt.xlabel('Time steps')
+    plt.ylabel('Cumulative regrets')
+    plt.title('%d-armed bandit' % solvers[0].bandit.K)
+    plt.legend()
+    plt.show()
+                
 #%%            
-
 class EpsilonGreedy(Solver):
     """ epsilon贪婪算法,继承Solver类 """
     def __init__(self, bandit, epsilon=0.01, init_prob=1.0):
@@ -70,21 +82,8 @@ class EpsilonGreedy(Solver):
         else:
             k = np.argmax(self.estimates)  # 选择期望奖励估值最大的拉杆
         r = self.bandit.step(k)  # 得到本次动作的奖励
-        self.estimates[k] += 1. / (self.counts[k] + 1) * (r -
-                                                          self.estimates[k])
+        self.estimates[k] += 1. / (self.counts[k] + 1) * (r - self.estimates[k])
         return k
-
-def plot_results(solvers, solver_names):
-    """生成累积懊悔随时间变化的图像。输入solvers是一个列表,列表中的每个元素是一种特定的策略。
-    而solver_names也是一个列表,存储每个策略的名称"""
-    for idx, solver in enumerate(solvers):
-        time_list = range(len(solver.regrets))
-        plt.plot(time_list, solver.regrets, label=solver_names[idx])
-    plt.xlabel('Time steps')
-    plt.ylabel('Cumulative regrets')
-    plt.title('%d-armed bandit' % solvers[0].bandit.K)
-    plt.legend()
-    plt.show()
 
 
 np.random.seed(1)
@@ -104,7 +103,7 @@ for solver in epsilon_greedy_solver_list:
 
 plot_results(epsilon_greedy_solver_list, epsilon_greedy_solver_names)
 
-
+#%%
 class DecayingEpsilonGreedy(Solver):
     """ epsilon值随时间衰减的epsilon-贪婪算法,继承Solver类 """
     def __init__(self, bandit, init_prob=1.0):
@@ -120,8 +119,7 @@ class DecayingEpsilonGreedy(Solver):
             k = np.argmax(self.estimates)
 
         r = self.bandit.step(k)
-        self.estimates[k] += 1. / (self.counts[k] + 1) * (r -
-                                                          self.estimates[k])
+        self.estimates[k] += 1. / (self.counts[k] + 1) * (r - self.estimates[k])
 
         return k
 
@@ -132,7 +130,7 @@ decaying_epsilon_greedy_solver.run(5000)
 print('epsilon值衰减的贪婪算法的累积懊悔为：', decaying_epsilon_greedy_solver.regret)
 plot_results([decaying_epsilon_greedy_solver], ["DecayingEpsilonGreedy"])
 
-
+#%%
 class UCB(Solver):
     """ UCB算法,继承Solver类 """
     def __init__(self, bandit, coef, init_prob=1.0):
@@ -147,8 +145,7 @@ class UCB(Solver):
             np.log(self.total_count) / (2 * (self.counts + 1)))  # 计算上置信界
         k = np.argmax(ucb)  # 选出上置信界最大的拉杆
         r = self.bandit.step(k)
-        self.estimates[k] += 1. / (self.counts[k] + 1) * (r -
-                                                          self.estimates[k])
+        self.estimates[k] += 1. / (self.counts[k] + 1) * (r - self.estimates[k])
         return k
 
 
@@ -158,7 +155,7 @@ UCB_solver = UCB(bandit_10_arm, coef)
 UCB_solver.run(5000)
 print('上置信界算法的累积懊悔为：', UCB_solver.regret)
 plot_results([UCB_solver], ["UCB"])
-
+# %%
 
 class ThompsonSampling(Solver):
     """ 汤普森采样算法,继承Solver类 """
