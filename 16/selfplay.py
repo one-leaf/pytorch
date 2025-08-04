@@ -594,11 +594,9 @@ class Train():
             for k in range(c+c_mod):
                 if k>=c-1 and c_mod==1:
                     data = [play_data[i]["data"]["steps"][k*split_step_count+j]["qval"] for j in range(len_steps-k*split_step_count)]
-                    p = play_data[i]["data"]["steps"][len_steps-1]["piece_count"] - play_data[i]["data"]["steps"][k*split_step_count]["piece_count"]
                 else:
                     data = [play_data[i]["data"]["steps"][k*split_step_count+j]["qval"] for j in range(split_step_count)]
-                    p = play_data[i]["data"]["steps"][(k+1)*split_step_count-1]["piece_count"] - play_data[i]["data"]["steps"][k*split_step_count]["piece_count"]
-                mean_val.append(np.mean(data)+1/p)
+                mean_val.append(np.mean(data) + 1/play_data[i]["agent"].piececount)
                 # mean_val.append(np.mean(data))
                 _std = np.std(data)
                 if _std==0: _std = 1
