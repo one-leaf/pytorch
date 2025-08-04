@@ -291,7 +291,7 @@ class MCTS():
             r = -0.4
             r += _removedlines   # 每消除一行奖励1，奖励越多，分数越高     
             r -= _emptyCount*0.1 # 每多一个空洞扣1
-            v = v + r # r/state.game.steps  # 奖励越多，分数越高
+            v = max(-1, v + r) # r/state.game.steps  # 奖励越多，分数越高
         
         # 外部奖励，放的方块越多越好
         #     v += 0.01
