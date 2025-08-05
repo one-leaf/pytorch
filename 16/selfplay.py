@@ -593,11 +593,11 @@ class Train():
             
             for k in range(c+c_mod):
                 if k>=c-1 and c_mod==1:
-                    data = [play_data[i]["data"]["steps"][k*split_step_count+j]["qval"] for j in range(len_steps-k*split_step_count)]
+                    data = [play_data[i]["data"]["steps"][k*split_step_count+j]["qval"] - play_data[i]["data"]["steps"][k*split_step_count+j]["state_value"] for j in range(len_steps-k*split_step_count)]
                 else:
-                    data = [play_data[i]["data"]["steps"][k*split_step_count+j]["qval"] for j in range(split_step_count)]
-                mean_val.append(np.mean(data) + 1/play_data[i]["agent"].piececount)
-                # mean_val.append(np.mean(data))
+                    data = [play_data[i]["data"]["steps"][k*split_step_count+j]["qval"] - play_data[i]["data"]["steps"][k*split_step_count+j]["state_value"] for j in range(split_step_count)]
+                # mean_val.append(np.mean(data) + 1/play_data[i]["agent"].piececount)
+                mean_val.append(np.mean(data))
                 _std = np.std(data)
                 if _std==0: _std = 1
                 std_val.append(_std)
@@ -612,8 +612,8 @@ class Train():
                 if j>=len(mean_val): j = -1
                 _mean_val = mean_val[j]
                 _std_val = std_val[j]               
-                step["qval"] = (step["qval"] - step["state_value"]) / _std_val
-                # step["qval"] = (step["qval"] - _mean_val) / _std_val
+                # step["qval"] = (step["qval"] - step["state_value"]) / _std_val
+                step["qval"] = (step["qval"] - _mean_val) / _std_val
                 # if k > 0:
                 #     values[-1] = step["qval"] - values[-1]                                
                 states.append(step["state"])
