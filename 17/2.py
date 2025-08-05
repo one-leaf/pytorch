@@ -40,7 +40,8 @@ class Solver:
 
     def update_regret(self, k):
         # 计算累积懊悔并保存,k为本次动作选择的拉杆的编号
-        self.regret += self.bandit.best_prob - self.bandit.probs[k]
+        # self.regret += self.bandit.best_prob - self.bandit.probs[k]
+        self.regret += 1 if self.bandit.best_idx != k else 0
         self.regrets.append(self.regret)
 
     def run_one_step(self):
@@ -89,7 +90,7 @@ class EpsilonGreedy(Solver):
 np.random.seed(1)
 epsilon_greedy_solver = EpsilonGreedy(bandit_10_arm, epsilon=0.01)
 epsilon_greedy_solver.run(5000)
-print('epsilon-贪婪算法的累积懊悔为：', epsilon_greedy_solver.regret)
+print('epsilon-贪婪算法的累积懊悔为：', epsilon_greedy_solver.regret, epsilon_greedy_solver.estimates)
 plot_results([epsilon_greedy_solver], ["EpsilonGreedy"])
 
 np.random.seed(0)
@@ -127,7 +128,7 @@ class DecayingEpsilonGreedy(Solver):
 np.random.seed(1)
 decaying_epsilon_greedy_solver = DecayingEpsilonGreedy(bandit_10_arm)
 decaying_epsilon_greedy_solver.run(5000)
-print('epsilon值衰减的贪婪算法的累积懊悔为：', decaying_epsilon_greedy_solver.regret)
+print('epsilon值衰减的贪婪算法的累积懊悔为：', decaying_epsilon_greedy_solver.regret, decaying_epsilon_greedy_solver.estimates)
 plot_results([decaying_epsilon_greedy_solver], ["DecayingEpsilonGreedy"])
 
 #%%
@@ -153,7 +154,7 @@ np.random.seed(1)
 coef = 1  # 控制不确定性比重的系数
 UCB_solver = UCB(bandit_10_arm, coef)
 UCB_solver.run(5000)
-print('上置信界算法的累积懊悔为：', UCB_solver.regret)
+print('上置信界算法的累积懊悔为：', UCB_solver.regret, UCB_solver.estimates)
 plot_results([UCB_solver], ["UCB"])
 # %%
 
