@@ -579,7 +579,7 @@ class Train():
         # 1 用 Q_i = (Q_i - mean(Q))/std(Q) 转为均衡Q
         # 2 用 A_i = Q_i+1 - Q_i 转为优势 A
         
-        split_step_count = self.n_playout
+        split_step_count = 512
         mark_no = 0
         for i in range(self.play_count):
             len_steps = len(play_data[i]["data"]["steps"])
@@ -588,53 +588,47 @@ class Train():
             # std_val = std_val * (state["total"]["steps_mcts"] / len_steps)
             mean_val = []
             std_val = []
-            c = len_steps//split_step_count 
-            c_mod = 1 if len_steps%split_step_count>0 else 0
             
-            for k in range(c+c_mod):
-                if k>=c-1 and c_mod==1:
-                    data = [play_data[i]["data"]["steps"][k*split_step_count+j]["qval"] - play_data[i]["data"]["steps"][k*split_step_count+j]["state_value"] for j in range(len_steps-k*split_step_count)]
-                    # data = [play_data[i]["data"]["steps"][k*split_step_count+j]["qval"] for j in range(len_steps-k*split_step_count)]
-                else:
-                    data = [play_data[i]["data"]["steps"][k*split_step_count+j]["qval"] - play_data[i]["data"]["steps"][k*split_step_count+j]["state_value"] for j in range(split_step_count)]
-                    # data = [play_data[i]["data"]["steps"][k*split_step_count+j]["qval"] for j in range(split_step_count)]
-                # mean_val.append(np.mean(data) + 1/play_data[i]["agent"].piececount)
+            data = np.zeros(split_step_count)
+            c = 0
+            for k in range(len_steps-1, -1, -1):
+                if c>0 and c%split_step_count==0:
+                    mean_val.append(np.mean(data))
+                    std_val.append(np.std(data))
+                    data = np.zeros(split_step_count)
+                data[c%split_step_count] = play_data[i]["data"]["steps"][k]["qval"] - play_data[i]["data"]["steps"][k]["state_value"]
+                c += 1
+                
+            if len_steps%split_step_count>0:
                 mean_val.append(np.mean(data))
-                _std = np.std(data)
-                if _std==0: _std = 1
-                std_val.append(_std)
-                if k>=c-1 and c_mod==1: break
+                std_val.append(np.std(data))                                   
                     
             print(i, "mean_val:", mean_val)
             print(i, "std_val:", std_val)         
+            
             _values = []
-            for k in range(len_steps):
+            c = 0
+            for k in range(len_steps-1, -1, -1):
                 step = play_data[i]["data"]["steps"][k]
-                j = k//split_step_count
-                if j>=len(mean_val): j = -1
+                j = c//split_step_count
                 _mean_val = mean_val[j]
                 _std_val = std_val[j]   
-                step["qval"] = (step["qval"] - step["state_value"])            
+                # step["qval"] = (step["qval"] - step["state_value"])            
                 # step["qval"] = (step["qval"] - step["state_value"]) / _std_val
-                # step["qval"] = (step["qval"] - step["state_value"] - _mean_val)/_std_val
+                value = (step["qval"] - step["state_value"] - _mean_val)/_std_val
 
                 # if k > 0:
                 #     values[-1] = step["qval"] - values[-1]                                
                 states.append(step["state"])
                 mcts_probs.append(step["move_probs"])
-                _values.append(step["qval"])
+                _values.append(value)
+                c += 1
 
             _values = np.array(_values)
-            _values = (_values - np.mean(_values)) / (np.std(_values)+1e-6)
+            # _values = (_values - np.mean(_values)) / (np.std(_values)+1e-6)
             _values = np.clip(_values, -1, 1)
             values.extend(_values.tolist())
-
-            for k in range(c+c_mod):
-                if k>=c-1 and c_mod==1:
-                    print(np.array(values[k*split_step_count+mark_no:len_steps+mark_no]))
-                else:
-                    print(np.array(values[k*split_step_count+mark_no:(k+1)*split_step_count+mark_no]))
-                if k>=c-1 and c_mod==1: break
+            print(_values)
                 
             mark_no += len_steps
                 
