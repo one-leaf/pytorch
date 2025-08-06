@@ -332,7 +332,6 @@ class Train():
             if self.lr_multiplier > 10:  self.lr_multiplier = 10
             
             status["total"]["lr_multiplier"] = float(self.lr_multiplier) 
-            status["kl"].append(round(float(kl),6))               
             save_status_file(status)    
 
             print("kl:{} vs {} lr_multiplier:{} lr:{} avg_values:{} std_values:{}".format(kl, self.kl_targ, self.lr_multiplier, self.learn_rate*self.lr_multiplier, \
