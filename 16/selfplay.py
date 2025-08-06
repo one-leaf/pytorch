@@ -593,9 +593,11 @@ class Train():
             
             for k in range(c+c_mod):
                 if k>=c-1 and c_mod==1:
-                    data = [play_data[i]["data"]["steps"][k*split_step_count+j]["qval"] - play_data[i]["data"]["steps"][k*split_step_count+j]["state_value"] for j in range(len_steps-k*split_step_count)]
+                    # data = [play_data[i]["data"]["steps"][k*split_step_count+j]["qval"] - play_data[i]["data"]["steps"][k*split_step_count+j]["state_value"] for j in range(len_steps-k*split_step_count)]
+                    data = [play_data[i]["data"]["steps"][k*split_step_count+j]["qval"] for j in range(len_steps-k*split_step_count)]
                 else:
-                    data = [play_data[i]["data"]["steps"][k*split_step_count+j]["qval"] - play_data[i]["data"]["steps"][k*split_step_count+j]["state_value"] for j in range(split_step_count)]
+                    # data = [play_data[i]["data"]["steps"][k*split_step_count+j]["qval"] - play_data[i]["data"]["steps"][k*split_step_count+j]["state_value"] for j in range(split_step_count)]
+                    data = [play_data[i]["data"]["steps"][k*split_step_count+j]["qval"] for j in range(split_step_count)]
                 # mean_val.append(np.mean(data) + 1/play_data[i]["agent"].piececount)
                 mean_val.append(np.mean(data))
                 _std = np.std(data)
