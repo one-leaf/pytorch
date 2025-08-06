@@ -607,22 +607,27 @@ class Train():
                     
             print(i, "mean_val:", mean_val)
             print(i, "std_val:", std_val)         
-            
+            _values = []
             for k in range(len_steps):
                 step = play_data[i]["data"]["steps"][k]
                 j = k//split_step_count
                 if j>=len(mean_val): j = -1
                 _mean_val = mean_val[j]
-                _std_val = std_val[j]               
-                step["qval"] = (step["qval"] - step["state_value"]) / _std_val
+                _std_val = std_val[j]   
+                step["qval"] = (step["qval"] - step["state_value"])            
+                # step["qval"] = (step["qval"] - step["state_value"]) / _std_val
                 # step["qval"] = (step["qval"] - step["state_value"] - _mean_val)/_std_val
 
                 # if k > 0:
                 #     values[-1] = step["qval"] - values[-1]                                
                 states.append(step["state"])
                 mcts_probs.append(step["move_probs"])
-                values.append(step["qval"])
+                _values.append(step["qval"])
 
+            _values = np.array(_values)
+            _values = (_values - np.mean(_values)) / (np.std(_values)+1e-6)
+            _values = np.clip(_values, -1, 1)
+            values.extend(_values.tolist())
 
             for k in range(c+c_mod):
                 if k>=c-1 and c_mod==1:
@@ -691,7 +696,7 @@ class Train():
         # # 裁剪到 [-1, 1]
         # values = np.clip(normalized, -1, 1)    
         # values = values/np.std(values)
-        values = np.clip(values, -1, 1)
+        # values = np.clip(values, -1, 1)
 
         assert len(states)>0
         assert len(states)==len(values)
