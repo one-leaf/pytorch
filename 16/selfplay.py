@@ -615,7 +615,7 @@ class Train():
                 _mean_val = mean_val[j]
                 _std_val = std_val[j]               
                 # step["qval"] = (step["qval"] - step["state_value"]) / _std_val
-                step["qval"] += (step["qval"] - step["state_value"] - _mean_val)/_std_val
+                step["qval"] = (step["qval"] - step["state_value"] - _mean_val)/_std_val
                 # if k > 0:
                 #     values[-1] = step["qval"] - values[-1]                                
                 states.append(step["state"])
