@@ -174,7 +174,7 @@ class Dataset(torch.utils.data.Dataset):
             os.rename(fn, savefile)
             if self.test_size==-1 or len(self.newsample)<self.test_size:
                 self.newsample.append(savefile)
-            if i>=self.max_keep_size//self.epoch: break     
+            if (i+1)>=self.max_keep_size//self.epoch: break     
             
         # random.shuffle(self.newsample)  
         print("mv %s/%s files to train"%(i+1,len(movefiles)))
