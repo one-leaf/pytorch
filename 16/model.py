@@ -224,8 +224,8 @@ class PolicyValueNet():
 
         ratios = torch.exp(probs - mcts_probs)
         print(ratios.shape, adv_batch.shape, values.shape, value_batch.shape)
-        surr1 = ratios * adv_batch
-        surr2 = torch.clamp(ratios, 1 - self.clip, 1 + self.clip) * adv_batch
+        surr1 = ratios * adv_batch.unsqueeze(1)
+        surr2 = torch.clamp(ratios, 1 - self.clip, 1 + self.clip) * adv_batch.unsqueeze(1)
         actor_loss = (-torch.min(surr1, surr2)).mean()
 
         value_loss = self.quantile_regression_loss(values, value_batch)
