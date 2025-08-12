@@ -29,7 +29,7 @@ class Train():
         self.learn_rate = 1e-8
         self.lr_multiplier = 1.0  # 基于KL的自适应学习率
         self.temp = 1  # MCTS的概率参数，越大越不肯定，训练时1，预测时1e-3
-        self.n_playout = 64  # 每个动作的模拟战记录个数，影响后续 512/2 = 256；256/16 = 16个方块 的走法
+        self.n_playout = 16  # 每个动作的模拟战记录个数，影响后续 512/2 = 256；256/16 = 16个方块 的走法
         # self.min_n_playout = 64   # 最小的模拟战记录个数
         # self.max_n_playout = 256  # 最大1的模拟战记录个数
         # 64/128/256/512 都不行
@@ -63,19 +63,19 @@ class Train():
 
     
 
-    def get_equi_data(self, states, mcts_probs, values):
+    def get_equi_data(self, states, mcts_probs, values, advs):
         """
         通过翻转增加数据集
-        play_data: [(state, mcts_prob, values, score), ..., ...]
+        play_data: [(state, mcts_prob, values, advs), ..., ...]
         """
         extend_data = []
         for i in range(len(states)):
             state, mcts_prob, value=states[i], mcts_probs[i], values[i]
-            extend_data.append((state, mcts_prob, value))
+            extend_data.append((state, mcts_prob, value, advs))
             if mcts_prob[0]<0.2 and np.max(mcts_prob)>0.8: # 如果旋转的概率的不大，就做翻转
                 equi_state = np.array([np.fliplr(s) for s in state])
                 equi_mcts_prob = mcts_prob[[0,2,1,3,4]]
-                extend_data.append((equi_state, equi_mcts_prob, value))
+                extend_data.append((equi_state, equi_mcts_prob, value, advs))
             # if i==0:
             #     print("state:",state)
             #     print("mcts_prob:",mcts_prob)
@@ -573,7 +573,7 @@ class Train():
         save_status_file(state)         
         avg_qval_list = [play_data[i]["avg_qval"] for i in range(self.play_count)]
         std_qval_list = [play_data[i]["std_qval"] for i in range(self.play_count)]    
-        states, mcts_probs, values= [], [], []
+        states, mcts_probs, values, advs= [], [], [], []
 
         # 将Q值转为优势A
         # 1 用 Q_i = (Q_i - mean(Q))/std(Q) 转为均衡Q
@@ -594,19 +594,22 @@ class Train():
             for k in range(len_steps-1, -1, -1):
                 if c>0 and c%split_step_count==0:
                     mean_val.append(np.mean(data))
-                    std_val.append(np.std(data))
+                    _std = np.std(data)
+                    if _std<0.1: _std=1
+                    std_val.append(_std)
                     data = np.zeros(split_step_count)
                 data[c%split_step_count] = play_data[i]["data"]["steps"][k]["qval"] - play_data[i]["data"]["steps"][k]["state_value"]
                 c += 1
                 
             if len_steps%split_step_count>0:
                 mean_val.append(np.mean(data))
-                std_val.append(np.std(data))                                   
+                _std = np.std(data)
+                if _std<0.1: _std=1
+                std_val.append(_std)                                   
                     
             print(i, "mean_val:", mean_val)
             print(i, "std_val:", std_val)         
             
-            _values = []
             c = 0
             for k in range(len_steps-1, -1, -1):
                 step = play_data[i]["data"]["steps"][k]
@@ -615,20 +618,22 @@ class Train():
                 _std_val = std_val[j]   
                 # step["qval"] = (step["qval"] - step["state_value"])            
                 # value = step["state_value"] + (step["qval"] - step["state_value"]) / _std_val
-                value = 0.5*step["state_value"] + 0.5*(step["qval"] - step["state_value"] - _mean_val)/_std_val
-
-                # if k > 0:
-                #     values[-1] = step["qval"] - values[-1]                                
+                # value = 0.5*step["state_value"] + 0.5*(step["qval"] - step["state_value"] - _mean_val)/_std_val
+                
+                adv = (step["qval"] - step["state_value"] - _mean_val)/(_std_val)
+                adv = np.clip(adv, -1, 1)                
+                advs.append(adv)
+                
+                value = step["qval"]
+                value = np.clip(value, -1, 1)
+                values.append(value)
+                
                 states.append(step["state"])
                 mcts_probs.append(step["move_probs"])
-                _values.append(value)
                 c += 1
 
-            _values = np.array(_values)
-            # _values = (_values - np.mean(_values)) / (np.std(_values)+1e-6)
-            _values = np.clip(_values, -1, 1)
-            values.extend(_values.tolist())
-            print(_values)
+            print(np.array(values[mark_no:mark_no+len_steps]))
+            print(np.array(advs[mark_no:mark_no+len_steps]))
                 
             mark_no += len_steps
                 
@@ -695,6 +700,7 @@ class Train():
         assert len(states)>0
         assert len(states)==len(values)
         assert len(states)==len(mcts_probs)
+        assert len(states)==len(advs)
         
         states_len = len(states)
             
@@ -704,8 +710,8 @@ class Train():
 
         # 保存对抗数据到data_buffer
         filetime = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        for i, obj in enumerate(self.get_equi_data(states, mcts_probs, values)):
-        # for i, obj in enumerate(zip(states, mcts_probs, values)):
+        for i, obj in enumerate(self.get_equi_data(states, mcts_probs, values, advs)):
+        # for i, obj in enumerate(zip(states, mcts_probs, values, advs)):
             filename = "{}-{}.pkl".format(filetime, i)
             savefile = os.path.join(data_wait_dir, filename)
             with open(savefile, "wb") as fn:

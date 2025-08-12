@@ -63,7 +63,8 @@ class Dataset(torch.utils.data.Dataset):
         state = torch.from_numpy(data["state"]).float()
         mcts_prob = torch.from_numpy(data["mcts_prob"]).float()
         value = torch.as_tensor(data["value"]).float()
-        return state, mcts_prob, value
+        adv = torch.as_tensor(data["adv"]).float()
+        return state, mcts_prob, value, adv
 
     def load_game_files(self):
         print("start load files name ... ")
@@ -101,7 +102,7 @@ class Dataset(torch.utils.data.Dataset):
         for i,fn in enumerate(self.file_list):
             try:
                 with open(fn, "rb") as f:
-                    state, mcts_prob, value = pickle.load(f)
+                    state, mcts_prob, value, adv = pickle.load(f)
                     assert state.shape == (4,20,10) , f'error: sate shape {state.shape}'
                     assert mcts_prob.shape == (5,) , f'error: prob shape {mcts_prob.shape}'
                     assert not np.isnan(value) , f'error: value is Nan'
@@ -128,7 +129,7 @@ class Dataset(torch.utils.data.Dataset):
             #             board[lc:]=board[:-lc]
             #             board[:lc]=0                         
 
-            self.data[fn]={"value":0, "state":state, "mcts_prob": mcts_prob}
+            self.data[fn]={"value":value, "state":state, "mcts_prob": mcts_prob, "adv": adv}
                         
         values_items = list(values.values())
         avg_values = np.average(values_items)
@@ -149,7 +150,7 @@ class Dataset(torch.utils.data.Dataset):
 
         for fn in self.data:
             self.data[fn]["value"] = values[fn]
-
+            
         pay_time = round(time.time()-start_time, 2)
         print("loaded to memory, paid time:", pay_time)
         print("load data end")
@@ -203,9 +204,9 @@ class Train():
         """更新策略价值网络policy-value"""
         # 训练策略价值网络
         # 随机抽取data_buffer中的对抗数据
-        state_batch, mcts_probs_batch, values_batch = sample_data
+        state_batch, mcts_probs_batch, values_batch, advs_batch = sample_data
         # 训练策略价值网络
-        p_acc, v_loss, p_loss = self.policy_value_net.train_step(state_batch, mcts_probs_batch, values_batch, self.learn_rate * self.lr_multiplier)
+        p_acc, v_loss, p_loss = self.policy_value_net.train_step(state_batch, mcts_probs_batch, values_batch, advs_batch, self.learn_rate * self.lr_multiplier)
          
         return p_acc, v_loss, p_loss
 
