@@ -240,6 +240,10 @@ class Train():
             test_data=None
             for i, data in enumerate(testing_loader):
                 test_batch, test_probs, test_values, test_advs = data
+                if i==0:
+                    print("test_batch shape:", test_batch.shape, "test_probs shape:", test_probs.shape, 
+                          "test_values shape:", test_values.shape, "test_advs shape:", test_advs.shape)
+                    print("test_advs:", test_advs[0].cpu().numpy())
                 if test_data==None: test_data=[test_batch, test_probs, test_values]
                 test_batch = test_batch.to(self.policy_value_net.device)
                 with torch.no_grad(): 
