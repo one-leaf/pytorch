@@ -222,7 +222,7 @@ class PolicyValueNet():
         self.policy_value_net.train()
         probs, values = self.policy_value_net(state_batch)
 
-        ratios = torch.exp(probs - mcts_probs)
+        ratios = torch.exp(probs.detach() - mcts_probs)
         # print(ratios.shape, adv_batch.shape, values.shape, value_batch.shape)
         surr1 = ratios * adv_batch.unsqueeze(1)
         surr2 = torch.clamp(ratios, 1 - self.clip, 1 + self.clip) * adv_batch.unsqueeze(1)
