@@ -239,7 +239,7 @@ class Train():
             begin_accuracy=None
             test_data=None
             for i, data in enumerate(testing_loader):
-                test_batch, test_probs, test_values = data
+                test_batch, test_probs, test_values, test_advs = data
                 if test_data==None: test_data=[test_batch, test_probs, test_values]
                 test_batch = test_batch.to(self.policy_value_net.device)
                 with torch.no_grad(): 
@@ -281,7 +281,7 @@ class Train():
             end_accuracy=None
             net = self.policy_value_net.policy_value
             for i, data in enumerate(testing_loader):
-                test_batch, test_probs, test_values = data
+                test_batch, test_probs, test_values, test_advs = data
                 test_batch = test_batch.to(self.policy_value_net.device)
                 with torch.no_grad(): 
                     act_probs, values = net(test_batch)                 
