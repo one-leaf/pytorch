@@ -50,6 +50,7 @@ class Train():
         # 由于value完全用结果胜负来拟合，所以value不稳，只能靠概率p拟合，最后带动value来拟合
         self.c_puct = 5 * self.n_playout/512  # MCTS child权重， 用来调节MCTS中 探索/乐观 的程度 默认 5 
         self.sample_count = 1024  # 每次采样的样本数
+        self.split_step_count = 1024  # 每次采样的步数，分割成多个小的样本，默认1024
         self.max_step_count = 10000 
         self.limit_steptime = 1  # 限制每一步的平均花费时间，单位秒，默认1秒
 
@@ -579,7 +580,7 @@ class Train():
         # 1 用 Q_i = (Q_i - mean(Q))/std(Q) 转为均衡Q
         # 2 用 A_i = Q_i+1 - Q_i 转为优势 A
         
-        split_step_count = 1024
+        split_step_count = self.split_step_count
         print("split_step_count:", split_step_count)
         mark_no = 0
         for i in range(self.play_count):
