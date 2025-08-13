@@ -595,9 +595,9 @@ class Train():
                 c_rem = c%split_step_count
                 if c>0 and c_rem==0:
                     qval_mean = np.mean(qval_list)
-                    # qval_std = np.mean(qval_list)+1e-2
+                    # qval_std = np.mean(qval_list)+1e-6
                     adv_mean = np.mean(adv_list)
-                    adv_std = np.std(adv_list)+1e-2
+                    adv_std = np.std(adv_list)+1e-6
                     qval_list = (qval_list - qval_mean)
                     adv_list = (adv_list - adv_mean) / adv_std
                     qval_list = np.clip(qval_list, -1, 1)
@@ -626,9 +626,9 @@ class Train():
                 print(qval_list[:rem])
                 print(adv_list[:rem])
                 qval_mean = np.mean(qval_list)
-                # qval_std = np.mean(qval_list)+1e-2
+                # qval_std = np.mean(qval_list)+1e-6
                 adv_mean = np.mean(adv_list)
-                adv_std = np.std(adv_list)+1e-2
+                adv_std = np.std(adv_list)+1e-6
                 qval_list = (qval_list - qval_mean)
                 adv_list = (adv_list - adv_mean) / adv_std
                 qval_list = np.clip(qval_list, -1, 1)
