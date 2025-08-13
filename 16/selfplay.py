@@ -601,7 +601,6 @@ class Train():
                     adv_list = (adv_list - adv_mean)/adv_std
                     values.extend(qval_list.tolist())
                     advs.extend(adv_list.tolist())
-                    print("adding last split_step_count:", split_step_count)
                     print(i, "qval_mean:", qval_mean, "adv_mean:", adv_mean, "adv_std:", adv_std)
                     print(qval_list)
                     print(adv_list)                        
@@ -609,8 +608,11 @@ class Train():
                     adv_list[:]=0
 
                 qval_list[c_rem]=step["qval"]
-                adv_list[c_rem]=step["qval"] - step["state_value"]
+                adv_list[c_rem]=step["qval"] - step["state_value"]        
                 c += 1
+                
+                states.append(step["state"])
+                mcts_probs.append(step["move_probs"])
             
             if rem>0:
                 qval_mean = np.mean(qval_list)
@@ -620,13 +622,10 @@ class Train():
                 adv_list = (adv_list - adv_mean)/adv_std
                 values.extend(qval_list.tolist()[:rem])
                 advs.extend(adv_list.tolist()[:rem])
-                print("adding last rem:", rem)
                 print(i, "qval_mean:", qval_mean, "adv_mean:", adv_mean, "adv_std:", adv_std)
                 print(qval_list)
                 print(adv_list)
                 
-            states.append(step["state"])
-            mcts_probs.append(step["move_probs"])
 
                     
                 
