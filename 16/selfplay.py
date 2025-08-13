@@ -49,7 +49,7 @@ class Train():
         # MCTS child权重， 用来调节MCTS搜索深度，越大搜索越深，越相信概率，越小越相信Q 的程度 默认 5
         # 由于value完全用结果胜负来拟合，所以value不稳，只能靠概率p拟合，最后带动value来拟合
         self.c_puct = 5 * self.n_playout/512  # MCTS child权重， 用来调节MCTS中 探索/乐观 的程度 默认 5 
-        self.sample_count = 512  # 每次采样的样本数
+        self.sample_count = 1024  # 每次采样的样本数
         self.max_step_count = 10000 
         self.limit_steptime = 1  # 限制每一步的平均花费时间，单位秒，默认1秒
 
@@ -579,52 +579,59 @@ class Train():
         # 1 用 Q_i = (Q_i - mean(Q))/std(Q) 转为均衡Q
         # 2 用 A_i = Q_i+1 - Q_i 转为优势 A
         
-        split_step_count = 512
+        split_step_count = self.sample_count
         mark_no = 0
         for i in range(self.play_count):
             len_steps = len(play_data[i]["data"]["steps"])
             # mean_val = np.mean([play_data[i]["data"]["steps"][k]["qval"] for k in range(len_steps)])
             # std_val = np.std([play_data[i]["data"]["steps"][k]["qval"] for k in range(len_steps)])
             # std_val = std_val * (state["total"]["steps_mcts"] / len_steps)
+            mean_adv = []
+            std_adv = []
             mean_val = []
-            std_val = []
-            
-            data = np.zeros(split_step_count)
+            data_adv = np.zeros(split_step_count)
+            data_val = np.zeros(split_step_count)
             c = 0
             for k in range(len_steps-1, -1, -1):
                 if c>0 and c%split_step_count==0:
-                    mean_val.append(np.mean(data))
-                    _std = np.std(data)
+                    mean_adv.append(np.mean(data_adv))
+                    mean_val.append(np.mean(data_val))
+                    _std = np.std(data_adv)
                     if _std<0.1: _std=1
-                    std_val.append(_std)
-                    data = np.zeros(split_step_count)
-                data[c%split_step_count] = play_data[i]["data"]["steps"][k]["qval"] - play_data[i]["data"]["steps"][k]["state_value"]
+                    std_adv.append(_std)
+                    data_adv = np.zeros(split_step_count)
+                    data_val = np.zeros(split_step_count)
+                data_adv[c%split_step_count] = play_data[i]["data"]["steps"][k]["qval"] - play_data[i]["data"]["steps"][k]["state_value"]
+                data_val[c%split_step_count] = play_data[i]["data"]["steps"][k]["qval"]
                 c += 1
                 
             if len_steps%split_step_count>0:
-                mean_val.append(np.mean(data))
-                _std = np.std(data)
+                mean_adv.append(np.mean(data_adv))
+                mean_val.append(np.mean(data_val))
+                _std = np.std(data_adv)
                 if _std<0.1: _std=1
-                std_val.append(_std)                                   
+                std_adv.append(_std)                                   
                     
             print(i, "mean_val:", mean_val)
-            print(i, "std_val:", std_val)         
+            print(i, "mean_adv:", mean_adv)
+            print(i, "std_adv:", std_adv)         
             
             c = 0
             for k in range(len_steps-1, -1, -1):
                 step = play_data[i]["data"]["steps"][k]
                 j = c//split_step_count
                 _mean_val = mean_val[j]
-                _std_val = std_val[j]   
+                _mean_adv = mean_adv[j]
+                _std_adv = std_adv[j]   
                 # step["qval"] = (step["qval"] - step["state_value"])            
                 # value = step["state_value"] + (step["qval"] - step["state_value"]) / _std_val
                 # value = 0.5*step["state_value"] + 0.5*(step["qval"] - step["state_value"] - _mean_val)/_std_val
                 
-                adv = (step["qval"] - step["state_value"] - _mean_val)/(_std_val)
+                adv = (step["qval"] - step["state_value"] - _mean_adv)/(_std_adv)
                 adv = np.clip(adv, -1, 1)                
                 advs.append(adv)
                 
-                value = step["qval"]
+                value = step["qval"]-_mean_val
                 value = np.clip(value, -1, 1)
                 values.append(value)
                 
