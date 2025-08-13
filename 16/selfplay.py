@@ -608,15 +608,16 @@ class Train():
                 qval_list[c%split_step_count]=step["qval"]
                 adv_list[c%split_step_count]=step["qval"] - step["state_value"]
                 c += 1
-                
-            if len_steps%split_step_count>0:
+            
+            split_mod = c%split_step_count    
+            if split_mod>0:
                 qval_mean = np.mean(qval_list)
                 adv_mean = np.mean(adv_list)
                 adv_std = np.std(adv_list)+1e-6
                 qval_list = (qval_list - qval_mean)
                 adv_list = (adv_list - adv_mean)/adv_std
-                values.extend(qval_list[:len_steps%split_step_count].tolist())
-                advs.extend(adv_list[:len_steps%split_step_count].tolist())
+                values.extend(qval_list[:split_mod].tolist())
+                advs.extend(adv_list[:split_mod].tolist())
                 print(i, "qval_mean:", qval_mean, "adv_mean:", adv_mean, "adv_std:", adv_std)
                 print(qval_list)
                 print(adv_list)
