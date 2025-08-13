@@ -615,8 +615,8 @@ class Train():
                 adv_std = np.std(adv_list)+1e-6
                 qval_list = (qval_list - qval_mean)
                 adv_list = (adv_list - adv_mean)/adv_std
-                values.extend(qval_list.tolist())
-                advs.extend(adv_list.tolist())
+                values.extend(qval_list[:len_steps%split_step_count].tolist())
+                advs.extend(adv_list[:len_steps%split_step_count].tolist())
                 print(i, "qval_mean:", qval_mean, "adv_mean:", adv_mean, "adv_std:", adv_std)
                 print(qval_list)
                 print(adv_list)
