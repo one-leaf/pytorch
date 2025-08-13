@@ -611,7 +611,12 @@ class Train():
                     adv_list[:]=0
 
                 qval_list[c_rem]=step["qval"]
-                adv_list[c_rem]=step["qval"] - step["state_value"]        
+                # 这里用 Q_t+1 - Q_t 转为优势A
+                if k==0:
+                    adv_list[c_rem] = step["qval"] - 0
+                else:
+                    adv_list[c_rem] = step["qval"] - play_data[i]["data"]["steps"][k-1]["qval"]
+                # adv_list[c_rem]=step["qval"] - step["state_value"]        
                 c += 1
                 
                 states.append(step["state"])
