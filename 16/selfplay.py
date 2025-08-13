@@ -579,7 +579,7 @@ class Train():
         # 1 用 Q_i = (Q_i - mean(Q))/std(Q) 转为均衡Q
         # 2 用 A_i = Q_i+1 - Q_i 转为优势 A
         
-        split_step_count = self.sample_count
+        split_step_count = 1024
         print("split_step_count:", split_step_count)
         mark_no = 0
         for i in range(self.play_count):
