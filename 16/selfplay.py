@@ -580,6 +580,7 @@ class Train():
         # 2 用 A_i = Q_i+1 - Q_i 转为优势 A
         
         split_step_count = self.sample_count
+        print("split_step_count:", split_step_count)
         mark_no = 0
         for i in range(self.play_count):
             len_steps = len(play_data[i]["data"]["steps"])
@@ -591,23 +592,28 @@ class Train():
             mean_val = []
             data_adv = np.zeros(split_step_count)
             data_val = np.zeros(split_step_count)
+            
             c = 0
             for k in range(len_steps-1, -1, -1):
                 if c>0 and c%split_step_count==0:
-                    mean_adv.append(np.mean(data_adv))
                     mean_val.append(np.mean(data_val))
+
+                    mean_adv.append(np.mean(data_adv))
                     _std = np.std(data_adv)
                     if _std<0.1: _std=1
                     std_adv.append(_std)
+
                     data_adv = np.zeros(split_step_count)
                     data_val = np.zeros(split_step_count)
-                data_adv[c%split_step_count] = play_data[i]["data"]["steps"][k]["qval"] - play_data[i]["data"]["steps"][k]["state_value"]
+
                 data_val[c%split_step_count] = play_data[i]["data"]["steps"][k]["qval"]
+                data_adv[c%split_step_count] = play_data[i]["data"]["steps"][k]["qval"] - play_data[i]["data"]["steps"][k]["state_value"]
                 c += 1
                 
             if len_steps%split_step_count>0:
-                mean_adv.append(np.mean(data_adv))
                 mean_val.append(np.mean(data_val))
+
+                mean_adv.append(np.mean(data_adv))
                 _std = np.std(data_adv)
                 if _std<0.1: _std=1
                 std_adv.append(_std)                                   
