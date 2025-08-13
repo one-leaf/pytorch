@@ -596,7 +596,7 @@ class Train():
                 if c>0 and c_rem==0:
                     qval_mean = np.mean(qval_list)
                     adv_mean = np.mean(adv_list)
-                    adv_std = np.std(adv_list)+1e-6
+                    adv_std = np.std(adv_list)+1e-2
                     qval_list = (qval_list - qval_mean)
                     adv_list = (adv_list - adv_mean)/adv_std
                     qval_list = np.clip(qval_list, -1, 1)
@@ -619,7 +619,7 @@ class Train():
             if rem>0:
                 qval_mean = np.mean(qval_list)
                 adv_mean = np.mean(adv_list)
-                adv_std = np.std(adv_list)+1e-6
+                adv_std = np.std(adv_list)+1e-2
                 qval_list = (qval_list - qval_mean)
                 adv_list = (adv_list - adv_mean)/adv_std
                 qval_list = np.clip(qval_list, -1, 1)
