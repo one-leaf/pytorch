@@ -588,11 +588,12 @@ class Train():
             c = 0
             qval_list=np.zeros((len_steps,), dtype=np.float32)
             adv_list=np.zeros((len_steps,), dtype=np.float32)
+            rem = c%split_step_count    
             for k in range(len_steps-1, -1, -1):
                 step = play_data[i]["data"]["steps"][k]
                 
-                rem = c%split_step_count
-                if c>0 and rem==0:
+                c_rem = c%split_step_count
+                if c>0 and c_rem==0:
                     qval_mean = np.mean(qval_list)
                     adv_mean = np.mean(adv_list)
                     adv_std = np.std(adv_list)+1e-6
@@ -606,11 +607,10 @@ class Train():
                     qval_list[:]=0    
                     adv_list[:]=0
 
-                qval_list[rem]=step["qval"]
-                adv_list[rem]=step["qval"] - step["state_value"]
+                qval_list[c_rem]=step["qval"]
+                adv_list[c_rem]=step["qval"] - step["state_value"]
                 c += 1
             
-            rem = c%split_step_count    
             if rem>0:
                 qval_mean = np.mean(qval_list)
                 adv_mean = np.mean(adv_list)
