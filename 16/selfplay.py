@@ -582,74 +582,49 @@ class Train():
         
         split_step_count = self.split_step_count
         print("split_step_count:", split_step_count)
-        mark_no = 0
         for i in range(self.play_count):
-            len_steps = len(play_data[i]["data"]["steps"])
-            # mean_val = np.mean([play_data[i]["data"]["steps"][k]["qval"] for k in range(len_steps)])
-            # std_val = np.std([play_data[i]["data"]["steps"][k]["qval"] for k in range(len_steps)])
-            # std_val = std_val * (state["total"]["steps_mcts"] / len_steps)
-            mean_adv = []
-            std_adv = []
-            mean_val = []
-            data_adv = np.zeros(split_step_count)
-            data_val = np.zeros(split_step_count)
+            len_steps = len(play_data[i]["data"]["steps"])           
             
             c = 0
+            qval_list=np.zeros((len_steps,), dtype=np.float32)
+            adv_list=np.zeros((len_steps,), dtype=np.float32)
             for k in range(len_steps-1, -1, -1):
+                step = play_data[i]["data"]["steps"][k]
+                
                 if c>0 and c%split_step_count==0:
-                    mean_val.append(np.mean(data_val))
+                    qval_mean = np.mean(qval_list)
+                    adv_mean = np.mean(adv_list)
+                    adv_std = np.std(adv_list)+1e-6
+                    qval_list = (qval_list - qval_mean)
+                    adv_list = (adv_list - adv_mean)/adv_std
+                    values.extend(qval_list.tolist())
+                    advs.extend(adv_list.tolist())
+                    print(i, "qval_mean:", qval_mean, "adv_mean:", adv_mean, "adv_std:", adv_std)
+                    print(qval_list)
+                    print(adv_list)                        
+                    qval_list[:]=0    
+                    adv_list[:]=0
 
-                    mean_adv.append(np.mean(data_adv))
-                    _std = np.std(data_adv)
-                    if _std<0.1: _std=1
-                    std_adv.append(_std)
-
-                    data_adv = np.zeros(split_step_count)
-                    data_val = np.zeros(split_step_count)
-
-                data_val[c%split_step_count] = play_data[i]["data"]["steps"][k]["qval"]
-                data_adv[c%split_step_count] = play_data[i]["data"]["steps"][k]["qval"] - play_data[i]["data"]["steps"][k]["state_value"]
+                qval_list[c%split_step_count]=step["qval"]
+                adv_list[c%split_step_count]=step["qval"] - step["state_value"]
                 c += 1
                 
             if len_steps%split_step_count>0:
-                mean_val.append(np.mean(data_val))
+                qval_mean = np.mean(qval_list)
+                adv_mean = np.mean(adv_list)
+                adv_std = np.std(adv_list)+1e-6
+                qval_list = (qval_list - qval_mean)
+                adv_list = (adv_list - adv_mean)/adv_std
+                values.extend(qval_list.tolist())
+                advs.extend(adv_list.tolist())
+                print(i, "qval_mean:", qval_mean, "adv_mean:", adv_mean, "adv_std:", adv_std)
+                print(qval_list)
+                print(adv_list)
+                
+            states.append(step["state"])
+            mcts_probs.append(step["move_probs"])
 
-                mean_adv.append(np.mean(data_adv))
-                _std = np.std(data_adv)
-                if _std<0.1: _std=1
-                std_adv.append(_std)                                   
                     
-            print(i, "mean_val:", mean_val)
-            print(i, "mean_adv:", mean_adv)
-            print(i, "std_adv:", std_adv)         
-            
-            c = 0
-            for k in range(len_steps-1, -1, -1):
-                step = play_data[i]["data"]["steps"][k]
-                j = c//split_step_count
-                _mean_val = mean_val[j]
-                _mean_adv = mean_adv[j]
-                _std_adv = std_adv[j]   
-                # step["qval"] = (step["qval"] - step["state_value"])            
-                # value = step["state_value"] + (step["qval"] - step["state_value"]) / _std_val
-                # value = 0.5*step["state_value"] + 0.5*(step["qval"] - step["state_value"] - _mean_val)/_std_val
-                
-                adv = (step["qval"] - step["state_value"] - _mean_adv)/(_std_adv)
-                adv = np.clip(adv, -1, 1)                
-                advs.append(adv)
-                
-                value = step["qval"]-_mean_val
-                value = np.clip(value, -1, 1)
-                values.append(value)
-                
-                states.append(step["state"])
-                mcts_probs.append(step["move_probs"])
-                c += 1
-
-            print(np.array(values[mark_no:mark_no+len_steps]))
-            print(np.array(advs[mark_no:mark_no+len_steps]))
-                
-            mark_no += len_steps
                 
         # 2 用 Q_t+1 - Q_t 转为优势A
         # for i in range(self.play_count):
