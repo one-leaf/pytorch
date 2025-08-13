@@ -617,6 +617,8 @@ class Train():
                 mcts_probs.append(step["move_probs"])
             
             if rem>0:
+                print(qval_list[:rem])
+                print(adv_list[:rem])
                 qval_mean = np.mean(qval_list)
                 adv_mean = np.mean(adv_list)
                 adv_std = np.std(adv_list)+1e-2
