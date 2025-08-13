@@ -601,6 +601,7 @@ class Train():
                     adv_list = (adv_list - adv_mean)/adv_std
                     values.extend(qval_list.tolist())
                     advs.extend(adv_list.tolist())
+                    print("adding last split_step_count:", split_step_count)
                     print(i, "qval_mean:", qval_mean, "adv_mean:", adv_mean, "adv_std:", adv_std)
                     print(qval_list)
                     print(adv_list)                        
@@ -619,6 +620,7 @@ class Train():
                 adv_list = (adv_list - adv_mean)/adv_std
                 values.extend(qval_list.tolist()[:rem])
                 advs.extend(adv_list.tolist()[:rem])
+                print("adding last rem:", rem)
                 print(i, "qval_mean:", qval_mean, "adv_mean:", adv_mean, "adv_std:", adv_std)
                 print(qval_list)
                 print(adv_list)
