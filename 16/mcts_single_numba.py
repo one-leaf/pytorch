@@ -481,8 +481,8 @@ class MCTSPlayer(object):
                 act_probs = act_probs / np.sum(act_probs)
             
             # if game.removedlines < 13:
-            return action, qval, act_probs, state_v, acc_ps, depth, find_end
             # return action, qval, act_probs, state_v, acc_ps, depth, find_end
+            return action, qval, act_probs, state_v, acc_ps, depth, find_end
         else:
             print("WARNING: game is terminal")
 
