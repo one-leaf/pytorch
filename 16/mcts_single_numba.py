@@ -482,7 +482,7 @@ class MCTSPlayer(object):
             
             # if game.removedlines < 13:
             # return action, qval, act_probs, state_v, acc_ps, depth, find_end
-            return action, qval, act_probs, state_v, acc_ps, depth, find_end
+            return action, qval, act_ps, state_v, acc_ps, depth, find_end
         else:
             print("WARNING: game is terminal")
 
