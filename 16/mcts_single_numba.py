@@ -263,7 +263,7 @@ class MCTS():
             v: 当前局面的状态
         """  
         if state.game.terminal: 
-            return -1 #-1-1/(1+state.game.removedlines)  # 游戏结束，返回-1，奖励越多，分数越高   
+            return -2 #-1-1/(1+state.game.removedlines)  # 游戏结束，返回-1，奖励越多，分数越高   
         s = hash(state)
 
         # 如果当前状态没有子节点，增加子节点
