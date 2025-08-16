@@ -115,6 +115,7 @@ def expandPN(s:int, availables, act_probs, v, Ps, Ns, Nsa, Qsa, actions_num):
         #     Ps[s] = probs*0.05 + _p*0.95/_p_sum
         # else:
         Ps[s] = _p/_p_sum
+        print("Expand PN Error, _p", _p, "availables:", availables)
     else:
         Ps[s] = availables/np.sum(availables) 
     Ns[s] = 0
