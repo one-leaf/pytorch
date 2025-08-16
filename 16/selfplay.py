@@ -625,10 +625,10 @@ class Train():
             if rem>0:
                 print(qval_list[:rem])
                 print(adv_list[:rem])
-                qval_mean = np.mean(qval_list)
+                qval_mean = np.mean(qval_list[:rem])
                 # qval_std = np.mean(qval_list)+1e-6
-                adv_mean = np.mean(adv_list)
-                adv_std = np.std(adv_list)+1e-6
+                adv_mean = np.mean(adv_list[:rem])
+                adv_std = np.std(adv_list[:rem])+1e-6
                 qval_list = (qval_list - qval_mean)
                 adv_list = (adv_list - adv_mean) / adv_std
                 qval_list = np.clip(qval_list, -1, 1)
