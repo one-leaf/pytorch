@@ -9,7 +9,6 @@ from datetime import timedelta
 from agent_numba import ACTONS_LEN
 # from numba import njit
 # import numba
-import torch
 
 jit_args = {'nopython': True, 'cache': True, 'fastmath': True}
 
@@ -209,7 +208,8 @@ class MCTS():
 
         find_end = False
         # self._n_playout = 256    # 最少256次，概率才会比较准确
-        for n in range(self._n_playout):
+        # for n in range(self._n_playout):
+        for n in count():
             self.simulation_count += 1
 
             state_:State = state.clone()
@@ -223,7 +223,7 @@ class MCTS():
                 
             self.max_depth = (depth, step_depth)
 
-            if self._n_playout>100 and self.Ns[s]>=self._n_playout*2 :
+            if self.Ns[s]>=100 :
                 break
 
         self._policy(state_.game, only_Cache_Next=True) 
