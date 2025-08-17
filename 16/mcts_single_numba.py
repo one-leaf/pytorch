@@ -210,7 +210,7 @@ class MCTS():
         # self._n_playout = 256    # 最少256次，概率才会比较准确
         # for n in range(self._n_playout):
         for n in count():
-            if self.Ns[s]>=100 : break
+            if s in self.Ns and self.Ns[s]>=100 : break
 
             self.simulation_count += 1
 
