@@ -415,7 +415,9 @@ class MCTSPlayer(object):
             #             idx = max_ps_idx    
             #         else:
             #             idx = max_ns_idx
-                                              
+                        
+            if game.piececount%2==0: idx = max_ns_idx
+                      
             p = 0
             _p = []     
             # if idx == -1 or min(act_qs)<0:    
