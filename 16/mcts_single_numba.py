@@ -390,7 +390,9 @@ class MCTSPlayer(object):
             #     act_probs[1] = avg_ps
             #     act_probs[2] = avg_ps
             #     act_probs[4] = 1-sum(act_probs[0:4])
-                     
+            if game.steps%2==0: idx = max_ns_idx
+
+         
             if availables[idx]==0: idx = -1      
                                          
             # 如果执行的还不错，就用最大概率去执行                             
@@ -416,7 +418,6 @@ class MCTSPlayer(object):
             #         else:
             #             idx = max_ns_idx
                         
-            if game.steps%2==0: idx = max_ns_idx
                       
             p = 0
             _p = []     
