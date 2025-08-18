@@ -223,7 +223,7 @@ class MCTS():
                 find_end = True
                 
             self.max_depth = (depth, step_depth)
-            if self.Ns[s]>=64 : break
+            if self.Ns[s]>=self._n_playout : break
 
 
         self._policy(state_.game, only_Cache_Next=True) 
