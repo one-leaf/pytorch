@@ -37,7 +37,7 @@ class Train():
         # 128  --> 0.7
         # self.n_playout = 128  # 每个动作的模拟战记录个数，影响后续 128/2 = 66；64/16 = 4个方块 的走法
         self.test_count = 10 # 每次测试次数
-        self.play_count = 3 # 每次运行次数
+        self.play_count = 2 # 每次运行次数
         self.buffer_size = 51200  # cache对次数
         self.play_size = 512  # 每次训练的样本数
         self.epochs = 2  # 每次更新策略价值网络的训练步骤数, 推荐是5
@@ -390,15 +390,15 @@ class Train():
         need_replay = True
         for playcount in range(self.play_count):
             player.set_player_id(playcount)
-            if his_pieces_len > 0 and playcount==0:
-                player.need_max_ps = False
-                player.need_max_ns = True
-            elif his_pieces_len > 0 and playcount>0:
-                player.need_max_ps = True
-                player.need_max_ns = False
-            else:
-                player.need_max_ps = True
-                player.need_max_ns = False
+            # if his_pieces_len > 0 and playcount==0:
+            #     player.need_max_ps = False
+            #     player.need_max_ns = True
+            # elif his_pieces_len > 0 and playcount>0:
+            #     player.need_max_ps = True
+            #     player.need_max_ns = False
+            # else:
+            #     player.need_max_ps = True
+            #     player.need_max_ns = False
                 
             agent, data, qval, state_value, avg_qval, std_qval, start_time, paytime = self.play(cache, state, self.sample_count, his_pieces, his_pieces_len, player, policy_value_net)
             
@@ -412,11 +412,11 @@ class Train():
             his_pieces_len = len(agent.piecehis)
             
             # 如果游戏达到了最小的消除行数，样本有效，直接结束
-            if agent.steps >= self.sample_count:
-            # if his_pieces_len > agent.next_Pieces_list_len:
-                self.play_count = playcount+1
-                need_replay = False
-                break
+            # if agent.steps >= self.sample_count:
+            # # if his_pieces_len > agent.next_Pieces_list_len:
+            #     self.play_count = playcount+1
+            #     need_replay = False
+            #     break
                             
         print("TRAIN Self Play ending ...")
         if need_replay and state["total"]["min_score"]>1:
