@@ -222,14 +222,17 @@ class PolicyValueNet():
         self.policy_value_net.train()
         probs, values = self.policy_value_net(state_batch)
 
+        # PPO损失计算        
+        probs = torch.softmax(probs, dim=1) 
         ratios = torch.exp(mcts_probs - probs)
-        # print(ratios.shape, adv_batch.shape, values.shape, value_batch.shape)
         surr1 = ratios * adv_batch.unsqueeze(1)
         surr2 = torch.clamp(ratios, 1 - self.clip, 1 + self.clip) * adv_batch.unsqueeze(1)
         actor_loss = (-torch.min(surr1, surr2)).mean()
 
-        value_loss = self.quantile_regression_loss(values, value_batch)
+        # MCTS损失计算
         # policy_loss = F.cross_entropy(probs, mcts_probs)
+
+        value_loss = self.quantile_regression_loss(values, value_batch)
 
         # loss = policy_loss + value_loss/(value_loss/policy_loss).detach() + qval_loss/(qval_loss/policy_loss).detach() 
         # loss = policy_loss + (value_loss + qval_loss)*0.01 
