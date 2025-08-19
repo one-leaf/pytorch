@@ -263,7 +263,7 @@ class MCTS():
             v: 当前局面的状态
         """  
         if state.game.terminal: 
-            return -2 # -1-1/(1+state.game.piececount)  # 游戏结束，返回-1，奖励越多，分数越高   
+            return -1-1/(1+state.game.piececount)  # 游戏结束，返回-1，奖励越多，分数越高   
         s = hash(state)
 
         # 如果当前状态没有子节点，增加子节点
@@ -487,7 +487,8 @@ class MCTSPlayer(object):
                 act_probs = act_probs / np.sum(act_probs)
             
             # if game.removedlines < 13:
-            return action, qval, act_probs, state_v, acc_ps, depth, find_end
+            return action, qval, act_ps, state_v, acc_ps, depth, find_end
+            # return action, qval, act_probs, state_v, acc_ps, depth, find_end
         else:
             print("WARNING: game is terminal")
 
