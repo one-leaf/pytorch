@@ -175,7 +175,7 @@ class Dataset(torch.utils.data.Dataset):
             os.rename(fn, savefile)
             if self.test_size==-1 or len(self.newsample)<self.test_size:
                 self.newsample.append(savefile)
-            if (i+1)>=self.max_keep_size//self.epoch: break     
+            if (i+1)>=self.max_keep_size//self.epoch and len(movefiles)-i<=self.max_keep_size: break     
             
         # random.shuffle(self.newsample)  
         print("mv %s/%s files to train"%(i+1,len(movefiles)))
@@ -195,7 +195,7 @@ class Train():
         self.n_playout = 256  # 每个动作的模拟战记录个数
         self.play_batch_size = 1 # 每次自学习次数
         self.buffer_size = 10240  # cache对次数 # 102400 6:30 收集
-        self.epochs = 5  # 每次更新策略价值网络的训练步骤数, 推荐是5
+        self.epochs = 10  # 每次更新策略价值网络的训练步骤数, 推荐是5
         self.kl_targ = 1e-4  # 策略价值网络KL值目标        
         self.c_puct = 2  # MCTS child权重， 用来调节MCTS中 探索/乐观 的程度 默认 5
    
