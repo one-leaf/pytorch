@@ -40,6 +40,8 @@ def save_status_file(state):
         # lock_file(f, exclusive=True)
         json.dump(state, f, ensure_ascii=False, indent=4)
         # unlock_file(f)
+    if os.path.exists(status_file):
+        os.remove(status_file)
     shutil.move(temp_file.name, status_file)
     os.chmod(status_file, 0o644)
 
@@ -62,7 +64,9 @@ def read_status_file(max_keep=30):
                 state = json.load(f)
             shutil.copy(status_file, status_file_bak)    
         except Exception as e:
-            shutil.copy(status_file_bak, status_file)
+            os.remove(status_file)
+            if os.path.exists(status_file_bak):
+                shutil.move(status_file_bak, status_file)
             raise e                  
     if state==None:
         state={"total":{"agent":0, "_agent":0}}
