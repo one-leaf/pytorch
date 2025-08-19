@@ -609,7 +609,7 @@ class Train():
                 states.append(step["state"])
                 mcts_probs.append(step["move_probs"])
             
-            if rem>=len_steps//2 or c==0:
+            if rem>=split_step_count//2 or c==0:
                 print(qval_list[:rem])
                 print(adv_list[:rem])
                 qval_mean = np.mean(qval_list[:rem])
