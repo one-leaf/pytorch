@@ -485,7 +485,7 @@ class VitNet(nn.Module):
         # self.act_fc_act = nn.GELU()
         # self.act_fc_act = nn.LeakyReLU()  
         self.act_dist = nn.Linear(embed_dim, num_classes)  # [B, 768] => [B, 5]
-        # self.act_dist_act = nn.Softmax(dim=1)
+        self.act_dist_act = nn.Softmax(dim=1)
 
         # self.val_fc = nn.Linear(embed_dim, embed_dim)   # [B, 768] => [B, 768]
         # self.norm_val = norm_layer(embed_dim)
@@ -529,7 +529,7 @@ class VitNet(nn.Module):
         # act = self.norm_act(act)
         # act = self.act_fc_act(act)
         act = self.act_dist(act)                # [B, num_classes]
-        # act = self.act_dist_act(act)
+        act = self.act_dist_act(act)
         # print(x[:, 0])
 
         # val = x[:, 1]                            # [B, 768]

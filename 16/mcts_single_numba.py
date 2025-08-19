@@ -101,8 +101,8 @@ def updateQN(s:int, a:int, v:float, Ns, Qsa, Nsa, actions_num):
 # njit  0.00022558832222352673
 # 0.0001987227917925678
 def expandPN(s:int, availables, act_probs, v, Ps, Ns, Nsa, Qsa, actions_num):
-    _p = np.exp((act_probs-np.max(act_probs)))
-    
+    # _p = np.exp((act_probs-np.max(act_probs)))
+    _p = act_probs.copy()
     _p[availables==0]=0
     _p_sum = np.sum(_p)
     if _p_sum > 0:     

@@ -223,7 +223,7 @@ class PolicyValueNet():
         probs, values = self.policy_value_net(state_batch)
 
         # PPO损失计算        
-        probs = torch.softmax(probs, dim=1) 
+        # probs = torch.softmax(probs, dim=1) 
         ratios = torch.exp(mcts_probs - probs)
         surr1 = ratios * adv_batch.unsqueeze(1)
         surr2 = torch.clamp(ratios, 1 - self.clip, 1 + self.clip) * adv_batch.unsqueeze(1)
