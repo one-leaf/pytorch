@@ -572,10 +572,12 @@ class Train():
         for i in range(self.play_count):
             len_steps = len(play_data[i]["data"]["steps"])           
             
-            c = 0
             qval_list=np.zeros(split_step_count, dtype=np.float32)
             adv_list=np.zeros(split_step_count, dtype=np.float32)
-            rem = len_steps%split_step_count    
+            rem = len_steps%split_step_count   
+            t = len_steps//split_step_count    
+ 
+            c = 0
             for k in range(len_steps-1, -1, -1):
                 step = play_data[i]["data"]["steps"][k]
                 
@@ -609,7 +611,7 @@ class Train():
                 states.append(step["state"])
                 mcts_probs.append(step["move_probs"])
             
-            if rem>=split_step_count//2 or c==0:
+            if t==0 or rem>=split_step_count//2:
                 print(qval_list[:rem])
                 print(adv_list[:rem])
                 qval_mean = np.mean(qval_list[:rem])
