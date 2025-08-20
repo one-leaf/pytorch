@@ -1,5 +1,6 @@
 import json,os,time,shutil
 import  tempfile
+from pathlib import Path
 
 if os.name == 'posix':
     import fcntl
@@ -12,6 +13,7 @@ model_dir = os.path.join(curr_dir, 'model', model_name)
 if not os.path.exists(model_dir): os.makedirs(model_dir)
 status_file = os.path.join(model_dir, 'status.json')
 status_file_bak = os.path.join(model_dir, 'status_bak.json')
+status_lock_file = os.path.join(model_dir, 'status.lock')
 
 def lock_file(f, exclusive=True):
     """
@@ -34,8 +36,10 @@ def unlock_file(f):
     elif os.name == 'nt':
         pass
 
-def save_status_file(state):   
-    temp_file = tempfile.NamedTemporaryFile(delete=False, mode='w', newline='')
+def save_status_file(state):  
+    if os.path.exists(status_lock_file): return 
+    
+    temp_file = tempfile.NamedTemporaryFile(delete=False, mode='w', newline='',dir=model_dir)
     with temp_file as f:
         # lock_file(f, exclusive=True)
         json.dump(state, f, ensure_ascii=False, indent=4)
@@ -59,6 +63,8 @@ def read_status_file(max_keep=30):
     # 获取历史训练数据
     state=None
     if os.path.exists(status_file):
+        lock_file = Path(status_lock_file)
+        lock_file.touch(exist_ok=True)
         try:
             with open(status_file, "r") as f:
                 state = json.load(f)
@@ -67,7 +73,11 @@ def read_status_file(max_keep=30):
             os.remove(status_file)
             if os.path.exists(status_file_bak):
                 shutil.move(status_file_bak, status_file)
-            raise e                  
+            raise e        
+        finally:
+            if lock_file.exists():
+                lock_file.unlink()    
+                      
     if state==None:
         state={"total":{"agent":0, "_agent":0}}
     if "best" not in state:
