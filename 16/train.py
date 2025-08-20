@@ -81,7 +81,7 @@ class Dataset(torch.utils.data.Dataset):
         
         delcount = 0
         for i, filename in enumerate(files):
-            if i >= self.max_keep_size:
+            if i >= self.max_keep_size or os.path.getsize(filename) == 0:
                 os.remove(filename)
                 # if cache: cache.delete(filename, noreply=True)                     
                 delcount += 1
