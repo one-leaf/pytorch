@@ -439,7 +439,7 @@ class MCTSPlayer(object):
                 #     p = 0.9
                 # else:
                 #     p = 0.99
-                if act_qs[max_ns_idx]>0:
+                if self.player==0:
                     p=0.90
                 else:
                     p=0.99
