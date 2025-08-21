@@ -207,8 +207,8 @@ class MCTS():
         state_ = None
 
         find_end = False
-        # for n in range(self._n_playout):
-        for n in count():
+        for n in range(self._n_playout):
+        # for n in count():
 
             self.simulation_count += 1
 
