@@ -207,8 +207,8 @@ class MCTS():
         state_ = None
 
         find_end = False
-        for n in range(self._n_playout):
-        # for n in count():
+        # for n in range(self._n_playout):
+        for n in count():
 
             self.simulation_count += 1
 
@@ -222,7 +222,7 @@ class MCTS():
                 find_end = True
                 
             self.max_depth = (depth, step_depth)
-            # if self.Ns[s]>=self._n_playout : break
+            if self.Ns[s]>=self._n_playout : break
 
 
         self._policy(state_.game, only_Cache_Next=True) 
