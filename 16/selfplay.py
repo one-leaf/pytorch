@@ -575,8 +575,11 @@ class Train():
             qval_list=np.zeros(split_step_count, dtype=np.float32)
             adv_list=np.zeros(split_step_count, dtype=np.float32)
             rem = len_steps%split_step_count   
-            t = len_steps//split_step_count    
-            values.extend(np.linspace(0, -1, len_steps, dtype=np.float32).tolist())
+            t = len_steps//split_step_count
+            
+            qval = np.linspace(0, -1, len_steps, dtype=np.float32)
+            qval = (qval - np.mean(qval)) / np.std(qval)
+            values.extend(qval.tolist())
 
             c = 0
             for k in range(len_steps-1, -1, -1):
