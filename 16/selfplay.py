@@ -616,7 +616,7 @@ class Train():
                 print(qval_list[:rem])
                 print(adv_list[:rem])
                 qval_mean = np.mean(qval_list[:rem])-1/play_data[i]["data"]["piece_count"]
-                qval_std = np.mean(qval_list[:rem])+1e-6
+                # qval_std = np.mean(qval_list[:rem])+1e-6
                 adv_mean = np.mean(adv_list[:rem])
                 adv_std = np.std(adv_list[:rem])+1e-6
                 qval_list = (qval_list - qval_mean) #/ qval_std
