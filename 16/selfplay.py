@@ -37,7 +37,7 @@ class Train():
         # 128  --> 0.7
         # self.n_playout = 128  # 每个动作的模拟战记录个数，影响后续 128/2 = 66；64/16 = 4个方块 的走法
         self.test_count = 10 # 每次测试次数
-        self.play_count = 2 # 每次运行次数
+        self.play_count = 3 # 每次运行次数
         self.buffer_size = 51200  # cache对次数
         self.play_size = 512  # 每次训练的样本数
         self.epochs = 2  # 每次更新策略价值网络的训练步骤数, 推荐是5
@@ -598,7 +598,7 @@ class Train():
                     # values.extend(qval_list.tolist())
                     advs.extend(adv_list.tolist())
                     print(i, "qval_mean:", qval_mean, "adv_mean:", adv_mean, "adv_std:", adv_std)
-                    print(qval_list)
+                    # print(qval_list)
                     print(adv_list)                        
                     qval_list[:]=0    
                     adv_list[:]=0
@@ -616,8 +616,8 @@ class Train():
                 mcts_probs.append(step["move_probs"])
             
             if t==0 or rem>=split_step_count//2:
-                print(qval_list[:rem])
-                print(adv_list[:rem])
+                # print(qval_list[:rem])
+                # print(adv_list[:rem])
                 qval_mean = np.mean(qval_list[:rem])-1/play_data[i]["data"]["piece_count"]
                 # qval_std = np.mean(qval_list[:rem])+1e-6
                 adv_mean = np.mean(adv_list[:rem])
@@ -629,7 +629,7 @@ class Train():
                 # values.extend(qval_list[:rem].tolist())
                 advs.extend(adv_list[:rem].tolist())
                 print(i, "qval_mean:", qval_mean, "adv_mean:", adv_mean, "adv_std:", adv_std)
-                print(qval_list[:rem])
+                # print(qval_list[:rem])
                 print(adv_list[:rem])
                 
 

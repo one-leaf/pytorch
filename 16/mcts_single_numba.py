@@ -440,6 +440,8 @@ class MCTSPlayer(object):
                 # else:
                 #     p = 0.99
                 if self.player==0:
+                    p=0.75
+                elif self.player==1:
                     p=0.90
                 else:
                     p=0.99
