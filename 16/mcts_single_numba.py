@@ -286,12 +286,14 @@ class MCTS():
                 
         v = self.search(state) 
 
-        # if state.game.state==1:
-        #     _emptyCount = state.game.emptyCount - _emptyCount
-        #     r = 0# -0.4
-        #     r += _removedlines   # 每消除一行奖励1，奖励越多，分数越高     
-        #     r -= _emptyCount*0.1 # 每多一个空洞扣0.1
-        #     v = v + r # r/state.game.steps  # 奖励越多，分数越高
+        if state.game.state==1 and state.game.piececount%2==0:
+            _emptyCount = state.game.emptyCount - _emptyCount
+            if _emptyCount > 0:
+                v = v - 0.5
+            # r = 0# -0.4
+            # r += _removedlines   # 每消除一行奖励1，奖励越多，分数越高     
+            # r -= _emptyCount*0.1 # 每多一个空洞扣0.1
+            # v = v + r # r/state.game.steps  # 奖励越多，分数越高
         
         # 外部奖励，放的方块越多越好
         #     v += 0.01
