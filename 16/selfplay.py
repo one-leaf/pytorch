@@ -579,7 +579,7 @@ class Train():
             
             qval = np.linspace(0, -1, len_steps, dtype=np.float32)
             qval = (qval - np.mean(qval)) / np.std(qval)
-            values.extend(qval.tolist())
+            # values.extend(qval.tolist())
 
             c = 0
             for k in range(len_steps-1, -1, -1):
@@ -595,10 +595,10 @@ class Train():
                     adv_list = (adv_list - adv_mean) / adv_std
                     qval_list = np.clip(qval_list, -1, 1)
                     adv_list = np.clip(adv_list, -1, 1)
-                    # values.extend(qval_list.tolist())
+                    values.extend(qval_list.tolist())
                     advs.extend(adv_list.tolist())
                     print(i, "qval_mean:", qval_mean, "adv_mean:", adv_mean, "adv_std:", adv_std)
-                    # print(qval_list)
+                    print(qval_list)
                     print(adv_list)                        
                     qval_list[:]=0    
                     adv_list[:]=0
@@ -626,10 +626,10 @@ class Train():
                 adv_list = (adv_list - adv_mean) / adv_std
                 qval_list = np.clip(qval_list, -1, 1)
                 adv_list = np.clip(adv_list, -1, 1)
-                # values.extend(qval_list[:rem].tolist())
+                values.extend(qval_list[:rem].tolist())
                 advs.extend(adv_list[:rem].tolist())
                 print(i, "qval_mean:", qval_mean, "adv_mean:", adv_mean, "adv_std:", adv_std)
-                # print(qval_list[:rem])
+                print(qval_list[:rem])
                 print(adv_list[:rem])
                 
 
