@@ -289,7 +289,7 @@ class MCTS():
         if state.game.state==1 and state.game.piececount%2==0:
             _emptyCount = state.game.emptyCount - _emptyCount
             if _emptyCount > 0:
-                v = v - 0.5
+                v = v - _emptyCount*0.1
             # r = 0# -0.4
             # r += _removedlines   # 每消除一行奖励1，奖励越多，分数越高     
             # r -= _emptyCount*0.1 # 每多一个空洞扣0.1
