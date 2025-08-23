@@ -283,13 +283,16 @@ class MCTS():
         
         _emptyCount = state.game.emptyCount
         _state, _removedlines = state.game.step(a)
+        _emptyCount = state.game.emptyCount - _emptyCount
                 
-        v = self.search(state) 
+        if state.game.state==1 and _emptyCount>=2:
+            v = -1
+        else:
+            v = self.search(state) 
 
-        if state.game.state==1 and state.game.piececount%2==0:
-            _emptyCount = state.game.emptyCount - _emptyCount
-            if _emptyCount > 0:
-                v = v - _emptyCount*0.1
+        # if state.game.state==1 and state.game.piececount%2==0:
+        #     if _emptyCount > 0:
+        #         v = v - _emptyCount*0.1
             # r = 0# -0.4
             # r += _removedlines   # 每消除一行奖励1，奖励越多，分数越高     
             # r -= _emptyCount*0.1 # 每多一个空洞扣0.1
