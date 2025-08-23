@@ -598,8 +598,8 @@ class Train():
                     values.extend(qval_list.tolist())
                     advs.extend(adv_list.tolist())
                     print(i, "qval_mean:", qval_mean, "adv_mean:", adv_mean, "adv_std:", adv_std)
-                    print(qval_list)
-                    print(adv_list)                        
+                    print(qval_list[::-1])
+                    print(adv_list[::-1])                        
                     qval_list[:]=0    
                     adv_list[:]=0
 
@@ -629,8 +629,8 @@ class Train():
                 values.extend(qval_list[:rem].tolist())
                 advs.extend(adv_list[:rem].tolist())
                 print(i, "qval_mean:", qval_mean, "adv_mean:", adv_mean, "adv_std:", adv_std)
-                print(qval_list[:rem])
-                print(adv_list[:rem])
+                print(qval_list[:rem][::-1])
+                print(adv_list[:rem][::-1])
                 
 
                     
