@@ -1,6 +1,8 @@
 import json,os,time,shutil
 import  tempfile
 from pathlib import Path
+from contextlib import contextmanager
+import errno
 
 if os.name == 'posix':
     import fcntl
@@ -15,33 +17,41 @@ status_file = os.path.join(model_dir, 'status.json')
 status_file_bak = os.path.join(model_dir, 'status_bak.json')
 status_lock_file = os.path.join(model_dir, 'status.lock')
 
-def lock_file(f, exclusive=True):
-    """
-    给文件对象 f 加锁。
-    - POSIX 系统使用 fcntl.flock。
-    - Windows 系统使用 msvcrt.locking。
-    """
-    if os.name == 'posix':
-        lock_type = fcntl.LOCK_EX if exclusive else fcntl.LOCK_SH
-        fcntl.flock(f.fileno(), lock_type)
-    elif os.name == 'nt':
-        pass
-
-def unlock_file(f):
-    """
-    解锁文件对象 f。
-    """
-    if os.name == 'posix':
-        fcntl.flock(f.fileno(), fcntl.LOCK_UN)
-    elif os.name == 'nt':
-        pass
+@contextmanager
+def file_lock(lock_path):
+    """文件锁上下文管理器"""
+    lock_file = Path(lock_path)
+    
+    # 等待锁释放
+    while lock_file.exists():
+        time.sleep(0.1)
+    
+    # 创建锁文件
+    try:
+        fd = os.open(lock_path, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+        os.close(fd)
+    except OSError as e:
+        if e.errno == errno.EEXIST:
+            # 如果其他进程先创建了，重新等待
+            while lock_file.exists():
+                time.sleep(0.1)
+            fd = os.open(lock_path, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+            os.close(fd)
+        else:
+            raise
+    
+    try:
+        yield lock_file
+    finally:
+        # 确保清理锁文件
+        try:
+            if lock_file.exists():
+                lock_file.unlink()
+        except:
+            pass
 
 def save_status_file(state):  
-    while os.path.exists(status_lock_file): 
-        time.sleep(0.1)
-    lock_file = Path(status_lock_file)
-    lock_file.touch(exist_ok=True)
-    try:    
+    with file_lock(status_lock_file):
         temp_file = tempfile.NamedTemporaryFile(delete=False, mode='w', newline='',dir=model_dir)
         with temp_file as f:
             # lock_file(f, exclusive=True)
@@ -51,8 +61,6 @@ def save_status_file(state):
             os.remove(status_file)
         shutil.move(temp_file.name, status_file)
         os.chmod(status_file, 0o644)
-    finally:
-        lock_file.unlink()
 
 def add_prop(state, key, default=0):
     if key not in state:
