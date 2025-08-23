@@ -37,17 +37,20 @@ def unlock_file(f):
         pass
 
 def save_status_file(state):  
-    if os.path.exists(status_lock_file): return 
-    
-    temp_file = tempfile.NamedTemporaryFile(delete=False, mode='w', newline='',dir=model_dir)
-    with temp_file as f:
-        # lock_file(f, exclusive=True)
-        json.dump(state, f, ensure_ascii=False, indent=4)
-        # unlock_file(f)
-    if os.path.exists(status_file):
-        os.remove(status_file)
-    shutil.move(temp_file.name, status_file)
-    os.chmod(status_file, 0o644)
+    lock_file = Path(status_lock_file)
+    lock_file.touch(exist_ok=True)
+    try:    
+        temp_file = tempfile.NamedTemporaryFile(delete=False, mode='w', newline='',dir=model_dir)
+        with temp_file as f:
+            # lock_file(f, exclusive=True)
+            json.dump(state, f, ensure_ascii=False, indent=4)
+            # unlock_file(f)
+        if os.path.exists(status_file):
+            os.remove(status_file)
+        shutil.move(temp_file.name, status_file)
+        os.chmod(status_file, 0o644)
+    finally:
+        lock_file.unlink()
 
 def add_prop(state, key, default=0):
     if key not in state:
@@ -62,9 +65,10 @@ def add_total_prop(state, key, default=0):
 def read_status_file(max_keep=30):
     # 获取历史训练数据
     state=None
+    while os.path.exists(status_lock_file): 
+        time.sleep(0.1)
+
     if os.path.exists(status_file):
-        lock_file = Path(status_lock_file)
-        lock_file.touch(exist_ok=True)
         try:
             with open(status_file, "r") as f:
                 state = json.load(f)
@@ -74,9 +78,6 @@ def read_status_file(max_keep=30):
             if os.path.exists(status_file_bak):
                 shutil.move(status_file_bak, status_file)
             raise e        
-        finally:
-            if lock_file.exists():
-                lock_file.unlink()    
                       
     if state==None:
         state={"total":{"agent":0, "_agent":0}}
