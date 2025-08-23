@@ -115,11 +115,11 @@ def read_status_file(max_keep=30):
     add_prop(state, "piececount_mcts")
     add_prop(state, "q_avg")
     add_prop(state, "q_std")
+    add_prop(state, "p_std", 1)
     add_total_prop(state, "kl", 1e-2)
     add_total_prop(state, "lr_multiplier", 1)    
     add_total_prop(state, "optimizer_type", 0)    
     add_prop(state, "steps_mcts", 0)    
-    add_prop(state, "rate_mcts", 0)    
     add_prop(state, "find_end_steps", 50)    
     
 

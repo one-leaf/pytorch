@@ -426,6 +426,11 @@ class Train():
         std_game_qval = sum([play_data[i]["std_qval"] for i in range(self.play_count)]) / self.play_count
         find_end_steps = sum([play_data[i]["data"]["find_end_steps"] for i in range(self.play_count)]) / self.play_count
 
+        probs_list = []
+        for i in range(self.play_count):
+            probs_list.extend([play_data[i]["data"]["steps"][j]["move_probs"] for j in range(len(play_data[i]["data"]["steps"]))])
+        std_game_prob = np.std(np.array(probs_list), axis=1).mean()
+
         game_score = max([play_data[i]["data"]["score"] for i in range(self.play_count)])
         win_values =[-1 for i in range(self.play_count)]
         for i in range(self.play_count):
@@ -456,6 +461,7 @@ class Train():
         set_status_total_value(state, "q_avg", avg_qval, alpha)
         set_status_total_value(state, "step_time", steptime, alpha)
         set_status_total_value(state, "q_std", std_game_qval, alpha)
+        set_status_total_value(state, "p_std", std_game_prob, alpha)
         # increments = [state["steps_mcts"][i] - state["steps_mcts"][i - 1] for i in range(1, len(state["steps_mcts"]))]
         # avg_increments = np.mean(increments) if len(increments)>0 else 0       
         # set_status_total_value(state, "steps_mcts", total_game_steps/self.play_count - avg_increments, alpha)
@@ -487,7 +493,6 @@ class Train():
         pacc = float(np.average(pacc))
         vdiff = sum([1 if play_data[i]["data"]["steps_count"]>self.sample_count else -1 for i in range(self.play_count)]) / self.play_count
 
-        rate_mcts = sum([1 if len(play_data[i]["agent"].piecehis) > play_data[i]["agent"].next_Pieces_list_len else -1 for i in range(self.play_count)]) / self.play_count
  
         depth = float(np.average(depth))
         
@@ -495,7 +500,6 @@ class Train():
         set_status_total_value(state, "pacc", pacc, alpha)
         set_status_total_value(state, "vdiff", vdiff, alpha)
         set_status_total_value(state, "depth", depth, alpha)
-        set_status_total_value(state, "rate_mcts", rate_mcts, alpha)
         
         update_agent_count = 20
         if state["total"]["_agent"]>update_agent_count:
@@ -509,11 +513,11 @@ class Train():
             state["piececount"].append(round(state["total"]["piececount"]))
             state["piececount_mcts"].append(round(state["total"]["piececount_mcts"]))
             state["q_std"].append(round(state["total"]["q_std"],2))
+            state["p_std"].append(round(state["total"]["p_std"],2))
             state["min_score"].append(round(state["total"]["min_score"]))
             state["no_terminal_rate"].append(round(state["total"]["no_terminal_rate"],2))
             state["steps_mcts"].append(round(state["total"]["steps_mcts"]))
             state["steps"].append(round(state["total"]["steps"]))
-            state["rate_mcts"].append(round(state["total"]["rate_mcts"],2))
             state["find_end_steps"].append(round(state["total"]["find_end_steps"]))
             
             local_time = time.localtime(start_time)
