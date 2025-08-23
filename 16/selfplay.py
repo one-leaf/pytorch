@@ -352,7 +352,6 @@ class Train():
         # if self.sample_count < state["total"]["steps_mcts"]:
         #     self.sample_count = state["total"]["steps_mcts"]
             
-        # self.sample_count += (0.9-state["total"]["vdiff"])*10
         # if self.sample_count < 520: self.sample_count = 520
         # if self.sample_count > state["total"]["steps_mcts"]:
         #     self.sample_count = state["total"]["steps_mcts"]
@@ -491,14 +490,11 @@ class Train():
                 depth.append(step["depth"])
 
         pacc = float(np.average(pacc))
-        vdiff = sum([1 if play_data[i]["data"]["steps_count"]>self.sample_count else -1 for i in range(self.play_count)]) / self.play_count
-
  
         depth = float(np.average(depth))
         
         state = read_status_file()                       
         set_status_total_value(state, "pacc", pacc, alpha)
-        set_status_total_value(state, "vdiff", vdiff, alpha)
         set_status_total_value(state, "depth", depth, alpha)
         
         update_agent_count = 20
@@ -507,7 +503,6 @@ class Train():
             state["score_mcts"].append(round(state["total"]["score_mcts"]))
             state["depth"].append(round(state["total"]["depth"],1))
             state["pacc"].append(round(state["total"]["pacc"],2))
-            state["vdiff"].append(round(state["total"]["vdiff"],2))
             state["step_time"].append(round(state["total"]["step_time"],1))
             state["q_avg"].append(round(state["total"]["q_avg"],2))
             state["piececount"].append(round(state["total"]["piececount"]))

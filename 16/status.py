@@ -97,7 +97,6 @@ def read_status_file(max_keep=30):
     add_prop(state, "score")
     add_prop(state, "depth")
     add_prop(state, "pacc")
-    add_prop(state, "vdiff")
     add_prop(state, "step_time")
     add_prop(state, "piececount")    
     add_prop(state, "steps")    
