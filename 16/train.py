@@ -206,9 +206,9 @@ class Train():
         # 随机抽取data_buffer中的对抗数据
         state_batch, mcts_probs_batch, values_batch, advs_batch = sample_data
         # 训练策略价值网络
-        p_acc, v_loss, p_loss = self.policy_value_net.train_step(state_batch, mcts_probs_batch, values_batch, advs_batch, self.learn_rate * self.lr_multiplier)
+        p_acc, v_loss, a_loss, p_loss = self.policy_value_net.train_step(state_batch, mcts_probs_batch, values_batch, advs_batch, self.learn_rate * self.lr_multiplier)
          
-        return p_acc, v_loss, p_loss
+        return p_acc, v_loss, a_loss, p_loss
 
     def run(self):
         """启动训练"""
@@ -267,10 +267,10 @@ class Train():
             self.policy_value_net.set_learning_rate(self.learn_rate*self.lr_multiplier)
             for i, data in enumerate(training_loader):  # 计划训练批次
                 # 使用对抗数据重新训练策略价值网络模型
-                p_acc, v_loss, p_loss = self.policy_update(data, self.epochs)
+                p_acc, v_loss, a_loss, p_loss = self.policy_update(data, self.epochs)
                 v_loss_list.append(v_loss)
                 if i%10 == 0:
-                    print(i,"p_loss:",p_loss,"v_loss:",v_loss,"p_acc:",p_acc)
+                    print(i,"a_loss:", a_loss, "p_loss:", p_loss, "v_loss:", v_loss, "p_acc:", p_acc)
                     # time.sleep(0.1)
 
                 if math.isnan(v_loss) : 
