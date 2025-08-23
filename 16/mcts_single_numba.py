@@ -285,7 +285,7 @@ class MCTS():
         _state, _removedlines = state.game.step(a)
         _emptyCount = state.game.emptyCount - _emptyCount
                 
-        if state.game.state==1 and _emptyCount>=2:
+        if state.game.state==1 and _emptyCount>=3:
             v = -1
         else:
             v = self.search(state) 
