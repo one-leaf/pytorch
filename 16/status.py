@@ -37,6 +37,8 @@ def unlock_file(f):
         pass
 
 def save_status_file(state):  
+    while os.path.exists(status_lock_file): 
+        time.sleep(0.1)
     lock_file = Path(status_lock_file)
     lock_file.touch(exist_ok=True)
     try:    
