@@ -632,7 +632,7 @@ class Train():
                 print(qval_list[:rem][::-1])
                 print(adv_list[:rem][::-1])
                 
-            values.extend(np.array(qvals2)*0.5 + np.array(qvals1)*0.5)
+            values.extend(np.array(qvals2)*0.9 + np.array(qvals1)*0.1)
                     
                 
         # 2 用 Q_t+1 - Q_t 转为优势A
