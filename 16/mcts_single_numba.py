@@ -49,6 +49,11 @@ def selectAction(s:int, availables, _c_puct:float, Ps, Ns, Qsa, Nsa):
     
     # 选择最大q的
     nz_idx = np.nonzero(availables)
+    
+    indices = np.where(q[nz_idx] == 0)[0]
+    if indices.size > 0:
+        return nz_idx[0][indices[0]]
+    
     max_q_idx = nz_idx[0][np.argmax(q[nz_idx])]
 
     return max_q_idx
