@@ -44,17 +44,17 @@ def selectAction(s:int, availables, _c_puct:float, Ps, Ns, Qsa, Nsa):
     # 如果有一次都没有探索的，返回
     # 开销 8.05366921094275e-05 S
     # njit 4.298482243524901e-05 S
-    
-   
-    # 选择最大q的
+       
+    # 选择可用动作
     nz_idx = np.nonzero(availables)
     
+    # 如果没有探索过，就先探索一次
     indices = np.where(Nsa[s][nz_idx] == 0)[0]
     if indices.size > 0:
         return nz_idx[0][indices[0]]
 
-    q = Qsa[s]+ _c_puct * Ps[s] * sqrt(Ns[s]) / (Nsa[s]+1)
-    
+    # 计算最大q值的动作
+    q = Qsa[s]+ _c_puct * Ps[s] * sqrt(Ns[s]) / (Nsa[s]+1)    
     max_q_idx = nz_idx[0][np.argmax(q[nz_idx])]
 
     return max_q_idx
