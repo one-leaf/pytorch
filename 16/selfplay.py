@@ -576,10 +576,9 @@ class Train():
             rem = len_steps%split_step_count   
             t = len_steps//split_step_count
             
-            qvals1 = np.linspace(-1, 0, len_steps, dtype=np.float32)
-            qvals1 = (qvals1-np.mean(qvals1))/(np.std(qvals1)+1e-6)
+            # qvals1 = np.linspace(-1, 0, len_steps, dtype=np.float32)
+            # qvals1 = (qvals1-np.mean(qvals1))/(np.std(qvals1)+1e-6)
             qvals2 = []
-            # values.extend(qval.tolist())
 
             c = 0
             for k in range(len_steps-1, -1, -1):
@@ -632,7 +631,8 @@ class Train():
                 print(qval_list[:rem][::-1])
                 print(adv_list[:rem][::-1])
                 
-            values.extend(np.array(qvals2)*0.9 + np.array(qvals1)*0.1)
+            # values.extend(np.array(qvals2)*0.9 + np.array(qvals1)*0.1)
+            values.extend(np.array(qvals2))
                     
                 
         # 2 用 Q_t+1 - Q_t 转为优势A
