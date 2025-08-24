@@ -95,7 +95,7 @@ class Train():
         max_removedlines = -1
 
         state = read_status_file()
-        limit_score = state["total"]["score"]*2
+        limit_score = 200 if state["total"]["score"]<100 else state["total"]["score"]*2
         self.min_piececount = state["total"]["min_piececount"] # (state["total"]["piececount"]+state["total"]["min_piececount"])/2     
         no_terminal=0   
         if test_count==None:
