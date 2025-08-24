@@ -229,7 +229,7 @@ class PolicyValueNet():
         actor_loss = (-torch.min(surr1, surr2)).mean()
 
         # MCTS损失计算
-        policy_loss = -torch.mean(torch.sum(mcts_probs * torch.log(probs + 1e-10), 1))
+        policy_loss = (-torch.sum(mcts_probs * torch.log(probs + 1e-10), 1)).mean() * 0.1
 
         value_loss = self.quantile_regression_loss(values, value_batch)
 
