@@ -576,8 +576,8 @@ class Train():
             rem = len_steps%split_step_count   
             t = len_steps//split_step_count
             
-            qvals = np.linspace(0, -1, len_steps, dtype=np.float32)
-            # qvals1 = (qvals1-np.mean(qvals1))/(np.std(qvals1)+1e-6)
+            # qvals = np.linspace(0, -1, len_steps, dtype=np.float32)
+            # qvals = (qvals1-np.mean(qvals1))/(np.std(qvals1)+1e-6)
 
             c = 0
             for k in range(len_steps-1, -1, -1):
@@ -585,7 +585,7 @@ class Train():
                 
                 c_rem = c%split_step_count
                 if c>0 and c_rem==0:
-                    qval_list += qvals[k:k+split_step_count][::-1]
+                    # qval_list += qvals[k:k+split_step_count][::-1]
                     qval_mean = np.mean(qval_list)#-1/play_data[i]["data"]["piece_count"]
                     qval_std = np.std(qval_list)+1e-6
                     adv_mean = np.mean(adv_list)
@@ -617,7 +617,7 @@ class Train():
             if t==0 or rem>=split_step_count//2:
                 # print(qval_list[:rem])
                 # print(adv_list[:rem])
-                qval_list += qvals[:rem][::-1]
+                # qval_list += qvals[:rem][::-1]
                 qval_mean = np.mean(qval_list[:rem])#-1/play_data[i]["data"]["piece_count"]
                 qval_std = np.std(qval_list[:rem])+1e-6
                 adv_mean = np.mean(adv_list[:rem])
