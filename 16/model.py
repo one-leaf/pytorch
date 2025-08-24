@@ -222,14 +222,16 @@ class PolicyValueNet():
         self.policy_value_net.train()
         probs, values = self.policy_value_net(state_batch)
 
+        probs_log = torch.log(probs + 1e-10)
+        
         # PPO损失计算        
-        ratios = torch.exp(mcts_probs - probs)
+        ratios = torch.exp(torch.log(mcts_probs) - probs_log)
         surr1 = ratios * adv_batch.unsqueeze(1)
         surr2 = torch.clamp(ratios, 1 - self.clip, 1 + self.clip) * adv_batch.unsqueeze(1)
         actor_loss = (-torch.min(surr1, surr2)).mean()
 
         # MCTS损失计算
-        policy_loss = (-torch.sum(mcts_probs * torch.log(probs + 1e-10), 1)).mean() * 0.1
+        policy_loss = (-torch.sum(mcts_probs * probs_log)).mean() * 0.1
 
         value_loss = self.quantile_regression_loss(values, value_batch)
 
