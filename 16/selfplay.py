@@ -576,8 +576,9 @@ class Train():
             rem = len_steps%split_step_count   
             t = len_steps//split_step_count
             
-            qval = np.linspace(0, -1, len_steps, dtype=np.float32)
-            qval = (qval - np.mean(qval)) / np.std(qval)
+            qvals1 = np.linspace(-1, 0, len_steps, dtype=np.float32)
+            qvals1 = (qvals1-np.mean(qvals1))/(np.std(qvals1)+1e-6)
+            qvals2 = []
             # values.extend(qval.tolist())
 
             c = 0
@@ -586,7 +587,7 @@ class Train():
                 
                 c_rem = c%split_step_count
                 if c>0 and c_rem==0:
-                    qval_mean = np.mean(qval_list)-1/play_data[i]["data"]["piece_count"]
+                    qval_mean = np.mean(qval_list)#-1/play_data[i]["data"]["piece_count"]
                     qval_std = np.std(qval_list)+1e-6
                     adv_mean = np.mean(adv_list)
                     adv_std = np.std(adv_list)+1e-6
@@ -594,7 +595,7 @@ class Train():
                     adv_list = (adv_list - adv_mean) / adv_std
                     qval_list = np.clip(qval_list, -1, 1)
                     adv_list = np.clip(adv_list, -1, 1)
-                    values.extend(qval_list.tolist())
+                    qvals2.extend(qval_list.tolist())
                     advs.extend(adv_list.tolist())
                     print(i, "qval_mean:", qval_mean, "adv_mean:", adv_mean, "adv_std:", adv_std)
                     print(qval_list[::-1])
@@ -617,7 +618,7 @@ class Train():
             if t==0 or rem>=split_step_count//2:
                 # print(qval_list[:rem])
                 # print(adv_list[:rem])
-                qval_mean = np.mean(qval_list[:rem])-1/play_data[i]["data"]["piece_count"]
+                qval_mean = np.mean(qval_list[:rem])#-1/play_data[i]["data"]["piece_count"]
                 qval_std = np.std(qval_list[:rem])+1e-6
                 adv_mean = np.mean(adv_list[:rem])
                 adv_std = np.std(adv_list[:rem])+1e-6
@@ -625,13 +626,13 @@ class Train():
                 adv_list = (adv_list - adv_mean) / adv_std
                 qval_list = np.clip(qval_list, -1, 1)
                 adv_list = np.clip(adv_list, -1, 1)
-                values.extend(qval_list[:rem].tolist())
+                qvals2.extend(qval_list[:rem].tolist())
                 advs.extend(adv_list[:rem].tolist())
                 print(i, "qval_mean:", qval_mean, "qval_std:", qval_std, "adv_mean:", adv_mean, "adv_std:", adv_std)
                 print(qval_list[:rem][::-1])
                 print(adv_list[:rem][::-1])
                 
-
+            values.extend(np.array(qvals2)*0.5 + np.array(qvals1)*0.5)
                     
                 
         # 2 用 Q_t+1 - Q_t 转为优势A
