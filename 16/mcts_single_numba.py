@@ -398,7 +398,8 @@ class MCTSPlayer(object):
             if self.player==0 : idx = max_ns_idx
             # elif self.player==2 : idx = max_qs_idx
             # elif game.steps%2==0: idx = max_ns_idx
-
+        
+            if idx == 0 : idx = -1
          
             if availables[idx]==0: idx = -1      
                                          
