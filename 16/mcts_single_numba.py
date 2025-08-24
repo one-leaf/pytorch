@@ -45,14 +45,15 @@ def selectAction(s:int, availables, _c_puct:float, Ps, Ns, Qsa, Nsa):
     # 开销 8.05366921094275e-05 S
     # njit 4.298482243524901e-05 S
     
-    q = Qsa[s]+ _c_puct * Ps[s] * sqrt(Ns[s]) / (Nsa[s]+1)
-    
+   
     # 选择最大q的
     nz_idx = np.nonzero(availables)
     
-    indices = np.where(q[nz_idx] == 0)[0]
+    indices = np.where(Nsa[s][nz_idx] == 0)[0]
     if indices.size > 0:
         return nz_idx[0][indices[0]]
+
+    q = Qsa[s]+ _c_puct * Ps[s] * sqrt(Ns[s]) / (Nsa[s]+1)
     
     max_q_idx = nz_idx[0][np.argmax(q[nz_idx])]
 
