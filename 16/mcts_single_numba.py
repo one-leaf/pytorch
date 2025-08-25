@@ -293,6 +293,8 @@ class MCTS():
                 
         if state.game.state==1 and _emptyCount>=3:
             v = -1
+        elif _emptyCount<0:
+            v = 1
         else:
             v = self.search(state) 
 
