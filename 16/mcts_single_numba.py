@@ -453,13 +453,13 @@ class MCTSPlayer(object):
                 #     p = 0.9
                 # else:
                 #     p = 0.99
-                # if self.player==0:
-                #     p=0.75
-                # elif self.player==1:
-                #     p=0.95
-                # else:
-                #     p=0.99
-                p = 0.95    
+                if self.player==0:
+                    p=0.99
+                elif self.player==1:
+                    p=0.95
+                else:
+                    p=0.99
+                # p = 0.95    
                 dirichlet = np.random.dirichlet(2 * np.ones(len(nz_idx)))
                 dirichlet_probs = np.zeros_like(act_probs, dtype=np.float64)
                 dirichlet_probs[nz_idx] = dirichlet
