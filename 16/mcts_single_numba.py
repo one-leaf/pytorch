@@ -292,8 +292,8 @@ class MCTS():
         _emptyCount = state.game.emptyCount - _emptyCount
             
         v = self.search(state)         
-        if state.game.state==1 and _emptyCount>=3:
-            v -= -1
+        if state.game.state==1 and _emptyCount>=3 and v<-2:
+            v = v-1
             if v<-2: v=-1.99
         # if state.game.state==1 and state.game.piececount%2==0:
         #     if _emptyCount > 0:
