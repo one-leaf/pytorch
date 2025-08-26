@@ -293,7 +293,7 @@ class MCTS():
             
                  
         if state.game.state==1 and _emptyCount>=3:
-            v = -1.99
+            v = -2
         else:
             v = self.search(state)
         # if state.game.state==1 and state.game.piececount%2==0:
@@ -307,7 +307,7 @@ class MCTS():
         # 外部奖励，放的方块越多越好
         #     v += 0.01
         # if v>2: v=2    
-        # if v<-2: v=-2    
+        if v<-2: v=-2    
         updateQN(s, a, v, self.Ns, self.Qsa, self.Nsa, state.actions_num)
         
         return v
