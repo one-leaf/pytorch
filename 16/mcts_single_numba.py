@@ -290,13 +290,10 @@ class MCTS():
         _emptyCount = state.game.emptyCount
         _state, _removedlines = state.game.step(a)
         _emptyCount = state.game.emptyCount - _emptyCount
-                
+            
+        v = self.search(state)         
         if state.game.state==1 and _emptyCount>=3:
-            v = -2 if state.game.terminal else -1
-        # elif _emptyCount<0:
-        #     v = 1
-        else:
-            v = self.search(state) 
+            v -= -0.5
 
         # if state.game.state==1 and state.game.piececount%2==0:
         #     if _emptyCount > 0:
