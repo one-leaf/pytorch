@@ -292,7 +292,7 @@ class MCTS():
         _emptyCount = state.game.emptyCount - _emptyCount
                 
         if state.game.state==1 and _emptyCount>=3:
-            v = -1
+            v = -2 if state.game.terminal else -1
         # elif _emptyCount<0:
         #     v = 1
         else:
