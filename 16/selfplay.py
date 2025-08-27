@@ -37,7 +37,7 @@ class Train():
         # 128  --> 0.7
         # self.n_playout = 128  # 每个动作的模拟战记录个数，影响后续 128/2 = 66；64/16 = 4个方块 的走法
         self.test_count = 10 # 每次测试次数
-        self.play_count = 2 # 每次运行次数
+        self.play_count = 3 # 每次运行次数
         self.buffer_size = 51200  # cache对次数
         self.play_size = 512  # 每次训练的样本数
         self.epochs = 2  # 每次更新策略价值网络的训练步骤数, 推荐是5
