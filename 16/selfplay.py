@@ -431,10 +431,6 @@ class Train():
         std_game_prob = np.std(np.array(probs_list), axis=1).mean()
 
         game_score = max([play_data[i]["data"]["score"] for i in range(self.play_count)])
-        win_values =[-1 for i in range(self.play_count)]
-        for i in range(self.play_count):
-            if play_data[i]["data"]["score"] > state["total"]["min_score"]:
-                win_values[i] = 1
                 
         steptime = total_game_paytime/total_game_steps            
         avg_qval = total_game_qval/total_game_steps
@@ -443,16 +439,19 @@ class Train():
         avg_game_piececount = total_game_piececount/self.play_count
         
         print("step pay time:", steptime, "qval:", avg_qval, "avg_state_value:", avg_state_value)
+
+        win_values =[-1 for i in range(self.play_count)]
+        for i in range(self.play_count):
+            if play_data[i]["data"]["piece_count"] > avg_game_piececount:
+                win_values[i] = 1
         
         state = read_status_file()                       
 
+        if len(state["total"]["win_lost_tie"])!=self.play_count:
+            state["total"]["win_lost_tie"]=[0 for _ in range(self.play_count)]
         for i in range(self.play_count):
-            if not play_data[i]["agent"].terminal:
-                state["total"]["win_lost_tie"][0] += 1
-            else:
-                state["total"]["win_lost_tie"][1] += 1    
-        if self.play_count>1:
-            state["total"]["win_lost_tie"][2] += 1
+            if win_values[i]==1:
+                state["total"]["win_lost_tie"][i] += 1
 
         alpha = 0.01
         set_status_total_value(state, "score_mcts", avg_game_score, alpha)
