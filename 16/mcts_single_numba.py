@@ -401,8 +401,8 @@ class MCTSPlayer(object):
             #     act_probs[2] = avg_ps
             #     act_probs[4] = 1-sum(act_probs[0:4])
             
-            if self.player==0 : idx = max_ns_idx
-            elif self.player==1 : idx = max_ps_idx
+            if self.player==0 : idx = max_ps_idx
+            elif self.player==1 : idx = max_ns_idx
             # elif game.steps%2==0: idx = max_ns_idx
         
             # if idx == 3 or idx == 0 : idx = -1
