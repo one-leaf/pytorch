@@ -62,7 +62,14 @@ class Train():
         self.stop_mark_file = os.path.join(self.waitplaydir,"../stop")
 
 
-    
+    def compute_advantage(self, gamma, lmbda, value_delta):
+        # 输入的 td_delta 就是倒装的，输出也是倒装的
+        advantage_list = []
+        advantage = 0.0
+        for delta in value_delta:
+            advantage = gamma * lmbda * advantage + delta
+            advantage_list.append(advantage)
+        return advantage_list
 
     def get_equi_data(self, states, mcts_probs, values, advs):
         """
