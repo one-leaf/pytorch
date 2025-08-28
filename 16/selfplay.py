@@ -582,7 +582,7 @@ class Train():
             rem = len_steps%split_step_count   
             t = len_steps//split_step_count
             
-            v = np.linspace(-1, 0, len_steps, dtype=np.float32)
+            v = np.linspace(-1, 1, len_steps, dtype=np.float32)
             v = v/np.std(v)
             v = np.clip(v, -1, 1)
             values.extend(v.tolist())
