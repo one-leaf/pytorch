@@ -29,7 +29,7 @@ class Train():
         self.learn_rate = 1e-8
         self.lr_multiplier = 1.0  # 基于KL的自适应学习率
         self.temp = 1  # MCTS的概率参数，越大越不肯定，训练时1，预测时1e-3
-        self.n_playout = 128  # 每个动作的模拟战记录个数，影响后续 512/2 = 256；256/16 = 16个方块 的走法
+        self.n_playout = 64  # 每个动作的模拟战记录个数，影响后续 512/2 = 256；256/16 = 16个方块 的走法
         # self.min_n_playout = 64   # 最小的模拟战记录个数
         # self.max_n_playout = 256  # 最大1的模拟战记录个数
         # 64/128/256/512 都不行
@@ -582,10 +582,10 @@ class Train():
             rem = len_steps%split_step_count   
             t = len_steps//split_step_count
             
-            v = np.linspace(-1, 1, len_steps, dtype=np.float32)
-            v = v/np.std(v)
-            v = np.clip(v, -1, 1)
-            values.extend(v.tolist())
+            # v = np.linspace(-1, 1, len_steps, dtype=np.float32)
+            # v = v/np.std(v)
+            # v = np.clip(v, -1, 1)
+            # values.extend(v.tolist())
 
             c = 0
             for k in range(len_steps-1, -1, -1):
@@ -602,7 +602,7 @@ class Train():
                     adv_list = (adv_list - adv_mean) / adv_std
                     qval_list = np.clip(qval_list, -1, 1)
                     adv_list = np.clip(adv_list, -1, 1)
-                    # values.extend(qval_list.tolist())
+                    values.extend(qval_list.tolist())
                     advs.extend(adv_list.tolist())
                     print(i, "qval_mean:", qval_mean, "adv_mean:", adv_mean, "adv_std:", adv_std)
                     print(qval_list[::-1])
@@ -634,7 +634,7 @@ class Train():
                 adv_list = (adv_list - adv_mean) / adv_std
                 qval_list = np.clip(qval_list, -1, 1)
                 adv_list = np.clip(adv_list, -1, 1)
-                # values.extend(qval_list[:rem].tolist())
+                values.extend(qval_list[:rem].tolist())
                 advs.extend(adv_list[:rem].tolist())
                 print(i, "qval_mean:", qval_mean, "qval_std:", qval_std, "adv_mean:", adv_mean, "adv_std:", adv_std)
                 print(qval_list[:rem][::-1])
