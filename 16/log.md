@@ -36,7 +36,20 @@
     n_playout: 64 
     loss: a + p + v + n
     out: 
-        steps:
+        steps: 275
+        piececount: 28
+        score_mcts: 0.1
+        pacc: 0.92
+
+1 days:
+    reward:
+        if state.game.terminal: return -2
+    v: (q - q_mean)/q_std
+    a: q - v
+    n_playout: 64 
+    loss: a + p + v + n
+    out: 
+        steps: 
         piececount: 
         score_mcts: 
         pacc: 
