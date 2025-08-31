@@ -49,7 +49,9 @@
     n_playout: 64 
     loss: a + p + v + n
     out: 
-        steps: 
-        piececount: 
-        score_mcts: 
-        pacc: 
+        steps: 165
+        piececount: 24
+        score_mcts: 0
+        pacc: 0.89
+
+
