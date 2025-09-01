@@ -67,4 +67,15 @@
         score_mcts: 0.1
         pacc: 0.91
 
-
+5   days: 1
+    reward:
+        if state.game.terminal: return -2
+    v: (q - q_mean)
+    a: q_t+1 - q_t
+    n_playout: 64 
+    loss: a + p + v + n
+    out: 
+        steps: 
+        piececount: 
+        score_mcts: 
+        pacc: 
