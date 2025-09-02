@@ -6,7 +6,7 @@
         else:
             v = self.search(state)
     v: (q - q_mean)/q_std
-    a: q_t+1 - q_t
+    a: ((q_t+1 - q_t) - a_mean)/a_std
     n_playout: 64 
     loss: a + p + v
     out: 
@@ -19,7 +19,7 @@
     reward:
         if state.game.terminal: return -2
     v: (1 ~ -1)/v_std 
-    a: q_t+1 - q_t
+    a: ((q_t+1 - q_t) - a_mean)/a_std
     n_playout: 64 
     loss: a + p + v + n
     out: 
@@ -32,7 +32,7 @@
     reward:
         if state.game.terminal: return -2
     v: (q - q_mean)/q_std
-    a: q_t+1 - q_t
+    a: ((q_t+1 - q_t) - a_mean)/a_std
     n_playout: 64 
     loss: a + p + v + n
     out: 
@@ -45,7 +45,7 @@
     reward:
         if state.game.terminal: return -2
     v: (q - q_mean)/q_std
-    a: q - v
+    a: ((q - v) - a_mean)/a_std
     n_playout: 64 
     loss: a + p + v + n
     out: 
@@ -54,11 +54,11 @@
         score_mcts: 0
         pacc: 0.89
 
-3   days: 2
+5   days: 2
     reward:
         if state.game.terminal: return -2
     v: (q - q_mean)/q_std
-    a: q_t+1 - q_t
+    a: ((q_t+1 - q_t) - a_mean)/a_std
     n_playout: 64 
     loss: a + p + v + n
     out: 
@@ -67,11 +67,11 @@
         score_mcts: 0.1
         pacc: 0.91
 
-5   days: 1
+6   days: 1
     reward:
         if state.game.terminal: return -2
     v: (q - q_mean)
-    a: q_t+1 - q_t
+    a: ((q_t+1 - q_t) - a_mean)/a_std
     n_playout: 64 
     loss: a + p + v + n
     out: 
@@ -79,3 +79,16 @@
         piececount: 23
         score_mcts: 0.08
         pacc: 0.93
+
+7   days: 1
+    reward:
+        if state.game.terminal: return -2
+    v: (q - q_mean)/q_std
+    a: ((q_t+1 - q_t) - a_mean)/a_std
+    n_playout: 128
+    loss: a + p + v + n
+    out: 
+        steps: 
+        piececount: 
+        score_mcts: 
+        pacc: 

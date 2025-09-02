@@ -576,69 +576,96 @@ class Train():
         print("split_step_count:", split_step_count)
         for i in range(self.play_count):
             len_steps = len(play_data[i]["data"]["steps"])           
+                       
+            qval_list=np.zeros(len_steps, dtype=np.float32)
+            adv_list=np.zeros(len_steps, dtype=np.float32)
+            for k in range(len_steps):
+                step = play_data[i]["data"]["steps"][k]
+                qval_list[k]=step["qval"]
+                if k==len_steps-1:
+                    adv_list[k] = 0
+                else:
+                    adv_list[k] = play_data[i]["data"]["steps"][k+1]["qval"] - step["qval"]
+                states.append(step["state"])
+                mcts_probs.append(step["move_probs"])
+                
+            qval_mean = np.mean(qval_list)
+            qval_std = np.std(qval_list)+1e-6
+            adv_mean = np.mean(adv_list)
+            adv_std = np.std(adv_list)+1e-6
+            qval_list = (qval_list - qval_mean) / qval_std
+            adv_list = (adv_list - adv_mean) / adv_std
+            qval_list = np.clip(qval_list, -1, 1)
+            adv_list = np.clip(adv_list, -1, 1)
+            values.extend(qval_list.tolist())
+            advs.extend(adv_list.tolist())
+            print(i, "qval_mean:", qval_mean, "qval_std:", qval_std, "adv_mean:", adv_mean, "adv_std:", adv_std)
+            print(qval_list)
+            print(adv_list)            
             
-            qval_list=np.zeros(split_step_count, dtype=np.float32)
-            adv_list=np.zeros(split_step_count, dtype=np.float32)
-            rem = len_steps%split_step_count   
-            t = len_steps//split_step_count
+            
+            # qval_list=np.zeros(split_step_count, dtype=np.float32)
+            # adv_list=np.zeros(split_step_count, dtype=np.float32)
+            # rem = len_steps%split_step_count   
+            # t = len_steps//split_step_count            
             
             # v = np.linspace(-1, 1, len_steps, dtype=np.float32)
             # v = v/np.std(v)
             # v = np.clip(v, -1, 1)
             # values.extend(v.tolist())
 
-            c = 0
-            for k in range(len_steps-1, -1, -1):
-                step = play_data[i]["data"]["steps"][k]
+            # c = 0
+            # for k in range(len_steps-1, -1, -1):
+            #     step = play_data[i]["data"]["steps"][k]
                 
-                c_rem = c%split_step_count
-                if c>0 and c_rem==0:
-                    # qval_list += qvals[k:k+split_step_count][::-1]
-                    qval_mean = np.mean(qval_list)#-1/play_data[i]["data"]["piece_count"]
-                    qval_std = np.std(qval_list)+1e-6
-                    adv_mean = np.mean(adv_list)
-                    adv_std = np.std(adv_list)+1e-6
-                    qval_list = (qval_list - qval_mean) / qval_std
-                    adv_list = (adv_list - adv_mean) / adv_std
-                    qval_list = np.clip(qval_list, -1, 1)
-                    adv_list = np.clip(adv_list, -1, 1)
-                    values.extend(qval_list.tolist())
-                    advs.extend(adv_list.tolist())
-                    print(i, "qval_mean:", qval_mean, "adv_mean:", adv_mean, "adv_std:", adv_std)
-                    print(qval_list[::-1])
-                    print(adv_list[::-1])                        
-                    qval_list[:]=0    
-                    adv_list[:]=0
+            #     c_rem = c%split_step_count
+            #     if c>0 and c_rem==0:
+            #         # qval_list += qvals[k:k+split_step_count][::-1]
+            #         qval_mean = np.mean(qval_list)#-1/play_data[i]["data"]["piece_count"]
+            #         qval_std = np.std(qval_list)+1e-6
+            #         adv_mean = np.mean(adv_list)
+            #         adv_std = np.std(adv_list)+1e-6
+            #         qval_list = (qval_list - qval_mean) / qval_std
+            #         adv_list = (adv_list - adv_mean) / adv_std
+            #         qval_list = np.clip(qval_list, -1, 1)
+            #         adv_list = np.clip(adv_list, -1, 1)
+            #         values.extend(qval_list.tolist())
+            #         advs.extend(adv_list.tolist())
+            #         print(i, "qval_mean:", qval_mean, "adv_mean:", adv_mean, "adv_std:", adv_std)
+            #         print(qval_list[::-1])
+            #         print(adv_list[::-1])                        
+            #         qval_list[:]=0    
+            #         adv_list[:]=0
 
-                qval_list[c_rem]=step["qval"]
-                # 这里用 Q_t+1 - Q_t 转为优势A
-                if k==0:
-                    adv_list[c_rem] = 0# step["qval"] - 0
-                else:
-                    adv_list[c_rem] = step["qval"] - play_data[i]["data"]["steps"][k-1]["qval"]
-                # adv_list[c_rem]=step["qval"] - step["state_value"]        
-                c += 1
+            #     qval_list[c_rem]=step["qval"]
+            #     # 这里用 Q_t+1 - Q_t 转为优势A
+            #     if k==0:
+            #         adv_list[c_rem] = 0# step["qval"] - 0
+            #     else:
+            #         adv_list[c_rem] = step["qval"] - play_data[i]["data"]["steps"][k-1]["qval"]
+            #     # adv_list[c_rem]=step["qval"] - step["state_value"]        
+            #     c += 1
                 
-                states.append(step["state"])
-                mcts_probs.append(step["move_probs"])
+            #     states.append(step["state"])
+            #     mcts_probs.append(step["move_probs"])
             
-            if t==0 or rem>=split_step_count//2:
-                # print(qval_list[:rem])
-                # print(adv_list[:rem])
-                # qval_list += qvals[:rem][::-1]
-                qval_mean = np.mean(qval_list[:rem])#-1/play_data[i]["data"]["piece_count"]
-                qval_std = np.std(qval_list[:rem])+1e-6
-                adv_mean = np.mean(adv_list[:rem])
-                adv_std = np.std(adv_list[:rem])+1e-6
-                qval_list = (qval_list - qval_mean) / qval_std
-                adv_list = (adv_list - adv_mean) / adv_std
-                qval_list = np.clip(qval_list, -1, 1)
-                adv_list = np.clip(adv_list, -1, 1)
-                values.extend(qval_list[:rem].tolist())
-                advs.extend(adv_list[:rem].tolist())
-                print(i, "qval_mean:", qval_mean, "qval_std:", qval_std, "adv_mean:", adv_mean, "adv_std:", adv_std)
-                print(qval_list[:rem][::-1])
-                print(adv_list[:rem][::-1])
+            # if t==0 or rem>=split_step_count//2:
+            #     # print(qval_list[:rem])
+            #     # print(adv_list[:rem])
+            #     # qval_list += qvals[:rem][::-1]
+            #     qval_mean = np.mean(qval_list[:rem])#-1/play_data[i]["data"]["piece_count"]
+            #     qval_std = np.std(qval_list[:rem])+1e-6
+            #     adv_mean = np.mean(adv_list[:rem])
+            #     adv_std = np.std(adv_list[:rem])+1e-6
+            #     qval_list = (qval_list - qval_mean) / qval_std
+            #     adv_list = (adv_list - adv_mean) / adv_std
+            #     qval_list = np.clip(qval_list, -1, 1)
+            #     adv_list = np.clip(adv_list, -1, 1)
+            #     values.extend(qval_list[:rem].tolist())
+            #     advs.extend(adv_list[:rem].tolist())
+            #     print(i, "qval_mean:", qval_mean, "qval_std:", qval_std, "adv_mean:", adv_mean, "adv_std:", adv_std)
+            #     print(qval_list[:rem][::-1])
+            #     print(adv_list[:rem][::-1])
                 
                     
                 
