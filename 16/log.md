@@ -88,7 +88,47 @@
     n_playout: 128
     loss: a + p + v + n
     out: 
+        steps: 169
+        piececount: 19
+        score_mcts: 0.03
+        pacc: 0.91
+
+8  days: 1
+    reward:
+        if state.game.terminal: return -2
+    v: (q - q_mean)/q_std
+    a: ((q_t+1 - q_t) - a_mean)/a_std
+    n_search_size: 64
+    loss: a + p + v + n
+    out: 
         steps: 
         piececount: 
         score_mcts: 
         pacc: 
+
+9   days: 1
+    reward:
+        if state.game.terminal: return -2
+    v: (q - q_mean)/q_std
+    a: ((q_t+1 - q_t) - a_mean)/a_std
+    n_playout: 64
+    loss: a + v + n
+    out: 
+        steps: 
+        piececount: 
+        score_mcts: 
+        pacc:         
+
+10   days: 1
+    reward:
+        if state.game.terminal: return -2
+    v: (q - q_mean)/q_std
+    a: ((q_t+1 - q_t) - a_mean)/a_std
+    n_playout: 64
+    loss: p + v + n
+    out: 
+        steps: 
+        piececount: 
+        score_mcts: 
+        pacc:                 
+
