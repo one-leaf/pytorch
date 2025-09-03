@@ -216,11 +216,12 @@ class MCTS():
         # for n in range(self._n_playout):
         # for n in count():
         while True:
+            state_:State = state.clone()
+            
             if s in self.Ns and self.Ns[s]>=self._n_playout: break
             
             self.simulation_count += 1
 
-            state_:State = state.clone()
             self.search(state_) 
             
             depth = state_.game.piececount-state.game.piececount
