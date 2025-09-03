@@ -216,7 +216,7 @@ class MCTS():
         # for n in range(self._n_playout):
         # for n in count():
         while True:
-            if s in self.NS and self.Ns[s]>=self._n_playout: break
+            if s in self.Ns and self.Ns[s]>=self._n_playout: break
             
             self.simulation_count += 1
 
