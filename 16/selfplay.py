@@ -459,6 +459,8 @@ class Train():
         for i in range(self.play_count):
             if win_values[i]==1:
                 state["total"]["win_lost_tie"][i] += 1
+            else:
+                state["total"]["win_lost_tie"][i] -= 1
 
         alpha = 0.01
         set_status_total_value(state, "score_mcts", avg_game_score, alpha)
