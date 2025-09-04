@@ -98,7 +98,20 @@
         if state.game.terminal: return -2
     v: (q - q_mean)/q_std
     a: ((q_t+1 - q_t) - a_mean)/a_std
-    n_search_size: 64
+    n_search_count: 64
+    loss: a + p + v + n
+    out: 
+        steps: 166
+        piececount: 24
+        score_mcts: 0.02
+        pacc: 0.87
+
+9  days: 1
+    reward:
+        if state.game.terminal: return -2
+    v: (q - q_mean)/q_std
+    a: ((q_t+1 - q_t) - a_mean)/a_std
+    n_search_count: 128
     loss: a + p + v + n
     out: 
         steps: 
@@ -106,7 +119,8 @@
         score_mcts: 
         pacc: 
 
-9   days: 1
+
+10   days: 1
     reward:
         if state.game.terminal: return -2
     v: (q - q_mean)/q_std
@@ -119,7 +133,7 @@
         score_mcts: 
         pacc:         
 
-10   days: 1
+11   days: 1
     reward:
         if state.game.terminal: return -2
     v: (q - q_mean)/q_std
