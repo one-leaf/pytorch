@@ -241,7 +241,7 @@ class Train():
             #     need_max_ps=not need_max_ps
             #     print("switch need_max_ps to:", need_max_ps)
             # need_max_ps = random.random() < agent.removedlines/100   
-            action, qval, mcts_probs, state_value, model_probs, acc_ps, depth, find_end = player.get_action(agent, temp=1) 
+            action, qval, mcts_probs, model_probs, state_value, acc_ps, depth, find_end = player.get_action(agent, temp=1) 
             
             _, score = agent.step(action)
 
