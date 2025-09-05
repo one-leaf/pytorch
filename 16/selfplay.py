@@ -577,6 +577,8 @@ class Train():
         split_step_count = self.split_step_count
         print("split_step_count:", split_step_count)
         for i in range(self.play_count):
+            if play_data[i]["data"]["piece_count"] < avg_game_piececount : continue
+            
             len_steps = len(play_data[i]["data"]["steps"])           
                        
             qval_list=np.zeros(len_steps, dtype=np.float32)
