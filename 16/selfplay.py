@@ -71,19 +71,20 @@ class Train():
             advantage_list.append(advantage)
         return advantage_list
 
-    def get_equi_data(self, states, mcts_probs, values, advs):
+    def get_equi_data(self, states, mcts_probs, model_probs, values, advs):
         """
         通过翻转增加数据集
         play_data: [(state, mcts_prob, values, advs), ..., ...]
         """
         extend_data = []
         for i in range(len(states)):
-            state, mcts_prob, value, adv=states[i], mcts_probs[i], values[i], advs[i]
-            extend_data.append((state, mcts_prob, value, adv))
+            state, mcts_prob, model_prob, value, adv=states[i], mcts_probs[i], model_probs[i], values[i], advs[i]
+            extend_data.append((state, mcts_prob, model_prob, value, adv))
             if mcts_prob[0]<0.2 and np.max(mcts_prob)>0.8: # 如果旋转的概率的不大，就做翻转
                 equi_state = np.array([np.fliplr(s) for s in state])
                 equi_mcts_prob = mcts_prob[[0,2,1,3,4]]
-                extend_data.append((equi_state, equi_mcts_prob, value, adv))
+                equi_model_prob = model_prob[[0,2,1,3,4]]
+                extend_data.append((equi_state, equi_mcts_prob, equi_model_prob, value, adv))
             # if i==0:
             #     print("state:",state)
             #     print("mcts_prob:",mcts_prob)
@@ -240,7 +241,7 @@ class Train():
             #     need_max_ps=not need_max_ps
             #     print("switch need_max_ps to:", need_max_ps)
             # need_max_ps = random.random() < agent.removedlines/100   
-            action, qval, move_probs, state_value, acc_ps, depth, find_end = player.get_action(agent, temp=1) 
+            action, qval, mcts_probs, state_value, acc_ps, model_probs, depth, find_end = player.get_action(agent, temp=1) 
 
             _, score = agent.step(action)
 
@@ -254,7 +255,8 @@ class Train():
 
             _step["piece_height"] = agent.pieceheight
             _step["score"] = score if score>0 else 0
-            _step["move_probs"] = move_probs
+            _step["mcts_probs"] = mcts_probs
+            _step["model_probs"] = model_probs
             _step["state_value"] = state_value
             _step["qval"] = qval
             _step["acc_ps"] = acc_ps
@@ -434,7 +436,7 @@ class Train():
 
         probs_list = []
         for i in range(self.play_count):
-            probs_list.extend([play_data[i]["data"]["steps"][j]["move_probs"] for j in range(len(play_data[i]["data"]["steps"]))])
+            probs_list.extend([play_data[i]["data"]["steps"][j]["mcts_probs"] for j in range(len(play_data[i]["data"]["steps"]))])
         std_game_prob = np.std(np.array(probs_list), axis=1).mean()
 
         game_score = max([play_data[i]["data"]["score"] for i in range(self.play_count)])
@@ -568,7 +570,7 @@ class Train():
         save_status_file(state)         
         avg_qval_list = [play_data[i]["avg_qval"] for i in range(self.play_count)]
         std_qval_list = [play_data[i]["std_qval"] for i in range(self.play_count)]    
-        states, mcts_probs, values, advs= [], [], [], []
+        states, mcts_probs, model_probs, values, advs= [], [], [], [], []
 
         # 将Q值转为优势A
         # 1 用 Q_i = (Q_i - mean(Q))/std(Q) 转为均衡Q
@@ -591,7 +593,8 @@ class Train():
                 else:
                     adv_list[k] = play_data[i]["data"]["steps"][k+1]["qval"] - step["qval"]
                 states.append(step["state"])
-                mcts_probs.append(step["move_probs"])
+                mcts_probs.append(step["mcts_probs"])
+                model_probs.append(step["model_probs"])
                 
             qval_mean = np.mean(qval_list)
             qval_std = np.std(qval_list)+1e-6
@@ -651,7 +654,7 @@ class Train():
             #     c += 1
                 
             #     states.append(step["state"])
-            #     mcts_probs.append(step["move_probs"])
+            #     mcts_probs.append(step["mcts_probs"])
             
             # if t==0 or rem>=split_step_count//2:
             #     # print(qval_list[:rem])
@@ -704,7 +707,7 @@ class Train():
         #         for k in range(len_steps):
         #             step = play_data[i]["data"]["steps"][k]
         #             states.append(step["state"])
-        #             mcts_probs.append(step["move_probs"])
+        #             mcts_probs.append(step["mcts_probs"])
         #             values.append((step["qval"]-mean_val)/std_val)
         #     else: 
         #         # 如果当前局面步数不够，全部补充1到 self.sample_count 计算方差
@@ -718,7 +721,7 @@ class Train():
         #         # std_val = 1
         #         for step in play_data[i]["data"]["steps"]:                    
         #             states.append(step["state"])
-        #             mcts_probs.append(step["move_probs"])
+        #             mcts_probs.append(step["mcts_probs"])
         #             values.append((step["qval"]-mean_val)/std_val)
                     
                     # values.append(step["qval"]+play_data[i]["agent"].piececount/total_game_piececount) 
@@ -736,6 +739,7 @@ class Train():
         assert len(states)>0
         assert len(states)==len(values)
         assert len(states)==len(mcts_probs)
+        assert len(states)==len(model_probs)
         assert len(states)==len(advs)
         
         states_len = len(states)
@@ -746,7 +750,7 @@ class Train():
 
         # 保存对抗数据到data_buffer
         filetime = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        for i, obj in enumerate(self.get_equi_data(states, mcts_probs, values, advs)):
+        for i, obj in enumerate(self.get_equi_data(states, mcts_probs, model_probs, values, advs)):
         # for i, obj in enumerate(zip(states, mcts_probs, values, advs)):
             filename = "{}-{}.pkl".format(filetime, i)
             savefile = os.path.join(data_wait_dir, filename)
