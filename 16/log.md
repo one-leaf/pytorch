@@ -119,7 +119,7 @@
         score_mcts: 0.06
         pacc: 0.93
 
-9  days: 2
+10  days: 1
     reward:
         if state.game.terminal: return -2
     v: (q - q_mean)/q_std
