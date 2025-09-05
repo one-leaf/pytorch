@@ -214,11 +214,11 @@ class MCTS():
 
         find_end = False
         # for n in range(self._n_playout):
-        # for n in count():
-        while True:
+        for n in count():
             state_:State = state.clone()
             
-            if s in self.Ns and self.Ns[s]>=self._n_playout: break
+            # if s in self.Ns and self.Ns[s]>=self._n_playout: break
+            if n >= self._n_playout: break            
             
             self.simulation_count += 1
 
