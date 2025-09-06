@@ -280,6 +280,14 @@ class Train():
                    math.isinf(v_loss) or math.isinf(a_loss) or math.isinf(p_loss): 
                     print(i,"a_loss:", a_loss, "p_loss:", p_loss, "v_loss:", v_loss, "p_acc:", p_acc)
                     print("find nan or inf return!", )
+                    
+                    state_batch, mcts_probs_batch, model_probs_batch, values_batch, advs_batch, actions_batch = data
+                    print("mcts_probs_batch:", mcts_probs_batch)
+                    print("model_probs_batch:", model_probs_batch)
+                    print("values_batch:", values_batch)
+                    print("advs_batch:", advs_batch)
+                    print("actions_batch:", actions_batch)
+                    
                     return
 
             self.policy_value_net.save_model(model_file)
