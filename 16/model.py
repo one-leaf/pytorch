@@ -227,6 +227,7 @@ class PolicyValueNet():
         actions = torch.argmax(log_probs, dim=1)
 
         print(actions.shape)
+        print(actions.unsqueeze(1).shape)
         print(log_probs.shape)
         print(model_probs.shape)
         print(adv_batch.shape)
