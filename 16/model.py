@@ -224,10 +224,13 @@ class PolicyValueNet():
         log_probs, values = self.policy_value_net(state_batch)
         
         # PPO损失计算        
-        ratios = torch.exp(log_probs - torch.log(model_probs + 1e-10))
+        actions = torch.argmax(log_probs, dim=1)
+        
+        ratios = torch.exp(log_probs.gather(1, actions) - torch.log(model_probs.gather(1, actions)) + 1e-10)
         print(ratios.shape)
         print(adv_batch.shape)
         print(adv_batch.unsqueeze(1).shape)
+        
         surr1 = ratios * adv_batch
         surr2 = torch.clamp(ratios, 1 - self.clip, 1 + self.clip) * adv_batch.unsqueeze(1)
         actor_loss = (-torch.min(surr1, surr2)).mean()
