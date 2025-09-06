@@ -84,7 +84,10 @@ class Train():
                 equi_state = np.array([np.fliplr(s) for s in state])
                 equi_mcts_prob = mcts_prob[[0,2,1,3,4]]
                 equi_model_prob = model_prob[[0,2,1,3,4]]
-                if action in [1,2]: equi_action = 3 - action
+                if action in [1,2]: 
+                    equi_action = 3 - action
+                else:
+                    equi_action = action
                 extend_data.append((equi_state, equi_mcts_prob, equi_model_prob, value, adv, equi_action))
             # if i==0:
             #     print("state:",state)
