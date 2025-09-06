@@ -233,6 +233,7 @@ class PolicyValueNet():
         
         surr1 = ratios * adv_batch
         surr2 = torch.clamp(ratios, 1 - self.clip, 1 + self.clip) * adv_batch
+        print(surr1.shape, surr2.shape)
         actor_loss = (-torch.min(surr1, surr2)).mean()
 
         # MCTS损失计算
