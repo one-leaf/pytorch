@@ -227,6 +227,7 @@ class PolicyValueNet():
         ratios = torch.exp(log_probs - torch.log(model_probs + 1e-10))
         print(ratios.shape)
         print(adv_batch.shape)
+        print(adv_batch.unsqueeze(1).shape)
         surr1 = ratios * adv_batch
         surr2 = torch.clamp(ratios, 1 - self.clip, 1 + self.clip) * adv_batch.unsqueeze(1)
         actor_loss = (-torch.min(surr1, surr2)).mean()
