@@ -276,9 +276,10 @@ class Train():
                     print(i,"a_loss:", a_loss, "p_loss:", p_loss, "v_loss:", v_loss, "p_acc:", p_acc)
                     # time.sleep(0.1)
 
-                if math.isnan(v_loss) : 
+                if math.isnan(v_loss) or math.isnan(a_loss) or math.isnan(p_loss) or \
+                   math.isinf(v_loss) or math.isinf(a_loss) or math.isinf(p_loss): 
                     print(i,"a_loss:", a_loss, "p_loss:", p_loss, "v_loss:", v_loss, "p_acc:", p_acc)
-                    print("v_loss is nan!", )
+                    print("find nan or inf return!", )
                     return
 
             self.policy_value_net.save_model(model_file)
