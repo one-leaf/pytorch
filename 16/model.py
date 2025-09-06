@@ -224,7 +224,7 @@ class PolicyValueNet():
         log_probs, values = self.policy_value_net(state_batch)
         
         # PPO损失计算        
-        actions = torch.argmax(log_probs, dim=1)
+        actions = torch.argmax(log_probs, dim=1).unsqueeze(1)
 
         print(actions.shape)
         print(actions.unsqueeze(1).shape)
