@@ -227,15 +227,18 @@ class PolicyValueNet():
         
         # PPO损失计算        
         actions = action_batch.unsqueeze(1)
-        adv_batch = adv_batch.unsqueeze(1)
+        adv_batch = action_batch.unsqueeze(1)
         
-        ratios = torch.exp(log_probs.gather(1, actions) - torch.log(model_probs.gather(1, actions)) + 1e-6)
+        s_log_probs = log_probs.gather(1, actions)
+        s_model_probs = torch.log(model_probs.gather(1, actions) + 1e-10) 
+        ratios = torch.exp( s_log_probs - s_model_probs)
 
-        # print(log_probs.gather(1, actions).shape, ratios.shape, adv_batch.shape)
+        print(s_log_probs.shape, s_model_probs.shape, ratios.shape, adv_batch.shape)
         surr1 = ratios * adv_batch
         surr2 = torch.clamp(ratios, 1 - self.clip, 1 + self.clip) * adv_batch
-        # print(surr1.shape, surr2.shape)
+        print(surr1.shape, surr2.shape)
         actor_loss = (-torch.min(surr1, surr2)).mean()
+        print(actor_loss.shape)
 
         # MCTS损失计算
         policy_loss = (-torch.sum(mcts_probs * log_probs, 1)).mean() 
