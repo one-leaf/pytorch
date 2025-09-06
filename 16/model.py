@@ -227,7 +227,7 @@ class PolicyValueNet():
         
         # PPO损失计算        
         actions = action_batch.unsqueeze(1)
-
+        adv_batch = adv_batch.unsqueeze(1)
         
         ratios = torch.exp(log_probs.gather(1, actions) - torch.log(model_probs.gather(1, actions)) + 1e-6)
 
