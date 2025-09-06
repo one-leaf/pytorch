@@ -65,7 +65,7 @@ class Dataset(torch.utils.data.Dataset):
         model_prob = torch.from_numpy(data["model_prob"]).float() 
         value = torch.as_tensor(data["value"]).float()
         adv = torch.as_tensor(data["adv"]).float()
-        action = torch.as_tensor(data["action"]).int()        
+        action = torch.as_tensor(data["action"]).long()        
         return state, mcts_prob, model_prob, value, adv, action
 
     def load_game_files(self):
