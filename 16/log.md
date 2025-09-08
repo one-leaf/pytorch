@@ -8,6 +8,7 @@
     v: (q - q_mean)/q_std
     a: ((q_t+1 - q_t) - a_mean)/a_std
     n_playout: 64 
+    model: a = mcts_probs - log_probs 
     loss: a + p + v
     out: 
         steps:229
@@ -21,6 +22,7 @@
     v: (1 ~ -1)/v_std 
     a: ((q_t+1 - q_t) - a_mean)/a_std
     n_playout: 64 
+    model: a = mcts_probs - log_probs 
     loss: a + p + v + n
     out: 
         steps:191
@@ -34,6 +36,7 @@
     v: (q - q_mean)/q_std
     a: ((q_t+1 - q_t) - a_mean)/a_std
     n_playout: 64 
+    model: a = mcts_probs - log_probs 
     loss: a + p + v + n
     out: 
         steps: 275
@@ -47,6 +50,7 @@
     v: (q - q_mean)/q_std
     a: ((q - v) - a_mean)/a_std
     n_playout: 64 
+    model: a = mcts_probs - log_probs 
     loss: a + p + v + n
     out: 
         steps: 165
@@ -60,6 +64,7 @@
     v: (q - q_mean)/q_std
     a: ((q_t+1 - q_t) - a_mean)/a_std
     n_playout: 64 
+    model: a = mcts_probs - log_probs 
     loss: a + p + v + n
     out: 
         steps: 268
@@ -73,6 +78,7 @@
     v: (q - q_mean)
     a: ((q_t+1 - q_t) - a_mean)/a_std
     n_playout: 64 
+    model: a = mcts_probs - log_probs 
     loss: a + p + v + n
     out: 
         steps: 214
@@ -86,6 +92,7 @@
     v: (q - q_mean)/q_std
     a: ((q_t+1 - q_t) - a_mean)/a_std
     n_playout: 128
+    model: a = mcts_probs - log_probs 
     loss: a + p + v + n
     out: 
         steps: 169
@@ -99,6 +106,7 @@
     v: (q - q_mean)/q_std
     a: ((q_t+1 - q_t) - a_mean)/a_std
     n_search_count: 64
+    model: a = mcts_probs - log_probs 
     loss: a + p + v + n
     out: 
         steps: 166
@@ -111,6 +119,7 @@
         if state.game.terminal: return -2
     v: (q - q_mean)/q_std
     a: ((q_t+1 - q_t) - a_mean)/a_std
+    model: a = mcts_probs - log_probs 
     n_search_count: 128
     loss: a + p + v + n
     out: 
@@ -119,16 +128,31 @@
         score_mcts: 0.06
         pacc: 0.93
 
-10  days: 1
+10  days: 1  
     reward:
         if state.game.terminal: return -2
     v: (q - q_mean)/q_std
     a: ((q_t+1 - q_t) - a_mean)/a_std
     n_playout: 64
-    sample: >= piece_count
+    model: a = log_probs - old_log_probs
     loss: a + p + v + n
+    out: 
+        steps: 242
+        piececount: 26
+        score_mcts: 0.09
+        pacc: 0.94
+
+11  days: 1
+    reward:
+        if state.game.terminal: return -2
+    v: (q - q_mean)/q_std
+    a: ((q_t+1 - q_t) - a_mean)/a_std
+    n_playout: 32
+    model: a = log_probs - old_log_probs
+    loss: a + v + n
     out: 
         steps: 
         piececount: 
         score_mcts: 
         pacc: 
+
