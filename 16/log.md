@@ -154,7 +154,7 @@
         steps: 120
         piececount: 18
         score_mcts: 0.04
-        pacc: 75
+        pacc: 0.75
 
 12  days: 1
     reward:
@@ -164,6 +164,20 @@
     n_playout: 32
     model: a = log_probs - mcts_log_probs
     loss: a + v + n
+    out: 
+        steps: 138
+        piececount: 20
+        score_mcts: 0.04
+        pacc: 0.87
+
+13 days: 1
+    reward:
+        if state.game.terminal: return -2
+    v: (q - q_mean)/q_std
+    a: ((q_t+1 - q_t) - a_mean)/a_std
+    n_playout: 32
+    model: a = old_log_probs - log_probs  
+    loss: a + v + n + p
     out: 
         steps: 
         piececount: 
