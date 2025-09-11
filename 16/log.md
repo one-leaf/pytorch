@@ -179,6 +179,20 @@
     model: a = old_log_probs - log_probs  
     loss: a + v + n + p
     out: 
+        steps: 91
+        piececount: 9
+        score_mcts: 0.04
+        pacc: 0.87
+
+14 days: 1
+    reward:
+        if state.game.terminal: return -2
+    v: (q - q_mean)/q_std
+    a: ((q_t+1 - q_t) - a_mean)/a_std
+    n_playout: 32
+    model: a = log_probs - old_log_probs
+    loss: a + v + n + p
+    out: 
         steps: 
         piececount: 
         score_mcts: 

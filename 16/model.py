@@ -232,8 +232,8 @@ class PolicyValueNet():
         s_log_probs = log_probs.gather(1, actions)
         s_model_probs = torch.log(model_probs.gather(1, actions) + 1e-10) 
         # s_model_probs = torch.log(mcts_probs.gather(1, actions) + 1e-10) 
-        ratios = torch.exp( s_model_probs - s_log_probs )
-        # ratios = torch.exp( s_log_probs - s_model_probs)
+        # ratios = torch.exp( s_model_probs - s_log_probs )
+        ratios = torch.exp( s_log_probs - s_model_probs )
 
         # print(s_log_probs.shape, s_model_probs.shape, ratios.shape, adv_batch.shape)
         surr1 = ratios * adv_batch
