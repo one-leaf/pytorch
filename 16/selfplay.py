@@ -130,7 +130,6 @@ class Train():
                     set_status_total_value(state, "score", agent.removedlines, 1/1000)
                     set_status_total_value(state, "piececount", agent.piececount, 1/1000)
                     set_status_total_value(state, "steps", agent.steps, 1/1000)
-                    state["lastupdate"] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')  
                     save_status_file(state)
                     break
                 
@@ -139,7 +138,6 @@ class Train():
                     set_status_total_value(state, "score", agent.removedlines, 1/1000)
                     set_status_total_value(state, "piececount", agent.piececount, 1/1000)
                     set_status_total_value(state, "steps", agent.steps, 1/1000)
-                    state["lastupdate"] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')  
                     save_status_file(state)
                     no_terminal += 1
                     break
@@ -571,7 +569,6 @@ class Train():
                 if os.path.exists(bestmodelfile): os.remove(bestmodelfile)
                 if os.path.exists(newmodelfile): os.link(newmodelfile, bestmodelfile)
                         
-        state["lastupdate"] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         save_status_file(state)         
         avg_qval_list = [play_data[i]["avg_qval"] for i in range(self.play_count)]
         std_qval_list = [play_data[i]["std_qval"] for i in range(self.play_count)]    

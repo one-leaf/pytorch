@@ -3,6 +3,7 @@ import  tempfile
 from pathlib import Path
 from contextlib import contextmanager
 import errno
+from datetime import datetime
 
 if os.name == 'posix':
     import fcntl
@@ -51,6 +52,11 @@ def file_lock(lock_path):
             pass
 
 def save_status_file(state):  
+    if "info" not in state:
+        state["info"] = {"create":datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+
+    state["info"]["modify"] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')  
+    
     with file_lock(status_lock_file):
         temp_file = tempfile.NamedTemporaryFile(delete=False, mode='w', newline='',dir=model_dir)
         with temp_file as f:
