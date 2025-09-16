@@ -44,6 +44,20 @@
         score_mcts: 0.1
         pacc: 0.92
 
+* 3.1   days: 2
+    reward:
+        if state.game.terminal: return -2
+    v: (q - q_mean)/q_std
+    a: ((q_t+1 - q_t) - a_mean)/a_std
+    n_playout: 64 
+    model: a = mcts_probs - log_probs 
+    loss: a + p + v + n
+    out: 
+        steps: 
+        piececount: 
+        score_mcts: 
+        pacc: 
+
 4   days: 1
     reward:
         if state.game.terminal: return -2
@@ -62,7 +76,7 @@
     reward:
         if state.game.terminal: return -2
     v: (q - q_mean)/q_std
-    a: ((q_t+1 - q_t) - a_mean)/a_std
+    a: ((q - v) - a_mean)/a_std
     n_playout: 64 
     model: a = mcts_probs - log_probs 
     loss: a + p + v + n
@@ -76,7 +90,7 @@
     reward:
         if state.game.terminal: return -2
     v: (q - q_mean)/q_std
-    a: ((q - v) - a_mean)/a_std
+    a: ((q_t+1 - q_t) - a_mean)/a_std
     n_playout: 64 
     model: a = log_probs - mcts_probs
     loss: a + p + v + n
@@ -85,6 +99,21 @@
         piececount: 23
         score_mcts: 0.11
         pacc: 0.84
+
+5.1   days: 2
+    reward:
+        if state.game.terminal: return -2
+    v: (q - q_mean)/q_std
+    a: ((q_t+1 - q_t) - a_mean)/a_std
+    n_playout: 64 
+    model: a = log_probs - mcts_probs
+    loss: a + p + v + n
+    out: 
+        steps: 200
+        piececount: 25
+        score_mcts: 0.16
+        pacc: 0.92
+
 
 6   days: 1
     reward:
