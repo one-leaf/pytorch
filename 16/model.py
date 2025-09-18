@@ -244,13 +244,13 @@ class PolicyValueNet():
         actor_loss = -(torch.min(surr1, surr2)).mean()
 
         # policy 损失计算
-        policy_loss = -(torch.sum(mcts_probs * log_probs, 1)).mean() 
+        policy_loss = -(mcts_probs * log_probs).sum(dim=1).mean() 
 
         # critic 损失计算
         value_loss = self.quantile_regression_loss(values, value_batch)
 
         # 添加熵正则化        
-        entropy = -(torch.sum(torch.exp(log_probs) * log_probs, 1)).mean() 
+        entropy = -(torch.exp(log_probs) * log_probs).sum(dim=1).mean() 
 
         # loss = policy_loss + value_loss/(value_loss/policy_loss).detach() + qval_loss/(qval_loss/policy_loss).detach() 
         # loss = policy_loss + (value_loss + qval_loss)*0.01 
