@@ -247,12 +247,12 @@ class PolicyValueNet():
 
         value_loss = self.quantile_regression_loss(values, value_batch)
         
-        entropy = (-torch.sum(torch.exp(log_probs) * log_probs, 1)).mean() * 1e-3
+        entropy = (-torch.exp(log_probs) * log_probs).mean() * 1e-2
 
         # loss = policy_loss + value_loss/(value_loss/policy_loss).detach() + qval_loss/(qval_loss/policy_loss).detach() 
         # loss = policy_loss + (value_loss + qval_loss)*0.01 
         # loss = policy_loss + value_loss + actor_loss 
-        loss = value_loss + actor_loss + entropy + policy_loss
+        loss = value_loss + actor_loss + policy_loss - entropy
         # 参数梯度清零
         self.optimizer.zero_grad()
         # 反向传播并计算梯度
