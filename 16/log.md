@@ -16,8 +16,7 @@
 | 10.1  | 242   | 26    | 0.09  | 0.94  |?      | ?     | 64    | (q - q_mean)/q_std | ((q_t+1 - q_t) - a_mean)/a_std | probs - old_probs  | a + p + v - n |
 | 10.3  | 256   | 29    | 0.25  | 0.95  |4936   | 203   | 64    | (q - q_mean)/q_std | ((q_t+1 - q_t) - a_mean)/a_std | probs - old_probs  | a + p + v - n |
 
-
-|*1.1   |       |       |       |       |       |       | 64    | (q - q_mean)/q_std | ((q - v) - a_mean)/a_std       | mcts_probs - probs | a + p + v - n |
+| 1.1   | 183   | 19    | 0.32  | 0.9   | 876   | 228   | 64    | (q - q_mean)/q_std | ((q - v) - a_mean)/a_std       | mcts_probs - probs | a + p + v - n |
 
 
 

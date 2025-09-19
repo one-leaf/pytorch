@@ -266,7 +266,7 @@ class PolicyValueNet():
         predicted_probs = torch.argmax(log_probs, dim=1)
         true_probs = torch.argmax(mcts_probs, dim=1)
         accuracy = (predicted_probs == true_probs).float().mean()
-        return accuracy.item(), value_loss.item(), actor_loss.item(), policy_loss.item()
+        return accuracy.item(), value_loss.item(), actor_loss.item(), policy_loss.item(), entropy.item()
         # return accuracy.item(), value_loss.item(), policy_loss.item()
         
 
