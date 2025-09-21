@@ -231,8 +231,8 @@ class PolicyValueNet():
         
         # 只抽取当前动作概率
         s_log_probs = log_probs.gather(1, actions)
-        # s_model_probs = torch.log(model_probs.gather(1, actions) + 1e-10) 
-        s_model_probs = torch.log(mcts_probs.gather(1, actions) + 1e-10) 
+        s_model_probs = torch.log(model_probs.gather(1, actions) + 1e-10) 
+        # s_model_probs = torch.log(mcts_probs.gather(1, actions) + 1e-10) 
         # ratios = torch.exp( s_model_probs - s_log_probs )
         ratios = torch.exp( s_log_probs - s_model_probs )
 
