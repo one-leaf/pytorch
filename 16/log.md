@@ -13,8 +13,10 @@
 | 2.1   | 158   | 21    | 0.08  | 0.9   | 1567  | 160   | -135 -127 | 64    | (q - q_mean)/q_std | ((q - v) - a_mean)/a_std       | probs - mcts_probs | a + p + v - n |
 
 # doing
-| 3.1   | 242   | 26    | 0.09  | 0.94  |?      | ?     |           | 32    | (q - q_mean)/q_std | ((q_t+1 - q_t) - a_mean)/a_std | probs - old_probs  | a + p + v - n |
+| 3.1   | 147   | 19    | 0.06  | 0.82  | 3234  | 160   | -261 -307 | 32    | (q - q_mean)/q_std | ((q_t+1 - q_t) - a_mean)/a_std | probs - old_probs  | a + p + v - n |
 
+# next doing
+| 4.1   | 113   | 16    | 0.11  | 0.64  | 308   | 134   | -42 -24   | 64    | (q - q_mean)/q_std | ((q_t+1 - q_t) - a_mean)/a_std | probs - old_probs  | a + v - n |
 
 # 训练无进度
 | 5.1   | 149   | 23    | 0.11  | 0.84  |?      | ?     |           | 64    | (q - q_mean)/q_std | ((q_t+1 - q_t) - a_mean)/a_std | probs - mcts_probs | a + p + v - n |
