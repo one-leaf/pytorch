@@ -462,10 +462,12 @@ class Train():
         if len(state["total"]["win_lost_tie"])!=self.play_count:
             state["total"]["win_lost_tie"]=[0 for _ in range(self.play_count)]
         for i in range(self.play_count):
-            if win_values[i]==1:
-                state["total"]["win_lost_tie"][i] += 1
-            else:
-                state["total"]["win_lost_tie"][i] -= 1
+            state["total"]["win_lost_tie"][i] = 0.99*state["total"]["win_lost_tie"][i] + 0.01*play_data[i]["data"]["piece_count"]
+        # for i in range(self.play_count):
+        #     if win_values[i]==1:
+        #         state["total"]["win_lost_tie"][i] += 1
+        #     else:
+        #         state["total"]["win_lost_tie"][i] -= 1
 
         alpha = 0.01
         set_status_total_value(state, "score_mcts", avg_game_score, alpha)
