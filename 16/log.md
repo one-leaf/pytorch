@@ -18,7 +18,7 @@
 | 4.1   | 50    | 10    | 0     | 0.98  | 6851  | 48    | -364 -0   | 32    | q_mean_std | (q_t+1 - q_t)_mean_std | probs - old_probs  | a + p + v - n | 5     | 0.99   |
 
 # doing
-| 4.1   | 50    | 10    | 0     | 0.98  | 6851  | 48    | -364 -0   | 32    | q_mean_std | (q_t+1 - q_t)_mean_std | probs - old_probs  | a + p + v - n | 5     | 0.9    |
+| 4.1   | 22    | 10    | 0     | 0.94  | 3603  | 26    | -10 -10   | 32    | q_mean_std | (q_t+1 - q_t)_mean_std | probs - old_probs  | a + p + v - n | 5     | 0.9    |
 
 # next doing
 | 6.1   | 113   | 16    | 0.11  | 0.64  | 308   | 134   | -42 -24   | 64    | q_mean_std | (q_t+1 - q_t)_mean_std | probs - old_probs  | a + v - n     | 0.5   | 0.99   |
