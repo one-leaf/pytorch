@@ -231,10 +231,10 @@ class PolicyValueNet():
         
         # 只抽取当前动作概率
         s_log_probs = log_probs.gather(1, actions)
-        s_model_probs = torch.log(model_probs.gather(1, actions) + 1e-10) 
-        # s_model_probs = torch.log(mcts_probs.gather(1, actions) + 1e-10) 
-        # ratios = torch.exp( s_model_probs - s_log_probs )
-        ratios = torch.exp( s_log_probs - s_model_probs )
+        # s_model_probs = torch.log(model_probs.gather(1, actions) + 1e-10) 
+        # ratios = torch.exp( s_log_probs - s_model_probs )
+        s_model_probs = torch.log(mcts_probs.gather(1, actions) + 1e-10) 
+        ratios = torch.exp( s_model_probs - s_log_probs )
 
         # print(s_log_probs.shape, s_model_probs.shape, ratios.shape, adv_batch.shape)
         surr1 = ratios * adv_batch
@@ -255,7 +255,9 @@ class PolicyValueNet():
         # loss = policy_loss + value_loss/(value_loss/policy_loss).detach() + qval_loss/(qval_loss/policy_loss).detach() 
         # loss = policy_loss + (value_loss + qval_loss)*0.01 
         # loss = policy_loss + value_loss + actor_loss 
-        loss = value_loss + actor_loss + policy_loss - entropy * 1e-3
+        # loss = value_loss + actor_loss + policy_loss - entropy * 1e-3
+        loss = value_loss + actor_loss - entropy * 1e-3
+
         # 参数梯度清零
         self.optimizer.zero_grad()
         # 反向传播并计算梯度
