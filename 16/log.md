@@ -22,7 +22,7 @@
 | 5.08  | 110   | 16    | 0.02  | 0.95  | 7287  | 122   | 19   19   | 32    | q_mean_std | (q_t+1 - q_t)_mean_std | probs - old_probs  | a + p + v - n | 1     | 0.99   |
 
 # next doing
-| 6.1   | 113   | 16    | 0.11  | 0.64  | 308   | 134   | -42 -24   | 32    | q_mean_std | (q_t+1 - q_t)_mean_std | mcts_probs - probs  | a + v - n    | 0.5   | 0.99   |
+| 6.1   | 113   | 16    | 0.11  | 0.64  | 308   | 134   | -42 -24   | 32    | q_mean_std | (q_t+1 - q_t)_mean_std | probs - old_probs  | a + v - n    | 0.5   | 0.99   |
 
 # 训练无进度
 | 7.1   | 149   | 23    | 0.11  | 0.84  |?      | ?     |           | 64    | q_mean_std | (q_t+1 - q_t)_mean_std | probs - mcts_probs | a + p + v - n | 0.5   | 0.99   |
