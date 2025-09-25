@@ -466,8 +466,8 @@ class MCTSPlayer(object):
                 # else:
                 #     p=0.99
                 p = 0.99    
-                # _probs = act_probs
-                _probs = act_ps
+                _probs = act_probs
+                # _probs = act_ps
                 dirichlet = np.random.dirichlet(2 * np.ones(len(nz_idx)))
                 dirichlet_probs = np.zeros_like(_probs, dtype=np.float64)
                 dirichlet_probs[nz_idx] = dirichlet

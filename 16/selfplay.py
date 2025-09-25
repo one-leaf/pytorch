@@ -603,12 +603,12 @@ class Train():
                 step = play_data[i]["data"]["steps"][k]
                 qval_list[k]=step["qval"]
                 
-                if k==len_steps-1:
-                    adv_list[k] = 0
-                else:
-                    adv_list[k] = play_data[i]["data"]["steps"][k+1]["qval"] - step["qval"]
+                # if k==len_steps-1:
+                #     adv_list[k] = 0
+                # else:
+                #     adv_list[k] = play_data[i]["data"]["steps"][k+1]["qval"] - step["qval"]
                 
-                # adv_list[k]=step["qval"] - step["state_value"]
+                adv_list[k]=step["qval"] - step["state_value"]
                     
                 states.append(step["state"])
                 mcts_probs.append(step["mcts_probs"])
@@ -623,7 +623,7 @@ class Train():
             adv_list = (adv_list - adv_mean) / adv_std
             qval_list = np.clip(qval_list, -1, 1)
             adv_list = np.clip(adv_list, -1, 1)
-            values.extend(qval_list.tolist())
+            # values.extend(qval_list.tolist())
             advs.extend(adv_list.tolist())
             print(i, "qval_mean:", qval_mean, "qval_std:", qval_std, "adv_mean:", adv_mean, "adv_std:", adv_std)
             print(qval_list)
@@ -635,10 +635,10 @@ class Train():
             # rem = len_steps%split_step_count   
             # t = len_steps//split_step_count            
             
-            # v = np.linspace(-1, 1, len_steps, dtype=np.float32)
+            v = np.linspace(0, -1, len_steps, dtype=np.float32)
             # v = v/np.std(v)
             # v = np.clip(v, -1, 1)
-            # values.extend(v.tolist())
+            values.extend(v.tolist())
 
             # c = 0
             # for k in range(len_steps-1, -1, -1):

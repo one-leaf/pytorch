@@ -27,8 +27,8 @@
 
 # 效果差
 | 6.1   | 50    | 10    | 0.01  | 0.83  | 4172  | 111   | 16   17   | 32    | q_mean_std | (q_t+1 - q_t)_mean_std | probs - old_probs  | a + v - n     | 0.5   | 0.99   |
-# doing
-| 6.1   | 7     | 7     | 0     | 0.13  | 2402  | 7     | 7    7    | 32    | q_mean_std | (q_t+1 - q_t)_mean_std | probs - old_probs  | a + v - n     | -     | 0.99   |
+# 全部动作收敛于down，完全失败
+| 6.1   | 7     | 7     | 0     | 0.13  | 2865  | 7     | 7    7    | 32    | q_mean_std | (q_t+1 - q_t)_mean_std | probs - old_probs  | a + v - n     | -     | 0.99   |
 
 
 # 训练无进度
