@@ -17,12 +17,14 @@
 # 0.5 days 失败
 | 4.05  | 50    | 10    | 0     | 0.98  | 6851  | 48    | -364 -0   | 32    | q_mean_std | (q_t+1 - q_t)_mean_std | probs - old_probs  | a + p + v - n | 5     | 0.99   |
 
-# doing
+# cupt 不能过大，否则学习不到任何东西
 | 5.02  | 22    | 10    | 0     | 0.94  | 3603  | 26    | -10 -10   | 32    | q_mean_std | (q_t+1 - q_t)_mean_std | probs - old_probs  | a + p + v - n | 5     | 0.9    |
 | 5.08  | 110   | 16    | 0.02  | 0.95  | 7287  | 122   | 19   19   | 32    | q_mean_std | (q_t+1 - q_t)_mean_std | probs - old_probs  | a + p + v - n | 1     | 0.99   |
 
-# next doing
-| 6.1   | 113   | 16    | 0.11  | 0.64  | 308   | 134   | -42 -24   | 32    | q_mean_std | (q_t+1 - q_t)_mean_std | probs - old_probs  | a + v - n    | 0.5   | 0.99   |
+# 效果差
+| 6.1   | 50    | 10    | 0.01  | 0.83  | 4172  | 111   | 16   17   | 32    | q_mean_std | (q_t+1 - q_t)_mean_std | probs - old_probs  | a + v - n     | 0.5   | 0.99   |
+| 6.2   | 50    | 10    | 0.01  | 0.83  | 4172  | 111   | 16   17   | 32    | q_mean_std | (q_t+1 - q_t)_mean_std | probs - old_probs  | a + v - n     | -     | 0.99   |
+
 
 # 训练无进度
 | 7.1   | 149   | 23    | 0.11  | 0.84  |?      | ?     |           | 64    | q_mean_std | (q_t+1 - q_t)_mean_std | probs - mcts_probs | a + p + v - n | 0.5   | 0.99   |

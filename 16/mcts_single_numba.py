@@ -466,17 +466,19 @@ class MCTSPlayer(object):
                 # else:
                 #     p=0.99
                 p = 0.99    
+                # _probs = act_probs
+                _probs = act_ps
                 dirichlet = np.random.dirichlet(2 * np.ones(len(nz_idx)))
-                dirichlet_probs = np.zeros_like(act_probs, dtype=np.float64)
+                dirichlet_probs = np.zeros_like(_probs, dtype=np.float64)
                 dirichlet_probs[nz_idx] = dirichlet
                 
-                _act_probs = act_probs * availables
-                if np.sum(_act_probs) == 0:
-                    _act_probs[nz_idx] = 1.0 / len(nz_idx)
+                _probs = _probs * availables
+                if np.sum(_probs) == 0:
+                    _probs[nz_idx] = 1.0 / len(nz_idx)
                 else:
-                    _act_probs = _act_probs / np.sum(_act_probs)
+                    _probs = _probs / np.sum(_probs)
                     
-                _p = p*_act_probs + (1.0-p)*dirichlet_probs
+                _p = p*_probs + (1.0-p)*dirichlet_probs
                 _p = _p / np.sum(_p) 
                 idx = np.random.choice(range(ACTONS_LEN), p=_p)
            
