@@ -60,6 +60,7 @@ class Train():
         if not os.path.exists(self.waitplaydir): os.makedirs(self.waitplaydir)
 
         self.stop_mark_file = os.path.join(self.waitplaydir,"../stop")
+        self.load_model = False
 
 
     def compute_advantage(self, gamma, lmbda, value_delta):
