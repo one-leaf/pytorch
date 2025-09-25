@@ -332,19 +332,26 @@ class Train():
         """收集自我对抗数据用于训练"""       
         print("TRAIN Self Play starting ...")
         
-        # 这里用上一次训练的模型作为预测有助于模型稳定
-        load_model_file=model_file
-        if os.path.exists(model_file+".bak"):
-            load_model_file = model_file+".bak"
+        if self.load_model:
+            policy_value_net = self.policy_value_net
+        else:        
+            # 这里用上一次训练的模型作为预测有助于模型稳定
+            load_model_file=model_file
+            if os.path.exists(model_file+".bak"):
+                load_model_file = model_file+".bak"
 
-        if os.path.exists(load_model_file):
-            if time.time()-os.path.getmtime(load_model_file)>60*60*5:
-                print("超过5小时模型都没有更新了，停止训练")
-                time.sleep(60)
-                return
+            if os.path.exists(load_model_file):
+                if time.time()-os.path.getmtime(load_model_file)>60*60*5:
+                    print("超过5小时模型都没有更新了，停止训练")
+                    time.sleep(60)
+                    return
 
-        # 开始游戏
-        policy_value_net = PolicyValueNet(GAME_WIDTH, GAME_HEIGHT, GAME_ACTIONS_NUM, model_file=load_model_file)
+            # 开始游戏
+            policy_value_net = PolicyValueNet(GAME_WIDTH, GAME_HEIGHT, GAME_ACTIONS_NUM, model_file=load_model_file)
+            
+            self.policy_value_net = policy_value_net
+            self.load_model = True
+            
         bestmodelfile = model_file+"_best"
           
         print('start test time:', datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
@@ -784,7 +791,8 @@ class Train():
     def run(self):
         """启动训练"""
         try:
-            self.collect_selfplay_data()                    
+            for i in range(10):
+                self.collect_selfplay_data()                    
         except KeyboardInterrupt:
             print('quit')
 
