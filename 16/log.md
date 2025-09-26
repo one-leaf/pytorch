@@ -1,12 +1,12 @@
-|No     |steps  |piecec |score_m|pacc   |agent  |steps_m|win_lost   |playout|v           |a                       |model_a             |loss           |cupt   |a_random|
+|No     |steps  |piecec |score_m|pacc   |agent  |steps_m|piecec_b   |playout|v           |a                       |model_a             |loss           |cupt   |a_random|
 | ----- | ----- | ----- | ----- | ----- | ----- | ----- | -----     | ----- | -----      | -----                  | -----              | -----         | ----- | -----  | 
 | xx.1  | 120   | 18    | 0.04  | 0.75  |2887   | ?     |           | 32    | q_mean_std | (q_t+1 - q_t)_mean_std | probs - old_probs  | a + v - n     | 0.25  | 0.99   |
 | xx.1  | 138   | 20    | 0.04  | 0.87  |3153   | ?     |           | 32    | q_mean_std | (q_t+1 - q_t)_mean_std | probs - mcts_probs | a + v - n     | 0.25  | 0.99   |
 | xx.1  | 91    | 9     | 0.04  | 0.87  |1897   | ?     |           | 32    | q_mean_std | (q_t+1 - q_t)_mean_std | old_probs - probs  | a + p + v - n | 0.25  | 0.99   |
 | xx.1  | 151   | 21    | 0.06  | 0.80  |3633   | ?     |           | 32    | q_mean_std | (q_t+1 - q_t)_mean_std | probs - old_probs  | a + p + v - n | 0.25  | 0.99   |
 
-# next
-| 0.1  | 151    | 21    | 0.06  | 0.80  |3633   | ?     |           | 64    | 0~-1       | (q - v)_mean_std       | probs - old_probs  | a  + v - n    | 0.5   | 0.99   |
+# doing
+| 0.1  | 96     | 10    | 0.00  | 0.91  |3808   | 134   | 16    16  | 32    | 0~-1       | (q - v)_mean_std       | probs - old_probs  | a + v - n     | 0.5   | 0.99   |
 
 
 # 训练无进度，并且学到的概率有误
@@ -28,7 +28,7 @@
 # 效果差
 | 6.1   | 50    | 10    | 0.01  | 0.83  | 4172  | 111   | 16   17   | 32    | q_mean_std | (q_t+1 - q_t)_mean_std | probs - old_probs  | a + v - n     | 0.5   | 0.99   |
 # 全部动作收敛于down，完全失败
-| 6.1   | 7     | 7     | 0     | 0.13  | 2865  | 7     | 7    7    | 32    | q_mean_std | (q_t+1 - q_t)_mean_std | probs - old_probs  | a + v - n     | -     | 0.99   |
+| 9.1   | 7     | 7     | 0     | 0.13  | 2865  | 7     | 7    7    | 32    | q_mean_std | (q_t+1 - q_t)_mean_std | probs - old_probs  | a + v - n     | -     | 0.99   |
 
 
 # 训练无进度
