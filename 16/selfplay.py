@@ -408,8 +408,8 @@ class Train():
         state = read_status_file() 
         need_replay = True
         for playcount in range(self.play_count):
-            player_id = random.randint(0, 2)
-            player.set_player_id(player_id)
+            # player_id = random.randint(0, 2)
+            player.set_player_id(playcount)
                 
             agent, data, qval, state_value, avg_qval, std_qval, start_time, paytime = self.play(cache, state, self.sample_count, his_pieces, his_pieces_len, player, policy_value_net)
                         
