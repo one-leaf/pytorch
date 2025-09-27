@@ -11,6 +11,7 @@
 # end return -1
 | 0.3  | 95     | 10    | 0.01  | 0.98  | 5859  | 136   | 15    15  | 64    | 0~-1       | (q - v)_mean_std       | probs - old_probs  | a + v - n     | 0.5   | 0.99   |
 
+
 # 训练无进度，并且学到的概率有误
 | 1.1   | 183   | 19    | 0.32  | 0.9   | 876   | 228   | -129 -25  | 64    | q_mean_std | (q - v)_mean_std       | mcts_probs - probs | a + p + v - n | 0.5   | 0.99   |
 | 1.2   | 217   | 22    | 0.33  | 0.9   | 1684  | 228   | -184 -22  | 64    | q_mean_std | (q - v)_mean_std       | mcts_probs - probs | a + p + v - n | 0.5   | 0.99   |
