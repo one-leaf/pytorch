@@ -603,12 +603,12 @@ class Train():
                 step = play_data[i]["data"]["steps"][k]
                 qval_list[k]=step["qval"]
                 
-                # if k==len_steps-1:
-                #     adv_list[k] = 0
-                # else:
-                #     adv_list[k] = play_data[i]["data"]["steps"][k+1]["qval"] - step["qval"]
+                if k==len_steps-1:
+                    adv_list[k] = 0
+                else:
+                    adv_list[k] = play_data[i]["data"]["steps"][k+1]["qval"] - step["qval"]
                 
-                adv_list[k]=step["qval"] - step["state_value"]
+                # adv_list[k]=step["qval"] - step["state_value"]
                     
                 states.append(step["state"])
                 mcts_probs.append(step["mcts_probs"])
