@@ -42,9 +42,11 @@
 | 10.1  | 242   | 26    | 0.09  | 0.94  |?      | ?     |           | 64    | q_mean_std | (q_t+1 - q_t)_mean_std | probs - old_probs  | a + p + v - n | 0.5   | 0.99   |
 | 10.3  | 256   | 29    | 0.25  | 0.95  |4936   | 203   | -254 -56  | 64    | q_mean_std | (q_t+1 - q_t)_mean_std | probs - old_probs  | a + p + v - n | 0.5   | 0.99   |
 
-# doing
-| 11.1  | 96     | 10    | 0.00  | 0.91 | 3808  | 134   | 16    16 | 64    | 0~-1       | (q_t+1 - q_t)_mean_std | probs - old_probs  | a + v - n     | 0.5   | 0.99   |
+# 进度缓慢
+| 11.1  | 92    | 9     | 0.08  | 0.92  | 2044  | 168   | 18    20  | 64    | 0~-1       | (q_t+1 - q_t)_mean_std | probs - old_probs  | a + v - n     | 0.5   | 0.99   |
 
+# doing
+| 12.1  | 92    | 9     | 0.08  | 0.92  | 2044  | 168   | 18    20  | 64    | q_mean_std | (q_t+1 - q_t)_mean_std | probs - old_probs  | a + v - n     | 0.5   | 0.99   |
 
 
 
