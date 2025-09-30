@@ -226,12 +226,12 @@ class PolicyValueNet():
         log_probs, values = self.policy_value_net(state_batch)
         
         # PPO损失计算        
-        actions = action_batch.unsqueeze(1)
-        adv_batch = action_batch.unsqueeze(1)
+        actions = action_batch.unsqueeze(1).detach()
+        adv_batch = action_batch.unsqueeze(1).detach()
         
         # 只抽取当前动作概率
         s_log_probs = log_probs.gather(1, actions)
-        s_model_probs = torch.log(model_probs.gather(1, actions) + 1e-10) 
+        s_model_probs = torch.log(model_probs.gather(1, actions) + 1e-10).detach() 
         ratios = torch.exp( s_log_probs - s_model_probs )
         # s_model_probs = torch.log(mcts_probs.gather(1, actions) + 1e-10) 
         # ratios = torch.exp( s_model_probs - s_log_probs )
