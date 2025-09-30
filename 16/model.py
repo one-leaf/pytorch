@@ -94,7 +94,7 @@ class PolicyValueNet():
     def set_optimizer(self, type_id):
         if type_id==0:
             # self.optimizer = Lion(self.policy_value_net.parameters(), lr=1e-5, weight_decay=self.l2_const)
-            self.optimizer = optim.AdamW(self.policy_value_net.parameters(), lr=1e-5, weight_decay=self.l2_const) 
+            self.optimizer = optim.AdamW(self.policy_value_net.parameters(), lr=1e-5) #, weight_decay=self.l2_const) 
         else:
             self.optimizer = optim.SGD(self.policy_value_net.parameters(), lr=1e-5, momentum=0.9, weight_decay=self.l2_const)
 
