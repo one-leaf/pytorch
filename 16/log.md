@@ -31,22 +31,38 @@
 | 9.1   | 7     | 7     | 0     | 0.13  | 2865  | 7     | 7    7    | 32    | q_mean_std | (q_t+1 - q_t)_mean_std | probs - old_probs  | a + v - n     | -     | 0.99   |
 
 # 训练无进度
-| 7.1   | 149   | 23    | 0.11  | 0.84  |?      | ?     |           | 64    | q_mean_std | (q_t+1 - q_t)_mean_std | probs - mcts_probs | a + p + v - n | 0.5   | 0.99   |
-| 7.2   | 200   | 25    | 0.18  | 0.92  |2983   | ?     | -81 -61   | 64    | q_mean_std | (q_t+1 - q_t)_mean_std | probs - mcts_probs | a + p + v - n | 0.5   | 0.99   |
+| 7.1   | 149   | 23    | 0.11  | 0.84  | ?     | ?     |           | 64    | q_mean_std | (q_t+1 - q_t)_mean_std | probs - mcts_probs | a + p + v - n | 0.5   | 0.99   |
+| 7.2   | 200   | 25    | 0.18  | 0.92  | 2983  | ?     | -81 -61   | 64    | q_mean_std | (q_t+1 - q_t)_mean_std | probs - mcts_probs | a + p + v - n | 0.5   | 0.99   |
 
-# 训练有效（快一点）
-| 8.1   | 166   | 24    | 0.02  | 0.87  |?      | ?     |           | 64    | q_mean_std | (q_t+1 - q_t)_mean_std | mcts_probs - probs | a + p + v - n | 0.5   | 0.99   |
-| 8.3   | 254   | 26    | 0.52  | 0.89  |6240   | 239   | 2124 2149 | 64    | q_mean_std | (q_t+1 - q_t)_mean_std | mcts_probs - probs | a + p + v - n | 0.5   | 0.99   |
-
-# 训练有效
-| 10.1  | 242   | 26    | 0.09  | 0.94  |?      | ?     |           | 64    | q_mean_std | (q_t+1 - q_t)_mean_std | probs - old_probs  | a + p + v - n | 0.5   | 0.99   |
-| 10.3  | 256   | 29    | 0.25  | 0.95  |4936   | 203   | -254 -56  | 64    | q_mean_std | (q_t+1 - q_t)_mean_std | probs - old_probs  | a + p + v - n | 0.5   | 0.99   |
-
-# 进度缓慢
+# 进度缓慢 0~-1 导致v太平缓，抓不到特征
 | 11.1  | 92    | 9     | 0.08  | 0.92  | 2044  | 168   | 18    20  | 64    | 0~-1       | (q_t+1 - q_t)_mean_std | probs - old_probs  | a + v - n     | 0.5   | 0.99   |
 
+
+# 以下为训练有效
+|No     |steps  |piecec |score_m|pacc   |agent  |steps_m|piecec_b   |playout|v           |a                       |model_a             |loss           |cupt   |a_random|
+# 训练有效（快一点），利用a来降低mcts_probs的方差
+| 8.1   | 166   | 24    | 0.02  | 0.87  | ?     | ?     |           | 64    | q_mean_std | (q_t+1 - q_t)_mean_std | mcts_probs - probs | a + p + v - n | 0.5   | 0.99   |
+| 8.3   | 254   | 26    | 0.52  | 0.89  | 6240  | 239   | 2124 2149 | 64    | q_mean_std | (q_t+1 - q_t)_mean_std | mcts_probs - probs | a + p + v - n | 0.5   | 0.99   |
+
+# 训练有效，但mcts_probs的方差过大
+| 10.1  | 242   | 26    | 0.09  | 0.94  | ?     | ?     |           | 64    | q_mean_std | (q_t+1 - q_t)_mean_std | probs - old_probs  | a + p + v - n | 0.5   | 0.99   |
+| 10.3  | 256   | 29    | 0.25  | 0.95  | 4936  | 203   | -254 -56  | 64    | q_mean_std | (q_t+1 - q_t)_mean_std | probs - old_probs  | a + p + v - n | 0.5   | 0.99   |
+
 # doing
-| 12.1  | 92    | 9     | 0.08  | 0.92  | 2044  | 168   | 18    20  | 64    | q_mean_std | (q_t+1 - q_t)_mean_std | probs - old_probs  | a + v - n     | 0.5   | 0.99   |
+| 12.1  | 39    | 7     | 0.17  | 0.87  | 1241  | 166   | 17    22  | 64    | q_mean_std | (q_t+1 - q_t)_mean_std | probs - old_probs  | a + v - n     | 0.5   | 0.99   |
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

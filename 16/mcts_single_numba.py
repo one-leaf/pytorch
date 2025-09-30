@@ -444,6 +444,8 @@ class MCTSPlayer(object):
             
             if self.player==1:            
                 idx = max_qs_idx
+            elif self.player==2:
+                idx = max_ps_idx
                       
             p = 0
             _p = []     
