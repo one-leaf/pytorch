@@ -628,7 +628,7 @@ class Train():
             # qval_list = np.clip(qval_list, -1, 1)
             # adv_list = np.clip(adv_list, -1, 1)
             values.extend(qval_list.tolist())
-            advs.extend(adv_list.tolist())
+            advs.extend(adv_list)
             print(i, "qval_mean:", qval_mean, "qval_std:", qval_std, "adv_mean:", adv_mean, "adv_std:", adv_std)
             print(qval_list)
             print(adv_list)            
