@@ -27,14 +27,20 @@
 
 # 效果差
 | 6.1   | 50    | 10    | 0.01  | 0.83  | 4172  | 111   | 16   17   | 32    | q_mean_std | (q_t+1 - q_t)_mean_std | probs - old_probs  | a + v - n     | 0.5   | 0.99   |
-# 全部动作收敛于down，完全失败
+# 全部动作收敛于 none，完全失败
 | 9.1   | 7     | 7     | 0     | 0.13  | 2865  | 7     | 7    7    | 32    | q_mean_std | (q_t+1 - q_t)_mean_std | probs - old_probs  | a + v - n     | -     | 0.99   |
+# 全部动作收敛于 none，完全失败
+| 12.2  | 39    | 7     | 0.14  | 0.84  | 2814  | 127   | 20    23  | 64    | q_mean_std | (q_t+1 - q_t)_mean_std | probs - old_probs  | a + v - n     | 0.5   | 0.99   |
+
+# doing
+| 13.1  | 39    | 7     | 0.14  | 0.84  | 2814  | 127   | 20    23  | 64    | q_mean_std | compute_advantage(q_t) | probs - old_probs  | a + v - n     | 0.5   | 0.99   |
+
 
 # 训练无进度
 | 7.1   | 149   | 23    | 0.11  | 0.84  | ?     | ?     |           | 64    | q_mean_std | (q_t+1 - q_t)_mean_std | probs - mcts_probs | a + p + v - n | 0.5   | 0.99   |
 | 7.2   | 200   | 25    | 0.18  | 0.92  | 2983  | ?     | -81 -61   | 64    | q_mean_std | (q_t+1 - q_t)_mean_std | probs - mcts_probs | a + p + v - n | 0.5   | 0.99   |
 
-# 进度缓慢 0~-1 导致v太平缓，抓不到特征
+# 全部动作收敛于 none
 | 11.1  | 92    | 9     | 0.08  | 0.92  | 2044  | 168   | 18    20  | 64    | 0~-1       | (q_t+1 - q_t)_mean_std | probs - old_probs  | a + v - n     | 0.5   | 0.99   |
 
 
@@ -48,8 +54,6 @@
 | 10.1  | 242   | 26    | 0.09  | 0.94  | ?     | ?     |           | 64    | q_mean_std | (q_t+1 - q_t)_mean_std | probs - old_probs  | a + p + v - n | 0.5   | 0.99   |
 | 10.3  | 256   | 29    | 0.25  | 0.95  | 4936  | 203   | -254 -56  | 64    | q_mean_std | (q_t+1 - q_t)_mean_std | probs - old_probs  | a + p + v - n | 0.5   | 0.99   |
 
-# doing
-| 12.1  | 39    | 7     | 0.17  | 0.87  | 1241  | 166   | 17    22  | 64    | q_mean_std | (q_t+1 - q_t)_mean_std | probs - old_probs  | a + v - n     | 0.5   | 0.99   |
 
 
 

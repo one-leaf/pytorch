@@ -63,13 +63,13 @@ class Train():
         self.load_model = False
 
 
-    def compute_advantage(self, gamma, lmbda, value_delta):
-        # 输入的 td_delta 就是倒装的，输出也是倒装的
+    def compute_advantage(self, value_delta, gamma=0.9, lmbda=0.8):
         advantage_list = []
         advantage = 0.0
-        for delta in value_delta:
+        for delta in value_delta[::-1]:
             advantage = gamma * lmbda * advantage + delta
             advantage_list.append(advantage)
+        advantage_list.reverse()            
         return advantage_list
 
     def get_equi_data(self, states, mcts_probs, model_probs, values, advs, actions):
@@ -603,10 +603,10 @@ class Train():
                 step = play_data[i]["data"]["steps"][k]
                 qval_list[k]=step["qval"]
                 
-                if k==len_steps-1:
-                    adv_list[k] = 0
-                else:
-                    adv_list[k] = play_data[i]["data"]["steps"][k+1]["qval"] - step["qval"]
+                # if k==len_steps-1:
+                #     adv_list[k] = 0
+                # else:
+                #     adv_list[k] = play_data[i]["data"]["steps"][k+1]["qval"] - step["qval"]
                 
                 # adv_list[k]=step["qval"] - step["state_value"]
                     
@@ -616,15 +616,22 @@ class Train():
                 actions.append(step["action"])
                 
             qval_mean = np.mean(qval_list)
-            qval_std = np.std(qval_list)+1e-6
+            qval_std = np.std(qval_list)
+            qval_std += 1e-6 if qval_std==0 else 0
+            
+            # 计算优势
+            adv_list = self.compute_advantage(qval_list)
+
             adv_mean = np.mean(adv_list)
-            adv_std = np.std(adv_list)+1e-6
+            adv_std = np.std(adv_list)
+            adv_std += 1e-6 if adv_std==0 else 0
+            
             qval_list = (qval_list - qval_mean) / qval_std
             adv_list = (adv_list - adv_mean) / adv_std
             qval_list = np.clip(qval_list, -1, 1)
             adv_list = np.clip(adv_list, -1, 1)
             values.extend(qval_list.tolist())
-            advs.extend(adv_list.tolist())
+            # advs.extend(adv_list.tolist())
             print(i, "qval_mean:", qval_mean, "qval_std:", qval_std, "adv_mean:", adv_mean, "adv_std:", adv_std)
             print(qval_list)
             print(adv_list)            
