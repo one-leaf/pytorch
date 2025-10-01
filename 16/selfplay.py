@@ -615,27 +615,38 @@ class Train():
                 model_probs.append(step["model_probs"])
                 actions.append(step["action"])
                 
-            qval_mean = np.mean(qval_list)
-            qval_std = np.std(qval_list)
-            qval_std += 1e-6 if qval_std==0 else 0
             
             # 计算优势
             adv_list = self.compute_advantage(qval_list)
 
-            adv_mean = np.mean(adv_list)
-            adv_std = np.std(adv_list)
-            adv_std += 1e-6 if adv_std==0 else 0
+            # adv_mean = np.mean(adv_list)
+            # adv_std = np.std(adv_list)
+            # adv_std += 1e-6 if adv_std==0 else 0
             
-            qval_list = (qval_list - qval_mean) / qval_std
-            adv_list = (adv_list - adv_mean) / adv_std
-            qval_list = np.clip(qval_list, -1, 1)
-            adv_list = np.clip(adv_list, -1, 1)
+            # qval_list = (qval_list - qval_mean) / qval_std
+            # adv_list = (adv_list - adv_mean) / adv_std
+            # qval_list = np.clip(qval_list, -1, 1)
+            # adv_list = np.clip(adv_list, -1, 1)
             values.extend(qval_list.tolist())
-            # advs.extend(adv_list.tolist())
+            advs.extend(adv_list.tolist())
             print(i, "qval_mean:", qval_mean, "qval_std:", qval_std, "adv_mean:", adv_mean, "adv_std:", adv_std)
             print(qval_list)
             print(adv_list)            
-            
+        
+
+        qval_mean = np.mean(values)
+        qval_std = np.std(values)
+        qval_std += 1e-6 if qval_std==0 else 0        
+        values = (np.array(values) - qval_mean) / qval_std
+        
+        adv_mean = np.mean(advs)
+        adv_std = np.std(advs)
+        adv_std += 1e-6 if adv_std==0 else 0
+        advs = (np.array(advs) - adv_mean) / adv_std
+
+        values = np.clip(values, -1, 1)
+        advs = np.clip(advs, -1, 1)        
+        
             
             # qval_list=np.zeros(split_step_count, dtype=np.float32)
             # adv_list=np.zeros(split_step_count, dtype=np.float32)
