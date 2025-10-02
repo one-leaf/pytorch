@@ -33,7 +33,7 @@
 | 12.2  | 39    | 7     | 0.14  | 0.84  | 2814  | 127   | 20    23  | 64    | q_mean_std | (q_t+1 - q_t)_mean_std | probs - old_probs  | a + v - n     | 0.5   | 0.99   |
 
 # doing
-| 13.1  | 39    | 7     | 0.14  | 0.84  | 2814  | 127   | 20    23  | 64    | q_mean_std | compute_advantage(q_t) | probs - old_probs  | a + v - n     | 0.5   | 0.99   |
+| 13.1  | 7     | 7     | 0.37  | 0.76  | 1856  | 122   | 10 20 24  | 64    | q_mean_std | compute_advantage(q_t) | probs - old_probs  | a + v - n     | 0.5   | 0.99   |
 
 
 # 训练无进度
