@@ -110,7 +110,7 @@ def read_status_file(max_keep=30):
     add_total_prop(state, "min_piececount")    
     add_total_prop(state, "max_piececount")  
     add_total_prop(state, "n_playout", 64)
-    add_total_prop(state, "win_lost_tie", [0,0,0])    
+    add_total_prop(state, "p_n_q", [0,0,0])    
     add_total_prop(state, "max_score")
     
     add_prop(state, "no_terminal_rate", 0)
