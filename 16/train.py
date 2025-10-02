@@ -166,8 +166,9 @@ class Dataset(torch.utils.data.Dataset):
         # 等待1秒钟，防止有数据还在写入
         time.sleep(1)
         i = -1
-        if len(movefiles)<self.max_keep_size//self.epoch:
-            print("SLEEP 60s for watting data, current model file count:",len(movefiles),"need:",self.max_keep_size//5)            
+        movefiles_count = self.max_keep_size//self.epoch
+        if len(movefiles)<movefiles_count:
+            print("SLEEP 60s for watting data, current model file count:",len(movefiles),"need:",movefiles_count)            
             time.sleep(60)
             raise Exception("NEED SOME NEW DATA TO TRAIN")
         
@@ -178,7 +179,7 @@ class Dataset(torch.utils.data.Dataset):
             os.rename(fn, savefile)
             if self.test_size==-1 or len(self.newsample)<self.test_size:
                 self.newsample.append(savefile)
-            if (i+1)>=self.max_keep_size//self.epoch and len(movefiles)-i<=self.max_keep_size: break     
+            if (i+1)>=movefiles_count and len(movefiles)-i<=2*movefiles_count: break     
             
         # random.shuffle(self.newsample)  
         print("mv %s/%s files to train"%(i+1,len(movefiles)))
