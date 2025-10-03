@@ -282,9 +282,11 @@ class MCTS():
         if s not in self.Ps:                          
             # 获得当前局面的概率 和 局面的打分
             act_probs, v = self._policy(state.game) 
+            v = float(v)
+            if v<-0.99: v=-0.99
+            if v>0.99: v=0.99
             expandPN(s, availables, act_probs, v, self.Ps, self.Ns, self.Nsa, self.Qsa, state.actions_num)             
             self.Vs[s] = v
-            v = float(v)
             return v
             
         # 当前最佳概率和最佳动作
