@@ -241,7 +241,8 @@ class PolicyValueNet():
         surr2 = torch.clamp(ratios, 1 - self.clip, 1 + self.clip) * adv_batch
         
         # advantages 相对优势
-        actor_loss = -(torch.min(surr1, surr2)).mean(dim=-1).mean()
+        # actor_loss = -(torch.min(surr1, surr2)).mean(dim=-1).mean()
+        actor_loss = (torch.min(surr1, surr2)).mean(dim=-1).mean()
 
         # policy 损失计算
         policy_loss = -(mcts_probs * log_probs).sum(dim=-1).mean() 
@@ -256,7 +257,7 @@ class PolicyValueNet():
         # loss = policy_loss + (value_loss + qval_loss)*0.01 
         # loss = policy_loss + value_loss + actor_loss 
         # loss = value_loss + actor_loss + policy_loss - entropy * 1e-3
-        loss = value_loss - actor_loss - entropy * 1e-3
+        loss = value_loss + actor_loss - entropy * 1e-3
 
         # 参数梯度清零
         self.optimizer.zero_grad()
