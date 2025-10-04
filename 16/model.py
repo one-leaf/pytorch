@@ -48,7 +48,8 @@ class PolicyValueNet():
 
         # 前期用这个
         # self.optimizer = optim.AdamW(self.policy_value_net.parameters(), lr=1e-6, weight_decay=self.l2_const)  
-        self.optimizer = optim.Adam(self.policy_value_net.parameters(), lr=1e-6, weight_decay=self.l2_const)  
+        # self.optimizer = optim.Adam(self.policy_value_net.parameters(), lr=1e-6, weight_decay=self.l2_const)  
+        self.optimizer = optim.Adam(self.policy_value_net.parameters(), lr=1e-6)  
         # transformers use adam 
         # self.optimizer = optim.SGD(self.policy_value_net.parameters(), lr=1e-6, momentum=0.9, weight_decay=self.l2_const)
 
@@ -96,7 +97,8 @@ class PolicyValueNet():
             # self.optimizer = Lion(self.policy_value_net.parameters(), lr=1e-5, weight_decay=self.l2_const)
             self.optimizer = optim.AdamW(self.policy_value_net.parameters(), lr=1e-5) #, weight_decay=self.l2_const) 
         else:
-            self.optimizer = optim.SGD(self.policy_value_net.parameters(), lr=1e-5, momentum=0.9, weight_decay=self.l2_const)
+            # self.optimizer = optim.SGD(self.policy_value_net.parameters(), lr=1e-5, momentum=0.9, weight_decay=self.l2_const)
+            self.optimizer = optim.SGD(self.policy_value_net.parameters(), lr=1e-5)
 
     # 设置学习率
     def set_learning_rate(self, lr):
