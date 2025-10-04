@@ -256,7 +256,7 @@ class PolicyValueNet():
         # loss = policy_loss + (value_loss + qval_loss)*0.01 
         # loss = policy_loss + value_loss + actor_loss 
         # loss = value_loss + actor_loss + policy_loss - entropy * 1e-3
-        loss = value_loss + actor_loss - entropy * 1e-3
+        loss = value_loss - actor_loss - entropy * 1e-3
 
         # 参数梯度清零
         self.optimizer.zero_grad()
