@@ -37,10 +37,6 @@
 | 13.2  | 36    | 9     | 0.61  | 0.73  | 3640  | 118   | 9  18 22  | 64    | q_mean_std | compute_advantage(q_t) | probs - old_probs  | a + v - n     | 0.5   | 0.99   |
 | 13.3  | 29    | 8     | 0.47  | 0.78  | 5123  | 127   | 9  21 23  | 64    | q_mean_std | compute_advantage(q_t) | probs - old_probs  | a + v - n     | 0.5   | 0.99   |
 
-# doing
-| 14.1  | 7     | 7     | 0.37  | 0.76  | 1856  | 122   | 10 20 24  | 64    | q_mean_std | compute_advantage(q_t) | probs - old_probs  | -a + v - n    | 0.5   | 0.99   |
-
-
 # 训练无进度
 | 7.1   | 149   | 23    | 0.11  | 0.84  | ?     | ?     |           | 64    | q_mean_std | (q_t+1 - q_t)_mean_std | probs - mcts_probs | a + p + v - n | 0.5   | 0.99   |
 | 7.2   | 200   | 25    | 0.18  | 0.92  | 2983  | ?     | -81 -61   | 64    | q_mean_std | (q_t+1 - q_t)_mean_std | probs - mcts_probs | a + p + v - n | 0.5   | 0.99   |
@@ -59,6 +55,8 @@
 | 10.1  | 242   | 26    | 0.09  | 0.94  | ?     | ?     |           | 64    | q_mean_std | (q_t+1 - q_t)_mean_std | probs - old_probs  | a + p + v - n | 0.5   | 0.99   |
 | 10.3  | 256   | 29    | 0.25  | 0.95  | 4936  | 203   | -254 -56  | 64    | q_mean_std | (q_t+1 - q_t)_mean_std | probs - old_probs  | a + p + v - n | 0.5   | 0.99   |
 
+# doing
+| 14.1  | 7     | 7     | 0.37  | 0.76  | 1856  | 122   | 10 20 24  | 32    | q_mean_std | compute_advantage(q_t) | probs - old_probs  | a + p + v - n | 0.5   | 0.99   |
 
 
 
