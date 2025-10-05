@@ -249,9 +249,10 @@ class PolicyValueNet():
 
         # policy 损失计算
         # policy_loss = -(mcts_probs * log_probs).sum(dim=-1).mean() 
-        log_ratio = (log_probs - log_old_probs).detach()
-        w = torch.exp(-torch.abs(log_ratio))
+        # log_ratio = (log_probs - log_old_probs).detach()
+        # w = torch.exp(-torch.abs(log_ratio))
         
+        w = 1-np.abs(log_probs.exp()-log_old_probs.exp())
         policy_loss = -(mcts_probs * log_probs * w).mean(dim=-1).mean() 
         
         # policy_loss = F.kl_div(log_probs, mcts_probs, reduction='batchmean')

@@ -56,7 +56,7 @@
 | 10.3  | 256   | 29    | 0.25  | 0.95  | 4936  | 203   | -254 -56  | 64    | q_mean_std | (q_t+1 - q_t)_mean_std | probs - old_probs  | a + p + v - n | 0.5   | 0.99   |
 
 # doing
-| 14.1  | 7     | 7     | 0.37  | 0.76  | 1856  | 122   | 10 20 24  | 32    | q_mean_std | compute_advantage(q_t) | probs - old_probs  | a + p + v - n | 0.5   | 0.99   |
+| 14.1  | 93    | 12    | 0.08  | 0.76  | 3527  | 120   | 11 21 22  | 32    | q_mean_std | compute_advantage(q_t) | probs - old_probs  | a + p + v - n | 0.5   | 0.99   |
 
 
 
