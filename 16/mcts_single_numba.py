@@ -213,12 +213,12 @@ class MCTS():
         state_ = None
 
         find_end = False
-        # for n in range(self._n_playout):
-        for n in count():
+        for n in range(self._n_playout):
+        # for n in count():
             state_:State = state.clone()
             
             # if s in self.Ns and self.Ns[s]>=self._n_playout: break
-            if n >= self._n_playout: break            
+            # if n >= self._n_playout: break            
             
             self.simulation_count += 1
 
@@ -234,8 +234,8 @@ class MCTS():
             
             # if self.Ns[s]>=self._n_playout : break
 
-
-        self._policy(state_.game, only_Cache_Next=True) 
+        if state_ != None:
+            self._policy(state_.game, only_Cache_Next=True) 
 
         probs = getprobsFromNsa(s, temp, state.availables(), state.actions_num, self.Nsa)                       
         
