@@ -234,7 +234,7 @@ class MCTS():
             
             # if self.Ns[s]>=self._n_playout : break
 
-        if state_ != None:
+        if state_ != None and not state_.game.terminal:
             self._policy(state_.game, only_Cache_Next=True) 
 
         probs = getprobsFromNsa(s, temp, state.availables(), state.actions_num, self.Nsa)                       
