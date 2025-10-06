@@ -55,8 +55,9 @@
 | 10.1  | 242   | 26    | 0.09  | 0.94  | ?     | ?     |           | 64    | q_mean_std | (q_t+1 - q_t)_mean_std | probs - old_probs  | a + p + v - n | 0.5   | 0.99   |
 | 10.3  | 256   | 29    | 0.25  | 0.95  | 4936  | 203   | -254 -56  | 64    | q_mean_std | (q_t+1 - q_t)_mean_std | probs - old_probs  | a + p + v - n | 0.5   | 0.99   |
 
-# doing
+# 效果最好
 | 14.1  | 93    | 12    | 0.08  | 0.76  | 3527  | 120   | 11 21 22  | 32    | q_mean_std | compute_advantage(q_t) | probs - old_probs  | a + p + v - n | 0.5   | 0.99   |
+| 14.2  | 88    | 12    | 0.74  | 0.77  | 6368  | 137   | 10 24 26  | 64    | q_mean_std | compute_advantage(q_t) | probs - old_probs  | a +*p + v - n | 0.5   | 0.99   |
 
 
 
