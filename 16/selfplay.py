@@ -522,8 +522,8 @@ class Train():
         
         update_agent_count = 20
         if state["total"]["_agent"]>update_agent_count:
-            state["score"].append(round(state["total"]["score"],2) if state["total"]["score"] <1 else round(state["total"]["score"]))
-            state["score_mcts"].append(round(state["total"]["score_mcts"],2) if state["total"]["score_mcts"] <1 else round(state["total"]["score_mcts"]))
+            state["score"].append(round(state["total"]["score"],2) if state["total"]["score"] <10 else round(state["total"]["score"]))
+            state["score_mcts"].append(round(state["total"]["score_mcts"],2) if state["total"]["score_mcts"] <10 else round(state["total"]["score_mcts"]))
             state["depth"].append(round(state["total"]["depth"],1))
             state["pacc"].append(round(state["total"]["pacc"],2))
             state["step_time"].append(round(state["total"]["step_time"],1))
