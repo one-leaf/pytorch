@@ -239,23 +239,16 @@ class PolicyValueNet():
         # s_model_probs = torch.log(mcts_probs.gather(1, actions) + 1e-10) 
         # ratios = torch.exp( s_model_probs - s_log_probs )
 
-        # print(s_log_probs.shape, s_model_probs.shape, ratios.shape, adv_batch.shape)
         surr1 = ratios * adv_batch
         surr2 = torch.clamp(ratios, 1 - self.clip, 1 + self.clip) * adv_batch
         
         # advantages 相对优势
         actor_loss = -(torch.min(surr1, surr2)).mean(dim=-1).mean()
-        # actor_loss = (torch.min(surr1, surr2)).mean(dim=-1).mean()
 
-        # policy 损失计算
-        # policy_loss = -(mcts_probs * log_probs).sum(dim=-1).mean() 
-        # log_ratio = (log_probs - log_old_probs).detach()
-        # w = torch.exp(-torch.abs(log_ratio))
-        
+        # policy 损失计算        
         w = (1-torch.abs(log_probs.exp()-log_old_probs.exp())).detach()
         policy_loss = -(mcts_probs * log_probs * w).mean(dim=-1).mean() 
-        
-        # policy_loss = F.kl_div(log_probs, mcts_probs, reduction='batchmean')
+        # policy_loss = -(mcts_probs * log_probs).mean(dim=-1).mean()         
         
         # critic 损失计算
         value_loss = self.quantile_regression_loss(values, value_batch)
@@ -264,10 +257,8 @@ class PolicyValueNet():
         entropy = -(torch.exp(log_probs) * log_probs).mean(dim=-1).mean() 
 
         # loss = policy_loss + value_loss/(value_loss/policy_loss).detach() + qval_loss/(qval_loss/policy_loss).detach() 
-        # loss = policy_loss + (value_loss + qval_loss)*0.01 
-        # loss = policy_loss + value_loss + actor_loss 
-        
         loss = value_loss + actor_loss + policy_loss - entropy*1e-3
+        # loss = value_loss + actor_loss + policy_loss*1e-2 - entropy*1e-3
         # loss = value_loss + actor_loss - entropy * 1e-3
 
         # 参数梯度清零
