@@ -613,12 +613,15 @@ class Train():
             adv_list=np.zeros(len_steps, dtype=np.float32)
             for k in range(len_steps):
                 step = play_data[i]["data"]["steps"][k]
-                qval_list[k]=step["qval"]
                 
-                # if k==len_steps-1:
-                #     adv_list[k] = 0
-                # else:
-                #     adv_list[k] = play_data[i]["data"]["steps"][k+1]["qval"] - step["qval"]
+                # 直接用 Q 值
+                # qval_list[k]=step["qval"]
+                
+                # 这里用 Q_t+1 - Q_t 转为优势A
+                if k==len_steps-1:
+                    adv_list[k] = step["qval"]
+                else:
+                    adv_list[k] = play_data[i]["data"]["steps"][k+1]["qval"] - step["qval"]
                 
                 # adv_list[k]=step["qval"] - step["state_value"]
                     
