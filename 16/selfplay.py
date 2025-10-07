@@ -64,6 +64,18 @@ class Train():
 
 
     def compute_advantage(self, value_delta, gamma=0.9, lmbda=0.8):
+        """
+        标准计算优势函数
+        A(t) = R(t) + γ * V(s(t+1)) - V(s(t))
+        gae: Generalized Advantage Estimation
+        A(t) = R(t) + γ * V(s(t+1)) - V(s(t)) + γ * λ * A(t+1)
+        最后一个时刻的 A(T+1) = 0 和 V(s(T+1)) = 0 ： 
+        A(T) = R(T) - V(s(T))
+        A(T-1) = R(T-1) + γ * V(s(T)) - V(s(T-1)) + γ * λ * A(T)
+        --------------------------------
+        mcts: A(t) = Q(s(t))
+        gae:  A(t) = Q(s(t) + γ * λ * A(t+1)        
+        """
         advantage_list = []
         advantage = 0.0
         for delta in value_delta[::-1]:
