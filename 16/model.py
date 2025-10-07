@@ -35,7 +35,8 @@ class PolicyValueNet():
         self.device=device
         print("use", device)
 
-        self.clip = 0.5  # PPO的clip参数
+        self.clip_low  = 0.2  # PPO的clip参数
+        self.clip_high = 0.3  # PPO的clip参数
         self.l2_const = l2_const  
         # ViT-Ti : depth 12 width 192 heads 3 LR=4e-3
         self.policy_value_net = VitNet(embed_dim=192, depth=6, num_heads=3, num_classes=5, num_quantiles=128, drop_ratio=0.1, drop_path_ratio=0.1, attn_drop_ratio=0.1, num_channels=self.input_channels)
@@ -240,7 +241,7 @@ class PolicyValueNet():
         # ratios = torch.exp( s_model_probs - s_log_probs )
 
         surr1 = ratios * adv_batch
-        surr2 = torch.clamp(ratios, 1 - self.clip, 1 + self.clip) * adv_batch
+        surr2 = torch.clamp(ratios, 1 - self.clip_low, 1 + self.clip_high) * adv_batch
         
         # advantages 相对优势
         actor_loss = -(torch.min(surr1, surr2)).mean(dim=-1).mean()
