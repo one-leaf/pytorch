@@ -615,7 +615,7 @@ class Train():
                 step = play_data[i]["data"]["steps"][k]
                 
                 # 直接用 Q 值
-                # qval_list[k]=step["qval"]
+                qval_list[k]=step["qval"]
                 
                 # 这里用 Q_t+1 - Q_t 转为优势A
                 if k==len_steps-1:
@@ -632,7 +632,7 @@ class Train():
                 
             
             # 计算优势
-            adv_list = self.compute_advantage(qval_list)
+            adv_list = self.compute_advantage(adv_list)
 
             # adv_mean = np.mean(adv_list)
             # adv_std = np.std(adv_list)
