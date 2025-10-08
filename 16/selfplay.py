@@ -553,8 +553,9 @@ class Train():
             local_time = time.localtime(start_time)
             current_month = local_time.tm_mon
             current_day = local_time.tm_mday
+            current_hour = local_time.tm_hour
 
-            state["update"].append(current_day)
+            state["update"].append(current_day+current_hour/24)
             state["total"]["_agent"] -= update_agent_count  
             state["total"]["n_playout"] = self.n_playout         
             
