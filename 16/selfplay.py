@@ -13,6 +13,7 @@ import os, random, uuid, math
 
 import numpy as np
 import copy
+import torch
 
 from status import save_status_file, read_status_file, set_status_total_value
 
@@ -848,8 +849,16 @@ def profiler():
     profiler.disable()
     profiler.print_stats()
 
+def setup_seed(seed):
+     torch.manual_seed(seed)
+     torch.cuda.manual_seed_all(seed)
+    #  np.random.seed(seed)
+    #  random.seed(seed)
+     torch.backends.cudnn.deterministic = True
+
 if __name__ == '__main__':
     print('start playing',datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+    setup_seed(3407)
     np.set_printoptions(precision=2, suppress=True)
     training = Train()
     training.run()
