@@ -157,7 +157,7 @@ def read_status_file(max_keep=30):
 def set_status_total_value(state, key, value, rate=1/1000):
     if type(state["total"][key]) == list:
         for i in range(len(value)):
-            state["total"][key][i] += (value[i]-state["total"][key][i]) * rate
+            state["total"][key][i] = round(state["total"][key][i] + (value[i]-state["total"][key][i]) * rate, 3)
     else:    
         state["total"][key] += (value-state["total"][key]) * rate
     
