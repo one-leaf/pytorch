@@ -595,7 +595,6 @@ class Train():
                 if os.path.exists(bestmodelfile): os.remove(bestmodelfile)
                 if os.path.exists(newmodelfile): os.link(newmodelfile, bestmodelfile)
                         
-        save_status_file(state)         
         avg_qval_list = [play_data[i]["avg_qval"] for i in range(self.play_count)]
         std_qval_list = [play_data[i]["std_qval"] for i in range(self.play_count)]    
         states, mcts_probs, model_probs, values, advs, actions = [], [], [], [], [], []
@@ -650,6 +649,11 @@ class Train():
             # adv_list = np.clip(adv_list, -1, 1)
             values.extend(qval_list.tolist())
             advs.extend(adv_list)
+
+        set_status_total_value(state, "model_probs", np.average(model_probs), alpha)
+        set_status_total_value(state, "mcts_probs", np.average(mcts_probs), alpha)
+
+        save_status_file(state)         
         
 
         qval_mean = np.mean(values)

@@ -120,6 +120,8 @@ def read_status_file(max_keep=30):
     add_total_prop(state, "max_piececount")  
     add_total_prop(state, "n_playout", 64)
     add_total_prop(state, "p_n_q", [0,0,0])    
+    add_total_prop(state, "model_probs", [0,0,0,0,0])
+    add_total_prop(state, "mcts_probs", [0,0,0,0,0])
     add_total_prop(state, "max_score")
     
     add_prop(state, "no_terminal_rate", 0)
@@ -153,8 +155,9 @@ def read_status_file(max_keep=30):
     return state
 
 def set_status_total_value(state, key, value, rate=1/1000):
-    if state["total"][key]==0:
-        state["total"][key] = value
-    else:
+    if type(state["total"][key]) == list:
+        for i in range(len(value)):
+            state["total"][key][i] += (value[i]-state["total"][key][i]) * rate
+    else:    
         state["total"][key] += (value-state["total"][key]) * rate
     
