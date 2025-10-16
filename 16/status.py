@@ -52,10 +52,19 @@ def file_lock(lock_path):
             pass
 
 def save_status_file(state):  
+    format_str = '%Y-%m-%d %H:%M:%S'
     if "info" not in state:
-        state["info"] = {"create":datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+        state["info"] = {"create":datetime.now().strftime(format_str)}
 
-    state["info"]["modify"] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')  
+    state["info"]["modify"] = datetime.now().strftime(format_str)  
+    
+    start_dt = datetime.strptime(state["info"]["create"], format_str)
+    end_dt   = datetime.strptime(state["info"]["modify"], format_str)
+    delta = end_dt - start_dt
+    if delta.days>0:
+        file_path = os.path.join(model_dir, f'status_{delta.days}d.json')
+        if not os.path.exists(file_path):
+            shutil.copy(status_file, file_path)
     
     with file_lock(status_lock_file):
         temp_file = tempfile.NamedTemporaryFile(delete=False, mode='w', newline='',dir=model_dir)
