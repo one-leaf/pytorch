@@ -650,8 +650,8 @@ class Train():
             values.extend(qval_list.tolist())
             advs.extend(adv_list)
 
-        set_status_total_value(state, "model_probs", np.average(model_probs), alpha)
-        set_status_total_value(state, "mcts_probs", np.average(mcts_probs), alpha)
+        set_status_total_value(state, "model_probs", np.average(model_probs, axis=1), alpha)
+        set_status_total_value(state, "mcts_probs", np.average(mcts_probs, axis=1), alpha)
 
         save_status_file(state)         
         
