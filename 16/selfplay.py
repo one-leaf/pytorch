@@ -611,7 +611,7 @@ class Train():
             len_steps = len(play_data[i]["data"]["steps"])           
                        
             # qval_list=np.zeros(len_steps, dtype=np.float32)
-            qval_list=np.linspace(0, -1, len_steps, dtype=np.float32)
+            qval_list=np.linspace(1, -1, len_steps, dtype=np.float32)
             adv_list=np.zeros(len_steps, dtype=np.float32)
 
             for k in range(len_steps):

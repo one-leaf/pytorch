@@ -260,9 +260,9 @@ class PolicyValueNet():
         # entropy = -(torch.exp(log_probs) - 1 - log_probs).mean(dim=-1).mean() 
 
         # loss = policy_loss + value_loss/(value_loss/policy_loss).detach() + qval_loss/(qval_loss/policy_loss).detach() 
-        # loss = value_loss + actor_loss + policy_loss - entropy*1e-3
+        loss = value_loss + actor_loss + policy_loss - entropy*1e-3
         # loss = value_loss + actor_loss + policy_loss*1e-2 - entropy*1e-3
-        loss = value_loss + actor_loss - entropy * 1e-3
+        # loss = value_loss + actor_loss - entropy * 1e-3
 
         # 参数梯度清零
         self.optimizer.zero_grad()
