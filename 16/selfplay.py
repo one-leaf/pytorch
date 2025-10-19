@@ -610,15 +610,15 @@ class Train():
             
             len_steps = len(play_data[i]["data"]["steps"])           
                        
-            # qval_list=np.zeros(len_steps, dtype=np.float32)
-            qval_list=np.linspace(1, -1, len_steps, dtype=np.float32)
+            qval_list=np.zeros(len_steps, dtype=np.float32)
+            val_list=np.linspace(1, -1, len_steps, dtype=np.float32)
             adv_list=np.zeros(len_steps, dtype=np.float32)
 
             for k in range(len_steps):
                 step = play_data[i]["data"]["steps"][k]
                 
                 # 直接用 Q 值
-                # qval_list[k]=step["qval"]
+                qval_list[k]=step["qval"]
                 
                 # 这里用 Q_t+1 - Q_t 转为优势A
                 # if k==len_steps-1:
@@ -628,7 +628,7 @@ class Train():
                 
                 # 这里用 Q - V 误差转为优势
                 # adv_list[k]=step["qval"] - step["state_value"]
-                adv_list[k]=step["qval"] - qval_list[k]
+                adv_list[k]=step["qval"] - val_list[k]
                 
                 # 这里直接用 Q 值，后面再统一计算优势             
                 # adv_list[k] = step["qval"]
