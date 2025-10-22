@@ -4,6 +4,7 @@ from pathlib import Path
 from contextlib import contextmanager
 import errno
 from datetime import datetime
+import numpy as np
 
 if os.name == 'posix':
     import fcntl
@@ -51,6 +52,24 @@ def file_lock(lock_path):
         except:
             pass
 
+def numpy_encoder(obj):
+    """
+    自定义 JSON 编码函数，用于处理 NumPy 类型。
+    """
+    # 检查是否是 NumPy 整数类型
+    if isinstance(obj, np.integer):
+        return int(obj)
+    # 检查是否是 NumPy 浮点数类型 (如 float32, float64)
+    elif isinstance(obj, np.floating):
+        # 使用 .item() 方法是提取 NumPy 标量到 Python 标量的推荐方式
+        return float(obj) 
+    # 检查是否是 NumPy 数组
+    elif isinstance(obj, np.ndarray):
+        return obj.tolist()
+    # 如果对象类型不是我们定义的，则让 JSON 编码器继续抛出 TypeError
+    raise TypeError(f'Object of type {obj.__class__.__name__} is not JSON serializable')
+
+
 def save_status_file(state):  
     format_str = '%Y-%m-%d %H:%M:%S'
     if "info" not in state:
@@ -70,7 +89,7 @@ def save_status_file(state):
         temp_file = tempfile.NamedTemporaryFile(delete=False, mode='w', newline='',dir=model_dir)
         with temp_file as f:
             # lock_file(f, exclusive=True)
-            json.dump(state, f, ensure_ascii=False, indent=4)
+            json.dump(state, f, ensure_ascii=False, indent=4, default=numpy_encoder)
             # unlock_file(f)
         if os.path.exists(status_file):
             os.remove(status_file)
