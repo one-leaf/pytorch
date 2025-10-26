@@ -533,7 +533,7 @@ class Train():
         set_status_total_value(state, "pacc", pacc, alpha)
         set_status_total_value(state, "depth", depth, alpha)
         
-        update_agent_count = 20
+        update_agent_count = 50
         if state["total"]["_agent"]>update_agent_count:
             state["score"].append(round(state["total"]["score"],2) if state["total"]["score"] <10 else round(state["total"]["score"]))
             state["score_mcts"].append(round(state["total"]["score_mcts"],2) if state["total"]["score_mcts"] <10 else round(state["total"]["score_mcts"]))
