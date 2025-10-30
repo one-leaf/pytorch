@@ -371,9 +371,11 @@ class MCTSPlayer(object):
             
             availables = state.availables()
 
-            if  hash(state) in self.cache :
-                action = self.cache[hash(state)]
-                if action < len(availables)-1:
+            key = game.key
+
+            if key in self.cache :
+                action = self.cache[key]
+                if sum(availables)>1:
                     availables[action]=0       
                 
             nz_idx = np.nonzero(availables)[0]  # [0,2,3,4]
@@ -525,7 +527,7 @@ class MCTSPlayer(object):
             # 将概率转为onehot
             # act_probs = np.zeros_like(act_probs)
             # act_probs[max_qs_idx] = 1
-            self.cache[hash(state)] = action
+            self.cache[key] = action
 
 
             # 将 act_probs 概率的标准差改为1
