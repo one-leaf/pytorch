@@ -306,7 +306,7 @@ class Train():
             paytime = time.time()-start_time
                 # (agent.removedlines > state["total"]["avg_score"]+1)  or \
 
-            if agent.terminal:
+            if agent.terminal or agent.piececount>=max(10, state["total"]["p_n_q"][0]*2):
 
                 # # 修复Q值，将最后都无法消行的全部设置为-1
                 # if agent.terminal:
