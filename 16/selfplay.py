@@ -214,8 +214,8 @@ class Train():
 
         # # 新局按Q值走，探索
         # agent = Agent(isRandomNextPiece=False, nextPiecesList=his_pieces )
-        # agent.is_replay = False
-        # agent.limitstep = False
+        agent.is_replay = False
+        agent.limitstep = False
 
         # if his_steps > sample_count:
         #     while True:
