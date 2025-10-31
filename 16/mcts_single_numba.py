@@ -449,7 +449,7 @@ class MCTSPlayer(object):
             if self.player==2:            
                 idx = max_qs_idx
             elif self.player==0:
-                p = 0.75    
+                p = 0.9    
                 _probs = act_ps
                 dirichlet = np.random.dirichlet(2 * np.ones(len(nz_idx)))
                 dirichlet_probs = np.zeros_like(_probs, dtype=np.float64)
