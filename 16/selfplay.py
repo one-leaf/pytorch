@@ -187,7 +187,7 @@ class Train():
                                
         return min_removedlines, min_his_pieces, min_his_pieces_len
 
-    def play(self, cache, state, sample_count, his_pieces, his_pieces_len, player, policy_value_net):
+    def play(self, cache, state, sample_count, his_pieces, his_pieces_len, player, policy_value_net, max_steps):
         # data = {"steps":deque(maxlen=self.play_size),"last_state":0,"score":0,"piece_count":0}
         data = {"steps":[],"last_state":0,"score":0,"piece_count":0}
         if his_pieces_len>0:
@@ -306,7 +306,7 @@ class Train():
             paytime = time.time()-start_time
                 # (agent.removedlines > state["total"]["avg_score"]+1)  or \
 
-            if agent.terminal or i>state["total"]["steps"]+state["total"]["p_n_q"][0]:
+            if agent.terminal or (max_steps>0 and i>max_steps):
 
                 # # 修复Q值，将最后都无法消行的全部设置为-1
                 # if agent.terminal:
@@ -420,15 +420,18 @@ class Train():
         play_data = []
         state = read_status_file() 
         need_replay = True
+        max_steps = -1
         for playcount in range(self.play_count):
             # player_id = random.randint(0, 2)
             player.set_player_id(playcount)
-                
-            agent, data, qval, state_value, avg_qval, std_qval, start_time, paytime = self.play(cache, state, self.sample_count, his_pieces, his_pieces_len, player, policy_value_net)
+                            
+            agent, data, qval, state_value, avg_qval, std_qval, start_time, paytime = self.play(cache, state, self.sample_count, his_pieces, his_pieces_len, player, policy_value_net, max_steps)
                         
             play_data.append({"agent":agent, "data":data, "qval":qval, "avg_qval":avg_qval, "std_qval":std_qval, "state_value":state_value, "start_time":start_time, "paytime":paytime})
             his_pieces = agent.piecehis
             his_pieces_len = len(agent.piecehis)
+            
+            if max_steps == -1 : max_steps = agent.steps
             
             # 如果游戏达到了最小的消除行数，样本有效，直接结束
             # if agent.steps >= self.sample_count:
