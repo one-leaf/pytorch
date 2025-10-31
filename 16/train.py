@@ -263,11 +263,9 @@ class Train():
                         begin_accuracy = np.concatenate((begin_accuracy, np.argmax(act_probs, axis=1)==np.argmax(test_probs.cpu().numpy(), axis=1)), axis=0)
             status = read_status_file()
             self.lr_multiplier = status["total"]["lr_multiplier"]
-            self.optimizer_type = status["total"]["optimizer_type"]
             print("lr_multiplier:", self.lr_multiplier, "learn_rate:", self.learn_rate*self.lr_multiplier)
 
             v_loss_list=[]
-            self.policy_value_net.set_optimizer(self.optimizer_type)
             self.policy_value_net.set_learning_rate(self.learn_rate*self.lr_multiplier)
             for i, data in enumerate(training_loader):  # 计划训练批次
                 # 使用对抗数据重新训练策略价值网络模型
