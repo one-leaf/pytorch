@@ -306,7 +306,7 @@ class Train():
             paytime = time.time()-start_time
                 # (agent.removedlines > state["total"]["avg_score"]+1)  or \
 
-            if agent.terminal or i>max(100, state["total"]["steps"]*2):
+            if agent.terminal or i>state["total"]["steps"]+state["total"]["p_n_q"][0]:
 
                 # # 修复Q值，将最后都无法消行的全部设置为-1
                 # if agent.terminal:
@@ -483,7 +483,7 @@ class Train():
         if len(state["total"]["p_n_q"])!=self.play_count:
             state["total"]["p_n_q"]=[0 for _ in range(self.play_count)]
         for i in range(self.play_count):
-            state["total"]["p_n_q"][i] = 0.99*state["total"]["p_n_q"][i] + 0.01*play_data[i]["data"]["piece_count"]
+            state["total"]["p_n_q"][i] = 0.99*state["total"]["p_n_q"][i] + 0.01*play_data[i]["data"]["steps_count"]
         # for i in range(self.play_count):
         #     if win_values[i]==1:
         #         state["total"]["p_n_q"][i] += 1
