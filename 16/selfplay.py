@@ -197,25 +197,25 @@ class Train():
         else:
             agent = Agent(isRandomNextPiece=True)
 
-        agent.show_mcts_process= False
-        for i in count():
-            action = policy_value_net.policy_value_fn_best_act(agent)
-            _, score = agent.step(action)
-            if agent.terminal:
-                break
-            if agent.removedlines > 1000:
-                raise Exception("removedlines too large, cancel play")
+        # agent.show_mcts_process= False
+        # for i in count():
+        #     action = policy_value_net.policy_value_fn_best_act(agent)
+        #     _, score = agent.step(action)
+        #     if agent.terminal:
+        #         break
+        #     if agent.removedlines > 1000:
+        #         raise Exception("removedlines too large, cancel play")
             
-        agent.print()    
-        print("agent.steps:", agent.steps, "agent.piececount:", agent.piececount, "agent.removedlines:", agent.removedlines)
-        his_pieces = agent.piecehis
-        his_pieces_len = len(his_pieces)
-        his_steps = agent.steps
+        # agent.print()    
+        # print("agent.steps:", agent.steps, "agent.piececount:", agent.piececount, "agent.removedlines:", agent.removedlines)
+        # his_pieces = agent.piecehis
+        # his_pieces_len = len(his_pieces)
+        # his_steps = agent.steps
 
-        # 新局按Q值走，探索
-        agent = Agent(isRandomNextPiece=False, nextPiecesList=his_pieces )
-        agent.is_replay = False
-        agent.limitstep = False
+        # # 新局按Q值走，探索
+        # agent = Agent(isRandomNextPiece=False, nextPiecesList=his_pieces )
+        # agent.is_replay = False
+        # agent.limitstep = False
 
         # if his_steps > sample_count:
         #     while True:
