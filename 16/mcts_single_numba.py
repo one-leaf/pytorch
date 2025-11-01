@@ -317,7 +317,7 @@ class MCTS():
         # 外部奖励，放的方块越多越好
         #     v += 0.01
         # if v>2: v=2    
-        if v<-1: v=-1    
+        # if v<-1: v=-1    
         updateQN(s, a, v, self.Ns, self.Qsa, self.Nsa, state.actions_num)
         
         return v
