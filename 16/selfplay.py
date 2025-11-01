@@ -486,7 +486,7 @@ class Train():
         if len(state["total"]["p_n_q"])!=self.play_count:
             state["total"]["p_n_q"]=[0 for _ in range(self.play_count)]
         for i in range(self.play_count):
-            state["total"]["p_n_q"][i] = 0.99*state["total"]["p_n_q"][i] + 0.01*play_data[i]["data"]["steps_count"]
+            state["total"]["p_n_q"][i] = 0.99*state["total"]["p_n_q"][i] + 0.01*play_data[i]["data"]["piece_count"]
         # for i in range(self.play_count):
         #     if win_values[i]==1:
         #         state["total"]["p_n_q"][i] += 1
