@@ -222,7 +222,7 @@ class PolicyValueNet():
         value_batch = torch.FloatTensor(value_batch).to(self.device)
         adv_batch = torch.FloatTensor(adv_batch).to(self.device)
         action_batch = torch.LongTensor(action_batch).to(self.device)
-        mask_batch = torch.LongTensor(action_batch).to(self.device) 
+        mask_batch = torch.LongTensor(mask_batch).to(self.device) 
 
         # 设置学习率
         # self.set_learning_rate(lr)
