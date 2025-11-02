@@ -85,15 +85,15 @@ class Train():
         advantage_list.reverse()            
         return advantage_list
 
-    def get_equi_data(self, states, mcts_probs, model_probs, values, advs, actions):
+    def get_equi_data(self, states, mcts_probs, model_probs, values, advs, actions, masks):
         """
         通过翻转增加数据集
         play_data: [(state, mcts_prob, values, advs), ..., ...]
         """
         extend_data = []
         for i in range(len(states)):
-            state, mcts_prob, model_prob, value, adv, action=states[i], mcts_probs[i], model_probs[i], values[i], advs[i], actions[i]
-            extend_data.append((state, mcts_prob, model_prob, value, adv, action))
+            state, mcts_prob, model_prob, value, adv, action, mask = states[i], mcts_probs[i], model_probs[i], values[i], advs[i], actions[i], masks[i]
+            extend_data.append((state, mcts_prob, model_prob, value, adv, action, mask))
             if mcts_prob[0]<0.2 and np.max(mcts_prob)>0.8: # 如果旋转的概率的不大，就做翻转
                 equi_state = np.array([np.fliplr(s) for s in state])
                 equi_mcts_prob = mcts_prob[[0,2,1,3,4]]
@@ -102,7 +102,7 @@ class Train():
                     equi_action = 3 - action
                 else:
                     equi_action = action
-                extend_data.append((equi_state, equi_mcts_prob, equi_model_prob, value, adv, equi_action))
+                extend_data.append((equi_state, equi_mcts_prob, equi_model_prob, value, adv, equi_action, mask))
             # if i==0:
             #     print("state:",state)
             #     print("mcts_prob:",mcts_prob)
@@ -600,7 +600,7 @@ class Train():
                         
         avg_qval_list = [play_data[i]["avg_qval"] for i in range(self.play_count)]
         std_qval_list = [play_data[i]["std_qval"] for i in range(self.play_count)]    
-        states, mcts_probs, model_probs, values, advs, actions = [], [], [], [], [], []
+        states, mcts_probs, model_probs, values, advs, actions, masks = [], [], [], [], [], [], []
 
         # 将Q值转为优势A
         # 1 用 Q_i = (Q_i - mean(Q))/std(Q) 转为均衡Q
@@ -640,7 +640,7 @@ class Train():
                 mcts_probs.append(step["mcts_probs"])
                 model_probs.append(step["model_probs"])
                 actions.append(step["action"])
-                
+                masks.append(0 if i==0 else 1)
             
             # 计算优势
             adv_list = self.compute_advantage(adv_list)
@@ -814,6 +814,7 @@ class Train():
         assert len(states)==len(model_probs)
         assert len(states)==len(advs)
         assert len(states)==len(actions)
+        assert len(states)==len(masks)
         
         states_len = len(states)
             
@@ -823,7 +824,7 @@ class Train():
 
         # 保存对抗数据到data_buffer
         filetime = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        for i, obj in enumerate(self.get_equi_data(states, mcts_probs, model_probs, values, advs, actions)):
+        for i, obj in enumerate(self.get_equi_data(states, mcts_probs, model_probs, values, advs, actions, masks)):
         # for i, obj in enumerate(zip(states, mcts_probs, model_probs, values, advs, actions))):
             filename = "{}-{}.pkl".format(filetime, i)
             savefile = os.path.join(data_wait_dir, filename)

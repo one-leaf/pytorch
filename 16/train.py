@@ -65,8 +65,9 @@ class Dataset(torch.utils.data.Dataset):
         model_prob = torch.from_numpy(data["model_prob"]).float() 
         value = torch.as_tensor(data["value"]).float()
         adv = torch.as_tensor(data["adv"]).float()
-        action = torch.as_tensor(data["action"]).long()        
-        return state, mcts_prob, model_prob, value, adv, action
+        action = torch.as_tensor(data["action"]).long()  
+        mask = torch.as_tensor(data["mask"]).long()        
+        return state, mcts_prob, model_prob, value, adv, action, mask
 
     def load_game_files(self):
         print("start load files name ... ")
@@ -104,7 +105,7 @@ class Dataset(torch.utils.data.Dataset):
         for i,fn in enumerate(self.file_list):
             try:
                 with open(fn, "rb") as f:
-                    state, mcts_prob, model_prob, value, adv, action = pickle.load(f)
+                    state, mcts_prob, model_prob, value, adv, action, mask = pickle.load(f)
                     assert state.shape == (4,20,10) , f'error: sate shape {state.shape}'
                     assert mcts_prob.shape == (5,) , f'error: prob shape {mcts_prob.shape}'
                     assert model_prob.shape == (5,) , f'error: prob shape {model_prob.shape}'
@@ -208,9 +209,9 @@ class Train():
         """更新策略价值网络policy-value"""
         # 训练策略价值网络
         # 随机抽取data_buffer中的对抗数据
-        state_batch, mcts_probs_batch, model_probs_batch, values_batch, advs_batch, actions_batch = sample_data
+        state_batch, mcts_probs_batch, model_probs_batch, values_batch, advs_batch, actions_batch, masks_batch = sample_data
         # 训练策略价值网络
-        p_acc, v_loss, a_loss, p_loss, n_loss = self.policy_value_net.train_step(state_batch, mcts_probs_batch, model_probs_batch, values_batch, advs_batch, actions_batch, self.learn_rate * self.lr_multiplier)
+        p_acc, v_loss, a_loss, p_loss, n_loss = self.policy_value_net.train_step(state_batch, mcts_probs_batch, model_probs_batch, values_batch, advs_batch, actions_batch, masks_batch, self.learn_rate * self.lr_multiplier)
          
         return p_acc, v_loss, a_loss, p_loss, n_loss
 
@@ -243,7 +244,7 @@ class Train():
             begin_accuracy=None
             test_data=None
             for i, data in enumerate(testing_loader):
-                test_batch, test_probs, test_model_probs, test_values, test_advs, test_action = data
+                test_batch, test_probs, test_model_probs, test_values, test_advs, test_action, test_mask= data
                 if i==0:
                     print("test_batch shape:", test_batch.shape, "test_probs shape:", test_probs.shape, 
                           "test_values shape:", test_values.shape, "test_advs shape:", test_advs.shape)
@@ -280,7 +281,7 @@ class Train():
                     print(i,"a_loss:", a_loss, "p_loss:", p_loss, "v_loss:", v_loss, "p_acc:", p_acc)
                     print("find nan or inf return!", )
                     
-                    state_batch, mcts_probs_batch, model_probs_batch, values_batch, advs_batch, actions_batch = data
+                    state_batch, mcts_probs_batch, model_probs_batch, values_batch, advs_batch, actions_batch, mask_batch = data
                     print("mcts_probs_batch:", mcts_probs_batch)
                     print("model_probs_batch:", model_probs_batch)
                     print("values_batch:", values_batch)
@@ -296,7 +297,7 @@ class Train():
             end_accuracy=None
             net = self.policy_value_net.policy_value
             for i, data in enumerate(testing_loader):
-                test_batch, test_probs, test_model_probs, test_values, test_advs, test_action = data
+                test_batch, test_probs, test_model_probs, test_values, test_advs, test_action, test_mask = data
                 test_batch = test_batch.to(self.policy_value_net.device)
                 with torch.no_grad(): 
                     act_probs, values = net(test_batch)                 

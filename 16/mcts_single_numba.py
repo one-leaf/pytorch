@@ -445,21 +445,22 @@ class MCTSPlayer(object):
             #             idx = max_ns_idx
             
             if self.player==0:
-                p = 0.5    
-                _probs = act_ps
-                dirichlet = np.random.dirichlet(2 * np.ones(len(nz_idx)))
-                dirichlet_probs = np.zeros_like(_probs, dtype=np.float64)
-                dirichlet_probs[nz_idx] = dirichlet
+                idx = max_ps_idx
+                # p = 0.5    
+                # _probs = act_ps
+                # dirichlet = np.random.dirichlet(2 * np.ones(len(nz_idx)))
+                # dirichlet_probs = np.zeros_like(_probs, dtype=np.float64)
+                # dirichlet_probs[nz_idx] = dirichlet
                 
-                _probs = _probs * availables
-                if np.sum(_probs) == 0:
-                    _probs[nz_idx] = 1.0 / len(nz_idx)
-                else:
-                    _probs = _probs / np.sum(_probs)
+                # _probs = _probs * availables
+                # if np.sum(_probs) == 0:
+                #     _probs[nz_idx] = 1.0 / len(nz_idx)
+                # else:
+                #     _probs = _probs / np.sum(_probs)
                     
-                _p = p*_probs + (1.0-p)*dirichlet_probs
-                _p = _p / np.sum(_p) 
-                idx = np.random.choice(range(ACTONS_LEN), p=_p)
+                # _p = p*_probs + (1.0-p)*dirichlet_probs
+                # _p = _p / np.sum(_p) 
+                # idx = np.random.choice(range(ACTONS_LEN), p=_p)
 
             elif self.player==2:            
                 idx = max_qs_idx

@@ -213,7 +213,7 @@ class PolicyValueNet():
         return torch.mean(weights * F.smooth_l1_loss(quantiles, newtarget, reduction='none'))
 
     # 训练
-    def train_step(self, state_batch, mcts_probs, model_probs, value_batch, adv_batch, action_batch, lr):
+    def train_step(self, state_batch, mcts_probs, model_probs, value_batch, adv_batch, action_batch, mask_batch, lr):
         """训练一次"""
         # 输入赋值       
         state_batch = torch.FloatTensor(state_batch).to(self.device)
@@ -222,6 +222,7 @@ class PolicyValueNet():
         value_batch = torch.FloatTensor(value_batch).to(self.device)
         adv_batch = torch.FloatTensor(adv_batch).to(self.device)
         action_batch = torch.LongTensor(action_batch).to(self.device)
+        mask_batch = torch.LongTensor(action_batch).to(self.device) 
 
         # 设置学习率
         # self.set_learning_rate(lr)
@@ -249,8 +250,8 @@ class PolicyValueNet():
         actor_loss = -(torch.min(surr1, surr2)).mean(dim=-1).mean()
 
         # policy 损失计算        
-        w = (1-torch.abs(log_probs.exp()-log_old_probs.exp())).detach()
-        policy_loss = -(mcts_probs * log_probs * w).mean(dim=-1).mean() 
+        # w = (1-torch.abs(log_probs.exp()-log_old_probs.exp())).detach()
+        policy_loss = -(mcts_probs * log_probs * mask_batch).mean(dim=-1).mean() 
         # policy_loss = -(mcts_probs * log_probs).mean(dim=-1).mean()         
         
         # critic 损失计算
