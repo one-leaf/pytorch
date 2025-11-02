@@ -450,7 +450,7 @@ class MCTSPlayer(object):
                 if game.steps%2==0: 
                     idx = max_ps_idx
                 else:
-                    idx = max_qs_idx
+                    idx = max_ns_idx
                 # p = 0.9    
                 # _probs = act_ps
                 # dirichlet = np.random.dirichlet(2 * np.ones(len(nz_idx)))
