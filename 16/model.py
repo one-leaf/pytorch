@@ -250,8 +250,9 @@ class PolicyValueNet():
         actor_loss = -(torch.min(surr1, surr2)).mean(dim=-1).mean()
 
         # policy 损失计算        
-        # w = (1-torch.abs(log_probs.exp()-log_old_probs.exp())).detach()
-        policy_loss = -(mcts_probs * log_probs * mask_batch).mean(dim=-1).mean() 
+        w = (1-torch.abs(log_probs.exp()-log_old_probs.exp())).detach()
+        # policy_loss = -(mcts_probs * log_probs ).mean(dim=-1)*mask_batch.mean()  
+        policy_loss = -((mcts_probs * log_probs * w).mean(dim=-1)*mask_batch).mean()  
         # policy_loss = -(mcts_probs * log_probs).mean(dim=-1).mean()         
         
         # critic 损失计算
