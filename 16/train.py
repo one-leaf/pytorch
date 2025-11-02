@@ -133,7 +133,7 @@ class Dataset(torch.utils.data.Dataset):
             #             board[lc:]=board[:-lc]
             #             board[:lc]=0                         
 
-            self.data[fn]={"value":value, "state":state, "mcts_prob": mcts_prob, "model_prob": model_prob, "adv": adv, "action": action}
+            self.data[fn]={"value":value, "state":state, "mcts_prob": mcts_prob, "model_prob": model_prob, "adv": adv, "action": action, "mask": mask}
                         
         values_items = list(values.values())
         avg_values = np.average(values_items)
