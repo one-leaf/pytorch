@@ -278,9 +278,10 @@ class Train():
 
                 if i == 0:
                     state_batch, mcts_probs_batch, model_probs_batch, values_batch, advs_batch, actions_batch, mask_batch = data
-                    print(mask_batch)
-                    print(advs_batch)
-                    print(actions_batch)
+                    print("mask_batch:", mask_batch)
+                    print("advs_batch:", advs_batch)
+                    print("actions_batch:", actions_batch)
+                    print("values_batch:", values_batch)
 
                 if math.isnan(v_loss) or math.isnan(a_loss) or math.isnan(p_loss) or \
                    math.isinf(v_loss) or math.isinf(a_loss) or math.isinf(p_loss): 
