@@ -271,10 +271,16 @@ class Train():
             for i, data in enumerate(training_loader):  # 计划训练批次
                 # 使用对抗数据重新训练策略价值网络模型
                 p_acc, v_loss, a_loss, p_loss, n_loss = self.policy_update(data, self.epochs)
-                v_loss_list.append(v_loss)
+                v_loss_list.append(v_loss)                                
                 if i%10 == 0:
                     print(i,"a_loss:", a_loss, "p_loss:", p_loss, "v_loss:", v_loss, "n_loss:", n_loss, "p_acc:", p_acc)
                     # time.sleep(0.1)
+
+                if i == 0:
+                    state_batch, mcts_probs_batch, model_probs_batch, values_batch, advs_batch, actions_batch, mask_batch = data
+                    print(mask_batch)
+                    print(advs_batch)
+                    print(actions_batch)
 
                 if math.isnan(v_loss) or math.isnan(a_loss) or math.isnan(p_loss) or \
                    math.isinf(v_loss) or math.isinf(a_loss) or math.isinf(p_loss): 
