@@ -444,29 +444,26 @@ class MCTSPlayer(object):
             #         else:
             #             idx = max_ns_idx
             
-            if self.player==2:            
-                idx = max_qs_idx
-            elif self.player==0:
-                if game.steps%2==0: 
-                    idx = max_ps_idx
-                else:
-                    idx = max_ns_idx
-                # p = 0.9    
-                # _probs = act_ps
-                # dirichlet = np.random.dirichlet(2 * np.ones(len(nz_idx)))
-                # dirichlet_probs = np.zeros_like(_probs, dtype=np.float64)
-                # dirichlet_probs[nz_idx] = dirichlet
+            if self.player==0:
+                p = 0.5    
+                _probs = act_ps
+                dirichlet = np.random.dirichlet(2 * np.ones(len(nz_idx)))
+                dirichlet_probs = np.zeros_like(_probs, dtype=np.float64)
+                dirichlet_probs[nz_idx] = dirichlet
                 
-                # _probs = _probs * availables
-                # if np.sum(_probs) == 0:
-                #     _probs[nz_idx] = 1.0 / len(nz_idx)
-                # else:
-                #     _probs = _probs / np.sum(_probs)
+                _probs = _probs * availables
+                if np.sum(_probs) == 0:
+                    _probs[nz_idx] = 1.0 / len(nz_idx)
+                else:
+                    _probs = _probs / np.sum(_probs)
                     
-                # _p = p*_probs + (1.0-p)*dirichlet_probs
-                # _p = _p / np.sum(_p) 
-                # idx = np.random.choice(range(ACTONS_LEN), p=_p)
-                      
+                _p = p*_probs + (1.0-p)*dirichlet_probs
+                _p = _p / np.sum(_p) 
+                idx = np.random.choice(range(ACTONS_LEN), p=_p)
+
+            elif self.player==2:            
+                idx = max_qs_idx
+                                 
             p = 0
             _p = []     
             # if idx == -1 or min(act_qs)<0:    
