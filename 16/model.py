@@ -234,7 +234,9 @@ class PolicyValueNet():
         # PPO损失计算        
         actions = action_batch.unsqueeze(-1).detach()
         adv_batch = action_batch.unsqueeze(-1).detach()
-        
+        print(adv_batch)
+        print(mask_batch)
+        print(actions)
         # 只抽取当前动作概率
         log_old_probs = torch.log(model_probs + 1e-10).detach()
         # s_log_probs = log_probs.gather(-1, actions)
@@ -248,8 +250,8 @@ class PolicyValueNet():
         
         # advantages 相对优势
         actor_loss = -(torch.min(surr1, surr2)).mean(dim=-1).mean()
-        # actor2_loss = -((torch.min(surr1, surr2)).mean(dim=-1)*(1-mask_batch)).mean()
-        actor2_loss = (adv_batch.squeeze()*(1-mask_batch)).mean()
+        actor2_loss = -((torch.min(surr1, surr2)).mean(dim=-1)*(1-mask_batch)).mean()
+        # actor2_loss = (adv_batch.squeeze()*(1-mask_batch)).mean()
 
         # policy 损失计算        
         w = (1-torch.abs(log_probs.exp()-log_old_probs.exp())).detach()
