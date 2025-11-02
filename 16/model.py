@@ -248,6 +248,7 @@ class PolicyValueNet():
         
         # advantages 相对优势
         actor_loss = -(torch.min(surr1, surr2)).mean(dim=-1).mean()
+        actor2_loss = -((torch.min(surr1, surr2)).mean(dim=-1))*(1-mask_batch).mean()
 
         # policy 损失计算        
         w = (1-torch.abs(log_probs.exp()-log_old_probs.exp())).detach()
@@ -278,7 +279,7 @@ class PolicyValueNet():
         predicted_probs = torch.argmax(log_probs, dim=1)
         true_probs = torch.argmax(mcts_probs, dim=1)
         accuracy = (predicted_probs == true_probs).float().mean()
-        return accuracy.item(), value_loss.item(), actor_loss.item(), policy_loss.item(), entropy.item()
+        return accuracy.item(), value_loss.item(), actor2_loss.item(), policy_loss.item(), entropy.item()
         # return accuracy.item(), value_loss.item(), policy_loss.item()
         
 
