@@ -682,7 +682,7 @@ class Train():
         print(values[:len_steps])
         print(advs[:len_steps])            
         print("#################[-100:]################")
-        print(values[:-100])
+        print(values[-100:])
         print(advs[-100:])            
             
             # qval_list=np.zeros(split_step_count, dtype=np.float32)
