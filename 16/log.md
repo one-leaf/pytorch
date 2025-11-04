@@ -76,6 +76,10 @@
 | 19.2  | 58    | 9     | 0     | 0.46  | 0.79  | 3217  | 138   | 10 22 25  | 64    | std(q) | std(gae(q-x))| p - old_p  | a + p + v - n | 0.5   | 0.99   |
 | 19.3  | 68    | 10    | 0     | 0.09  | 0.81  | 4441  | 121   | 10 18 21  | 64    | std(q) | std(gae(q-x))| p - old_p  | a + p + v - n | 0.5   | 0.99   |
 
+# 失败  a=q-[1~-1] v=q p=*p step=first
+| 20.1  | 109   | 13    | 0     | 0.26  | 0.60  | 1093  | 103   | 13 13 11  | 64    | std(q) | std(gae(q-x))  | p - old_p  | a + p + v - n | 0.5   | 0.99   |
+
+
 
 # 以下为训练有效
 | N     | steps |piecec | score |score_m| pacc  | agent |steps_m|piecec_b   | play  | v      | a            | model_a    | loss          | cupt  |a_random|
@@ -86,8 +90,6 @@
 | 14.2  | 88    | 12    | 0.02  | 0.74  | 0.77  | 6368  | 137   | 10 24 26  | 64    | std(q) | std(gae(q))  | p - old_p  | a +*p + v - n | 0.5   | 0.99   |
 | 14.3  | 110   | 14    | 0.07  | 1.34  | 0.79  | 7793  | 132   | 10 23 28  | 64    | std(q) | std(gae(q))  | p - old_p  | a +*p + v - n | 0.5   | 0.99   |
 
-# doing  a=q-[1~-1] v=q p=*p 
-| 20.1  | 109   | 13    | 0     | 0.26  | 0.60  | 1093  | 103   | 13 13 11  | 64    | std(q) | std(gae(q))  | p - old_p  | a + p + v - n | 0.5   | 0.99   |
 
 
 
