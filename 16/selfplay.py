@@ -677,10 +677,12 @@ class Train():
         
         print(i, "qval_mean:", qval_mean, "qval_std:", qval_std, "adv_mean:", adv_mean, "adv_std:", adv_std)
         print("values len:", len(values))
-        print(values[:100])
-        print(values[-100:])
-        print("advs:")
-        print(advs[:100])            
+        len_steps = len(play_data[0]["data"]["steps"])
+        print("#################[:1]################")
+        print(values[:len_steps])
+        print(advs[:len_steps])            
+        print("#################[-100:]################")
+        print(values[:-100])
         print(advs[-100:])            
             
             # qval_list=np.zeros(split_step_count, dtype=np.float32)
