@@ -252,7 +252,7 @@ class PolicyValueNet():
         # actor2_loss = (adv_batch.squeeze()*(1-mask_batch)).mean()
 
         # policy 损失计算2
-        surr_policy = torch.mean(1./ratios)
+        surr_policy = torch.mean(1./ratios, dim =-1)
         policy_loss = -(( mcts_probs*log_probs).mean(dim=-1)*mask_batch*surr_policy).mean()  
 
         # policy 损失计算        
