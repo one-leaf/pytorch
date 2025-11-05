@@ -243,11 +243,11 @@ class PolicyValueNet():
         # s_model_probs = torch.log(mcts_probs.gather(1, actions) + 1e-10) 
         # ratios = torch.exp( s_model_probs - s_log_probs )
 
-        surr1 = ratios_action * adv_batch
-        surr2 = torch.clamp(ratios_action, 1 - self.clip_low, 1 + self.clip_high) * adv_batch
+        surr_actor1 = ratios_action * adv_batch
+        surr_actor2 = torch.clamp(ratios_action, 1 - self.clip_low, 1 + self.clip_high) * adv_batch
         
         # advantages 相对优势
-        actor_loss = -(torch.min(surr1, surr2)).mean(dim=-1).mean()
+        actor_loss = -(torch.min(surr_actor1, surr_actor2)).mean(dim=-1).mean()
         # actor2_loss = -((torch.min(surr1, surr2)).mean(dim=-1)*(1-mask_batch)).mean()
         # actor2_loss = (adv_batch.squeeze()*(1-mask_batch)).mean()
 
