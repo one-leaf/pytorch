@@ -238,22 +238,28 @@ class PolicyValueNet():
         log_old_probs = torch.log(model_probs + 1e-10).detach()
         # s_log_probs = log_probs.gather(-1, actions)
         # s_model_probs = torch.log(model_probs.gather(-1, actions) + 1e-10).detach() 
-        ratios = torch.exp( (log_probs - log_old_probs).gather(-1, actions) )
+        ratios = torch.exp((log_probs - log_old_probs))
+        ratios_action = ratios.gather(-1, actions)
         # s_model_probs = torch.log(mcts_probs.gather(1, actions) + 1e-10) 
         # ratios = torch.exp( s_model_probs - s_log_probs )
 
-        surr1 = ratios * adv_batch
-        surr2 = torch.clamp(ratios, 1 - self.clip_low, 1 + self.clip_high) * adv_batch
+        surr1 = ratios_action * adv_batch
+        surr2 = torch.clamp(ratios_action, 1 - self.clip_low, 1 + self.clip_high) * adv_batch
         
         # advantages 相对优势
         actor_loss = -(torch.min(surr1, surr2)).mean(dim=-1).mean()
         # actor2_loss = -((torch.min(surr1, surr2)).mean(dim=-1)*(1-mask_batch)).mean()
         # actor2_loss = (adv_batch.squeeze()*(1-mask_batch)).mean()
 
+        # policy 损失计算2
+        surr_policy1 = ratios * mcts_probs
+        surr_policy2 = torch.clamp(ratios, 1 - self.clip_low, 1 + self.clip_high) * mcts_probs
+        policy_loss = -((torch.min(surr_policy1, surr_policy2) * log_probs).mean(dim=-1)*mask_batch).mean()  
+
         # policy 损失计算        
-        w = (1-torch.abs(log_probs.exp()-log_old_probs.exp())).detach()
+        # w = (1-torch.abs(log_probs.exp()-log_old_probs.exp())).detach()
         # policy_loss = -(mcts_probs * log_probs * w).mean(dim=-1).mean()  
-        policy_loss = -((mcts_probs * log_probs * w).mean(dim=-1)*mask_batch).mean()  
+        # policy_loss = -((mcts_probs * log_probs * w).mean(dim=-1)*mask_batch).mean()  
         # policy_loss = -(mcts_probs * log_probs).mean(dim=-1).mean()         
         
         # critic 损失计算
