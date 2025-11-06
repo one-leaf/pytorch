@@ -210,7 +210,7 @@ class PolicyValueNet():
         newtarget = newtarget.repeat(1, num_quantiles)                                    #[b, num_quantiles]
         weights = torch.where(quantiles > newtarget, tau, 1 - tau)                     #[b, num_quantiles]
         # return torch.mean(weights * F.huber_loss(quantiles, newtarget, reduction='none'))
-        return torch.mean(weights * F.smooth_l1_loss(quantiles, newtarget, reduction='none'))
+        return torch.mean(weights * F.smooth_l1_loss(quantiles, newtarget, reduction='none'), dim=-1)
 
     # 训练
     def train_step(self, state_batch, mcts_probs, model_probs, value_batch, adv_batch, action_batch, mask_batch, lr):
@@ -262,7 +262,7 @@ class PolicyValueNet():
         # policy_loss = -(mcts_probs * log_probs).mean(dim=-1).mean()         
         
         # critic 损失计算
-        value_loss = self.quantile_regression_loss(values, value_batch)
+        value_loss = (self.quantile_regression_loss(values, value_batch)*surr_policy).mean()
 
         # 添加熵正则化        
         entropy = -(torch.exp(log_probs) * log_probs).mean(dim=-1).mean() 
