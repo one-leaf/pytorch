@@ -640,7 +640,7 @@ class Train():
                 mcts_probs.append(step["mcts_probs"])
                 model_probs.append(step["model_probs"])
                 actions.append(step["action"])
-                masks.append(0 if i==0 else 1)
+                masks.append(0 if i==0 or i==2 else 1)
             
             # 计算优势
             adv_list = self.compute_advantage(adv_list)
