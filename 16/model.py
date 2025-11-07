@@ -262,7 +262,7 @@ class PolicyValueNet():
         # policy_loss = -(mcts_probs * log_probs).mean(dim=-1).mean()         
         
         # critic 损失计算
-        value_loss = (self.quantile_regression_loss(values, value_batch)*surr_policy).mean()
+        value_loss = (self.quantile_regression_loss(values, value_batch)).mean()
 
         # 添加熵正则化        
         entropy = -(torch.exp(log_probs) * log_probs).mean(dim=-1).mean() 
