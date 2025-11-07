@@ -79,11 +79,11 @@ def save_status_file(state):
     
     start_dt = datetime.strptime(state["info"]["create"], format_str)
     end_dt   = datetime.strptime(state["info"]["modify"], format_str)
-    # delta = end_dt - start_dt
-    # if delta.days>0:
-    #     file_path = os.path.join(model_dir, f'status_{delta.days}d.json')
-    #     if not os.path.exists(file_path):
-    #         shutil.copy(status_file, file_path)
+    delta = end_dt - start_dt
+    if delta.days>0:
+        file_path = os.path.join(model_dir, f'status_{delta.days}d.json')
+        if not os.path.exists(file_path):
+            shutil.copy(status_file, file_path)
     if state["total"]["agent"]%1000 == 0:
         file_path = os.path.join(model_dir, f'status_{state["total"]["agent"]}.json')
         if not os.path.exists(file_path):
