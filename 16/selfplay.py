@@ -591,8 +591,8 @@ class Train():
             #     policy_value_net.save_model(newmodelfile)
 
             # 如果当前最佳，将模型设置为最佳模型
-            if max(state["score_mcts"])==state["score_mcts"][-1]:
-                newmodelfile = model_file+"_score_"+str(state["score_mcts"][-1])
+            if max(state["steps"])==state["steps"][-1]:
+                newmodelfile = model_file+"_score_"+str(state["steps"][-1])
                 if not os.path.exists(newmodelfile):
                     policy_value_net.save_model(newmodelfile)
                 if os.path.exists(bestmodelfile): os.remove(bestmodelfile)
