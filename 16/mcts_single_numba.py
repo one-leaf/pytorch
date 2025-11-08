@@ -464,8 +464,10 @@ class MCTSPlayer(object):
 
             elif self.player==2:            
                 idx = max_qs_idx
-                if idx == 3 and random.random()>0.5:
-                    idx = 4
+            
+            # 如果是不动，有机会就直接下降
+            if idx == 3 and random.random()>0.5:
+                idx = 4
                                  
             p = 0
             _p = []     
