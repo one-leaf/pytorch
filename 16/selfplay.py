@@ -625,7 +625,7 @@ class Train():
                 
                 # 这里用 Q_t+1 - Q_t 转为优势A
                 if k==len_steps-1:
-                    adv_list[k] = -1
+                    adv_list[k] = 0
                 else:
                     adv_list[k] = play_data[i]["data"]["steps"][k+1]["qval"] - step["qval"]   
                 

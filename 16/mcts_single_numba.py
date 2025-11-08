@@ -272,7 +272,7 @@ class MCTS():
             v: 当前局面的状态
         """  
         if state.game.terminal: 
-            return -2#-1-1/(1+state.game.piececount)  # 游戏结束，返回-1，奖励越多，分数越高   
+            return -1#-1-1/(1+state.game.piececount)  # 游戏结束，返回-1，奖励越多，分数越高   
         s = hash(state)
 
         # 如果当前状态没有子节点，增加子节点
@@ -466,8 +466,8 @@ class MCTSPlayer(object):
                 idx = max_qs_idx
             
             # 如果是不动，有机会就直接下降
-            if idx == 3 and random.random()>0.5:
-                idx = 4
+            # if idx == 3 and random.random()>0.5:
+            #     idx = 4
                                  
             p = 0
             _p = []     
