@@ -445,7 +445,7 @@ class MCTSPlayer(object):
             #             idx = max_ns_idx
             
             if self.player==0:
-                idx = max_ps_idx
+                idx = max_ps_idx                
                 # p = 0.5    
                 # _probs = act_ps
                 # dirichlet = np.random.dirichlet(2 * np.ones(len(nz_idx)))
@@ -464,6 +464,8 @@ class MCTSPlayer(object):
 
             elif self.player==2:            
                 idx = max_qs_idx
+                if idx == 3 and random.random()>0.5:
+                    idx = 4
                                  
             p = 0
             _p = []     
