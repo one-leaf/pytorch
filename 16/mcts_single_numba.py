@@ -526,7 +526,7 @@ class MCTSPlayer(object):
             if max_ps_idx!=max_ns_idx:
                 print("          {} act_ps: {}, act_probs: {}, old: {}, new: {}".format(self.player, act_ps[max_ps_idx], act_probs[max_ps_idx], \
                     game.position_to_action_name(max_ps_idx), game.position_to_action_name(max_ns_idx)))
-            acc_ps = 1 if max_ns_idx==max_ps_idx else 0 # np.var(act_probs) #0 if abs(act_ps[idx]-act_probs[idx])>0.4 else 1
+            acc_ps = 1 if max_qs_idx==max_ps_idx else 0 # np.var(act_probs) #0 if abs(act_ps[idx]-act_probs[idx])>0.4 else 1
 
             # 将概率转为onehot
             # act_probs = np.zeros_like(act_probs)
