@@ -614,6 +614,11 @@ class Train():
             len_steps = len(play_data[i]["data"]["steps"])           
                        
             qval_list=np.zeros(len_steps, dtype=np.float32)
+            
+            ratio = 0.999
+            # 构建从后往前的乘积因子序列：f[i] = ratio^(len_steps-1-i)
+            factors = ratio ** np.arange(len_steps - 1, -1, -1)
+            val_list = -1.0 * factors
             # val_list=np.linspace(1, -1, len_steps, dtype=np.float32)
             adv_list=np.zeros(len_steps, dtype=np.float32)
 
@@ -624,14 +629,14 @@ class Train():
                 qval_list[k]=step["qval"]
                 
                 # 这里用 Q_t+1 - Q_t 转为优势A
-                if k==len_steps-1:
-                    adv_list[k] = 0
-                else:
-                    adv_list[k] = play_data[i]["data"]["steps"][k+1]["qval"] - step["qval"]   
+                # if k==len_steps-1:
+                #     adv_list[k] = 0
+                # else:
+                #     adv_list[k] = play_data[i]["data"]["steps"][k+1]["qval"] - step["qval"]   
                 
                 # 这里用 Q - V 误差转为优势
                 # adv_list[k]=step["qval"] - step["state_value"]
-                # adv_list[k]=step["qval"] - val_list[k]
+                adv_list[k] = step["qval"] - val_list[k]
                 
                 # 这里直接用 Q 值，后面再统一计算优势             
                 # adv_list[k] = step["qval"]
@@ -653,7 +658,8 @@ class Train():
             # adv_list = (adv_list - adv_mean) / adv_std
             # qval_list = np.clip(qval_list, -1, 1)
             # adv_list = np.clip(adv_list, -1, 1)
-            values.extend(qval_list.tolist())
+            # values.extend(qval_list.tolist())
+            values.extend(val_list.tolist())
             advs.extend(adv_list)
 
         set_status_total_value(state, "model_probs", np.average(model_probs, axis=0), alpha)
@@ -665,7 +671,7 @@ class Train():
         qval_mean = np.mean(values)
         qval_std = np.std(values)
         qval_std += 1e-6 if qval_std==0 else 0        
-        values = (np.array(values) - qval_mean) / qval_std
+        # values = (np.array(values) - qval_mean) / qval_std
         
         adv_mean = np.mean(advs)
         adv_std = np.std(advs)
