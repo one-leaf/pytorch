@@ -629,14 +629,14 @@ class Train():
                 qval_list[k]=step["qval"]
                 
                 # 这里用 Q_t+1 - Q_t 转为优势A
-                # if k==len_steps-1:
-                #     adv_list[k] = 0
-                # else:
-                #     adv_list[k] = play_data[i]["data"]["steps"][k+1]["qval"] - step["qval"]   
+                if k==len_steps-1:
+                    adv_list[k] = 0
+                else:
+                    adv_list[k] = play_data[i]["data"]["steps"][k+1]["qval"] - step["qval"]   
                 
                 # 这里用 Q - V 误差转为优势
                 # adv_list[k]=step["qval"] - step["state_value"]
-                adv_list[k] = step["qval"] - val_list[k]
+                # adv_list[k] = step["qval"] - val_list[k]
                 
                 # 这里直接用 Q 值，后面再统一计算优势             
                 # adv_list[k] = step["qval"]
