@@ -86,7 +86,7 @@ def save_status_file(state):
             shutil.copy(status_file, file_path)
     if state["total"]["agent"]%1000 == 0:
         file_path = os.path.join(model_dir, f'status_{state["total"]["agent"]}.json')
-        if not os.path.exists(file_path):
+        if not os.path.exists(file_path) and os.path.exists(status_file):
             shutil.copy(status_file, file_path)
     
     with file_lock(status_lock_file):
