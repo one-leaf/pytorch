@@ -347,7 +347,7 @@ class MCTSPlayer(object):
     def reset_player(self):
         self.mcts.reset()
 
-    def get_action(self, game, temp=0):        
+    def get_action(self, game, temp=0, dirichlet_p=0):        
         """计算下一步走子action"""
         if not game.terminal:  # 如果游戏没有结束
             # 训练的时候 temp = 1
@@ -494,7 +494,7 @@ class MCTSPlayer(object):
                 # else:
                 #     p=0.99
                 # p = 0.75 
-                p = 0.8
+                p = 1 - dirichlet_p
                 _probs = act_probs
                 # _probs = act_ps
                 dirichlet = np.random.dirichlet(2 * np.ones(len(nz_idx)))

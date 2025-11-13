@@ -244,6 +244,12 @@ class Train():
         find_end_steps = 0
         has_find_end = False
         player.need_max_ps = not player.need_max_ns
+        
+        if state["total"]["p_n_q"][0]>state["total"]["p_n_q"][1]:
+            dirichlet_p = 0.05
+        else:
+            dirichlet_p = 0.15
+            
         print("max_emptyCount:",max_emptyCount,"isRandomNextPiece:",agent.isRandomNextPiece,"limitstep:",agent.limitstep,"max_ps:",player.need_max_ps,"max_qs:",agent.is_replay)
         for i in count():
             _step={"step":i}
@@ -257,7 +263,7 @@ class Train():
             #     need_max_ps=not need_max_ps
             #     print("switch need_max_ps to:", need_max_ps)
             # need_max_ps = random.random() < agent.removedlines/100   
-            action, qval, mcts_probs, model_probs, state_value, acc_ps, depth, find_end = player.get_action(agent, temp=1) 
+            action, qval, mcts_probs, model_probs, state_value, acc_ps, depth, find_end = player.get_action(agent, temp=1, dirichlet_p=dirichlet_p) 
             
             _, score = agent.step(action)
 
