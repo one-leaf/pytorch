@@ -651,7 +651,7 @@ class Train():
                 mcts_probs.append(step["mcts_probs"])
                 model_probs.append(step["model_probs"])
                 actions.append(step["action"])
-                masks.append(0 if i==0 else 1)
+                masks.append(1 if i==1 else 0)  # 只用第二个agent的数据
             
             # 计算优势
             adv_list = self.compute_advantage(adv_list)
