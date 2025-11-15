@@ -621,7 +621,7 @@ class Train():
                        
             qval_list=np.zeros(len_steps, dtype=np.float32)
             
-            ratio = 0.999
+            ratio = 0.99
             # 构建从后往前的乘积因子序列：f[i] = ratio^(len_steps-1-i)
             factors = ratio ** np.arange(len_steps - 1, -1, -1)
             val_list = -1.0 * factors
