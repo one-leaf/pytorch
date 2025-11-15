@@ -621,10 +621,10 @@ class Train():
                        
             qval_list=np.zeros(len_steps, dtype=np.float32)
             
-            ratio = 0.99
+            # ratio = 0.99
             # 构建从后往前的乘积因子序列：f[i] = ratio^(len_steps-1-i)
-            factors = ratio ** np.arange(len_steps - 1, -1, -1)
-            val_list = -1.0 * factors
+            # factors = ratio ** np.arange(len_steps - 1, -1, -1)
+            # val_list = -1.0 * factors
             # val_list=np.linspace(1, -1, len_steps, dtype=np.float32)
             adv_list=np.zeros(len_steps, dtype=np.float32)
 
@@ -654,6 +654,7 @@ class Train():
                 masks.append(1 if i==1 else 0)  # 只用第二个agent的数据
             
             # 计算优势
+            val_list = qval_list - adv_list
             adv_list = self.compute_advantage(adv_list)
 
             # adv_mean = np.mean(adv_list)
@@ -674,10 +675,10 @@ class Train():
         save_status_file(state)         
         
 
-        qval_mean = np.mean(values)
-        qval_std = np.std(values)
-        qval_std += 1e-6 if qval_std==0 else 0        
-        # values = (np.array(values) - qval_mean) / qval_std
+        val_mean = np.mean(values)
+        val_std = np.std(values)
+        val_std += 1e-6 if val_std==0 else 0        
+        values = (np.array(values) - val_mean) / val_std
         
         adv_mean = np.mean(advs)
         adv_std = np.std(advs)
@@ -687,7 +688,7 @@ class Train():
         values = np.clip(values, -1, 1)
         advs = np.clip(advs, -1, 1)        
         
-        print(i, "qval_mean:", qval_mean, "qval_std:", qval_std, "adv_mean:", adv_mean, "adv_std:", adv_std)
+        print(i, "val_mean:", val_mean, "val_std:", val_std, "adv_mean:", adv_mean, "adv_std:", adv_std)
         print("values len:", len(values))
         len_steps = len(play_data[0]["data"]["steps"])
         print("############ values ###########")
