@@ -627,21 +627,22 @@ class Train():
             # val_list = -1.0 * factors
             # val_list=np.linspace(1, -1, len_steps, dtype=np.float32)
             adv_list=np.zeros(len_steps, dtype=np.float32)
+            qadv_list=np.zeros(len_steps, dtype=np.float32)
 
             for k in range(len_steps):
                 step = play_data[i]["data"]["steps"][k]
                 
                 # 直接用 Q 值
-                qval_list[k]=step["qval"]
+                qval_list[k] = step["qval"]
                 
                 # 这里用 Q_t+1 - Q_t 转为优势A
-                # if k==len_steps-1:
-                #     adv_list[k] = 0
-                # else:
-                #     adv_list[k] = play_data[i]["data"]["steps"][k+1]["qval"] - step["qval"]   
+                if k == 0:
+                    qadv_list[k] = 0
+                else:
+                    qadv_list[k] = step["qval"] - play_data[i]["data"]["steps"][k-1]["qval"]
                 
                 # 这里用 Q - V 误差转为优势
-                adv_list[k]=step["qval"] - step["state_value"]
+                adv_list[k] = step["qval"] - step["state_value"]
                 # adv_list[k] = step["qval"] - val_list[k]
                 
                 # 这里直接用 Q 值，后面再统一计算优势             
@@ -654,7 +655,7 @@ class Train():
                 masks.append(0 if i==0 else 1)  # 只用第1个agent的数据
             
             # 计算优势
-            val_list = qval_list - adv_list
+            val_list = qval_list - qadv_list
             adv_list = self.compute_advantage(adv_list)
 
             # adv_mean = np.mean(adv_list)
