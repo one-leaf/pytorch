@@ -247,7 +247,7 @@ class PolicyValueNet():
         surr_actor2 = torch.clamp(ratios_action, 1 - self.clip_low, 1 + self.clip_high) * adv_batch
         
         # advantages 相对优势
-        actor_loss = ((torch.min(surr_actor1, surr_actor2)).mean(dim=-1)*(1-mask_batch)).mean()
+        actor_loss = -((torch.min(surr_actor1, surr_actor2)).mean(dim=-1)*(1-mask_batch)).mean()
         # actor2_loss = -((torch.min(surr1, surr2)).mean(dim=-1)*(1-mask_batch)).mean()
         # actor2_loss = (adv_batch.squeeze()*(1-mask_batch)).mean()
 
