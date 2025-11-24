@@ -247,7 +247,8 @@ class PolicyValueNet():
         surr_actor2 = torch.clamp(ratios_action, 1 - self.clip_low, 1 + self.clip_high) * adv_batch
         
         # advantages 相对优势        
-        actor_loss = -((torch.min(surr_actor1, surr_actor2)).mean(dim=-1)*(1-mask_batch)).mean()
+        # actor_loss = -((torch.min(surr_actor1, surr_actor2)).mean(dim=-1)*(1-mask_batch)).mean()
+        actor_loss = -(torch.min(surr_actor1, surr_actor2)).mean(dim=-1).mean()        
         # actor2_loss = -((torch.min(surr1, surr2)).mean(dim=-1)*(1-mask_batch)).mean()
         # actor2_loss = (adv_batch.squeeze()*(1-mask_batch)).mean()
 
@@ -255,7 +256,8 @@ class PolicyValueNet():
         # surr_policy = torch.clamp(1./ratios.mean(dim=-1), 0, 1).detach()
         # policy_loss = -(( mcts_probs*log_probs).mean(dim=-1)*mask_batch*surr_policy).mean()  
         # policy_loss = -((mcts_probs*log_probs).mean(dim=-1)).mean()  
-        policy_loss = -((mcts_probs*log_probs).mean(dim=-1)*mask_batch).mean()  
+        # policy_loss = -((mcts_probs*log_probs).mean(dim=-1)*mask_batch).mean()  
+        policy_loss = -(mcts_probs*log_probs).mean(dim=-1).mean()  
 
         # policy 损失计算        
         # w = (1-torch.abs(log_probs.exp()-log_old_probs.exp())).detach()
