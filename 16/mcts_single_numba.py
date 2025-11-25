@@ -444,7 +444,7 @@ class MCTSPlayer(object):
             #         else:
             #             idx = max_ns_idx
             
-            if self.player==0:
+            if self.player==0 or game.piececount%5==0:
                 idx = max_ps_idx                
                 # p = 0.5    
                 # _probs = act_ps
