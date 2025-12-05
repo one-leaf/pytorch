@@ -515,14 +515,13 @@ class Train():
         state["total"]["agent"] += 1
         state["total"]["_agent"] += 1
     
-        if game_score>state["best"]["score"]:
-            state["best"]["score"] = game_score
+        if game_score>state["best"]["score"]:  
+            game_score_ext = 1e-6*(game_score-1 if game_score%10==0 else game_score)
+            state["best"]["score"] = game_score+game_score_ext
             state["best"]["agent"] = state["total"]["agent"]
         else:
-            if isinstance(state["best"]["score"], int):
-                state["best"]["score"] += float(f'0.{state["best"]["score"]}')
             if state["best"]["score"]>1:
-                state["best"]["score"] = round(state["best"]["score"]-1,10) 
+                state["best"]["score"] -= 1
     
         save_status_file(state)     
             
