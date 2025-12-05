@@ -516,7 +516,7 @@ class Train():
         state["total"]["_agent"] += 1
     
         if game_score>state["best"]["score"]:  
-            game_score_ext = 1e-6*(game_score-1 if game_score%10==0 else game_score)
+            game_score_ext = 1e-4*(game_score-1 if game_score%10==0 else game_score)
             state["best"]["score"] = game_score+game_score_ext
             state["best"]["agent"] = state["total"]["agent"]
         else:
