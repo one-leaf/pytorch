@@ -397,7 +397,7 @@ class Train():
         self.sample_count = int(self.sample_count)          
         print("sample_count:", self.sample_count)   
         
-        player = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout, limit_count=self.sample_count, min_score=state["total"]["min_score"])
+        player = MCTSPlayer(policy_value_net.policy_value_fn, c_puct=self.c_puct, n_playout=self.n_playout, limit_count=self.sample_count, piececount_mcts=state["total"]["piececount_mcts"])
 
         cache={}
 

@@ -326,7 +326,7 @@ class MCTSPlayer(object):
     """基于模型指导概率的MCTS + AI player"""
 
     # c_puct MCTS child权重， 用来调节MCTS搜索深度，越大搜索越深，越相信概率，越小越相信Q 的程度 默认 5
-    def __init__(self, policy_value_function, c_puct=5, n_playout=2000, limit_count=512, min_score=20, need_max_ps=False, need_max_ns=False):
+    def __init__(self, policy_value_function, c_puct=5, n_playout=2000, limit_count=512, piececount_mcts=20, need_max_ps=False, need_max_ns=False):
         """初始化参数"""
         self.mcts = MCTS(policy_value_function, c_puct, n_playout)
         self.need_max_ps = need_max_ps
@@ -334,10 +334,10 @@ class MCTSPlayer(object):
         self.limit_count = limit_count
         self.n_playout = n_playout
         self.player = -1
-        self.min_score = min_score
+        self.piececount_mcts = piececount_mcts
         self.cache = {}
         self.start_time = time.time()
-        print("create mcts player, c_puct: {}, n_playout: {}, min_score: {}".format(c_puct, n_playout, min_score))
+        print("create mcts player, c_puct: {}, n_playout: {}, min_score: {}".format(c_puct, n_playout, piececount_mcts))
         
     def set_player_id(self, p):
         """指定MCTS的playerid"""
@@ -443,8 +443,8 @@ class MCTSPlayer(object):
             #             idx = max_ps_idx    
             #         else:
             #             idx = max_ns_idx
-            
-            if self.player==0 or game.piececount%5==0:
+                            
+            if self.player==0 or game.piececount%4==0:
                 idx = max_ps_idx                
                 # p = 0.5    
                 # _probs = act_ps
@@ -462,7 +462,7 @@ class MCTSPlayer(object):
                 # _p = _p / np.sum(_p) 
                 # idx = np.random.choice(range(ACTONS_LEN), p=_p)
 
-            elif self.player==2:            
+            elif self.player==2:   
                 idx = max_qs_idx
             
             # 如果是不动，有机会就直接下降
