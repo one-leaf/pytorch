@@ -463,7 +463,10 @@ class MCTSPlayer(object):
                 # idx = np.random.choice(range(ACTONS_LEN), p=_p)
 
             elif self.player==2:   
-                idx = max_qs_idx
+                if game.piececount > self.piececount_mcts and random.random()>0.5:
+                    idx = max_ps_idx
+                else:
+                    idx = max_qs_idx
             
             # 如果是不动，有机会就直接下降
             # if idx == 3 and random.random()>0.5:
