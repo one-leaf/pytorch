@@ -248,7 +248,7 @@ class Train():
         if state["total"]["p_n_q"][0]>state["total"]["p_n_q"][1]:
             dirichlet_p = 0.05
         else:
-            dirichlet_p = 0.15
+            dirichlet_p = 0.10
             
         print("max_emptyCount:",max_emptyCount,"isRandomNextPiece:",agent.isRandomNextPiece,"limitstep:",agent.limitstep,"max_ps:",player.need_max_ps,"max_qs:",agent.is_replay)
         for i in count():
