@@ -862,8 +862,8 @@ class Train():
     def run(self):
         """启动训练"""
         try:
-            for i in range(10):
-                self.collect_selfplay_data()                    
+            # for i in range(10):
+            self.collect_selfplay_data()                    
         except KeyboardInterrupt:
             print('quit')
 
