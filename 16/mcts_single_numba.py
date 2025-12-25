@@ -444,7 +444,7 @@ class MCTSPlayer(object):
             #         else:
             #             idx = max_ns_idx
                             
-            if self.player==0 or game.piececount%4==0:
+            if self.player==0:
                 idx = max_ps_idx                
                 # p = 0.5    
                 # _probs = act_ps
@@ -461,13 +461,16 @@ class MCTSPlayer(object):
                 # _p = p*_probs + (1.0-p)*dirichlet_probs
                 # _p = _p / np.sum(_p) 
                 # idx = np.random.choice(range(ACTONS_LEN), p=_p)
-
-            elif self.player==2:   
-                if game.piececount > self.piececount and random.random()>0.5:
+            elif self.player==1:
+                if game.piececount%2==0:
                     idx = max_ps_idx
                 else:
-                    idx = max_qs_idx
-            
+                    idx = max_ns_idx
+            elif self.player==2:   
+                if game.piececount%2==0:
+                    idx = max_ps_idx
+                else:
+                    idx = max_qs_idx            
             # 如果是不动，有机会就直接下降
             # if idx == 3 and random.random()>0.5:
             #     idx = 4
