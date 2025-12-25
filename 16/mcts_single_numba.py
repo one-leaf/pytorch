@@ -465,7 +465,7 @@ class MCTSPlayer(object):
                 if game.piececount%2==0:
                     idx = max_ps_idx
                 else:
-                    idx = max_ns_idx
+                    idx = -1
             elif self.player==2:   
                 if game.piececount%2==0:
                     idx = max_ps_idx
