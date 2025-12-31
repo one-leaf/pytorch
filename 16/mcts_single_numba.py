@@ -468,9 +468,9 @@ class MCTSPlayer(object):
                     idx = -1
             elif self.player==2:   
                 if game.piececount%2==0:
-                    idx = max_ps_idx
+                    idx = max_qs_idx
                 else:
-                    idx = max_qs_idx            
+                    idx = -1            
             # 如果是不动，有机会就直接下降
             # if idx == 3 and random.random()>0.5:
             #     idx = 4
