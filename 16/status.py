@@ -4,6 +4,7 @@ from pathlib import Path
 from contextlib import contextmanager
 import errno
 from datetime import datetime
+from typing import Any
 import numpy as np
 
 if os.name == 'posix':
@@ -70,7 +71,7 @@ def numpy_encoder(obj):
     raise TypeError(f'Object of type {obj.__class__.__name__} is not JSON serializable')
 
 
-def save_status_file(state):  
+def save_status_file(state:dict[str, Any]):  
     format_str = '%Y-%m-%d %H:%M:%S'
     if "info" not in state:
         state["info"] = {"create":datetime.now().strftime(format_str)}
@@ -100,21 +101,22 @@ def save_status_file(state):
         shutil.move(temp_file.name, status_file)
         os.chmod(status_file, 0o644)
 
-def add_prop(state, key, default=0):
+def add_prop(state:dict[str, Any], key:str, default:Any=0):
     if key not in state:
         state[key]=[]
     if key not in state["total"]:
         state["total"][key]=default
 
-def add_total_prop(state, key, default=0):
+def add_total_prop(state:dict[str, Any], key:str, default:Any=0):
     if key not in state["total"]:
         state["total"][key]=default
 
 def read_status_file(max_keep=30):
     # 获取历史训练数据
-    state=None
     while os.path.exists(status_lock_file): 
         time.sleep(0.1)
+
+    state: dict[str, Any] = {"total": {"agent":0, "_agent":0}, "best": {"score":0, "agent":0}}
 
     if os.path.exists(status_file):
         try:
@@ -126,12 +128,7 @@ def read_status_file(max_keep=30):
             if os.path.exists(status_file_bak):
                 shutil.move(status_file_bak, status_file)
             raise e        
-                      
-    if state==None:
-        state={"total":{"agent":0, "_agent":0}}
-    if "best" not in state:
-        state["best"]={"score":0, "agent":0}
-        
+                             
     add_prop(state, "score")
     add_prop(state, "depth")
     add_prop(state, "pacc")
@@ -176,7 +173,7 @@ def read_status_file(max_keep=30):
                 state[key][1] = min_v 
     return state
 
-def set_status_total_value(state, key, value, rate=1/1000):
+def set_status_total_value(state:dict[str, Any], key:str, value:Any, rate=1/1000):
     if type(state["total"][key]) == list:
         for i in range(len(value)):
             state["total"][key][i] = round(state["total"][key][i] + (value[i]-state["total"][key][i]) * rate, 3)

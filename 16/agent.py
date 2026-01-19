@@ -261,14 +261,14 @@ class Agent():
     def is_status_optimal(self):
         return self.piececount<=self.score*2.5+self.must_reward_piece_count
 
-    # 最差分 0 ~ -1
-    def get_final_reward(self):
-        # return -self.max_pieces_count/self.piececount+1
-        return (self.piececount-self.max_pieces_count)*self.get_singe_piece_value()
+    # # 最差分 0 ~ -1
+    # def get_final_reward(self):
+    #     # return -self.max_pieces_count/self.piececount+1
+    #     return (self.piececount-self.max_pieces_count)*self.get_singe_piece_value()
     
-    # 每一个方块的价值
-    def get_singe_piece_value(self):
-        return 1./self.max_pieces_count
+    # # 每一个方块的价值
+    # def get_singe_piece_value(self):
+    #     return 1./self.max_pieces_count
     
     # 打印
     def print(self):
