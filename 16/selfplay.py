@@ -249,7 +249,7 @@ class Train():
         else:
             dirichlet_p = 0.10
             
-        print("max_emptyCount:",max_emptyCount,"isRandomNextPiece:",agent.isRandomNextPiece,"limitstep:",agent.limitstep,"max_ps:",player.need_max_ps,"max_qs:",agent.is_replay)
+        print("max_emptyCount:",max_emptyCount,"isRandomNextPiece:",agent.isRandomNextPiece,"limitstep:",agent.limitstep,"max_ps:",player.need_max_ps)
         for i in count():
             _step={"step":i}
             _step["state"] = np.copy(agent.current_state())
