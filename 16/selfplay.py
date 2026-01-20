@@ -358,6 +358,12 @@ class Train():
                 print("超过5小时模型都没有更新了，停止训练")
                 time.sleep(60)
                 return
+
+        print('start test time:', datetime.now().strftime('%Y-%m-%d %H:%M:%S'))        
+        _test_policy_value_net = PolicyValueNet(GAME_WIDTH, GAME_HEIGHT, GAME_ACTIONS_NUM, model_file=model_file)
+        min_removedlines, his_pieces, his_pieces_len = self.test_play(_test_policy_value_net)
+        print('end test time:', datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+
         
         if self.load_model:
             policy_value_net = self.policy_value_net
@@ -374,14 +380,7 @@ class Train():
             
             self.policy_value_net = policy_value_net
             self.load_model = True
-            
-          
-        print('start test time:', datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-
-        min_removedlines, his_pieces, his_pieces_len = self.test_play(policy_value_net)
-        
-        print('end test time:', datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-
+                              
         # 正式运行
         state = read_status_file() 
         
