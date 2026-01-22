@@ -310,7 +310,7 @@ class Train():
             # 如果游戏结束或玩了超过2小时
             paytime = time.time()-start_time
                 # (agent.removedlines > state["total"]["avg_score"]+1)  or \
-            dirichlet_p = 0.01 + min(0.5, paytime/(60*60*10))
+            dirichlet_p = 0.01 + min(0.9, paytime/(60*60*10))
 
             if agent.terminal:
 
