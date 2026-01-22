@@ -101,6 +101,7 @@ class Dataset(torch.utils.data.Dataset):
         print("start load data to memory ...")
         start_time = time.time()
         values={}
+        advs = {}
         # double_train_list=[]
         for i,fn in enumerate(self.file_list):
             try:
@@ -120,7 +121,7 @@ class Dataset(torch.utils.data.Dataset):
                 self.file_list.remove(fn)
                 continue
             values[fn]=value
-
+            advs[fn]=adv
             # 对背景进行 shuffle
             # 保留最近的2行，其余扰动
             # if random.random()>0.9:
@@ -141,19 +142,39 @@ class Dataset(torch.utils.data.Dataset):
         max_values = np.max(values_items)
         std_values = np.std(values_items)
 
+        # 标准化处理
         for fn in values:
-            value = values[fn]
-            if value>=1: value=1-1e-6
-            if value<=-1: value=-1+1e-6
+            value = values[fn]-avg_values
+            value = value/(std_values+1e-6)
+            if value>=1: value=1
+            if value<=-1: value=-1
             values[fn] = value
-
 
         print("value min/avg/max/std:",[min_values, avg_values, max_values, std_values])        
         self.avg_values = avg_values
         self.std_values = std_values
 
+        advs_items = list(advs.values())
+        avg_advs = np.average(advs_items)
+        min_advs = np.min(advs_items)
+        max_advs = np.max(advs_items)
+        std_advs = np.std(advs_items)
+
+        # 标准化处理
+        for fn in advs:
+            value = advs[fn]-avg_advs
+            value = value/(std_advs+1e-6)
+            if value>=1: value=1
+            if value<=-1: value=-1
+            advs[fn] = value
+
+        print("advs min/avg/max/std:",[min_advs, avg_advs, max_advs, std_advs])        
+        self.avg_advs = avg_advs
+        self.std_advs = std_advs
+
         for fn in self.data:
             self.data[fn]["value"] = values[fn]
+            self.data[fn]["adv"] = advs[fn]
             
         pay_time = round(time.time()-start_time, 2)
         print("loaded to memory, paid time:", pay_time)

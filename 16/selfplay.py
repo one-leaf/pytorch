@@ -678,16 +678,18 @@ class Train():
 
         val_mean = np.mean(values)
         val_std = np.std(values)
-        val_std += 1e-6 if val_std==0 else 0        
-        values = (np.array(values) - val_mean) / val_std
+        # val_std += 1e-6 if val_std==0 else 0        
+        # values = (np.array(values) - val_mean) / val_std
+        values = np.array(values)
         
         adv_mean = np.mean(advs)
         adv_std = np.std(advs)
-        adv_std += 1e-6 if adv_std==0 else 0
-        advs = (np.array(advs) - adv_mean) / adv_std
-
-        values = np.clip(values, -1, 1)
-        advs = np.clip(advs, -1, 1)        
+        # adv_std += 1e-6 if adv_std==0 else 0
+        # advs = (np.array(advs) - adv_mean) / adv_std
+        advs = np.array(advs)
+        
+        # values = np.clip(values, -1, 1)
+        # advs = np.clip(advs, -1, 1)        
         
         print(i, "val_mean:", val_mean, "val_std:", val_std, "adv_mean:", adv_mean, "adv_std:", adv_std)
         print("values len:", len(values))
