@@ -244,11 +244,11 @@ class Train():
         has_find_end = False
         player.need_max_ps = not player.need_max_ns
         
-        if state["total"]["p_n_q"][0]>state["total"]["p_n_q"][1]:
-            dirichlet_p = 0.05
-        else:
-            dirichlet_p = 0.10
-            
+        # if state["total"]["p_n_q"][0]>state["total"]["p_n_q"][1]:
+        #     dirichlet_p = 0.05
+        # else:
+        #     dirichlet_p = 0.10
+        dirichlet_p = 0.05    
         print("max_emptyCount:",max_emptyCount,"isRandomNextPiece:",agent.isRandomNextPiece,"limitstep:",agent.limitstep,"max_ps:",player.need_max_ps)
         for i in count():
             _step={"step":i}
@@ -310,8 +310,9 @@ class Train():
             # 如果游戏结束或玩了超过2小时
             paytime = time.time()-start_time
                 # (agent.removedlines > state["total"]["avg_score"]+1)  or \
+            dirichlet_p = 0.01 + min(0.5, paytime/(60*60*10))
 
-            if agent.terminal or (paytime > 60*60 and qval>0.9):
+            if agent.terminal:
 
                 # # 修复Q值，将最后都无法消行的全部设置为-1
                 # if agent.terminal:
