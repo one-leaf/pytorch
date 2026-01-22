@@ -311,7 +311,7 @@ class Train():
             paytime = time.time()-start_time
                 # (agent.removedlines > state["total"]["avg_score"]+1)  or \
 
-            if agent.terminal:# or (max_steps>0 and i>max_steps):
+            if agent.terminal or (paytime > 60*60 and qval>0.9):
 
                 # # 修复Q值，将最后都无法消行的全部设置为-1
                 # if agent.terminal:
