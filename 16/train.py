@@ -223,7 +223,7 @@ class Train():
         self.buffer_size = 204800  # cache对次数 # 102400 6:30 收集
         self.epochs = 50  # 每次更新策略价值网络的训练步骤数, 推荐是5
         self.kl_targ = 1e-4  # 策略价值网络KL值目标        
-        self.c_puct = 2  # MCTS child权重， 用来调节MCTS中 探索/乐观 的程度 默认 5
+        self.c_puct = 3  # MCTS child权重， 用来调节MCTS中 探索/乐观 的程度 默认 5
    
 
     def policy_update(self, sample_data, epochs=1):
