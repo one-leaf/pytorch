@@ -462,12 +462,12 @@ class MCTSPlayer(object):
                 # _p = _p / np.sum(_p) 
                 # idx = np.random.choice(range(ACTONS_LEN), p=_p)
             elif self.player==1:
-                if game.piececount%2==0:
+                if game.piececount%5!=0:
                     idx = max_ns_idx
                 else:
                     idx = -1
             elif self.player==2:   
-                if game.piececount%2==0:
+                if game.piececount%5!=0:
                     idx = max_qs_idx
                 else:
                     idx = -1            
