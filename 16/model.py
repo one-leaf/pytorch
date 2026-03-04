@@ -67,8 +67,8 @@ class PolicyValueNet():
             *self.policy_value_net.val_token.parameters(),
         ]        
         param_groups = [
-            dict(params=hidden_weights, use_muon=True, lr=1e-6, weight_decay=0.05),  
-            dict(params=hidden_gains_biases+nonhidden_params, use_muon=False, lr=1e-6, betas=(0.9, 0.95), weight_decay=0.01),
+            dict(params=hidden_weights, use_muon=True, lr=1e-4, weight_decay=0.05),  
+            dict(params=hidden_gains_biases+nonhidden_params, use_muon=False, lr=1e-4, betas=(0.9, 0.95), weight_decay=0.01),
         ]  
            
         self.optimizer = MuonWithAuxAdam(param_groups)
