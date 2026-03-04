@@ -16,7 +16,9 @@ def zeropower_via_newtonschulz5(G, steps: int):
     """
     assert G.ndim >= 2 # batched Muon implementation by @scottjmaddox, and put into practice in the record by @YouJiacheng
     a, b, c = (3.4445, -4.7750,  2.0315)
-    X = G.bfloat16()
+    original_dtype = G.dtype
+    # X = G.bfloat16()
+    X = G.float()
     if G.size(-2) > G.size(-1):
         X = X.mT
 
@@ -30,7 +32,7 @@ def zeropower_via_newtonschulz5(G, steps: int):
     
     if G.size(-2) > G.size(-1):
         X = X.mT
-    return X
+    return X.to(original_dtype)
 
 
 def muon_update(grad, momentum, beta=0.95, ns_steps=5, nesterov=True):
