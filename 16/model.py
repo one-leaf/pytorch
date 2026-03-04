@@ -54,7 +54,7 @@ class PolicyValueNet():
         # self.optimizer = optim.Adam(self.policy_value_net.parameters(), lr=1e-6)  
         
         # self.optimizer = Muon(self.policy_value_net.parameters(), lr=1e-4, weight_decay=self.l2_const)
-        self.optimizer = Muon(self.policy_value_net.parameters(), lr=1e-4, weight_decay=0.05)
+        self.optimizer = Muon(list(self.policy_value_net.parameters()), lr=1e-4, weight_decay=0.05)
         
         # hidden_weights = [p for p in self.policy_value_net.blocks.parameters() if p.ndim >= 2]
         # hidden_gains_biases = [p for p in self.policy_value_net.blocks.parameters() if p.ndim < 2]
