@@ -54,24 +54,24 @@ class PolicyValueNet():
         # self.optimizer = optim.Adam(self.policy_value_net.parameters(), lr=1e-6)  
         
         # self.optimizer = Muon(self.policy_value_net.parameters(), lr=1e-4, weight_decay=self.l2_const)
-        self.optimizer = Muon(list(self.policy_value_net.parameters()), lr=1e-4, weight_decay=0.05)
+        # self.optimizer = Muon(list(self.policy_value_net.parameters()), lr=1e-4, weight_decay=0.05)
         
-        # hidden_weights = [p for p in self.policy_value_net.blocks.parameters() if p.ndim >= 2]
-        # hidden_gains_biases = [p for p in self.policy_value_net.blocks.parameters() if p.ndim < 2]
-        # nonhidden_params = [
-        #     *self.policy_value_net.patch_embed.parameters(),
-        #     *self.policy_value_net.act_dist.parameters(),
-        #     *self.policy_value_net.val_dist.parameters(),
-        #     *self.policy_value_net.pos_embed.parameters(),
-        #     *self.policy_value_net.act_token.parameters(),
-        #     *self.policy_value_net.val_token.parameters(),
-        # ]        
-        # param_groups = [
-        #     dict(params=hidden_weights, use_muon=True, lr=1e-4, weight_decay=0.05),  
-        #     dict(params=hidden_gains_biases+nonhidden_params, use_muon=False, lr=1e-4, betas=(0.9, 0.95), weight_decay=0.01),
-        # ]  
+        hidden_weights = [p for p in self.policy_value_net.blocks.parameters() if p.ndim >= 2]
+        hidden_gains_biases = [p for p in self.policy_value_net.blocks.parameters() if p.ndim < 2]
+        nonhidden_params = [
+            *self.policy_value_net.patch_embed.parameters(),
+            *self.policy_value_net.act_dist.parameters(),
+            *self.policy_value_net.val_dist.parameters(),
+            self.policy_value_net.pos_embed,
+            self.policy_value_net.act_token,
+            self.policy_value_net.val_token,
+        ]        
+        param_groups = [
+            dict(params=hidden_weights, use_muon=True, lr=1e-4, weight_decay=0.05),  
+            dict(params=hidden_gains_biases+nonhidden_params, use_muon=False, lr=1e-4, betas=(0.9, 0.95), weight_decay=0.01),
+        ]  
            
-        # self.optimizer = MuonWithAuxAdam(param_groups)
+        self.optimizer = MuonWithAuxAdam(param_groups)
 
         # transformers use adam 
         # self.optimizer = optim.SGD(self.policy_value_net.parameters(), lr=1e-6, momentum=0.9, weight_decay=self.l2_const)
