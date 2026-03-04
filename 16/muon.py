@@ -195,9 +195,17 @@ class MuonWithAuxAdam(torch.optim.Optimizer):
             if group["use_muon"]:
                 params = group["params"]
                 
-                params_pad = params + [torch.empty_like(params[-1])] * (dist.get_world_size() - len(params) % dist.get_world_size())
+                if dist.is_initialized():
+                    params_pad = params + [torch.empty_like(params[-1])] * (dist.get_world_size() - len(params) % dist.get_world_size())
+                else:
+                    # 单卡模式，直接跳过 padding
+                    params_pad = params
+                # params_pad = params + [torch.empty_like(params[-1])] * (dist.get_world_size() - len(params) % dist.get_world_size())
                 
-                for base_i in range(len(params))[::dist.get_world_size()]:
+                world_size = dist.get_world_size() if dist.is_initialized() else 1
+                for base_i in range(len(params))[::world_size]:                
+                
+                # for base_i in range(len(params))[::dist.get_world_size()]:
                     if base_i + dist.get_rank() < len(params):
                         p = params[base_i + dist.get_rank()]
                         if p.grad is None:
