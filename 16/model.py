@@ -53,7 +53,8 @@ class PolicyValueNet():
         # self.optimizer = optim.Adam(self.policy_value_net.parameters(), lr=1e-6, weight_decay=self.l2_const)  
         # self.optimizer = optim.Adam(self.policy_value_net.parameters(), lr=1e-6)  
         
-        self.optimizer = Muon(self.policy_value_net.parameters(), lr=1e-6, weight_decay=self.l2_const)
+        # self.optimizer = Muon(self.policy_value_net.parameters(), lr=1e-4, weight_decay=self.l2_const)
+        self.optimizer = Muon(self.policy_value_net.parameters(), lr=1e-4, weight_decay=0.05)
         
         # hidden_weights = [p for p in self.policy_value_net.blocks.parameters() if p.ndim >= 2]
         # hidden_gains_biases = [p for p in self.policy_value_net.blocks.parameters() if p.ndim < 2]
@@ -115,22 +116,23 @@ class PolicyValueNet():
         self.lr = 0
         self.cache = {}
 
-    def set_optimizer(self, type_id):
-        if type_id==0:
-            # self.optimizer = optim.Muon(self.policy_value_net.parameters(), lr=1e-5)
-            # self.optimizer = Lion(self.policy_value_net.parameters(), lr=1e-5, weight_decay=self.l2_const)
-            self.optimizer = optim.AdamW(self.policy_value_net.parameters(), lr=1e-5) #, weight_decay=self.l2_const) 
-        else:
-            # self.optimizer = optim.SGD(self.policy_value_net.parameters(), lr=1e-5, momentum=0.9, weight_decay=self.l2_const)
-            self.optimizer = optim.SGD(self.policy_value_net.parameters(), lr=1e-5)
+    # def set_optimizer(self, type_id):
+    #     if type_id==0:
+    #         # self.optimizer = optim.Muon(self.policy_value_net.parameters(), lr=1e-5)
+    #         # self.optimizer = Lion(self.policy_value_net.parameters(), lr=1e-5, weight_decay=self.l2_const)
+    #         self.optimizer = optim.AdamW(self.policy_value_net.parameters(), lr=1e-5) #, weight_decay=self.l2_const) 
+    #     else:
+    #         # self.optimizer = optim.SGD(self.policy_value_net.parameters(), lr=1e-5, momentum=0.9, weight_decay=self.l2_const)
+    #         self.optimizer = optim.SGD(self.policy_value_net.parameters(), lr=1e-5)
 
     # 设置学习率
     def set_learning_rate(self, lr):
-        if self.lr != lr:
-            for param_group in self.optimizer.param_groups:
-                param_group['lr'] = lr
-            self.lr = lr
-            print("Set modle learn rate to:", lr)
+        pass
+        # if self.lr != lr:
+        #     for param_group in self.optimizer.param_groups:
+        #         param_group['lr'] = lr
+        #     self.lr = lr
+        #     print("Set modle learn rate to:", lr)
 
     # 打印当前网络
     def print_netwark(self):
@@ -297,7 +299,7 @@ class PolicyValueNet():
 
         # loss = policy_loss + value_loss/(value_loss/policy_loss).detach() + qval_loss/(qval_loss/policy_loss).detach() 
         # 用 actor 对抗 mcts
-        loss = value_loss - actor_loss*1e-2 + policy_loss - entropy*1e-3
+        loss = value_loss - actor_loss*1e-1 + policy_loss - entropy*1e-3
         # loss = value_loss + actor_loss + policy_loss*1e-2 - entropy*1e-3
         # loss = value_loss + actor_loss - entropy * 1e-3
 
