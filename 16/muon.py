@@ -194,7 +194,11 @@ class MuonWithAuxAdam(torch.optim.Optimizer):
         for group in self.param_groups:
             if group["use_muon"]:
                 params = group["params"]
-                params_pad = params + [torch.empty_like(params[-1])] * (dist.get_world_size() - len(params) % dist.get_world_size())
+                
+                # params_pad = params + [torch.empty_like(params[-1])] * (dist.get_world_size() - len(params) % dist.get_world_size())
+                # 不需要多卡并行，所以不需要pad了，直接用params就行了
+                params_pad = params
+                
                 for base_i in range(len(params))[::dist.get_world_size()]:
                     if base_i + dist.get_rank() < len(params):
                         p = params[base_i + dist.get_rank()]
