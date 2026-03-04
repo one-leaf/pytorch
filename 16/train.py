@@ -12,6 +12,14 @@ import numpy as np
 import torch
 from status import save_status_file, read_status_file, set_status_total_value
 
+import torch.distributed as dist
+os.environ['MASTER_ADDR'] = 'localhost'
+os.environ['MASTER_PORT'] = '29500'
+os.environ['RANK'] = '0'
+os.environ['WORLD_SIZE'] = '1'
+dist.init_process_group(backend='nccl'
+
+
 # 添加 cache 反而更慢
 # try:
 #     import memcache
