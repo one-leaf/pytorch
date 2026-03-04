@@ -14,13 +14,6 @@ from status import save_status_file, read_status_file, set_status_total_value
 
 import torch.distributed as dist
 
-if not dist.is_initialized():
-    print("init dist process group ...")
-    os.environ['MASTER_ADDR'] = 'localhost'
-    os.environ['MASTER_PORT'] = '29500'
-    os.environ['RANK'] = '0'
-    os.environ['WORLD_SIZE'] = '1'
-    dist.init_process_group(backend='nccl')
 
 # 添加 cache 反而更慢
 # try:
@@ -398,6 +391,15 @@ class Train():
 
 if __name__ == '__main__':
     os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
+    if not dist.is_initialized():
+        print("init dist process group ...")
+        os.environ['MASTER_ADDR'] = 'localhost'
+        os.environ['MASTER_PORT'] = '29500'
+        os.environ['RANK'] = '0'
+        os.environ['WORLD_SIZE'] = '1'
+        dist.init_process_group(backend='nccl')
+    
+    
     print('start training',datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
     training = Train()
     training.run()
