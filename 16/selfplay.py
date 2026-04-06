@@ -373,7 +373,7 @@ class Train():
             load_model_file=model_file
             if os.path.exists(bestmodelfile):
                 load_model_file = bestmodelfile
-            elif os.path.exists(model_file+".bak"):
+            # elif os.path.exists(model_file+".bak"):
                 load_model_file = model_file+".bak"
 
             # 开始游戏
