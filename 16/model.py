@@ -49,7 +49,7 @@ class PolicyValueNet():
         # self.print_netwark()
 
         # 前期用这个
-        # self.optimizer = optim.AdamW(self.policy_value_net.parameters(), lr=1e-6, weight_decay=self.l2_const)  
+        self.optimizer = optim.AdamW(self.policy_value_net.parameters(), lr=1e-6, weight_decay=self.l2_const)  
         # self.optimizer = optim.Adam(self.policy_value_net.parameters(), lr=1e-6, weight_decay=self.l2_const)  
         # self.optimizer = optim.Adam(self.policy_value_net.parameters(), lr=1e-6)  
         
@@ -57,21 +57,21 @@ class PolicyValueNet():
         # self.optimizer = Muon(list(self.policy_value_net.parameters()), lr=1e-4, weight_decay=0.05)
         
         # 这边尝试对transformer的权重和偏置分开设置不同的优化器参数，结果失败了，学不会了
-        hidden_weights = [p for p in self.policy_value_net.blocks.parameters() if p.ndim >= 2]
-        hidden_gains_biases = [p for p in self.policy_value_net.blocks.parameters() if p.ndim < 2]
-        nonhidden_params = [
-            *self.policy_value_net.patch_embed.parameters(),
-            *self.policy_value_net.act_dist.parameters(),
-            *self.policy_value_net.val_dist.parameters(),
-            self.policy_value_net.pos_embed,
-            self.policy_value_net.act_token,
-            self.policy_value_net.val_token,
-        ]        
-        param_groups = [
-            dict(params=hidden_weights, use_muon=True, lr=1e-6, weight_decay=0.05),  
-            dict(params=hidden_gains_biases+nonhidden_params, use_muon=False, lr=1e-6, betas=(0.9, 0.95), weight_decay=0.01),
-        ]             
-        self.optimizer = MuonWithAuxAdam(param_groups)
+        # hidden_weights = [p for p in self.policy_value_net.blocks.parameters() if p.ndim >= 2]
+        # hidden_gains_biases = [p for p in self.policy_value_net.blocks.parameters() if p.ndim < 2]
+        # nonhidden_params = [
+        #     *self.policy_value_net.patch_embed.parameters(),
+        #     *self.policy_value_net.act_dist.parameters(),
+        #     *self.policy_value_net.val_dist.parameters(),
+        #     self.policy_value_net.pos_embed,
+        #     self.policy_value_net.act_token,
+        #     self.policy_value_net.val_token,
+        # ]        
+        # param_groups = [
+        #     dict(params=hidden_weights, use_muon=True, lr=1e-6, weight_decay=0.05),  
+        #     dict(params=hidden_gains_biases+nonhidden_params, use_muon=False, lr=1e-6, betas=(0.9, 0.95), weight_decay=0.01),
+        # ]             
+        # self.optimizer = MuonWithAuxAdam(param_groups)
 
         # transformers use adam 
         # self.optimizer = optim.SGD(self.policy_value_net.parameters(), lr=1e-6, momentum=0.9, weight_decay=self.l2_const)
