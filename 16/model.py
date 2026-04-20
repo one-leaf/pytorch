@@ -9,7 +9,7 @@ from collections import OrderedDict
 from torchvision.models import resnet34
 from vit import VitNet
 import random
-from muon import Muon, MuonWithAuxAdam
+from muon import Muon, SingleDeviceMuonWithAuxAdam
 
 # 定义游戏的保存文件名和路径
 model_name = "vit-ti" # "vit" # "mlp"
@@ -56,22 +56,22 @@ class PolicyValueNet():
         # self.optimizer = Muon(self.policy_value_net.parameters(), lr=1e-4, weight_decay=self.l2_const)
         # self.optimizer = Muon(list(self.policy_value_net.parameters()), lr=1e-4, weight_decay=0.05)
         
-        # 这边尝试对transformer的权重和偏置分开设置不同的优化器参数，结果失败了，学不会了
+        # 这边 Muon 优化器参数，结果失败了，学不会了，因为 >1B 参数才能体现出优势
         # hidden_weights = [p for p in self.policy_value_net.blocks.parameters() if p.ndim >= 2]
-        # hidden_gains_biases = [p for p in self.policy_value_net.blocks.parameters() if p.ndim < 2]
-        # nonhidden_params = [
+        # embed_weights = [self.policy_value_net.pos_embed, self.policy_value_net.act_token, self.policy_value_net.val_token]
+        # other_params = [
         #     *self.policy_value_net.patch_embed.parameters(),
         #     *self.policy_value_net.act_dist.parameters(),
         #     *self.policy_value_net.val_dist.parameters(),
-        #     self.policy_value_net.pos_embed,
-        #     self.policy_value_net.act_token,
-        #     self.policy_value_net.val_token,
-        # ]        
+        # ]
+        # scalar_params = [p for p in self.policy_value_net.blocks.parameters() if p.ndim < 2]                
+        #
         # param_groups = [
-        #     dict(params=hidden_weights, use_muon=True, lr=1e-6, weight_decay=0.05),  
-        #     dict(params=hidden_gains_biases+nonhidden_params, use_muon=False, lr=1e-6, betas=(0.9, 0.95), weight_decay=0.01),
+        #     dict(params=hidden_weights, use_muon=True, lr=0.02, weight_decay=0.0),
+        #     dict(params=other_params + scalar_params, use_muon=False, lr=3e-4, betas=(0.9, 0.95), eps=1e-10, weight_decay=self.l2_const),
+        #     dict(params=embed_params, use_muon=False, lr=3e-4, betas=(0.9, 0.95), eps=1e-10, weight_decay=0.0),
         # ]             
-        # self.optimizer = MuonWithAuxAdam(param_groups)
+        # self.optimizer = SingleDeviceMuonWithAuxAdam(param_groups)
 
         # transformers use adam 
         # self.optimizer = optim.SGD(self.policy_value_net.parameters(), lr=1e-6, momentum=0.9, weight_decay=self.l2_const)
@@ -189,6 +189,8 @@ class PolicyValueNet():
             while not game.terminal:
                 nz_idx = np.nonzero(game.availables)[0]
                 game.step(random.choice(nz_idx[:-1]))
+                if game.terminal:
+                    break
                 key = game.full_key
                 if key not in self.cache:
                     k_list.append(key)
@@ -299,7 +301,7 @@ class PolicyValueNet():
 
         # loss = policy_loss + value_loss/(value_loss/policy_loss).detach() + qval_loss/(qval_loss/policy_loss).detach() 
         # 用 actor 对抗 mcts
-        loss = value_loss - actor_loss*1e-1 + policy_loss - entropy*1e-3
+        loss = value_loss - actor_loss*1e-1 + policy_loss - entropy*1e-2
         # loss = value_loss + actor_loss + policy_loss*1e-2 - entropy*1e-3
         # loss = value_loss + actor_loss - entropy * 1e-3
 

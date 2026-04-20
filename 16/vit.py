@@ -399,6 +399,7 @@ class VitPatchEmbed(nn.Module):
         padding_height, padding_width = pair(padding) 
         stride_height, stride_width = pair(stride) 
         self.dropout = nn.Dropout(p=drop_ratio)
+        self.gelu = nn.GELU()
         self.proj_init = nn.Conv2d(in_c, in_c, kernel_size=1, stride=1, padding=0, bias=False)
         self.proj1 = nn.Conv2d(in_c, in_c, kernel_size=1, stride=1, padding=0, bias=False)
         self.proj2 = nn.Conv2d(in_c, in_c, kernel_size=3, stride=1, padding=1, bias=False)
@@ -417,21 +418,21 @@ class VitPatchEmbed(nn.Module):
         x  = self.proj_init(x)
         x  = self.dropout(x)
 
-        x1 = self.proj1(x)
-        x1 = self.dropout(x1)
+        x1 = self.gelu(self.proj1(x))    
+        # x1 = self.dropout(x1)
         
-        x2 = self.proj2(x)
-        x2 = self.dropout(x2)
+        x2 = self.gelu(self.proj2(x))
+        # x2 = self.dropout(x2)
         
-        x3 = self.proj3(x)
-        x3 = self.dropout(x3)
+        x3 = self.gelu(self.proj3(x))
+        # x3 = self.dropout(x3)
         
-        x4 = self.proj4(x)
-        x4 = self.dropout(x4)
+        x4 = self.gelu(self.proj4(x))
+        # x4 = self.dropout(x4)
         
         x = torch.cat((x , x1 , x2 , x3 , x4), dim=1)   # [B, 5*C, H, W]
 
-        x = self.proj_end(x)
+        x = self.gelu(self.proj_end(x))
         x = self.dropout(x)
         
         x = self.out(x)
