@@ -1,6 +1,6 @@
-# 06/ - 五子棋 AI（AlphaGo 风格）
+# 07/ - 俄罗斯方块 AI（AlphaGo 风格 MCTS）
 
-这个目录包含五子棋游戏的 AlphaGo 风格 AI 实现，使用蒙特卡洛树搜索（MCTS）和残差网络（ResNet）进行策略和价值预测。
+这个目录包含俄罗斯方块游戏的 AlphaGo 风格 AI 实现，使用蒙特卡洛树搜索（MCTS）和残差网络（ResNet）进行策略和价值预测。
 
 ## 文件清单
 
@@ -12,11 +12,12 @@
   - 自对弈生成训练数据
   - 模型更新接口
 
-- **game.py**: 五子棋游戏环境
-  - 15×15 棋盘
-  - 落子合法性检查
-  - 胜负判定（五连珠检测）
-  - 状态编码（黑白棋子位置）
+- **game.py**: 俄罗斯方块游戏环境
+  - 棋盘状态管理
+  - 方块生成与旋转
+  - 碰撞检测
+  - 行消除逻辑
+  - 游戏结束判断
 
 - **mcts.py**: 蒙特卡洛树搜索
   - 选择：UCB1 公式
@@ -26,10 +27,14 @@
   - `c_puct`: 探索常数
   - `n_playout`: 模拟次数
 
+- **mcts_old.py**: 旧版 MCTS 实现
+  - 保留的历史版本
+  - 用于对比和回退
+
 - **model.py**: 残差神经网络
   - 卷积层提取棋盘特征
   - 策略头：输出动作概率分布
-  - 价值头：输出局面评估（胜率）
+  - 价值头：输出局面评估
   - 残差块：批量归一化 + ReLU
 
 - **selfplay.py**: 自对弈引擎
@@ -41,7 +46,7 @@
 - **train.py**: 训练循环
   - 加载自对弈数据
   - 策略损失 + 价值损失
-  - 数据增强（旋转/翻转）
+  - 数据增强
   - 模型检查点保存
 
 - **test.py**: 模型评估
@@ -49,22 +54,7 @@
   - 胜率统计
   - 性能指标记录
 
-- **playandtest.py**: 人机对战 + 测试
-  - 人类玩家界面
-  - 实时 MCTS 决策
-  - 胜负记录
-
 ### 数据目录
 
 - **data/**: 自对弈生成的训练数据
 - **model/**: 训练好的模型检查点
-- **web/**: 网页界面（可选）
-
-## 参考
-
-- https://codemyroad.wordpress.com/2013/04/14/tetris-ai-the-near-perfect-player/
-- https://github.com/junxiaosong/AlphaZero_Gomoku/
-- https://arxiv.org/pdf/1805.09613.pdf
-- https://github.com/leela-zero/leela-zero
-
-https://medium.com/applied-data-science/alphago-zero-explained-in-one-diagram-365f5abf67e0

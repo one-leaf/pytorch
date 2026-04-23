@@ -1,13 +1,81 @@
-## Chinese NER using Bert
+# 08/ - 中文命名实体识别（NER）
 
-BERT for Chinese NER. 
+这个目录包含中文命名实体识别的完整实现，支持 BERT/Albert 预训练模型，以及 Softmax、CRF、Span 等多种解码方式。
 
-### dataset list
+## 文件清单
 
-1. cner: datasets/cner
+### 核心模块
+
+- **run_ner_crf.py**: CRF 解码 NER
+  - BERT/Albert 编码器
+  - CRF 层处理标签依赖
+  - 训练/评估/预测流程
+  - 支持 FGM/PGD 对抗训练
+
+- **run_ner_softmax.py**: Softmax 解码 NER
+  - BERT/Albert 编码器
+  - 独立标签分类
+  - 简单快速基线
+  - 训练/评估/预测流程
+
+- **run_ner_span.py**: Span 解码 NER
+  - 基于片段的解码
+  - 起始/结束位置预测
+  - 处理嵌套实体
+  - 训练/评估/预测流程
+
+### 工具模块
+
+- **callback/**: 训练回调函数
+  - 模型检查点保存
+  - 早停机制
+  - 学习率调度
+  - 对抗训练（FGM/PGD）
+
+- **datasets/**: 数据集加载
+  - CLUENER 数据集处理
+  - 数据预处理
+  - DataLoader 创建
+
+- **losses/**: 损失函数
+  - CRF 损失
+  - 交叉熵损失
+  - 自定义损失
+
+- **metrics/**: 评估指标
+  - 精确率、召回率、F1 值
+  - 实体级别评估
+  - 标签级别评估
+
+- **models/**: 模型定义
+  - BERT/Albert NER 模型
+  - CRF 层实现
+  - Span 解码器
+
+- **processors/**: 数据处理
+  - 文本预处理
+  - 标签编码
+  - 特征工程
+
+- **tools/**: 辅助工具
+  - 数据转换
+  - 结果分析
+  - 可视化
+
+### 其他文件
+
+- **outputs/**: 训练输出和预测结果
+- **prev_trained_model/**: 预训练模型权重
+- **scripts/**: 运行脚本
+- **LICENSE**: 开源许可证
+- **README.md**: 项目说明
+- **README2.md**: 补充说明
+- **__init__.py**: 包初始化
+
+## 数据集
+
+1. CNER: datasets/cner
 2. CLUENER: https://github.com/CLUEbenchmark/CLUENER
-
-### model list
 
 1. BERT+Softmax
 2. BERT+CRF

@@ -1,4 +1,56 @@
-# Rocket-recycling with Reinforcement Learning
+# 10/ - 火箭悬停/着陆 RL（Actor-Critic）
+
+这个目录包含火箭悬停和着陆任务的强化学习实现，使用 Actor-Critic 算法和位置编码映射。
+
+## 文件清单
+
+### 核心模块
+
+- **train.py**: 训练主程序
+  - Actor-Critic 算法实现
+  - 环境交互循环
+  - 策略梯度更新
+  - 价值函数优化
+  - 训练日志记录
+  - 模型检查点保存
+
+- **policy.py**: 策略网络
+  - Actor 网络：输出动作概率分布
+  - Critic 网络：输出状态价值
+  - PositionalMapping：位置编码
+  - 网络层定义
+  - 激活函数选择
+
+- **rocket.py**: 火箭环境
+  - 物理模拟（重力、推力、阻力）
+  - 状态空间：位置、速度、角度
+  - 动作空间：推力大小、方向
+  - 奖励设计：悬停奖励、着陆奖励、碰撞惩罚
+  - 终止条件：着陆、坠毁、超时
+
+- **inference.py**: 推理/测试
+  - 加载训练好的模型
+  - 运行策略评估
+  - 可视化火箭轨迹
+  - 性能指标计算
+
+- **utils.py**: 工具函数
+  - 辅助函数
+  - 数据预处理
+  - 可视化函数
+
+### 其他文件
+
+- **README.md**: 项目说明
+- **Requirements.txt**: 依赖列表
+- **gallery/**: 示例图像/视频
+- **landing_ckpt/**: 着陆检查点
+
+## 参考
+
+- Actor-Critic 算法
+- 位置编码（Positional Encoding）
+- 火箭物理模拟
 
 Developed by: [Zhengxia Zou, Ph.D.](https://zhengxiazou.github.io/)
 
