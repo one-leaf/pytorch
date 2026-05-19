@@ -258,6 +258,7 @@ class GRPOSelfPlay():
         # 更新训练状态
         state = read_status_file()
         state["total"]["agent"] += 1
+        state["total"]["_agent"] = state["total"].get("_agent", 0) + 1
         # 评估结果（test_play）
         state["total"]["max_score_grpo"] = max(state["total"]["max_score_grpo"], max_pieces_count)
         state["total"]["max_piececount_grpo"] = max(state["total"]["max_piececount_grpo"], max_pieces_count)

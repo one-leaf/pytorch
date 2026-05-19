@@ -73,8 +73,13 @@ def numpy_encoder(obj):
 
 
 def _append_history(state: dict[str, Any]):
-    """在 state["total"]["history"] 追加当前关键指标快照（保留最近100条）"""
+    """在 state["total"]["history"] 追加当前关键指标快照（用 _agent 计数，>100 时记录）"""
     t = state.get("total", {})
+    # 用 _agent 作为增量计数器，>100 时记录并重置
+    _agent = t.get("_agent", 0)
+    if _agent < 100:
+        return
+
     snapshot = {
         "agent": t.get("agent", 0),
         "grpo_score": t.get("grpo_score", 0),
@@ -86,7 +91,7 @@ def _append_history(state: dict[str, Any]):
         "min_score_grpo": t.get("min_score_grpo", 0),
         "kl": t.get("kl", 0),
         "lr_multiplier": t.get("lr_multiplier", 1),
-        "modify": t.get("modify", ""),
+        "modify": "",
     }
     if "info" in state:
         snapshot["modify"] = state["info"].get("modify", "")
@@ -97,6 +102,9 @@ def _append_history(state: dict[str, Any]):
     # 保留最近100条
     if len(t["history"]) > HISTORY_MAX:
         t["history"] = t["history"][-HISTORY_MAX:]
+
+    # 重置计数器
+    t["_agent"] = 0
 
 
 def save_status_file(state:dict[str, Any]):
@@ -166,6 +174,7 @@ def read_status_file():
     add_total_prop(state, "grpo_steps", 0)
     add_total_prop(state, "grpo_min_piececount", 999999)
     add_total_prop(state, "grpo_max_piececount", 0)
+    add_total_prop(state, "_agent", 0)
     add_total_prop(state, "history", [])
 
     return state
