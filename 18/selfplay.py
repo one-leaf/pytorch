@@ -180,9 +180,12 @@ class GRPOSelfPlay():
 
         total_score = 0
         total_piececount = 0
+        total_removedlines = 0
         total_steps = 0
         min_piececount = 999999
         max_piececount = 0
+        min_removedlines = 999999
+        max_removedlines = 0
 
         # 运行 G 局游戏
         for g in range(G):
@@ -199,11 +202,16 @@ class GRPOSelfPlay():
 
             total_score += total_reward
             total_piececount += agent.piececount
+            total_removedlines += agent.removedlines
             total_steps += agent.steps
             if agent.piececount < min_piececount:
                 min_piececount = agent.piececount
             if agent.piececount > max_piececount:
                 max_piececount = agent.piececount
+            if agent.removedlines < min_removedlines:
+                min_removedlines = agent.removedlines
+            if agent.removedlines > max_removedlines:
+                max_removedlines = agent.removedlines
 
             # 记录每个 step 的数据
             for step_data in trajectory:
@@ -267,9 +275,12 @@ class GRPOSelfPlay():
         # GRPO 游戏结果
         state["total"]["grpo_score"] = round(total_score / G, 3)
         state["total"]["grpo_piececount"] = round(total_piececount / G, 3)
+        state["total"]["grpo_removedlines"] = round(total_removedlines / G, 3)
         state["total"]["grpo_steps"] = round(total_steps / G, 3)
         state["total"]["grpo_min_piececount"] = min(state["total"]["grpo_min_piececount"], min_piececount)
         state["total"]["grpo_max_piececount"] = max(state["total"]["grpo_max_piececount"], max_piececount)
+        state["total"]["grpo_min_removedlines"] = min(state["total"].get("grpo_min_removedlines", 999999), min_removedlines)
+        state["total"]["grpo_max_removedlines"] = max(state["total"].get("grpo_max_removedlines", 0), max_removedlines)
         save_status_file(state)
         print(f"status updated: agent={state['total']['agent']}")
 

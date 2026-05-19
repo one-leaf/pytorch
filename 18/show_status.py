@@ -52,11 +52,13 @@ def show_status(max_history=0, as_json=False):
     steps = total.get("grpo_steps")
 
     if score is not None:
-        print(f"  GRPO 平均消除行数: {fmt(score)}")
+        print(f"  GRPO 平均消除行数: {fmt(total.get('grpo_removedlines'), 3)}")
         print(f"  GRPO 平均方块数:   {fmt(pieces, 1)}")
         print(f"  GRPO 平均步数:     {fmt(steps, 1)}")
         print(f"  GRPO 最少方块数:   {total.get('grpo_min_piececount', 0)}")
         print(f"  GRPO 最多方块数:   {total.get('grpo_max_piececount', 0)}")
+        print(f"  GRPO 最少消除行数: {total.get('grpo_min_removedlines', 0)}")
+        print(f"  GRPO 最多消除行数: {total.get('grpo_max_removedlines', 0)}")
     else:
         print(f"  GRPO 分数:         (尚未采集数据)")
     print("-" * 60)
@@ -73,11 +75,12 @@ def show_status(max_history=0, as_json=False):
         print("=" * 60)
         print(f"  最近 {min(len(history), max_history)} 条训练记录:")
         print("-" * 60)
-        print(f"  {'Agent':>6}  {'Score':>7}  {'Pieces':>7}  {'Steps':>7}  {'Min':>5}  {'Max':>5}  {'KL':>8}")
+        print(f"  {'Agent':>6}  {'Score':>7}  {'Pieces':>7}  {'Lines':>6}  {'Steps':>7}  {'Min':>5}  {'Max':>5}  {'KL':>8}")
         print("-" * 60)
         for h in history[-max_history:]:
             print(f"  {h.get('agent', 0):>6}  {h.get('grpo_score', 0):>7.1f}  "
-                  f"{h.get('grpo_piececount', 0):>7.1f}  {h.get('grpo_steps', 0):>7.1f}  "
+                  f"{h.get('grpo_piececount', 0):>7.1f}  {h.get('grpo_removedlines', 0):>6.3f}  "
+                  f"{h.get('grpo_steps', 0):>7.1f}  "
                   f"{h.get('grpo_min_piececount', 0):>5}  {h.get('grpo_max_piececount', 0):>5}  "
                   f"{h.get('kl', 0):>8.6f}")
         print("=" * 60)

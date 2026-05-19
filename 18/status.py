@@ -84,6 +84,7 @@ def _append_history(state: dict[str, Any]):
         "agent": t.get("agent", 0),
         "grpo_score": t.get("grpo_score", 0),
         "grpo_piececount": t.get("grpo_piececount", 0),
+        "grpo_removedlines": t.get("grpo_removedlines", 0),
         "grpo_steps": t.get("grpo_steps", 0),
         "grpo_min_piececount": t.get("grpo_min_piececount", 999999),
         "grpo_max_piececount": t.get("grpo_max_piececount", 0),
@@ -171,9 +172,12 @@ def read_status_file():
     add_total_prop(state, "min_piececount_grpo", 999999)
     add_total_prop(state, "grpo_score", 0)
     add_total_prop(state, "grpo_piececount", 0)
+    add_total_prop(state, "grpo_removedlines", 0)
     add_total_prop(state, "grpo_steps", 0)
     add_total_prop(state, "grpo_min_piececount", 999999)
     add_total_prop(state, "grpo_max_piececount", 0)
+    add_total_prop(state, "grpo_min_removedlines", 999999)
+    add_total_prop(state, "grpo_max_removedlines", 0)
     add_total_prop(state, "_agent", 0)
     add_total_prop(state, "history", [])
 
