@@ -280,7 +280,6 @@ class GRPOSelfPlay():
         state = read_status_file()
         state["counters"]["agent"] += 1
         state["counters"]["_agent"] += 1
-        state["_accum"]["_sum_score"] += total_score / G
         state["_accum"]["_sum_piececount"] += total_piececount / G
         state["_accum"]["_sum_removedlines"] += total_removedlines / G
         state["_accum"]["_sum_steps"] += total_steps / G
@@ -290,7 +289,6 @@ class GRPOSelfPlay():
         state["metrics"]["grpo_removedlines_worst"] = min(state["metrics"]["grpo_removedlines_worst"], worst_removedlines)
         state["metrics"]["grpo_piececount_worst"] = min(state["metrics"]["grpo_piececount_worst"], min_pieces_count)
         # GRPO 游戏结果（当轮值，用于状态显示）
-        state["metrics"]["grpo_score"] = round(total_score / G, 3)
         state["metrics"]["grpo_piececount"] = round(total_piececount / G, 3)
         state["metrics"]["grpo_removedlines"] = round(total_removedlines / G, 3)
         state["metrics"]["grpo_steps"] = round(total_steps / G, 3)

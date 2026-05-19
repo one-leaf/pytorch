@@ -51,7 +51,7 @@ def _default_state():
     return {
         "counters": {"agent": 0, "_agent": 0},
         "metrics": {
-            "grpo_score": 0, "grpo_piececount": 0,
+            "grpo_piececount": 0,
             "grpo_removedlines": 0, "grpo_steps": 0,
             "grpo_piececount_min": 999999, "grpo_piececount_max": 0,
             "grpo_removedlines_min": 999999, "grpo_removedlines_max": 0,
@@ -59,7 +59,7 @@ def _default_state():
             "grpo_removedlines_worst": 999999, "grpo_piececount_worst": 999999,
         },
         "training": {"kl": 1e-2, "lr_multiplier": 1},
-        "_accum": {"_sum_score": 0, "_sum_piececount": 0, "_sum_removedlines": 0, "_sum_steps": 0},
+        "_accum": {"_sum_piececount": 0, "_sum_removedlines": 0, "_sum_steps": 0},
         "history": [],
         "info": {},
     }
@@ -83,7 +83,7 @@ def _migrate(state: dict[str, Any]):
     for k in ("agent", "_agent"):
         if k in old:
             state["counters"][k] = old.pop(k)
-    for k in ["grpo_score", "grpo_piececount", "grpo_removedlines", "grpo_steps",
+    for k in ["grpo_piececount", "grpo_removedlines", "grpo_steps",
               "grpo_piececount_min", "grpo_piececount_max",
               "grpo_removedlines_min", "grpo_removedlines_max",
               "grpo_removedlines_best", "grpo_piececount_best",
@@ -93,7 +93,7 @@ def _migrate(state: dict[str, Any]):
     for k in ("kl", "lr_multiplier"):
         if k in old:
             state["training"][k] = old.pop(k)
-    for k in ("_sum_score", "_sum_piececount", "_sum_removedlines", "_sum_steps"):
+    for k in ("_sum_piececount", "_sum_removedlines", "_sum_steps"):
         if k in old:
             state["_accum"][k] = old.pop(k)
     if "history" in old:
@@ -132,7 +132,6 @@ def _append_history(state: dict[str, Any]):
     n = max(_agent, 1)
     snapshot = {
         "agent": c.get("agent", 0),
-        "grpo_score": round(acc.get("_sum_score", 0) / n, 3),
         "grpo_piececount": round(acc.get("_sum_piececount", 0) / n, 3),
         "grpo_removedlines": round(acc.get("_sum_removedlines", 0) / n, 3),
         "grpo_steps": round(acc.get("_sum_steps", 0) / n, 3),
@@ -156,7 +155,6 @@ def _append_history(state: dict[str, Any]):
         state["history"] = state["history"][-HISTORY_MAX:]
 
     c["_agent"] = 0
-    acc["_sum_score"] = 0
     acc["_sum_piececount"] = 0
     acc["_sum_removedlines"] = 0
     acc["_sum_steps"] = 0
