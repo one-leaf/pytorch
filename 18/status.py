@@ -71,11 +71,12 @@ def numpy_encoder(obj):
     raise TypeError(f'Object of type {obj.__class__.__name__} is not JSON serializable')
 
 
-def save_status_file(state:dict[str, Any]):  
+def save_status_file(state:dict[str, Any]):
     format_str = '%Y-%m-%d %H:%M:%S'
     if "info" not in state:
-        state["info"] = {"create":datetime.now().strftime(format_str)}
-
+        state["info"] = {}
+    if "create" not in state["info"]:
+        state["info"]["create"] = datetime.now().strftime(format_str)
     state["info"]["modify"] = datetime.now().strftime(format_str)  
     
     start_dt = datetime.strptime(state["info"]["create"], format_str)
