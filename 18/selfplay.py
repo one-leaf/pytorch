@@ -265,24 +265,28 @@ class GRPOSelfPlay():
 
         # 更新训练状态
         state = read_status_file()
-        state["total"]["agent"] += 1
-        state["total"]["_agent"] = state["total"].get("_agent", 0) + 1
-        # 评估结果（test_play）
-        state["total"]["max_score_grpo"] = max(state["total"]["max_score_grpo"], max_pieces_count)
-        state["total"]["max_piececount_grpo"] = max(state["total"]["max_piececount_grpo"], max_pieces_count)
-        state["total"]["min_score_grpo"] = min(state["total"]["min_score_grpo"], min_pieces_count)
-        state["total"]["min_piececount_grpo"] = min(state["total"]["min_piececount_grpo"], min_pieces_count)
-        # GRPO 游戏结果
-        state["total"]["grpo_score"] = round(total_score / G, 3)
-        state["total"]["grpo_piececount"] = round(total_piececount / G, 3)
-        state["total"]["grpo_removedlines"] = round(total_removedlines / G, 3)
-        state["total"]["grpo_steps"] = round(total_steps / G, 3)
-        state["total"]["grpo_min_piececount"] = min(state["total"]["grpo_min_piececount"], min_piececount)
-        state["total"]["grpo_max_piececount"] = max(state["total"]["grpo_max_piececount"], max_piececount)
-        state["total"]["grpo_min_removedlines"] = min(state["total"].get("grpo_min_removedlines", 999999), min_removedlines)
-        state["total"]["grpo_max_removedlines"] = max(state["total"].get("grpo_max_removedlines", 0), max_removedlines)
+        state["counters"]["agent"] += 1
+        state["counters"]["_agent"] += 1
+        state["_accum"]["_sum_score"] += total_score / G
+        state["_accum"]["_sum_piececount"] += total_piececount / G
+        state["_accum"]["_sum_removedlines"] += total_removedlines / G
+        state["_accum"]["_sum_steps"] += total_steps / G
+        # 评估结果（test_play 历史最值）
+        state["metrics"]["grpo_score_best"] = max(state["metrics"]["grpo_score_best"], max_pieces_count)
+        state["metrics"]["grpo_piececount_best"] = max(state["metrics"]["grpo_piececount_best"], max_pieces_count)
+        state["metrics"]["grpo_score_worst"] = min(state["metrics"]["grpo_score_worst"], min_pieces_count)
+        state["metrics"]["grpo_piececount_worst"] = min(state["metrics"]["grpo_piececount_worst"], min_pieces_count)
+        # GRPO 游戏结果（当轮值，用于状态显示）
+        state["metrics"]["grpo_score"] = round(total_score / G, 3)
+        state["metrics"]["grpo_piececount"] = round(total_piececount / G, 3)
+        state["metrics"]["grpo_removedlines"] = round(total_removedlines / G, 3)
+        state["metrics"]["grpo_steps"] = round(total_steps / G, 3)
+        state["metrics"]["grpo_piececount_min"] = min(state["metrics"]["grpo_piececount_min"], min_piececount)
+        state["metrics"]["grpo_piececount_max"] = max(state["metrics"]["grpo_piececount_max"], max_piececount)
+        state["metrics"]["grpo_removedlines_min"] = min(state["metrics"]["grpo_removedlines_min"], min_removedlines)
+        state["metrics"]["grpo_removedlines_max"] = max(state["metrics"]["grpo_removedlines_max"], max_removedlines)
         save_status_file(state)
-        print(f"status updated: agent={state['total']['agent']}")
+        print(f"status updated: agent={state['counters']['agent']}")
 
     def run(self):
         """运行数据采集"""

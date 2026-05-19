@@ -10,7 +10,7 @@ import os, math, copy
 import numpy as np
 import torch
 
-from status import save_status_file, read_status_file, set_status_total_value
+from status import save_status_file, read_status_file, set_status_value
 from augment import get_equi_data
 
 # 定义游戏的动作
@@ -257,7 +257,7 @@ class GRPOTrain():
                         )
 
             status = read_status_file()
-            self.lr_multiplier = status["total"].get("lr_multiplier", 1.0)
+            self.lr_multiplier = status["training"]["lr_multiplier"]
             print(f"lr_multiplier: {self.lr_multiplier}, learn_rate: {self.learn_rate * self.lr_multiplier}")
 
             # 训练循环
@@ -324,8 +324,8 @@ class GRPOTrain():
                 kl = 0
 
             status = read_status_file()
-            set_status_total_value(status, "kl", kl, 0.1)
-            total_kl = status["total"]["kl"]
+            set_status_value(status, "kl", kl, 0.1)
+            total_kl = status["training"]["kl"]
 
             if total_kl > self.kl_targ * 2:
                 self.lr_multiplier /= 1.1
@@ -333,7 +333,7 @@ class GRPOTrain():
                 self.lr_multiplier *= 1.1
             self.lr_multiplier = np.clip(self.lr_multiplier, 0.1, 10)
 
-            status["total"]["lr_multiplier"] = float(self.lr_multiplier)
+            status["training"]["lr_multiplier"] = float(self.lr_multiplier)
             save_status_file(status)
 
             print(f"kl:{kl:.6f} vs {self.kl_targ} lr_multiplier:{self.lr_multiplier} "

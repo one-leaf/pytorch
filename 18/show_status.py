@@ -30,9 +30,11 @@ def show_status(max_history=0, as_json=False):
         print(json.dumps(state, indent=2, ensure_ascii=False))
         return
 
-    total = state.get("total", {})
+    c = state.get("counters", {})
+    m = state.get("metrics", {})
+    tr = state.get("training", {})
     info = state.get("info", {})
-    history = total.get("history", [])
+    history = state.get("history", [])
 
     # 基本信息
     print("=" * 60)
@@ -41,34 +43,34 @@ def show_status(max_history=0, as_json=False):
     print(f"  创建时间:   {info.get('create', '-')}")
     print(f"  最后更新:   {info.get('modify', '-')}")
 
-    agent = total.get("agent", 0)
-    if agent == 0 and "_agent" in total:
-        agent = total["_agent"]
+    agent = c.get("agent", 0)
+    if agent == 0 and "_agent" in c:
+        agent = c["_agent"]
     print(f"  训练轮次:   {agent}")
     print("-" * 60)
 
-    score = total.get("grpo_score")
-    pieces = total.get("grpo_piececount")
-    steps = total.get("grpo_steps")
+    score = m.get("grpo_score")
+    pieces = m.get("grpo_piececount")
+    steps = m.get("grpo_steps")
 
-    if score is not None:
-        print(f"  GRPO 平均消除行数: {fmt(total.get('grpo_removedlines'), 3)}")
+    if score is not None and score != 0:
+        print(f"  GRPO 平均消除行数: {fmt(m.get('grpo_removedlines'), 3)}")
         print(f"  GRPO 平均方块数:   {fmt(pieces, 1)}")
         print(f"  GRPO 平均步数:     {fmt(steps, 1)}")
-        print(f"  GRPO 最少方块数:   {total.get('grpo_min_piececount', 0)}")
-        print(f"  GRPO 最多方块数:   {total.get('grpo_max_piececount', 0)}")
-        print(f"  GRPO 最少消除行数: {total.get('grpo_min_removedlines', 0)}")
-        print(f"  GRPO 最多消除行数: {total.get('grpo_max_removedlines', 0)}")
+        print(f"  GRPO 最少方块数:   {m.get('grpo_piececount_min', 0)}")
+        print(f"  GRPO 最多方块数:   {m.get('grpo_piececount_max', 0)}")
+        print(f"  GRPO 最少消除行数: {m.get('grpo_removedlines_min', 0)}")
+        print(f"  GRPO 最多消除行数: {m.get('grpo_removedlines_max', 0)}")
     else:
         print(f"  GRPO 分数:         (尚未采集数据)")
     print("-" * 60)
-    print(f"  历史最高分:        {total.get('max_score_grpo', 0)}")
-    print(f"  历史最高方块数:    {total.get('max_piececount_grpo', 0)}")
-    print(f"  历史最低分:        {total.get('min_score_grpo', 0)}")
-    print(f"  历史最低方块数:    {total.get('min_piececount_grpo', 0)}")
+    print(f"  历史最高分:        {m.get('grpo_score_best', 0)}")
+    print(f"  历史最高方块数:    {m.get('grpo_piececount_best', 0)}")
+    print(f"  历史最低分:        {m.get('grpo_score_worst', 0)}")
+    print(f"  历史最低方块数:    {m.get('grpo_piececount_worst', 0)}")
     print("-" * 60)
-    print(f"  KL 散度:           {fmt(total.get('kl'), 6)}")
-    print(f"  学习率倍率:        {fmt(total.get('lr_multiplier'), 4)}")
+    print(f"  KL 散度:           {fmt(tr.get('kl'), 6)}")
+    print(f"  学习率倍率:        {fmt(tr.get('lr_multiplier'), 4)}")
 
     # 历史趋势
     if history and max_history > 0:
@@ -81,20 +83,19 @@ def show_status(max_history=0, as_json=False):
             print(f"  {h.get('agent', 0):>6}  {h.get('grpo_score', 0):>7.1f}  "
                   f"{h.get('grpo_piececount', 0):>7.1f}  {h.get('grpo_removedlines', 0):>6.3f}  "
                   f"{h.get('grpo_steps', 0):>7.1f}  "
-                  f"{h.get('grpo_min_piececount', 0):>5}  {h.get('grpo_max_piececount', 0):>5}  "
+                  f"{h.get('grpo_piececount_min', 0):>5}  {h.get('grpo_piececount_max', 0):>5}  "
                   f"{h.get('kl', 0):>8.6f}")
         print("=" * 60)
     elif history:
         print("=" * 60)
         print(f"  历史记录: 共 {len(history)} 条 (用 --history N 查看)")
-        # 首尾对比
         if len(history) >= 2:
             first, last = history[0], history[-1]
             print(f"  起始(agent {first['agent']}): score={first['grpo_score']:.1f}  "
                   f"pieces={first['grpo_piececount']:.1f}")
             print(f"  当前(agent {last['agent']}): score={last['grpo_score']:.1f}  "
                   f"pieces={last['grpo_piececount']:.1f}")
-            print("=" * 60)
+        print("=" * 60)
 
 
 if __name__ == '__main__':
