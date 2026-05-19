@@ -65,7 +65,7 @@ class GRPOSelfPlay():
                 "ref_prob": probs.copy(),
                 "log_prob": log_prob.copy(),
                 "piececount": agent.piececount,
-                "score": agent.removedlines,
+                "score": agent.piececount,
             })
 
             _, reward = agent.step(action)
@@ -194,8 +194,8 @@ class GRPOSelfPlay():
                 nextPiecesList=his_pieces if use_replay else None
             )
 
-            total_reward = agent.removedlines
-            print(f"Game {g}: removedlines={total_reward}, piececount={agent.piececount}, steps={agent.steps}")
+            total_reward = agent.piececount
+            print(f"Game {g}: reward={total_reward}, steps={agent.steps}")
 
             total_score += total_reward
             total_piececount += agent.piececount
@@ -259,9 +259,9 @@ class GRPOSelfPlay():
         state = read_status_file()
         state["total"]["agent"] += 1
         # 评估结果（test_play）
-        state["total"]["max_score_grpo"] = max(state["total"]["max_score_grpo"], max_removedlines)
+        state["total"]["max_score_grpo"] = max(state["total"]["max_score_grpo"], max_pieces_count)
         state["total"]["max_piececount_grpo"] = max(state["total"]["max_piececount_grpo"], max_pieces_count)
-        state["total"]["min_score_grpo"] = min(state["total"]["min_score_grpo"], min_removedlines)
+        state["total"]["min_score_grpo"] = min(state["total"]["min_score_grpo"], min_pieces_count)
         state["total"]["min_piececount_grpo"] = min(state["total"]["min_piececount_grpo"], min_pieces_count)
         # GRPO 游戏结果
         state["total"]["grpo_score"] = round(total_score / G, 3)
@@ -270,8 +270,6 @@ class GRPOSelfPlay():
         state["total"]["grpo_min_piececount"] = min(state["total"]["grpo_min_piececount"], min_piececount)
         state["total"]["grpo_max_piececount"] = max(state["total"]["grpo_max_piececount"], max_piececount)
         save_status_file(state)
-
-        print(f"saved file basename: {filetime} length: {len(equi_data)}")
         print(f"status updated: agent={state['total']['agent']}")
 
     def run(self):
