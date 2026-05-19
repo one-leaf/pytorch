@@ -119,14 +119,7 @@ class GRPOSelfPlay():
             with open(his_pieces_file, "wb") as fn:
                 pickle.dump(min_his_pieces, fn)
 
-        state = read_status_file()
-        set_status_total_value(state, "max_score_grpo", max_removedlines, 1 / 100)
-        set_status_total_value(state, "max_piececount_grpo", max_pieces_count, 1 / 100)
-        set_status_total_value(state, "min_score_grpo", min_removedlines, 1 / 100)
-        set_status_total_value(state, "min_piececount_grpo", min_pieces_count, 1 / 100)
-        save_status_file(state)
-
-        return min_removedlines, min_his_pieces, min_his_pieces_len
+        return min_removedlines, min_his_pieces, min_his_pieces_len, max_removedlines, max_pieces_count, min_pieces_count
 
     def collect_grpo_data(self):
         """收集 GRPO 自我对抗数据"""
@@ -148,7 +141,7 @@ class GRPOSelfPlay():
         _test_policy_value_net = PolicyValueNet(
             GAME_WIDTH, GAME_HEIGHT, GAME_ACTIONS_NUM, model_file=load_model_file
         )
-        min_removedlines, his_pieces, his_pieces_len = self.test_play(_test_policy_value_net)
+        min_removedlines, his_pieces, his_pieces_len, max_removedlines, max_pieces_count, min_pieces_count = self.test_play(_test_policy_value_net)
         print('end test time:', datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 
         # 加载模型用于数据收集
@@ -185,6 +178,12 @@ class GRPOSelfPlay():
         all_actions = []
         all_masks = []
 
+        total_score = 0
+        total_piececount = 0
+        total_steps = 0
+        min_piececount = 999999
+        max_piececount = 0
+
         # 运行 G 局游戏
         for g in range(G):
             print(f"\n=== Game {g + 1}/{G} ===")
@@ -197,6 +196,14 @@ class GRPOSelfPlay():
 
             total_reward = agent.removedlines
             print(f"Game {g}: removedlines={total_reward}, piececount={agent.piececount}, steps={agent.steps}")
+
+            total_score += total_reward
+            total_piececount += agent.piececount
+            total_steps += agent.steps
+            if agent.piececount < min_piececount:
+                min_piececount = agent.piececount
+            if agent.piececount > max_piececount:
+                max_piececount = agent.piececount
 
             # 记录每个 step 的数据
             for step_data in trajectory:
@@ -247,6 +254,25 @@ class GRPOSelfPlay():
                 pickle.dump(obj, fn)
 
         print(f"saved file basename: {filetime} length: {len(equi_data)}")
+
+        # 更新训练状态
+        state = read_status_file()
+        state["total"]["agent"] += 1
+        # 评估结果（test_play）
+        state["total"]["max_score_grpo"] = max(state["total"]["max_score_grpo"], max_removedlines)
+        state["total"]["max_piececount_grpo"] = max(state["total"]["max_piececount_grpo"], max_pieces_count)
+        state["total"]["min_score_grpo"] = min(state["total"]["min_score_grpo"], min_removedlines)
+        state["total"]["min_piececount_grpo"] = min(state["total"]["min_piececount_grpo"], min_pieces_count)
+        # GRPO 游戏结果
+        state["total"]["grpo_score"] = round(total_score / G, 3)
+        state["total"]["grpo_piececount"] = round(total_piececount / G, 3)
+        state["total"]["grpo_steps"] = round(total_steps / G, 3)
+        state["total"]["grpo_min_piececount"] = min(state["total"]["grpo_min_piececount"], min_piececount)
+        state["total"]["grpo_max_piececount"] = max(state["total"]["grpo_max_piececount"], max_piececount)
+        save_status_file(state)
+
+        print(f"saved file basename: {filetime} length: {len(equi_data)}")
+        print(f"status updated: agent={state['total']['agent']}")
 
     def run(self):
         """运行数据采集"""

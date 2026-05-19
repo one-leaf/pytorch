@@ -101,22 +101,17 @@ def save_status_file(state:dict[str, Any]):
         shutil.move(temp_file.name, status_file)
         os.chmod(status_file, 0o644)
 
-def add_prop(state:dict[str, Any], key:str, default:Any=0):
-    if key not in state:
-        state[key]=[]
-    if key not in state["total"]:
-        state["total"][key]=default
 
 def add_total_prop(state:dict[str, Any], key:str, default:Any=0):
     if key not in state["total"]:
         state["total"][key]=default
 
-def read_status_file(max_keep=30):
+def read_status_file():
     # 获取历史训练数据
     while os.path.exists(status_lock_file): 
         time.sleep(0.1)
 
-    state: dict[str, Any] = {"total": {"agent":0, "_agent":0}, "best": {"score":0, "agent":0}}
+    state: dict[str, Any] = {"total": {"agent": 0}, "info": {}}
 
     if os.path.exists(status_file):
         try:
@@ -129,48 +124,23 @@ def read_status_file(max_keep=30):
                 shutil.move(status_file_bak, status_file)
             raise e        
                              
-    add_prop(state, "score")
-    add_prop(state, "depth")
-    add_prop(state, "pacc")
-    add_prop(state, "step_time")
-    add_prop(state, "piececount")    
-    add_prop(state, "steps")    
-      
-    add_total_prop(state, "min_piececount")    
-    add_total_prop(state, "max_piececount")
-    add_total_prop(state, "max_score")
-    
-    add_prop(state, "no_terminal_rate", 0)
-    add_prop(state, "min_score")
-
     add_total_prop(state, "kl", 1e-2)
     add_total_prop(state, "lr_multiplier", 1)
     add_total_prop(state, "max_score_grpo", 0)
     add_total_prop(state, "max_piececount_grpo", 0)
     add_total_prop(state, "min_score_grpo", 0)
     add_total_prop(state, "min_piececount_grpo", 999999)
-    add_prop(state, "find_end_steps", 50)
-    
+    add_total_prop(state, "grpo_score", 0)
+    add_total_prop(state, "grpo_piececount", 0)
+    add_total_prop(state, "grpo_steps", 0)
+    add_total_prop(state, "grpo_min_piececount", 999999)
+    add_total_prop(state, "grpo_max_piececount", 0)
 
-    if "update" not in state:
-        state["update"]=[]
-    
-    for key in state:
-        if isinstance(state[key],list) and len(state[key])>max_keep: 
-            max_v = max(state[key])
-            min_v = min(state[key])
-            need_keep = key not in ["update"] and max_v==state[key][0]
-            while len(state[key])>max_keep:
-                state[key].pop(0)  
-            if need_keep:
-                state[key][0] = max_v
-                state[key][1] = min_v 
     return state
 
 def set_status_total_value(state:dict[str, Any], key:str, value:Any, rate=1/1000):
-    if type(state["total"][key]) == list:
-        for i in range(len(value)):
-            state["total"][key][i] = round(state["total"][key][i] + (value[i]-state["total"][key][i]) * rate, 3)
-    else:    
-        state["total"][key] += (value-state["total"][key]) * rate
+    if key not in state["total"]:
+        state["total"][key] = value
+    else:
+        state["total"][key] += (value - state["total"][key]) * rate
     
