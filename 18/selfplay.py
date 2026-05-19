@@ -5,7 +5,7 @@ import torch
 
 from model import PolicyValueNet, data_dir, data_wait_dir, model_file
 from agent import Agent, ACTIONS
-from status import save_status_file, read_status_file, set_status_total_value
+from status import save_status_file, read_status_file
 from augment import get_equi_data
 
 # 定义游戏的动作
