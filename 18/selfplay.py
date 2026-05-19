@@ -81,6 +81,8 @@ class GRPOSelfPlay():
         max_pieces_count = 0
         min_removedlines = 0
         max_removedlines = 0
+        best_removedlines = 0     # 测试中最多消除行数
+        worst_removedlines = 999999  # 测试中最少消除行数
         min_his_pieces = None
         min_his_pieces_len = 0
 
@@ -96,6 +98,7 @@ class GRPOSelfPlay():
 
             agent.print()
 
+            # 跟踪最差/最好局面
             if agent.piececount < min_pieces_count:
                 min_pieces_count = agent.piececount
                 min_his_pieces = agent.piecehis
@@ -104,6 +107,12 @@ class GRPOSelfPlay():
             if agent.piececount > max_pieces_count:
                 max_pieces_count = agent.piececount
                 max_removedlines = agent.removedlines
+
+            # 独立跟踪消除行数最值
+            if agent.removedlines > best_removedlines:
+                best_removedlines = agent.removedlines
+            if agent.removedlines < worst_removedlines:
+                worst_removedlines = agent.removedlines
 
         print(f"test: min_pieces={min_pieces_count} max_pieces={max_pieces_count} "
               f"min_lines={min_removedlines} max_lines={max_removedlines}")
@@ -119,7 +128,9 @@ class GRPOSelfPlay():
             with open(his_pieces_file, "wb") as fn:
                 pickle.dump(min_his_pieces, fn)
 
-        return min_removedlines, min_his_pieces, min_his_pieces_len, max_removedlines, max_pieces_count, min_pieces_count
+        return (min_removedlines, min_his_pieces, min_his_pieces_len,
+                max_removedlines, max_pieces_count, min_pieces_count,
+                best_removedlines, worst_removedlines)
 
     def collect_grpo_data(self):
         """收集 GRPO 自我对抗数据"""
@@ -141,7 +152,9 @@ class GRPOSelfPlay():
         _test_policy_value_net = PolicyValueNet(
             GAME_WIDTH, GAME_HEIGHT, GAME_ACTIONS_NUM, model_file=load_model_file
         )
-        min_removedlines, his_pieces, his_pieces_len, max_removedlines, max_pieces_count, min_pieces_count = self.test_play(_test_policy_value_net)
+        (min_removedlines, his_pieces, his_pieces_len, max_removedlines,
+         max_pieces_count, min_pieces_count,
+         best_removedlines, worst_removedlines) = self.test_play(_test_policy_value_net)
         print('end test time:', datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 
         # 加载模型用于数据收集
@@ -272,9 +285,9 @@ class GRPOSelfPlay():
         state["_accum"]["_sum_removedlines"] += total_removedlines / G
         state["_accum"]["_sum_steps"] += total_steps / G
         # 评估结果（test_play 历史最值）
-        state["metrics"]["grpo_score_best"] = max(state["metrics"]["grpo_score_best"], max_pieces_count)
+        state["metrics"]["grpo_removedlines_best"] = max(state["metrics"]["grpo_removedlines_best"], best_removedlines)
         state["metrics"]["grpo_piececount_best"] = max(state["metrics"]["grpo_piececount_best"], max_pieces_count)
-        state["metrics"]["grpo_score_worst"] = min(state["metrics"]["grpo_score_worst"], min_pieces_count)
+        state["metrics"]["grpo_removedlines_worst"] = min(state["metrics"]["grpo_removedlines_worst"], worst_removedlines)
         state["metrics"]["grpo_piececount_worst"] = min(state["metrics"]["grpo_piececount_worst"], min_pieces_count)
         # GRPO 游戏结果（当轮值，用于状态显示）
         state["metrics"]["grpo_score"] = round(total_score / G, 3)

@@ -55,8 +55,8 @@ def _default_state():
             "grpo_removedlines": 0, "grpo_steps": 0,
             "grpo_piececount_min": 999999, "grpo_piececount_max": 0,
             "grpo_removedlines_min": 999999, "grpo_removedlines_max": 0,
-            "grpo_score_best": 0, "grpo_piececount_best": 0,
-            "grpo_score_worst": 999999, "grpo_piececount_worst": 999999,
+            "grpo_removedlines_best": 0, "grpo_piececount_best": 0,
+            "grpo_removedlines_worst": 999999, "grpo_piececount_worst": 999999,
         },
         "training": {"kl": 1e-2, "lr_multiplier": 1},
         "_accum": {"_sum_score": 0, "_sum_piececount": 0, "_sum_removedlines": 0, "_sum_steps": 0},
@@ -86,8 +86,8 @@ def _migrate(state: dict[str, Any]):
     for k in ["grpo_score", "grpo_piececount", "grpo_removedlines", "grpo_steps",
               "grpo_piececount_min", "grpo_piececount_max",
               "grpo_removedlines_min", "grpo_removedlines_max",
-              "grpo_score_best", "grpo_piececount_best",
-              "grpo_score_worst", "grpo_piececount_worst"]:
+              "grpo_removedlines_best", "grpo_piececount_best",
+              "grpo_removedlines_worst", "grpo_piececount_worst"]:
         if k in old:
             state["metrics"][k] = old.pop(k)
     for k in ("kl", "lr_multiplier"):
@@ -140,9 +140,9 @@ def _append_history(state: dict[str, Any]):
         "grpo_piececount_max": m.get("grpo_piececount_max", 0),
         "grpo_removedlines_min": m.get("grpo_removedlines_min", 999999),
         "grpo_removedlines_max": m.get("grpo_removedlines_max", 0),
-        "grpo_score_best": m.get("grpo_score_best", 0),
+        "grpo_removedlines_best": m.get("grpo_removedlines_best", 0),
         "grpo_piececount_best": m.get("grpo_piececount_best", 0),
-        "grpo_score_worst": m.get("grpo_score_worst", 999999),
+        "grpo_removedlines_worst": m.get("grpo_removedlines_worst", 999999),
         "grpo_piececount_worst": m.get("grpo_piececount_worst", 999999),
         "kl": tr.get("kl", 0),
         "lr_multiplier": tr.get("lr_multiplier", 1),

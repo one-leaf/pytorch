@@ -64,9 +64,9 @@ def show_status(max_history=0, as_json=False):
     else:
         print(f"  GRPO 分数:         (尚未采集数据)")
     print("-" * 60)
-    print(f"  历史最高分:        {m.get('grpo_score_best', 0)}")
+    print(f"  历史最多消除行数:  {m.get('grpo_removedlines_best', 0)}")
     print(f"  历史最高方块数:    {m.get('grpo_piececount_best', 0)}")
-    print(f"  历史最低分:        {m.get('grpo_score_worst', 0)}")
+    print(f"  历史最少消除行数:  {m.get('grpo_removedlines_worst', 0)}")
     print(f"  历史最低方块数:    {m.get('grpo_piececount_worst', 0)}")
     print("-" * 60)
     print(f"  KL 散度:           {fmt(tr.get('kl'), 6)}")
