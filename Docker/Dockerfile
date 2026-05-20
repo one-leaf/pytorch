@@ -1,16 +1,15 @@
 FROM docker.io/nvidia/cuda:13.0.3-cudnn-runtime-ubuntu24.04
 
-RUN rm /etc/apt/sources.list.d/* && \
-    sed -i s@/archive.ubuntu.com/@/mirrors.163.com/@g /etc/apt/sources.list && \
-    apt update -y && \
-    apt install -y software-properties-common curl
+RUN apt-get update -y && \
+    apt-get install -y --no-install-recommends software-properties-common curl && \
+    rm -rf /var/lib/apt/lists/*
 
 RUN DEBIAN_FRONTEND=noninteractive TZ=Asia/Shanghai apt-get -y install tzdata
 
 RUN  apt-add-repository -y ppa:deadsnakes/ppa && \
-    apt update -y && \
-    apt install -y python3.13 python3.13-distutils && \
-    update-alternatives --install /usr/bin/python python /usr/bin/python3.13 10 
+    apt-get update -y && \
+    apt-get install -y --no-install-recommends python3.13 python3.13-distutils && \
+    update-alternatives --install /usr/bin/python python /usr/bin/python3.13 10
 
 RUN curl -sS https://bootstrap.pypa.io/get-pip.py | python && \
     pip config set global.index-url https://pypi.douban.com/simple/
