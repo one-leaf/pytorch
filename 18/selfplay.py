@@ -227,36 +227,28 @@ class GRPOSelfPlay():
                 max_removedlines = agent.removedlines
 
             # 记录每个 step 的数据
-            for step_data in trajectory:
+            # 使用 discount credit assignment：越接近终局的 step 权重越高
+            gamma = 0.99
+            traj_len = len(trajectory)
+            for i, step_data in enumerate(trajectory):
                 all_states.append(step_data["state"])
                 all_ref_probs.append(step_data["ref_prob"])
                 all_actions.append(step_data["action"])
                 all_masks.append(1)  # all steps valid
-                # 优势用最终奖励填充，后续在训练时标准化
-                all_advantages.append(float(total_reward))
+                # 按步做 credit assignment：越接近终局的 step 权重越高
+                discount = gamma ** (traj_len - 1 - i)
+                all_advantages.append(float(total_reward * discount))
 
         print(f"\nCollected {len(all_states)} steps from {G} games")
 
-        # GRPO 优势标准化：按组内标准化
-        steps_per_game = len(all_states) // G
-        if steps_per_game == 0:
+        # 优势标准化：只在此处做全局标准化（去掉组内标准化，避免与训练时的全局标准化叠加）
+        if len(all_advantages) == 0:
             print("no data collected, return")
             return
 
-        normalized_advantages = []
-        for g in range(G):
-            start = g * steps_per_game
-            end = (g + 1) * steps_per_game if g < G - 1 else len(all_states)
-            group_advs = all_advantages[start:end]
-            if len(group_advs) == 0:
-                continue
-            group_mean = np.mean(group_advs)
-            group_std = np.std(group_advs) + 1e-6
-            for adv in group_advs:
-                normalized_adv = (adv - group_mean) / group_std
-                normalized_advantages.append(float(normalized_adv))
-
-        all_advantages = normalized_advantages
+        adv_mean = np.mean(all_advantages)
+        adv_std = np.std(all_advantages) + 1e-6
+        all_advantages = [(a - adv_mean) / adv_std for a in all_advantages]
 
         # 打印优势分布
         adv_array = np.array(all_advantages)

@@ -105,22 +105,17 @@ class GRPODataset(torch.utils.data.Dataset):
                 "advantage": advantage, "action": action, "mask": mask
             }
 
-        # 全局优势标准化
+        # 优势已在 selfplay 中做全局标准化，此处只做 clip 和打印
         advs = np.array([d["advantage"] for d in self.data.values()])
-        adv_mean = np.mean(advs)
-        adv_std = np.std(advs) + 1e-6
-        print(f"advantage before norm: min={advs.min():.3f} mean={advs.mean():.3f} max={advs.max():.3f} std={advs.std():.3f}")
+        print(f"advantage stats: min={advs.min():.3f} mean={advs.mean():.3f} max={advs.max():.3f} std={advs.std():.3f}")
 
+        # clip 极端值
         for fn in self.data:
-            v = (self.data[fn]["advantage"] - adv_mean) / adv_std
-            v = np.clip(v, -3, 3)
+            v = np.clip(self.data[fn]["advantage"], -5, 5)
             self.data[fn]["advantage"] = v
 
-        advs_after = np.array([d["advantage"] for d in self.data.values()])
-        print(f"advantage after norm: min={advs_after.min():.3f} "
-              f"mean={advs_after.mean():.3f} std={advs_after.std():.3f}")
-        self.avg_adv = adv_mean
-        self.std_adv = adv_std
+        self.avg_adv = np.mean(advs)
+        self.std_adv = np.std(advs) + 1e-6
 
         pay_time = round(time.time() - start_time, 2)
         print("loaded to memory, paid time:", pay_time)

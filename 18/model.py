@@ -32,7 +32,7 @@ class PolicyValueNet():
         self.policy_value_net = VitNet(embed_dim=192, depth=6, num_heads=3, num_classes=5, num_quantiles=128, drop_ratio=0.1, drop_path_ratio=0.1, attn_drop_ratio=0.1, num_channels=self.input_channels)
         self.policy_value_net.to(device)
 
-        self.optimizer = optim.AdamW(self.policy_value_net.parameters(), lr=1e-6, weight_decay=self.l2_const)
+        self.optimizer = optim.AdamW(self.policy_value_net.parameters(), lr=1e-4, weight_decay=self.l2_const)
 
         if model_file and os.path.exists(model_file):
             print("Loading model", model_file)
