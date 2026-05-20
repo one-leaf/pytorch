@@ -12,8 +12,8 @@ RUN  apt-add-repository -y ppa:deadsnakes/ppa && \
     update-alternatives --install /usr/bin/python python /usr/bin/python3.13 10
 
 RUN curl -sS https://bootstrap.pypa.io/get-pip.py | python && \
-    pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple/
-
+    pip config set global.index-url https://pypi.douban.com/simple/
+    
 RUN pip install torch torchvision torchaudio 
 
 RUN pip install Pillow opencv-python opencv-contrib-python 
