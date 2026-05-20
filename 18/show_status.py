@@ -73,12 +73,21 @@ def show_status(max_history=0, as_json=False):
 
     # 历史趋势
     if history and max_history > 0:
+        # 从完整历史中均匀抽取
+        if len(history) > max_history:
+            step = (len(history) - 1) / max_history
+            display = [history[int(i * step)] for i in range(max_history)]
+            label = f"  训练记录 (均匀抽样 {max_history}/{len(history)} 条):"
+        else:
+            display = history
+            label = f"  训练记录 ({len(history)} 条):"
+
         print("=" * 60)
-        print(f"  最近 {min(len(history), max_history)} 条训练记录:")
+        print(label)
         print("-" * 60)
         print(f"  {'Agent':>6}  {'Pieces':>7}  {'Lines':>6}  {'Steps':>7}  {'Min':>5}  {'Max':>5}  {'KL':>8}")
         print("-" * 60)
-        for h in history[-max_history:]:
+        for h in display:
             print(f"  {h.get('agent', 0):>6}  {h.get('grpo_piececount', 0):>7.1f}  "
                   f"{h.get('grpo_removedlines', 0):>6.3f}  "
                   f"{h.get('grpo_steps', 0):>7.1f}  "
@@ -98,21 +107,21 @@ def show_status(max_history=0, as_json=False):
 
 
 if __name__ == '__main__':
-    max_hist = 0
+    max_hist = 20  # 默认显示 20 条
     as_json = False
     for arg in sys.argv[1:]:
         if arg == '--json':
             as_json = True
         elif arg == '--history' or arg == '-H':
-            max_hist = 10
+            max_hist = 20
         elif arg.startswith('-H') and len(arg) > 2:
             max_hist = int(arg[2:])
         elif arg.isdigit():
             max_hist = int(arg)
 
     if max_hist == 0 and '--history' in sys.argv:
-        max_hist = 10
+        max_hist = 20
     elif max_hist == 0 and '-H' in sys.argv:
-        max_hist = 10
+        max_hist = 20
 
     show_status(max_history=max_hist, as_json=as_json)
