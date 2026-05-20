@@ -103,7 +103,7 @@ class ParallelThingsBlock(nn.Module):
             self,
             dim,
             num_heads,
-            num_parallel=2,
+            num_parallel=1,
             mlp_ratio=4.,
             qkv_bias=False,
             qk_scale=False,
