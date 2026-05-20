@@ -8,8 +8,8 @@ RUN DEBIAN_FRONTEND=noninteractive TZ=Asia/Shanghai apt-get -y install tzdata
 
 RUN  apt-add-repository -y ppa:deadsnakes/ppa && \
     apt-get update -y && \
-    apt-get install -y --no-install-recommends python3.13 python3.13-venv && \
-    update-alternatives --install /usr/bin/python python /usr/bin/python3.13 10
+    apt-get install -y --no-install-recommends python3.14 python3.14-venv && \
+    update-alternatives --install /usr/bin/python python /usr/bin/python3.14 10
 
 RUN curl -sS https://bootstrap.pypa.io/get-pip.py | python && \
     pip config set global.index-url https://pypi.douban.com/simple/
