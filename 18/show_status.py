@@ -73,11 +73,14 @@ def show_status(max_history=0, as_json=False):
 
     # 历史趋势
     if history and max_history > 0:
-        # 从完整历史中均匀抽取
+        # 保留一头一尾，中间均匀抽样
         if len(history) > max_history:
-            step = (len(history) - 1) / max_history
-            display = [history[int(i * step)] for i in range(max_history)]
-            label = f"  训练记录 (均匀抽样 {max_history}/{len(history)} 条):"
+            display = [history[0], history[-1]]
+            if max_history > 2:
+                step = (len(history) - 1) / (max_history - 1)
+                middle = [history[int(i * step)] for i in range(1, max_history - 1)]
+                display = [history[0]] + middle + [history[-1]]
+            label = f"  训练记录 (一头一尾+中间均匀抽样 {max_history}/{len(history)} 条):"
         else:
             display = history
             label = f"  训练记录 ({len(history)} 条):"
