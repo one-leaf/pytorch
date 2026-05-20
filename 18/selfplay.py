@@ -241,14 +241,26 @@ class GRPOSelfPlay():
 
         print(f"\nCollected {len(all_states)} steps from {G} games")
 
-        # 优势标准化：只在此处做全局标准化（去掉组内标准化，避免与训练时的全局标准化叠加）
-        if len(all_advantages) == 0:
+        # GRPO 优势标准化：按组内标准化
+        steps_per_game = len(all_states) // G
+        if steps_per_game == 0:
             print("no data collected, return")
             return
 
-        adv_mean = np.mean(all_advantages)
-        adv_std = np.std(all_advantages) + 1e-6
-        all_advantages = [(a - adv_mean) / adv_std for a in all_advantages]
+        normalized_advantages = []
+        for g in range(G):
+            start = g * steps_per_game
+            end = (g + 1) * steps_per_game if g < G - 1 else len(all_states)
+            group_advs = all_advantages[start:end]
+            if len(group_advs) == 0:
+                continue
+            group_mean = np.mean(group_advs)
+            group_std = np.std(group_advs) + 1e-6
+            for adv in group_advs:
+                normalized_adv = (adv - group_mean) / group_std
+                normalized_advantages.append(float(normalized_adv))
+
+        all_advantages = normalized_advantages
 
         # 打印优势分布
         adv_array = np.array(all_advantages)

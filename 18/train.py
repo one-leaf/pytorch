@@ -105,7 +105,7 @@ class GRPODataset(torch.utils.data.Dataset):
                 "advantage": advantage, "action": action, "mask": mask
             }
 
-        # 优势已在 selfplay 中做全局标准化，此处只做 clip 和打印
+        # 优势已在 selfplay 中按组内标准化，此处只做 clip 和打印
         advs = np.array([d["advantage"] for d in self.data.values()])
         print(f"advantage stats: min={advs.min():.3f} mean={advs.mean():.3f} max={advs.max():.3f} std={advs.std():.3f}")
 
