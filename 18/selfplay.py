@@ -166,8 +166,6 @@ class GRPOSelfPlay():
             self.policy_value_net = PolicyValueNet(
                 GAME_WIDTH, GAME_HEIGHT, GAME_ACTIONS_NUM, model_file=load_model_file
             )
-        policy_value_net = self.policy_value_net
-        device = policy_value_net.device
 
         # 检查重玩列表
         replay_dir = os.path.join(data_dir, "replay")
@@ -211,7 +209,7 @@ class GRPOSelfPlay():
             print(f"\n=== Game {g + 1}/{G} ===")
             use_replay = (g == 0 and his_pieces_len > 0)
             agent, trajectory = self.play_one_game(
-                policy_value_net, device,
+                self.policy_value_net, self.policy_value_net.device,
                 isRandomNextPiece=not use_replay,
                 nextPiecesList=his_pieces if use_replay else None
             )
