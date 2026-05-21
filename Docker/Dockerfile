@@ -14,10 +14,10 @@ RUN  apt-add-repository -y ppa:deadsnakes/ppa && \
 RUN curl -sS https://bootstrap.pypa.io/get-pip.py | python && \
     pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple/
 
-RUN pip install torch torchvision torchaudio 
-
 RUN pip install Pillow opencv-python opencv-contrib-python 
 
 RUN pip install pygame 
+
+RUN pip install torch torchvision --index-url https://download.pytorch.org/whl/cu126
 
 RUN rm -rf /root/.cache/pip
