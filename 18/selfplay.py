@@ -227,17 +227,14 @@ class GRPOSelfPlay():
                 max_removedlines = agent.removedlines
 
             # 记录每个 step 的数据
-            # 使用 discount credit assignment：越接近终局的 step 权重越高
-            gamma = 0.99
-            traj_len = len(trajectory)
+            # 同局游戏的所有 step 共享同一个优势值，让组内标准化反映游戏质量差异
+            # （如果用 step 位置 discount，优势只反映早期/晚期，不反映动作好坏）
             for i, step_data in enumerate(trajectory):
                 all_states.append(step_data["state"])
                 all_ref_probs.append(step_data["ref_prob"])
                 all_actions.append(step_data["action"])
                 all_masks.append(1)  # all steps valid
-                # 按步做 credit assignment：越接近终局的 step 权重越高
-                discount = gamma ** (traj_len - 1 - i)
-                all_advantages.append(float(total_reward * discount))
+                all_advantages.append(float(total_reward))
 
         print(f"\nCollected {len(all_states)} steps from {G} games")
 
