@@ -19,6 +19,9 @@ class GRPOSelfPlay():
         self.rollout_max_steps = 500    # 单局最大步数
         self.test_count = 10            # 测试次数
         self.max_step_count = 10000     # 最大步数限制
+        self._test_policy_value_net = None
+        self.policy_value_net = None
+
 
     def get_action_from_policy(self, policy_value_net, agent, device):
         """从策略网络采样一个动作（带动作掩码）"""
@@ -149,18 +152,21 @@ class GRPOSelfPlay():
                 return
 
         print('start test time:', datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-        _test_policy_value_net = PolicyValueNet(
-            GAME_WIDTH, GAME_HEIGHT, GAME_ACTIONS_NUM, model_file=load_model_file
-        )
+        if self._test_policy_value_net==None:
+            self._test_policy_value_net = PolicyValueNet(
+                GAME_WIDTH, GAME_HEIGHT, GAME_ACTIONS_NUM, model_file=load_model_file
+            )
         (min_removedlines, his_pieces, his_pieces_len, max_removedlines,
          max_pieces_count, min_pieces_count,
-         best_removedlines, worst_removedlines) = self.test_play(_test_policy_value_net)
+         best_removedlines, worst_removedlines) = self.test_play(self._test_policy_value_net)
         print('end test time:', datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 
         # 加载模型用于数据收集
-        policy_value_net = PolicyValueNet(
-            GAME_WIDTH, GAME_HEIGHT, GAME_ACTIONS_NUM, model_file=load_model_file
-        )
+        if self.policy_value_net is None:
+            self.policy_value_net = PolicyValueNet(
+                GAME_WIDTH, GAME_HEIGHT, GAME_ACTIONS_NUM, model_file=load_model_file
+            )
+        policy_value_net = self.policy_value_net
         device = policy_value_net.device
 
         # 检查重玩列表
