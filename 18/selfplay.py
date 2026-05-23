@@ -159,7 +159,7 @@ class GRPOSelfPlay():
             )
         (min_removedlines, his_pieces, his_pieces_len, max_removedlines,
          max_pieces_count, min_pieces_count,
-         best_removedlines, worst_removedlines) = self.test_play(self._test_policy_value_net)
+         best_removedlines, worst_removedlines) = self.test_play()
         print('end test time:', datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 
         # 加载模型用于数据收集
