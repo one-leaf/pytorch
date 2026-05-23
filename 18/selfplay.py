@@ -23,9 +23,10 @@ class GRPOSelfPlay():
         self.policy_value_net = None
 
 
-    def get_action_from_policy(self, policy_value_net, agent, device):
+    def get_action_from_policy(self, agent, policy_value_net):
         """从策略网络采样一个动作（带动作掩码）"""
         state = np.array([agent.current_state()])
+        device = policy_value_net.device
         state_tensor = torch.FloatTensor(state).to(device)
 
         policy_value_net.policy_value_net.eval()
@@ -46,7 +47,7 @@ class GRPOSelfPlay():
         action = np.random.choice(GAME_ACTIONS_NUM, p=probs)
         return int(action), probs, log_probs[0].cpu().numpy()
 
-    def play_one_game(self, policy_value_net, device, isRandomNextPiece=True, nextPiecesList=None):
+    def play_one_game(self, isRandomNextPiece=True, nextPiecesList=None):
         """用当前策略玩一局游戏，记录完整轨迹"""
         if nextPiecesList is not None and len(nextPiecesList) > 0:
             agent = Agent(isRandomNextPiece=False, nextPiecesList=nextPiecesList)
@@ -60,7 +61,7 @@ class GRPOSelfPlay():
                 break
 
             state = agent.current_state().copy()
-            action, probs, log_prob = self.get_action_from_policy(policy_value_net, agent, device)
+            action, probs, log_prob = self.get_action_from_policy(agent, self.policy_value_net)
 
             trajectory.append({
                 "state": state,
@@ -75,7 +76,7 @@ class GRPOSelfPlay():
 
         return agent, trajectory
 
-    def test_play(self, policy_value_net, test_count=None):
+    def test_play(self, test_count=None):
         """测试模式：贪婪策略评估"""
         if test_count is None:
             test_count = self.test_count
@@ -93,7 +94,7 @@ class GRPOSelfPlay():
             agent = Agent(isRandomNextPiece=True)
             for i in range(self.max_step_count):
                 action, _, _ = self.get_action_from_policy(
-                    policy_value_net, agent, policy_value_net.device
+                    agent, self._test_policy_value_net
                 )
                 _, reward = agent.step(action)
                 if agent.terminal:
@@ -152,7 +153,7 @@ class GRPOSelfPlay():
                 return
 
         print('start test time:', datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-        if self._test_policy_value_net==None:
+        if self._test_policy_value_net is None:
             self._test_policy_value_net = PolicyValueNet(
                 GAME_WIDTH, GAME_HEIGHT, GAME_ACTIONS_NUM, model_file=load_model_file
             )
@@ -209,7 +210,6 @@ class GRPOSelfPlay():
             print(f"\n=== Game {g + 1}/{G} ===")
             use_replay = (g == 0 and his_pieces_len > 0)
             agent, trajectory = self.play_one_game(
-                self.policy_value_net, self.policy_value_net.device,
                 isRandomNextPiece=not use_replay,
                 nextPiecesList=his_pieces if use_replay else None
             )
@@ -310,7 +310,7 @@ class GRPOSelfPlay():
             _start_time = time.time()
             for _ in range(100):  # 最多运行100轮，每轮采集一次数据:
                 self.collect_grpo_data()
-                if time.time() - _start_time > 60 * 10 :  # 每个模型最多10分钟采集,避免过度采集
+                if time.time() - _start_time > 60 * 30 :  # 每个模型最多30分钟采集,避免过度采集
                     break
                 
         except KeyboardInterrupt:
