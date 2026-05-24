@@ -310,7 +310,7 @@ class GRPOSelfPlay():
             _start_time = time.time()
             for _ in range(100):  # 最多运行100轮，每轮采集一次数据:
                 self.collect_grpo_data()
-                if time.time() - _start_time > 60 * 30 :  # 每个模型最多30分钟采集,避免过度采集
+                if time.time() - _start_time > 60 * 20 :  # 每个模型最多20分钟采集,避免过度采集
                     break
                 
         except KeyboardInterrupt:
