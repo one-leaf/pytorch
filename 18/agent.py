@@ -766,7 +766,7 @@ class Agent():
         return 1./self.max_pieces_count
     
     # 打印（字符区分方块，颜色辅助）
-    _CH = {0:'.', 1:'S', 2:'Z', 3:'I', 4:'O', 5:'L', 6:'J', 7:'T'}
+    _CH = {0:' ', 1:'S', 2:'Z', 3:'I', 4:'O', 5:'L', 6:'J', 7:'T'}
 
     def print(self):
         print("")
@@ -784,7 +784,7 @@ class Agent():
             line = "| "
             for x in range(boardwidth):
                 v = int(board[y][x])
-                ch = self._CH.get(v, '.')
+                ch = self._CH.get(v, ' ')
                 line += ch + " "
             print(line)
         print(" " + " -" * boardwidth)
