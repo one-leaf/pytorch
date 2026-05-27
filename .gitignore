@@ -8,6 +8,9 @@
 cached_*
 .ideas/
 .vscode/
+.venv/
+.claude/
+.pytest_cache/
 __pycache__/
 checkpoints/
 cache/

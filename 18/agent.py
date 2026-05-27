@@ -1,4 +1,3 @@
-import hashlib
 import numpy as np
 import random
 import time
@@ -135,6 +134,9 @@ pieces = {'s':stemplate,
           't':ttemplate}
 
 pieces_type = list(pieces.keys())
+
+# piece type → color ID (1~7) for display
+PIECE_IDS = {'s':1, 'z':2, 'i':3, 'o':4, 'l':5, 'j':6, 't':7}
 
 KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_NONE, KEY_DOWN = 0, 1, 2, 3, 4
 ACTIONS = [KEY_ROTATION, KEY_LEFT, KEY_RIGHT, KEY_NONE, KEY_DOWN]
@@ -409,30 +411,24 @@ class Agent():
         self.piecesteps = 0
         # 方块的数量
         self.piececount = 0
-        # 方块的最高高度
-        self.pieceheight = 0
-        # 方块空洞数量
-        self.emptyCount = 0
         # 方块最大高度差
         self.heightDiff = 0
         # 方块高度标准差
         self.heightStd = 0
         # 方块不能消除的行数
-        self.failLines = 0        
+        self.failLines = 0
         # 方块不能消除的最大高度
         self.failtop = 0
-        # 当前方块的高度
-        self.fallpieceheight = 0
         # 限制步骤
         self.limitstep=False
         # 面板
         self.board = self.getblankboard()
+        # 面板碰撞掩码 (0/1)
+        self.board_mask = self.getblankboard()
         # 状态： 0 下落过程中 1 更换方块 2 结束一局
         self.state = 0
-        self.piece_actions = "" 
         # 当前prices所有动作
         # self.actions=[]
-        self.cache=None
 
         # 记录下降的次数
         self.downcount=0
@@ -442,11 +438,7 @@ class Agent():
         self.need_update_status=True
         self.status = np.zeros((4, boardheight, boardwidth), dtype=np.int8)
         self.set_status()
-        # key
-        self.key = 0
-        self.full_key = 0
-        self.set_key()
-        # 下一个可用步骤，设置需要在key之后
+        # 下一个可用步骤
         self.availables=np.ones(ACTONS_LEN, dtype=np.int8)
         self.set_availables()
         self.start_time = time.time()
@@ -466,25 +458,19 @@ class Agent():
         agent.steps = self.steps
         agent.piecesteps = self.piecesteps
         agent.piececount = self.piececount
-        agent.pieceheight = self.pieceheight
-        agent.emptyCount = self.emptyCount
         agent.heightDiff = self.heightDiff
         agent.heightStd = self.heightStd
         agent.failLines = self.failLines
         agent.failtop = self.failtop
-        agent.fallpieceheight = self.fallpieceheight
         agent.limitstep=self.limitstep
         agent.board=np.copy(self.board)
+        agent.board_mask=np.copy(self.board_mask)
         agent.state=self.state
-        agent.piece_actions = self.piece_actions
         agent.availables=np.copy(self.availables)
         agent.downcount = self.downcount
         agent.last_reward = self.last_reward
         agent.need_update_status = self.need_update_status
         agent.status = np.copy(self.status)
-        agent.key = self.key
-        agent.full_key = self.full_key
-        agent.cache = self.cache
         agent.start_time = self.start_time
         return agent
 
@@ -504,17 +490,14 @@ class Agent():
             'steps': self.steps,
             'piecesteps': self.piecesteps,
             'piececount': self.piececount,
-            'pieceheight': self.pieceheight,
-            'emptyCount': self.emptyCount,
             'heightDiff': self.heightDiff,
             'heightStd': self.heightStd,
             'failLines': self.failLines,
             'failtop': self.failtop,
-            'fallpieceheight': self.fallpieceheight,
             'limitstep': self.limitstep,
             'board': self.board.copy(),
+            'board_mask': self.board_mask.copy(),
             'state': self.state,
-            'piece_actions': self.piece_actions,
             'availables': self.availables.copy(),
             'downcount': self.downcount,
             'last_reward': self.last_reward,
@@ -540,23 +523,19 @@ class Agent():
         agent.steps = snapshot['steps']
         agent.piecesteps = snapshot['piecesteps']
         agent.piececount = snapshot['piececount']
-        agent.pieceheight = snapshot['pieceheight']
-        agent.emptyCount = snapshot['emptyCount']
         agent.heightDiff = snapshot['heightDiff']
         agent.heightStd = snapshot['heightStd']
         agent.failLines = snapshot['failLines']
         agent.failtop = snapshot['failtop']
-        agent.fallpieceheight = snapshot['fallpieceheight']
         agent.limitstep = snapshot['limitstep']
         agent.board = snapshot['board']
+        agent.board_mask = snapshot['board_mask']
         agent.state = snapshot['state']
-        agent.piece_actions = snapshot['piece_actions']
         agent.availables = snapshot['availables']
         agent.downcount = snapshot['downcount']
         agent.last_reward = snapshot['last_reward']
         agent.need_update_status = snapshot['need_update_status']
         agent.status = snapshot['status']
-        agent.set_key()
         return agent
     
     def clonePiece(self, piece):
@@ -599,7 +578,40 @@ class Agent():
     
     def addtoboard(self,board,piece):
         _piece = pieces[piece['shape']][piece['rotation']]
-        nb_addtoboard(board, _piece, piece['x'], piece['y'])               
+        nb_addtoboard(board, _piece, piece['x'], piece['y'])
+
+    def add_piece(self, piece):
+        """Add piece to both colored board (1~7) and binary mask."""
+        _piece = pieces[piece['shape']][piece['rotation']]
+        value = PIECE_IDS[piece['shape']]
+        for x in range(templatenum):
+            for y in range(templatenum):
+                if _piece[y][x] != 0:
+                    w, h = x + piece['x'], y + piece['y']
+                    if 0 <= w < boardwidth and 0 <= h < boardheight:
+                        self.board[h][w] = value
+                        self.board_mask[h][w] = 1
+
+    def validposition_mask(self, piece, ax=0, ay=0):
+        """Check collision using binary mask (needed when board stores 1~7)."""
+        _piece = pieces[piece['shape']][piece['rotation']]
+        return nb_validposition(self.board_mask, _piece, piece['x'], piece['y'], ax=ax, ay=ay)
+
+    def remove_mask_line(self):
+        """Clear completed lines from both board_mask and board."""
+        numremove = 0
+        y = boardheight - 1
+        while y >= 0:
+            if np.min(self.board_mask[y]) == 1:
+                for pulldowny in range(y, 0, -1):
+                    self.board_mask[pulldowny] = self.board_mask[pulldowny - 1]
+                    self.board[pulldowny] = self.board[pulldowny - 1]
+                self.board_mask[0] = 0
+                self.board[0] = 0
+                numremove += 1
+            else:
+                y -= 1
+        return numremove               
         
     def validposition(self, board, piece, ax = 0, ay = 0):        
         _piece = pieces[piece['shape']][piece['rotation']]
@@ -632,16 +644,11 @@ class Agent():
     # 获取可用步骤, 保留一个旋转始终有用
     # 将单人游戏变为双人博弈，一个正常下，一个只下走，
     def set_availables(self):
-        if self.cache!=None and self.key in self.cache:
-            c = self.cache[self.key]
-            self.availables = np.copy(c)
-            return
-
-        if not self.validposition(self.board, self.fallpiece, ax = -1):
+        if not self.validposition_mask(self.fallpiece, ax = -1):
             self.availables[KEY_LEFT]=0
         else:
             self.availables[KEY_LEFT]=1
-        if not self.validposition(self.board, self.fallpiece, ax = 1):
+        if not self.validposition_mask(self.fallpiece, ax = 1):
             self.availables[KEY_RIGHT]=0
         else:
             self.availables[KEY_RIGHT]=1
@@ -651,18 +658,13 @@ class Agent():
         else:
             r = self.fallpiece['rotation']
             self.fallpiece['rotation'] =  (self.fallpiece['rotation'] + 1) % len(pieces[self.fallpiece['shape']])
-            if not self.validposition(self.board,self.fallpiece):
+            if not self.validposition_mask(self.fallpiece):
                 self.availables[KEY_ROTATION]=0
             else:
                 self.availables[KEY_ROTATION]=1
             self.fallpiece['rotation'] = r
 
-        if self.cache!=None:
-            self.cache[self.key]=np.copy(self.availables)
-
-    # 设置缓存
-    def setCache(self, cache):
-        self.cache=cache
+    # 打印
         
     def step(self, action):                
         # 状态 0 下落过程中 1 更换方块 2 结束一局    
@@ -683,26 +685,21 @@ class Agent():
                 while True: 
                     self.downcount += 1
                     self.fallpiece['y'] += 1            
-                    if not self.validposition(self.board, self.fallpiece, ay=1): break
+                    if not self.validposition_mask(self.fallpiece, ay=1): break
 
         isFalling=True
-        if self.validposition(self.board, self.fallpiece, ay=1):
+        if self.validposition_mask(self.fallpiece, ay=1):
             self.fallpiece['y'] += 1
-            if not self.validposition(self.board, self.fallpiece, ay=1):
+            if not self.validposition_mask(self.fallpiece, ay=1):
                 isFalling = False
         else:
             isFalling = False
 
-        # self.fallpieceheight = 20 - self.fallpiece['y']
-        if self.piecesteps==1: self.piece_actions=""
-        self.piece_actions += self.position_to_action_name(action)
-
         reward = 0
         removedlines = 0
         if not isFalling:
-            self.addtoboard(self.board, self.fallpiece)
-            removedlines = self.removecompleteline(self.board)
-            emptyCount = self.getEmptyCount()
+            self.add_piece(self.fallpiece)
+            removedlines = self.remove_mask_line()
 
             self.need_update_status=True
             self.removedlines += removedlines
@@ -716,9 +713,6 @@ class Agent():
                 self.downcount = 0
                 self.last_reward = self.piececount
 
-            self.emptyCount  = emptyCount
-            
-            self.pieceheight = self.getMaxHeight()
             self.state = 1
             self.piecesteps = 0
             self.piececount += 1
@@ -726,7 +720,7 @@ class Agent():
             self.fallpiece = self.nextpiece
             self.nextpiece = self.getnewpiece()
 
-            if not self.validposition(self.board, self.fallpiece, ay=0):
+            if not self.validposition_mask(self.fallpiece, ay=0):
                 self.terminal = True
                 self.state = 1
                 removedlines = -1
@@ -735,7 +729,6 @@ class Agent():
 
         # 以下顺序不能变
         self.set_status()
-        self.set_key()       
         self.set_availables()
 
         return self.state, removedlines
@@ -747,7 +740,7 @@ class Agent():
         self.status[0] = nb_get_status(shapedraw, piece['x'], piece['y'])
 
         if self.piecesteps == 0:
-            self.status[1] = self.board.copy()
+            self.status[1] = self.board_mask.copy()
             self.status[3] = np.zeros((boardheight, boardwidth), dtype=np.int8)
             piece_template = pieces[self.nextpiece['shape']]
             for i in range(4):
@@ -760,17 +753,6 @@ class Agent():
                 _piece = piece_template[_rotation]
                 nb_put_status(self.status[3], _piece, 5, i*5)
 
-    def set_key(self):
-        bytes = self.status[[0,1,3]].tobytes()
-        key = hashlib.md5(bytes).hexdigest()
-        key = int(key, 16)
-        self.key = key
-
-        bytes = self.status.tobytes()
-        key = hashlib.md5(bytes).hexdigest()
-        key = int(key, 16)
-        self.full_key = key
-        
     def is_status_optimal(self):
         return self.piececount<=self.score*2.5+self.must_reward_piece_count
 
@@ -783,30 +765,31 @@ class Agent():
     def get_singe_piece_value(self):
         return 1./self.max_pieces_count
     
-    # 打印
+    # 打印（字符区分方块，颜色辅助）
+    _CH = {0:'.', 1:'S', 2:'Z', 3:'I', 4:'O', 5:'L', 6:'J', 7:'T'}
+
     def print(self):
-        # print("actions:" ,self.piece_actions)
         print("")
         board = np.copy(self.board)
+        fall_value = PIECE_IDS[self.fallpiece['shape']]
+        shapedraw = pieces[self.fallpiece['shape']][self.fallpiece['rotation']]
         for x in range(templatenum):
             for y in range(templatenum):
-                w = x + self.fallpiece['x']
-                h = y + self.fallpiece['y']
-                if pieces[self.fallpiece['shape']][self.fallpiece['rotation']][y][x]!=blank:
-                    if w>=0 and w<boardwidth and h>=0 and h<boardheight:
-                        board[h][w] = 1
+                if shapedraw[y][x] != blank:
+                    w, h = x + self.fallpiece['x'], y + self.fallpiece['y']
+                    if 0 <= w < boardwidth and 0 <= h < boardheight:
+                        board[h][w] = fall_value
 
         for y in range(boardheight):
-            line="| "
+            line = "| "
             for x in range(boardwidth):
-                if board[y][x]==blank:
-                    line=line+"  "
-                else:
-                    line=line+str(board[y][x])+" "
+                v = int(board[y][x])
+                ch = self._CH.get(v, '.')
+                line += ch + " "
             print(line)
-        print(" "+" -"*boardwidth)
-        print("pieceheight:", self.pieceheight, "lines:",self.removedlines, "piececount:", self.piececount, "piecehis:", len(self.piecehis), "/", \
-            self.next_Pieces_list_len, "steps:", self.steps, "emptyCount:", self.emptyCount)
+        print(" " + " -" * boardwidth)
+        print("lines:", self.removedlines, "piececount:", self.piececount, "piecehis:", len(self.piecehis), "/", \
+            self.next_Pieces_list_len, "steps:", self.steps)
 
 
     def getTerminalEmptyCount(self):    

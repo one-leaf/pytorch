@@ -1,10 +1,53 @@
-import json,os,time,shutil,tempfile
+import json,os,time,shutil,tempfile,sys
 from contextlib import contextmanager
 from datetime import datetime
 from typing import Any
 import numpy as np
 
-import fcntl  # Linux only; for Docker containers
+if sys.platform != "win32":
+    import fcntl
+
+    def _lock_file(fd, exclusive=False, blocking=True):
+        """内核级文件锁（Docker 挂载卷安全）"""
+        lock_type = fcntl.LOCK_EX if exclusive else fcntl.LOCK_SH
+        if not blocking:
+            lock_type |= fcntl.LOCK_NB
+        fcntl.flock(fd, lock_type)
+
+    def _unlock_file(fd):
+        fcntl.flock(fd, fcntl.LOCK_UN)
+
+    @contextmanager
+    def _shared_lock(fd):
+        """共享读锁上下文"""
+        _lock_file(fd, exclusive=False)
+        try:
+            yield
+        finally:
+            _unlock_file(fd)
+
+    @contextmanager
+    def _exclusive_lock(fd):
+        """排他写锁上下文"""
+        _lock_file(fd, exclusive=True)
+        try:
+            yield
+        finally:
+            _unlock_file(fd)
+else:
+    def _lock_file(fd, exclusive=False, blocking=True):
+        pass
+
+    def _unlock_file(fd):
+        pass
+
+    @contextmanager
+    def _shared_lock(fd):
+        yield
+
+    @contextmanager
+    def _exclusive_lock(fd):
+        yield
 
 model_name = "vit-ti" # "vit" # "mlp"
 curr_dir = os.path.dirname(os.path.abspath(__file__))
@@ -13,38 +56,6 @@ if not os.path.exists(model_dir): os.makedirs(model_dir)
 status_file = os.path.join(model_dir, 'status.json')
 status_file_bak = os.path.join(model_dir, 'status_bak.json')
 HISTORY_MAX = 100
-
-
-def _lock_file(fd, exclusive=False, blocking=True):
-    """内核级文件锁（Docker 挂载卷安全）"""
-    lock_type = fcntl.LOCK_EX if exclusive else fcntl.LOCK_SH  # type: ignore[attr-defined]
-    if not blocking:
-        lock_type |= fcntl.LOCK_NB  # type: ignore[attr-defined]
-    fcntl.flock(fd, lock_type)  # type: ignore[attr-defined]
-
-
-def _unlock_file(fd):
-    fcntl.flock(fd, fcntl.LOCK_UN)  # type: ignore[attr-defined]
-
-
-@contextmanager
-def _shared_lock(fd):
-    """共享读锁上下文"""
-    _lock_file(fd, exclusive=False)
-    try:
-        yield
-    finally:
-        _unlock_file(fd)
-
-
-@contextmanager
-def _exclusive_lock(fd):
-    """排他写锁上下文"""
-    _lock_file(fd, exclusive=True)
-    try:
-        yield
-    finally:
-        _unlock_file(fd)
 
 
 def _default_state():
