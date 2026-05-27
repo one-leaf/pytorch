@@ -213,9 +213,10 @@ class GRPOSelfPlay():
                 isRandomNextPiece=not use_replay,
                 nextPiecesList=his_pieces if use_replay else None
             )
+            agent.print()
 
             total_reward = agent.piececount
-            print(f"Game {g}: reward={total_reward}, steps={agent.steps}")
+            # print(f"Game {g}: reward={total_reward}, steps={agent.steps}")
 
             total_score += total_reward
             total_piececount += agent.piececount
