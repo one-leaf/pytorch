@@ -242,7 +242,7 @@ class GRPOSelfPlay():
             state["metrics"]["grpo_piececount_worst"] = min(state["metrics"]["grpo_piececount_worst"], min_pieces_count)
 
             # 当轮游戏结果（EMA 式平滑）
-            n = game_counter
+            n = 1000 #game_counter
             old_pc = state["metrics"]["grpo_piececount"]
             old_rl = state["metrics"]["grpo_removedlines"]
             old_st = state["metrics"]["grpo_steps"]
