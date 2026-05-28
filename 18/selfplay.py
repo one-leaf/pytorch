@@ -206,7 +206,7 @@ class GRPOSelfPlay():
                 continue
 
             agent.print()
-            reward = agent.piececount
+            reward = agent.piececount / max(agent.steps, 1)
             game_counter += 1
             print(f"Game {game_counter}: piececount={agent.piececount} removedlines={agent.removedlines} steps={agent.steps}")
 
