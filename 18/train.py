@@ -83,7 +83,6 @@ class GRPODataset(torch.utils.data.Dataset):
     def calc_data(self):
         print("start load data to memory ...")
         start_time = time.time()
-        filter_count = 0
         for i, fn in enumerate(self.file_list):
             try:
                 with open(fn, "rb") as f:
@@ -98,13 +97,6 @@ class GRPODataset(torch.utils.data.Dataset):
                     os.remove(fn)
                 if fn in self.file_list:
                     self.file_list.remove(fn)
-                continue
-
-            # 过滤旧数据：新奖励为 piececount/steps <= 1，reward > 1 说明是旧格式
-            if advantage > 1:
-                os.remove(fn)
-                self.file_list.remove(fn)
-                filter_count += 1
                 continue
 
             self.data[fn] = {
@@ -129,7 +121,7 @@ class GRPODataset(torch.utils.data.Dataset):
         print(f"Normalized advantage stats: min={advs_norm.min():.3f} mean={advs_norm.mean():.3f} max={advs_norm.max():.3f} std={advs_norm.std():.3f}")
 
         pay_time = round(time.time() - start_time, 2)
-        print(f"loaded to memory, paid time: {pay_time}, filtered old data: {filter_count}")
+        print("loaded to memory, paid time:", pay_time)
         print("load data end")
 
     def copy_wait_file(self):
