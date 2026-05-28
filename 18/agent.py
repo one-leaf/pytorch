@@ -790,6 +790,7 @@ class Agent():
         print(" " + " -" * boardwidth)
         print("lines:", self.removedlines, "piececount:", self.piececount, "piecehis:", len(self.piecehis), "/", \
             self.next_Pieces_list_len, "steps:", self.steps)
+        print("".join(self.piecehis))
 
 
     def getTerminalEmptyCount(self):    
