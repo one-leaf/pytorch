@@ -11,7 +11,6 @@ import numpy as np
 import torch
 
 from status import save_status_file, read_status_file, set_status_value
-from augment import get_equi_data
 
 # 定义游戏的动作
 GAME_ACTIONS_NUM = len(ACTIONS)
@@ -105,17 +104,21 @@ class GRPODataset(torch.utils.data.Dataset):
                 "advantage": advantage, "action": action, "mask": mask
             }
 
-        # 优势已在 selfplay 中按组内标准化，此处只做 clip 和打印
+        # 优势已在 selfplay 中保存为原始 reward，此处做全局归一化
         advs = np.array([d["advantage"] for d in self.data.values()])
-        print(f"advantage stats: min={advs.min():.3f} mean={advs.mean():.3f} max={advs.max():.3f} std={advs.std():.3f}")
+        print(f"Raw advantage stats: min={advs.min():.3f} mean={advs.mean():.3f} max={advs.max():.3f} std={advs.std():.3f}")
 
-        # clip 极端值
-        for fn in self.data:
-            v = np.clip(self.data[fn]["advantage"], -5, 5)
-            self.data[fn]["advantage"] = v
-
+        # 全局标准化：减去全局均值，除以全局标准差
         self.avg_adv = np.mean(advs)
         self.std_adv = np.std(advs) + 1e-6
+        for fn in self.data:
+            v = (self.data[fn]["advantage"] - self.avg_adv) / self.std_adv
+            # clip 极端值
+            v = np.clip(v, -5, 5)
+            self.data[fn]["advantage"] = v
+
+        advs_norm = np.array([d["advantage"] for d in self.data.values()])
+        print(f"Normalized advantage stats: min={advs_norm.min():.3f} mean={advs_norm.mean():.3f} max={advs_norm.max():.3f} std={advs_norm.std():.3f}")
 
         pay_time = round(time.time() - start_time, 2)
         print("loaded to memory, paid time:", pay_time)
