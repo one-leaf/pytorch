@@ -185,6 +185,12 @@ class GRPOSelfPlay():
             his_pieces = []
             his_pieces_len = 0
 
+        # 读取历史平均步数作为最小步数阈值
+        state = read_status_file()
+        avg_steps = state["metrics"]["grpo_steps"]
+        if avg_steps < 1:
+            avg_steps = 100  # 首次无历史数据时的默认值
+
         # 持续采集，每局完成后立即保存
         print("starting continuous collection ...")
         _start_time = time.time()
@@ -206,7 +212,7 @@ class GRPOSelfPlay():
                 continue
 
             agent.print()
-            reward = agent.piececount / max(agent.steps, 1)
+            reward = agent.piececount / max(agent.steps, avg_steps)
             game_counter += 1
             print(f"Game {game_counter}: piececount={agent.piececount} removedlines={agent.removedlines} steps={agent.steps}")
 
