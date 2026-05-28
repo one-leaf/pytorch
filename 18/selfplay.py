@@ -196,6 +196,17 @@ class GRPOSelfPlay():
         all_actions = []
         all_masks = []
 
+        # 固定 piece 序列跑 G 局：同题不同解，advantage 反映策略选择而非运气
+        # 先跑一局生成 piece 序列（含 replay 逻辑），后续 G 局复用同序列
+        print(f"\n=== Generating piece sequence (replay: {his_pieces_len > 0}) ===")
+        seed_agent, _ = self.play_one_game(
+            isRandomNextPiece=(his_pieces_len == 0),
+            nextPiecesList=his_pieces if his_pieces_len > 0 else None,
+        )
+        seed_pieces = seed_agent.piecehis[:]
+        seed_agent.print()
+        print(f"Piece sequence length: {len(seed_pieces)}")
+
         total_score = 0
         total_piececount = 0
         total_removedlines = 0
@@ -205,13 +216,12 @@ class GRPOSelfPlay():
         min_removedlines = 999999
         max_removedlines = 0
 
-        # 运行 G 局游戏
+        # 运行 G 局游戏（固定 piece 序列）
         for g in range(G):
-            print(f"\n=== Game {g + 1}/{G} ===")
-            use_replay = (g == 0 and his_pieces_len > 0)
+            print(f"\n=== Game {g + 1}/{G} (fixed pieces) ===")
             agent, trajectory = self.play_one_game(
-                isRandomNextPiece=not use_replay,
-                nextPiecesList=his_pieces if use_replay else None
+                isRandomNextPiece=False,
+                nextPiecesList=seed_pieces,
             )
             agent.print()
 
