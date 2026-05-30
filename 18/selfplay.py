@@ -157,7 +157,7 @@ class GRPOSelfPlay():
             )
         (_, his_pieces, his_pieces_len, _,
          max_pieces_count, min_pieces_count,
-         _, worst_removedlines) = self.test_play()
+         best_removedlines, worst_removedlines) = self.test_play()
         print('end test time:', datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 
         # 加载模型用于数据收集
@@ -236,7 +236,7 @@ class GRPOSelfPlay():
             state["_accum"]["_sum_steps"] += agent.steps
 
             # test_play 历史最值（只在第一局采集前跑过一次）
-            state["metrics"]["grpo_removedlines_best"] = max(state["metrics"]["grpo_removedlines_best"], max_pieces_count)
+            state["metrics"]["grpo_removedlines_best"] = max(state["metrics"]["grpo_removedlines_best"], best_removedlines)
             state["metrics"]["grpo_piececount_best"] = max(state["metrics"]["grpo_piececount_best"], max_pieces_count)
             state["metrics"]["grpo_removedlines_worst"] = min(state["metrics"]["grpo_removedlines_worst"], worst_removedlines)
             state["metrics"]["grpo_piececount_worst"] = min(state["metrics"]["grpo_piececount_worst"], min_pieces_count)
