@@ -241,14 +241,14 @@ class GRPOSelfPlay():
             state["metrics"]["grpo_removedlines_worst"] = min(state["metrics"]["grpo_removedlines_worst"], worst_removedlines)
             state["metrics"]["grpo_piececount_worst"] = min(state["metrics"]["grpo_piececount_worst"], min_pieces_count)
 
-            # 当轮游戏结果（EMA 式平滑）
-            n = 1000 #game_counter
-            old_pc = state["metrics"]["grpo_piececount"]
-            old_rl = state["metrics"]["grpo_removedlines"]
-            old_st = state["metrics"]["grpo_steps"]
-            state["metrics"]["grpo_piececount"] = round(old_pc * (n - 1) / n + agent.piececount / n, 3) if n > 1 else round(agent.piececount, 3)
-            state["metrics"]["grpo_removedlines"] = round(old_rl * (n - 1) / n + agent.removedlines / n, 3) if n > 1 else round(agent.removedlines, 3)
-            state["metrics"]["grpo_steps"] = round(old_st * (n - 1) / n + agent.steps / n, 3) if n > 1 else round(agent.steps, 3)
+            # 当轮游戏结果：EMA 移动平均（每局 10% 权重给新值，跨运行继承）
+            alpha = 0.1
+            old_pc = state["metrics"].get("grpo_piececount", 0)
+            old_rl = state["metrics"].get("grpo_removedlines", 0)
+            old_st = state["metrics"].get("grpo_steps", 0)
+            state["metrics"]["grpo_piececount"] = round(old_pc * (1 - alpha) + agent.piececount * alpha, 3)
+            state["metrics"]["grpo_removedlines"] = round(old_rl * (1 - alpha) + agent.removedlines * alpha, 3)
+            state["metrics"]["grpo_steps"] = round(old_st * (1 - alpha) + agent.steps * alpha, 3)
 
             state["metrics"]["grpo_piececount_min"] = min(state["metrics"]["grpo_piececount_min"], agent.piececount)
             state["metrics"]["grpo_piececount_max"] = max(state["metrics"]["grpo_piececount_max"], agent.piececount)
