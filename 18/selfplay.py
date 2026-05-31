@@ -248,8 +248,6 @@ class GRPOSelfPlay():
                     with open(savefile, "wb") as fn:
                         pickle.dump(data, fn)
 
-                print(f"  saved game {game_counter} (run {run_idx + 1}), {len(trajectory)} steps")
-
             # 一组完成后，更新训练状态
             state = read_status_file()
             state["counters"]["agent"] += 1
