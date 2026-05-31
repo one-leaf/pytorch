@@ -197,7 +197,7 @@ class GRPOSelfPlay():
         game_counter = 0
 
         for g in itertools.count():
-            if time.time() - _start_time > 60 * 30:  # 每个模型最多30分钟采集
+            if time.time() - _start_time > 60 * 40:  # 每个模型最多40分钟采集
                 break
 
             # 确定本局方块序列
