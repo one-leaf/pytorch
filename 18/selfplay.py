@@ -248,35 +248,42 @@ class GRPOSelfPlay():
                     with open(savefile, "wb") as fn:
                         pickle.dump(data, fn)
 
-                # 更新训练状态
-                state = read_status_file()
-                state["counters"]["agent"] += 1
-                state["counters"]["_agent"] += 1
-                state["_accum"]["_sum_piececount"] += agent.piececount
-                state["_accum"]["_sum_removedlines"] += agent.removedlines
-                state["_accum"]["_sum_steps"] += agent.steps
+                print(f"  saved game {game_counter} (run {run_idx + 1}), {len(trajectory)} steps")
 
-                # test_play 历史最值
-                state["metrics"]["grpo_removedlines_best"] = max(state["metrics"]["grpo_removedlines_best"], best_removedlines)
-                state["metrics"]["grpo_piececount_best"] = max(state["metrics"]["grpo_piececount_best"], max_pieces_count)
-                state["metrics"]["grpo_removedlines_worst"] = min(state["metrics"]["grpo_removedlines_worst"], worst_removedlines)
-                state["metrics"]["grpo_piececount_worst"] = min(state["metrics"]["grpo_piececount_worst"], min_pieces_count)
+            # 一组完成后，更新训练状态
+            state = read_status_file()
+            state["counters"]["agent"] += 1
+            state["counters"]["_agent"] += 1
+            
+            avg_pc = np.mean([a.piececount for a, _ in group_agents])
+            avg_rl = np.mean([a.removedlines for a, _ in group_agents])
+            avg_st = np.mean([a.steps for a, _ in group_agents])
 
-                # EMA 移动平均
-                alpha = 0.1
-                old_pc = state["metrics"].get("grpo_piececount", 0)
-                old_rl = state["metrics"].get("grpo_removedlines", 0)
-                old_st = state["metrics"].get("grpo_steps", 0)
-                state["metrics"]["grpo_piececount"] = round(old_pc * (1 - alpha) + agent.piececount * alpha, 3)
-                state["metrics"]["grpo_removedlines"] = round(old_rl * (1 - alpha) + agent.removedlines * alpha, 3)
-                state["metrics"]["grpo_steps"] = round(old_st * (1 - alpha) + agent.steps * alpha, 3)
+            state["_accum"]["_sum_piececount"] += avg_pc
+            state["_accum"]["_sum_removedlines"] += avg_rl
+            state["_accum"]["_sum_steps"] += avg_st
 
-                state["metrics"]["grpo_piececount_min"] = min(state["metrics"]["grpo_piececount_min"], agent.piececount)
-                state["metrics"]["grpo_piececount_max"] = max(state["metrics"]["grpo_piececount_max"], agent.piececount)
-                state["metrics"]["grpo_removedlines_min"] = min(state["metrics"]["grpo_removedlines_min"], agent.removedlines)
-                state["metrics"]["grpo_removedlines_max"] = max(state["metrics"]["grpo_removedlines_max"], agent.removedlines)
-                save_status_file(state)
+            # test_play 历史最值
+            state["metrics"]["grpo_removedlines_best"] = max(state["metrics"]["grpo_removedlines_best"], best_removedlines)
+            state["metrics"]["grpo_piececount_best"] = max(state["metrics"]["grpo_piececount_best"], max_pieces_count)
+            state["metrics"]["grpo_removedlines_worst"] = min(state["metrics"]["grpo_removedlines_worst"], worst_removedlines)
+            state["metrics"]["grpo_piececount_worst"] = min(state["metrics"]["grpo_piececount_worst"], min_pieces_count)
 
+            # EMA 移动平均（用组平均）
+            alpha = 0.1
+            old_pc = state["metrics"].get("grpo_piececount", 0)
+            old_rl = state["metrics"].get("grpo_removedlines", 0)
+            old_st = state["metrics"].get("grpo_steps", 0)
+            state["metrics"]["grpo_piececount"] = round(old_pc * (1 - alpha) + avg_pc * alpha, 3)
+            state["metrics"]["grpo_removedlines"] = round(old_rl * (1 - alpha) + avg_rl * alpha, 3)
+            state["metrics"]["grpo_steps"] = round(old_st * (1 - alpha) + avg_st * alpha, 3)
+
+            # 组内最值
+            state["metrics"]["grpo_piececount_min"] = min(state["metrics"]["grpo_piececount_min"], min(a.piececount for a, _ in group_agents))
+            state["metrics"]["grpo_piececount_max"] = max(state["metrics"]["grpo_piececount_max"], max(a.piececount for a, _ in group_agents))
+            state["metrics"]["grpo_removedlines_min"] = min(state["metrics"]["grpo_removedlines_min"], min(a.removedlines for a, _ in group_agents))
+            state["metrics"]["grpo_removedlines_max"] = max(state["metrics"]["grpo_removedlines_max"], max(a.removedlines for a, _ in group_agents))
+            save_status_file(state)
             print(f"status updated: agent={state['counters']['agent']}")
 
         print(f"\nCollection finished. Total games: {game_counter}")
