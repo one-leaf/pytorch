@@ -207,35 +207,47 @@ class GRPOSelfPlay():
                 agent0, _ = self.play_one_game(isRandomNextPiece=True)
                 pieces_list = agent0.piecehis
 
-            # 用相同方块序列运行两次
-            agents, trajectories = [], []
-            for run_idx in range(2):
+            # 用相同方块序列运行 8 局
+            group_agents = []
+            for _ in range(8):
                 agent, trajectory = self.play_one_game(
                     isRandomNextPiece=False, nextPiecesList=pieces_list,
                 )
-                agents.append(agent)
-                trajectories.append(trajectory)
+                if len(trajectory) > 0:
+                    group_agents.append((agent, trajectory))
+                agent.print()  
+                
+            if len(group_agents) == 0:
+                continue
 
-            # 合并两次运行的轨迹和结果
-            for run_idx, (agent, trajectory) in enumerate(zip(agents, trajectories)):
-                if len(trajectory) == 0:
-                    continue
+            # 计算每局的原始奖励
+            raw_rewards = [agent.piececount + 1.0 / agent.steps for agent, _ in group_agents]
+            raw_arr = np.array(raw_rewards)
 
+            # 组内正规化
+            mean_r = raw_arr.mean()
+            std_r = raw_arr.std() + 1e-6
+            norm_rewards = (raw_arr - mean_r) / std_r
+
+            # 打印信息
+            print(f"Group {g}: raw_rewards={raw_arr}  mean={mean_r:.3f} std={std_r:.3f}")
+
+            # 保存每局结果
+            filetime = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+            for run_idx, (agent, trajectory) in enumerate(group_agents):
                 agent.print()
-                reward = agent.piececount + 1 / agent.steps
+                norm_reward = norm_rewards[run_idx]
                 game_counter += 1
-                print(f"Game {game_counter} (run {run_idx + 1}): piececount={agent.piececount} removedlines={agent.removedlines} steps={agent.steps}")
+                print(f"  Run {run_idx + 1}: raw={raw_rewards[run_idx]:.3f} norm={norm_reward:.4f} "
+                      f"piececount={agent.piececount} removedlines={agent.removedlines} steps={agent.steps}")
 
-                # 保存该局的 step 数据
-                filetime = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+                # 保存该局的 step 数据（已正规化的 reward）
                 for i, step_data in enumerate(trajectory):
-                    data = (step_data["state"], step_data["ref_prob"], float(reward), step_data["action"], 1)
+                    data = (step_data["state"], step_data["ref_prob"], float(norm_reward), step_data["action"], 1)
                     filename = f"{filetime}-{game_counter:06d}-r{run_idx}-{i}.pkl"
                     savefile = os.path.join(data_wait_dir, filename)
                     with open(savefile, "wb") as fn:
                         pickle.dump(data, fn)
-
-                print(f"saved game {game_counter} (run {run_idx + 1}), {len(trajectory)} steps")
 
                 # 更新训练状态
                 state = read_status_file()
@@ -245,13 +257,13 @@ class GRPOSelfPlay():
                 state["_accum"]["_sum_removedlines"] += agent.removedlines
                 state["_accum"]["_sum_steps"] += agent.steps
 
-                # test_play 历史最值（只在第一局采集前跑过一次）
+                # test_play 历史最值
                 state["metrics"]["grpo_removedlines_best"] = max(state["metrics"]["grpo_removedlines_best"], best_removedlines)
                 state["metrics"]["grpo_piececount_best"] = max(state["metrics"]["grpo_piececount_best"], max_pieces_count)
                 state["metrics"]["grpo_removedlines_worst"] = min(state["metrics"]["grpo_removedlines_worst"], worst_removedlines)
                 state["metrics"]["grpo_piececount_worst"] = min(state["metrics"]["grpo_piececount_worst"], min_pieces_count)
 
-                # 当轮游戏结果：EMA 移动平均（每局 10% 权重给新值，跨运行继承）
+                # EMA 移动平均
                 alpha = 0.1
                 old_pc = state["metrics"].get("grpo_piececount", 0)
                 old_rl = state["metrics"].get("grpo_removedlines", 0)
@@ -265,7 +277,8 @@ class GRPOSelfPlay():
                 state["metrics"]["grpo_removedlines_min"] = min(state["metrics"]["grpo_removedlines_min"], agent.removedlines)
                 state["metrics"]["grpo_removedlines_max"] = max(state["metrics"]["grpo_removedlines_max"], agent.removedlines)
                 save_status_file(state)
-                print(f"status updated: agent={state['counters']['agent']}")
+
+            print(f"status updated: agent={state['counters']['agent']}")
 
         print(f"\nCollection finished. Total games: {game_counter}")
 
