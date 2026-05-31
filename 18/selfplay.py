@@ -235,7 +235,6 @@ class GRPOSelfPlay():
             # 保存每局结果
             filetime = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
             for run_idx, (agent, trajectory) in enumerate(group_agents):
-                agent.print()
                 norm_reward = norm_rewards[run_idx]
                 game_counter += 1
                 print(f"  Run {run_idx + 1}: raw={raw_rewards[run_idx]:.3f} norm={norm_reward:.4f} "
