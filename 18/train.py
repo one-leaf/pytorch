@@ -168,7 +168,7 @@ class GRPOTrain():
         self.lr_multiplier = 1.0
         self.buffer_size = 204800       # 最大保存数据量
         self.epochs = 50                # 每次更新的训练步骤数
-        self.kl_targ = 1e-4             # KL 目标
+        self.kl_targ = 5e-4             # KL 目标（5e-4，与 GRPO 实际 KL 量级匹配）
 
         # GRPO 超参数
         self.grpo_clip_eps = 0.2
