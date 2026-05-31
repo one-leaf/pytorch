@@ -176,7 +176,7 @@ class GRPOTestDataset(torch.utils.data.Dataset):
 class GRPOTrain():
     def __init__(self):
         self.batch_size = 32            # 每批训练样本数
-        self.learn_rate = 1e-6
+        self.learn_rate = 1e-4
         self.lr_multiplier = 1.0
         self.buffer_size = 204800       # 最大保存数据量
         self.epochs = 50                # 每次更新的训练步骤数
