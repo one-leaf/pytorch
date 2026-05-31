@@ -200,62 +200,72 @@ class GRPOSelfPlay():
             if time.time() - _start_time > 60 * 30:  # 每个模型最多30分钟采集
                 break
 
-            # 第一局用 replay，后续全部随机
+            # 确定本局方块序列
             if g == 0 and his_pieces_len > 0:
-                agent, trajectory = self.play_one_game(
-                    isRandomNextPiece=False, nextPiecesList=his_pieces,
-                )
+                pieces_list = his_pieces
             else:
-                agent, trajectory = self.play_one_game(isRandomNextPiece=True)
+                agent0, _ = self.play_one_game(isRandomNextPiece=True)
+                pieces_list = agent0.piecehis
 
-            if len(trajectory) == 0:
-                continue
+            # 用相同方块序列运行两次
+            agents, trajectories = [], []
+            for run_idx in range(2):
+                agent, trajectory = self.play_one_game(
+                    isRandomNextPiece=False, nextPiecesList=pieces_list,
+                )
+                agents.append(agent)
+                trajectories.append(trajectory)
 
-            agent.print()
-            reward = agent.piececount + 1 / agent.steps
-            game_counter += 1
-            print(f"Game {game_counter}: piececount={agent.piececount} removedlines={agent.removedlines} steps={agent.steps}")
+            # 合并两次运行的轨迹和结果
+            for run_idx, (agent, trajectory) in enumerate(zip(agents, trajectories)):
+                if len(trajectory) == 0:
+                    continue
 
-            # 保存该局的 step 数据
-            filetime = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-            for i, step_data in enumerate(trajectory):
-                data = (step_data["state"], step_data["ref_prob"], float(reward), step_data["action"], 1)
-                filename = f"{filetime}-{game_counter:06d}-{i}.pkl"
-                savefile = os.path.join(data_wait_dir, filename)
-                with open(savefile, "wb") as fn:
-                    pickle.dump(data, fn)
+                agent.print()
+                reward = agent.piececount + 1 / agent.steps
+                game_counter += 1
+                print(f"Game {game_counter} (run {run_idx + 1}): piececount={agent.piececount} removedlines={agent.removedlines} steps={agent.steps}")
 
-            print(f"saved game {game_counter}, {len(trajectory)} steps")
+                # 保存该局的 step 数据
+                filetime = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+                for i, step_data in enumerate(trajectory):
+                    data = (step_data["state"], step_data["ref_prob"], float(reward), step_data["action"], 1)
+                    filename = f"{filetime}-{game_counter:06d}-r{run_idx}-{i}.pkl"
+                    savefile = os.path.join(data_wait_dir, filename)
+                    with open(savefile, "wb") as fn:
+                        pickle.dump(data, fn)
 
-            # 更新训练状态
-            state = read_status_file()
-            state["counters"]["agent"] += 1
-            state["counters"]["_agent"] += 1
-            state["_accum"]["_sum_piececount"] += agent.piececount
-            state["_accum"]["_sum_removedlines"] += agent.removedlines
-            state["_accum"]["_sum_steps"] += agent.steps
+                print(f"saved game {game_counter} (run {run_idx + 1}), {len(trajectory)} steps")
 
-            # test_play 历史最值（只在第一局采集前跑过一次）
-            state["metrics"]["grpo_removedlines_best"] = max(state["metrics"]["grpo_removedlines_best"], best_removedlines)
-            state["metrics"]["grpo_piececount_best"] = max(state["metrics"]["grpo_piececount_best"], max_pieces_count)
-            state["metrics"]["grpo_removedlines_worst"] = min(state["metrics"]["grpo_removedlines_worst"], worst_removedlines)
-            state["metrics"]["grpo_piececount_worst"] = min(state["metrics"]["grpo_piececount_worst"], min_pieces_count)
+                # 更新训练状态
+                state = read_status_file()
+                state["counters"]["agent"] += 1
+                state["counters"]["_agent"] += 1
+                state["_accum"]["_sum_piececount"] += agent.piececount
+                state["_accum"]["_sum_removedlines"] += agent.removedlines
+                state["_accum"]["_sum_steps"] += agent.steps
 
-            # 当轮游戏结果：EMA 移动平均（每局 10% 权重给新值，跨运行继承）
-            alpha = 0.1
-            old_pc = state["metrics"].get("grpo_piececount", 0)
-            old_rl = state["metrics"].get("grpo_removedlines", 0)
-            old_st = state["metrics"].get("grpo_steps", 0)
-            state["metrics"]["grpo_piececount"] = round(old_pc * (1 - alpha) + agent.piececount * alpha, 3)
-            state["metrics"]["grpo_removedlines"] = round(old_rl * (1 - alpha) + agent.removedlines * alpha, 3)
-            state["metrics"]["grpo_steps"] = round(old_st * (1 - alpha) + agent.steps * alpha, 3)
+                # test_play 历史最值（只在第一局采集前跑过一次）
+                state["metrics"]["grpo_removedlines_best"] = max(state["metrics"]["grpo_removedlines_best"], best_removedlines)
+                state["metrics"]["grpo_piececount_best"] = max(state["metrics"]["grpo_piececount_best"], max_pieces_count)
+                state["metrics"]["grpo_removedlines_worst"] = min(state["metrics"]["grpo_removedlines_worst"], worst_removedlines)
+                state["metrics"]["grpo_piececount_worst"] = min(state["metrics"]["grpo_piececount_worst"], min_pieces_count)
 
-            state["metrics"]["grpo_piececount_min"] = min(state["metrics"]["grpo_piececount_min"], agent.piececount)
-            state["metrics"]["grpo_piececount_max"] = max(state["metrics"]["grpo_piececount_max"], agent.piececount)
-            state["metrics"]["grpo_removedlines_min"] = min(state["metrics"]["grpo_removedlines_min"], agent.removedlines)
-            state["metrics"]["grpo_removedlines_max"] = max(state["metrics"]["grpo_removedlines_max"], agent.removedlines)
-            save_status_file(state)
-            print(f"status updated: agent={state['counters']['agent']}")
+                # 当轮游戏结果：EMA 移动平均（每局 10% 权重给新值，跨运行继承）
+                alpha = 0.1
+                old_pc = state["metrics"].get("grpo_piececount", 0)
+                old_rl = state["metrics"].get("grpo_removedlines", 0)
+                old_st = state["metrics"].get("grpo_steps", 0)
+                state["metrics"]["grpo_piececount"] = round(old_pc * (1 - alpha) + agent.piececount * alpha, 3)
+                state["metrics"]["grpo_removedlines"] = round(old_rl * (1 - alpha) + agent.removedlines * alpha, 3)
+                state["metrics"]["grpo_steps"] = round(old_st * (1 - alpha) + agent.steps * alpha, 3)
+
+                state["metrics"]["grpo_piececount_min"] = min(state["metrics"]["grpo_piececount_min"], agent.piececount)
+                state["metrics"]["grpo_piececount_max"] = max(state["metrics"]["grpo_piececount_max"], agent.piececount)
+                state["metrics"]["grpo_removedlines_min"] = min(state["metrics"]["grpo_removedlines_min"], agent.removedlines)
+                state["metrics"]["grpo_removedlines_max"] = max(state["metrics"]["grpo_removedlines_max"], agent.removedlines)
+                save_status_file(state)
+                print(f"status updated: agent={state['counters']['agent']}")
 
         print(f"\nCollection finished. Total games: {game_counter}")
 
