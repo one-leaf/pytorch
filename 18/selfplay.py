@@ -216,6 +216,8 @@ class GRPOSelfPlay():
                 if len(trajectory) > 0:
                     group_agents.append((agent, trajectory))
                 agent.print()  
+                if len(agent.piecehis)>len(pieces_list):
+                    pieces_list = agent.piecehis
                 
             if len(group_agents) == 0:
                 continue
