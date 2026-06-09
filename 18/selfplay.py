@@ -222,8 +222,9 @@ class GRPOSelfPlay():
             if len(group_agents) == 0:
                 continue
 
-            # 计算每局的原始奖励
-            raw_rewards = [agent.piececount + 1.0 / agent.steps for agent, _ in group_agents]
+            # 奖励设计：消行权重压倒 piececount，鼓励冒险消行
+            # 1 行 = 2.5 piececount 的价值，agent 消 1 行就能弥补少放 2.5 方块的损失
+            raw_rewards = [agent.removedlines * 2.5 + agent.piececount for agent, _ in group_agents]
             raw_arr = np.array(raw_rewards)
 
             # 组内正规化
