@@ -64,6 +64,7 @@ def _default_state():
         "metrics": {
             "grpo_piececount": 0,
             "grpo_removedlines": 0, "grpo_steps": 0,
+            "grpo_reward_mean": 0, "grpo_reward_std": 0,
             "grpo_piececount_min": 999999, "grpo_piececount_max": 0,
             "grpo_removedlines_min": 999999, "grpo_removedlines_max": 0,
             "grpo_removedlines_best": 0, "grpo_piececount_best": 0,
@@ -95,6 +96,7 @@ def _migrate(state: dict[str, Any]):
         if k in old:
             state["counters"][k] = old.pop(k)
     for k in ["grpo_piececount", "grpo_removedlines", "grpo_steps",
+              "grpo_reward_mean", "grpo_reward_std",
               "grpo_piececount_min", "grpo_piececount_max",
               "grpo_removedlines_min", "grpo_removedlines_max",
               "grpo_removedlines_best", "grpo_piececount_best",
@@ -146,6 +148,8 @@ def _append_history(state: dict[str, Any]):
         "grpo_piececount": round(acc.get("_sum_piececount", 0) / n, 3),
         "grpo_removedlines": round(acc.get("_sum_removedlines", 0) / n, 3),
         "grpo_steps": round(acc.get("_sum_steps", 0) / n, 3),
+        "grpo_reward_mean": m.get("grpo_reward_mean", 0),
+        "grpo_reward_std": m.get("grpo_reward_std", 0),
         "grpo_piececount_min": m.get("grpo_piececount_min", 999999),
         "grpo_piececount_max": m.get("grpo_piececount_max", 0),
         "grpo_removedlines_min": m.get("grpo_removedlines_min", 999999),
