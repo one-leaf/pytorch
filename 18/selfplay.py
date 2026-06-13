@@ -275,9 +275,13 @@ class GRPOSelfPlay():
             old_pc = state["metrics"].get("grpo_piececount", 0)
             old_rl = state["metrics"].get("grpo_removedlines", 0)
             old_st = state["metrics"].get("grpo_steps", 0)
+            old_reward_mean = state["metrics"].get("grpo_reward_mean", 0)
+            old_reward_std = state["metrics"].get("grpo_reward_std", 0)
             state["metrics"]["grpo_piececount"] = round(old_pc * (1 - alpha) + avg_pc * alpha, 3)
             state["metrics"]["grpo_removedlines"] = round(old_rl * (1 - alpha) + avg_rl * alpha, 3)
             state["metrics"]["grpo_steps"] = round(old_st * (1 - alpha) + avg_st * alpha, 3)
+            state["metrics"]["grpo_reward_mean"] = round(old_reward_mean * (1 - alpha) + mean_r * alpha, 3)
+            state["metrics"]["grpo_reward_std"] = round(old_reward_std * (1 - alpha) + std_r * alpha, 3)
 
             # 组内最值
             state["metrics"]["grpo_piececount_min"] = min(state["metrics"]["grpo_piececount_min"], min(a.piececount for a, _ in group_agents))

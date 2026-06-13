@@ -56,6 +56,8 @@ def show_status(max_history=0, as_json=False):
         print(f"  GRPO 平均消除行数: {fmt(m.get('grpo_removedlines'), 3)}")
         print(f"  GRPO 平均方块数:   {fmt(pieces, 1)}")
         print(f"  GRPO 平均步数:     {fmt(steps, 1)}")
+        print(f"  GRPO 奖励均值:     {fmt(m.get('grpo_reward_mean'), 3)}")
+        print(f"  GRPO 奖励方差:     {fmt(m.get('grpo_reward_std'), 3)}")
         print(f"  GRPO 最少方块数:   {m.get('grpo_piececount_min', 0)}")
         print(f"  GRPO 最多方块数:   {m.get('grpo_piececount_max', 0)}")
         print(f"  GRPO 最少消除行数: {m.get('grpo_removedlines_min', 0)}")
@@ -88,13 +90,14 @@ def show_status(max_history=0, as_json=False):
         print("=" * 60)
         print(label)
         print("-" * 60)
-        print(f"  {'Agent':>6}  {'Pieces':>7}  {'Lines':>6}  {'Steps':>7}  {'Min':>5}  {'Max':>5}  {'KL':>8}")
+        print(f"  {'Agent':>6}  {'Pieces':>7}  {'Lines':>6}  {'Steps':>7}  {'Min':>5}  {'Max':>5}  {'RwdStd':>7}  {'KL':>8}")
         print("-" * 60)
         for h in display:
             print(f"  {h.get('agent', 0):>6}  {h.get('grpo_piececount', 0):>7.1f}  "
                   f"{h.get('grpo_removedlines', 0):>6.3f}  "
                   f"{h.get('grpo_steps', 0):>7.1f}  "
                   f"{h.get('grpo_piececount_min', 0):>5}  {h.get('grpo_piececount_max', 0):>5}  "
+                  f"{h.get('grpo_reward_std', 0):>7.3f}  "
                   f"{h.get('kl', 0):>8.6f}")
         print("=" * 60)
     elif history:
