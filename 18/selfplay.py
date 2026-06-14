@@ -21,7 +21,7 @@ class GRPOSelfPlay():
         self.policy_value_net = None
 
 
-    def get_action_from_policy(self, agent, policy_value_net):
+    def get_action_from_policy(self, agent, policy_value_net, train=True):
         """从策略网络采样一个动作（带动作掩码）"""
         state = np.array([agent.current_state()])
         device = policy_value_net.device
@@ -32,24 +32,27 @@ class GRPOSelfPlay():
             log_probs, _ = policy_value_net.policy_value_net(state_tensor)
         probs = torch.exp(log_probs[0]).cpu().numpy()  # [5]
 
-        p = 0.75
-        dirichlet = np.random.dirichlet(2 * np.ones(GAME_ACTIONS_NUM))            
-        probs = p*probs + (1.0-p)*dirichlet
-        probs = probs / np.sum(probs) 
+        if train:
+            p = 0.75
+            dirichlet = np.random.dirichlet(2 * np.ones(GAME_ACTIONS_NUM))            
+            probs = p*probs + (1.0-p)*dirichlet
+            probs = probs / np.sum(probs) 
 
-        # 应用动作掩码
-        availables = agent.availables  # [5] 0/1 掩码
-        probs = probs * availables.astype(np.float32)
-        probs_sum = probs.sum()
-        if probs_sum < 1e-10:
-            probs = availables.astype(np.float32)
+            # 应用动作掩码
+            availables = agent.availables  # [5] 0/1 掩码
+            probs = probs * availables.astype(np.float32)
             probs_sum = probs.sum()
-        probs = probs / probs_sum
+            if probs_sum < 1e-10:
+                probs = availables.astype(np.float32)
+                probs_sum = probs.sum()
+            probs = probs / probs_sum
 
-        action = np.random.choice(GAME_ACTIONS_NUM, p=probs)
+            action = np.random.choice(GAME_ACTIONS_NUM, p=probs)
+        else:
+            action = np.argmax(probs)
         return int(action), probs, log_probs[0].cpu().numpy()
 
-    def play_one_game(self, isRandomNextPiece=True, nextPiecesList=None):
+    def play_one_game(self, isRandomNextPiece=True, nextPiecesList=None, train=True):
         """用当前策略玩一局游戏，记录完整轨迹"""
         if nextPiecesList is not None and len(nextPiecesList) > 0:
             agent = Agent(isRandomNextPiece=False, nextPiecesList=nextPiecesList)
@@ -63,7 +66,7 @@ class GRPOSelfPlay():
                 break
 
             state = agent.current_state().copy()
-            action, probs, log_prob = self.get_action_from_policy(agent, self.policy_value_net)
+            action, probs, log_prob = self.get_action_from_policy(agent, self.policy_value_net, train)
 
             trajectory.append({
                 "state": state,
