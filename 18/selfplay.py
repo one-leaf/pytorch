@@ -49,6 +49,8 @@ class GRPOSelfPlay():
 
             action = np.random.choice(GAME_ACTIONS_NUM, p=probs)
         else:
+            availables = agent.availables  # [5] 0/1 掩码
+            probs = probs * availables.astype(np.float32)
             action = np.argmax(probs)
         return int(action), probs, log_probs[0].cpu().numpy()
 
