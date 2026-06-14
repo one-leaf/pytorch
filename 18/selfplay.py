@@ -209,7 +209,8 @@ class GRPOSelfPlay():
 
             # 用相同方块序列运行 8 局
             group_agents = []
-            for _ in range(8):
+            group_rewards = []
+            for _ in itertools.count():
                 agent, trajectory = self.play_one_game(
                     isRandomNextPiece=False, nextPiecesList=pieces_list,
                 )
@@ -219,6 +220,10 @@ class GRPOSelfPlay():
                 if len(agent.piecehis)>len(pieces_list):
                     pieces_list = agent.piecehis
                 
+                group_rewards.append(agent.removedlines * 2.5 + agent.piececount)
+                if len(group_rewards) >= 8 and np.std(group_rewards) > 3:
+                    break
+
             if len(group_agents) == 0:
                 continue
 
