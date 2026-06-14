@@ -229,16 +229,11 @@ class GRPOSelfPlay():
                 if len(agent.piecehis)>len(pieces_list):
                     pieces_list = agent.piecehis
                 
-                # group_rewards.append(agent.removedlines * 2.5 + agent.piececount)
-                # if len(group_rewards) >= 8 and np.std(group_rewards) > 3:
-                #     break
-
             if len(group_agents) == 0:
                 continue
 
             # 奖励设计：消行权重压倒 piececount，鼓励冒险消行
-            # 1 行 = 2.5 piececount 的价值，agent 消 1 行就能弥补少放 2.5 方块的损失
-            raw_rewards = [agent.removedlines * 2.5 + agent.piececount for agent, _ in group_agents]
+            raw_rewards = [agent.piececount for agent, _ in group_agents]
             raw_arr = np.array(raw_rewards)
 
             # 组内正规化
