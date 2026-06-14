@@ -30,8 +30,13 @@ class GRPOSelfPlay():
         policy_value_net.policy_value_net.eval()
         with torch.no_grad():
             log_probs, _ = policy_value_net.policy_value_net(state_tensor)
-
         probs = torch.exp(log_probs[0]).cpu().numpy()  # [5]
+
+        p = 0.75
+        dirichlet = np.random.dirichlet(2 * np.ones(GAME_ACTIONS_NUM))
+            
+        probs = p*probs + (1.0-p)*dirichlet
+        probs = probs / np.sum(probs) 
 
         # 应用动作掩码
         availables = agent.availables  # [5] 0/1 掩码
@@ -209,8 +214,8 @@ class GRPOSelfPlay():
 
             # 用相同方块序列运行 8 局
             group_agents = []
-            group_rewards = []
-            for _ in itertools.count():
+            # group_rewards = []
+            for _ in range(8):
                 agent, trajectory = self.play_one_game(
                     isRandomNextPiece=False, nextPiecesList=pieces_list,
                 )
@@ -220,9 +225,9 @@ class GRPOSelfPlay():
                 if len(agent.piecehis)>len(pieces_list):
                     pieces_list = agent.piecehis
                 
-                group_rewards.append(agent.removedlines * 2.5 + agent.piececount)
-                if len(group_rewards) >= 8 and np.std(group_rewards) > 3:
-                    break
+                # group_rewards.append(agent.removedlines * 2.5 + agent.piececount)
+                # if len(group_rewards) >= 8 and np.std(group_rewards) > 3:
+                #     break
 
             if len(group_agents) == 0:
                 continue
