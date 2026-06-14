@@ -20,7 +20,6 @@ class GRPOSelfPlay():
         self._test_policy_value_net = None
         self.policy_value_net = None
 
-
     def get_action_from_policy(self, agent, policy_value_net, train=True):
         """从策略网络采样一个动作（带动作掩码）"""
         state = np.array([agent.current_state()])
@@ -52,6 +51,7 @@ class GRPOSelfPlay():
             availables = agent.availables  # [5] 0/1 掩码
             probs = probs * availables.astype(np.float32)
             action = np.argmax(probs)
+            
         return int(action), probs, log_probs[0].cpu().numpy()
 
     def play_one_game(self, isRandomNextPiece=True, nextPiecesList=None, train=True):
