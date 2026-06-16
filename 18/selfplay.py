@@ -101,7 +101,7 @@ class GRPOSelfPlay():
             agent = Agent(isRandomNextPiece=True)
             for i in range(self.max_step_count):
                 action, _, _ = self.get_action_from_policy(
-                    agent, self._test_policy_value_net
+                    agent, self._test_policy_value_net, train=False
                 )
                 _, reward = agent.step(action)
                 if agent.terminal:
