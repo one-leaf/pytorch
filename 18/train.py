@@ -275,8 +275,10 @@ class GRPOTrain():
                     act_probs, values = net(test_batch)
                     if end_values is None:
                         end_values = values
+                        all_test_probs = test_probs.cpu()
                     else:
                         end_values = np.concatenate((end_values, values), axis=0)
+                        all_test_probs = torch.cat((all_test_probs, test_probs.cpu()), dim=0)
                     if end_act_probs is None:
                         end_act_probs = act_probs
                         end_accuracy = np.argmax(act_probs, axis=1) == np.argmax(test_probs.cpu().numpy(), axis=1)
