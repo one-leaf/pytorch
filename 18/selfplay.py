@@ -99,7 +99,7 @@ class GRPOSelfPlay():
 
         for _ in range(test_count):
             agent = Agent(isRandomNextPiece=True)
-            for i in range(self.max_step_count):
+            for _ in range(self.max_step_count):
                 action, _, _ = self.get_action_from_policy(
                     agent, self._test_policy_value_net, train=False
                 )
@@ -231,29 +231,40 @@ class GRPOSelfPlay():
             if len(group_agents) == 0:
                 continue
 
-            # 奖励设计：消行权重压倒 piececount，鼓励冒险消行
-            raw_rewards = [agent.piececount for agent, _ in group_agents]
-            raw_arr = np.array(raw_rewards)
+            # 每局游戏：step 奖励从 piececount 递减到 0
+            # 先按 piececount 计算游戏级奖励，再做 step 级衰减分配
+            N_arr = np.array([agent.piececount for agent, _ in group_agents])
+
+            # 游戏级基础奖励：piececount（消行信息已编码在 piececount 差异中）
+            raw_rewards = N_arr.copy()
 
             # 组内正规化
-            mean_r = raw_arr.mean()
-            std_r = raw_arr.std() + 1e-6
-            norm_rewards = (raw_arr - mean_r) / std_r
+            mean_r = raw_rewards.mean()
+            std_r = raw_rewards.std() + 1e-6
+            norm_rewards = (raw_rewards - mean_r) / std_r
 
             # 打印信息
-            print(f"Group {g}: raw_rewards={raw_arr}  mean={mean_r:.3f} std={std_r:.3f}")
+            print(f"Group {g}: piececounts={N_arr}  mean={mean_r:.3f} std={std_r:.3f}")
 
-            # 保存每局结果
+            # 保存每局结果（step 级奖励：按 piececount 递减到 0）
             filetime = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
             for run_idx, (agent, trajectory) in enumerate(group_agents):
-                norm_reward = norm_rewards[run_idx]
                 game_counter += 1
-                print(f"  Run {run_idx + 1}: raw={raw_rewards[run_idx]:.3f} norm={norm_reward:.4f} "
+                T = len(trajectory)
+
+                # step 级衰减权重：从 1 递减到 ~0
+                step_weights = np.array([1.0 - i / T for i in range(T)])
+
+                # 每步的奖励
+                step_rewards = norm_rewards[run_idx] * step_weights
+
+                # 打印信息
+                print(f"  Run {run_idx + 1}: raw={raw_rewards[run_idx]:.1f} norm={norm_rewards[run_idx]:.4f} "
                       f"piececount={agent.piececount} removedlines={agent.removedlines} steps={agent.steps}")
 
-                # 保存该局的 step 数据（已正规化的 reward）
+                # 保存该局的 step 数据
                 for i, step_data in enumerate(trajectory):
-                    data = (step_data["state"], step_data["ref_prob"], float(norm_reward), step_data["action"], 1)
+                    data = (step_data["state"], step_data["ref_prob"], float(step_rewards[i]), step_data["action"], 1)
                     filename = f"{filetime}-{game_counter:06d}-r{run_idx}-{i}.pkl"
                     savefile = os.path.join(data_wait_dir, filename)
                     with open(savefile, "wb") as fn:
