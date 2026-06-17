@@ -301,10 +301,10 @@ class GRPOTrain():
             print(end_values[:24])
             for i in range(min(5, len(begin_values))):
                 idx = np.argmax(begin_act_probs[i])
-                n_cls = min(begin_act_probs.shape[1], test_probs[i].shape[0])
+                n_cls = min(begin_act_probs.shape[1], all_test_probs[i].shape[0])
                 idx = min(idx, n_cls - 1)
                 print(f"probs[{i}] begin:{begin_act_probs[i][:n_cls][idx]:.3f} end:{end_act_probs[i][:n_cls][idx]:.3f} "
-                      f"target:{test_probs[i].numpy()[:n_cls][idx]:.3f}")
+                      f"target:{all_test_probs[i].numpy()[:n_cls][idx]:.3f}")
 
             print(f"probs begin_accuracy: {np.mean(begin_accuracy):.4f} end_accuracy: {np.mean(end_accuracy):.4f}")
 
