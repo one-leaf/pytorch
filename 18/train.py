@@ -308,11 +308,7 @@ class GRPOTrain():
 
             print(f"probs begin_accuracy: {np.mean(begin_accuracy):.4f} end_accuracy: {np.mean(end_accuracy):.4f}")
 
-            # KL 散度
-            kl = np.mean(np.sum(begin_act_probs * (np.log(begin_act_probs / end_act_probs)), axis=1))
-            if np.isnan(kl):
-                kl = 0
-
+            # KL 散度：使用训练中最后一个 batch 的真实 KL
             status = read_status_file()
             set_status_value(status, "kl", kl, 0.1)
             total_kl = status["training"]["kl"]
