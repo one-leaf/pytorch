@@ -91,7 +91,7 @@ def show_status(max_history=0, as_json=False):
             print(f"  {h.get('agent', 0):>6}  {h.get('grpo_piececount', 0):>7.1f}  "
                   f"{h.get('grpo_removedlines', 0):>6.3f}  "
                   f"{h.get('grpo_steps', 0):>7.1f}  "
-                  f"{h.get('grpo_piececount_min', 0):>5}  {h.get('grpo_piececount_max', 0):>5}  "
+                  f"{int(h.get('grpo_piececount_min', 0)):>5}  {int(h.get('grpo_piececount_max', 0)):>5}  "
                   f"{h.get('grpo_reward_std', 0):>7.3f}")
         print("=" * 60)
     elif history:
