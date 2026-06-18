@@ -302,11 +302,19 @@ class GRPOSelfPlay():
             state["metrics"]["grpo_reward_mean"] = round(old_reward_mean * (1 - alpha) + mean_r * alpha, 3)
             state["metrics"]["grpo_reward_std"] = round(old_reward_std * (1 - alpha) + std_r * alpha, 3)
 
-            # 组内最值
-            state["metrics"]["grpo_piececount_min"] = min(state["metrics"]["grpo_piececount_min"], min(a.piececount for a, _ in group_agents))
-            state["metrics"]["grpo_piececount_max"] = max(state["metrics"]["grpo_piececount_max"], max(a.piececount for a, _ in group_agents))
-            state["metrics"]["grpo_removedlines_min"] = min(state["metrics"]["grpo_removedlines_min"], min(a.removedlines for a, _ in group_agents))
-            state["metrics"]["grpo_removedlines_max"] = max(state["metrics"]["grpo_removedlines_max"], max(a.removedlines for a, _ in group_agents))
+            # 组内最值：EMA 平滑
+            g_min_pc = min(a.piececount for a, _ in group_agents)
+            g_max_pc = max(a.piececount for a, _ in group_agents)
+            g_min_rl = min(a.removedlines for a, _ in group_agents)
+            g_max_rl = max(a.removedlines for a, _ in group_agents)
+            old_min_pc = state["metrics"].get("grpo_piececount_min", 999999)
+            old_max_pc = state["metrics"].get("grpo_piececount_max", 0)
+            old_min_rl = state["metrics"].get("grpo_removedlines_min", 999999)
+            old_max_rl = state["metrics"].get("grpo_removedlines_max", 0)
+            state["metrics"]["grpo_piececount_min"] = round(old_min_pc * (1 - alpha) + g_min_pc * alpha, 3)
+            state["metrics"]["grpo_piececount_max"] = round(old_max_pc * (1 - alpha) + g_max_pc * alpha, 3)
+            state["metrics"]["grpo_removedlines_min"] = round(old_min_rl * (1 - alpha) + g_min_rl * alpha, 3)
+            state["metrics"]["grpo_removedlines_max"] = round(old_max_rl * (1 - alpha) + g_max_rl * alpha, 3)
             save_status_file(state)
             print(f"status updated: agent={state['counters']['agent']}")
 
