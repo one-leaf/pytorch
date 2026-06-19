@@ -173,7 +173,7 @@ class GRPOTrain():
         # GRPO 超参数
         self.grpo_clip_eps = 0.2
         self.grpo_beta = 0.05
-        self.grpo_entropy_weight = 0.01
+        self.grpo_entropy_weight = 0.001
 
     def policy_update(self, sample_data, epochs=1):
         """GRPO 策略更新"""
