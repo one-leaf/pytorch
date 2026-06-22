@@ -32,7 +32,7 @@ class GRPOSelfPlay():
         probs = torch.exp(log_probs[0]).cpu().numpy()  # [5]
 
         if train:
-            p = 0.75
+            p = 0.9
             dirichlet = np.random.dirichlet(2 * np.ones(GAME_ACTIONS_NUM))            
             probs = p*probs + (1.0-p)*dirichlet
             probs = probs / np.sum(probs) 
