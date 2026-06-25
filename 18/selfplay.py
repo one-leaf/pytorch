@@ -96,6 +96,10 @@ class GRPOSelfPlay():
         worst_removedlines = 999999  # 测试中最少消除行数
         min_his_pieces = None
         min_his_pieces_len = 0
+        sum_piececount = 0
+        sum_removedlines = 0
+        sum_steps = 0
+        test_games = 0
 
         for _ in range(test_count):
             agent = Agent(isRandomNextPiece=True)
@@ -108,6 +112,10 @@ class GRPOSelfPlay():
                     break
 
             agent.print()
+            sum_piececount += agent.piececount
+            sum_removedlines += agent.removedlines
+            sum_steps += agent.steps
+            test_games += 1
 
             # 跟踪最差/最好局面
             if agent.piececount < min_pieces_count:
@@ -125,8 +133,12 @@ class GRPOSelfPlay():
             if agent.removedlines < worst_removedlines:
                 worst_removedlines = agent.removedlines
 
+        avg_pc = sum_piececount / max(test_games, 1)
+        avg_rl = sum_removedlines / max(test_games, 1)
+        avg_st = sum_steps / max(test_games, 1)
         print(f"test: min_pieces={min_pieces_count} max_pieces={max_pieces_count} "
-              f"min_lines={min_removedlines} max_lines={max_removedlines}")
+              f"min_lines={min_removedlines} max_lines={max_removedlines} "
+              f"avg_pieces={avg_pc:.1f} avg_lines={avg_rl:.3f} avg_steps={avg_st:.1f}")
 
         # 保存最差局面用于重玩
         if min_pieces_count < 20 and min_his_pieces:
@@ -141,7 +153,8 @@ class GRPOSelfPlay():
 
         return (min_removedlines, min_his_pieces, min_his_pieces_len,
                 max_removedlines, max_pieces_count, min_pieces_count,
-                best_removedlines, worst_removedlines)
+                best_removedlines, worst_removedlines,
+                avg_pc, avg_rl, avg_st)
 
     def collect_grpo_data(self):
         """收集 GRPO 自我对抗数据"""
@@ -166,7 +179,8 @@ class GRPOSelfPlay():
             )
         (_, his_pieces, his_pieces_len, _,
          max_pieces_count, min_pieces_count,
-         best_removedlines, worst_removedlines) = self.test_play()
+         best_removedlines, worst_removedlines,
+         test_avg_pc, test_avg_rl, test_avg_st) = self.test_play()
         print('end test time:', datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 
         # 加载模型用于数据收集
@@ -275,9 +289,9 @@ class GRPOSelfPlay():
             state["counters"]["agent"] += 1
             state["counters"]["_agent"] += 1
             
-            avg_pc = np.mean([a.piececount for a, _ in group_agents])
-            avg_rl = np.mean([a.removedlines for a, _ in group_agents])
-            avg_st = np.mean([a.steps for a, _ in group_agents])
+            avg_pc = test_avg_pc
+            avg_rl = test_avg_rl
+            avg_st = test_avg_st
 
             state["_accum"]["_sum_piececount"] += avg_pc
             state["_accum"]["_sum_removedlines"] += avg_rl
@@ -289,16 +303,16 @@ class GRPOSelfPlay():
             state["metrics"]["grpo_removedlines_worst"] = min(state["metrics"]["grpo_removedlines_worst"], worst_removedlines)
             state["metrics"]["grpo_piececount_worst"] = min(state["metrics"]["grpo_piececount_worst"], min_pieces_count)
 
-            # EMA 移动平均（用组平均）
+            # EMA 移动平均（用 test_play 贪婪平均值）
             alpha = 0.1
             old_pc = state["metrics"].get("grpo_piececount", 0)
             old_rl = state["metrics"].get("grpo_removedlines", 0)
             old_st = state["metrics"].get("grpo_steps", 0)
             old_reward_mean = state["metrics"].get("grpo_reward_mean", 0)
             old_reward_std = state["metrics"].get("grpo_reward_std", 0)
-            state["metrics"]["grpo_piececount"] = round(old_pc * (1 - alpha) + avg_pc * alpha, 3)
-            state["metrics"]["grpo_removedlines"] = round(old_rl * (1 - alpha) + avg_rl * alpha, 3)
-            state["metrics"]["grpo_steps"] = round(old_st * (1 - alpha) + avg_st * alpha, 3)
+            state["metrics"]["grpo_piececount"] = round(old_pc * (1 - alpha) + test_avg_pc * alpha, 3)
+            state["metrics"]["grpo_removedlines"] = round(old_rl * (1 - alpha) + test_avg_rl * alpha, 3)
+            state["metrics"]["grpo_steps"] = round(old_st * (1 - alpha) + test_avg_st * alpha, 3)
             state["metrics"]["grpo_reward_mean"] = round(old_reward_mean * (1 - alpha) + mean_r * alpha, 3)
             state["metrics"]["grpo_reward_std"] = round(old_reward_std * (1 - alpha) + std_r * alpha, 3)
 
