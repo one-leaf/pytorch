@@ -168,11 +168,11 @@ class GRPOTrain():
         self.lr_multiplier = 1.0
         self.buffer_size = 204800       # 最大保存数据量
         self.epochs = 50                # 每次更新的训练步骤数
-        self.kl_targ = 0.02             # KL 目标（2e-2，与 GRPO 实际 KL 量级匹配）
+        self.kl_targ = 0.05             # KL 目标
 
         # GRPO 超参数
         self.grpo_clip_eps = 0.2
-        self.grpo_beta = 0.05
+        self.grpo_beta = 0.005
         self.grpo_entropy_weight = 0.001
 
     def policy_update(self, sample_data, epochs=1):
