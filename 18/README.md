@@ -32,11 +32,11 @@
   - 左右翻转（swap LEFT/RIGHT 动作和概率）
   - selfplay 和 train 共享
 
-- **vit.py**: Vision Transformer 实现
-  - Patch Embedding
-  - Multi-Head Self-Attention
-  - Transformer Encoder
-  - 双 token（action + value）
+- **transformer.py**: Decoder-only Transformer 实现（~105K 参数）
+  - Patch Embedding（Conv2d 2×2 stride 2）→ 50 state tokens
+  - 可学习 Action BOS token（序列末尾，用于预测动作）
+  - 2 层 TransformerDecoder，D=64，4 heads，causal mask
+  - 输出：log_probs [B, 5] + dummy value [B, 1]
 
 - **status.py**: 状态管理
   - 文件锁状态管理

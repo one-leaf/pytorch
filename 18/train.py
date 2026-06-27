@@ -183,12 +183,7 @@ class GRPOTrain():
     def run(self):
         """启动 GRPO 训练"""
         try:
-            print("start data loader")
-            self.dataset = GRPODataset(data_dir, self.buffer_size, -1, epochs=self.epochs)
-            # test dataset shares data dict but uses newsample for validation
-            self.testdataset = GRPOTestDataset(self.dataset)
-            print("end data loader")
-
+            # 先创建/加载模型（确保 model_file 存在，selfplay 才能启动）
             try:
                 self.policy_value_net = PolicyValueNet(
                     GAME_WIDTH, GAME_HEIGHT, GAME_ACTIONS_NUM, model_file=model_file, l2_const=1e-4
@@ -200,6 +195,18 @@ class GRPOTrain():
                 return
 
             self.policy_value_net.save_model(model_file + ".bak")
+
+            # 等待 selfplay 产生训练数据
+            while True:
+                try:
+                    print("start data loader")
+                    self.dataset = GRPODataset(data_dir, self.buffer_size, -1, epochs=self.epochs)
+                    self.testdataset = GRPOTestDataset(self.dataset)
+                    print("end data loader")
+                    break
+                except Exception as e:
+                    print(f"waiting for data: {e}")
+                    time.sleep(30)
 
             dataset_len = len(self.dataset)
             training_loader = torch.utils.data.DataLoader(

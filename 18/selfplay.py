@@ -166,12 +166,13 @@ class GRPOSelfPlay():
         elif os.path.exists(model_file + ".bak"):
             load_model_file = model_file + ".bak"
 
-        if os.path.exists(load_model_file):
-            if time.time() - os.path.getmtime(load_model_file) > 60 * 60 * 5:
-                print("超过5小时模型都没有更新了，停止训练")
-                return
-        else:
-            print("no model file found, waiting for train to create one...")
+        # 等待模型文件出现
+        while not os.path.exists(load_model_file):
+            print("no model file found, waiting for train to create one... (sleep 30s)")
+            time.sleep(30)
+
+        if time.time() - os.path.getmtime(load_model_file) > 60 * 60 * 5:
+            print("超过5小时模型都没有更新了，停止训练")
             return
 
         # 加载模型用于数据收集
