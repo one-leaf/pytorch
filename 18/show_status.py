@@ -72,11 +72,12 @@ def show_status(max_history=0, as_json=False):
     if history and max_history > 0:
         # 保留一头一尾，中间均匀抽样
         if len(history) > max_history:
-            display = [history[0], history[-1]]
             if max_history > 2:
                 step = (len(history) - 1) / (max_history - 1)
                 middle = [history[int(i * step)] for i in range(1, max_history - 1)]
                 display = [history[0]] + middle + [history[-1]]
+            else:
+                display = [history[0], history[-1]]
             label = f"  训练记录 (一头一尾+中间均匀抽样 {max_history}/{len(history)} 条):"
         else:
             display = history

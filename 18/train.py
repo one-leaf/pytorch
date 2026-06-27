@@ -1,7 +1,8 @@
 import os, glob, pickle
 
 from model import PolicyValueNet, data_dir, data_wait_dir, model_file
-from agent import ACTIONS
+from agent import Agent, ACTIONS
+from selfplay import GRPOSelfPlay
 
 import time
 from datetime import datetime
@@ -27,29 +28,24 @@ class GRPODataset(torch.utils.data.Dataset):
         self.file_list = []
         self.newsample = []
         self.data = {}
+        self._flat_index = []
+        self._test_flat_index = []
         self.copy_wait_file()
         self.load_game_files()
         self.calc_data()
         self.test = False
 
     def __len__(self):
-        if self.test:
-            return len(self.newsample)
-        else:
-            return len(self.file_list)
+        return len(self._flat_index) if not self.test else len(self._test_flat_index)
 
     def __getitem__(self, index):
-        if self.test:
-            fn = self.newsample[index]
-        else:
-            fn = self.file_list[index]
-
-        d = self.data[fn]
-        state = torch.from_numpy(d["state"]).float()
-        ref_prob = torch.from_numpy(d["ref_prob"]).float()
-        advantage = torch.as_tensor(d["advantage"]).float()
-        action = torch.as_tensor(d["action"]).long()
-        mask = torch.as_tensor(d["mask"]).long()
+        fn, step_idx = (self._flat_index if not self.test else self._test_flat_index)[index]
+        state, ref_prob, advantage, action, mask = self.data[fn][step_idx]
+        state = torch.from_numpy(state).float()
+        ref_prob = torch.from_numpy(ref_prob).float()
+        advantage = torch.as_tensor(advantage).float()
+        action = torch.as_tensor(action).long()
+        mask = torch.as_tensor(mask).long()
         return state, ref_prob, advantage, action, mask
 
     def load_game_files(self):
@@ -86,11 +82,17 @@ class GRPODataset(torch.utils.data.Dataset):
         for i, fn in enumerate(self.file_list):
             try:
                 with open(fn, "rb") as f:
-                    state, ref_prob, advantage, action, mask = pickle.load(f)
+                    steps = pickle.load(f)
+
+                for step in steps:
+                    state, ref_prob, advantage, action, mask = step
                     assert state.shape == (4, 20, 10), f'error: state shape {state.shape}'
                     assert ref_prob.shape == (5,), f'error: ref_prob shape {ref_prob.shape}'
                     assert not np.isnan(advantage), f'error: advantage is Nan'
                     assert not np.isinf(advantage), f'error: advantage is Inf'
+
+                self.data[fn] = steps
+
             except Exception as e:
                 print(f"filename {fn} error can't load: {e}")
                 if os.path.exists(fn):
@@ -99,14 +101,13 @@ class GRPODataset(torch.utils.data.Dataset):
                     self.file_list.remove(fn)
                 continue
 
-            self.data[fn] = {
-                "state": state, "ref_prob": ref_prob,
-                "advantage": advantage, "action": action, "mask": mask
-            }
-
         # advantage 已在 selfplay 中组内正规化，此处不再归一化
-        advs = np.array([d["advantage"] for d in self.data.values()])
+        advs = np.array([step[2] for file_steps in self.data.values() for step in file_steps])
         print(f"Advantage stats: min={advs.min():.3f} mean={advs.mean():.3f} max={advs.max():.3f} std={advs.std():.3f}")
+
+        # 构建 flat index: [(filename, step_idx), ...]
+        self._flat_index = [(fn, i) for fn in self.file_list for i in range(len(self.data[fn]))]
+        self._test_flat_index = [(fn, i) for fn in self.newsample for i in range(len(self.data.get(fn, [])))]
 
         pay_time = round(time.time() - start_time, 2)
         print("loaded to memory, paid time:", pay_time)
@@ -121,8 +122,7 @@ class GRPODataset(torch.utils.data.Dataset):
         i = -1
         movefiles_count = self.max_keep_size // self.epoch
         if len(movefiles) < movefiles_count:
-            print(f"SLEEP 60s for waiting data, current file count: {len(movefiles)}, need: {movefiles_count}")
-            time.sleep(60)
+            print(f"Insufficient data: have {len(movefiles)}, need {movefiles_count}")
             raise Exception("NEED SOME NEW DATA TO TRAIN")
 
         for i, fn in enumerate(movefiles):
@@ -143,23 +143,16 @@ class GRPODataset(torch.utils.data.Dataset):
 
 
 class GRPOTestDataset(torch.utils.data.Dataset):
-    """测试数据集：共享训练集的数据，但只遍历 newsample（最新样本）"""
+    """测试数据集：共享父数据集的 data，通过 test=True 切换 flat index"""
     def __init__(self, parent: GRPODataset):
-        self.data = parent.data
-        self.newsample = parent.newsample
+        self.parent = parent
+        parent.test = True
 
     def __len__(self):
-        return len(self.newsample)
+        return len(self.parent._test_flat_index)
 
     def __getitem__(self, index):
-        fn = self.newsample[index]
-        d = self.data[fn]
-        state = torch.from_numpy(d["state"]).float()
-        ref_prob = torch.from_numpy(d["ref_prob"]).float()
-        advantage = torch.as_tensor(d["advantage"]).float()
-        action = torch.as_tensor(d["action"]).long()
-        mask = torch.as_tensor(d["mask"]).long()
-        return state, ref_prob, advantage, action, mask
+        return self.parent.__getitem__(index)
 
 class GRPOTrain():
     def __init__(self):
@@ -218,7 +211,6 @@ class GRPOTrain():
 
             # 训练前评估
             begin_accuracy = None
-            begin_values = None
             begin_act_probs = None
             net = self.policy_value_net.policy_value
             for i, data in enumerate(testing_loader):
@@ -227,11 +219,7 @@ class GRPOTrain():
                     print("test_batch shape:", test_batch.shape, "test_probs shape:", test_probs.shape)
                 test_batch = test_batch.to(self.policy_value_net.device)
                 with torch.no_grad():
-                    act_probs, values = net(test_batch)
-                    if begin_values is None:
-                        begin_values = values
-                    else:
-                        begin_values = np.concatenate((begin_values, values), axis=0)
+                    act_probs, _ = net(test_batch)
                     if begin_act_probs is None:
                         begin_act_probs = act_probs
                         begin_accuracy = np.argmax(act_probs, axis=1) == np.argmax(test_probs.cpu().numpy(), axis=1)
@@ -260,6 +248,7 @@ class GRPOTrain():
                 if math.isnan(kl) or math.isnan(acc) or math.isnan(entropy) or \
                    math.isinf(kl) or math.isinf(acc) or math.isinf(entropy):
                     print(f"find nan or inf at step {i}!")
+                    self.policy_value_net.save_model(model_file)
                     return
 
             self.policy_value_net.save_model(model_file)
@@ -267,17 +256,15 @@ class GRPOTrain():
             # 训练后评估
             end_accuracy = None
             end_act_probs = None
-            end_values = None
+            all_test_probs = None
             for i, data in enumerate(testing_loader):
                 test_batch, test_probs, test_advs, test_action, test_mask = data
                 test_batch = test_batch.to(self.policy_value_net.device)
                 with torch.no_grad():
-                    act_probs, values = net(test_batch)
-                    if end_values is None:
-                        end_values = values
+                    act_probs, _ = net(test_batch)
+                    if all_test_probs is None:
                         all_test_probs = test_probs.cpu()
                     else:
-                        end_values = np.concatenate((end_values, values), axis=0)
                         all_test_probs = torch.cat((all_test_probs, test_probs.cpu()), dim=0)
                     if end_act_probs is None:
                         end_act_probs = act_probs
@@ -295,17 +282,6 @@ class GRPOTrain():
             end_act_probs_e = np.exp(end_act_probs - np.max(end_act_probs, axis=1, keepdims=True))
             end_act_probs = end_act_probs_e / np.sum(end_act_probs_e, axis=1, keepdims=True)
 
-            print("初始 value:")
-            print(begin_values[:24])
-            print("结束 value:")
-            print(end_values[:24])
-            for i in range(min(5, len(begin_values))):
-                idx = np.argmax(begin_act_probs[i])
-                n_cls = min(begin_act_probs.shape[1], all_test_probs[i].shape[0])
-                idx = min(idx, n_cls - 1)
-                print(f"probs[{i}] begin:{begin_act_probs[i][:n_cls][idx]:.3f} end:{end_act_probs[i][:n_cls][idx]:.3f} "
-                      f"target:{all_test_probs[i].numpy()[:n_cls][idx]:.3f}")
-
             print(f"probs begin_accuracy: {np.mean(begin_accuracy):.4f} end_accuracy: {np.mean(end_accuracy):.4f}")
 
             # KL 散度：使用训练中最后一个 batch 的真实 KL
@@ -321,6 +297,39 @@ class GRPOTrain():
 
             status["training"]["lr_multiplier"] = float(self.lr_multiplier)
             save_status_file(status)
+
+            # ── test_play + EMA 指标更新 ──────────────────────────────
+            print("running test_play for EMA metrics update...")
+            sp = GRPOSelfPlay()
+            sp.policy_value_net = self.policy_value_net
+            (test_min_rl, _, _,
+             test_max_rl, test_max_pc, test_min_pc,
+             test_best_rl, test_worst_rl,
+             test_avg_pc, test_avg_rl, test_avg_st) = sp.test_play()
+
+            status = read_status_file()
+
+            # 历史最值
+            status["metrics"]["grpo_removedlines_best"] = max(status["metrics"]["grpo_removedlines_best"], test_best_rl)
+            status["metrics"]["grpo_piececount_best"]   = max(status["metrics"]["grpo_piececount_best"],   test_max_pc)
+            status["metrics"]["grpo_removedlines_worst"] = min(status["metrics"]["grpo_removedlines_worst"], test_worst_rl)
+            status["metrics"]["grpo_piececount_worst"]   = min(status["metrics"]["grpo_piececount_worst"],   test_min_pc)
+
+            # EMA 移动平均（贪婪策略）
+            alpha = 0.1
+            m = status["metrics"]
+            m["grpo_piececount"]     = round(m.get("grpo_piececount",     0) * (1 - alpha) + test_avg_pc * alpha, 3)
+            m["grpo_removedlines"]   = round(m.get("grpo_removedlines",   0) * (1 - alpha) + test_avg_rl * alpha, 3)
+            m["grpo_steps"]          = round(m.get("grpo_steps",          0) * (1 - alpha) + test_avg_st * alpha, 3)
+
+            # 最近一轮采集的奖励统计（从 dataset 的 advantage 计算）
+            all_advs = np.array([step[2] for file_steps in self.dataset.data.values() for step in file_steps])
+            m["grpo_reward_mean"] = round(float(all_advs.mean()), 3) if len(all_advs) > 0 else 0.0
+            m["grpo_reward_std"]  = round(float(all_advs.std()),  3) if len(all_advs) > 0 else 0.0
+
+            save_status_file(status)
+            print(f"test: avg_pieces={test_avg_pc:.1f} avg_lines={test_avg_rl:.3f} avg_steps={test_avg_st:.1f}")
+            print(f"EMA updated: pieces={m['grpo_piececount']} lines={m['grpo_removedlines']} steps={m['grpo_steps']}")
 
             print(f"kl:{kl:.6f} vs {self.kl_targ} lr_multiplier:{self.lr_multiplier} "
                   f"lr:{self.learn_rate * self.lr_multiplier}")

@@ -2,7 +2,7 @@ import torch
 import torch.optim as optim
 import os
 import numpy as np
-from vit import VitNet
+from transformer import GameTransformer
 
 # 定义游戏的保存文件名和路径
 model_name = "vit-ti" # "vit" # "mlp"
@@ -29,7 +29,8 @@ class PolicyValueNet():
         print("use", device)
 
         self.l2_const = l2_const
-        self.policy_value_net = VitNet(embed_dim=192, depth=6, num_heads=3, num_classes=5, num_quantiles=128, drop_ratio=0.1, drop_path_ratio=0.1, attn_drop_ratio=0.1, num_channels=self.input_channels)
+        self.policy_value_net = GameTransformer(embed_dim=64, depth=2, num_heads=4,
+                                                 num_actions=output_size, in_channels=4)
         self.policy_value_net.to(device)
 
         self.optimizer = optim.AdamW(self.policy_value_net.parameters(), lr=1e-5, weight_decay=self.l2_const)
@@ -50,9 +51,9 @@ class PolicyValueNet():
     def print_netwark(self):
         x = torch.Tensor(1,4,20,10).to(self.device)
         print(self.policy_value_net)
-        v, p = self.policy_value_net(x)
-        print("value:", v.size())
-        print("policy:", p.size())
+        log_probs, _ = self.policy_value_net(x)
+        print("log_probs:", log_probs.size())
+        print("policy probs:", torch.exp(log_probs).size())
 
     def policy_value(self, state_batch):
         """
@@ -68,11 +69,8 @@ class PolicyValueNet():
         with torch.no_grad():
             act_probs, value = self.policy_value_net.forward(state_batch_tensor)
 
-        value = torch.clamp(value, -1, 1)
-        value = torch.mean(value, dim=1)
-
         act_probs = np.exp(act_probs.cpu().numpy())
-        value = value.cpu().numpy()
+        value = np.zeros(act_probs.shape[0])
         return act_probs, value
         
 

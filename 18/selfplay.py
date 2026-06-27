@@ -17,7 +17,6 @@ class GRPOSelfPlay():
         self.rollout_max_steps = 500    # 单局最大步数
         self.test_count = 10            # 测试次数
         self.max_step_count = 10000     # 最大步数限制
-        self._test_policy_value_net = None
         self.policy_value_net = None
 
     def get_action_from_policy(self, agent, policy_value_net, train=True):
@@ -105,7 +104,7 @@ class GRPOSelfPlay():
             agent = Agent(isRandomNextPiece=True)
             for _ in range(self.max_step_count):
                 action, _, _ = self.get_action_from_policy(
-                    agent, self._test_policy_value_net, train=False
+                    agent, self.policy_value_net, train=False
                 )
                 _, reward = agent.step(action)
                 if agent.terminal:
@@ -160,6 +159,7 @@ class GRPOSelfPlay():
         """收集 GRPO 自我对抗数据"""
         print("GRPO Self Play starting ...")
 
+        # 确定初始模型文件
         load_model_file = model_file
         if os.path.exists(model_file + "_best"):
             load_model_file = model_file + "_best"
@@ -169,30 +169,23 @@ class GRPOSelfPlay():
         if os.path.exists(load_model_file):
             if time.time() - os.path.getmtime(load_model_file) > 60 * 60 * 5:
                 print("超过5小时模型都没有更新了，停止训练")
-                time.sleep(60)
                 return
-
-        print('start test time:', datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-        if self._test_policy_value_net is None:
-            self._test_policy_value_net = PolicyValueNet(
-                GAME_WIDTH, GAME_HEIGHT, GAME_ACTIONS_NUM, model_file=load_model_file
-            )
-        (_, his_pieces, his_pieces_len, _,
-         max_pieces_count, min_pieces_count,
-         best_removedlines, worst_removedlines,
-         test_avg_pc, test_avg_rl, test_avg_st) = self.test_play()
-        print('end test time:', datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+        else:
+            print("no model file found, waiting for train to create one...")
+            return
 
         # 加载模型用于数据收集
         if self.policy_value_net is None:
             self.policy_value_net = PolicyValueNet(
                 GAME_WIDTH, GAME_HEIGHT, GAME_ACTIONS_NUM, model_file=load_model_file
             )
+        _last_model_mtime = os.path.getmtime(load_model_file)
 
         # 检查重玩列表
         replay_dir = os.path.join(data_dir, "replay")
         if not os.path.exists(replay_dir):
             os.makedirs(replay_dir)
+        his_pieces = []
         listFiles = [f for f in os.listdir(replay_dir) if f.endswith(".pkl")]
         if listFiles and random.random() > 0.20:
             earliest_files = sorted(listFiles, key=lambda f: os.path.getctime(os.path.join(replay_dir, f)))
@@ -200,19 +193,9 @@ class GRPOSelfPlay():
             try:
                 with open(filename, "rb") as fn:
                     his_pieces = pickle.load(fn)
-                    his_pieces_len = len(his_pieces)
                 print(f"load need replay {filename}")
             finally:
                 os.remove(filename)
-        else:
-            his_pieces = []
-            his_pieces_len = 0
-
-        # 读取历史平均步数作为最小步数阈值
-        state = read_status_file()
-        avg_steps = state["metrics"]["grpo_steps"]
-        if avg_steps < 1:
-            avg_steps = 100  # 首次无历史数据时的默认值
 
         # 持续采集，每局完成后立即保存
         print("starting continuous collection ...")
@@ -223,33 +206,46 @@ class GRPOSelfPlay():
             if time.time() - _start_time > 60 * 20:  # 每个模型最多20分钟采集
                 break
 
+            # 每组之前检查模型是否有更新，有则重新加载
+            current_model = model_file
+            if os.path.exists(model_file + "_best"):
+                current_model = model_file + "_best"
+            elif os.path.exists(model_file + ".bak"):
+                current_model = model_file + ".bak"
+            if os.path.exists(current_model):
+                mtime = os.path.getmtime(current_model)
+                if mtime > _last_model_mtime:
+                    print(f"Model updated, reloading from {current_model}")
+                    self.policy_value_net = PolicyValueNet(
+                        GAME_WIDTH, GAME_HEIGHT, GAME_ACTIONS_NUM, model_file=current_model
+                    )
+                    _last_model_mtime = mtime
+
             # 确定本局方块序列
-            if g == 0 and his_pieces_len > 0:
+            if g == 0 and len(his_pieces) > 0:
                 pieces_list = his_pieces
+                his_pieces = []
             else:
                 agent0, _ = self.play_one_game(isRandomNextPiece=True)
                 pieces_list = agent0.piecehis
 
             # 用相同方块序列运行 16 局
+            group_pieces_list = pieces_list  # 组内共享同一序列
             group_agents = []
             for _ in range(16):
                 agent, trajectory = self.play_one_game(
-                    isRandomNextPiece=False, nextPiecesList=pieces_list,
+                    isRandomNextPiece=False, nextPiecesList=group_pieces_list,
                 )
                 if len(trajectory) > 0:
                     group_agents.append((agent, trajectory))
-                agent.print()  
-                if len(agent.piecehis)>len(pieces_list):
-                    pieces_list = agent.piecehis
-                
+                if len(agent.piecehis) > len(pieces_list):
+                    pieces_list = agent.piecehis  # 只在组外使用，不影响本组内其他局
+
             if len(group_agents) == 0:
                 continue
 
-            # 每局游戏：step 奖励从 piececount 递减到 0
-            # 先按 piececount 计算游戏级奖励，再做 step 级衰减分配
-            N_arr = np.array([agent.piececount for agent, _ in group_agents])
-
             # 游戏级基础奖励：piececount（消行信息已编码在 piececount 差异中）
+            N_arr = np.array([agent.piececount for agent, _ in group_agents])
             raw_rewards = N_arr.copy()
 
             # 组内正规化
@@ -260,7 +256,7 @@ class GRPOSelfPlay():
             # 打印信息
             print(f"Group {g}: piececounts={N_arr}  mean={mean_r:.3f} std={std_r:.3f}")
 
-            # 保存每局结果（step 级奖励：按 piececount 递减到 0）
+            # 保存每局结果：一局一个 pkl 文件（包含所有 step）
             filetime = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
             for run_idx, (agent, trajectory) in enumerate(group_agents):
                 game_counter += 1
@@ -268,67 +264,26 @@ class GRPOSelfPlay():
 
                 # step 级衰减权重：从 1 递减到 ~0
                 step_weights = np.array([1.0 - i / T for i in range(T)])
-
-                # 每步的奖励
                 step_rewards = norm_rewards[run_idx] * step_weights
 
-                # 打印信息
+                # 一局的所有 step 合并为一个文件
+                game_steps = [
+                    (step_data["state"], step_data["ref_prob"],
+                     float(step_rewards[i]), step_data["action"], 1)
+                    for i, step_data in enumerate(trajectory)
+                ]
+                filename = f"{filetime}-{game_counter:06d}-r{run_idx}.pkl"
+                savefile = os.path.join(data_wait_dir, filename)
+                with open(savefile, "wb") as fn:
+                    pickle.dump(game_steps, fn)
+
                 print(f"  Run {run_idx + 1}: raw={raw_rewards[run_idx]:.1f} norm={norm_rewards[run_idx]:.4f} "
                       f"piececount={agent.piececount} removedlines={agent.removedlines} steps={agent.steps}")
 
-                # 保存该局的 step 数据
-                for i, step_data in enumerate(trajectory):
-                    data = (step_data["state"], step_data["ref_prob"], float(step_rewards[i]), step_data["action"], 1)
-                    filename = f"{filetime}-{game_counter:06d}-r{run_idx}-{i}.pkl"
-                    savefile = os.path.join(data_wait_dir, filename)
-                    with open(savefile, "wb") as fn:
-                        pickle.dump(data, fn)
-
-            # 一组完成后，更新训练状态
+            # 更新计数器
             state = read_status_file()
             state["counters"]["agent"] += 1
             state["counters"]["_agent"] += 1
-            
-            avg_pc = test_avg_pc
-            avg_rl = test_avg_rl
-            avg_st = test_avg_st
-
-            state["_accum"]["_sum_piececount"] += avg_pc
-            state["_accum"]["_sum_removedlines"] += avg_rl
-            state["_accum"]["_sum_steps"] += avg_st
-
-            # test_play 历史最值
-            state["metrics"]["grpo_removedlines_best"] = max(state["metrics"]["grpo_removedlines_best"], best_removedlines)
-            state["metrics"]["grpo_piececount_best"] = max(state["metrics"]["grpo_piececount_best"], max_pieces_count)
-            state["metrics"]["grpo_removedlines_worst"] = min(state["metrics"]["grpo_removedlines_worst"], worst_removedlines)
-            state["metrics"]["grpo_piececount_worst"] = min(state["metrics"]["grpo_piececount_worst"], min_pieces_count)
-
-            # EMA 移动平均（用 test_play 贪婪平均值）
-            alpha = 0.1
-            old_pc = state["metrics"].get("grpo_piececount", 0)
-            old_rl = state["metrics"].get("grpo_removedlines", 0)
-            old_st = state["metrics"].get("grpo_steps", 0)
-            old_reward_mean = state["metrics"].get("grpo_reward_mean", 0)
-            old_reward_std = state["metrics"].get("grpo_reward_std", 0)
-            state["metrics"]["grpo_piececount"] = round(old_pc * (1 - alpha) + test_avg_pc * alpha, 3)
-            state["metrics"]["grpo_removedlines"] = round(old_rl * (1 - alpha) + test_avg_rl * alpha, 3)
-            state["metrics"]["grpo_steps"] = round(old_st * (1 - alpha) + test_avg_st * alpha, 3)
-            state["metrics"]["grpo_reward_mean"] = round(old_reward_mean * (1 - alpha) + mean_r * alpha, 3)
-            state["metrics"]["grpo_reward_std"] = round(old_reward_std * (1 - alpha) + std_r * alpha, 3)
-
-            # 组内最值：EMA 平滑
-            g_min_pc = min(a.piececount for a, _ in group_agents)
-            g_max_pc = max(a.piececount for a, _ in group_agents)
-            g_min_rl = min(a.removedlines for a, _ in group_agents)
-            g_max_rl = max(a.removedlines for a, _ in group_agents)
-            old_min_pc = state["metrics"].get("grpo_piececount_min", 999999)
-            old_max_pc = state["metrics"].get("grpo_piececount_max", 0)
-            old_min_rl = state["metrics"].get("grpo_removedlines_min", 999999)
-            old_max_rl = state["metrics"].get("grpo_removedlines_max", 0)
-            state["metrics"]["grpo_piececount_min"] = round(old_min_pc * (1 - alpha) + g_min_pc * alpha, 3)
-            state["metrics"]["grpo_piececount_max"] = round(old_max_pc * (1 - alpha) + g_max_pc * alpha, 3)
-            state["metrics"]["grpo_removedlines_min"] = round(old_min_rl * (1 - alpha) + g_min_rl * alpha, 3)
-            state["metrics"]["grpo_removedlines_max"] = round(old_max_rl * (1 - alpha) + g_max_rl * alpha, 3)
             save_status_file(state)
             print(f"status updated: agent={state['counters']['agent']}")
 
