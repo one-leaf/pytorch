@@ -13,9 +13,9 @@
   - save_state/restore_from_state 用于 GRPO fork rollout
 
 - **model.py**: 策略价值网络
-  - 基于 ViT 架构
+  - 基于 Decoder-only Transformer 架构（`transformer.py`）
   - 策略头：输出动作 log 概率 [B, 5]
-  - 价值头：输出分位数价值 [B, 128]
+  - 无价值头（纯 GRPO，value 返回 dummy zeros）
   - train_step_grpo: GRPO 训练方法
 
 - **selfplay.py**: GRPO 数据采集引擎
