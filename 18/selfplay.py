@@ -281,10 +281,34 @@ class GRPOSelfPlay():
                 print(f"  Run {run_idx + 1}: raw={raw_rewards[run_idx]:.1f} norm={norm_rewards[run_idx]:.4f} "
                       f"piececount={agent.piececount} removedlines={agent.removedlines} steps={agent.steps}")
 
-            # 更新计数器
+            # 更新计数器 + 历史统计（用实际游戏数据，保证 show_status 有数据）
+            alpha = 0.1
+            g_avg_pc = sum(a.piececount for a, _ in group_agents) / len(group_agents)
+            g_avg_rl = sum(a.removedlines for a, _ in group_agents) / len(group_agents)
+            g_avg_st = sum(a.steps for a, _ in group_agents) / len(group_agents)
+            g_min_pc = min(a.piececount for a, _ in group_agents)
+            g_max_pc = max(a.piececount for a, _ in group_agents)
+            g_min_rl = min(a.removedlines for a, _ in group_agents)
+            g_max_rl = max(a.removedlines for a, _ in group_agents)
+
             state = read_status_file()
             state["counters"]["agent"] += 1
             state["counters"]["_agent"] += 1
+
+            state["_accum"]["_sum_piececount"]   += g_avg_pc
+            state["_accum"]["_sum_removedlines"] += g_avg_rl
+            state["_accum"]["_sum_steps"]        += g_avg_st
+
+            m = state["metrics"]
+            m["grpo_piececount_min"]     = round(m.get("grpo_piececount_min",     999999) * (1 - alpha) + g_min_pc * alpha, 3)
+            m["grpo_piececount_max"]     = round(m.get("grpo_piececount_max",     0)      * (1 - alpha) + g_max_pc * alpha, 3)
+            m["grpo_removedlines_min"]   = round(m.get("grpo_removedlines_min",   999999) * (1 - alpha) + g_min_rl * alpha, 3)
+            m["grpo_removedlines_max"]   = round(m.get("grpo_removedlines_max",   0)      * (1 - alpha) + g_max_rl * alpha, 3)
+            m["grpo_piececount_best"]    = max(m.get("grpo_piececount_best",    0), g_max_pc)
+            m["grpo_removedlines_best"]  = max(m.get("grpo_removedlines_best",  0), g_max_rl)
+            m["grpo_piececount_worst"]   = min(m.get("grpo_piececount_worst",   999999), g_min_pc)
+            m["grpo_removedlines_worst"] = min(m.get("grpo_removedlines_worst", 999999), g_min_rl)
+
             save_status_file(state)
             print(f"status updated: agent={state['counters']['agent']}")
 
