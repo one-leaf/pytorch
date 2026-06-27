@@ -1,6 +1,6 @@
 import os, glob, pickle
 
-from model import PolicyValueNet, data_dir, data_wait_dir, model_file
+from model import PolicyNet, data_dir, data_wait_dir, model_file
 from agent import Agent, ACTIONS
 from selfplay import GRPOSelfPlay
 
@@ -171,7 +171,7 @@ class GRPOTrain():
     def policy_update(self, sample_data, epochs=1):
         """GRPO 策略更新"""
         state_batch, ref_probs_batch, advantages_batch, actions_batch, masks_batch = sample_data
-        acc, kl, entropy = self.policy_value_net.train_step_grpo(
+        acc, kl, entropy = self.policy_net.train_step_grpo(
             state_batch, ref_probs_batch, advantages_batch, actions_batch, masks_batch,
             self.learn_rate * self.lr_multiplier,
             clip_eps=self.grpo_clip_eps,
@@ -185,7 +185,7 @@ class GRPOTrain():
         try:
             # 先创建/加载模型（确保 model_file 存在，selfplay 才能启动）
             try:
-                self.policy_value_net = PolicyValueNet(
+                self.policy_net = PolicyNet(
                     GAME_WIDTH, GAME_HEIGHT, GAME_ACTIONS_NUM, model_file=model_file, l2_const=1e-4
                 )
             except Exception as e:
@@ -194,7 +194,7 @@ class GRPOTrain():
                 time.sleep(60)
                 return
 
-            self.policy_value_net.save_model(model_file + ".bak")
+            self.policy_net.save_model(model_file + ".bak")
 
             # 等待 selfplay 产生训练数据
             while True:
@@ -219,14 +219,14 @@ class GRPOTrain():
             # 训练前评估
             begin_accuracy = None
             begin_act_probs = None
-            net = self.policy_value_net.policy_value
+            net = self.policy_net.policy
             for i, data in enumerate(testing_loader):
                 test_batch, test_probs, test_advs, test_action, test_mask = data
                 if i == 0:
                     print("test_batch shape:", test_batch.shape, "test_probs shape:", test_probs.shape)
-                test_batch = test_batch.to(self.policy_value_net.device)
+                test_batch = test_batch.to(self.policy_net.device)
                 with torch.no_grad():
-                    act_probs, _ = net(test_batch)
+                    act_probs = net(test_batch)
                     if begin_act_probs is None:
                         begin_act_probs = act_probs
                         begin_accuracy = np.argmax(act_probs, axis=1) == np.argmax(test_probs.cpu().numpy(), axis=1)
@@ -255,10 +255,10 @@ class GRPOTrain():
                 if math.isnan(kl) or math.isnan(acc) or math.isnan(entropy) or \
                    math.isinf(kl) or math.isinf(acc) or math.isinf(entropy):
                     print(f"find nan or inf at step {i}!")
-                    self.policy_value_net.save_model(model_file)
+                    self.policy_net.save_model(model_file)
                     return
 
-            self.policy_value_net.save_model(model_file)
+            self.policy_net.save_model(model_file)
 
             # 训练后评估
             end_accuracy = None
@@ -266,9 +266,9 @@ class GRPOTrain():
             all_test_probs = None
             for i, data in enumerate(testing_loader):
                 test_batch, test_probs, test_advs, test_action, test_mask = data
-                test_batch = test_batch.to(self.policy_value_net.device)
+                test_batch = test_batch.to(self.policy_net.device)
                 with torch.no_grad():
-                    act_probs, _ = net(test_batch)
+                    act_probs = net(test_batch)
                     if all_test_probs is None:
                         all_test_probs = test_probs.cpu()
                     else:
@@ -308,7 +308,7 @@ class GRPOTrain():
             # ── test_play + EMA 指标更新 ──────────────────────────────
             print("running test_play for EMA metrics update...")
             sp = GRPOSelfPlay()
-            sp.policy_value_net = self.policy_value_net
+            sp.policy_net = self.policy_net
             (test_min_rl, _, _,
              test_max_rl, test_max_pc, test_min_pc,
              test_best_rl, test_worst_rl,

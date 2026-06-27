@@ -17,7 +17,7 @@ class PatchEmbed(nn.Module):
 class GameTransformer(nn.Module):
     """Decoder-only transformer for game action prediction.
     Input:  [B, C, H, W] game state
-    Output: (log_probs [B, num_actions], dummy [B, 1])
+    Output: log_probs [B, num_actions]
     """
     def __init__(self, embed_dim=64, depth=2, num_heads=4, mlp_ratio=2.0,
                  patch_size=2, num_actions=5, in_channels=4, dropout=0.1):
@@ -73,4 +73,4 @@ class GameTransformer(nn.Module):
 
         action_logits = self.action_head(x[:, -1])
         log_probs = torch.log_softmax(action_logits, dim=-1)
-        return log_probs, torch.zeros(B, 1, device=x.device)
+        return log_probs

@@ -16,7 +16,7 @@ if not os.path.exists(model_dir): os.makedirs(model_dir)
 model_file =  os.path.join(model_dir, 'model.pth')
 
 
-class PolicyValueNet():
+class PolicyNet():
     def __init__(self, input_width, input_height, output_size, model_file=None, device=None, l2_const=5e-5):
         self.input_channels = 4  # 输入通道数
         self.input_width = input_width
@@ -29,49 +29,48 @@ class PolicyValueNet():
         print("use", device)
 
         self.l2_const = l2_const
-        self.policy_value_net = GameTransformer(embed_dim=64, depth=2, num_heads=4,
+        self.net = GameTransformer(embed_dim=64, depth=2, num_heads=4,
                                                  num_actions=output_size, in_channels=4)
-        self.policy_value_net.to(device)
+        self.net.to(device)
 
-        self.optimizer = optim.AdamW(self.policy_value_net.parameters(), lr=1e-5, weight_decay=self.l2_const)
+        self.optimizer = optim.AdamW(self.net.parameters(), lr=1e-5, weight_decay=self.l2_const)
 
         if model_file and os.path.exists(model_file):
             print("Loading model", model_file)
             net_sd = torch.load(model_file, map_location=self.device)
             print("Load model", model_file, "success")
             print("Loading weight")
-            self.policy_value_net.load_state_dict(net_sd, strict=False)
+            self.net.load_state_dict(net_sd, strict=False)
             print("Load weight success")
         else:
             print("Initializing new model", model_file)
-            self.policy_value_net.init_weights()
+            self.net.init_weights()
             self.save_model(model_file)
         self.lr = 0
 
-    def print_netwark(self):
+    def print_network(self):
         x = torch.Tensor(1,4,20,10).to(self.device)
-        print(self.policy_value_net)
-        log_probs, _ = self.policy_value_net(x)
+        print(self.net)
+        log_probs = self.net(x)
         print("log_probs:", log_probs.size())
         print("policy probs:", torch.exp(log_probs).size())
 
-    def policy_value(self, state_batch):
+    def policy(self, state_batch):
         """
         输入: 一组游戏的当前状态
-        输出: 一组动作的概率和动作的得分
+        输出: 一组动作的概率
         """
         if torch.is_tensor(state_batch):
             state_batch_tensor = state_batch.to(self.device)
         else:
             state_batch_tensor = torch.FloatTensor(state_batch).to(self.device)
 
-        self.policy_value_net.eval()
+        self.net.eval()
         with torch.no_grad():
-            act_probs, value = self.policy_value_net.forward(state_batch_tensor)
+            act_probs = self.net.forward(state_batch_tensor)
 
         act_probs = np.exp(act_probs.cpu().numpy())
-        value = np.zeros(act_probs.shape[0])
-        return act_probs, value
+        return act_probs
         
 
     # GRPO 训练步骤
@@ -81,16 +80,14 @@ class PolicyValueNet():
         - policy_loss: PPO clip 损失，使用 GRPO 组相对优势
         - kl_loss: KL 散度惩罚，约束新策略相对参考策略
         - entropy: 熵正则化
-        - 无 value loss（value head 保留但训练时不使用）
         """
         state_batch = torch.FloatTensor(state_batch).to(self.device)
         ref_log_probs = torch.log(torch.FloatTensor(ref_probs) + 1e-10).to(self.device)
         advantages = torch.FloatTensor(advantages).unsqueeze(-1).to(self.device)
         action_batch = torch.LongTensor(action_batch).to(self.device)
 
-        self.policy_value_net.train()
-        log_probs, values = self.policy_value_net(state_batch)
-        # values 计算但不用于损失（纯 GRPO 不需要价值网络）
+        self.net.train()
+        log_probs = self.net(state_batch)
 
         # 取被选择动作的 log 概率
         actions = action_batch.unsqueeze(-1)
@@ -127,4 +124,4 @@ class PolicyValueNet():
     # 保存模型
     def save_model(self, model_file):
         """ save model params to file """
-        torch.save(self.policy_value_net.state_dict(), model_file)
+        torch.save(self.net.state_dict(), model_file)

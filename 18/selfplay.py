@@ -3,7 +3,7 @@ from datetime import datetime
 import numpy as np
 import torch
 
-from model import PolicyValueNet, data_dir, data_wait_dir, model_file
+from model import PolicyNet, data_dir, data_wait_dir, model_file
 from agent import Agent, ACTIONS
 from status import save_status_file, read_status_file
 
@@ -17,17 +17,17 @@ class GRPOSelfPlay():
         self.rollout_max_steps = 500    # 单局最大步数
         self.test_count = 10            # 测试次数
         self.max_step_count = 10000     # 最大步数限制
-        self.policy_value_net = None
+        self.policy_net = None
 
-    def get_action_from_policy(self, agent, policy_value_net, train=True):
+    def get_action_from_policy(self, agent, policy_net, train=True):
         """从策略网络采样一个动作（带动作掩码）"""
         state = np.array([agent.current_state()])
-        device = policy_value_net.device
+        device = policy_net.device
         state_tensor = torch.FloatTensor(state).to(device)
 
-        policy_value_net.policy_value_net.eval()
+        policy_net.net.eval()
         with torch.no_grad():
-            log_probs, _ = policy_value_net.policy_value_net(state_tensor)
+            log_probs = policy_net.net(state_tensor)
         probs = torch.exp(log_probs[0]).cpu().numpy()  # [5]
 
         if train:
@@ -67,7 +67,7 @@ class GRPOSelfPlay():
                 break
 
             state = agent.current_state().copy()
-            action, probs, log_prob = self.get_action_from_policy(agent, self.policy_value_net, train)
+            action, probs, log_prob = self.get_action_from_policy(agent, self.policy_net, train)
 
             trajectory.append({
                 "state": state,
@@ -104,7 +104,7 @@ class GRPOSelfPlay():
             agent = Agent(isRandomNextPiece=True)
             for _ in range(self.max_step_count):
                 action, _, _ = self.get_action_from_policy(
-                    agent, self.policy_value_net, train=False
+                    agent, self.policy_net, train=False
                 )
                 _, reward = agent.step(action)
                 if agent.terminal:
@@ -176,8 +176,8 @@ class GRPOSelfPlay():
             return
 
         # 加载模型用于数据收集
-        if self.policy_value_net is None:
-            self.policy_value_net = PolicyValueNet(
+        if self.policy_net is None:
+            self.policy_net = PolicyNet(
                 GAME_WIDTH, GAME_HEIGHT, GAME_ACTIONS_NUM, model_file=load_model_file
             )
         _last_model_mtime = os.path.getmtime(load_model_file)
@@ -217,7 +217,7 @@ class GRPOSelfPlay():
                 mtime = os.path.getmtime(current_model)
                 if mtime > _last_model_mtime:
                     print(f"Model updated, reloading from {current_model}")
-                    self.policy_value_net = PolicyValueNet(
+                    self.policy_net = PolicyNet(
                         GAME_WIDTH, GAME_HEIGHT, GAME_ACTIONS_NUM, model_file=current_model
                     )
                     _last_model_mtime = mtime
