@@ -55,20 +55,33 @@ model_dir = os.path.join(curr_dir, 'model', model_name)
 if not os.path.exists(model_dir): os.makedirs(model_dir)
 status_file = os.path.join(model_dir, 'status.json')
 status_file_bak = os.path.join(model_dir, 'status_bak.json')
-HISTORY_MAX = 100
+HISTORY_MAX = 1000
 
 
 def _default_state():
     return {
         "counters": {"agent": 0, "_agent": 0},
         "metrics": {
-            "grpo_piececount": 0,
-            "grpo_removedlines": 0, "grpo_steps": 0,
-            "grpo_reward_mean": 0, "grpo_reward_std": 0,
-            "grpo_piececount_min": 999999, "grpo_piececount_max": 0,
-            "grpo_removedlines_min": 999999, "grpo_removedlines_max": 0,
-            "grpo_removedlines_best": 0, "grpo_piececount_best": 0,
-            "grpo_removedlines_worst": 999999, "grpo_piececount_worst": 999999,
+            # GRPO player（selfplay，带 Dirichlet 噪声探索）
+            "grpo_piececount": 0,       # EMA: 玩家平均方块数
+            "grpo_removedlines": 0,     # EMA: 玩家平均消行数
+            "grpo_steps": 0,            # EMA: 玩家平均步数
+            "grpo_reward_mean": 0,
+            "grpo_reward_std": 0,
+            "grpo_piececount_min": 999999,  # EMA: 组内最少方块数
+            "grpo_piececount_max": 0,       # EMA: 组内最多方块数
+            "grpo_removedlines_best": 0,    # 历史最高消行数
+            "grpo_piececount_best": 0,      # 历史最高方块数
+            # test_play（纯贪婪，无噪声）
+            "test_piececount": 0,           # EMA: 贪婪平均方块数
+            "test_removedlines": 0,         # EMA: 贪婪平均消行数
+            "test_steps": 0,                # EMA: 贪婪平均步数
+            "test_piececount_best": 0,      # 历史最高贪婪方块数
+            "test_removedlines_best": 0,    # 历史最高贪婪消行数
+            # train 训练指标（EMA）
+            "train_acc": 0,
+            "train_kl": 0,
+            "train_entropy": 0,
         },
         "training": {"kl": 1e-2, "lr_multiplier": 1},
         "_accum": {"_sum_piececount": 0, "_sum_removedlines": 0, "_sum_steps": 0},
@@ -98,9 +111,10 @@ def _migrate(state: dict[str, Any]):
     for k in ["grpo_piececount", "grpo_removedlines", "grpo_steps",
               "grpo_reward_mean", "grpo_reward_std",
               "grpo_piececount_min", "grpo_piececount_max",
-              "grpo_removedlines_min", "grpo_removedlines_max",
               "grpo_removedlines_best", "grpo_piececount_best",
-              "grpo_removedlines_worst", "grpo_piececount_worst"]:
+              "test_piececount", "test_removedlines", "test_steps",
+              "test_piececount_best", "test_removedlines_best",
+              "train_acc", "train_kl", "train_entropy"]:
         if k in old:
             state["metrics"][k] = old.pop(k)
     for k in ("kl", "lr_multiplier"):
@@ -145,6 +159,7 @@ def _append_history(state: dict[str, Any]):
     n = max(_agent, 1)
     snapshot = {
         "agent": c.get("agent", 0),
+        # GRPO player
         "grpo_piececount": round(acc.get("_sum_piececount", 0) / n, 3),
         "grpo_removedlines": round(acc.get("_sum_removedlines", 0) / n, 3),
         "grpo_steps": round(acc.get("_sum_steps", 0) / n, 3),
@@ -152,12 +167,19 @@ def _append_history(state: dict[str, Any]):
         "grpo_reward_std": m.get("grpo_reward_std", 0),
         "grpo_piececount_min": m.get("grpo_piececount_min", 999999),
         "grpo_piececount_max": m.get("grpo_piececount_max", 0),
-        "grpo_removedlines_min": m.get("grpo_removedlines_min", 999999),
-        "grpo_removedlines_max": m.get("grpo_removedlines_max", 0),
         "grpo_removedlines_best": m.get("grpo_removedlines_best", 0),
         "grpo_piececount_best": m.get("grpo_piececount_best", 0),
-        "grpo_removedlines_worst": m.get("grpo_removedlines_worst", 999999),
-        "grpo_piececount_worst": m.get("grpo_piececount_worst", 999999),
+        # test_play
+        "test_piececount": m.get("test_piececount", 0),
+        "test_removedlines": m.get("test_removedlines", 0),
+        "test_steps": m.get("test_steps", 0),
+        "test_piececount_best": m.get("test_piececount_best", 0),
+        "test_removedlines_best": m.get("test_removedlines_best", 0),
+        # train 训练指标
+        "train_acc": m.get("train_acc", 0),
+        "train_kl": m.get("train_kl", 0),
+        "train_entropy": m.get("train_entropy", 0),
+        # training
         "kl": tr.get("kl", 0),
         "lr_multiplier": tr.get("lr_multiplier", 1),
         "modify": "",

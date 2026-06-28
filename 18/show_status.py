@@ -49,24 +49,22 @@ def show_status(max_history=0, as_json=False):
     print(f"  训练轮次:   {agent}")
     print("-" * 60)
 
-    pieces = m.get("grpo_piececount")
-    steps = m.get("grpo_steps")
-
-    if pieces is not None and pieces != 0:
-        print(f"  GRPO 平均消除行数: {fmt(m.get('grpo_removedlines'), 3)}")
-        print(f"  GRPO 平均方块数:   {fmt(pieces, 1)}")
-        print(f"  GRPO 平均步数:     {fmt(steps, 1)}")
-        print(f"  GRPO 奖励均值/方差: {fmt(m.get('grpo_reward_mean'), 3)} / {fmt(m.get('grpo_reward_std'), 3)}")
-        print(f"  GRPO 最少/多方块数:   {m.get('grpo_piececount_min', 0)} / {m.get('grpo_piececount_max', 0)}")
-        print(f"  GRPO 最少/多消除行数: {m.get('grpo_removedlines_min', 0)} / {m.get('grpo_removedlines_max', 0)}")
+    # test_play（纯贪婪，无噪声）
+    test_pc = m.get("test_piececount")
+    if test_pc is not None and test_pc != 0:
+        print("  [Test] test_play（纯贪婪，无噪声）")
+        print(f"    平均方块数:   {fmt(test_pc, 1)}")
+        print(f"    平均消行数:   {fmt(m.get('test_removedlines'), 3)}")
+        print(f"    平均步数:     {fmt(m.get('test_steps'), 1)}")
+        print(f"    历史最高:     方块={m.get('test_piececount_best', 0)}  消行={m.get('test_removedlines_best', 0)}")
     else:
-        print(f"  GRPO 分数:         (尚未采集数据)")
+        print("  [Test] （尚未运行 test_play）")
     print("-" * 60)
-    print(f"  历史最多/少消除行数:  {m.get('grpo_removedlines_best', 0)} / {m.get('grpo_removedlines_worst', 0)}")
-    print(f"  历史最高/低方块数:    {m.get('grpo_piececount_best', 0)} / {m.get('grpo_piececount_worst', 0)}")
-    print("-" * 60)
-    print(f"  KL 散度:           {fmt(tr.get('kl'), 6)}")
-    print(f"  学习率倍率:        {fmt(tr.get('lr_multiplier'), 4)}")
+    print(f"  KL 散度:      {fmt(tr.get('kl'), 6)}")
+    print(f"  学习率倍率:   {fmt(tr.get('lr_multiplier'), 4)}")
+    train_acc = m.get("train_acc")
+    if train_acc is not None and train_acc != 0:
+        print(f"  Train EMA:    acc={fmt(train_acc, 4)}  kl={fmt(m.get('train_kl'), 5)}  entropy={fmt(m.get('train_entropy'), 4)}")
 
     # 历史趋势
     if history and max_history > 0:
@@ -86,43 +84,58 @@ def show_status(max_history=0, as_json=False):
         print("=" * 60)
         print(label)
         print("-" * 60)
-        print(f"  {'Agent':>6}  {'Pieces':>7}  {'Lines':>6}  {'Steps':>7}  {'Min':>5}  {'Max':>5}  {'RwdStd':>7}")
+        header = (f"  {'Agent':>6}  "
+                  f"{'GRPO_Pc':>7} {'GRPO_Ln':>6} {'GRPO_St':>7} {'GRPO_Mn':>7} {'GRPO_Mx':>7} {'GRPO_Rs':>7}  "
+                  f"{'Test_Pc':>7} {'Test_Ln':>6} {'Test_St':>7} {'TBest':>5}  "
+                  f"{'TR_Acc':>6} {'TR_KL':>7} {'TR_Ent':>6}")
+        print(header)
         print("-" * 60)
         for h in display:
-            print(f"  {h.get('agent', 0):>6}  {h.get('grpo_piececount', 0):>7.1f}  "
-                  f"{h.get('grpo_removedlines', 0):>6.3f}  "
-                  f"{h.get('grpo_steps', 0):>7.1f}  "
-                  f"{int(h.get('grpo_piececount_min', 0)):>5}  {int(h.get('grpo_piececount_max', 0)):>5}  "
-                  f"{h.get('grpo_reward_std', 0):>7.3f}")
+            print(f"  {h.get('agent', 0):>6}  "
+                  f"{h.get('grpo_piececount', 0):>7.1f} "
+                  f"{h.get('grpo_removedlines', 0):>6.3f} "
+                  f"{h.get('grpo_steps', 0):>7.1f} "
+                  f"{h.get('grpo_piececount_min', 0):>7.1f} "
+                  f"{h.get('grpo_piececount_max', 0):>7.1f} "
+                  f"{h.get('grpo_reward_std', 0):>7.3f}  "
+                  f"{h.get('test_piececount', 0):>7.1f} "
+                  f"{h.get('test_removedlines', 0):>6.3f} "
+                  f"{h.get('test_steps', 0):>7.1f} "
+                  f"{h.get('test_piececount_best', 0):>5}  "
+                  f"{h.get('train_acc', 0):>6.4f} "
+                  f"{h.get('train_kl', 0):>7.5f} "
+                  f"{h.get('train_entropy', 0):>6.4f}")
         print("=" * 60)
     elif history:
         print("=" * 60)
         print(f"  历史记录: 共 {len(history)} 条 (用 --history N 查看)")
         if len(history) >= 2:
             first, last = history[0], history[-1]
-            print(f"  起始(agent {first['agent']}): pieces={first['grpo_piececount']:.1f}  "
-                  f"lines={first['grpo_removedlines']:.3f}")
-            print(f"  当前(agent {last['agent']}): pieces={last['grpo_piececount']:.1f}  "
-                  f"lines={last['grpo_removedlines']:.3f}")
+            print(f"  起始(agent {first['agent']}): "
+                  f"player pc={first.get('grpo_piececount', 0):.1f} ln={first.get('grpo_removedlines', 0):.3f}  "
+                  f"test pc={first.get('test_piececount', 0):.1f} ln={first.get('test_removedlines', 0):.3f}")
+            print(f"  当前(agent {last['agent']}):  "
+                  f"player pc={last.get('grpo_piececount', 0):.1f} ln={last.get('grpo_removedlines', 0):.3f}  "
+                  f"test pc={last.get('test_piececount', 0):.1f} ln={last.get('test_removedlines', 0):.3f}")
         print("=" * 60)
 
 
 if __name__ == '__main__':
-    max_hist = 20  # 默认显示 20 条
+    max_hist = 30  # 默认显示 30 条
     as_json = False
     for arg in sys.argv[1:]:
         if arg == '--json':
             as_json = True
         elif arg == '--history' or arg == '-H':
-            max_hist = 20
+            max_hist = 30
         elif arg.startswith('-H') and len(arg) > 2:
             max_hist = int(arg[2:])
         elif arg.isdigit():
             max_hist = int(arg)
 
     if max_hist == 0 and '--history' in sys.argv:
-        max_hist = 20
+        max_hist = 30
     elif max_hist == 0 and '-H' in sys.argv:
-        max_hist = 20
+        max_hist = 30
 
     show_status(max_history=max_hist, as_json=as_json)

@@ -225,8 +225,14 @@ class GRPOTrain():
             print(f"lr_multiplier: {self.lr_multiplier}, learn_rate: {self.learn_rate * self.lr_multiplier}")
 
             # 训练循环
+            _sum_acc = _sum_kl = _sum_ent = 0.0
+            _num_batches = 0
             for i, data in enumerate(training_loader):
                 acc, kl, entropy = self.policy_update(data)
+                _sum_acc += acc
+                _sum_kl += kl
+                _sum_ent += entropy
+                _num_batches += 1
                 if i % 10 == 0:
                     print(i, "acc:", acc, "kl:", kl, "entropy:", entropy)
 
@@ -242,6 +248,10 @@ class GRPOTrain():
                         GAME_WIDTH, GAME_HEIGHT, GAME_ACTIONS_NUM, model_file=model_file + ".bak", l2_const=1e-4
                     )
                     return
+
+            avg_acc = _sum_acc / max(_num_batches, 1)
+            avg_kl  = _sum_kl  / max(_num_batches, 1)
+            avg_ent = _sum_ent / max(_num_batches, 1)
 
             self.policy_net.save_model(model_file)
 
@@ -278,43 +288,47 @@ class GRPOTrain():
 
             print(f"probs begin_accuracy: {np.mean(begin_accuracy):.4f} end_accuracy: {np.mean(end_accuracy):.4f}")
 
-            # KL 散度：使用训练中最后一个 batch 的真实 KL
+            # KL 散度：使用训练循环的平均 KL
             status = read_status_file()
-            set_status_value(status, "kl", kl, 0.1)
+            alpha = 0.1
+            m = status["metrics"]
+            m["train_acc"]     = round(m.get("train_acc",     0) * (1 - alpha) + avg_acc * alpha, 5)
+            m["train_kl"]      = round(m.get("train_kl",      0) * (1 - alpha) + avg_kl  * alpha, 5)
+            m["train_entropy"] = round(m.get("train_entropy", 0) * (1 - alpha) + avg_ent * alpha, 5)
+            # lr_multiplier 调整使用 EMA 平滑后的 train_kl
+            set_status_value(status, "kl", avg_kl, alpha)
             total_kl = status["training"]["kl"]
 
             if total_kl > self.kl_targ * 2:
                 self.lr_multiplier /= 1.1
             elif total_kl < self.kl_targ / 2:
                 self.lr_multiplier *= 1.1
-            self.lr_multiplier = np.clip(self.lr_multiplier, 0.1, 10)
+            self.lr_multiplier = np.clip(self.lr_multiplier, 0.5, 5.0)
 
             status["training"]["lr_multiplier"] = float(self.lr_multiplier)
             save_status_file(status)
+            print(f"train EMA: acc={m['train_acc']:.4f} kl={m['train_kl']:.5f} entropy={m['train_entropy']:.4f}")
 
             # ── test_play + EMA 指标更新 ──────────────────────────────
             print("running test_play for EMA metrics update...")
             sp = GRPOSelfPlay()
             sp.policy_net = self.policy_net
-            (test_min_rl, _, _,
-             test_max_rl, test_max_pc, test_min_pc,
-             test_best_rl, test_worst_rl,
+            (_, _, _,
+             _, test_max_pc, _,
+             test_best_rl, _,
              test_avg_pc, test_avg_rl, test_avg_st) = sp.test_play()
 
             status = read_status_file()
-
-            # 历史最值
-            status["metrics"]["grpo_removedlines_best"] = max(status["metrics"]["grpo_removedlines_best"], test_best_rl)
-            status["metrics"]["grpo_piececount_best"]   = max(status["metrics"]["grpo_piececount_best"],   test_max_pc)
-            status["metrics"]["grpo_removedlines_worst"] = min(status["metrics"]["grpo_removedlines_worst"], test_worst_rl)
-            status["metrics"]["grpo_piececount_worst"]   = min(status["metrics"]["grpo_piececount_worst"],   test_min_pc)
-
-            # EMA 移动平均（贪婪策略）
             alpha = 0.1
             m = status["metrics"]
-            m["grpo_piececount"]     = round(m.get("grpo_piececount",     0) * (1 - alpha) + test_avg_pc * alpha, 3)
-            m["grpo_removedlines"]   = round(m.get("grpo_removedlines",   0) * (1 - alpha) + test_avg_rl * alpha, 3)
-            m["grpo_steps"]          = round(m.get("grpo_steps",          0) * (1 - alpha) + test_avg_st * alpha, 3)
+
+            # test_play EMA（纯贪婪，无噪声）
+            m["test_piececount"]       = round(m.get("test_piececount",       0) * (1 - alpha) + test_avg_pc * alpha, 3)
+            m["test_removedlines"]     = round(m.get("test_removedlines",     0) * (1 - alpha) + test_avg_rl * alpha, 3)
+            m["test_steps"]            = round(m.get("test_steps",            0) * (1 - alpha) + test_avg_st * alpha, 3)
+            # test_play 历史最值（无噪声真实表现）
+            m["test_piececount_best"]    = max(m.get("test_piececount_best",    0), test_max_pc)
+            m["test_removedlines_best"]  = max(m.get("test_removedlines_best",  0), test_best_rl)
 
             # 最近一轮采集的奖励统计（从 dataset 的 advantage 计算）
             all_advs = np.array([step[2] for file_steps in self.dataset.data.values() for step in file_steps])
@@ -322,8 +336,9 @@ class GRPOTrain():
             m["grpo_reward_std"]  = round(float(all_advs.std()),  3) if len(all_advs) > 0 else 0.0
 
             save_status_file(status)
-            print(f"test: avg_pieces={test_avg_pc:.1f} avg_lines={test_avg_rl:.3f} avg_steps={test_avg_st:.1f}")
-            print(f"EMA updated: pieces={m['grpo_piececount']} lines={m['grpo_removedlines']} steps={m['grpo_steps']}")
+            print(f"test: greedy avg_pieces={test_avg_pc:.1f} avg_lines={test_avg_rl:.3f} avg_steps={test_avg_st:.1f}")
+            print(f"test EMA: pieces={m['test_piececount']} lines={m['test_removedlines']} "
+                  f"best_pieces={m['test_piececount_best']} best_lines={m['test_removedlines_best']}")
 
             print(f"kl:{kl:.6f} vs {self.kl_targ} lr_multiplier:{self.lr_multiplier} "
                   f"lr:{self.learn_rate * self.lr_multiplier}")
