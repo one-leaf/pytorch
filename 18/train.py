@@ -143,12 +143,12 @@ class GRPOTrain():
         self.lr_multiplier = 1.0
         self.max_files = 5000          # data 目录最大保留文件数
         self.min_new_files = 200       # 每轮训练至少需要的新文件数（5 workers × ~60 games/20min ≈ 300）
-        self.kl_targ = 0.05
+        self.kl_targ = 0.3           # 实际 KL 约 0.6~0.8，目标设为 0.3 允许充分学习
 
         # GRPO 超参数
         self.grpo_clip_eps = 0.2
-        self.grpo_beta = 0.005
-        self.grpo_entropy_weight = 0.001
+        self.grpo_beta = 0.02         # KL 惩罚系数，beta*KL=0.02*0.8=0.016，与 policy_loss 量级可比
+        self.grpo_entropy_weight = 0.005  # 熵正则，防止过早收敛到确定性策略
 
     def policy_update(self, sample_data):
         """GRPO 策略更新"""
