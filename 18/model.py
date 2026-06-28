@@ -114,11 +114,13 @@ class PolicyNet():
         policy_loss = -torch.min(surr1, surr2).mean()
 
         # KL 散度: sum(p_new * (log_p_new - log_p_ref))
-        probs_new = torch.exp(log_probs)  # [B, 5]
-        kl_div = (probs_new * (log_probs - ref_log_probs)).sum(dim=-1).mean()
+        # clamp 防止 log_probs=-inf 时 probs=0，0*(-inf)=NaN
+        log_probs_safe = torch.clamp(log_probs, min=-20.0)
+        probs_new = torch.exp(log_probs_safe)  # [B, 5]
+        kl_div = (probs_new * (log_probs_safe - ref_log_probs)).sum(dim=-1).mean()
 
         # 熵正则化
-        entropy = -(probs_new * log_probs).sum(dim=-1).mean()
+        entropy = -(probs_new * log_probs_safe).sum(dim=-1).mean()
 
         # 总损失
         loss = policy_loss + beta * kl_div - entropy_weight * entropy
