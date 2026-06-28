@@ -19,157 +19,138 @@ GAME_WIDTH, GAME_HEIGHT = 10, 20
 
 
 class GRPODataset(torch.utils.data.Dataset):
-    """GRPO 数据集，读取 pickle 格式: (state, ref_prob, advantage, action, mask)"""
-    def __init__(self, data_dir, max_keep_size, test_size, epochs=5):
+    """GRPO 数据集，每个 pkl 包含一局游戏的所有 step:
+    (state, ref_prob, advantage, action, mask, prev_action)
+    """
+    def __init__(self, data_dir, max_files, min_new_files):
         self.data_dir = data_dir
-        self.max_keep_size = max_keep_size
-        self.test_size = test_size
-        self.epoch = epochs
+        self.max_files = max_files
+        self.min_new_files = min_new_files
         self.file_list = []
         self.newsample = []
         self.data = {}
         self._flat_index = []
         self._test_flat_index = []
-        self.copy_wait_file()
+        self.move_wait_files()
         self.load_game_files()
-        self.calc_data()
-        self.test = False
+        self.load_data()
 
     def __len__(self):
-        return len(self._flat_index) if not self.test else len(self._test_flat_index)
+        return len(self._flat_index)
 
     def __getitem__(self, index):
-        fn, step_idx = (self._flat_index if not self.test else self._test_flat_index)[index]
+        fn, step_idx = self._flat_index[index]
         state, ref_prob, advantage, action, mask, prev_action = self.data[fn][step_idx]
-        state = torch.from_numpy(state).float()
-        ref_prob = torch.from_numpy(ref_prob).float()
-        advantage = torch.as_tensor(advantage).float()
-        action = torch.as_tensor(action).long()
-        mask = torch.as_tensor(mask).long()
-        prev_action = torch.as_tensor(prev_action).long()
-        return state, ref_prob, advantage, action, mask, prev_action
+        return (torch.from_numpy(state).float(),
+                torch.from_numpy(ref_prob).float(),
+                torch.as_tensor(advantage).float(),
+                torch.as_tensor(action).long(),
+                torch.as_tensor(mask).long(),
+                torch.as_tensor(prev_action).long())
+
+    def move_wait_files(self):
+        """将 wait 目录的 pkl 移入 data 目录"""
+        files = sorted(glob.glob(os.path.join(data_wait_dir, "*.pkl")),
+                       key=lambda x: os.path.getmtime(x))
+        time.sleep(1)
+
+        if len(files) < self.min_new_files:
+            print(f"Insufficient data: have {len(files)}, need {self.min_new_files}")
+            raise Exception("NEED MORE DATA TO TRAIN")
+
+        for fn in files:
+            dest = os.path.join(self.data_dir, os.path.basename(fn))
+            if os.path.exists(dest):
+                os.remove(dest)
+            os.rename(fn, dest)
+            self.newsample.append(dest)
+
+        print(f"moved {len(files)} files to train, newsample: {len(self.newsample)}")
 
     def load_game_files(self):
-        print("start load files name ... ")
-        start_time = time.time()
-        files = glob.glob(os.path.join(self.data_dir, "*.pkl"))
-        files = sorted(files, key=lambda x: os.path.getmtime(x), reverse=True)
+        """加载 data 目录的文件列表，按时间倒序，超出 max_files 的删除"""
+        files = sorted(glob.glob(os.path.join(self.data_dir, "*.pkl")),
+                       key=lambda x: os.path.getmtime(x), reverse=True)
 
-        if len(files) == 0:
+        if not files:
             print("no data files found")
             return
 
-        modified_time = os.path.getmtime(files[-1])
-        self.first_time = time.localtime(modified_time)
-        print("first time:", time.strftime('%y-%m-%d %H:%M:%S', self.first_time))
-        modified_time = os.path.getmtime(files[0])
-        self.last_time = time.localtime(modified_time)
-        print("last time:", time.strftime('%y-%m-%d %H:%M:%S', self.last_time))
+        print(f"first time: {time.strftime('%y-%m-%d %H:%M:%S', time.localtime(os.path.getmtime(files[-1])))}")
+        print(f"last time:  {time.strftime('%y-%m-%d %H:%M:%S', time.localtime(os.path.getmtime(files[0])))}")
 
-        delcount = 0
-        for i, filename in enumerate(files):
-            if i >= self.max_keep_size or os.path.getsize(filename) == 0:
+        for filename in files:
+            if len(self.file_list) >= self.max_files or os.path.getsize(filename) == 0:
                 os.remove(filename)
-                delcount += 1
             else:
                 self.file_list.append(filename)
 
-        pay_time = round(time.time() - start_time, 2)
-        print("loaded data, total:", len(self.file_list), "delete:", delcount, "paid time:", pay_time)
+        print(f"loaded {len(self.file_list)} files, deleted {len(files) - len(self.file_list)}")
 
-    def calc_data(self):
-        print("start load data to memory ...")
+    def load_data(self):
+        """将所有 pkl 加载到内存，构建 flat index"""
         start_time = time.time()
-        for i, fn in enumerate(self.file_list):
+        for fn in self.file_list:
             try:
                 with open(fn, "rb") as f:
                     steps = pickle.load(f)
-
                 for step in steps:
                     state, ref_prob, advantage, action, mask, prev_action = step
                     assert state.shape == (2, 20, 10), f'error: state shape {state.shape}'
                     assert ref_prob.shape == (5,), f'error: ref_prob shape {ref_prob.shape}'
                     assert not np.isnan(advantage), f'error: advantage is Nan'
                     assert not np.isinf(advantage), f'error: advantage is Inf'
-
                 self.data[fn] = steps
-
             except Exception as e:
-                print(f"filename {fn} error can't load: {e}")
+                print(f"file {fn} error: {e}")
                 if os.path.exists(fn):
                     os.remove(fn)
-                if fn in self.file_list:
-                    self.file_list.remove(fn)
-                continue
+                self.file_list.remove(fn)
 
-        # advantage 已在 selfplay 中组内正规化，此处不再归一化
-        advs = np.array([step[2] for file_steps in self.data.values() for step in file_steps])
-        print(f"Advantage stats: min={advs.min():.3f} mean={advs.mean():.3f} max={advs.max():.3f} std={advs.std():.3f}")
+        advs = np.array([step[2] for steps in self.data.values() for step in steps])
+        if len(advs) > 0:
+            print(f"Advantage stats: min={advs.min():.3f} mean={advs.mean():.3f} max={advs.max():.3f} std={advs.std():.3f}")
 
-        # 构建 flat index: [(filename, step_idx), ...]
         self._flat_index = [(fn, i) for fn in self.file_list for i in range(len(self.data[fn]))]
         self._test_flat_index = [(fn, i) for fn in self.newsample for i in range(len(self.data.get(fn, [])))]
 
-        pay_time = round(time.time() - start_time, 2)
-        print("loaded to memory, paid time:", pay_time)
-        print("load data end")
-
-    def copy_wait_file(self):
-        print("start copy wait file to train ...")
-        files = glob.glob(os.path.join(data_wait_dir, "*.pkl"))
-        movefiles = sorted(files, key=lambda x: os.path.getmtime(x))
-        time.sleep(1)
-
-        i = -1
-        movefiles_count = self.max_keep_size // self.epoch
-        if len(movefiles) < movefiles_count:
-            print(f"Insufficient data: have {len(movefiles)}, need {movefiles_count}")
-            raise Exception("NEED SOME NEW DATA TO TRAIN")
-
-        for i, fn in enumerate(movefiles):
-            filename = os.path.basename(fn)
-            savefile = os.path.join(self.data_dir, filename)
-            if os.path.exists(savefile):
-                os.remove(savefile)
-            os.rename(fn, savefile)
-            if self.test_size == -1 or len(self.newsample) < self.test_size:
-                self.newsample.append(savefile)
-            if (i + 1) >= movefiles_count and len(movefiles) - i <= 2 * movefiles_count:
-                break
-
-        print(f"mv {i + 1}/{len(movefiles)} files to train")
-
-    def curr_size(self):
-        return len(self.file_list)
+        print(f"loaded {len(self._flat_index)} steps in {time.time() - start_time:.1f}s")
 
 
 class GRPOTestDataset(torch.utils.data.Dataset):
-    """测试数据集：共享父数据集的 data，通过 test=True 切换 flat index"""
+    """测试数据集：使用 newsample（本轮新采集的文件）"""
     def __init__(self, parent: GRPODataset):
         self.parent = parent
-        parent.test = True
 
     def __len__(self):
         return len(self.parent._test_flat_index)
 
     def __getitem__(self, index):
-        return self.parent.__getitem__(index)
+        fn, step_idx = self.parent._test_flat_index[index]
+        state, ref_prob, advantage, action, mask, prev_action = self.parent.data[fn][step_idx]
+        return (torch.from_numpy(state).float(),
+                torch.from_numpy(ref_prob).float(),
+                torch.as_tensor(advantage).float(),
+                torch.as_tensor(action).long(),
+                torch.as_tensor(mask).long(),
+                torch.as_tensor(prev_action).long())
+
 
 class GRPOTrain():
     def __init__(self):
-        self.batch_size = 32            # 每批训练样本数
+        self.batch_size = 64
         self.learn_rate = 1e-5
         self.lr_multiplier = 1.0
-        self.buffer_size = 204800       # 最大保存数据量
-        self.epochs = 50                # 每次更新的训练步骤数
-        self.kl_targ = 0.05             # KL 目标
+        self.max_files = 5000          # data 目录最大保留文件数
+        self.min_new_files = 200       # 每轮训练至少需要的新文件数（5 workers × ~60 games/20min ≈ 300）
+        self.kl_targ = 0.05
 
         # GRPO 超参数
         self.grpo_clip_eps = 0.2
         self.grpo_beta = 0.005
         self.grpo_entropy_weight = 0.001
 
-    def policy_update(self, sample_data, epochs=1):
+    def policy_update(self, sample_data):
         """GRPO 策略更新"""
         state_batch, ref_probs_batch, advantages_batch, actions_batch, masks_batch, prev_actions_batch = sample_data
         acc, kl, entropy = self.policy_net.train_step_grpo(
@@ -201,7 +182,7 @@ class GRPOTrain():
             while True:
                 try:
                     print("start data loader")
-                    self.dataset = GRPODataset(data_dir, self.buffer_size, -1, epochs=self.epochs)
+                    self.dataset = GRPODataset(data_dir, self.max_files, self.min_new_files)
                     self.testdataset = GRPOTestDataset(self.dataset)
                     print("end data loader")
                     break
@@ -245,7 +226,7 @@ class GRPOTrain():
 
             # 训练循环
             for i, data in enumerate(training_loader):
-                acc, kl, entropy = self.policy_update(data, self.epochs)
+                acc, kl, entropy = self.policy_update(data)
                 if i % 10 == 0:
                     print(i, "acc:", acc, "kl:", kl, "entropy:", entropy)
 
@@ -266,6 +247,7 @@ class GRPOTrain():
             end_accuracy = None
             end_act_probs = None
             all_test_probs = None
+            end_accuracy = np.array([])
             for i, data in enumerate(testing_loader):
                 test_batch, test_probs, test_advs, test_action, test_mask, test_prev_action = data
                 test_batch = test_batch.to(self.policy_net.device)
