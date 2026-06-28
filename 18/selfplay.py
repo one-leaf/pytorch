@@ -29,6 +29,8 @@ class GRPOSelfPlay():
         policy_net.net.eval()
         with torch.no_grad():
             log_probs = policy_net.net(state_tensor, prev_action_tensor)
+        if torch.isnan(log_probs).any():
+            log_probs = torch.zeros_like(log_probs)
         probs = torch.exp(log_probs[0]).cpu().numpy()  # [5]
 
         if train:
@@ -53,6 +55,17 @@ class GRPOSelfPlay():
             action = np.argmax(probs)
             
         return int(action), probs, log_probs[0].cpu().numpy()
+
+    def _check_and_fix_nan(self, policy_net):
+        """检测模型是否输出 NaN，如有则重新初始化权重"""
+        device = policy_net.device
+        dummy_state = torch.zeros(1, 2, 20, 10, device=device)
+        dummy_prev = torch.zeros(1, dtype=torch.long, device=device)
+        with torch.no_grad():
+            out = policy_net.net(dummy_state, dummy_prev)
+        if torch.isnan(out).any():
+            print("WARNING: model output contains NaN, reinitializing weights!")
+            policy_net.net.init_weights()
 
     def play_one_game(self, isRandomNextPiece=True, nextPiecesList=None, train=True):
         """用当前策略玩一局游戏，记录完整轨迹"""
@@ -184,6 +197,7 @@ class GRPOSelfPlay():
             self.policy_net = PolicyNet(
                 GAME_WIDTH, GAME_HEIGHT, GAME_ACTIONS_NUM, model_file=load_model_file
             )
+        self._check_and_fix_nan(self.policy_net)
         _last_model_mtime = os.path.getmtime(load_model_file)
 
         # 检查重玩列表
@@ -224,6 +238,7 @@ class GRPOSelfPlay():
                     self.policy_net = PolicyNet(
                         GAME_WIDTH, GAME_HEIGHT, GAME_ACTIONS_NUM, model_file=current_model
                     )
+                    self._check_and_fix_nan(self.policy_net)
                     _last_model_mtime = mtime
 
             # 确定本局方块序列

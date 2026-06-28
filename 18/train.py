@@ -199,7 +199,7 @@ class GRPOTrain():
             )
 
             # 训练前评估
-            begin_accuracy = None
+            begin_accuracy = np.array([])
             begin_act_probs = None
             net = self.policy_net.policy
             for i, data in enumerate(testing_loader):
@@ -237,8 +237,10 @@ class GRPOTrain():
 
                 if math.isnan(kl) or math.isnan(acc) or math.isnan(entropy) or \
                    math.isinf(kl) or math.isinf(acc) or math.isinf(entropy):
-                    print(f"find nan or inf at step {i}!")
-                    self.policy_net.save_model(model_file)
+                    print(f"find nan or inf at step {i}, discarding corrupted model, restoring from bak!")
+                    self.policy_net = PolicyNet(
+                        GAME_WIDTH, GAME_HEIGHT, GAME_ACTIONS_NUM, model_file=model_file + ".bak", l2_const=1e-4
+                    )
                     return
 
             self.policy_net.save_model(model_file)
