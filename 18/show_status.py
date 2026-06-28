@@ -37,29 +37,23 @@ def show_status(max_history=0, as_json=False):
     history = state.get("history", [])
 
     # 基本信息
-    print("=" * 60)
-    print(f"  训练状态  ({model_name})")
-    print("=" * 60)
-    print(f"  创建时间:   {info.get('create', '-')}")
-    print(f"  最后更新:   {info.get('modify', '-')}")
-
+    print("=" * 120)
+    print(f"  创建时间:   {info.get('create', '-')}  最后更新:   {info.get('modify', '-')}")
     agent = c.get("agent", 0)
     if agent == 0 and "_agent" in c:
         agent = c["_agent"]
     print(f"  训练轮次:   {agent}")
-    print("-" * 60)
+    print("-" * 120)
 
     # test_play（纯贪婪，无噪声）
     test_pc = m.get("test_piececount")
     if test_pc is not None and test_pc != 0:
         print("  [Test] test_play（纯贪婪，无噪声）")
-        print(f"    平均方块数:   {fmt(test_pc, 1)}")
-        print(f"    平均消行数:   {fmt(m.get('test_removedlines'), 3)}")
-        print(f"    平均步数:     {fmt(m.get('test_steps'), 1)}")
+        print(f"    平均方块数:   {fmt(test_pc, 1)}    平均步数:     {fmt(m.get('test_steps'), 1)}    平均消行数:   {fmt(m.get('test_removedlines'), 3)}")
         print(f"    历史最高:     方块={m.get('test_piececount_best', 0)}  消行={m.get('test_removedlines_best', 0)}")
     else:
         print("  [Test] （尚未运行 test_play）")
-    print("-" * 60)
+    print("-" * 120)
     print(f"  KL 散度:      {fmt(tr.get('kl'), 6)}")
     print(f"  学习率倍率:   {fmt(tr.get('lr_multiplier'), 4)}")
     train_acc = m.get("train_acc")
@@ -81,15 +75,15 @@ def show_status(max_history=0, as_json=False):
             display = history
             label = f"  训练记录 ({len(history)} 条):"
 
-        print("=" * 60)
+        print("=" * 120)
         print(label)
-        print("-" * 60)
+        print("-" * 120)
         header = (f"  {'Agent':>6}  "
                   f"{'GRPO_Pc':>7} {'GRPO_Ln':>6} {'GRPO_St':>7} {'GRPO_Mn':>7} {'GRPO_Mx':>7} {'GRPO_Rs':>7}  "
                   f"{'Test_Pc':>7} {'Test_Ln':>6} {'Test_St':>7} {'TBest':>5}  "
                   f"{'TR_Acc':>6} {'TR_KL':>7} {'TR_Ent':>6}")
         print(header)
-        print("-" * 60)
+        print("-" * 120)
         for h in display:
             print(f"  {h.get('agent', 0):>6}  "
                   f"{h.get('grpo_piececount', 0):>7.1f} "
@@ -105,9 +99,9 @@ def show_status(max_history=0, as_json=False):
                   f"{h.get('train_acc', 0):>6.4f} "
                   f"{h.get('train_kl', 0):>7.5f} "
                   f"{h.get('train_entropy', 0):>6.4f}")
-        print("=" * 60)
+        print("=" * 120)
     elif history:
-        print("=" * 60)
+        print("=" * 120)
         print(f"  历史记录: 共 {len(history)} 条 (用 --history N 查看)")
         if len(history) >= 2:
             first, last = history[0], history[-1]
@@ -117,7 +111,7 @@ def show_status(max_history=0, as_json=False):
             print(f"  当前(agent {last['agent']}):  "
                   f"player pc={last.get('grpo_piececount', 0):.1f} ln={last.get('grpo_removedlines', 0):.3f}  "
                   f"test pc={last.get('test_piececount', 0):.1f} ln={last.get('test_removedlines', 0):.3f}")
-        print("=" * 60)
+        print("=" * 120)
 
 
 if __name__ == '__main__':
