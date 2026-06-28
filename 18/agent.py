@@ -426,7 +426,7 @@ class Agent():
         # 面板碰撞掩码 (0/1)
         self.board_mask = self.getblankboard()
         # 状态： 0 下落过程中 1 更换方块 2 结束一局
-        self.state = 0
+        self.done = False
         # 当前prices所有动作
         # self.actions=[]
 
@@ -436,8 +436,8 @@ class Agent():
         self.last_reward = -1
         # 盘面的状态
         self.need_update_status=True
-        self.status = np.zeros((4, boardheight, boardwidth), dtype=np.int8)
-        self.set_status()
+        self.state = np.zeros((2, boardheight, boardwidth), dtype=np.int8)
+        self.set_state()
         # 下一个可用步骤
         self.availables=np.ones(ACTONS_LEN, dtype=np.int8)
         self.set_availables()
@@ -465,12 +465,12 @@ class Agent():
         agent.limitstep=self.limitstep
         agent.board=np.copy(self.board)
         agent.board_mask=np.copy(self.board_mask)
-        agent.state=self.state
+        agent.done = self.done
         agent.availables=np.copy(self.availables)
         agent.downcount = self.downcount
         agent.last_reward = self.last_reward
         agent.need_update_status = self.need_update_status
-        agent.status = np.copy(self.status)
+        agent.state = np.copy(self.state)
         agent.start_time = self.start_time
         return agent
 
@@ -497,12 +497,12 @@ class Agent():
             'limitstep': self.limitstep,
             'board': self.board.copy(),
             'board_mask': self.board_mask.copy(),
-            'state': self.state,
+            'done': self.done,
             'availables': self.availables.copy(),
             'downcount': self.downcount,
             'last_reward': self.last_reward,
             'need_update_status': self.need_update_status,
-            'status': self.status.copy(),
+            'state': self.state.copy(),
         }
 
     @classmethod
@@ -530,12 +530,12 @@ class Agent():
         agent.limitstep = snapshot['limitstep']
         agent.board = snapshot['board']
         agent.board_mask = snapshot['board_mask']
-        agent.state = snapshot['state']
+        agent.done = snapshot['done']
         agent.availables = snapshot['availables']
         agent.downcount = snapshot['downcount']
         agent.last_reward = snapshot['last_reward']
         agent.need_update_status = snapshot['need_update_status']
-        agent.status = snapshot['status']
+        agent.state = snapshot['state']
         return agent
     
     def clonePiece(self, piece):
@@ -713,7 +713,6 @@ class Agent():
                 self.downcount = 0
                 self.last_reward = self.piececount
 
-            self.state = 1
             self.piecesteps = 0
             self.piececount += 1
 
@@ -722,36 +721,18 @@ class Agent():
 
             if not self.validposition_mask(self.fallpiece, ay=0):
                 self.terminal = True
-                self.state = 1
+                self.done = True
                 removedlines = -1
-        else:
-            self.state = 0
 
         # 以下顺序不能变
-        self.set_status()
+        self.set_state()
         self.set_availables()
 
-        return self.state, removedlines
+        return removedlines
 
-    def set_status(self):
-        piece = self.fallpiece
-        shapedraw = pieces[piece['shape']][piece['rotation']]
-        self.status[2] = self.status[0] | self.status[1]
-        self.status[0] = nb_get_status(shapedraw, piece['x'], piece['y'])
-
-        if self.piecesteps == 0:
-            self.status[1] = self.board_mask.copy()
-            self.status[3] = np.zeros((boardheight, boardwidth), dtype=np.int8)
-            piece_template = pieces[self.nextpiece['shape']]
-            for i in range(4):
-                _rotation = i%len(piece_template)
-                _piece = piece_template[_rotation]
-                nb_put_status(self.status[3], _piece, 0, i*5)
-            piece_template = pieces[self.fallpiece['shape']]
-            for i in range(4):
-                _rotation = i%len(piece_template)
-                _piece = piece_template[_rotation]
-                nb_put_status(self.status[3], _piece, 5, i*5)
+    def set_state(self):
+        self.state[0] = self.board_mask.copy()
+        self.state[1] = self.get_fallpiece_board()
 
     def is_status_optimal(self):
         return self.piececount<=self.score*2.5+self.must_reward_piece_count
@@ -868,5 +849,5 @@ class Agent():
     # 背景 + 最后一步 + 合并后旋转90度
     # 返回 [3, height, width]
     def current_state(self):
-        return self.status
+        return self.state
 

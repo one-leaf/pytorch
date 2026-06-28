@@ -18,7 +18,7 @@ model_file =  os.path.join(model_dir, 'model.pth')
 
 class PolicyNet():
     def __init__(self, input_width, input_height, output_size, model_file=None, device=None, l2_const=5e-5):
-        self.input_channels = 4  # 输入通道数
+        self.input_channels = 2  # 输入通道数
         self.input_width = input_width
         self.input_height = input_height
         self.input_size = input_width * input_height
@@ -30,7 +30,7 @@ class PolicyNet():
 
         self.l2_const = l2_const
         self.net = GameTransformer(embed_dim=64, depth=2, num_heads=4,
-                                                 num_actions=output_size, in_channels=4)
+                                                 num_actions=output_size, in_channels=2)
         self.net.to(device)
 
         self.optimizer = optim.AdamW(self.net.parameters(), lr=1e-5, weight_decay=self.l2_const)
@@ -49,15 +49,16 @@ class PolicyNet():
         self.lr = 0
 
     def print_network(self):
-        x = torch.Tensor(1,4,20,10).to(self.device)
+        x = torch.Tensor(1,2,20,10).to(self.device)
+        prev_action = torch.LongTensor([0]).to(self.device)
         print(self.net)
-        log_probs = self.net(x)
+        log_probs = self.net(x, prev_action)
         print("log_probs:", log_probs.size())
         print("policy probs:", torch.exp(log_probs).size())
 
-    def policy(self, state_batch):
+    def policy(self, state_batch, prev_action):
         """
-        输入: 一组游戏的当前状态
+        输入: 一组游戏的当前状态 [B, 2, 20, 10], 上一步动作 [B]
         输出: 一组动作的概率
         """
         if torch.is_tensor(state_batch):
@@ -65,16 +66,21 @@ class PolicyNet():
         else:
             state_batch_tensor = torch.FloatTensor(state_batch).to(self.device)
 
+        if not torch.is_tensor(prev_action):
+            prev_action = torch.LongTensor(prev_action).to(self.device)
+        else:
+            prev_action = prev_action.to(self.device)
+
         self.net.eval()
         with torch.no_grad():
-            act_probs = self.net.forward(state_batch_tensor)
+            act_probs = self.net.forward(state_batch_tensor, prev_action)
 
         act_probs = np.exp(act_probs.cpu().numpy())
         return act_probs
         
 
     # GRPO 训练步骤
-    def train_step_grpo(self, state_batch, ref_probs, advantages, action_batch, mask_batch, lr,
+    def train_step_grpo(self, state_batch, ref_probs, advantages, action_batch, mask_batch, prev_action_batch, lr,
                         clip_eps=0.2, beta=0.05, entropy_weight=0.01):
         """GRPO 训练步骤
         - policy_loss: PPO clip 损失，使用 GRPO 组相对优势
@@ -85,9 +91,10 @@ class PolicyNet():
         ref_log_probs = torch.log(torch.FloatTensor(ref_probs) + 1e-10).to(self.device)
         advantages = torch.FloatTensor(advantages).unsqueeze(-1).to(self.device)
         action_batch = torch.LongTensor(action_batch).to(self.device)
+        prev_action_batch = torch.LongTensor(prev_action_batch).to(self.device)
 
         self.net.train()
-        log_probs = self.net(state_batch)
+        log_probs = self.net(state_batch, prev_action_batch)
 
         # 取被选择动作的 log 概率
         actions = action_batch.unsqueeze(-1)

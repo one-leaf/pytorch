@@ -19,15 +19,16 @@ class GRPOSelfPlay():
         self.max_step_count = 10000     # 最大步数限制
         self.policy_net = None
 
-    def get_action_from_policy(self, agent, policy_net, train=True):
+    def get_action_from_policy(self, agent, policy_net, prev_action, train=True):
         """从策略网络采样一个动作（带动作掩码）"""
         state = np.array([agent.current_state()])
         device = policy_net.device
         state_tensor = torch.FloatTensor(state).to(device)
+        prev_action_tensor = torch.LongTensor([prev_action]).to(device)
 
         policy_net.net.eval()
         with torch.no_grad():
-            log_probs = policy_net.net(state_tensor)
+            log_probs = policy_net.net(state_tensor, prev_action_tensor)
         probs = torch.exp(log_probs[0]).cpu().numpy()  # [5]
 
         if train:
@@ -60,25 +61,26 @@ class GRPOSelfPlay():
         else:
             agent = Agent(isRandomNextPiece=isRandomNextPiece)
 
-        trajectory = []  # [(state, action, ref_prob, log_prob), ...]
+        trajectory = []
+        prev_action = 3  # KEY_NONE
 
         for _ in range(self.rollout_max_steps):
             if agent.terminal:
                 break
 
             state = agent.current_state().copy()
-            action, probs, log_prob = self.get_action_from_policy(agent, self.policy_net, train)
+            action, probs, log_prob = self.get_action_from_policy(agent, self.policy_net, prev_action, train)
 
             trajectory.append({
                 "state": state,
                 "action": action,
+                "prev_action": prev_action,
                 "ref_prob": probs.copy(),
                 "log_prob": log_prob.copy(),
-                "piececount": agent.piececount,
-                "score": agent.piececount,
             })
 
-            _, reward = agent.step(action)
+            prev_action = action
+            agent.step(action)
 
         return agent, trajectory
 
@@ -102,11 +104,13 @@ class GRPOSelfPlay():
 
         for _ in range(test_count):
             agent = Agent(isRandomNextPiece=True)
+            prev_action = 3  # KEY_NONE
             for _ in range(self.max_step_count):
                 action, _, _ = self.get_action_from_policy(
-                    agent, self.policy_net, train=False
+                    agent, self.policy_net, prev_action, train=False
                 )
-                _, reward = agent.step(action)
+                prev_action = action
+                agent.step(action)
                 if agent.terminal:
                     break
 
@@ -270,7 +274,8 @@ class GRPOSelfPlay():
                 # 一局的所有 step 合并为一个文件
                 game_steps = [
                     (step_data["state"], step_data["ref_prob"],
-                     float(step_rewards[i]), step_data["action"], 1)
+                     float(step_rewards[i]), step_data["action"], 1,
+                     step_data["prev_action"])
                     for i, step_data in enumerate(trajectory)
                 ]
                 filename = f"{filetime}-{game_counter:06d}-r{run_idx}.pkl"

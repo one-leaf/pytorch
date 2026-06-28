@@ -3,7 +3,7 @@ import torch.nn as nn
 
 
 class PatchEmbed(nn.Module):
-    def __init__(self, in_channels=4, embed_dim=64, patch_size=2):
+    def __init__(self, in_channels=2, embed_dim=64, patch_size=2):
         super().__init__()
         self.proj = nn.Conv2d(in_channels, embed_dim,
                               kernel_size=patch_size, stride=patch_size)
@@ -16,19 +16,22 @@ class PatchEmbed(nn.Module):
 
 class GameTransformer(nn.Module):
     """Decoder-only transformer for game action prediction.
-    Input:  [B, C, H, W] game state
+    Input:  state [B, 2, 20, 10], prev_action [B]
     Output: log_probs [B, num_actions]
+
+    Sequence: [prev_action_token, 50 state patches, action_BOS_token]
     """
     def __init__(self, embed_dim=64, depth=2, num_heads=4, mlp_ratio=2.0,
-                 patch_size=2, num_actions=5, in_channels=4, dropout=0.1):
+                 patch_size=2, num_actions=5, in_channels=2, dropout=0.1):
         super().__init__()
         self.embed_dim = embed_dim
         self.num_actions = num_actions
 
         self.patch_embed = PatchEmbed(in_channels, embed_dim, patch_size)
         num_patches = (20 // patch_size) * (10 // patch_size)
-        seq_len = num_patches + 1
+        seq_len = 1 + num_patches + 1  # prev_action + patches + action_BOS
 
+        self.prev_action_embed = nn.Embedding(num_actions, embed_dim)
         self.pos_embed = nn.Parameter(torch.zeros(1, seq_len, embed_dim))
         self.action_token = nn.Parameter(torch.zeros(1, 1, embed_dim))
         self.pos_drop = nn.Dropout(dropout)
@@ -61,11 +64,14 @@ class GameTransformer(nn.Module):
                 nn.init.zeros_(m.bias)
                 nn.init.ones_(m.weight)
 
-    def forward(self, x):
+    def forward(self, x, prev_action):
         B = x.shape[0]
-        x = self.patch_embed(x)
-        action_token = self.action_token.expand(B, -1, -1)
-        x = torch.cat([x, action_token], dim=1)
+
+        prev_token = self.prev_action_embed(prev_action).unsqueeze(1)  # [B, 1, D]
+        patches = self.patch_embed(x)                                   # [B, 50, D]
+        action_token = self.action_token.expand(B, -1, -1)             # [B, 1, D]
+
+        x = torch.cat([prev_token, patches, action_token], dim=1)      # [B, 52, D]
         x = self.pos_drop(x + self.pos_embed)
 
         causal_mask = self.causal_mask.to(x.device)

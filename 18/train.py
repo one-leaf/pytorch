@@ -40,13 +40,14 @@ class GRPODataset(torch.utils.data.Dataset):
 
     def __getitem__(self, index):
         fn, step_idx = (self._flat_index if not self.test else self._test_flat_index)[index]
-        state, ref_prob, advantage, action, mask = self.data[fn][step_idx]
+        state, ref_prob, advantage, action, mask, prev_action = self.data[fn][step_idx]
         state = torch.from_numpy(state).float()
         ref_prob = torch.from_numpy(ref_prob).float()
         advantage = torch.as_tensor(advantage).float()
         action = torch.as_tensor(action).long()
         mask = torch.as_tensor(mask).long()
-        return state, ref_prob, advantage, action, mask
+        prev_action = torch.as_tensor(prev_action).long()
+        return state, ref_prob, advantage, action, mask, prev_action
 
     def load_game_files(self):
         print("start load files name ... ")
@@ -85,8 +86,8 @@ class GRPODataset(torch.utils.data.Dataset):
                     steps = pickle.load(f)
 
                 for step in steps:
-                    state, ref_prob, advantage, action, mask = step
-                    assert state.shape == (4, 20, 10), f'error: state shape {state.shape}'
+                    state, ref_prob, advantage, action, mask, prev_action = step
+                    assert state.shape == (2, 20, 10), f'error: state shape {state.shape}'
                     assert ref_prob.shape == (5,), f'error: ref_prob shape {ref_prob.shape}'
                     assert not np.isnan(advantage), f'error: advantage is Nan'
                     assert not np.isinf(advantage), f'error: advantage is Inf'
@@ -170,9 +171,9 @@ class GRPOTrain():
 
     def policy_update(self, sample_data, epochs=1):
         """GRPO 策略更新"""
-        state_batch, ref_probs_batch, advantages_batch, actions_batch, masks_batch = sample_data
+        state_batch, ref_probs_batch, advantages_batch, actions_batch, masks_batch, prev_actions_batch = sample_data
         acc, kl, entropy = self.policy_net.train_step_grpo(
-            state_batch, ref_probs_batch, advantages_batch, actions_batch, masks_batch,
+            state_batch, ref_probs_batch, advantages_batch, actions_batch, masks_batch, prev_actions_batch,
             self.learn_rate * self.lr_multiplier,
             clip_eps=self.grpo_clip_eps,
             beta=self.grpo_beta,
@@ -221,12 +222,13 @@ class GRPOTrain():
             begin_act_probs = None
             net = self.policy_net.policy
             for i, data in enumerate(testing_loader):
-                test_batch, test_probs, test_advs, test_action, test_mask = data
+                test_batch, test_probs, test_advs, test_action, test_mask, test_prev_action = data
                 if i == 0:
                     print("test_batch shape:", test_batch.shape, "test_probs shape:", test_probs.shape)
                 test_batch = test_batch.to(self.policy_net.device)
+                test_prev_action = test_prev_action.to(self.policy_net.device)
                 with torch.no_grad():
-                    act_probs = net(test_batch)
+                    act_probs = net(test_batch, test_prev_action)
                     if begin_act_probs is None:
                         begin_act_probs = act_probs
                         begin_accuracy = np.argmax(act_probs, axis=1) == np.argmax(test_probs.cpu().numpy(), axis=1)
@@ -248,7 +250,7 @@ class GRPOTrain():
                     print(i, "acc:", acc, "kl:", kl, "entropy:", entropy)
 
                 if i == 0:
-                    state_batch, ref_probs_batch, advantages_batch, actions_batch, masks_batch = data
+                    state_batch, ref_probs_batch, advantages_batch, actions_batch, masks_batch, prev_actions_batch = data
                     print("advantages_batch:", advantages_batch[:10])
                     print("actions_batch:", actions_batch[:10])
 
@@ -265,10 +267,11 @@ class GRPOTrain():
             end_act_probs = None
             all_test_probs = None
             for i, data in enumerate(testing_loader):
-                test_batch, test_probs, test_advs, test_action, test_mask = data
+                test_batch, test_probs, test_advs, test_action, test_mask, test_prev_action = data
                 test_batch = test_batch.to(self.policy_net.device)
+                test_prev_action = test_prev_action.to(self.policy_net.device)
                 with torch.no_grad():
-                    act_probs = net(test_batch)
+                    act_probs = net(test_batch, test_prev_action)
                     if all_test_probs is None:
                         all_test_probs = test_probs.cpu()
                     else:
