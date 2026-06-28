@@ -87,6 +87,10 @@ class PolicyNet():
         - kl_loss: KL 散度惩罚，约束新策略相对参考策略
         - entropy: 熵正则化
         """
+        # 每次更新学习率（lr_multiplier 动态调整）
+        for param_group in self.optimizer.param_groups:
+            param_group['lr'] = lr
+
         state_batch = torch.FloatTensor(state_batch).to(self.device)
         ref_log_probs = torch.log(torch.FloatTensor(ref_probs) + 1e-10).to(self.device)
         advantages = torch.FloatTensor(advantages).unsqueeze(-1).to(self.device)
@@ -101,8 +105,9 @@ class PolicyNet():
         log_prob_new = log_probs.gather(-1, actions)              # [B, 1]
         log_prob_old = ref_log_probs.gather(-1, actions).detach()  # [B, 1]
 
-        # PPO 风格 ratio
-        ratios = torch.exp(log_prob_new - log_prob_old)            # [B, 1]
+        # PPO 风格 ratio，clamp 输入防止 exp 溢出产生 NaN
+        log_ratio = torch.clamp(log_prob_new - log_prob_old, -10.0, 10.0)
+        ratios = torch.exp(log_ratio)                            # [B, 1]
         surr1 = ratios * advantages
         surr2 = torch.clamp(ratios, 1 - clip_eps, 1 + clip_eps) * advantages
 
@@ -120,6 +125,7 @@ class PolicyNet():
 
         self.optimizer.zero_grad()
         loss.backward()
+        torch.nn.utils.clip_grad_norm_(self.net.parameters(), max_norm=1.0)
         self.optimizer.step()
 
         # 指标
