@@ -251,7 +251,7 @@ class GRPOTrain():
                     _epoch_kl += kl
                     _epoch_ent += entropy
                     _epoch_batches += 1
-                    if i % 10 == 0:
+                    if i % 100 == 0:
                         print(f"epoch {epoch+1}/{self.n_epochs}", i, "acc:", acc, "kl:", kl, "entropy:", entropy)
 
                     if epoch == 0 and i == 0:
