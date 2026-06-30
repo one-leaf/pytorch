@@ -49,7 +49,7 @@ class GRPODataset(torch.utils.data.Dataset):
                 torch.as_tensor(prev_action).long())
 
     def move_wait_files(self):
-        """将 wait 目录的 pkl 移入 data 目录"""
+        """将 wait 目录的 pkl 全部移入 data 目录（清空 wait，防止堆积）"""
         files = sorted(glob.glob(os.path.join(data_wait_dir, "*.pkl")),
                        key=lambda x: os.path.getmtime(x))
         time.sleep(1)
@@ -68,7 +68,7 @@ class GRPODataset(torch.utils.data.Dataset):
         print(f"moved {len(files)} files to train, newsample: {len(self.newsample)}")
 
     def load_game_files(self):
-        """加载 data 目录的文件列表，按时间倒序，超出 max_files 的删除"""
+        """加载 data 目录的文件列表，按时间倒序，动态删除以保证每局被训练 n_train_times 次"""
         files = sorted(glob.glob(os.path.join(self.data_dir, "*.pkl")),
                        key=lambda x: os.path.getmtime(x), reverse=True)
 
@@ -79,13 +79,21 @@ class GRPODataset(torch.utils.data.Dataset):
         print(f"first time: {time.strftime('%y-%m-%d %H:%M:%S', time.localtime(os.path.getmtime(files[-1])))}")
         print(f"last time:  {time.strftime('%y-%m-%d %H:%M:%S', time.localtime(os.path.getmtime(files[0])))}")
 
-        for filename in files:
-            if len(self.file_list) >= self.max_files or os.path.getsize(filename) == 0:
-                os.remove(filename)
-            else:
-                self.file_list.append(filename)
+        # 动态删除：每轮删除 newsample // n_train_times 个最旧文件
+        # 数据池稳定在 (T-1)*P，每局存活恰好 T 轮
+        n_new = len(self.newsample)
+        to_delete_by_rotation = n_new // self.n_train_times if n_new >= self.n_train_times else 0
+        keep_count = min(len(files), self.max_files)
+        keep_count = max(0, keep_count - to_delete_by_rotation)
 
-        print(f"loaded {len(self.file_list)} files, deleted {len(files) - len(self.file_list)}")
+        for i, filename in enumerate(files):
+            if i < keep_count and os.path.getsize(filename) > 0:
+                self.file_list.append(filename)
+            else:
+                os.remove(filename)
+
+        deleted = len(files) - len(self.file_list)
+        print(f"loaded {len(self.file_list)} files, deleted {deleted} (pool rotation: {to_delete_by_rotation})")
 
     def load_data(self):
         """将所有 pkl 加载到内存，构建 flat index"""
@@ -141,14 +149,16 @@ class GRPOTrain():
         self.batch_size = 64
         self.learn_rate = 1e-5
         self.lr_multiplier = 1.0
-        self.max_files = 5000          # data 目录最大保留文件数
-        self.min_new_files = 200       # 每轮训练至少需要的新文件数（5 workers × ~60 games/20min ≈ 300）
+        self.max_files = 15000         # data 目录最大保留文件数（安全上限，需 ≥ 2 × P × n_train_times）
+        self.n_train_times = 3         # 每局严格保证被训练的轮数
+        self.min_new_files = 1         # 至少有1个新文件就训练（不限制移动数量，清空 wait 目录）
         self.kl_targ = 0.3           # 实际 KL 约 0.6~0.8，目标设为 0.3 允许充分学习
 
         # GRPO 超参数
         self.grpo_clip_eps = 0.2
         self.grpo_beta = 0.02         # KL 惩罚系数，beta*KL=0.02*0.8=0.016，与 policy_loss 量级可比
         self.grpo_entropy_weight = 0.005  # 熵正则，防止过早收敛到确定性策略
+        self.n_epochs = 1             # 每轮训练只跑 1 个 epoch，训练次数由 min_new_files 控制
 
     def policy_update(self, sample_data):
         """GRPO 策略更新"""
@@ -191,9 +201,6 @@ class GRPOTrain():
                     time.sleep(30)
 
             dataset_len = len(self.dataset)
-            training_loader = torch.utils.data.DataLoader(
-                self.dataset, batch_size=self.batch_size, shuffle=True, num_workers=0
-            )
             testing_loader = torch.utils.data.DataLoader(
                 self.testdataset, batch_size=self.batch_size, shuffle=False, num_workers=0
             )
@@ -224,30 +231,44 @@ class GRPOTrain():
             self.lr_multiplier = status["training"]["lr_multiplier"]
             print(f"lr_multiplier: {self.lr_multiplier}, learn_rate: {self.learn_rate * self.lr_multiplier}")
 
-            # 训练循环
+            # 训练循环（n_epochs 个 epoch，保证每局被训练 n_epochs 次）
             _sum_acc = _sum_kl = _sum_ent = 0.0
             _num_batches = 0
-            for i, data in enumerate(training_loader):
-                acc, kl, entropy = self.policy_update(data)
-                _sum_acc += acc
-                _sum_kl += kl
-                _sum_ent += entropy
-                _num_batches += 1
-                if i % 10 == 0:
-                    print(i, "acc:", acc, "kl:", kl, "entropy:", entropy)
+            for epoch in range(self.n_epochs):
+                training_loader = torch.utils.data.DataLoader(
+                    self.dataset, batch_size=self.batch_size, shuffle=True, num_workers=0
+                )
+                _epoch_acc = _epoch_kl = _epoch_ent = 0.0
+                _epoch_batches = 0
+                for i, data in enumerate(training_loader):
+                    acc, kl, entropy = self.policy_update(data)
+                    _sum_acc += acc
+                    _sum_kl += kl
+                    _sum_ent += entropy
+                    _num_batches += 1
+                    _epoch_acc += acc
+                    _epoch_kl += kl
+                    _epoch_ent += entropy
+                    _epoch_batches += 1
+                    if i % 10 == 0:
+                        print(f"epoch {epoch+1}/{self.n_epochs}", i, "acc:", acc, "kl:", kl, "entropy:", entropy)
 
-                if i == 0:
-                    state_batch, ref_probs_batch, advantages_batch, actions_batch, masks_batch, prev_actions_batch = data
-                    print("advantages_batch:", advantages_batch[:10])
-                    print("actions_batch:", actions_batch[:10])
+                    if epoch == 0 and i == 0:
+                        state_batch, ref_probs_batch, advantages_batch, actions_batch, masks_batch, prev_actions_batch = data
+                        print("advantages_batch:", advantages_batch[:10])
+                        print("actions_batch:", actions_batch[:10])
 
-                if math.isnan(kl) or math.isnan(acc) or math.isnan(entropy) or \
-                   math.isinf(kl) or math.isinf(acc) or math.isinf(entropy):
-                    print(f"find nan or inf at step {i}, discarding corrupted model, restoring from bak!")
-                    self.policy_net = PolicyNet(
-                        GAME_WIDTH, GAME_HEIGHT, GAME_ACTIONS_NUM, model_file=model_file + ".bak", l2_const=1e-4
-                    )
-                    return
+                    if math.isnan(kl) or math.isnan(acc) or math.isnan(entropy) or \
+                       math.isinf(kl) or math.isinf(acc) or math.isinf(entropy):
+                        print(f"find nan or inf at epoch {epoch+1} step {i}, discarding corrupted model, restoring from bak!")
+                        self.policy_net = PolicyNet(
+                            GAME_WIDTH, GAME_HEIGHT, GAME_ACTIONS_NUM, model_file=model_file + ".bak", l2_const=1e-4
+                        )
+                        return
+                e_acc = _epoch_acc / max(_epoch_batches, 1)
+                e_kl  = _epoch_kl  / max(_epoch_batches, 1)
+                e_ent = _epoch_ent / max(_epoch_batches, 1)
+                print(f"epoch {epoch+1} done: acc={e_acc:.4f} kl={e_kl:.5f} entropy={e_ent:.4f}")
 
             avg_acc = _sum_acc / max(_num_batches, 1)
             avg_kl  = _sum_kl  / max(_num_batches, 1)
