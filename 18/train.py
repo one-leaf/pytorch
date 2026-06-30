@@ -22,10 +22,11 @@ class GRPODataset(torch.utils.data.Dataset):
     """GRPO 数据集，每个 pkl 包含一局游戏的所有 step:
     (state, ref_prob, advantage, action, mask, prev_action)
     """
-    def __init__(self, data_dir, max_files, min_new_files):
+    def __init__(self, data_dir, max_files, min_new_files, n_train_times=3):
         self.data_dir = data_dir
         self.max_files = max_files
         self.min_new_files = min_new_files
+        self.n_train_times = n_train_times
         self.file_list = []
         self.newsample = []
         self.data = {}
@@ -192,7 +193,7 @@ class GRPOTrain():
             while True:
                 try:
                     print("start data loader")
-                    self.dataset = GRPODataset(data_dir, self.max_files, self.min_new_files)
+                    self.dataset = GRPODataset(data_dir, self.max_files, self.min_new_files, self.n_train_times)
                     self.testdataset = GRPOTestDataset(self.dataset)
                     print("end data loader")
                     break
