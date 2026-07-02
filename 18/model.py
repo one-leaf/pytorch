@@ -47,6 +47,9 @@ class PolicyNet():
             self.net.init_weights()
             self.save_model(model_file)
         self.lr = 0
+        self.r_running_mean = 15.0
+        self.r_running_std = 1.0
+        self.r_ema_alpha = 0.01
 
     def print_network(self):
         x = torch.Tensor(1,2,20,10).to(self.device)
@@ -108,6 +111,13 @@ class PolicyNet():
         log_probs, values = self.net(state_batch, prev_action_batch)
         values = values.squeeze(-1)  # [B]
 
+        # ── 用 EMA running stats 归一化 R ────────────────────────────
+        r_mean = R_batch.mean().item()
+        r_std = R_batch.std().item() + 1e-8
+        self.r_running_mean = self.r_ema_alpha * self.r_running_mean + (1 - self.r_ema_alpha) * r_mean
+        self.r_running_std = self.r_ema_alpha * self.r_running_std + (1 - self.r_ema_alpha) * r_std
+        R_norm = (R_batch - self.r_running_mean) / (self.r_running_std + 1e-8)
+
         # ── GAE: 按游戏分组计算步级别优势 ──────────────────────────
         B = values.shape[0]
         advantages = torch.zeros(B, device=self.device)
@@ -115,14 +125,14 @@ class PolicyNet():
         for gid in set(game_ids):
             idx = [i for i, g in enumerate(game_ids) if g == gid]
             if len(idx) <= 1:
-                advantages[idx[0]] = R_batch[idx[0]] - values[idx[0]].detach()
+                advantages[idx[0]] = R_norm[idx[0]] - values[idx[0]].detach()
                 continue
 
             V = values[idx]
-            R = R_batch[idx[0]]
+            R = R_norm[idx[0]]
             n = len(idx)
 
-            # rewards: 全零，最后一步为 R
+            # rewards: 全零，最后一步为 R_norm
             rewards = torch.zeros(n, device=self.device)
             rewards[-1] = R
 
@@ -156,10 +166,7 @@ class PolicyNet():
         surr2 = torch.clamp(ratios, 1 - clip_eps, 1 + clip_eps) * advantages
         policy_loss = -torch.min(surr1, surr2).mean()
 
-        # ── Value loss (MSE: V(s) 预测标准化后的 R) ─────────────────
-        R_mean = R_batch.mean()
-        R_std = R_batch.std() + 1e-8
-        R_norm = (R_batch - R_mean) / R_std
+        # ── Value loss (MSE: V(s) 预测归一化后的 R) ─────────────────
         value_loss = ((values - R_norm) ** 2).mean()
 
         # ── KL 散度 ──────────────────────────────────────────────
