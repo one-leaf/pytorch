@@ -118,7 +118,12 @@ class GRPODataset(torch.utils.data.Dataset):
 
         Rs = np.array([step[6] for steps in self.data.values() for step in steps])
         if len(Rs) > 0:
-            print(f"R stats: min={Rs.min():.1f} mean={Rs.mean():.1f} max={Rs.max():.1f}")
+            self.r_mean = float(Rs.mean())
+            self.r_std = float(Rs.std())
+            print(f"R stats: min={Rs.min():.1f} mean={self.r_mean:.2f} std={self.r_std:.2f} max={Rs.max():.1f}")
+        else:
+            self.r_mean = 15.0
+            self.r_std = 1.0
 
         self._flat_index = [(fn, i) for fn in self.file_list for i in range(len(self.data[fn]))]
         self._test_flat_index = [(fn, i) for fn in self.newsample for i in range(len(self.data.get(fn, [])))]
@@ -165,15 +170,16 @@ class GRPOTrain():
     def policy_update(self, sample_data):
         """GRPO 策略更新（带 GAE 信用分配）"""
         state_batch, ref_probs_batch, log_probs_old_batch, actions_batch, prev_actions_batch, game_ids_batch, R_batch = sample_data
-        acc, kl, entropy, value_loss, r_mean, r_std = self.policy_net.train_step_grpo(
+        acc, kl, entropy, value_loss = self.policy_net.train_step_grpo(
             state_batch, ref_probs_batch, log_probs_old_batch, actions_batch, None, prev_actions_batch,
             game_ids_batch, R_batch,
             self.learn_rate * self.lr_multiplier,
+            self.dataset.r_mean, self.dataset.r_std,
             clip_eps=self.grpo_clip_eps,
             beta=self.grpo_beta,
             entropy_weight=self.grpo_entropy_weight
         )
-        return acc, kl, entropy, value_loss, r_mean, r_std
+        return acc, kl, entropy, value_loss
 
     def run(self):
         """启动 GRPO 训练"""
@@ -244,7 +250,7 @@ class GRPOTrain():
                 _epoch_acc = _epoch_kl = _epoch_ent = _epoch_vl = 0.0
                 _epoch_batches = 0
                 for i, data in enumerate(training_loader):
-                    acc, kl, entropy, value_loss, r_mean, r_std = self.policy_update(data)
+                    acc, kl, entropy, value_loss = self.policy_update(data)
                     _sum_acc += acc
                     _sum_kl += kl
                     _sum_ent += entropy
@@ -258,7 +264,7 @@ class GRPOTrain():
                     if i % 100 == 0:
                         print(f"epoch {epoch+1}/{self.n_epochs}", i,
                               "acc:", acc, "kl:", kl, "entropy:", entropy, "vloss:", value_loss,
-                              "r_mean:", round(r_mean, 2), "r_std:", round(r_std, 2))
+                              "r_mean:", round(self.dataset.r_mean, 2), "r_std:", round(self.dataset.r_std, 2))
 
                     if epoch == 0 and i == 0:
                         state_batch, ref_probs_batch, log_probs_old_batch, actions_batch, prev_actions_batch, game_ids_batch, R_batch = data
@@ -282,8 +288,8 @@ class GRPOTrain():
             avg_kl  = _sum_kl  / max(_num_batches, 1)
             avg_ent = _sum_ent / max(_num_batches, 1)
             avg_vl  = _sum_vl  / max(_num_batches, 1)
-            avg_r_mean = r_mean
-            avg_r_std = r_std
+            avg_r_mean = self.dataset.r_mean
+            avg_r_std = self.dataset.r_std
 
             self.policy_net.save_model(model_file)
 

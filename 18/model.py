@@ -35,21 +35,13 @@ class PolicyNet():
 
         self.optimizer = optim.AdamW(self.net.parameters(), lr=1e-5, weight_decay=self.l2_const)
 
-        self.r_running_mean = 15.0
-        self.r_running_std = 1.0
-        self.r_ema_alpha = 0.01
-
         if model_file and os.path.exists(model_file):
             print("Loading model", model_file)
-            checkpoint = torch.load(model_file, map_location=self.device)
-            if isinstance(checkpoint, dict) and 'model_state_dict' in checkpoint:
-                self.net.load_state_dict(checkpoint['model_state_dict'], strict=False)
-                self.r_running_mean = checkpoint.get('r_running_mean', 15.0)
-                self.r_running_std = checkpoint.get('r_running_std', 1.0)
-                print(f"Load model + running stats (mean={self.r_running_mean:.2f}, std={self.r_running_std:.2f})")
+            net_sd = torch.load(model_file, map_location=self.device)
+            if isinstance(net_sd, dict) and 'model_state_dict' in net_sd:
+                self.net.load_state_dict(net_sd['model_state_dict'], strict=False)
             else:
-                self.net.load_state_dict(checkpoint, strict=False)
-                print("Load model (old format, no running stats)")
+                self.net.load_state_dict(net_sd, strict=False)
             print("Load weight success")
         else:
             print("Initializing new model", model_file)
@@ -90,7 +82,7 @@ class PolicyNet():
 
     # GRPO 训练步骤（带 Value Head + GAE 信用分配）
     def train_step_grpo(self, state_batch, ref_probs, log_probs_old, action_batch, _mask_batch, prev_action_batch,
-                        game_ids, R_batch, lr,
+                        game_ids, R_batch, lr, r_mean, r_std,
                         clip_eps=0.2, beta=0.05, entropy_weight=0.01,
                         gamma=0.99, lam=0.95, vf_coef=0.5):
         """GRPO + V(s) 训练步骤
@@ -117,12 +109,8 @@ class PolicyNet():
         log_probs, values = self.net(state_batch, prev_action_batch)
         values = values.squeeze(-1)  # [B]
 
-        # ── 用 EMA running stats 归一化 R ────────────────────────────
-        r_mean = R_batch.mean().item()
-        r_std = R_batch.std().item() + 1e-8
-        self.r_running_mean = self.r_ema_alpha * self.r_running_mean + (1 - self.r_ema_alpha) * r_mean
-        self.r_running_std = self.r_ema_alpha * self.r_running_std + (1 - self.r_ema_alpha) * r_std
-        R_norm = (R_batch - self.r_running_mean) / (self.r_running_std + 1e-8)
+        # ── 用数据集全局统计量归一化 R ────────────────────────────
+        R_norm = (R_batch - r_mean) / (r_std + 1e-8)
         R_norm = torch.clamp(R_norm, -5.0, 5.0)
 
         # ── GAE: 按游戏分组计算步级别优势 ──────────────────────────
@@ -196,13 +184,9 @@ class PolicyNet():
         predicted = torch.argmax(log_probs, dim=1)
         accuracy = (predicted == action_batch).float().mean()
 
-        return accuracy.item(), kl_div.item(), entropy.item(), value_loss.item(), self.r_running_mean, self.r_running_std
+        return accuracy.item(), kl_div.item(), entropy.item(), value_loss.item()
 
     # 保存模型
     def save_model(self, model_file):
-        """ save model params + running stats to file """
-        torch.save({
-            'model_state_dict': self.net.state_dict(),
-            'r_running_mean': self.r_running_mean,
-            'r_running_std': self.r_running_std,
-        }, model_file)
+        """ save model params to file """
+        torch.save(self.net.state_dict(), model_file)
