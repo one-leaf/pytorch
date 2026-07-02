@@ -264,8 +264,8 @@ class GRPOTrain():
                         print("R_batch:", R_batch[:10])
                         print("actions_batch:", actions_batch[:10])
 
-                    if math.isnan(kl) or math.isnan(acc) or math.isnan(entropy) or \
-                       math.isinf(kl) or math.isinf(acc) or math.isinf(entropy):
+                    if math.isnan(kl) or math.isnan(acc) or math.isnan(entropy) or math.isnan(value_loss) or \
+                       math.isinf(kl) or math.isinf(acc) or math.isinf(entropy) or math.isinf(value_loss):
                         print(f"find nan or inf at epoch {epoch+1} step {i}, discarding corrupted model, restoring from bak!")
                         self.policy_net = PolicyNet(
                             GAME_WIDTH, GAME_HEIGHT, GAME_ACTIONS_NUM, model_file=model_file + ".bak", l2_const=1e-4

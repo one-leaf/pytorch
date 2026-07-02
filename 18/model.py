@@ -156,8 +156,11 @@ class PolicyNet():
         surr2 = torch.clamp(ratios, 1 - clip_eps, 1 + clip_eps) * advantages
         policy_loss = -torch.min(surr1, surr2).mean()
 
-        # ── Value loss (MSE: V(s) 预测 R) ────────────────────────
-        value_loss = ((values - R_batch) ** 2).mean()
+        # ── Value loss (MSE: V(s) 预测标准化后的 R) ─────────────────
+        R_mean = R_batch.mean()
+        R_std = R_batch.std() + 1e-8
+        R_norm = (R_batch - R_mean) / R_std
+        value_loss = ((values - R_norm) ** 2).mean()
 
         # ── KL 散度 ──────────────────────────────────────────────
         log_probs_safe = torch.clamp(log_probs, min=-20.0)
