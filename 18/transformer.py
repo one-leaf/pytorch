@@ -43,6 +43,7 @@ class GameTransformer(nn.Module):
         )
         self.decoder = nn.TransformerDecoder(decoder_layer, num_layers=depth)
         self.action_head = nn.Linear(embed_dim, num_actions)
+        self.value_head = nn.Linear(embed_dim, 1)
 
         self.causal_mask = nn.Transformer.generate_square_subsequent_mask(seq_len)
 
@@ -78,5 +79,6 @@ class GameTransformer(nn.Module):
         x = self.decoder(tgt=x, memory=x, tgt_mask=causal_mask, memory_mask=causal_mask)
 
         action_logits = self.action_head(x[:, -1])
+        value = self.value_head(x[:, -1])
         log_probs = torch.log_softmax(action_logits, dim=-1)
-        return log_probs
+        return log_probs, value

@@ -20,7 +20,7 @@ GAME_WIDTH, GAME_HEIGHT = 10, 20
 
 class GRPODataset(torch.utils.data.Dataset):
     """GRPO 数据集，每个 pkl 包含一局游戏的所有 step:
-    (state, ref_prob, advantage, action, mask, prev_action)
+    (state, ref_prob, log_prob, action, prev_action, game_id, R)
     """
     def __init__(self, data_dir, max_files, min_new_files, n_train_times=3):
         self.data_dir = data_dir
@@ -41,13 +41,14 @@ class GRPODataset(torch.utils.data.Dataset):
 
     def __getitem__(self, index):
         fn, step_idx = self._flat_index[index]
-        state, ref_prob, advantage, action, mask, prev_action = self.data[fn][step_idx]
+        state, ref_prob, log_prob, action, prev_action, game_id, R = self.data[fn][step_idx]
         return (torch.from_numpy(state).float(),
                 torch.from_numpy(ref_prob).float(),
-                torch.as_tensor(advantage).float(),
+                torch.from_numpy(log_prob).float(),
                 torch.as_tensor(action).long(),
-                torch.as_tensor(mask).long(),
-                torch.as_tensor(prev_action).long())
+                torch.as_tensor(prev_action).long(),
+                torch.as_tensor(game_id).long(),
+                torch.as_tensor(R).float())
 
     def move_wait_files(self):
         """将 wait 目录的 pkl 全部移入 data 目录（清空 wait，防止堆积）"""
@@ -104,11 +105,10 @@ class GRPODataset(torch.utils.data.Dataset):
                 with open(fn, "rb") as f:
                     steps = pickle.load(f)
                 for step in steps:
-                    state, ref_prob, advantage, action, mask, prev_action = step
+                    state, ref_prob, _log_prob, _action, _prev_action, _game_id, R = step
                     assert state.shape == (2, 20, 10), f'error: state shape {state.shape}'
                     assert ref_prob.shape == (5,), f'error: ref_prob shape {ref_prob.shape}'
-                    assert not np.isnan(advantage), f'error: advantage is Nan'
-                    assert not np.isinf(advantage), f'error: advantage is Inf'
+                    assert not np.isnan(R), f'error: R is Nan'
                 self.data[fn] = steps
             except Exception as e:
                 print(f"file {fn} error: {e}")
@@ -116,9 +116,9 @@ class GRPODataset(torch.utils.data.Dataset):
                     os.remove(fn)
                 self.file_list.remove(fn)
 
-        advs = np.array([step[2] for steps in self.data.values() for step in steps])
-        if len(advs) > 0:
-            print(f"Advantage stats: min={advs.min():.3f} mean={advs.mean():.3f} max={advs.max():.3f} std={advs.std():.3f}")
+        Rs = np.array([step[6] for steps in self.data.values() for step in steps])
+        if len(Rs) > 0:
+            print(f"R stats: min={Rs.min():.1f} mean={Rs.mean():.1f} max={Rs.max():.1f}")
 
         self._flat_index = [(fn, i) for fn in self.file_list for i in range(len(self.data[fn]))]
         self._test_flat_index = [(fn, i) for fn in self.newsample for i in range(len(self.data.get(fn, [])))]
@@ -136,13 +136,14 @@ class GRPOTestDataset(torch.utils.data.Dataset):
 
     def __getitem__(self, index):
         fn, step_idx = self.parent._test_flat_index[index]
-        state, ref_prob, advantage, action, mask, prev_action = self.parent.data[fn][step_idx]
+        state, ref_prob, log_prob, action, prev_action, game_id, R = self.parent.data[fn][step_idx]
         return (torch.from_numpy(state).float(),
                 torch.from_numpy(ref_prob).float(),
-                torch.as_tensor(advantage).float(),
+                torch.from_numpy(log_prob).float(),
                 torch.as_tensor(action).long(),
-                torch.as_tensor(mask).long(),
-                torch.as_tensor(prev_action).long())
+                torch.as_tensor(prev_action).long(),
+                torch.as_tensor(game_id).long(),
+                torch.as_tensor(R).float())
 
 
 class GRPOTrain():
@@ -162,10 +163,11 @@ class GRPOTrain():
         self.n_epochs = 1             # 每轮训练只跑 1 个 epoch，训练次数由 min_new_files 控制
 
     def policy_update(self, sample_data):
-        """GRPO 策略更新"""
-        state_batch, ref_probs_batch, advantages_batch, actions_batch, masks_batch, prev_actions_batch = sample_data
+        """GRPO 策略更新（带 GAE 信用分配）"""
+        state_batch, ref_probs_batch, log_probs_old_batch, actions_batch, prev_actions_batch, game_ids_batch, R_batch = sample_data
         acc, kl, entropy = self.policy_net.train_step_grpo(
-            state_batch, ref_probs_batch, advantages_batch, actions_batch, masks_batch, prev_actions_batch,
+            state_batch, ref_probs_batch, log_probs_old_batch, actions_batch, None, prev_actions_batch,
+            game_ids_batch, R_batch,
             self.learn_rate * self.lr_multiplier,
             clip_eps=self.grpo_clip_eps,
             beta=self.grpo_beta,
@@ -211,7 +213,7 @@ class GRPOTrain():
             begin_act_probs = None
             net = self.policy_net.policy
             for i, data in enumerate(testing_loader):
-                test_batch, test_probs, test_advs, test_action, test_mask, test_prev_action = data
+                test_batch, test_probs, _log_probs_old, test_action, test_prev_action, _game_ids, _R = data
                 if i == 0:
                     print("test_batch shape:", test_batch.shape, "test_probs shape:", test_probs.shape)
                 test_batch = test_batch.to(self.policy_net.device)
@@ -255,8 +257,8 @@ class GRPOTrain():
                         print(f"epoch {epoch+1}/{self.n_epochs}", i, "acc:", acc, "kl:", kl, "entropy:", entropy)
 
                     if epoch == 0 and i == 0:
-                        state_batch, ref_probs_batch, advantages_batch, actions_batch, masks_batch, prev_actions_batch = data
-                        print("advantages_batch:", advantages_batch[:10])
+                        state_batch, ref_probs_batch, log_probs_old_batch, actions_batch, prev_actions_batch, game_ids_batch, R_batch = data
+                        print("R_batch:", R_batch[:10])
                         print("actions_batch:", actions_batch[:10])
 
                     if math.isnan(kl) or math.isnan(acc) or math.isnan(entropy) or \
@@ -283,7 +285,7 @@ class GRPOTrain():
             all_test_probs = None
             end_accuracy = np.array([])
             for i, data in enumerate(testing_loader):
-                test_batch, test_probs, test_advs, test_action, test_mask, test_prev_action = data
+                test_batch, test_probs, _log_probs_old, _test_action, test_prev_action, _game_ids, _R = data
                 test_batch = test_batch.to(self.policy_net.device)
                 test_prev_action = test_prev_action.to(self.policy_net.device)
                 with torch.no_grad():

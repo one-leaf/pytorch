@@ -52,8 +52,8 @@ class PolicyNet():
         x = torch.Tensor(1,2,20,10).to(self.device)
         prev_action = torch.LongTensor([0]).to(self.device)
         print(self.net)
-        log_probs = self.net(x, prev_action)
-        print("log_probs:", log_probs.size())
+        log_probs, value = self.net(x, prev_action)
+        print("log_probs:", log_probs.size(), "value:", value.size())
         print("policy probs:", torch.exp(log_probs).size())
 
     def policy(self, state_batch, prev_action):
@@ -73,18 +73,23 @@ class PolicyNet():
 
         self.net.eval()
         with torch.no_grad():
-            act_probs = self.net.forward(state_batch_tensor, prev_action)
+            act_probs, _ = self.net.forward(state_batch_tensor, prev_action)
 
         act_probs = np.exp(act_probs.cpu().numpy())
         return act_probs
         
 
-    # GRPO 训练步骤
-    def train_step_grpo(self, state_batch, ref_probs, advantages, action_batch, mask_batch, prev_action_batch, lr,
-                        clip_eps=0.2, beta=0.05, entropy_weight=0.01):
-        """GRPO 训练步骤
-        - policy_loss: PPO clip 损失，使用 GRPO 组相对优势
-        - kl_loss: KL 散度惩罚，约束新策略相对参考策略
+    # GRPO 训练步骤（带 Value Head + GAE 信用分配）
+    def train_step_grpo(self, state_batch, ref_probs, log_probs_old, action_batch, _mask_batch, prev_action_batch,
+                        game_ids, R_batch, lr,
+                        clip_eps=0.2, beta=0.05, entropy_weight=0.01,
+                        gamma=0.99, lam=0.95, vf_coef=0.5):
+        """GRPO + V(s) 训练步骤
+        - V(s): value head 估计每步状态价值
+        - GAE: 步级别信用分配（替代线性衰减）
+        - policy_loss: PPO clip 损失
+        - value_loss: MSE 损失
+        - kl_loss: KL 散度惩罚
         - entropy: 熵正则化
         """
         # 每次更新学习率（lr_multiplier 动态调整）
@@ -93,37 +98,77 @@ class PolicyNet():
 
         state_batch = torch.FloatTensor(state_batch).to(self.device)
         ref_log_probs = torch.log(torch.FloatTensor(ref_probs) + 1e-10).to(self.device)
-        advantages = torch.FloatTensor(advantages).unsqueeze(-1).to(self.device)
+        log_probs_old_t = torch.FloatTensor(log_probs_old).to(self.device)
         action_batch = torch.LongTensor(action_batch).to(self.device)
         prev_action_batch = torch.LongTensor(prev_action_batch).to(self.device)
+        game_ids = game_ids.tolist() if hasattr(game_ids, 'tolist') else list(game_ids)
+        R_batch = torch.FloatTensor(R_batch).to(self.device)
 
         self.net.train()
-        log_probs = self.net(state_batch, prev_action_batch)
+        log_probs, values = self.net(state_batch, prev_action_batch)
+        values = values.squeeze(-1)  # [B]
 
-        # 取被选择动作的 log 概率
+        # ── GAE: 按游戏分组计算步级别优势 ──────────────────────────
+        B = values.shape[0]
+        advantages = torch.zeros(B, device=self.device)
+
+        for gid in set(game_ids):
+            idx = [i for i, g in enumerate(game_ids) if g == gid]
+            if len(idx) <= 1:
+                advantages[idx[0]] = R_batch[idx[0]] - values[idx[0]].detach()
+                continue
+
+            V = values[idx]
+            R = R_batch[idx[0]]
+            n = len(idx)
+
+            # rewards: 全零，最后一步为 R
+            rewards = torch.zeros(n, device=self.device)
+            rewards[-1] = R
+
+            # V_next: 每步的下一步价值，最后一步为 0（游戏结束）
+            V_next = torch.zeros(n, device=self.device)
+            V_next[:-1] = V[1:].detach()
+
+            # TD error
+            deltas = rewards + gamma * V_next - V.detach()
+
+            # GAE: A_t = δ_t + γλ·δ_{t+1} + (γλ)²·δ_{t+2} + ...
+            gae = torch.zeros(n, device=self.device)
+            gae[-1] = deltas[-1]
+            for t in range(n - 2, -1, -1):
+                gae[t] = deltas[t] + gamma * lam * gae[t + 1]
+            advantages[idx] = gae
+
+        # 全局标准化
+        adv_mean = advantages.mean()
+        adv_std = advantages.std() + 1e-8
+        advantages = (advantages - adv_mean) / adv_std
+
+        # ── Policy loss (PPO clip) ────────────────────────────────
         actions = action_batch.unsqueeze(-1)
-        log_prob_new = log_probs.gather(-1, actions)              # [B, 1]
-        log_prob_old = ref_log_probs.gather(-1, actions).detach()  # [B, 1]
+        log_prob_new = log_probs.gather(-1, actions)                        # [B, 1]
+        log_prob_old = log_probs_old_t.gather(-1, actions).squeeze(-1)      # [B]
 
-        # PPO 风格 ratio，clamp 输入防止 exp 溢出产生 NaN
-        log_ratio = torch.clamp(log_prob_new - log_prob_old, -10.0, 10.0)
-        ratios = torch.exp(log_ratio)                            # [B, 1]
+        log_ratio = torch.clamp(log_prob_new.squeeze(-1) - log_prob_old, -10.0, 10.0)
+        ratios = torch.exp(log_ratio)
         surr1 = ratios * advantages
         surr2 = torch.clamp(ratios, 1 - clip_eps, 1 + clip_eps) * advantages
-
         policy_loss = -torch.min(surr1, surr2).mean()
 
-        # KL 散度: sum(p_new * (log_p_new - log_p_ref))
-        # clamp 防止 log_probs=-inf 时 probs=0，0*(-inf)=NaN
+        # ── Value loss (MSE: V(s) 预测 R) ────────────────────────
+        value_loss = ((values - R_batch) ** 2).mean()
+
+        # ── KL 散度 ──────────────────────────────────────────────
         log_probs_safe = torch.clamp(log_probs, min=-20.0)
-        probs_new = torch.exp(log_probs_safe)  # [B, 5]
+        probs_new = torch.exp(log_probs_safe)
         kl_div = (probs_new * (log_probs_safe - ref_log_probs)).sum(dim=-1).mean()
 
-        # 熵正则化
+        # ── 熵正则化 ─────────────────────────────────────────────
         entropy = -(probs_new * log_probs_safe).sum(dim=-1).mean()
 
-        # 总损失
-        loss = policy_loss + beta * kl_div - entropy_weight * entropy
+        # ── 总损失 ───────────────────────────────────────────────
+        loss = policy_loss + vf_coef * value_loss + beta * kl_div - entropy_weight * entropy
 
         self.optimizer.zero_grad()
         loss.backward()

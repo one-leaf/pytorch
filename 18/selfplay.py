@@ -28,7 +28,7 @@ class GRPOSelfPlay():
 
         policy_net.net.eval()
         with torch.no_grad():
-            log_probs = policy_net.net(state_tensor, prev_action_tensor)
+            log_probs, _ = policy_net.net(state_tensor, prev_action_tensor)
         if torch.isnan(log_probs).any():
             log_probs = torch.zeros_like(log_probs)
         probs = torch.exp(log_probs[0]).cpu().numpy()  # [5]
@@ -62,7 +62,7 @@ class GRPOSelfPlay():
         dummy_state = torch.zeros(1, 2, 20, 10, device=device)
         dummy_prev = torch.zeros(1, dtype=torch.long, device=device)
         with torch.no_grad():
-            out = policy_net.net(dummy_state, dummy_prev)
+            out, _ = policy_net.net(dummy_state, dummy_prev)
         if torch.isnan(out).any():
             print("WARNING: model output contains NaN, reinitializing weights!")
             policy_net.net.init_weights()
@@ -280,18 +280,14 @@ class GRPOSelfPlay():
             filetime = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
             for run_idx, (agent, trajectory) in enumerate(group_agents):
                 game_counter += 1
-                T = len(trajectory)
+                R = float(agent.piececount)  # 该局的目标回报
 
-                # step 级衰减权重：从 1 递减到 ~0
-                step_weights = np.array([1.0 - i / T for i in range(T)])
-                step_rewards = norm_rewards[run_idx] * step_weights
-
-                # 一局的所有 step 合并为一个文件
+                # 每步存储: (state, ref_prob, log_prob, action, prev_action, game_id, R)
                 game_steps = [
                     (step_data["state"], step_data["ref_prob"],
-                     float(step_rewards[i]), step_data["action"], 1,
-                     step_data["prev_action"])
-                    for i, step_data in enumerate(trajectory)
+                     step_data["log_prob"], step_data["action"],
+                     step_data["prev_action"], game_counter, R)
+                    for step_data in trajectory
                 ]
                 filename = f"{filetime}-{game_counter:06d}-r{run_idx}.pkl"
                 savefile = os.path.join(data_wait_dir, filename)
