@@ -81,7 +81,8 @@ def show_status(max_history=0, as_json=False):
         header = (f"  {'Agent':>6}  "
                   f"{'GR_Piece':>8} {'GR_Lines':>8} {'GR_Steps':>8} {'GR_Min':>7} {'GR_Max':>7} {'GR_RwdStd':>9}  "
                   f"{'Te_Piece':>8} {'Te_Lines':>8} {'Te_Steps':>8} {'Te_Best':>7}  "
-                  f"{'Tr_Acc':>8} {'Tr_KL':>9} {'Tr_Ent':>8} {'Tr_VL':>8}")
+                  f"{'Tr_Acc':>8} {'Tr_KL':>9} {'Tr_Ent':>8} {'Tr_VL':>8}  "
+                  f"{'R_Mean':>7} {'R_Std':>7}")
         print(header)
         print("-" * 140)
         for h in display:
@@ -99,7 +100,9 @@ def show_status(max_history=0, as_json=False):
                   f"{h.get('train_acc', 0):>8.4f} "
                   f"{h.get('train_kl', 0):>9.5f} "
                   f"{h.get('train_entropy', 0):>8.4f} "
-                  f"{h.get('train_vloss', 0):>8.4f}")
+                  f"{h.get('train_vloss', 0):>8.4f}  "
+                  f"{h.get('r_mean', 0):>7.2f} "
+                  f"{h.get('r_std', 0):>7.2f}")
         print("=" * 140)
     elif history:
         print("=" * 140)

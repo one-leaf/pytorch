@@ -282,6 +282,8 @@ class GRPOTrain():
             avg_kl  = _sum_kl  / max(_num_batches, 1)
             avg_ent = _sum_ent / max(_num_batches, 1)
             avg_vl  = _sum_vl  / max(_num_batches, 1)
+            avg_r_mean = r_mean
+            avg_r_std = r_std
 
             self.policy_net.save_model(model_file)
 
@@ -326,6 +328,8 @@ class GRPOTrain():
             m["train_kl"]      = round(m.get("train_kl",      0) * (1 - alpha) + avg_kl  * alpha, 5)
             m["train_entropy"] = round(m.get("train_entropy", 0) * (1 - alpha) + avg_ent * alpha, 5)
             m["train_vloss"]   = round(m.get("train_vloss",   0) * (1 - alpha) + avg_vl  * alpha, 5)
+            m["r_mean"]        = round(avg_r_mean, 3)
+            m["r_std"]         = round(avg_r_std, 3)
             # lr_multiplier 调整使用 EMA 平滑后的 train_kl
             set_status_value(status, "kl", avg_kl, alpha)
             total_kl = status["training"]["kl"]
@@ -338,7 +342,7 @@ class GRPOTrain():
 
             status["training"]["lr_multiplier"] = float(self.lr_multiplier)
             save_status_file(status)
-            print(f"train EMA: acc={m['train_acc']:.4f} kl={m['train_kl']:.5f} entropy={m['train_entropy']:.4f} vloss={m['train_vloss']:.4f}")
+            print(f"train EMA: acc={m['train_acc']:.4f} kl={m['train_kl']:.5f} entropy={m['train_entropy']:.4f} vloss={m['train_vloss']:.4f} r_mean={m['r_mean']:.2f} r_std={m['r_std']:.2f}")
 
             # ── test_play + EMA 指标更新 ──────────────────────────────
             print("running test_play for EMA metrics update...")
