@@ -165,7 +165,7 @@ class GRPOTrain():
     def policy_update(self, sample_data):
         """GRPO 策略更新（带 GAE 信用分配）"""
         state_batch, ref_probs_batch, log_probs_old_batch, actions_batch, prev_actions_batch, game_ids_batch, R_batch = sample_data
-        acc, kl, entropy = self.policy_net.train_step_grpo(
+        acc, kl, entropy, value_loss = self.policy_net.train_step_grpo(
             state_batch, ref_probs_batch, log_probs_old_batch, actions_batch, None, prev_actions_batch,
             game_ids_batch, R_batch,
             self.learn_rate * self.lr_multiplier,
@@ -173,7 +173,7 @@ class GRPOTrain():
             beta=self.grpo_beta,
             entropy_weight=self.grpo_entropy_weight
         )
-        return acc, kl, entropy
+        return acc, kl, entropy, value_loss
 
     def run(self):
         """启动 GRPO 训练"""
@@ -235,26 +235,29 @@ class GRPOTrain():
             print(f"lr_multiplier: {self.lr_multiplier}, learn_rate: {self.learn_rate * self.lr_multiplier}")
 
             # 训练循环（n_epochs 个 epoch，保证每局被训练 n_epochs 次）
-            _sum_acc = _sum_kl = _sum_ent = 0.0
+            _sum_acc = _sum_kl = _sum_ent = _sum_vl = 0.0
             _num_batches = 0
             for epoch in range(self.n_epochs):
                 training_loader = torch.utils.data.DataLoader(
                     self.dataset, batch_size=self.batch_size, shuffle=True, num_workers=0
                 )
-                _epoch_acc = _epoch_kl = _epoch_ent = 0.0
+                _epoch_acc = _epoch_kl = _epoch_ent = _epoch_vl = 0.0
                 _epoch_batches = 0
                 for i, data in enumerate(training_loader):
-                    acc, kl, entropy = self.policy_update(data)
+                    acc, kl, entropy, value_loss = self.policy_update(data)
                     _sum_acc += acc
                     _sum_kl += kl
                     _sum_ent += entropy
+                    _sum_vl += value_loss
                     _num_batches += 1
                     _epoch_acc += acc
                     _epoch_kl += kl
                     _epoch_ent += entropy
+                    _epoch_vl += value_loss
                     _epoch_batches += 1
                     if i % 100 == 0:
-                        print(f"epoch {epoch+1}/{self.n_epochs}", i, "acc:", acc, "kl:", kl, "entropy:", entropy)
+                        print(f"epoch {epoch+1}/{self.n_epochs}", i,
+                              "acc:", acc, "kl:", kl, "entropy:", entropy, "vloss:", value_loss)
 
                     if epoch == 0 and i == 0:
                         state_batch, ref_probs_batch, log_probs_old_batch, actions_batch, prev_actions_batch, game_ids_batch, R_batch = data
@@ -271,11 +274,13 @@ class GRPOTrain():
                 e_acc = _epoch_acc / max(_epoch_batches, 1)
                 e_kl  = _epoch_kl  / max(_epoch_batches, 1)
                 e_ent = _epoch_ent / max(_epoch_batches, 1)
-                print(f"epoch {epoch+1} done: acc={e_acc:.4f} kl={e_kl:.5f} entropy={e_ent:.4f}")
+                e_vl  = _epoch_vl  / max(_epoch_batches, 1)
+                print(f"epoch {epoch+1} done: acc={e_acc:.4f} kl={e_kl:.5f} entropy={e_ent:.4f} vloss={e_vl:.4f}")
 
             avg_acc = _sum_acc / max(_num_batches, 1)
             avg_kl  = _sum_kl  / max(_num_batches, 1)
             avg_ent = _sum_ent / max(_num_batches, 1)
+            avg_vl  = _sum_vl  / max(_num_batches, 1)
 
             self.policy_net.save_model(model_file)
 
@@ -319,6 +324,7 @@ class GRPOTrain():
             m["train_acc"]     = round(m.get("train_acc",     0) * (1 - alpha) + avg_acc * alpha, 5)
             m["train_kl"]      = round(m.get("train_kl",      0) * (1 - alpha) + avg_kl  * alpha, 5)
             m["train_entropy"] = round(m.get("train_entropy", 0) * (1 - alpha) + avg_ent * alpha, 5)
+            m["train_vloss"]   = round(m.get("train_vloss",   0) * (1 - alpha) + avg_vl  * alpha, 5)
             # lr_multiplier 调整使用 EMA 平滑后的 train_kl
             set_status_value(status, "kl", avg_kl, alpha)
             total_kl = status["training"]["kl"]
@@ -331,7 +337,7 @@ class GRPOTrain():
 
             status["training"]["lr_multiplier"] = float(self.lr_multiplier)
             save_status_file(status)
-            print(f"train EMA: acc={m['train_acc']:.4f} kl={m['train_kl']:.5f} entropy={m['train_entropy']:.4f}")
+            print(f"train EMA: acc={m['train_acc']:.4f} kl={m['train_kl']:.5f} entropy={m['train_entropy']:.4f} vloss={m['train_vloss']:.4f}")
 
             # ── test_play + EMA 指标更新 ──────────────────────────────
             print("running test_play for EMA metrics update...")

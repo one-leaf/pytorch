@@ -179,7 +179,7 @@ class PolicyNet():
         predicted = torch.argmax(log_probs, dim=1)
         accuracy = (predicted == action_batch).float().mean()
 
-        return accuracy.item(), kl_div.item(), entropy.item()
+        return accuracy.item(), kl_div.item(), entropy.item(), value_loss.item()
 
     # 保存模型
     def save_model(self, model_file):
