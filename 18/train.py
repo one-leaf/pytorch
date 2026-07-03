@@ -195,8 +195,6 @@ class GRPOTrain():
                 time.sleep(60)
                 return
 
-            self.policy_net.save_model(model_file + ".bak")
-
             # 等待 selfplay 产生训练数据
             while True:
                 try:
@@ -274,9 +272,14 @@ class GRPOTrain():
                     if math.isnan(kl) or math.isnan(acc) or math.isnan(entropy) or math.isnan(value_loss) or \
                        math.isinf(kl) or math.isinf(acc) or math.isinf(entropy) or math.isinf(value_loss):
                         msg = f"LOSS NaN/Inf | epoch {epoch+1} step {i}: acc={acc} kl={kl} entropy={entropy} vloss={value_loss}"
-                        print(f"\n[SKIP] {msg}")
+                        print(f"\n[ROLLBACK] {msg}")
                         log_nan(msg)
-                        continue
+                        if os.path.exists(model_file + ".bak"):
+                            print(f"[ROLLBACK] restoring from {model_file}.bak")
+                            self.policy_net = PolicyNet(
+                                GAME_WIDTH, GAME_HEIGHT, GAME_ACTIONS_NUM, model_file=model_file + ".bak", l2_const=1e-4
+                            )
+                        return
                 e_acc = _epoch_acc / max(_epoch_batches, 1)
                 e_kl  = _epoch_kl  / max(_epoch_batches, 1)
                 e_ent = _epoch_ent / max(_epoch_batches, 1)
@@ -374,6 +377,7 @@ class GRPOTrain():
             if test_avg_pc > old_ema_pc:
                 best_model_path = f"{model_file}.{test_avg_pc:.1f}"
                 self.policy_net.save_model(best_model_path)
+                self.policy_net.save_model(model_file + ".bak")
                 print(f"*** new best! test_avg_pc={test_avg_pc:.1f} > ema={old_ema_pc:.1f}, saved to {best_model_path}")
 
             # 最近一轮采集的奖励统计（从 dataset 的 advantage 计算）
