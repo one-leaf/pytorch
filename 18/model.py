@@ -99,6 +99,7 @@ class PolicyNet():
 
         state_batch = torch.FloatTensor(state_batch).to(self.device)
         ref_log_probs = torch.log(torch.FloatTensor(ref_probs) + 1e-10).to(self.device)
+        ref_log_probs = torch.clamp(ref_log_probs, min=-20.0)
         log_probs_old_t = torch.FloatTensor(log_probs_old).to(self.device)
         action_batch = torch.LongTensor(action_batch).to(self.device)
         prev_action_batch = torch.LongTensor(prev_action_batch).to(self.device)
@@ -108,9 +109,10 @@ class PolicyNet():
         self.net.train()
         log_probs, values = self.net(state_batch, prev_action_batch)
         values = values.squeeze(-1)  # [B]
+        values = torch.clamp(values, -10.0, 10.0)
 
         # ── 用数据集全局统计量归一化 R ────────────────────────────
-        R_norm = (R_batch - r_mean) / (r_std + 1e-8)
+        R_norm = (R_batch - r_mean) / (r_std + 1e-3)
         R_norm = torch.clamp(R_norm, -5.0, 5.0)
 
         # ── GAE: 按游戏分组计算步级别优势 ──────────────────────────
@@ -147,7 +149,7 @@ class PolicyNet():
 
         # 全局标准化
         adv_mean = advantages.mean()
-        adv_std = advantages.std() + 1e-8
+        adv_std = advantages.std().clamp(min=1e-3)
         advantages = (advantages - adv_mean) / adv_std
 
         # ── Policy loss (PPO clip) ────────────────────────────────
@@ -178,6 +180,15 @@ class PolicyNet():
         self.optimizer.zero_grad()
         loss.backward()
         torch.nn.utils.clip_grad_norm_(self.net.parameters(), max_norm=1.0)
+
+        has_nan_grad = any(
+            torch.isnan(p.grad).any() or torch.isinf(p.grad).any()
+            for p in self.net.parameters() if p.grad is not None
+        )
+        if has_nan_grad:
+            self.optimizer.zero_grad()
+            return torch.tensor(0.0), torch.tensor(0.0), torch.tensor(0.0), torch.tensor(float('nan'))
+
         self.optimizer.step()
 
         # 指标

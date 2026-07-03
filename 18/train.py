@@ -119,7 +119,7 @@ class GRPODataset(torch.utils.data.Dataset):
         Rs = np.array([step[6] for steps in self.data.values() for step in steps])
         if len(Rs) > 0:
             self.r_mean = float(Rs.mean())
-            self.r_std = float(Rs.std())
+            self.r_std = max(float(Rs.std()), 1e-3)
             print(f"R stats: min={Rs.min():.1f} mean={self.r_mean:.2f} std={self.r_std:.2f} max={Rs.max():.1f}")
         else:
             self.r_mean = 15.0
@@ -273,11 +273,8 @@ class GRPOTrain():
 
                     if math.isnan(kl) or math.isnan(acc) or math.isnan(entropy) or math.isnan(value_loss) or \
                        math.isinf(kl) or math.isinf(acc) or math.isinf(entropy) or math.isinf(value_loss):
-                        print(f"find nan or inf at epoch {epoch+1} step {i}, discarding corrupted model, restoring from bak!")
-                        self.policy_net = PolicyNet(
-                            GAME_WIDTH, GAME_HEIGHT, GAME_ACTIONS_NUM, model_file=model_file + ".bak", l2_const=1e-4
-                        )
-                        return
+                        print(f"[SKIP] nan/inf at epoch {epoch+1} step {i}, skipping batch (weights preserved)")
+                        continue
                 e_acc = _epoch_acc / max(_epoch_batches, 1)
                 e_kl  = _epoch_kl  / max(_epoch_batches, 1)
                 e_ent = _epoch_ent / max(_epoch_batches, 1)
