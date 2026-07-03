@@ -1,6 +1,6 @@
 import os, glob, pickle
 
-from model import PolicyNet, data_dir, data_wait_dir, model_file
+from model import PolicyNet, data_dir, data_wait_dir, model_file, log_nan
 from agent import Agent, ACTIONS
 from selfplay import GRPOSelfPlay
 
@@ -273,7 +273,9 @@ class GRPOTrain():
 
                     if math.isnan(kl) or math.isnan(acc) or math.isnan(entropy) or math.isnan(value_loss) or \
                        math.isinf(kl) or math.isinf(acc) or math.isinf(entropy) or math.isinf(value_loss):
-                        print(f"[SKIP] nan/inf at epoch {epoch+1} step {i}, skipping batch (weights preserved)")
+                        msg = f"LOSS NaN/Inf | epoch {epoch+1} step {i}: acc={acc} kl={kl} entropy={entropy} vloss={value_loss}"
+                        print(f"\n[SKIP] {msg}")
+                        log_nan(msg)
                         continue
                 e_acc = _epoch_acc / max(_epoch_batches, 1)
                 e_kl  = _epoch_kl  / max(_epoch_batches, 1)

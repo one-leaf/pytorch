@@ -2,6 +2,7 @@ import torch
 import torch.optim as optim
 import os
 import numpy as np
+from datetime import datetime
 from transformer import GameTransformer
 
 # 定义游戏的保存文件名和路径
@@ -14,6 +15,12 @@ if not os.path.exists(data_wait_dir): os.makedirs(data_wait_dir)
 model_dir = os.path.join(curr_dir, 'model', model_name)
 if not os.path.exists(model_dir): os.makedirs(model_dir)
 model_file =  os.path.join(model_dir, 'model.pth')
+nan_log_file = os.path.join(model_dir, 'nan_log.txt')
+
+
+def log_nan(msg):
+    with open(nan_log_file, 'a') as f:
+        f.write(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] {msg}\n")
 
 
 class PolicyNet():
@@ -186,6 +193,16 @@ class PolicyNet():
             for p in self.net.parameters() if p.grad is not None
         )
         if has_nan_grad:
+            nan_params = [name for name, p in self.net.named_parameters()
+                          if p.grad is not None and (torch.isnan(p.grad).any() or torch.isinf(p.grad).any())]
+            msg = (f"GRAD NaN | policy_loss={policy_loss.item():.6f} value_loss={value_loss.item():.6f} "
+                   f"kl_div={kl_div.item():.6f} entropy={entropy.item():.6f} loss={loss.item():.6f} | "
+                   f"values=[{values.min().item():.4f}, {values.max().item():.4f}] "
+                   f"R_norm=[{R_norm.min().item():.4f}, {R_norm.max().item():.4f}] "
+                   f"adv=[{advantages.min().item():.4f}, {advantages.max().item():.4f}] | "
+                   f"nan_params={nan_params[:10]}")
+            print(f"\n[NaN GRAD] {msg}")
+            log_nan(msg)
             self.optimizer.zero_grad()
             return torch.tensor(0.0), torch.tensor(0.0), torch.tensor(0.0), torch.tensor(float('nan'))
 
