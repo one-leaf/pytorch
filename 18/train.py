@@ -365,8 +365,14 @@ class GRPOTrain():
             m["test_removedlines"]     = round(m.get("test_removedlines",     0) * (1 - alpha) + test_avg_rl * alpha, 3)
             m["test_steps"]            = round(m.get("test_steps",            0) * (1 - alpha) + test_avg_st * alpha, 3)
             # test_play 历史最值（无噪声真实表现）
-            m["test_piececount_best"]    = max(m.get("test_piececount_best",    0), test_max_pc)
+            old_best_pc = m.get("test_piececount_best", 0)
+            m["test_piececount_best"]    = max(old_best_pc, test_max_pc)
             m["test_removedlines_best"]  = max(m.get("test_removedlines_best",  0), test_best_rl)
+
+            if test_max_pc > old_best_pc:
+                best_model_path = f"{model_file}.{test_max_pc}"
+                self.policy_net.save_model(best_model_path)
+                print(f"*** new best! test_max_pc={test_max_pc}, saved to {best_model_path}")
 
             # 最近一轮采集的奖励统计（从 dataset 的 advantage 计算）
             all_advs = np.array([step[2] for file_steps in self.dataset.data.values() for step in file_steps])
