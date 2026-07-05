@@ -380,10 +380,10 @@ class GRPOTrain():
                 self.policy_net.save_model(model_file + ".bak")
                 print(f"*** new best! test_avg_pc={test_avg_pc:.1f} > ema={old_ema_pc:.1f}, saved to {best_model_path}")
 
-            # 最近一轮采集的奖励统计（从 dataset 的 advantage 计算）
-            all_advs = np.array([step[2] for file_steps in self.dataset.data.values() for step in file_steps])
-            m["grpo_reward_mean"] = round(float(all_advs.mean()), 3) if len(all_advs) > 0 else 0.0
-            m["grpo_reward_std"]  = round(float(all_advs.std()),  3) if len(all_advs) > 0 else 0.0
+            # 最近一轮采集的奖励统计（从 dataset 的 R 值计算）
+            all_rs = np.array([step[6] for file_steps in self.dataset.data.values() for step in file_steps])
+            m["grpo_reward_mean"] = round(float(all_rs.mean()), 3) if len(all_rs) > 0 else 0.0
+            m["grpo_reward_std"]  = round(float(all_rs.std()),  3) if len(all_rs) > 0 else 0.0
 
             save_status_file(status)
             print(f"test: greedy avg_pieces={test_avg_pc:.1f} avg_lines={test_avg_rl:.3f} avg_steps={test_avg_st:.1f}")
