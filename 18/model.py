@@ -122,14 +122,16 @@ class PolicyNet():
         R_norm = (R_batch - r_mean) / (r_std + 1e-3)
         R_norm = torch.clamp(R_norm, -5.0, 5.0)
 
-        # ── GAE: 按游戏分组计算步级别优势 ──────────────────────────
+        # ── GAE: 按游戏分组计算步级别优势 + value target ──────────
         B = values.shape[0]
         advantages = torch.zeros(B, device=self.device)
+        v_targets = torch.zeros(B, device=self.device)
 
         for gid in set(game_ids):
             idx = [i for i, g in enumerate(game_ids) if g == gid]
             if len(idx) <= 1:
                 advantages[idx[0]] = R_norm[idx[0]] - values[idx[0]].detach()
+                v_targets[idx[0]] = R_norm[idx[0]]
                 continue
 
             V = values[idx]
@@ -154,6 +156,10 @@ class PolicyNet():
                 gae[t] = deltas[t] + gamma * lam * gae[t + 1]
             advantages[idx] = gae
 
+            # discounted value target: V(s_k) → R_norm * γ^(n-1-k)
+            discounts = gamma ** torch.arange(n - 1, -1, -1, device=self.device)
+            v_targets[idx] = R * discounts
+
         # 全局标准化
         adv_mean = advantages.mean()
         adv_std = advantages.std().clamp(min=1e-3)
@@ -170,8 +176,8 @@ class PolicyNet():
         surr2 = torch.clamp(ratios, 1 - clip_eps, 1 + clip_eps) * advantages
         policy_loss = -torch.min(surr1, surr2).mean()
 
-        # ── Value loss (MSE: V(s) 预测归一化后的 R) ─────────────────
-        value_loss = ((values - R_norm) ** 2).mean()
+        # ── Value loss (MSE: V(s) 预测 discounted return) ─────────
+        value_loss = ((values - v_targets) ** 2).mean()
 
         # ── KL 散度 ──────────────────────────────────────────────
         log_probs_safe = torch.clamp(log_probs, min=-20.0)
