@@ -249,10 +249,10 @@ class GRPOSelfPlay():
                 agent0, _ = self.play_one_game(isRandomNextPiece=True)
                 pieces_list = agent0.piecehis
 
-            # 用相同方块序列运行 8 局
+            # 用相同方块序列运行 4 局
             group_pieces_list = pieces_list  # 组内共享同一序列
             group_agents = []
-            for _ in range(8):
+            for _ in range(4):
                 agent, trajectory = self.play_one_game(
                     isRandomNextPiece=False, nextPiecesList=group_pieces_list,
                 )
