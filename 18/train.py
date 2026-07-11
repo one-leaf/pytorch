@@ -164,7 +164,7 @@ class GRPOTrain():
         # GRPO 超参数
         self.grpo_clip_eps = 0.2
         self.grpo_beta = 0.02         # KL 惩罚系数，beta*KL=0.02*0.8=0.016，与 policy_loss 量级可比
-        self.grpo_entropy_weight = 0.005  # 熵正则，防止过早收敛到确定性策略
+        self.grpo_entropy_weight = 0.03   # 熵正则，防止过早收敛到确定性策略
         self.n_epochs = 1             # 每轮训练只跑 1 个 epoch，训练次数由 min_new_files 控制
 
     def policy_update(self, sample_data):
