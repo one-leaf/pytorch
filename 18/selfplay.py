@@ -264,6 +264,14 @@ class GRPOSelfPlay():
             if len(group_agents) == 0:
                 continue
 
+            # 只保留最差和最好的 2 局（≥3 局时筛选）
+            if len(group_agents) >= 3:
+                pcs = [a.piececount for a, _ in group_agents]
+                best_idx = max(range(len(pcs)), key=lambda i: pcs[i])
+                worst_idx = min(range(len(pcs)), key=lambda i: pcs[i])
+                keep = sorted(set([best_idx, worst_idx]))
+                group_agents = [group_agents[i] for i in keep]
+
             # 游戏级基础奖励：piececount（消行信息已编码在 piececount 差异中）
             N_arr = np.array([agent.piececount for agent, _ in group_agents])
             raw_rewards = N_arr.copy()
