@@ -178,10 +178,10 @@ class GRPOSelfPlay():
 
         # 确定初始模型文件
         load_model_file = model_file
-        if os.path.exists(model_file + "_best"):
-            load_model_file = model_file + "_best"
-        elif os.path.exists(model_file + ".bak"):
-            load_model_file = model_file + ".bak"
+        # if os.path.exists(model_file + "_best"):
+        #     load_model_file = model_file + "_best"
+        # elif os.path.exists(model_file + ".bak"):
+        #     load_model_file = model_file + ".bak"
 
         # 等待模型文件出现
         while not os.path.exists(load_model_file):
