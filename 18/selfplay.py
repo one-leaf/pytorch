@@ -249,23 +249,33 @@ class GRPOSelfPlay():
                 agent0, _ = self.play_one_game(isRandomNextPiece=True)
                 pieces_list = agent0.piecehis
 
-            # 用相同方块序列运行 4 局
+            # 动态采样：最多 16 局，一旦出现 best-worst ≥ 2 立即停止
             group_pieces_list = pieces_list  # 组内共享同一序列
             group_agents = []
-            for _ in range(4):
+            best_pc = -1
+            worst_pc = 999999
+
+            for _ in range(16):
                 agent, trajectory = self.play_one_game(
                     isRandomNextPiece=False, nextPiecesList=group_pieces_list,
                 )
                 if len(trajectory) > 0:
                     group_agents.append((agent, trajectory))
+                    if agent.piececount > best_pc:
+                        best_pc = agent.piececount
+                    if agent.piececount < worst_pc:
+                        worst_pc = agent.piececount
                 if len(agent.piecehis) > len(pieces_list):
-                    pieces_list = agent.piecehis  # 只在组外使用，不影响本组内其他局
+                    pieces_list = agent.piecehis
+
+                if best_pc - worst_pc >= 2:
+                    break
 
             if len(group_agents) == 0:
                 continue
 
-            # 只保留最差和最好的 2 局（≥3 局时筛选）
-            if len(group_agents) >= 3:
+            # 只保留最差和最好的 2 局
+            if len(group_agents) >= 2:
                 pcs = [a.piececount for a, _ in group_agents]
                 best_idx = max(range(len(pcs)), key=lambda i: pcs[i])
                 worst_idx = min(range(len(pcs)), key=lambda i: pcs[i])
