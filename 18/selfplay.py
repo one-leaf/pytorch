@@ -255,6 +255,7 @@ class GRPOSelfPlay():
             best_pc = -1
             worst_pc = 999999
 
+            agent_count = 0
             for _ in range(16):
                 agent, trajectory = self.play_one_game(
                     isRandomNextPiece=False, nextPiecesList=group_pieces_list,
@@ -267,6 +268,8 @@ class GRPOSelfPlay():
                         worst_pc = agent.piececount
                 if len(agent.piecehis) > len(pieces_list):
                     pieces_list = agent.piecehis
+
+                agent_count += 1
 
                 if best_pc - worst_pc >= 2:
                     break
@@ -292,7 +295,7 @@ class GRPOSelfPlay():
             norm_rewards = (raw_rewards - mean_r) / std_r
 
             # 打印信息
-            print(f"Group {g}: piececounts={N_arr}  mean={mean_r:.3f} std={std_r:.3f}")
+            print(f"Group {g}, Run {agent_count}: piececounts={N_arr}  mean={mean_r:.3f} std={std_r:.3f}")
 
             # 保存每局结果：一局一个 pkl 文件（包含所有 step）
             filetime = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
