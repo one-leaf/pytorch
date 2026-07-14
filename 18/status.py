@@ -55,7 +55,6 @@ model_dir = os.path.join(curr_dir, 'model', model_name)
 if not os.path.exists(model_dir): os.makedirs(model_dir)
 status_file = os.path.join(model_dir, 'status.json')
 status_file_bak = os.path.join(model_dir, 'status_bak.json')
-HISTORY_MAX = 1000
 
 
 def _default_state():
@@ -195,8 +194,6 @@ def _append_history(state: dict[str, Any]):
         snapshot["modify"] = state["info"].get("modify", "")
 
     state["history"].append(snapshot)
-    if len(state["history"]) > HISTORY_MAX:
-        state["history"] = state["history"][-HISTORY_MAX:]
 
     c["_agent"] = 0
     acc["_sum_piececount"] = 0
