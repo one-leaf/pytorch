@@ -227,10 +227,10 @@ class GRPOSelfPlay():
 
             # 每组之前检查模型是否有更新，有则重新加载
             current_model = model_file
-            if os.path.exists(model_file + "_best"):
-                current_model = model_file + "_best"
-            elif os.path.exists(model_file + ".bak"):
-                current_model = model_file + ".bak"
+            # if os.path.exists(model_file + "_best"):
+            #     current_model = model_file + "_best"
+            # elif os.path.exists(model_file + ".bak"):
+            #     current_model = model_file + ".bak"
             if os.path.exists(current_model):
                 mtime = os.path.getmtime(current_model)
                 if mtime > _last_model_mtime:
