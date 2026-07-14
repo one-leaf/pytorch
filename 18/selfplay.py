@@ -256,7 +256,7 @@ class GRPOSelfPlay():
             worst_pc = 999999
 
             agent_count = 0
-            for _ in range(16):
+            for _ in range(8):
                 agent, trajectory = self.play_one_game(
                     isRandomNextPiece=False, nextPiecesList=group_pieces_list,
                 )
@@ -284,6 +284,9 @@ class GRPOSelfPlay():
                 worst_idx = min(range(len(pcs)), key=lambda i: pcs[i])
                 keep = sorted(set([best_idx, worst_idx]))
                 group_agents = [group_agents[i] for i in keep]
+            else:
+                print(f"Group {g}, Run {agent_count}: only {len(group_agents)} games, skipping reward calculation.")
+                continue  # 至少需要两局才能计算奖励
 
             # 游戏级基础奖励：piececount（消行信息已编码在 piececount 差异中）
             N_arr = np.array([agent.piececount for agent, _ in group_agents])
