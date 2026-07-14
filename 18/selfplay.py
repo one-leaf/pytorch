@@ -19,7 +19,7 @@ class GRPOSelfPlay():
         self.max_step_count = 10000     # 最大步数限制
         self.policy_net = None
 
-    def get_action_from_policy(self, agent, policy_net, prev_action, train=True):
+    def get_action_from_policy(self, agent, policy_net, prev_action, train=True, temperature=1.0):
         """从策略网络采样一个动作（带动作掩码）"""
         state = np.array([agent.current_state()])
         device = policy_net.device
@@ -31,11 +31,11 @@ class GRPOSelfPlay():
             log_probs, _ = policy_net.net(state_tensor, prev_action_tensor)
         if torch.isnan(log_probs).any():
             log_probs = torch.zeros_like(log_probs)
-        probs = torch.exp(log_probs[0]).cpu().numpy()  # [5]
+        probs = torch.exp(log_probs[0] / temperature).cpu().numpy()  # [5]
 
         if train:
             p = 0.98
-            dirichlet = np.random.dirichlet(2 * np.ones(GAME_ACTIONS_NUM))            
+            dirichlet = np.random.dirichlet(0.3 * np.ones(GAME_ACTIONS_NUM))            
             probs = p*probs + (1.0-p)*dirichlet
             probs = probs / np.sum(probs) 
 
@@ -67,7 +67,7 @@ class GRPOSelfPlay():
             print("WARNING: model output contains NaN, reinitializing weights!")
             policy_net.net.init_weights()
 
-    def play_one_game(self, isRandomNextPiece=True, nextPiecesList=None, train=True):
+    def play_one_game(self, isRandomNextPiece=True, nextPiecesList=None, train=True, temperature=1.0):
         """用当前策略玩一局游戏，记录完整轨迹"""
         if nextPiecesList is not None and len(nextPiecesList) > 0:
             agent = Agent(isRandomNextPiece=False, nextPiecesList=nextPiecesList)
@@ -82,7 +82,7 @@ class GRPOSelfPlay():
                 break
 
             state = agent.current_state().copy()
-            action, probs, log_prob = self.get_action_from_policy(agent, self.policy_net, prev_action, train)
+            action, probs, log_prob = self.get_action_from_policy(agent, self.policy_net, prev_action, train, temperature)
 
             trajectory.append({
                 "state": state,
@@ -249,16 +249,18 @@ class GRPOSelfPlay():
                 agent0, _ = self.play_one_game(isRandomNextPiece=True)
                 pieces_list = agent0.piecehis
 
-            # 动态采样：最多 16 局，一旦出现 best-worst ≥ 2 立即停止
+            # 动态采样：最多 8 局，一旦出现 best-worst ≥ 2 立即停止
+            # 温度递增：更多探索 → 更多样的结果
             group_pieces_list = pieces_list  # 组内共享同一序列
             group_agents = []
             best_pc = -1
             worst_pc = 999999
 
-            agent_count = 0
-            for _ in range(8):
+            for i in range(8):
+                temperature = 1.0 + 0.2 * i  # 1.0, 1.2, 1.4, 1.6, ...
                 agent, trajectory = self.play_one_game(
                     isRandomNextPiece=False, nextPiecesList=group_pieces_list,
+                    temperature=temperature,
                 )
                 if len(trajectory) > 0:
                     group_agents.append((agent, trajectory))
@@ -268,8 +270,6 @@ class GRPOSelfPlay():
                         worst_pc = agent.piececount
                 if len(agent.piecehis) > len(pieces_list):
                     pieces_list = agent.piecehis
-
-                agent_count += 1
 
                 if best_pc - worst_pc >= 2:
                     break
@@ -282,7 +282,7 @@ class GRPOSelfPlay():
                 keep = sorted(set([best_idx, worst_idx]))
                 group_agents = [group_agents[i] for i in keep]
             else:
-                print(f"Group {g}, Run {agent_count}: only {len(group_agents)} games, skipping reward calculation.")
+                print(f"Group {g}, Run {i + 1}: only {len(group_agents)} games, skipping reward calculation.")
                 for agent, _ in group_agents:
                     agent.print()
                 continue  # 至少需要两局才能计算奖励
@@ -297,7 +297,7 @@ class GRPOSelfPlay():
             norm_rewards = (raw_rewards - mean_r) / std_r
 
             # 打印信息
-            print(f"Group {g}, Run {agent_count}: piececounts={N_arr}  mean={mean_r:.3f} std={std_r:.3f}")
+            print(f"Group {g}, Run {i + 1}: piececounts={N_arr}  mean={mean_r:.3f} std={std_r:.3f}")
 
             # 保存每局结果：一局一个 pkl 文件（包含所有 step）
             filetime = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
