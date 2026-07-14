@@ -274,11 +274,8 @@ class GRPOSelfPlay():
                 if best_pc - worst_pc >= 2:
                     break
 
-            if len(group_agents) == 0:
-                continue
-
             # 只保留最差和最好的 2 局
-            if len(group_agents) >= 2:
+            if len(group_agents) >= 2 and best_pc - worst_pc >= 2:
                 pcs = [a.piececount for a, _ in group_agents]
                 best_idx = max(range(len(pcs)), key=lambda i: pcs[i])
                 worst_idx = min(range(len(pcs)), key=lambda i: pcs[i])
@@ -286,6 +283,8 @@ class GRPOSelfPlay():
                 group_agents = [group_agents[i] for i in keep]
             else:
                 print(f"Group {g}, Run {agent_count}: only {len(group_agents)} games, skipping reward calculation.")
+                for agent, _ in group_agents:
+                    agent.print()
                 continue  # 至少需要两局才能计算奖励
 
             # 游戏级基础奖励：piececount（消行信息已编码在 piececount 差异中）
