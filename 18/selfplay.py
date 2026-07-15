@@ -222,7 +222,7 @@ class GRPOSelfPlay():
         game_counter = 0
 
         for g in itertools.count():
-            if time.time() - _start_time > 60 * 20:  # 每个模型最多20分钟采集
+            if time.time() - _start_time > 60 * 60:  # 最多60分钟采集
                 break
 
             # 每组之前检查模型是否有更新，有则重新加载
