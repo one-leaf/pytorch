@@ -153,7 +153,7 @@ class GRPOTestDataset(torch.utils.data.Dataset):
 
 class GRPOTrain():
     def __init__(self):
-        self.batch_size = 64
+        self.batch_size = 256
         self.learn_rate = 1e-5
         self.lr_multiplier = 1.0
         self.max_files = 15000         # data 目录最大保留文件数（安全上限，需 ≥ 2 × P × n_train_times）
