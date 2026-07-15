@@ -236,7 +236,7 @@ class GRPOTrain():
 
             status = read_status_file()
             self.lr_multiplier = status["training"]["lr_multiplier"]
-            print(f"lr_multiplier: {self.lr_multiplier}, learn_rate: {self.learn_rate * self.lr_multiplier}")
+            print(f"batch_size: {self.batch_size}, lr_multiplier: {self.lr_multiplier}, learn_rate: {self.learn_rate * self.lr_multiplier}")
 
             # 训练循环（n_epochs 个 epoch，保证每局被训练 n_epochs 次）
             _sum_acc = _sum_kl = _sum_ent = _sum_vl = 0.0
