@@ -185,6 +185,9 @@ class PolicyNet():
         kl_div = (probs_new * (log_probs_safe - ref_log_probs)).sum(dim=-1).mean()
 
         # ── 熵正则化 ─────────────────────────────────────────────
+        # 1.0 2-3 个动作在竞争
+        # 0.5 基本确定性，探索很弱 ： 安全线，如果熵 < 0.5，且策略停顿，就需要增加 entropy_weight
+        # 0.3 接近完全确定性
         entropy = -(probs_new * log_probs_safe).sum(dim=-1).mean()
 
         # ── 总损失 ───────────────────────────────────────────────
