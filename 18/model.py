@@ -170,6 +170,14 @@ class PolicyNet():
                 gae[t] = deltas[t] + gamma * lam * gae[t + 1]
             advantages[idx] = gae
 
+            # 调试：打印第一局的详细信息
+            if gid == list(set(game_ids))[0]:
+                print(f"\n=== Game {gid} ({n} steps) ===")
+                print(f"r_t:     {rewards.cpu().numpy()}")
+                print(f"v_target:{returns.cpu().numpy()}")
+                print(f"V(s):    {V.detach().cpu().numpy()}")
+                print(f"adv:     {gae.cpu().numpy()}")
+
         # 全局标准化
         adv_mean = advantages.mean()
         adv_std = advantages.std().clamp(min=1e-3)
