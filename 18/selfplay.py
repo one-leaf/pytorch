@@ -287,9 +287,22 @@ class GRPOSelfPlay():
                     agent.print()
                 continue  # 至少需要两局才能计算奖励
 
-            # 游戏级基础奖励：piececount（消行信息已编码在 piececount 差异中）
+            # 自适应消行奖励：根据当前平均消行水平动态调整
+            status = read_status_file()
+            avg_lines = status["metrics"].get("grpo_removedlines", 0)
+            if avg_lines < 0.05:
+                line_bonus = 5     # 引导阶段：还没学会消行
+            elif avg_lines < 0.3:
+                line_bonus = 3     # 起步阶段：开始消行
+            elif avg_lines < 1.0:
+                line_bonus = 2     # 成长阶段：能消行了
+            else:
+                line_bonus = 1     # 成熟阶段：piececount 主导
+
+            # 游戏级奖励：piececount + 消行奖励
             N_arr = np.array([agent.piececount for agent, _ in group_agents])
-            raw_rewards = N_arr.copy()
+            L_arr = np.array([agent.removedlines for agent, _ in group_agents])
+            raw_rewards = N_arr + L_arr * line_bonus
 
             # 组内正规化
             mean_r = raw_rewards.mean()
@@ -297,13 +310,13 @@ class GRPOSelfPlay():
             norm_rewards = (raw_rewards - mean_r) / std_r
 
             # 打印信息
-            print(f"Group {g}, Run {i + 1}: piececounts={N_arr}  mean={mean_r:.3f} std={std_r:.3f}")
+            print(f"Group {g}, Run {i + 1}: piececounts={N_arr} lines={L_arr} bonus={line_bonus} mean={mean_r:.3f} std={std_r:.3f}")
 
             # 保存每局结果：一局一个 pkl 文件（包含所有 step）
             filetime = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
             for run_idx, (agent, trajectory) in enumerate(group_agents):
                 game_counter += 1
-                R = float(agent.piececount)  # 该局的目标回报
+                R = float(agent.piececount + agent.removedlines * line_bonus)  # 该局的目标回报
 
                 # 每步存储: (state, ref_prob, log_prob, action, prev_action, game_id, R)
                 game_steps = [
