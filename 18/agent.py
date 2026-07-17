@@ -303,7 +303,9 @@ class Agent():
 
         reward = 0
         removedlines = 0
+        landed = False
         if not isFalling:
+            landed = True
             self.add_piece(self.fallpiece)
             removedlines = self.remove_mask_line()
 
@@ -326,13 +328,13 @@ class Agent():
 
             if not self.validposition_mask(self.fallpiece, ay=0):
                 self.terminal = True
-                removedlines = -1
+                # removedlines 保持为 0（本步没有消行）
 
         # 以下顺序不能变
         self.set_state()
         self.set_availables()
 
-        return removedlines
+        return landed, removedlines
 
     def set_state(self):
         self.state[0] = self.board_mask.copy()

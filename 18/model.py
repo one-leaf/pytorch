@@ -128,9 +128,10 @@ class PolicyNet():
         spread = (values * taus).sum(-1) - (values * (1 - taus)).sum(-1)  # [B]
         spread = spread.clamp(min=0.01)
 
-        # ── 用数据集全局统计量归一化 R ────────────────────────────
-        R_norm = (R_batch - r_mean) / (r_std + 1e-3)
-        R_norm = torch.clamp(R_norm, -5.0, 5.0)
+        # ── 逐步奖励归一化 ──────────────────────────────────────────
+        # R_batch 现在是每步即时奖励（方块落地=1, 其他=0）
+        r_step = (R_batch - r_mean) / (r_std + 1e-3)
+        r_step = torch.clamp(r_step, -5.0, 5.0)
 
         # ── GAE: 按游戏分组计算步级别优势 + value target ──────────
         B = v_scalar.shape[0]
@@ -139,36 +140,35 @@ class PolicyNet():
 
         for gid in set(game_ids):
             idx = [i for i, g in enumerate(game_ids) if g == gid]
-            if len(idx) <= 1:
-                advantages[idx[0]] = R_norm[idx[0]] - v_scalar[idx[0]].detach()
-                v_targets[idx[0]] = R_norm[idx[0]]
+            n = len(idx)
+
+            if n <= 1:
+                # 单步：advantage = r - V(s), target = r
+                advantages[idx[0]] = r_step[idx[0]] - v_scalar[idx[0]].detach()
+                v_targets[idx[0]] = r_step[idx[0]]
                 continue
 
             V = v_scalar[idx]
-            R = R_norm[idx[0]]
-            n = len(idx)
+            rewards = r_step[idx]
 
-            # rewards: 全零，最后一步为 R_norm
-            rewards = torch.zeros(n, device=self.device)
-            rewards[-1] = R
+            # 折扣回报：G_t = r_t + γ·r_{t+1} + γ²·r_{t+2} + ...
+            returns = torch.zeros(n, device=self.device)
+            returns[-1] = rewards[-1]
+            for t in range(n - 2, -1, -1):
+                returns[t] = rewards[t] + gamma * returns[t + 1]
+            v_targets[idx] = returns
 
-            # V_next: 每步的下一步价值，最后一步为 0（游戏结束）
+            # GAE advantage: A_t = δ_t + γλ·δ_{t+1} + (γλ)²·δ_{t+2} + ...
+            # δ_t = r_t + γ·V(s_{t+1}) - V(s_t)
             V_next = torch.zeros(n, device=self.device)
             V_next[:-1] = V[1:].detach()
-
-            # TD error
             deltas = rewards + gamma * V_next - V.detach()
 
-            # GAE: A_t = δ_t + γλ·δ_{t+1} + (γλ)²·δ_{t+2} + ...
             gae = torch.zeros(n, device=self.device)
             gae[-1] = deltas[-1]
             for t in range(n - 2, -1, -1):
                 gae[t] = deltas[t] + gamma * lam * gae[t + 1]
             advantages[idx] = gae
-
-            # discounted value target: V(s_k) → R_norm * γ^(n-1-k)
-            discounts = gamma ** torch.arange(n - 1, -1, -1, device=self.device)
-            v_targets[idx] = R * discounts
 
         # 全局标准化
         adv_mean = advantages.mean()
@@ -225,7 +225,7 @@ class PolicyNet():
                    f"kl_div={kl_div.item():.6f} entropy={entropy.item():.6f} loss={loss.item():.6f} | "
                    f"v_scalar=[{v_scalar.min().item():.4f}, {v_scalar.max().item():.4f}] "
                    f"spread=[{spread.min().item():.4f}, {spread.max().item():.4f}] "
-                   f"R_norm=[{R_norm.min().item():.4f}, {R_norm.max().item():.4f}] "
+                   f"r_step=[{r_step.min().item():.4f}, {r_step.max().item():.4f}] "
                    f"adv=[{advantages.min().item():.4f}, {advantages.max().item():.4f}] | "
                    f"nan_params={nan_params[:10]}")
             print(f"\n[NaN GRAD] {msg}")

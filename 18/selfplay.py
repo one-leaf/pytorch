@@ -75,6 +75,7 @@ class PPOSelfPlay():
             agent = Agent(isRandomNextPiece=isRandomNextPiece)
 
         trajectory = []
+        step_results = []  # 每步 (landed, lines_cleared)
         prev_action = 3  # KEY_NONE
 
         for _ in range(self.rollout_max_steps):
@@ -93,9 +94,10 @@ class PPOSelfPlay():
             })
 
             prev_action = action
-            agent.step(action)
+            landed, removed = agent.step(action)
+            step_results.append((landed, removed))
 
-        return agent, trajectory
+        return agent, trajectory, step_results
 
     def test_play(self, test_count=None):
         """测试模式：贪婪策略评估"""
@@ -123,7 +125,7 @@ class PPOSelfPlay():
                     agent, self.policy_net, prev_action, train=False
                 )
                 prev_action = action
-                agent.step(action)
+                agent.step(action)  # (landed, removedlines) — 不需要返回值
                 if agent.terminal:
                     break
 
@@ -246,7 +248,7 @@ class PPOSelfPlay():
                 pieces_list = his_pieces
                 his_pieces = []
             else:
-                agent0, _ = self.play_one_game(isRandomNextPiece=True)
+                agent0, _, _ = self.play_one_game(isRandomNextPiece=True)
                 pieces_list = agent0.piecehis
 
             # 动态采样：最多 8 局，一旦出现 best-worst ≥ 2 立即停止
@@ -258,12 +260,12 @@ class PPOSelfPlay():
 
             for i in range(8):
                 temperature = 1.0 + 0.2 * i  # 1.0, 1.2, 1.4, 1.6, ...
-                agent, trajectory = self.play_one_game(
+                agent, trajectory, step_results = self.play_one_game(
                     isRandomNextPiece=False, nextPiecesList=group_pieces_list,
                     temperature=temperature,
                 )
                 if len(trajectory) > 0:
-                    group_agents.append((agent, trajectory))
+                    group_agents.append((agent, trajectory, step_results))
                     if agent.piececount > best_pc:
                         best_pc = agent.piececount
                     if agent.piececount < worst_pc:
@@ -276,14 +278,14 @@ class PPOSelfPlay():
 
             # 只保留最差和最好的 2 局
             if len(group_agents) >= 2 and best_pc - worst_pc >= 2:
-                pcs = [a.piececount for a, _ in group_agents]
+                pcs = [a.piececount for a, _, _ in group_agents]
                 best_idx = max(range(len(pcs)), key=lambda i: pcs[i])
                 worst_idx = min(range(len(pcs)), key=lambda i: pcs[i])
                 keep = sorted(set([best_idx, worst_idx]))
                 group_agents = [group_agents[i] for i in keep]
             else:
                 print(f"Group {g}, Run {i + 1}: only {len(group_agents)} games, skipping reward calculation.")
-                for agent, _ in group_agents:
+                for agent, _, _ in group_agents:
                     agent.print()
                 continue  # 至少需要两局才能计算奖励
 
@@ -300,8 +302,8 @@ class PPOSelfPlay():
                 line_bonus = 1     # 成熟阶段：piececount 主导
 
             # 游戏级奖励：piececount + 消行奖励
-            N_arr = np.array([agent.piececount for agent, _ in group_agents])
-            L_arr = np.array([agent.removedlines for agent, _ in group_agents])
+            N_arr = np.array([agent.piececount for agent, _, _ in group_agents])
+            L_arr = np.array([agent.removedlines for agent, _, _ in group_agents])
             raw_rewards = N_arr + L_arr * line_bonus
 
             # 组内正规化
@@ -314,17 +316,20 @@ class PPOSelfPlay():
 
             # 保存每局结果：一局一个 pkl 文件（包含所有 step）
             filetime = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-            for run_idx, (agent, trajectory) in enumerate(group_agents):
+            for run_idx, (agent, trajectory, step_results) in enumerate(group_agents):
                 game_counter += 1
-                R = float(agent.piececount + agent.removedlines * line_bonus)  # 该局的目标回报
 
-                # 每步存储: (state, ref_prob, log_prob, action, prev_action, game_id, R)
-                game_steps = [
-                    (step_data["state"], step_data["ref_prob"],
-                     step_data["log_prob"], step_data["action"],
-                     step_data["prev_action"], game_counter, R)
-                    for step_data in trajectory
-                ]
+                # 每步存储: (state, ref_prob, log_prob, action, prev_action, game_id, r_step)
+                # r_step = 1 + lines * line_bonus（方块落地）, 0（未落地）
+                game_steps = []
+                for step_idx, step_data in enumerate(trajectory):
+                    landed, removed = step_results[step_idx]
+                    r_step = float(1 + removed * line_bonus) if landed else 0.0
+                    game_steps.append((
+                        step_data["state"], step_data["ref_prob"],
+                        step_data["log_prob"], step_data["action"],
+                        step_data["prev_action"], game_counter, r_step
+                    ))
                 filename = f"{filetime}-{game_counter:06d}-r{run_idx}.pkl"
                 savefile = os.path.join(data_wait_dir, filename)
                 with open(savefile, "wb") as fn:
@@ -335,12 +340,12 @@ class PPOSelfPlay():
 
             # 更新计数器 + 历史统计（用实际游戏数据，保证 show_status 有数据）
             alpha = 0.1
-            g_avg_pc = sum(a.piececount for a, _ in group_agents) / len(group_agents)
-            g_avg_rl = sum(a.removedlines for a, _ in group_agents) / len(group_agents)
-            g_avg_st = sum(a.steps for a, _ in group_agents) / len(group_agents)
-            g_min_pc = min(a.piececount for a, _ in group_agents)
-            g_max_pc = max(a.piececount for a, _ in group_agents)
-            g_max_rl = max(a.removedlines for a, _ in group_agents)
+            g_avg_pc = sum(a.piececount for a, _, _ in group_agents) / len(group_agents)
+            g_avg_rl = sum(a.removedlines for a, _, _ in group_agents) / len(group_agents)
+            g_avg_st = sum(a.steps for a, _, _ in group_agents) / len(group_agents)
+            g_min_pc = min(a.piececount for a, _, _ in group_agents)
+            g_max_pc = max(a.piececount for a, _, _ in group_agents)
+            g_max_rl = max(a.removedlines for a, _, _ in group_agents)
 
             state = read_status_file()
             state["counters"]["agent"] += 1
