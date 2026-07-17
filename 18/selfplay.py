@@ -320,11 +320,11 @@ class PPOSelfPlay():
                 game_counter += 1
 
                 # 每步存储: (state, ref_prob, log_prob, action, prev_action, game_id, r_step)
-                # r_step: 每步基础 0.1，落地时额外 +1 + 消行奖励
+                # r_step: 每步基础 0.1，落地时额外 +0.01 + 消行奖励
                 game_steps = []
                 for step_idx, step_data in enumerate(trajectory):
                     landed, removed = step_results[step_idx]
-                    r_step = 0.1 + (1 + removed * line_bonus if landed else 0)
+                    r_step = 0.1 + (0.01 + removed * line_bonus if landed else 0)
                     game_steps.append((
                         step_data["state"], step_data["ref_prob"],
                         step_data["log_prob"], step_data["action"],
