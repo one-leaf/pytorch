@@ -12,7 +12,7 @@ GAME_ACTIONS_NUM = len(ACTIONS)
 GAME_WIDTH, GAME_HEIGHT = 10, 20
 
 
-class GRPOSelfPlay():
+class PPOSelfPlay():
     def __init__(self):
         self.rollout_max_steps = 500    # 单局最大步数
         self.test_count = 10            # 测试次数
@@ -172,9 +172,9 @@ class GRPOSelfPlay():
                 best_removedlines, worst_removedlines,
                 avg_pc, avg_rl, avg_st)
 
-    def collect_grpo_data(self):
-        """收集 GRPO 自我对抗数据"""
-        print("GRPO Self Play starting ...")
+    def collect_ppo_data(self):
+        """收集 PPO 自我对抗数据"""
+        print("PPO Self Play starting ...")
 
         # 确定初始模型文件
         load_model_file = model_file
@@ -289,7 +289,7 @@ class GRPOSelfPlay():
 
             # 自适应消行奖励：根据当前平均消行水平动态调整
             status = read_status_file()
-            avg_lines = status["metrics"].get("grpo_removedlines", 0)
+            avg_lines = status["metrics"].get("ppo_removedlines", 0)
             if avg_lines < 0.05:
                 line_bonus = 5     # 引导阶段：还没学会消行
             elif avg_lines < 0.3:
@@ -351,15 +351,15 @@ class GRPOSelfPlay():
             state["_accum"]["_sum_steps"]        += g_avg_st
 
             m = state["metrics"]
-            # GRPO player EMA（带噪声探索的移动平均）
-            m["grpo_piececount"]       = round(m.get("grpo_piececount",       0) * (1 - alpha) + g_avg_pc * alpha, 3)
-            m["grpo_removedlines"]     = round(m.get("grpo_removedlines",     0) * (1 - alpha) + g_avg_rl * alpha, 3)
-            m["grpo_steps"]            = round(m.get("grpo_steps",            0) * (1 - alpha) + g_avg_st * alpha, 3)
-            m["grpo_piececount_min"]   = round(m.get("grpo_piececount_min",   999999) * (1 - alpha) + g_min_pc * alpha, 3)
-            m["grpo_piececount_max"]   = round(m.get("grpo_piececount_max",   0)      * (1 - alpha) + g_max_pc * alpha, 3)
+            # PPO player EMA（带噪声探索的移动平均）
+            m["ppo_piececount"]       = round(m.get("ppo_piececount",       0) * (1 - alpha) + g_avg_pc * alpha, 3)
+            m["ppo_removedlines"]     = round(m.get("ppo_removedlines",     0) * (1 - alpha) + g_avg_rl * alpha, 3)
+            m["ppo_steps"]            = round(m.get("ppo_steps",            0) * (1 - alpha) + g_avg_st * alpha, 3)
+            m["ppo_piececount_min"]   = round(m.get("ppo_piececount_min",   999999) * (1 - alpha) + g_min_pc * alpha, 3)
+            m["ppo_piececount_max"]   = round(m.get("ppo_piececount_max",   0)      * (1 - alpha) + g_max_pc * alpha, 3)
             # 历史最值
-            m["grpo_piececount_best"]    = max(m.get("grpo_piececount_best",    0), g_max_pc)
-            m["grpo_removedlines_best"]  = max(m.get("grpo_removedlines_best",  0), g_max_rl)
+            m["ppo_piececount_best"]    = max(m.get("ppo_piececount_best",    0), g_max_pc)
+            m["ppo_removedlines_best"]  = max(m.get("ppo_removedlines_best",  0), g_max_rl)
 
             save_status_file(state)
             print(f"status updated: agent={state['counters']['agent']}")
@@ -369,15 +369,15 @@ class GRPOSelfPlay():
     def run(self):
         """运行数据采集"""
         try:
-            self.collect_grpo_data()                
+            self.collect_ppo_data()                
         except KeyboardInterrupt:
             print('quit')
 
 
 if __name__ == '__main__':
     os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
-    print('start GRPO selfplay', datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+    print('start PPO selfplay', datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
     np.set_printoptions(precision=2, suppress=True)
-    training = GRPOSelfPlay()
+    training = PPOSelfPlay()
     training.run()
-    print('end GRPO selfplay', datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+    print('end PPO selfplay', datetime.now().strftime('%Y-%m-%d %H:%M:%S'))

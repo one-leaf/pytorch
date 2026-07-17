@@ -61,16 +61,16 @@ def _default_state():
     return {
         "counters": {"agent": 0, "_agent": 0},
         "metrics": {
-            # GRPO player（selfplay，带 Dirichlet 噪声探索）
-            "grpo_piececount": 0,       # EMA: 玩家平均方块数
-            "grpo_removedlines": 0,     # EMA: 玩家平均消行数
-            "grpo_steps": 0,            # EMA: 玩家平均步数
-            "grpo_reward_mean": 0,
-            "grpo_reward_std": 0,
-            "grpo_piececount_min": 999999,  # EMA: 组内最少方块数
-            "grpo_piececount_max": 0,       # EMA: 组内最多方块数
-            "grpo_removedlines_best": 0,    # 历史最高消行数
-            "grpo_piececount_best": 0,      # 历史最高方块数
+            # PPO player（selfplay，带 Dirichlet 噪声探索）
+            "ppo_piececount": 0,       # EMA: 玩家平均方块数
+            "ppo_removedlines": 0,     # EMA: 玩家平均消行数
+            "ppo_steps": 0,            # EMA: 玩家平均步数
+            "ppo_reward_mean": 0,
+            "ppo_reward_std": 0,
+            "ppo_piececount_min": 999999,  # EMA: 组内最少方块数
+            "ppo_piececount_max": 0,       # EMA: 组内最多方块数
+            "ppo_removedlines_best": 0,    # 历史最高消行数
+            "ppo_piececount_best": 0,      # 历史最高方块数
             # test_play（纯贪婪，无噪声）
             "test_piececount": 0,           # EMA: 贪婪平均方块数
             "test_removedlines": 0,         # EMA: 贪婪平均消行数
@@ -110,10 +110,10 @@ def _migrate(state: dict[str, Any]):
     for k in ("agent", "_agent"):
         if k in old:
             state["counters"][k] = old.pop(k)
-    for k in ["grpo_piececount", "grpo_removedlines", "grpo_steps",
-              "grpo_reward_mean", "grpo_reward_std",
-              "grpo_piececount_min", "grpo_piececount_max",
-              "grpo_removedlines_best", "grpo_piececount_best",
+    for k in ["ppo_piececount", "ppo_removedlines", "ppo_steps",
+              "ppo_reward_mean", "ppo_reward_std",
+              "ppo_piececount_min", "ppo_piececount_max",
+              "ppo_removedlines_best", "ppo_piececount_best",
               "test_piececount", "test_removedlines", "test_steps",
               "test_piececount_best", "test_removedlines_best",
               "train_acc", "train_kl", "train_entropy", "train_vloss",
@@ -162,16 +162,16 @@ def _append_history(state: dict[str, Any]):
     n = max(_agent, 1)
     snapshot = {
         "agent": c.get("agent", 0),
-        # GRPO player
-        "grpo_piececount": round(acc.get("_sum_piececount", 0) / n, 3),
-        "grpo_removedlines": round(acc.get("_sum_removedlines", 0) / n, 3),
-        "grpo_steps": round(acc.get("_sum_steps", 0) / n, 3),
-        "grpo_reward_mean": m.get("grpo_reward_mean", 0),
-        "grpo_reward_std": m.get("grpo_reward_std", 0),
-        "grpo_piececount_min": m.get("grpo_piececount_min", 999999),
-        "grpo_piececount_max": m.get("grpo_piececount_max", 0),
-        "grpo_removedlines_best": m.get("grpo_removedlines_best", 0),
-        "grpo_piececount_best": m.get("grpo_piececount_best", 0),
+        # PPO player
+        "ppo_piececount": round(acc.get("_sum_piececount", 0) / n, 3),
+        "ppo_removedlines": round(acc.get("_sum_removedlines", 0) / n, 3),
+        "ppo_steps": round(acc.get("_sum_steps", 0) / n, 3),
+        "ppo_reward_mean": m.get("ppo_reward_mean", 0),
+        "ppo_reward_std": m.get("ppo_reward_std", 0),
+        "ppo_piececount_min": m.get("ppo_piececount_min", 999999),
+        "ppo_piececount_max": m.get("ppo_piececount_max", 0),
+        "ppo_removedlines_best": m.get("ppo_removedlines_best", 0),
+        "ppo_piececount_best": m.get("ppo_piececount_best", 0),
         # test_play
         "test_piececount": m.get("test_piececount", 0),
         "test_removedlines": m.get("test_removedlines", 0),

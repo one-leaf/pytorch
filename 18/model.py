@@ -1,5 +1,6 @@
 import torch
 import torch.optim as optim
+import torch.nn.functional as F
 import os
 import numpy as np
 from datetime import datetime
@@ -87,12 +88,12 @@ class PolicyNet():
         return act_probs
         
 
-    # GRPO 训练步骤（带 Value Head + GAE 信用分配）
-    def train_step_grpo(self, state_batch, ref_probs, log_probs_old, action_batch, _mask_batch, prev_action_batch,
+    # PPO 训练步骤（带 Value Head + GAE 信用分配 + 分位数价值）
+    def train_step_ppo(self, state_batch, ref_probs, log_probs_old, action_batch, _mask_batch, prev_action_batch,
                         game_ids, R_batch, lr, r_mean, r_std,
                         clip_eps=0.2, beta=0.05, entropy_weight=0.01,
                         gamma=0.99, lam=0.95, vf_coef=0.5):
-        """GRPO + V(s) 训练步骤
+        """PPO + V(s) 训练步骤（分位数价值头 + 步重要性加权）
         - V(s): value head 估计每步状态价值
         - GAE: 步级别信用分配（替代线性衰减）
         - policy_loss: PPO clip 损失
@@ -115,26 +116,35 @@ class PolicyNet():
 
         self.net.train()
         log_probs, values = self.net(state_batch, prev_action_batch)
-        values = values.squeeze(-1)  # [B]
-        values = torch.clamp(values, -10.0, 10.0)
+        # values: [B, N] quantiles
+
+        # 中位数作为标量 V(s) 用于 GAE
+        N_q = values.shape[1]
+        v_scalar = values[:, N_q // 2]  # [B] median
+        v_scalar = torch.clamp(v_scalar, -10.0, 10.0)
+
+        # 分位数 spread：条件方差的代理，衡量步重要性
+        taus = (torch.arange(N_q, device=self.device) + 0.5) / N_q  # [N]
+        spread = (values * taus).sum(-1) - (values * (1 - taus)).sum(-1)  # [B]
+        spread = spread.clamp(min=0.01)
 
         # ── 用数据集全局统计量归一化 R ────────────────────────────
         R_norm = (R_batch - r_mean) / (r_std + 1e-3)
         R_norm = torch.clamp(R_norm, -5.0, 5.0)
 
         # ── GAE: 按游戏分组计算步级别优势 + value target ──────────
-        B = values.shape[0]
+        B = v_scalar.shape[0]
         advantages = torch.zeros(B, device=self.device)
         v_targets = torch.zeros(B, device=self.device)
 
         for gid in set(game_ids):
             idx = [i for i, g in enumerate(game_ids) if g == gid]
             if len(idx) <= 1:
-                advantages[idx[0]] = R_norm[idx[0]] - values[idx[0]].detach()
+                advantages[idx[0]] = R_norm[idx[0]] - v_scalar[idx[0]].detach()
                 v_targets[idx[0]] = R_norm[idx[0]]
                 continue
 
-            V = values[idx]
+            V = v_scalar[idx]
             R = R_norm[idx[0]]
             n = len(idx)
 
@@ -165,7 +175,7 @@ class PolicyNet():
         adv_std = advantages.std().clamp(min=1e-3)
         advantages = (advantages - adv_mean) / adv_std
 
-        # ── Policy loss (PPO clip) ────────────────────────────────
+        # ── Policy loss (PPO clip + 步重要性加权) ─────────────────
         actions = action_batch.unsqueeze(-1)
         log_prob_new = log_probs.gather(-1, actions)                        # [B, 1]
         log_prob_old = log_probs_old_t.gather(-1, actions).squeeze(-1)      # [B]
@@ -174,10 +184,16 @@ class PolicyNet():
         ratios = torch.exp(log_ratio)
         surr1 = ratios * advantages
         surr2 = torch.clamp(ratios, 1 - clip_eps, 1 + clip_eps) * advantages
-        policy_loss = -torch.min(surr1, surr2).mean()
+        # 步重要性加权：spread 大的步骤获得更大梯度
+        step_weight = spread / spread.mean().detach()
+        step_weight = (0.5 + step_weight.clamp(max=1.5)).detach()  # [B]
+        policy_loss = -(torch.min(surr1, surr2) * step_weight).mean()
 
-        # ── Value loss (MSE: V(s) 预测 discounted return) ─────────
-        value_loss = ((values - v_targets) ** 2).mean()
+        # ── Value loss (Quantile Huber: 分位数回归) ───────────────
+        target_exp = v_targets.unsqueeze(1).expand_as(values)  # [B, N]
+        diff = values - target_exp
+        q_weights = torch.where(diff > 0, taus.unsqueeze(0), 1 - taus.unsqueeze(0))
+        value_loss = (q_weights * F.smooth_l1_loss(values, target_exp, reduction='none')).mean()
 
         # ── KL 散度 ──────────────────────────────────────────────
         log_probs_safe = torch.clamp(log_probs, min=-20.0)
@@ -207,7 +223,8 @@ class PolicyNet():
                           if p.grad is not None and (torch.isnan(p.grad).any() or torch.isinf(p.grad).any())]
             msg = (f"GRAD NaN | policy_loss={policy_loss.item():.6f} value_loss={value_loss.item():.6f} "
                    f"kl_div={kl_div.item():.6f} entropy={entropy.item():.6f} loss={loss.item():.6f} | "
-                   f"values=[{values.min().item():.4f}, {values.max().item():.4f}] "
+                   f"v_scalar=[{v_scalar.min().item():.4f}, {v_scalar.max().item():.4f}] "
+                   f"spread=[{spread.min().item():.4f}, {spread.max().item():.4f}] "
                    f"R_norm=[{R_norm.min().item():.4f}, {R_norm.max().item():.4f}] "
                    f"adv=[{advantages.min().item():.4f}, {advantages.max().item():.4f}] | "
                    f"nan_params={nan_params[:10]}")

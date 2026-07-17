@@ -79,7 +79,7 @@ def show_status(max_history=0, as_json=False):
         print(label)
         print("-" * 157)
         header = (f"  {'Agent':>6}  "
-                  f"{'GR_Piece':>8} {'GR_Lines':>8} {'GR_Steps':>8} {'GR_Min':>7} {'GR_Max':>7} {'GR_RwdStd':>9}  "
+                  f"{'PP_Piece':>8} {'PP_Lines':>8} {'PP_Steps':>8} {'PP_Min':>7} {'PP_Max':>7} {'PP_RwdStd':>9}  "
                   f"{'Te_Piece':>8} {'Te_Lines':>8} {'Te_Steps':>8} {'Te_Best':>7}  "
                   f"{'Tr_Acc':>8} {'Tr_KL':>9} {'Tr_Ent':>8} {'Tr_VL':>8}  "
                   f"{'R_Mean':>7} {'R_Std':>7}")
@@ -87,12 +87,12 @@ def show_status(max_history=0, as_json=False):
         print("-" * 157)
         for h in display:
             print(f"  {h.get('agent', 0):>6}  "
-                  f"{h.get('grpo_piececount', 0):>8.1f} "
-                  f"{h.get('grpo_removedlines', 0):>8.3f} "
-                  f"{h.get('grpo_steps', 0):>8.1f} "
-                  f"{h.get('grpo_piececount_min', 0):>7.1f} "
-                  f"{h.get('grpo_piececount_max', 0):>7.1f} "
-                  f"{h.get('grpo_reward_std', 0):>9.3f}  "
+                  f"{h.get('ppo_piececount', 0):>8.1f} "
+                  f"{h.get('ppo_removedlines', 0):>8.3f} "
+                  f"{h.get('ppo_steps', 0):>8.1f} "
+                  f"{h.get('ppo_piececount_min', 0):>7.1f} "
+                  f"{h.get('ppo_piececount_max', 0):>7.1f} "
+                  f"{h.get('ppo_reward_std', 0):>9.3f}  "
                   f"{h.get('test_piececount', 0):>8.1f} "
                   f"{h.get('test_removedlines', 0):>8.3f} "
                   f"{h.get('test_steps', 0):>8.1f} "
@@ -110,10 +110,10 @@ def show_status(max_history=0, as_json=False):
         if len(history) >= 2:
             first, last = history[0], history[-1]
             print(f"  起始(agent {first['agent']}): "
-                  f"player pc={first.get('grpo_piececount', 0):.1f} ln={first.get('grpo_removedlines', 0):.3f}  "
+                  f"player pc={first.get('ppo_piececount', 0):.1f} ln={first.get('ppo_removedlines', 0):.3f}  "
                   f"test pc={first.get('test_piececount', 0):.1f} ln={first.get('test_removedlines', 0):.3f}")
             print(f"  当前(agent {last['agent']}):  "
-                  f"player pc={last.get('grpo_piececount', 0):.1f} ln={last.get('grpo_removedlines', 0):.3f}  "
+                  f"player pc={last.get('ppo_piececount', 0):.1f} ln={last.get('ppo_removedlines', 0):.3f}  "
                   f"test pc={last.get('test_piececount', 0):.1f} ln={last.get('test_removedlines', 0):.3f}")
         print("=" * 157)
 

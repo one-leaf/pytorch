@@ -43,7 +43,8 @@ class GameTransformer(nn.Module):
         )
         self.decoder = nn.TransformerDecoder(decoder_layer, num_layers=depth)
         self.action_head = nn.Linear(embed_dim, num_actions)
-        self.value_head = nn.Linear(embed_dim, 1)
+        self.num_quantiles = 8
+        self.value_head = nn.Linear(embed_dim, self.num_quantiles)
 
         self.causal_mask = nn.Transformer.generate_square_subsequent_mask(seq_len)
 

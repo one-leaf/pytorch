@@ -2,7 +2,7 @@ import os, glob, pickle
 
 from model import PolicyNet, data_dir, data_wait_dir, model_file, log_nan
 from agent import Agent, ACTIONS
-from selfplay import GRPOSelfPlay
+from selfplay import PPOSelfPlay
 
 import time
 from datetime import datetime
@@ -18,8 +18,8 @@ GAME_ACTIONS_NUM = len(ACTIONS)
 GAME_WIDTH, GAME_HEIGHT = 10, 20
 
 
-class GRPODataset(torch.utils.data.Dataset):
-    """GRPO 数据集，每个 pkl 包含一局游戏的所有 step:
+class PPODataset(torch.utils.data.Dataset):
+    """PPO 数据集，每个 pkl 包含一局游戏的所有 step:
     (state, ref_prob, log_prob, action, prev_action, game_id, R)
     """
     def __init__(self, data_dir, max_files, min_new_files, n_train_times=3):
@@ -131,9 +131,9 @@ class GRPODataset(torch.utils.data.Dataset):
         print(f"loaded {len(self._flat_index)} steps in {time.time() - start_time:.1f}s")
 
 
-class GRPOTestDataset(torch.utils.data.Dataset):
+class PPOTestDataset(torch.utils.data.Dataset):
     """测试数据集：使用 newsample（本轮新采集的文件）"""
-    def __init__(self, parent: GRPODataset):
+    def __init__(self, parent: PPODataset):
         self.parent = parent
 
     def __len__(self):
@@ -151,7 +151,7 @@ class GRPOTestDataset(torch.utils.data.Dataset):
                 torch.as_tensor(R).float())
 
 
-class GRPOTrain():
+class PPOTrain():
     def __init__(self):
         self.batch_size = 256
         self.learn_rate = 1e-5
@@ -161,28 +161,28 @@ class GRPOTrain():
         self.min_new_files = 1         # 至少有1个新文件就训练（不限制移动数量，清空 wait 目录）
         self.kl_targ = 0.3           # 实际 KL 约 0.6~0.8，目标设为 0.3 允许充分学习
 
-        # GRPO 超参数
-        self.grpo_clip_eps = 0.2
-        self.grpo_beta = 0.02         # KL 惩罚系数，beta*KL=0.02*0.8=0.016，与 policy_loss 量级可比
-        self.grpo_entropy_weight = 0.2   # 熵正则，维持 entropy 在 0.8-1.0 促进探索
+        # PPO 超参数
+        self.ppo_clip_eps = 0.2
+        self.ppo_beta = 0.02         # KL 惩罚系数，beta*KL=0.02*0.8=0.016，与 policy_loss 量级可比
+        self.ppo_entropy_weight = 0.2   # 熵正则，维持 entropy 在 0.8-1.0 促进探索
         self.n_epochs = 1             # 每轮训练只跑 1 个 epoch，训练次数由 min_new_files 控制
 
     def policy_update(self, sample_data):
-        """GRPO 策略更新（带 GAE 信用分配）"""
+        """PPO 策略更新（带 GAE 信用分配）"""
         state_batch, ref_probs_batch, log_probs_old_batch, actions_batch, prev_actions_batch, game_ids_batch, R_batch = sample_data
-        acc, kl, entropy, value_loss = self.policy_net.train_step_grpo(
+        acc, kl, entropy, value_loss = self.policy_net.train_step_ppo(
             state_batch, ref_probs_batch, log_probs_old_batch, actions_batch, None, prev_actions_batch,
             game_ids_batch, R_batch,
             self.learn_rate * self.lr_multiplier,
             self.dataset.r_mean, self.dataset.r_std,
-            clip_eps=self.grpo_clip_eps,
-            beta=self.grpo_beta,
-            entropy_weight=self.grpo_entropy_weight
+            clip_eps=self.ppo_clip_eps,
+            beta=self.ppo_beta,
+            entropy_weight=self.ppo_entropy_weight
         )
         return acc, kl, entropy, value_loss
 
     def run(self):
-        """启动 GRPO 训练"""
+        """启动 PPO 训练"""
         try:
             # 先创建/加载模型（确保 model_file 存在，selfplay 才能启动）
             try:
@@ -199,8 +199,8 @@ class GRPOTrain():
             while True:
                 try:
                     print("start data loader")
-                    self.dataset = GRPODataset(data_dir, self.max_files, self.min_new_files, self.n_train_times)
-                    self.testdataset = GRPOTestDataset(self.dataset)
+                    self.dataset = PPODataset(data_dir, self.max_files, self.min_new_files, self.n_train_times)
+                    self.testdataset = PPOTestDataset(self.dataset)
                     print("end data loader")
                     break
                 except Exception as e:
@@ -354,7 +354,7 @@ class GRPOTrain():
 
             # ── test_play + EMA 指标更新 ──────────────────────────────
             print("running test_play for EMA metrics update...")
-            sp = GRPOSelfPlay()
+            sp = PPOSelfPlay()
             sp.policy_net = self.policy_net
             (_, _, _,
              _, _, _,
@@ -382,8 +382,8 @@ class GRPOTrain():
 
             # 最近一轮采集的奖励统计（从 dataset 的 R 值计算）
             all_rs = np.array([step[6] for file_steps in self.dataset.data.values() for step in file_steps])
-            m["grpo_reward_mean"] = round(float(all_rs.mean()), 3) if len(all_rs) > 0 else 0.0
-            m["grpo_reward_std"]  = round(float(all_rs.std()),  3) if len(all_rs) > 0 else 0.0
+            m["ppo_reward_mean"] = round(float(all_rs.mean()), 3) if len(all_rs) > 0 else 0.0
+            m["ppo_reward_std"]  = round(float(all_rs.std()),  3) if len(all_rs) > 0 else 0.0
 
             save_status_file(status)
             print(f"test: greedy avg_pieces={test_avg_pc:.1f} avg_lines={test_avg_rl:.3f} avg_steps={test_avg_st:.1f}")
@@ -398,7 +398,7 @@ class GRPOTrain():
 
 
 if __name__ == '__main__':
-    print('start GRPO training', datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-    training = GRPOTrain()
+    print('start PPO training', datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+    training = PPOTrain()
     training.run()
-    print('end GRPO training', datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+    print('end PPO training', datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
