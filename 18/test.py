@@ -48,11 +48,11 @@ def play_one_game():
 
         prev_action = action
         landed, removed = agent.step(action)
-        if landed:
-            print(f"  >> LANDED  cleared={removed}  piececount={agent.piececount}")
+        # if landed:
+        #     print(f"  >> LANDED  cleared={removed}  piececount={agent.piececount}")
 
         step += 1
-        time.sleep(0.1)
+        time.sleep(0.2)
 
     agent.print()
     print(f"\nGame Over! piececount={agent.piececount} removedlines={agent.removedlines} steps={agent.steps}")
