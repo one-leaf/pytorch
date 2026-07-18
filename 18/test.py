@@ -27,8 +27,10 @@ def play_one_game():
 
         policy_net.net.eval()
         with torch.no_grad():
-            log_probs, _ = policy_net.net(state_tensor, prev_action_tensor)
+            log_probs, values = policy_net.net(state_tensor, prev_action_tensor)
         probs = np.exp(log_probs[0].cpu().numpy())
+        v_val = values[0].cpu().numpy()  # [N_q] quantiles
+        v_median = v_val[len(v_val)//2]
 
         availables = agent.availables
         probs_masked = probs * availables.astype(np.float32)
@@ -43,6 +45,7 @@ def play_one_game():
 
         os.system('cls' if os.name == 'nt' else 'clear')
         print(f"=== Step {step} === Action: {ACTION_NAMES[action]} | Piece: {agent.fallpiece['shape']} (rot={agent.fallpiece['rotation']}, x={agent.fallpiece['x']}, y={agent.fallpiece['y']})")
+        print(f"V(s) = {v_median:.3f} (quantiles: {v_val.round(3)})")
         agent.print()
 
         prev_action = action
