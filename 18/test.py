@@ -118,6 +118,6 @@ def play_one_game():
 
 
 if __name__ == '__main__':
-    plot_training_curves()
-    input("\n按回车开始游戏...")
     play_one_game()
+    print("\n")
+    plot_training_curves()
