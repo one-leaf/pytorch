@@ -43,11 +43,11 @@ def play_one_game():
 
         os.system('cls' if os.name == 'nt' else 'clear')
         print(f"=== Step {step} === Action: {ACTION_NAMES[action]} | Piece: {agent.fallpiece['shape']} (rot={agent.fallpiece['rotation']}, x={agent.fallpiece['x']}, y={agent.fallpiece['y']})")
-        print(f"\nProbs: {dict(zip(ACTION_NAMES.values(), [f'{p:.3f}' for p in probs_masked]))}")
+        agent.print()
 
         prev_action = action
         landed, removed = agent.step(action)
-        agent.print()
+        print(f"\nProbs: {dict(zip(ACTION_NAMES.values(), [f'{p:.3f}' for p in probs_masked]))}")
         # if landed:
         #     print(f"  >> LANDED  cleared={removed}  piececount={agent.piececount}")
 
