@@ -1,4 +1,4 @@
-import os, time
+import os, time, json
 import numpy as np
 import torch
 
@@ -10,6 +10,62 @@ GAME_WIDTH, GAME_HEIGHT = 10, 20
 
 ACTION_NAMES = {0: 'ROTATE', 1: 'LEFT', 2: 'RIGHT', 3: 'NONE', 4: 'DOWN'}
 
+
+def plot_training_curves():
+    """读取状态日志并在终端显示 PP_Piece 和 Te_Piece 曲线"""
+    curr_dir = os.path.dirname(os.path.abspath(__file__))
+    status_file = os.path.join(curr_dir, 'model', 'vit-ti', 'status.json')
+
+    if not os.path.exists(status_file):
+        print(f"状态文件不存在: {status_file}")
+        return
+
+    with open(status_file, 'r', encoding='utf-8') as f:
+        status = json.load(f)
+
+    history = status.get('history', [])
+    if not history:
+        print("历史记录为空")
+        return
+
+    # 提取数据
+    pp_piece = [h.get('ppo_piececount', 0) for h in history]
+    te_piece = [h.get('test_piececount', 0) for h in history]
+    agents = [h.get('agent', 0) for h in history]
+
+    # 绘制 ASCII 曲线
+    width = 60
+    height = 15
+
+    def draw_curve(data, label):
+        if not data:
+            return
+        min_val = min(data)
+        max_val = max(data)
+        if max_val == min_val:
+            max_val = min_val + 1
+
+        print(f"\n{label} (min={min_val:.1f}, max={max_val:.1f})")
+        print('  ' + '─' * (width + 2))
+
+        for row in range(height, -1, -1):
+            threshold = min_val + (max_val - min_val) * row / height
+            line = '  │'
+            for col in range(width):
+                idx = int(col * len(data) / width)
+                if idx < len(data) and data[idx] >= threshold:
+                    line += '█'
+                else:
+                    line += ' '
+            val = min_val + (max_val - min_val) * row / height
+            line += f'│ {val:.1f}'
+            print(line)
+
+        print('  ' + '─' * (width + 2))
+        print(f'  Agent: {agents[0]} → {agents[-1]}')
+
+    draw_curve(pp_piece, 'PP_Piece (训练)')
+    draw_curve(te_piece, 'Te_Piece (测试)')
 
 def play_one_game():
     curr_dir = os.path.dirname(os.path.abspath(__file__))
@@ -62,4 +118,6 @@ def play_one_game():
 
 
 if __name__ == '__main__':
+    plot_training_curves()
+    input("\n按回车开始游戏...")
     play_one_game()
