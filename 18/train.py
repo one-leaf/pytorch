@@ -41,14 +41,15 @@ class PPODataset(torch.utils.data.Dataset):
 
     def __getitem__(self, index):
         fn, step_idx = self._flat_index[index]
-        state, ref_prob, log_prob, action, prev_action, game_id, R = self.data[fn][step_idx]
+        state, ref_prob, log_prob, action, prev_action, game_id, R, G = self.data[fn][step_idx]
         return (torch.from_numpy(state).float(),
                 torch.from_numpy(ref_prob).float(),
                 torch.from_numpy(log_prob).float(),
                 torch.as_tensor(action).long(),
                 torch.as_tensor(prev_action).long(),
-                torch.as_tensor(game_id).long(),
-                torch.as_tensor(R).float())
+                game_id,
+                torch.as_tensor(R).float(),
+                torch.as_tensor(G).float())
 
     def move_wait_files(self):
         """将 wait 目录的 pkl 全部移入 data 目录（清空 wait，防止堆积）"""
@@ -98,18 +99,36 @@ class PPODataset(torch.utils.data.Dataset):
         print(f"loaded {len(self.file_list)} files, deleted {deleted} (pool rotation: {to_delete_by_rotation})")
 
     def load_data(self):
-        """将所有 pkl 加载到内存，构建 flat index"""
+        """将所有 pkl 加载到内存，构建 flat index，并预计算每步的 G_t"""
         start_time = time.time()
+        gamma = 0.99
+
         for fn in self.file_list:
             try:
                 with open(fn, "rb") as f:
                     steps = pickle.load(f)
+
+                # 验证数据
                 for step in steps:
                     state, ref_prob, _log_prob, _action, _prev_action, _game_id, R = step
                     assert state.shape == (2, 20, 10), f'error: state shape {state.shape}'
                     assert ref_prob.shape == (5,), f'error: ref_prob shape {ref_prob.shape}'
                     assert not np.isnan(R), f'error: R is Nan'
-                self.data[fn] = steps
+
+                # 预计算这局游戏的 G_t（折扣回报）
+                n_steps = len(steps)
+                g_values = np.zeros(n_steps)
+                g_values[-1] = steps[-1][6]  # 最后一步的 R
+                for t in range(n_steps - 2, -1, -1):
+                    g_values[t] = steps[t][6] + gamma * g_values[t + 1]
+
+                # 将 G_t 附加到每个 step
+                steps_with_g = []
+                for i, step in enumerate(steps):
+                    state, ref_prob, log_prob, action, prev_action, game_id, R = step
+                    steps_with_g.append((state, ref_prob, log_prob, action, prev_action, game_id, R, g_values[i]))
+
+                self.data[fn] = steps_with_g
             except Exception as e:
                 print(f"file {fn} error: {e}")
                 if os.path.exists(fn):
@@ -141,14 +160,15 @@ class PPOTestDataset(torch.utils.data.Dataset):
 
     def __getitem__(self, index):
         fn, step_idx = self.parent._test_flat_index[index]
-        state, ref_prob, log_prob, action, prev_action, game_id, R = self.parent.data[fn][step_idx]
+        state, ref_prob, log_prob, action, prev_action, game_id, R, G = self.parent.data[fn][step_idx]
         return (torch.from_numpy(state).float(),
                 torch.from_numpy(ref_prob).float(),
                 torch.from_numpy(log_prob).float(),
                 torch.as_tensor(action).long(),
                 torch.as_tensor(prev_action).long(),
-                torch.as_tensor(game_id).long(),
-                torch.as_tensor(R).float())
+                game_id,
+                torch.as_tensor(R).float(),
+                torch.as_tensor(G).float())
 
 
 class PPOTrain():
@@ -169,10 +189,10 @@ class PPOTrain():
 
     def policy_update(self, sample_data):
         """PPO 策略更新（带 GAE 信用分配）"""
-        state_batch, ref_probs_batch, log_probs_old_batch, actions_batch, prev_actions_batch, game_ids_batch, R_batch = sample_data
+        state_batch, ref_probs_batch, log_probs_old_batch, actions_batch, prev_actions_batch, game_ids_batch, R_batch, G_batch = sample_data
         acc, kl, entropy, value_loss, g_mean, g_std = self.policy_net.train_step_ppo(
             state_batch, ref_probs_batch, log_probs_old_batch, actions_batch, None, prev_actions_batch,
-            game_ids_batch, R_batch,
+            game_ids_batch, R_batch, G_batch,
             self.learn_rate * self.lr_multiplier,
             self.dataset.r_mean, self.dataset.r_std,
             clip_eps=self.ppo_clip_eps,
@@ -207,7 +227,6 @@ class PPOTrain():
                     print(f"waiting for data: {e}")
                     time.sleep(30)
 
-            dataset_len = len(self.dataset)
             testing_loader = torch.utils.data.DataLoader(
                 self.testdataset, batch_size=self.batch_size, shuffle=False, num_workers=0
             )
@@ -217,7 +236,7 @@ class PPOTrain():
             begin_act_probs = None
             net = self.policy_net.policy
             for i, data in enumerate(testing_loader):
-                test_batch, test_probs, _log_probs_old, test_action, test_prev_action, _game_ids, _R = data
+                test_batch, test_probs, _log_probs_old, test_action, test_prev_action, _game_ids, _R, _G = data
                 if i == 0:
                     print("test_batch shape:", test_batch.shape, "test_probs shape:", test_probs.shape)
                 test_batch = test_batch.to(self.policy_net.device)
@@ -243,7 +262,7 @@ class PPOTrain():
             _num_batches = 0
             for epoch in range(self.n_epochs):
                 training_loader = torch.utils.data.DataLoader(
-                    self.dataset, batch_size=self.batch_size, shuffle=True, num_workers=0
+                    self.dataset, batch_size=self.batch_size, shuffle=False, num_workers=0
                 )
                 _epoch_acc = _epoch_kl = _epoch_ent = _epoch_vl = _epoch_g_mean = _epoch_g_std = 0.0
                 _epoch_batches = 0

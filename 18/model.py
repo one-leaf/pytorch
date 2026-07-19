@@ -90,7 +90,7 @@ class PolicyNet():
 
     # PPO 训练步骤（带 Value Head + GAE 信用分配 + 分位数价值）
     def train_step_ppo(self, state_batch, ref_probs, log_probs_old, action_batch, _mask_batch, prev_action_batch,
-                        game_ids, R_batch, lr, r_mean, r_std,
+                        game_ids, R_batch, G_batch, lr, r_mean, r_std,
                         clip_eps=0.2, beta=0.05, entropy_weight=0.01,
                         gamma=0.99, lam=0.95, vf_coef=0.5):
         """PPO + V(s) 训练步骤（分位数价值头 + 步重要性加权）
@@ -113,6 +113,7 @@ class PolicyNet():
         prev_action_batch = torch.LongTensor(prev_action_batch).to(self.device)
         game_ids = game_ids.tolist() if hasattr(game_ids, 'tolist') else list(game_ids)
         R_batch = torch.FloatTensor(R_batch).to(self.device)
+        G_batch = torch.FloatTensor(G_batch).to(self.device)
 
         self.net.train()
         log_probs, values = self.net(state_batch, prev_action_batch)
@@ -133,33 +134,25 @@ class PolicyNet():
         r_step = (R_batch - r_mean) / (r_std + 1e-3)
         r_step = torch.clamp(r_step, -5.0, 5.0)
 
-        # ── GAE: 按游戏分组计算步级别优势 + value target ──────────
+        # ── GAE: 按游戏分组计算步级别优势 ──────────
         B = v_scalar.shape[0]
         advantages = torch.zeros(B, device=self.device)
-        v_targets = torch.zeros(B, device=self.device)
+        v_targets = G_batch  # 使用预计算的完整 G_t
 
         for gid in set(game_ids):
             idx = [i for i, g in enumerate(game_ids) if g == gid]
             n = len(idx)
 
             if n <= 1:
-                # 单步：advantage = r - V(s), target = r
-                advantages[idx[0]] = r_step[idx[0]] - v_scalar[idx[0]].detach()
-                v_targets[idx[0]] = r_step[idx[0]]
+                # 单步：advantage = G - V(s)
+                advantages[idx[0]] = G_batch[idx[0]] - v_scalar[idx[0]].detach()
                 continue
 
             V = v_scalar[idx]
-            rewards = r_step[idx]
-
-            # 折扣回报：G_t = r_t + γ·r_{t+1} + γ²·r_{t+2} + ...
-            returns = torch.zeros(n, device=self.device)
-            returns[-1] = rewards[-1]
-            for t in range(n - 2, -1, -1):
-                returns[t] = rewards[t] + gamma * returns[t + 1]
-            v_targets[idx] = returns
 
             # GAE advantage: A_t = δ_t + γλ·δ_{t+1} + (γλ)²·δ_{t+2} + ...
             # δ_t = r_t + γ·V(s_{t+1}) - V(s_t)
+            rewards = r_step[idx]
             V_next = torch.zeros(n, device=self.device)
             V_next[:-1] = V[1:].detach()
             deltas = rewards + gamma * V_next - V.detach()
@@ -174,7 +167,7 @@ class PolicyNet():
             if gid == list(set(game_ids))[0]:
                 print(f"\n=== Game {gid} ({n} steps) ===")
                 print(f"r_t:     {rewards.cpu().numpy()}")
-                print(f"v_target:{returns.cpu().numpy()}")
+                print(f"v_target:{v_targets[idx].cpu().numpy()}")
                 print(f"V(s):    {V.detach().cpu().numpy()}")
                 print(f"adv:     {gae.cpu().numpy()}")
 
