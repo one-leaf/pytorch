@@ -65,8 +65,6 @@ def _default_state():
             "ppo_piececount": 0,       # EMA: 玩家平均方块数
             "ppo_removedlines": 0,     # EMA: 玩家平均消行数
             "ppo_steps": 0,            # EMA: 玩家平均步数
-            "ppo_reward_mean": 0,
-            "ppo_reward_std": 0,
             "ppo_piececount_min": 999999,  # EMA: 组内最少方块数
             "ppo_piececount_max": 0,       # EMA: 组内最多方块数
             "ppo_removedlines_best": 0,    # 历史最高消行数
@@ -113,7 +111,6 @@ def _migrate(state: dict[str, Any]):
         if k in old:
             state["counters"][k] = old.pop(k)
     for k in ["ppo_piececount", "ppo_removedlines", "ppo_steps",
-              "ppo_reward_mean", "ppo_reward_std",
               "ppo_piececount_min", "ppo_piececount_max",
               "ppo_removedlines_best", "ppo_piececount_best",
               "test_piececount", "test_removedlines", "test_steps",
@@ -168,8 +165,6 @@ def _append_history(state: dict[str, Any]):
         "ppo_piececount": round(acc.get("_sum_piececount", 0) / n, 3),
         "ppo_removedlines": round(acc.get("_sum_removedlines", 0) / n, 3),
         "ppo_steps": round(acc.get("_sum_steps", 0) / n, 3),
-        "ppo_reward_mean": m.get("ppo_reward_mean", 0),
-        "ppo_reward_std": m.get("ppo_reward_std", 0),
         "ppo_piececount_min": m.get("ppo_piececount_min", 999999),
         "ppo_piececount_max": m.get("ppo_piececount_max", 0),
         "ppo_removedlines_best": m.get("ppo_removedlines_best", 0),
