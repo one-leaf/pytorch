@@ -282,7 +282,7 @@ class PPOTrain():
                     _epoch_g_mean += g_mean
                     _epoch_g_std += g_std
                     _epoch_batches += 1
-                    if i % 100 == 0:
+                    if i % 500 == 0:
                         print(f"epoch {epoch+1}/{self.n_epochs}", i,
                               "acc:", acc, "kl:", kl, "entropy:", entropy, "vloss:", value_loss,
                               "g_mean:", round(g_mean, 3), "g_std:", round(g_std, 3),

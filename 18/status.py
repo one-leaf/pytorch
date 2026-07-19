@@ -148,14 +148,14 @@ def numpy_encoder(obj):
 
 
 def _append_history(state: dict[str, Any]):
-    """每100轮(_agent>100)记录一次周期内平均值快照"""
+    """每500轮(_agent>500)记录一次周期内平均值快照"""
     c = state.get("counters", {})
     m = state.get("metrics", {})
     tr = state.get("training", {})
     acc = state.get("_accum", {})
 
     _agent = c.get("_agent", 0)
-    if _agent < 100:
+    if _agent < 500:
         return
 
     n = max(_agent, 1)
