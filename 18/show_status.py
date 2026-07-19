@@ -102,8 +102,8 @@ def show_status(max_history=0, as_json=False):
                   f"{h.get('train_kl', 0):>9.5f} "
                   f"{h.get('train_entropy', 0):>8.4f} "
                   f"{h.get('train_vloss', 0):>8.4f}  "
-                  f"{h.get('g_mean', 0):>7.3f} "
-                  f"{h.get('g_std', 0):>7.3f}  "
+                  f"{h.get('g_mean', 0):>7.2f} "
+                  f"{h.get('g_std', 0):>7.2f}  "
                   f"{h.get('r_mean', 0):>7.2f} "
                   f"{h.get('r_std', 0):>7.2f}")
         print("=" * 173)

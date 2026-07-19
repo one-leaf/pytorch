@@ -345,8 +345,8 @@ class PPOTrain():
             m["train_kl"]      = round(m.get("train_kl",      0) * (1 - alpha) + avg_kl  * alpha, 5)
             m["train_entropy"] = round(m.get("train_entropy", 0) * (1 - alpha) + avg_ent * alpha, 5)
             m["train_vloss"]   = round(m.get("train_vloss",   0) * (1 - alpha) + avg_vl  * alpha, 5)
-            m["g_mean"]        = round(m.get("g_mean",        0) * (1 - alpha) + avg_g_mean * alpha, 3)
-            m["g_std"]         = round(m.get("g_std",         0) * (1 - alpha) + avg_g_std * alpha, 3)
+            m["g_mean"]        = round(m.get("g_mean",        0) * (1 - alpha) + avg_g_mean * alpha, 2)
+            m["g_std"]         = round(m.get("g_std",         0) * (1 - alpha) + avg_g_std * alpha, 2)
             m["r_mean"]        = round(avg_r_mean, 3)
             m["r_std"]         = round(avg_r_std, 3)
             # lr_multiplier 调整使用 EMA 平滑后的 train_kl
