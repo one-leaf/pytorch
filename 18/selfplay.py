@@ -353,7 +353,6 @@ class PPOSelfPlay():
             m["ppo_removedlines_best"]  = max(m.get("ppo_removedlines_best",  0), g_max_rl)
 
             save_status_file(state)
-            print(f"status updated: agent={state['counters']['agent']}")
 
         print(f"\nCollection finished. Total games: {game_counter}")
 
