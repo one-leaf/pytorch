@@ -82,6 +82,8 @@ def _default_state():
             "train_kl": 0,
             "train_entropy": 0,
             "train_vloss": 0,
+            "g_mean": 0,
+            "g_std": 0,
             "r_mean": 0,
             "r_std": 0,
         },
@@ -117,7 +119,7 @@ def _migrate(state: dict[str, Any]):
               "test_piececount", "test_removedlines", "test_steps",
               "test_piececount_best", "test_removedlines_best",
               "train_acc", "train_kl", "train_entropy", "train_vloss",
-              "r_mean", "r_std"]:
+              "g_mean", "g_std", "r_mean", "r_std"]:
         if k in old:
             state["metrics"][k] = old.pop(k)
     for k in ("kl", "lr_multiplier"):
@@ -183,6 +185,8 @@ def _append_history(state: dict[str, Any]):
         "train_kl": m.get("train_kl", 0),
         "train_entropy": m.get("train_entropy", 0),
         "train_vloss": m.get("train_vloss", 0),
+        "g_mean": m.get("g_mean", 0),
+        "g_std": m.get("g_std", 0),
         "r_mean": m.get("r_mean", 0),
         "r_std": m.get("r_std", 0),
         # training

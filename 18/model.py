@@ -178,6 +178,10 @@ class PolicyNet():
             #     print(f"V(s):    {V.detach().cpu().numpy()}")
             #     print(f"adv:     {gae.cpu().numpy()}")
 
+        # G 统计（折扣回报 v_targets）
+        g_mean = v_targets.mean().item()
+        g_std = v_targets.std().item()
+
         # 全局标准化
         adv_mean = advantages.mean()
         adv_std = advantages.std().clamp(min=1e-3)
@@ -239,7 +243,7 @@ class PolicyNet():
             print(f"\n[NaN GRAD] {msg}")
             log_nan(msg)
             self.optimizer.zero_grad()
-            return torch.tensor(0.0), torch.tensor(0.0), torch.tensor(0.0), torch.tensor(float('nan'))
+            return torch.tensor(0.0), torch.tensor(0.0), torch.tensor(0.0), torch.tensor(float('nan')), 0.0, 0.0
 
         self.optimizer.step()
 
@@ -247,7 +251,7 @@ class PolicyNet():
         predicted = torch.argmax(log_probs, dim=1)
         accuracy = (predicted == action_batch).float().mean()
 
-        return accuracy.item(), kl_div.item(), entropy.item(), value_loss.item()
+        return accuracy.item(), kl_div.item(), entropy.item(), value_loss.item(), g_mean, g_std
 
     # 保存模型
     def save_model(self, model_file):

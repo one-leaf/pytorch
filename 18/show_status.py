@@ -82,6 +82,7 @@ def show_status(max_history=0, as_json=False):
                   f"{'PP_Piece':>8} {'PP_Lines':>8} {'PP_Steps':>8} {'PP_Min':>7} {'PP_Max':>7} {'PP_RwdStd':>9}  "
                   f"{'Te_Piece':>8} {'Te_Lines':>8} {'Te_Steps':>8} {'Te_Best':>7}  "
                   f"{'Tr_Acc':>8} {'Tr_KL':>9} {'Tr_Ent':>8} {'Tr_VL':>8}  "
+                  f"{'G_Mean':>7} {'G_Std':>7}  "
                   f"{'R_Mean':>7} {'R_Std':>7}")
         print(header)
         print("-" * 157)
@@ -101,6 +102,8 @@ def show_status(max_history=0, as_json=False):
                   f"{h.get('train_kl', 0):>9.5f} "
                   f"{h.get('train_entropy', 0):>8.4f} "
                   f"{h.get('train_vloss', 0):>8.4f}  "
+                  f"{h.get('g_mean', 0):>7.3f} "
+                  f"{h.get('g_std', 0):>7.3f}  "
                   f"{h.get('r_mean', 0):>7.2f} "
                   f"{h.get('r_std', 0):>7.2f}")
         print("=" * 157)

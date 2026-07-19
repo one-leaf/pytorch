@@ -170,7 +170,7 @@ class PPOTrain():
     def policy_update(self, sample_data):
         """PPO 策略更新（带 GAE 信用分配）"""
         state_batch, ref_probs_batch, log_probs_old_batch, actions_batch, prev_actions_batch, game_ids_batch, R_batch = sample_data
-        acc, kl, entropy, value_loss = self.policy_net.train_step_ppo(
+        acc, kl, entropy, value_loss, g_mean, g_std = self.policy_net.train_step_ppo(
             state_batch, ref_probs_batch, log_probs_old_batch, actions_batch, None, prev_actions_batch,
             game_ids_batch, R_batch,
             self.learn_rate * self.lr_multiplier,
@@ -179,7 +179,7 @@ class PPOTrain():
             beta=self.ppo_beta,
             entropy_weight=self.ppo_entropy_weight
         )
-        return acc, kl, entropy, value_loss
+        return acc, kl, entropy, value_loss, g_mean, g_std
 
     def run(self):
         """启动 PPO 训练"""
@@ -239,29 +239,34 @@ class PPOTrain():
             print(f"batch_size: {self.batch_size}, lr_multiplier: {self.lr_multiplier}, learn_rate: {self.learn_rate * self.lr_multiplier}")
 
             # 训练循环（n_epochs 个 epoch，保证每局被训练 n_epochs 次）
-            _sum_acc = _sum_kl = _sum_ent = _sum_vl = 0.0
+            _sum_acc = _sum_kl = _sum_ent = _sum_vl = _sum_g_mean = _sum_g_std = 0.0
             _num_batches = 0
             for epoch in range(self.n_epochs):
                 training_loader = torch.utils.data.DataLoader(
                     self.dataset, batch_size=self.batch_size, shuffle=True, num_workers=0
                 )
-                _epoch_acc = _epoch_kl = _epoch_ent = _epoch_vl = 0.0
+                _epoch_acc = _epoch_kl = _epoch_ent = _epoch_vl = _epoch_g_mean = _epoch_g_std = 0.0
                 _epoch_batches = 0
                 for i, data in enumerate(training_loader):
-                    acc, kl, entropy, value_loss = self.policy_update(data)
+                    acc, kl, entropy, value_loss, g_mean, g_std = self.policy_update(data)
                     _sum_acc += acc
                     _sum_kl += kl
                     _sum_ent += entropy
                     _sum_vl += value_loss
+                    _sum_g_mean += g_mean
+                    _sum_g_std += g_std
                     _num_batches += 1
                     _epoch_acc += acc
                     _epoch_kl += kl
                     _epoch_ent += entropy
                     _epoch_vl += value_loss
+                    _epoch_g_mean += g_mean
+                    _epoch_g_std += g_std
                     _epoch_batches += 1
                     if i % 100 == 0:
                         print(f"epoch {epoch+1}/{self.n_epochs}", i,
                               "acc:", acc, "kl:", kl, "entropy:", entropy, "vloss:", value_loss,
+                              "g_mean:", round(g_mean, 3), "g_std:", round(g_std, 3),
                               "r_mean:", round(self.dataset.r_mean, 2), "r_std:", round(self.dataset.r_std, 2))
 
                     if epoch == 0 and i == 0:
@@ -284,12 +289,16 @@ class PPOTrain():
                 e_kl  = _epoch_kl  / max(_epoch_batches, 1)
                 e_ent = _epoch_ent / max(_epoch_batches, 1)
                 e_vl  = _epoch_vl  / max(_epoch_batches, 1)
-                print(f"epoch {epoch+1} done: acc={e_acc:.4f} kl={e_kl:.5f} entropy={e_ent:.4f} vloss={e_vl:.4f}")
+                e_g_mean = _epoch_g_mean / max(_epoch_batches, 1)
+                e_g_std = _epoch_g_std / max(_epoch_batches, 1)
+                print(f"epoch {epoch+1} done: acc={e_acc:.4f} kl={e_kl:.5f} entropy={e_ent:.4f} vloss={e_vl:.4f} g_mean={e_g_mean:.3f} g_std={e_g_std:.3f}")
 
             avg_acc = _sum_acc / max(_num_batches, 1)
             avg_kl  = _sum_kl  / max(_num_batches, 1)
             avg_ent = _sum_ent / max(_num_batches, 1)
             avg_vl  = _sum_vl  / max(_num_batches, 1)
+            avg_g_mean = _sum_g_mean / max(_num_batches, 1)
+            avg_g_std = _sum_g_std / max(_num_batches, 1)
             avg_r_mean = self.dataset.r_mean
             avg_r_std = self.dataset.r_std
 
@@ -336,6 +345,8 @@ class PPOTrain():
             m["train_kl"]      = round(m.get("train_kl",      0) * (1 - alpha) + avg_kl  * alpha, 5)
             m["train_entropy"] = round(m.get("train_entropy", 0) * (1 - alpha) + avg_ent * alpha, 5)
             m["train_vloss"]   = round(m.get("train_vloss",   0) * (1 - alpha) + avg_vl  * alpha, 5)
+            m["g_mean"]        = round(m.get("g_mean",        0) * (1 - alpha) + avg_g_mean * alpha, 3)
+            m["g_std"]         = round(m.get("g_std",         0) * (1 - alpha) + avg_g_std * alpha, 3)
             m["r_mean"]        = round(avg_r_mean, 3)
             m["r_std"]         = round(avg_r_std, 3)
             # lr_multiplier 调整使用 EMA 平滑后的 train_kl
