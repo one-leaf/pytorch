@@ -290,8 +290,10 @@ class PPOTrain():
 
                     if epoch == 0 and i == 0:
                         state_batch, ref_probs_batch, log_probs_old_batch, actions_batch, prev_actions_batch, game_ids_batch, R_batch, G_batch = data
-                        print("R_batch:", R_batch[:10])
-                        print("actions_batch:", actions_batch[:10])
+                        print("R_batch:", R_batch)
+                        print("G_batch:", G_batch)
+                        print("actions_batch:", actions_batch)
+                        print("game_ids_batch:", set(game_ids_batch))
 
                     if math.isnan(kl) or math.isnan(acc) or math.isnan(entropy) or math.isnan(value_loss) or \
                        math.isinf(kl) or math.isinf(acc) or math.isinf(entropy) or math.isinf(value_loss):
