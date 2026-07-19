@@ -289,7 +289,7 @@ class PPOTrain():
                               "r_mean:", round(self.dataset.r_mean, 2), "r_std:", round(self.dataset.r_std, 2))
 
                     if epoch == 0 and i == 0:
-                        state_batch, ref_probs_batch, log_probs_old_batch, actions_batch, prev_actions_batch, game_ids_batch, R_batch = data
+                        state_batch, ref_probs_batch, log_probs_old_batch, actions_batch, prev_actions_batch, game_ids_batch, R_batch, G_batch = data
                         print("R_batch:", R_batch[:10])
                         print("actions_batch:", actions_batch[:10])
 
@@ -329,7 +329,7 @@ class PPOTrain():
             all_test_probs = None
             end_accuracy = np.array([])
             for i, data in enumerate(testing_loader):
-                test_batch, test_probs, _log_probs_old, _test_action, test_prev_action, _game_ids, _R = data
+                test_batch, test_probs, _log_probs_old, _test_action, test_prev_action, _game_ids, _R, _G = data
                 test_batch = test_batch.to(self.policy_net.device)
                 test_prev_action = test_prev_action.to(self.policy_net.device)
                 with torch.no_grad():
