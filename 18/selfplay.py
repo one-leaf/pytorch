@@ -324,9 +324,6 @@ class PPOSelfPlay():
                 with open(savefile, "wb") as fn:
                     pickle.dump(game_steps, fn)
 
-                print(f"  Run {run_idx + 1}: raw={raw_rewards[run_idx]:.1f} norm={norm_rewards[run_idx]:.4f} "
-                      f"piececount={agent.piececount} removedlines={agent.removedlines} steps={agent.steps}")
-
             # 更新计数器 + 历史统计（用实际游戏数据，保证 show_status 有数据）
             alpha = 0.1
             g_avg_pc = sum(a.piececount for a, _, _ in group_agents) / len(group_agents)
