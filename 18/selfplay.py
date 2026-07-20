@@ -302,8 +302,9 @@ class PPOSelfPlay():
                 game_counter += 1
                 game_id = str(uuid.uuid4())  # 用 UUID 避免跨批次混淆
 
-                # 每步存储: (state, ref_prob, log_prob, action, prev_action, game_id, r_step)
+                # 每步存储: (state, ref_prob, log_prob, action, prev_action, game_id, r_step, is_terminal)
                 # r_step: 每步基础 0.1，落地无消行 -0.01（惩罚），落地消行 +line_bonus
+                n_steps = len(trajectory)
                 game_steps = []
                 for step_idx, step_data in enumerate(trajectory):
                     landed, removed = step_results[step_idx]
@@ -313,10 +314,11 @@ class PPOSelfPlay():
                             r_step -= 0.01  # 落地未消行，轻微惩罚
                         else:
                             r_step += 0.01  # 落地消行，轻微奖励
+                    is_terminal = 1 if step_idx == n_steps - 1 else 0
                     game_steps.append((
                         step_data["state"], step_data["ref_prob"],
                         step_data["log_prob"], step_data["action"],
-                        step_data["prev_action"], game_id, r_step
+                        step_data["prev_action"], game_id, r_step, is_terminal
                     ))
                     
                 filename = f"{filetime}-{game_counter:06d}-r{run_idx}.pkl"

@@ -90,7 +90,7 @@ class PolicyNet():
 
     # PPO 训练步骤（带 Value Head + GAE 信用分配 + 分位数价值）
     def train_step_ppo(self, state_batch, ref_probs, log_probs_old, action_batch, _mask_batch, prev_action_batch,
-                        game_ids, R_batch, G_batch, lr, r_mean, r_std,
+                        game_ids, R_batch, is_terminal_batch, G_batch, lr, r_mean, r_std,
                         clip_eps=0.2, beta=0.05, entropy_weight=0.01,
                         gamma=0.99, lam=0.95, vf_coef=0.5):
         """PPO + V(s) 训练步骤（分位数价值头 + 步重要性加权）
@@ -113,6 +113,7 @@ class PolicyNet():
         prev_action_batch = torch.LongTensor(prev_action_batch).to(self.device)
         game_ids = game_ids.tolist() if hasattr(game_ids, 'tolist') else list(game_ids)
         R_batch = torch.FloatTensor(R_batch).to(self.device)
+        is_terminal_batch = torch.FloatTensor(is_terminal_batch).to(self.device)
         G_batch = torch.FloatTensor(G_batch).to(self.device)
 
         self.net.train()
@@ -155,6 +156,9 @@ class PolicyNet():
             rewards = r_step[idx]
             V_next = torch.zeros(n, device=self.device)
             V_next[:-1] = V[1:].detach()
+            # 最后一步：游戏结束 → V_next=0；batch截断 → bootstrap V(s)
+            last_terminal = is_terminal_batch[idx[-1]]
+            V_next[-1] = V[-1].detach() * (1 - last_terminal)
             deltas = rewards + gamma * V_next - V.detach()
 
             gae = torch.zeros(n, device=self.device)

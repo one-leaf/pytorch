@@ -41,7 +41,7 @@ class PPODataset(torch.utils.data.Dataset):
 
     def __getitem__(self, index):
         fn, step_idx = self._flat_index[index]
-        state, ref_prob, log_prob, action, prev_action, game_id, R, G = self.data[fn][step_idx]
+        state, ref_prob, log_prob, action, prev_action, game_id, R, is_terminal, G = self.data[fn][step_idx]
         return (torch.from_numpy(state).float(),
                 torch.from_numpy(ref_prob).float(),
                 torch.from_numpy(log_prob).float(),
@@ -49,6 +49,7 @@ class PPODataset(torch.utils.data.Dataset):
                 torch.as_tensor(prev_action).long(),
                 game_id,
                 torch.as_tensor(R).float(),
+                torch.as_tensor(is_terminal).float(),
                 torch.as_tensor(G).float())
 
     def move_wait_files(self):
@@ -108,9 +109,10 @@ class PPODataset(torch.utils.data.Dataset):
                 with open(fn, "rb") as f:
                     steps = pickle.load(f)
 
-                # 验证数据
+                # 验证数据（兼容旧格式：7元素无 is_terminal）
                 for step in steps:
-                    state, ref_prob, _log_prob, _action, _prev_action, _game_id, R = step
+                    state, ref_prob = step[0], step[1]
+                    R = step[6]
                     assert state.shape == (2, 20, 10), f'error: state shape {state.shape}'
                     assert ref_prob.shape == (5,), f'error: ref_prob shape {ref_prob.shape}'
                     assert not np.isnan(R), f'error: R is Nan'
@@ -122,11 +124,13 @@ class PPODataset(torch.utils.data.Dataset):
                 for t in range(n_steps - 2, -1, -1):
                     g_values[t] = steps[t][6] + gamma * g_values[t + 1]
 
-                # 将 G_t 附加到每个 step
+                # 将 G_t 附加到每个 step，统一为 9 元素
+                # (state, ref_prob, log_prob, action, prev_action, game_id, R, is_terminal, G)
                 steps_with_g = []
                 for i, step in enumerate(steps):
-                    state, ref_prob, log_prob, action, prev_action, game_id, R = step
-                    steps_with_g.append((state, ref_prob, log_prob, action, prev_action, game_id, R, g_values[i]))
+                    state, ref_prob, log_prob, action, prev_action, game_id, R = step[:7]
+                    is_terminal = step[7] if len(step) >= 8 else (1 if i == n_steps - 1 else 0)
+                    steps_with_g.append((state, ref_prob, log_prob, action, prev_action, game_id, R, is_terminal, g_values[i]))
 
                 self.data[fn] = steps_with_g
             except Exception as e:
@@ -160,7 +164,7 @@ class PPOTestDataset(torch.utils.data.Dataset):
 
     def __getitem__(self, index):
         fn, step_idx = self.parent._test_flat_index[index]
-        state, ref_prob, log_prob, action, prev_action, game_id, R, G = self.parent.data[fn][step_idx]
+        state, ref_prob, log_prob, action, prev_action, game_id, R, is_terminal, G = self.parent.data[fn][step_idx]
         return (torch.from_numpy(state).float(),
                 torch.from_numpy(ref_prob).float(),
                 torch.from_numpy(log_prob).float(),
@@ -168,6 +172,7 @@ class PPOTestDataset(torch.utils.data.Dataset):
                 torch.as_tensor(prev_action).long(),
                 game_id,
                 torch.as_tensor(R).float(),
+                torch.as_tensor(is_terminal).float(),
                 torch.as_tensor(G).float())
 
 
@@ -189,10 +194,10 @@ class PPOTrain():
 
     def policy_update(self, sample_data):
         """PPO 策略更新（带 GAE 信用分配）"""
-        state_batch, ref_probs_batch, log_probs_old_batch, actions_batch, prev_actions_batch, game_ids_batch, R_batch, G_batch = sample_data
+        state_batch, ref_probs_batch, log_probs_old_batch, actions_batch, prev_actions_batch, game_ids_batch, R_batch, is_terminal_batch, G_batch = sample_data
         acc, kl, entropy, value_loss, g_mean, g_std = self.policy_net.train_step_ppo(
             state_batch, ref_probs_batch, log_probs_old_batch, actions_batch, None, prev_actions_batch,
-            game_ids_batch, R_batch, G_batch,
+            game_ids_batch, R_batch, is_terminal_batch, G_batch,
             self.learn_rate * self.lr_multiplier,
             self.dataset.r_mean, self.dataset.r_std,
             clip_eps=self.ppo_clip_eps,
@@ -236,7 +241,7 @@ class PPOTrain():
             begin_act_probs = None
             net = self.policy_net.policy
             for i, data in enumerate(testing_loader):
-                test_batch, test_probs, _log_probs_old, test_action, test_prev_action, _game_ids, _R, _G = data
+                test_batch, test_probs, _log_probs_old, test_action, test_prev_action, _game_ids, _R, _is_terminal, _G = data
                 if i == 0:
                     print("test_batch shape:", test_batch.shape, "test_probs shape:", test_probs.shape)
                 test_batch = test_batch.to(self.policy_net.device)
@@ -289,7 +294,7 @@ class PPOTrain():
                               "r_mean:", round(self.dataset.r_mean, 2), "r_std:", round(self.dataset.r_std, 2))
 
                     if epoch == 0 and i == 0:
-                        state_batch, ref_probs_batch, log_probs_old_batch, actions_batch, prev_actions_batch, game_ids_batch, R_batch, G_batch = data
+                        state_batch, ref_probs_batch, log_probs_old_batch, actions_batch, prev_actions_batch, game_ids_batch, R_batch, _is_terminal, G_batch = data
                         print("R_batch:", R_batch)
                         print("G_batch:", G_batch)
                         print("actions_batch:", actions_batch)
@@ -331,7 +336,7 @@ class PPOTrain():
             all_test_probs = None
             end_accuracy = np.array([])
             for i, data in enumerate(testing_loader):
-                test_batch, test_probs, _log_probs_old, _test_action, test_prev_action, _game_ids, _R, _G = data
+                test_batch, test_probs, _log_probs_old, _test_action, test_prev_action, _game_ids, _R, _is_terminal, _G = data
                 test_batch = test_batch.to(self.policy_net.device)
                 test_prev_action = test_prev_action.to(self.policy_net.device)
                 with torch.no_grad():
