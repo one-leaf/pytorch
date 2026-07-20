@@ -41,7 +41,8 @@ class PPODataset(torch.utils.data.Dataset):
 
     def __getitem__(self, index):
         fn, step_idx = self._flat_index[index]
-        state, ref_prob, log_prob, action, prev_action, game_id, R, is_terminal, G = self.data[fn][step_idx]
+        state, ref_prob, log_prob, action, prev_action, R, is_terminal, G = self.data[fn][step_idx]
+        game_id = os.path.basename(fn)  # 用文件名作为 game_id
         return (torch.from_numpy(state).float(),
                 torch.from_numpy(ref_prob).float(),
                 torch.from_numpy(log_prob).float(),
@@ -109,37 +110,54 @@ class PPODataset(torch.utils.data.Dataset):
                 with open(fn, "rb") as f:
                     steps = pickle.load(f)
 
-                # 验证数据（兼容旧格式：7元素无 is_terminal）
+                # 验证数据
                 for step in steps:
                     state, ref_prob = step[0], step[1]
-                    R = step[6]
                     assert state.shape == (2, 20, 10), f'error: state shape {state.shape}'
                     assert ref_prob.shape == (5,), f'error: ref_prob shape {ref_prob.shape}'
-                    assert not np.isnan(R), f'error: R is Nan'
+
+                # 兼容多种 pkl 格式：
+                # 旧格式(8元素): (state, ref_prob, log_prob, action, prev_action, game_id, R, is_terminal)
+                # 旧格式(7元素): (state, ref_prob, log_prob, action, prev_action, game_id, R)
+                # 新格式(7元素): (state, ref_prob, log_prob, action, prev_action, R, is_terminal)
+                # 判断方法：step[5] 是字符串 → 有 game_id；是数字 → 无 game_id
+                has_game_id = isinstance(steps[0][5], str) if steps else False
+
+                # 找到 R 的索引
+                r_idx = 6 if has_game_id else 5
+
+                # 验证 R
+                for step in steps:
+                    assert not np.isnan(step[r_idx]), f'error: R is Nan'
 
                 # 预计算这局游戏的 G_t（折扣回报）
                 n_steps = len(steps)
                 g_values = np.zeros(n_steps)
-                g_values[-1] = steps[-1][6]  # 最后一步的 R
+                g_values[-1] = steps[-1][r_idx]
                 for t in range(n_steps - 2, -1, -1):
-                    g_values[t] = steps[t][6] + gamma * g_values[t + 1]
+                    g_values[t] = steps[t][r_idx] + gamma * g_values[t + 1]
 
-                # 将 G_t 附加到每个 step，统一为 9 元素
-                # (state, ref_prob, log_prob, action, prev_action, game_id, R, is_terminal, G)
-                steps_with_g = []
+                # 统一为 8 元素（用文件名作为 game_id）
+                # (state, ref_prob, log_prob, action, prev_action, R, is_terminal, G)
+                game_id = os.path.basename(fn)
+                steps_unified = []
                 for i, step in enumerate(steps):
-                    state, ref_prob, log_prob, action, prev_action, game_id, R = step[:7]
-                    is_terminal = step[7] if len(step) >= 8 else (1 if i == n_steps - 1 else 0)
-                    steps_with_g.append((state, ref_prob, log_prob, action, prev_action, game_id, R, is_terminal, g_values[i]))
+                    state, ref_prob, log_prob, action, prev_action = step[:5]
+                    R = step[r_idx]
+                    if has_game_id:
+                        is_terminal = step[7] if len(step) >= 8 else (1 if i == n_steps - 1 else 0)
+                    else:
+                        is_terminal = step[6] if len(step) >= 7 else (1 if i == n_steps - 1 else 0)
+                    steps_unified.append((state, ref_prob, log_prob, action, prev_action, R, is_terminal, g_values[i]))
 
-                self.data[fn] = steps_with_g
+                self.data[fn] = steps_unified
             except Exception as e:
                 print(f"file {fn} error: {e}")
                 if os.path.exists(fn):
                     os.remove(fn)
                 self.file_list.remove(fn)
 
-        Rs = np.array([step[6] for steps in self.data.values() for step in steps])
+        Rs = np.array([step[5] for steps in self.data.values() for step in steps])
         if len(Rs) > 0:
             self.r_mean = float(Rs.mean())
             self.r_std = max(float(Rs.std()), 1e-3)
@@ -164,7 +182,8 @@ class PPOTestDataset(torch.utils.data.Dataset):
 
     def __getitem__(self, index):
         fn, step_idx = self.parent._test_flat_index[index]
-        state, ref_prob, log_prob, action, prev_action, game_id, R, is_terminal, G = self.parent.data[fn][step_idx]
+        state, ref_prob, log_prob, action, prev_action, R, is_terminal, G = self.parent.data[fn][step_idx]
+        game_id = os.path.basename(fn)  # 用文件名作为 game_id
         return (torch.from_numpy(state).float(),
                 torch.from_numpy(ref_prob).float(),
                 torch.from_numpy(log_prob).float(),
@@ -298,6 +317,7 @@ class PPOTrain():
                         print("R_batch:", R_batch)
                         print("G_batch:", G_batch)
                         print("actions_batch:", actions_batch)
+                        print("terminal:", _is_terminal)
                         print("game_ids_batch:", set(game_ids_batch))
 
                     if math.isnan(kl) or math.isnan(acc) or math.isnan(entropy) or math.isnan(value_loss) or \
