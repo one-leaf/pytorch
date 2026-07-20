@@ -2,7 +2,6 @@ import os, glob, pickle
 
 from model import PolicyNet, data_dir, data_wait_dir, model_file, log_nan
 from agent import Agent, ACTIONS
-from selfplay import PPOSelfPlay
 
 import time
 from datetime import datetime
@@ -225,6 +224,88 @@ class PPOTrain():
         )
         return acc, kl, entropy, value_loss, g_mean, g_std
 
+    def test_play(self, test_count=10):
+        """测试模式：贪婪策略评估"""
+        max_step_count = 10000
+        min_pieces_count = 999999
+        max_pieces_count = 0
+        min_removedlines = 0
+        max_removedlines = 0
+        best_removedlines = 0
+        worst_removedlines = 999999
+        min_his_pieces = None
+        min_his_pieces_len = 0
+        sum_piececount = 0
+        sum_removedlines = 0
+        sum_steps = 0
+        test_games = 0
+        device = self.policy_net.device
+
+        for _ in range(test_count):
+            agent = Agent(isRandomNextPiece=True)
+            prev_action = 3  # KEY_NONE
+            for _ in range(max_step_count):
+                state = np.array([agent.current_state()])
+                state_tensor = torch.FloatTensor(state).to(device)
+                prev_action_tensor = torch.LongTensor([prev_action]).to(device)
+
+                self.policy_net.net.eval()
+                with torch.no_grad():
+                    log_probs, _ = self.policy_net.net(state_tensor, prev_action_tensor)
+                probs = torch.exp(log_probs[0]).cpu().numpy()
+
+                availables = agent.availables
+                probs = probs * availables.astype(np.float32)
+                action = np.argmax(probs)
+
+                prev_action = int(action)
+                agent.step(prev_action)
+                if agent.terminal:
+                    break
+
+            agent.print()
+            sum_piececount += agent.piececount
+            sum_removedlines += agent.removedlines
+            sum_steps += agent.steps
+            test_games += 1
+
+            if agent.piececount < min_pieces_count:
+                min_pieces_count = agent.piececount
+                min_his_pieces = agent.piecehis
+                min_his_pieces_len = len(agent.piecehis)
+                min_removedlines = agent.removedlines
+            if agent.piececount > max_pieces_count:
+                max_pieces_count = agent.piececount
+                max_removedlines = agent.removedlines
+
+            if agent.removedlines > best_removedlines:
+                best_removedlines = agent.removedlines
+            if agent.removedlines < worst_removedlines:
+                worst_removedlines = agent.removedlines
+
+        avg_pc = sum_piececount / max(test_games, 1)
+        avg_rl = sum_removedlines / max(test_games, 1)
+        avg_st = sum_steps / max(test_games, 1)
+        print(f"test: min_pieces={min_pieces_count} max_pieces={max_pieces_count} "
+              f"min_lines={min_removedlines} max_lines={max_removedlines} "
+              f"avg_pieces={avg_pc:.1f} avg_lines={avg_rl:.3f} avg_steps={avg_st:.1f}")
+
+        # 保存最差局面用于重玩
+        if min_pieces_count < 20 and min_his_pieces:
+            replay_dir = os.path.join(data_dir, "replay")
+            if not os.path.exists(replay_dir):
+                os.makedirs(replay_dir)
+            filename = f"{min_his_pieces_len:05d}-{min_removedlines:05d}-{''.join(min_his_pieces)[:50]}.pkl"
+            his_pieces_file = os.path.join(replay_dir, filename)
+            print(f"save need replay {his_pieces_file}")
+            with open(his_pieces_file, "wb") as fn:
+                pickle.dump(min_his_pieces, fn)
+
+        return (min_removedlines, min_his_pieces, min_his_pieces_len,
+                max_removedlines, max_pieces_count, min_pieces_count,
+                best_removedlines, worst_removedlines,
+                avg_pc, avg_rl, avg_st)
+
     def run(self):
         """启动 PPO 训练"""
         try:
@@ -411,12 +492,10 @@ class PPOTrain():
 
             # ── test_play + EMA 指标更新 ──────────────────────────────
             print("running test_play for EMA metrics update...")
-            sp = PPOSelfPlay()
-            sp.policy_net = self.policy_net
             (_, _, _,
              _, _, _,
              test_best_rl, _,
-             test_avg_pc, test_avg_rl, test_avg_st) = sp.test_play()
+             test_avg_pc, test_avg_rl, test_avg_st) = self.test_play()
 
             status = read_status_file()
             alpha = 0.1

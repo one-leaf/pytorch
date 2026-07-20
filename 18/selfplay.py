@@ -15,46 +15,103 @@ GAME_WIDTH, GAME_HEIGHT = 10, 20
 class PPOSelfPlay():
     def __init__(self):
         self.rollout_max_steps = 500    # 单局最大步数
-        self.test_count = 10            # 测试次数
-        self.max_step_count = 10000     # 最大步数限制
         self.policy_net = None
 
-    def get_action_from_policy(self, agent, policy_net, prev_action, train=True, temperature=1.0):
-        """从策略网络采样一个动作（带动作掩码）"""
-        state = np.array([agent.current_state()])
-        device = policy_net.device
-        state_tensor = torch.FloatTensor(state).to(device)
-        prev_action_tensor = torch.LongTensor([prev_action]).to(device)
+    def get_actions_batch(self, agents, prev_actions, train=True, temperature=1.0):
+        """批量预测多个游戏的动作（一次 forward pass）"""
+        # 只处理未结束的游戏
+        active_indices = [i for i, a in enumerate(agents) if not a.terminal]
+        if not active_indices:
+            return []
 
-        policy_net.net.eval()
+        device = self.policy_net.device
+        states = np.array([agents[i].current_state() for i in active_indices])
+        prev_acts = [prev_actions[i] for i in active_indices]
+
+        states_tensor = torch.FloatTensor(states).to(device)
+        prev_tensor = torch.LongTensor(prev_acts).to(device)
+
+        self.policy_net.net.eval()
         with torch.no_grad():
-            log_probs, _ = policy_net.net(state_tensor, prev_action_tensor)
-        if torch.isnan(log_probs).any():
-            log_probs = torch.zeros_like(log_probs)
-        probs = torch.exp(log_probs[0] / temperature).cpu().numpy()  # [5]
+            log_probs_batch, _ = self.policy_net.net(states_tensor, prev_tensor)
 
-        if train:
-            p = 0.98
-            dirichlet = np.random.dirichlet(0.3 * np.ones(GAME_ACTIONS_NUM))            
-            probs = p*probs + (1.0-p)*dirichlet
-            probs = probs / np.sum(probs) 
+        if torch.isnan(log_probs_batch).any():
+            log_probs_batch = torch.zeros_like(log_probs_batch)
 
-            # 应用动作掩码
-            availables = agent.availables  # [5] 0/1 掩码
-            probs = probs * availables.astype(np.float32)
-            probs_sum = probs.sum()
-            if probs_sum < 1e-10:
-                probs = availables.astype(np.float32)
+        actions = []
+        all_probs = []
+        all_log_probs = []
+
+        for idx, i in enumerate(active_indices):
+            agent = agents[i]
+            log_probs = log_probs_batch[idx]
+            probs = torch.exp(log_probs / temperature).cpu().numpy()
+
+            if train:
+                p = 0.98
+                dirichlet = np.random.dirichlet(0.3 * np.ones(GAME_ACTIONS_NUM))
+                probs = p * probs + (1.0 - p) * dirichlet
+                probs = probs / np.sum(probs)
+
+                availables = agent.availables
+                probs = probs * availables.astype(np.float32)
                 probs_sum = probs.sum()
-            probs = probs / probs_sum
+                if probs_sum < 1e-10:
+                    probs = availables.astype(np.float32)
+                    probs_sum = probs.sum()
+                probs = probs / probs_sum
+                action = np.random.choice(GAME_ACTIONS_NUM, p=probs)
+            else:
+                availables = agent.availables
+                probs = probs * availables.astype(np.float32)
+                action = np.argmax(probs)
 
-            action = np.random.choice(GAME_ACTIONS_NUM, p=probs)
-        else:
-            availables = agent.availables  # [5] 0/1 掩码
-            probs = probs * availables.astype(np.float32)
-            action = np.argmax(probs)
-            
-        return int(action), probs, log_probs[0].cpu().numpy()
+            actions.append(int(action))
+            all_probs.append(probs.copy())
+            all_log_probs.append(log_probs.cpu().numpy())
+
+        return actions, all_probs, all_log_probs
+
+    def play_games_parallel(self, n_games=3, pieces_list=None, train=True, temperature=1.0):
+        """同时玩 n_games 局，共享方块序列，批量预测"""
+        agents = [Agent(isRandomNextPiece=False, nextPiecesList=pieces_list) for _ in range(n_games)]
+        trajectories = [[] for _ in range(n_games)]
+        step_results = [[] for _ in range(n_games)]
+        prev_actions = [3] * n_games  # KEY_NONE
+
+        for _ in range(self.rollout_max_steps):
+            if all(a.terminal for a in agents):
+                break
+
+            actions, all_probs, all_log_probs = self.get_actions_batch(
+                agents, prev_actions, train, temperature
+            )
+
+            # 为每个 active 游戏记录轨迹
+            action_idx = 0
+            for i, agent in enumerate(agents):
+                if agent.terminal:
+                    continue
+
+                state = agent.current_state().copy()
+                action = actions[action_idx]
+                probs = all_probs[action_idx]
+                log_prob = all_log_probs[action_idx]
+                action_idx += 1
+
+                trajectories[i].append({
+                    "state": state,
+                    "action": action,
+                    "prev_action": prev_actions[i],
+                    "ref_prob": probs,
+                    "log_prob": log_prob,
+                })
+
+                prev_actions[i] = action
+                landed, removed = agent.step(action)
+                step_results[i].append((landed, removed))
+
+        return agents, trajectories, step_results
 
     def _check_and_fix_nan(self, policy_net):
         """检测模型是否输出 NaN，如有则重新初始化权重"""
@@ -66,113 +123,6 @@ class PPOSelfPlay():
         if torch.isnan(out).any():
             print("WARNING: model output contains NaN, reinitializing weights!")
             policy_net.net.init_weights()
-
-    def play_one_game(self, isRandomNextPiece=True, nextPiecesList=None, train=True, temperature=1.0):
-        """用当前策略玩一局游戏，记录完整轨迹"""
-        if nextPiecesList is not None and len(nextPiecesList) > 0:
-            agent = Agent(isRandomNextPiece=False, nextPiecesList=nextPiecesList)
-        else:
-            agent = Agent(isRandomNextPiece=isRandomNextPiece)
-
-        trajectory = []
-        step_results = []  # 每步 (landed, lines_cleared)
-        prev_action = 3  # KEY_NONE
-
-        for _ in range(self.rollout_max_steps):
-            if agent.terminal:
-                break
-
-            state = agent.current_state().copy()
-            action, probs, log_prob = self.get_action_from_policy(agent, self.policy_net, prev_action, train, temperature)
-
-            trajectory.append({
-                "state": state,
-                "action": action,
-                "prev_action": prev_action,
-                "ref_prob": probs.copy(),
-                "log_prob": log_prob.copy(),
-            })
-
-            prev_action = action
-            landed, removed = agent.step(action)
-            step_results.append((landed, removed))
-
-        return agent, trajectory, step_results
-
-    def test_play(self, test_count=None):
-        """测试模式：贪婪策略评估"""
-        if test_count is None:
-            test_count = self.test_count
-
-        min_pieces_count = 999999
-        max_pieces_count = 0
-        min_removedlines = 0
-        max_removedlines = 0
-        best_removedlines = 0     # 测试中最多消除行数
-        worst_removedlines = 999999  # 测试中最少消除行数
-        min_his_pieces = None
-        min_his_pieces_len = 0
-        sum_piececount = 0
-        sum_removedlines = 0
-        sum_steps = 0
-        test_games = 0
-
-        for _ in range(test_count):
-            agent = Agent(isRandomNextPiece=True)
-            prev_action = 3  # KEY_NONE
-            for _ in range(self.max_step_count):
-                action, _, _ = self.get_action_from_policy(
-                    agent, self.policy_net, prev_action, train=False
-                )
-                prev_action = action
-                agent.step(action)  # (landed, removedlines) — 不需要返回值
-                if agent.terminal:
-                    break
-
-            agent.print()
-            sum_piececount += agent.piececount
-            sum_removedlines += agent.removedlines
-            sum_steps += agent.steps
-            test_games += 1
-
-            # 跟踪最差/最好局面
-            if agent.piececount < min_pieces_count:
-                min_pieces_count = agent.piececount
-                min_his_pieces = agent.piecehis
-                min_his_pieces_len = len(agent.piecehis)
-                min_removedlines = agent.removedlines
-            if agent.piececount > max_pieces_count:
-                max_pieces_count = agent.piececount
-                max_removedlines = agent.removedlines
-
-            # 独立跟踪消除行数最值
-            if agent.removedlines > best_removedlines:
-                best_removedlines = agent.removedlines
-            if agent.removedlines < worst_removedlines:
-                worst_removedlines = agent.removedlines
-
-        avg_pc = sum_piececount / max(test_games, 1)
-        avg_rl = sum_removedlines / max(test_games, 1)
-        avg_st = sum_steps / max(test_games, 1)
-        print(f"test: min_pieces={min_pieces_count} max_pieces={max_pieces_count} "
-              f"min_lines={min_removedlines} max_lines={max_removedlines} "
-              f"avg_pieces={avg_pc:.1f} avg_lines={avg_rl:.3f} avg_steps={avg_st:.1f}")
-
-        # 保存最差局面用于重玩
-        if min_pieces_count < 20 and min_his_pieces:
-            replay_dir = os.path.join(data_dir, "replay")
-            if not os.path.exists(replay_dir):
-                os.makedirs(replay_dir)
-            filename = f"{min_his_pieces_len:05d}-{min_removedlines:05d}-{''.join(min_his_pieces)[:50]}.pkl"
-            his_pieces_file = os.path.join(replay_dir, filename)
-            print(f"save need replay {his_pieces_file}")
-            with open(his_pieces_file, "wb") as fn:
-                pickle.dump(min_his_pieces, fn)
-
-        return (min_removedlines, min_his_pieces, min_his_pieces_len,
-                max_removedlines, max_pieces_count, min_pieces_count,
-                best_removedlines, worst_removedlines,
-                avg_pc, avg_rl, avg_st)
 
     def collect_ppo_data(self):
         """收集 PPO 自我对抗数据"""
@@ -243,58 +193,42 @@ class PPOSelfPlay():
                     self._check_and_fix_nan(self.policy_net)
                     _last_model_mtime = mtime
 
-            # 确定本局方块序列
+            # 确定本局方块序列：随机生成，长度 = 当前平均方块数 + 1000
             if g == 0 and len(his_pieces) > 0:
                 pieces_list = his_pieces
                 his_pieces = []
             else:
-                agent0, _, _ = self.play_one_game(isRandomNextPiece=True)
-                pieces_list = agent0.piecehis
+                status = read_status_file()
+                avg_pc = status["metrics"].get("ppo_piececount", 50)
+                pieces_list = [random.choice(['s', 'z', 'i', 'o', 'l', 'j', 't']) for _ in range(int(avg_pc))]                
+            pieces_list += [random.choice(['s', 'z', 'i', 'o', 'l', 'j', 't']) for _ in range(1000)]    
 
-            # 动态采样：最多 8 局，一旦出现 best-worst ≥ 2 立即停止
-            # 温度递增：更多探索 → 更多样的结果
-            group_pieces_list = pieces_list  # 组内共享同一序列
-            group_agents = []
-            best_pc = -1
-            worst_pc = 999999
+            # 并行玩 3 局，取 max 和 min
+            agents, trajectories, step_results = self.play_games_parallel(
+                n_games=3, pieces_list=pieces_list, train=True, temperature=1.0
+            )
 
-            for i in range(8):
-                temperature = 1.0 + 0.2 * i  # 1.0, 1.2, 1.4, 1.6, ...
-                agent, trajectory, step_results = self.play_one_game(
-                    isRandomNextPiece=False, nextPiecesList=group_pieces_list,
-                    temperature=temperature,
-                )
-                if len(trajectory) > 0:
-                    group_agents.append((agent, trajectory, step_results))
-                    if agent.piececount > best_pc:
-                        best_pc = agent.piececount
-                    if agent.piececount < worst_pc:
-                        worst_pc = agent.piececount
-                if len(agent.piecehis) > len(pieces_list):
-                    pieces_list = agent.piecehis
+            # 取 max 和 min piececount
+            pcs = [a.piececount for a in agents]
+            best_idx = max(range(len(pcs)), key=lambda i: pcs[i])
+            worst_idx = min(range(len(pcs)), key=lambda i: pcs[i])
 
-                if best_pc - worst_pc >= 2:
-                    break
-
-            # 只保留最差和最好的 2 局
-            if len(group_agents) >= 2 and best_pc - worst_pc >= 2:
-                pcs = [a.piececount for a, _, _ in group_agents]
-                best_idx = max(range(len(pcs)), key=lambda i: pcs[i])
-                worst_idx = min(range(len(pcs)), key=lambda i: pcs[i])
-                keep = sorted(set([best_idx, worst_idx]))
-                group_agents = [group_agents[i] for i in keep]
+            # 判断是否保留
+            if pcs[best_idx] - pcs[worst_idx] >= 2:
+                group_agents = [
+                    (agents[best_idx], trajectories[best_idx], step_results[best_idx]),
+                    (agents[worst_idx], trajectories[worst_idx], step_results[worst_idx])
+                ]
             else:
-                print(f"Group {g}, Run {i + 1}: only {len(group_agents)} games, skipping reward calculation.")
-                for agent, _, _ in group_agents:
-                    agent.print()
-                continue  # 至少需要两局才能计算奖励
+                print(f"Group {g}: piececounts={pcs}, diff={pcs[best_idx] - pcs[worst_idx]} < 2, skipping")
+                continue
 
             # 游戏级奖励：piececount + 消行奖励
             N_arr = np.array([agent.piececount for agent, _, _ in group_agents])
             L_arr = np.array([agent.removedlines for agent, _, _ in group_agents])
 
             # 打印信息
-            print(f"Group {g}, Run {i + 1}: piececounts={N_arr} lines={L_arr}")
+            print(f"Group {g}: piececounts={N_arr} lines={L_arr}")
 
             # 保存每局结果：一局一个 pkl 文件（包含所有 step）
             filetime = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
