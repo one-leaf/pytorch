@@ -220,19 +220,20 @@ class PPOSelfPlay():
             state = read_status_file()
             alpha = 0.1
             m = state["metrics"]
-            old_test_pc = m.get("test_piececount", 0)
-            m["test_piececount"] = round(old_test_pc * (1 - alpha) + greedy_agent.piececount * alpha, 3)
+            m["test_piececount"] = round(m.get("test_piececount", 0) * (1 - alpha) + greedy_agent.piececount * alpha, 3)
             m["test_removedlines"] = round(m.get("test_removedlines", 0) * (1 - alpha) + greedy_agent.removedlines * alpha, 3)
             m["test_steps"] = round(m.get("test_steps", 0) * (1 - alpha) + greedy_agent.steps * alpha, 3)
-            m["test_piececount_best"] = max(m.get("test_piececount_best", 0), greedy_agent.piececount)
-            m["test_removedlines_best"] = max(m.get("test_removedlines_best", 0), greedy_agent.removedlines)
 
-            # 如果贪婪局表现超过历史最佳，保存模型
-            if greedy_agent.piececount > old_test_pc:
+            # 检查是否刷新历史最佳
+            old_best_pc = m.get("test_piececount_best", 0)
+            if greedy_agent.piececount > old_best_pc:
+                m["test_piececount_best"] = greedy_agent.piececount
+                m["test_removedlines_best"] = max(m.get("test_removedlines_best", 0), greedy_agent.removedlines)
+                # 保存最佳模型
                 best_model_path = f"{model_file}.{greedy_agent.piececount:.1f}"
                 self.policy_net.save_model(best_model_path)
                 self.policy_net.save_model(model_file + ".bak")
-                print(f"*** new best! greedy_piececount={greedy_agent.piececount} > ema={old_test_pc:.1f}, saved to {best_model_path}")
+                print(f"*** new best! greedy_piececount={greedy_agent.piececount} > best={old_best_pc}, saved to {best_model_path}")
 
             save_status_file(state)
 
