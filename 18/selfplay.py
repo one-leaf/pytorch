@@ -17,8 +17,10 @@ class PPOSelfPlay():
         self.rollout_max_steps = 500    # 单局最大步数
         self.policy_net = None
 
-    def get_actions_batch(self, agents, prev_actions, train=True, temperature=1.0):
+    def get_actions_batch(self, agents, prev_actions, temperature=1.0, greedy_indices=None):
         """批量预测多个游戏的动作（一次 forward pass）"""
+        if greedy_indices is None:
+            greedy_indices = set()
         # 只处理未结束的游戏
         active_indices = [i for i, a in enumerate(agents) if not a.terminal]
         if not active_indices:
@@ -47,7 +49,7 @@ class PPOSelfPlay():
             log_probs = log_probs_batch[idx]
             probs = torch.exp(log_probs / temperature).cpu().numpy()
 
-            if train:
+            if i not in greedy_indices:
                 p = 0.98
                 dirichlet = np.random.dirichlet(0.3 * np.ones(GAME_ACTIONS_NUM))
                 probs = p * probs + (1.0 - p) * dirichlet
@@ -72,7 +74,7 @@ class PPOSelfPlay():
 
         return actions, all_probs, all_log_probs
 
-    def play_games_parallel(self, n_games=4, pieces_list=None, train=True, temperature=1.0):
+    def play_games_parallel(self, n_games=4, pieces_list=None, temperature=1.0, greedy_indices=None):
         """同时玩 n_games 局，共享方块序列，批量预测"""
         agents = [Agent(isRandomNextPiece=False, nextPiecesList=pieces_list) for _ in range(n_games)]
         trajectories = [[] for _ in range(n_games)]
@@ -84,7 +86,7 @@ class PPOSelfPlay():
                 break
 
             actions, all_probs, all_log_probs = self.get_actions_batch(
-                agents, prev_actions, train, temperature
+                agents, prev_actions, temperature, greedy_indices
             )
 
             # 为每个 active 游戏记录轨迹
@@ -208,7 +210,8 @@ class PPOSelfPlay():
 
             # 并行玩 4 局，取 max 和 min
             agents, trajectories, step_results = self.play_games_parallel(
-                n_games=4, pieces_list=pieces_list, train=True, temperature=1.0
+                n_games=4, pieces_list=pieces_list, temperature=1.0,
+                greedy_indices={0}
             )
 
             # 取 max 和 min piececount
