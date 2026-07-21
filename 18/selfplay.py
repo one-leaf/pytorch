@@ -214,6 +214,28 @@ class PPOSelfPlay():
             )
 
             pcs = [a.piececount for a in agents]
+
+            # 更新贪婪局（test）的 EMA 指标
+            greedy_agent = agents[0]
+            state = read_status_file()
+            alpha = 0.1
+            m = state["metrics"]
+            old_test_pc = m.get("test_piececount", 0)
+            m["test_piececount"] = round(old_test_pc * (1 - alpha) + greedy_agent.piececount * alpha, 3)
+            m["test_removedlines"] = round(m.get("test_removedlines", 0) * (1 - alpha) + greedy_agent.removedlines * alpha, 3)
+            m["test_steps"] = round(m.get("test_steps", 0) * (1 - alpha) + greedy_agent.steps * alpha, 3)
+            m["test_piececount_best"] = max(m.get("test_piececount_best", 0), greedy_agent.piececount)
+            m["test_removedlines_best"] = max(m.get("test_removedlines_best", 0), greedy_agent.removedlines)
+
+            # 如果贪婪局表现超过历史最佳，保存模型
+            if greedy_agent.piececount > old_test_pc:
+                best_model_path = f"{model_file}.{greedy_agent.piececount:.1f}"
+                self.policy_net.save_model(best_model_path)
+                self.policy_net.save_model(model_file + ".bak")
+                print(f"*** new best! greedy_piececount={greedy_agent.piececount} > ema={old_test_pc:.1f}, saved to {best_model_path}")
+
+            save_status_file(state)
+
             # 判断是否保留：最大最小相差 2 以上则保存全部 4 局
             if max(pcs) - min(pcs) >= 2:
                 group_agents = [(agents[i], trajectories[i], step_results[i]) for i in range(len(agents))]
