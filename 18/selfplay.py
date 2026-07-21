@@ -72,7 +72,7 @@ class PPOSelfPlay():
 
         return actions, all_probs, all_log_probs
 
-    def play_games_parallel(self, n_games=3, pieces_list=None, train=True, temperature=1.0):
+    def play_games_parallel(self, n_games=4, pieces_list=None, train=True, temperature=1.0):
         """同时玩 n_games 局，共享方块序列，批量预测"""
         agents = [Agent(isRandomNextPiece=False, nextPiecesList=pieces_list) for _ in range(n_games)]
         trajectories = [[] for _ in range(n_games)]
@@ -203,9 +203,9 @@ class PPOSelfPlay():
                 pieces_list = [random.choice(['s', 'z', 'i', 'o', 'l', 'j', 't']) for _ in range(int(avg_pc))]                
             pieces_list += [random.choice(['s', 'z', 'i', 'o', 'l', 'j', 't']) for _ in range(1000)]    
 
-            # 并行玩 3 局，取 max 和 min
+            # 并行玩 4 局，取 max 和 min
             agents, trajectories, step_results = self.play_games_parallel(
-                n_games=3, pieces_list=pieces_list, train=True, temperature=1.0
+                n_games=4, pieces_list=pieces_list, train=True, temperature=1.0
             )
 
             # 取 max 和 min piececount
