@@ -210,24 +210,17 @@ class PPOSelfPlay():
 
             # 并行玩 4 局，取 max 和 min
             agents, trajectories, step_results = self.play_games_parallel(
-                n_games=4, pieces_list=pieces_list, temperature=1.0,
-                greedy_indices={0}
+                n_games=4, pieces_list=pieces_list, temperature=1.0, greedy_indices={0}
             )
 
-            # 取 max 和 min piececount
             pcs = [a.piececount for a in agents]
-            best_idx = max(range(len(pcs)), key=lambda i: pcs[i])
-            worst_idx = min(range(len(pcs)), key=lambda i: pcs[i])
-
-            # 判断是否保留
-            if pcs[best_idx] - pcs[worst_idx] >= 2:
-                group_agents = [
-                    (agents[best_idx], trajectories[best_idx], step_results[best_idx]),
-                    (agents[worst_idx], trajectories[worst_idx], step_results[worst_idx])
-                ]
+            # 判断是否保留：最大最小相差 2 以上则保存全部 4 局
+            if max(pcs) - min(pcs) >= 2:
+                group_agents = [(agents[i], trajectories[i], step_results[i]) for i in range(len(agents))]
             else:
-                print(f"Group {g}: piececounts={pcs}, diff={pcs[best_idx] - pcs[worst_idx]} < 2, skipping")
+                print(f"Group {g}: piececounts={pcs}, diff={max(pcs) - min(pcs)} < 2, skipping")
                 # 导出最佳局的历史方块到重玩目录
+                best_idx = max(range(len(pcs)), key=lambda i: pcs[i])
                 best_pieces = agents[best_idx].piecehis
                 if len(best_pieces) > 10:
                     filename = f"{len(best_pieces):05d}-{agents[best_idx].removedlines:05d}-{''.join(best_pieces)[:50]}.pkl"
