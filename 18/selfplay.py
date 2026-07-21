@@ -152,21 +152,11 @@ class PPOSelfPlay():
         self._check_and_fix_nan(self.policy_net)
         _last_model_mtime = os.path.getmtime(load_model_file)
 
-        # 检查重玩列表
+        # 重玩目录
         replay_dir = os.path.join(data_dir, "replay")
         if not os.path.exists(replay_dir):
             os.makedirs(replay_dir)
         his_pieces = []
-        listFiles = [f for f in os.listdir(replay_dir) if f.endswith(".pkl")]
-        if listFiles and random.random() > 0.20:
-            earliest_files = sorted(listFiles, key=lambda f: os.path.getctime(os.path.join(replay_dir, f)))
-            filename = os.path.join(replay_dir, earliest_files[0])
-            try:
-                with open(filename, "rb") as fn:
-                    his_pieces = pickle.load(fn)
-                print(f"load need replay {filename}")
-            finally:
-                os.remove(filename)
 
         # 持续采集，每局完成后立即保存
         print("starting continuous collection ...")
@@ -193,8 +183,22 @@ class PPOSelfPlay():
                     self._check_and_fix_nan(self.policy_net)
                     _last_model_mtime = mtime
 
-            # 确定本局方块序列：随机生成，长度 = 当前平均方块数 + 1000
-            if g == 0 and len(his_pieces) > 0:
+            # 每 10 轮检查一次重玩数据
+            his_pieces = []
+            if g % 10 == 0:
+                listFiles = [f for f in os.listdir(replay_dir) if f.endswith(".pkl")]
+                if listFiles and random.random() > 0.20:
+                    earliest_files = sorted(listFiles, key=lambda f: os.path.getctime(os.path.join(replay_dir, f)))
+                    filename = os.path.join(replay_dir, earliest_files[0])
+                    try:
+                        with open(filename, "rb") as fn:
+                            his_pieces = pickle.load(fn)
+                        print(f"load need replay {filename}")
+                    finally:
+                        os.remove(filename)
+
+            # 确定本局方块序列：有重玩数据则用重玩，否则随机生成
+            if len(his_pieces) > 0:
                 pieces_list = his_pieces
                 his_pieces = []
             else:
@@ -221,6 +225,13 @@ class PPOSelfPlay():
                 ]
             else:
                 print(f"Group {g}: piececounts={pcs}, diff={pcs[best_idx] - pcs[worst_idx]} < 2, skipping")
+                # 导出最佳局的历史方块到重玩目录
+                best_pieces = agents[best_idx].piecehis
+                if len(best_pieces) > 10:
+                    filename = f"{len(best_pieces):05d}-{agents[best_idx].removedlines:05d}-{''.join(best_pieces)[:50]}.pkl"
+                    savefile = os.path.join(replay_dir, filename)
+                    with open(savefile, "wb") as fn:
+                        pickle.dump(best_pieces, fn)
                 continue
 
             # 游戏级奖励：piececount + 消行奖励
