@@ -200,7 +200,6 @@ class PPOSelfPlay():
             # 确定本局方块序列：有重玩数据则用重玩，否则随机生成
             if len(his_pieces) > 0:
                 pieces_list = his_pieces
-                his_pieces = []
             else:
                 status = read_status_file()
                 avg_pc = status["metrics"].get("ppo_piececount", 50)
