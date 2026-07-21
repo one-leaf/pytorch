@@ -241,7 +241,7 @@ class PPOSelfPlay():
             L_arr = np.array([agent.removedlines for agent, _, _ in group_agents])
 
             # 打印信息
-            print(f"Group {g}: piececounts={N_arr} lines={L_arr}")
+            print(f"Group {g}: all_piececounts={pcs} selected={N_arr} lines={L_arr}")
 
             # 保存每局结果：一局一个 pkl 文件（包含所有 step）
             filetime = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
