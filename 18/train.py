@@ -202,7 +202,7 @@ class PPOTrain():
         self.max_files = 10000          # data 目录最大保留文件数（安全上限，需 ≥ 2 × P × n_train_times）
         self.n_train_times = 2          # 每局严格保证被训练的轮数
         self.min_new_files = 1          # 至少有1个新文件就训练（不限制移动数量，清空 wait 目录）
-        self.kl_targ = 0.25             # 实际 KL 约 0.4~0.5，目标降低让 LR 调整更早介入
+        self.kl_targ = 0.05             # 实际 KL 约 0.4~0.5，目标降低让 LR 调整更早介入
 
         # PPO 超参数
         self.ppo_clip_eps = 0.2
