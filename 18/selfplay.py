@@ -289,7 +289,7 @@ class PPOSelfPlay():
                     pickle.dump(game_steps, fn)
 
             # 更新计数器 + 历史统计（用实际游戏数据，保证 show_status 有数据）
-            alpha = 0.1
+            alpha = 0.01
             g_avg_pc = sum(a.piececount for a, _, _ in group_agents) / len(group_agents)
             g_avg_rl = sum(a.removedlines for a, _, _ in group_agents) / len(group_agents)
             g_avg_st = sum(a.steps for a, _, _ in group_agents) / len(group_agents)
