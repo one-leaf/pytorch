@@ -106,9 +106,8 @@ class PolicyNet():
             param_group['lr'] = lr
 
         state_batch = torch.FloatTensor(state_batch).to(self.device)
-        ref_log_probs = torch.log(torch.FloatTensor(ref_probs) + 1e-10).to(self.device)
-        ref_log_probs = torch.clamp(ref_log_probs, min=-20.0)
         log_probs_old_t = torch.FloatTensor(log_probs_old).to(self.device)
+        log_probs_old_t = torch.clamp(log_probs_old_t, min=-20.0)
         action_batch = torch.LongTensor(action_batch).to(self.device)
         prev_action_batch = torch.LongTensor(prev_action_batch).to(self.device)
         game_ids = game_ids.tolist() if hasattr(game_ids, 'tolist') else list(game_ids)
@@ -207,7 +206,7 @@ class PolicyNet():
         # ── KL 散度 ──────────────────────────────────────────────
         log_probs_safe = torch.clamp(log_probs, min=-20.0)
         probs_new = torch.exp(log_probs_safe)
-        kl_div = (probs_new * (log_probs_safe - ref_log_probs)).sum(dim=-1).mean()
+        kl_div = (probs_new * (log_probs_safe - log_probs_old_t)).sum(dim=-1).mean()
 
         # ── 熵正则化 ─────────────────────────────────────────────
         # 1.0 2-3 个动作在竞争
