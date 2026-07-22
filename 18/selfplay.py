@@ -208,9 +208,9 @@ class PPOSelfPlay():
                 pieces_list = [random.choice(['s', 'z', 'i', 'o', 'l', 'j', 't']) for _ in range(int(avg_pc))]                
             pieces_list += [random.choice(['s', 'z', 'i', 'o', 'l', 'j', 't']) for _ in range(1000)]    
 
-            # 并行玩 4 局，取 max 和 min
+            # 并行玩 8 局，取 max 和 min
             agents, trajectories, step_results = self.play_games_parallel(
-                n_games=4, pieces_list=pieces_list, temperature=1.0, greedy_indices={0}
+                n_games=8, pieces_list=pieces_list, temperature=1.0, greedy_indices={0}
             )
 
             pcs = [a.piececount for a in agents]
