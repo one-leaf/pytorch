@@ -77,7 +77,7 @@ def show_status(max_history=0, as_json=False):
         print("=" * 163)
         print(label)
         print("-" * 163)
-        header = (f"  {'Train':>6} {'Sample':>7}  "
+        header = (f"  {'Train':>6}  "
                   f"{'PP_Piece':>8} {'PP_Lines':>8} {'PP_Steps':>8} {'PP_Min':>7} {'PP_Max':>7}  "
                   f"{'Te_Piece':>8} {'Te_Lines':>8} {'Te_Steps':>8} {'Te_Best':>7}  "
                   f"{'Tr_Acc':>8} {'Tr_KL':>9} {'Tr_Ent':>8} {'Tr_VL':>8}  "
@@ -86,7 +86,7 @@ def show_status(max_history=0, as_json=False):
         print(header)
         print("-" * 163)
         for h in display:
-            print(f"  {h.get('train', 0):>6} {h.get('agent', 0):>7}  "
+            print(f"  {h.get('train', 0):>6}  "
                   f"{h.get('ppo_piececount', 0):>8.1f} "
                   f"{h.get('ppo_removedlines', 0):>8.3f} "
                   f"{h.get('ppo_steps', 0):>8.1f} "
@@ -110,10 +110,10 @@ def show_status(max_history=0, as_json=False):
         print(f"  历史记录: 共 {len(history)} 条 (用 --history N 查看)")
         if len(history) >= 2:
             first, last = history[0], history[-1]
-            print(f"  起始(agent {first['agent']}): "
+            print(f"  起始(train {first.get('train', 0)}): "
                   f"player pc={first.get('ppo_piececount', 0):.1f} ln={first.get('ppo_removedlines', 0):.3f}  "
                   f"test pc={first.get('test_piececount', 0):.1f} ln={first.get('test_removedlines', 0):.3f}")
-            print(f"  当前(agent {last['agent']}):  "
+            print(f"  当前(train {last.get('train', 0)}):  "
                   f"player pc={last.get('ppo_piececount', 0):.1f} ln={last.get('ppo_removedlines', 0):.3f}  "
                   f"test pc={last.get('test_piececount', 0):.1f} ln={last.get('test_removedlines', 0):.3f}")
         print("=" * 163)

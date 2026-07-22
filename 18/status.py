@@ -158,7 +158,6 @@ def _append_history(state: dict[str, Any]):
         return
 
     snapshot = {
-        "agent": c.get("agent", 0),
         "train": c.get("train", 0),
         # PPO player (使用当前 EMA 值)
         "ppo_piececount": m.get("ppo_piececount", 0),
