@@ -148,13 +148,13 @@ def numpy_encoder(obj):
 
 
 def _append_history(state: dict[str, Any]):
-    """每100轮训练(_train>=100)记录一次周期内平均值快照"""
+    """每10轮训练(_train>=10)记录一次周期内快照"""
     c = state.get("counters", {})
     m = state.get("metrics", {})
     tr = state.get("training", {})
 
     _train = c.get("_train", 0)
-    if _train < 100:
+    if _train < 10:
         return
 
     snapshot = {
