@@ -306,7 +306,7 @@ class PPOTrain():
                     _epoch_g_std += g_std
                     _epoch_batches += 1
                     if i % 500 == 0:
-                        print(f"epoch {epoch+1}/{self.n_epochs}", i,
+                        print(f"Train {i} {self.batch_size*i/len(self.dataset)*100:.1f}%", 
                               "acc:", acc, "kl:", kl, "entropy:", entropy, "vloss:", value_loss,
                               "g_mean:", round(g_mean, 3), "g_std:", round(g_std, 3),
                               "r_mean:", round(self.dataset.r_mean, 2), "r_std:", round(self.dataset.r_std, 2))
