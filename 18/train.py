@@ -402,7 +402,7 @@ class PPOTrain():
                 self.lr_multiplier /= 1.1
             elif total_kl < self.kl_targ / 2:
                 self.lr_multiplier *= 1.1
-            self.lr_multiplier = np.clip(self.lr_multiplier, 0.5, 5.0)
+            self.lr_multiplier = np.clip(self.lr_multiplier, 0.1, 5.0)
 
             status["training"]["lr_multiplier"] = float(self.lr_multiplier)
             status["counters"]["train"] += 1

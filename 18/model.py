@@ -204,6 +204,10 @@ class PolicyNet():
         value_loss = (q_weights * F.smooth_l1_loss(values, target_exp, reduction='none')).mean()
 
         # ── KL 散度 ──────────────────────────────────────────────
+        # 0.01 策略几乎没变，训练非常保守
+        # 0.05~0.15 健康范围，策略在稳步更新
+        # 0.2~0.3 变化较大，可能需要降低学习率
+        # 0.5+  策略偏移严重，训练不稳定
         log_probs_safe = torch.clamp(log_probs, min=-20.0)
         probs_new = torch.exp(log_probs_safe)
         kl_div = (probs_new * (log_probs_safe - log_probs_old_t)).sum(dim=-1).mean()
