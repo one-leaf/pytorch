@@ -405,6 +405,8 @@ class PPOTrain():
             self.lr_multiplier = np.clip(self.lr_multiplier, 0.5, 5.0)
 
             status["training"]["lr_multiplier"] = float(self.lr_multiplier)
+            status["counters"]["train"] += 1
+            status["counters"]["_train"] += 1
             save_status_file(status)
             print(f"train EMA: acc={m['train_acc']:.4f} kl={m['train_kl']:.5f} entropy={m['train_entropy']:.4f} vloss={m['train_vloss']:.4f} r_mean={m['r_mean']:.2f} r_std={m['r_std']:.2f}")
 

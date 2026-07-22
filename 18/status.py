@@ -59,7 +59,7 @@ status_file_bak = os.path.join(model_dir, 'status_bak.json')
 
 def _default_state():
     return {
-        "counters": {"agent": 0, "_agent": 0},
+        "counters": {"agent": 0, "_agent": 0, "train": 0, "_train": 0},
         "metrics": {
             # PPO player（selfplay，带 Dirichlet 噪声探索）
             "ppo_piececount": 0,       # EMA: 玩家平均方块数
@@ -107,7 +107,7 @@ def _migrate(state: dict[str, Any]):
     state.setdefault("_accum", {})
     state.setdefault("history", [])
 
-    for k in ("agent", "_agent"):
+    for k in ("agent", "_agent", "train", "_train"):
         if k in old:
             state["counters"][k] = old.pop(k)
     for k in ["ppo_piececount", "ppo_removedlines", "ppo_steps",
@@ -148,23 +148,22 @@ def numpy_encoder(obj):
 
 
 def _append_history(state: dict[str, Any]):
-    """每500轮(_agent>500)记录一次周期内平均值快照"""
+    """每100轮训练(_train>=100)记录一次周期内平均值快照"""
     c = state.get("counters", {})
     m = state.get("metrics", {})
     tr = state.get("training", {})
-    acc = state.get("_accum", {})
 
-    _agent = c.get("_agent", 0)
-    if _agent < 500:
+    _train = c.get("_train", 0)
+    if _train < 100:
         return
 
-    n = max(_agent, 1)
     snapshot = {
         "agent": c.get("agent", 0),
-        # PPO player
-        "ppo_piececount": round(acc.get("_sum_piececount", 0) / n, 3),
-        "ppo_removedlines": round(acc.get("_sum_removedlines", 0) / n, 3),
-        "ppo_steps": round(acc.get("_sum_steps", 0) / n, 3),
+        "train": c.get("train", 0),
+        # PPO player (使用当前 EMA 值)
+        "ppo_piececount": m.get("ppo_piececount", 0),
+        "ppo_removedlines": m.get("ppo_removedlines", 0),
+        "ppo_steps": m.get("ppo_steps", 0),
         "ppo_piececount_min": m.get("ppo_piececount_min", 999999),
         "ppo_piececount_max": m.get("ppo_piececount_max", 0),
         "ppo_removedlines_best": m.get("ppo_removedlines_best", 0),
@@ -195,6 +194,7 @@ def _append_history(state: dict[str, Any]):
     state["history"].append(snapshot)
 
     c["_agent"] = 0
+    c["_train"] = 0
     acc["_sum_piececount"] = 0
     acc["_sum_removedlines"] = 0
     acc["_sum_steps"] = 0

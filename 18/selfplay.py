@@ -301,10 +301,6 @@ class PPOSelfPlay():
             state["counters"]["agent"] += 1
             state["counters"]["_agent"] += 1
 
-            state["_accum"]["_sum_piececount"]   += g_avg_pc
-            state["_accum"]["_sum_removedlines"] += g_avg_rl
-            state["_accum"]["_sum_steps"]        += g_avg_st
-
             m = state["metrics"]
             # PPO player EMA（带噪声探索的移动平均）
             m["ppo_piececount"]       = round(m.get("ppo_piececount",       0) * (1 - alpha) + g_avg_pc * alpha, 3)

@@ -39,10 +39,9 @@ def show_status(max_history=0, as_json=False):
     # 基本信息
     print("=" * 163)
     print(f"  创建时间:   {info.get('create', '-')}  最后更新:   {info.get('modify', '-')}")
-    agent = c.get("agent", 0)
-    if agent == 0 and "_agent" in c:
-        agent = c["_agent"]
-    print(f"  训练轮次:   {agent}")
+    train_count = c.get("train", 0)
+    sample_count = c.get("agent", 0)
+    print(f"  训练轮次:   {train_count}    样本数:   {sample_count}")
     print("-" * 163)
 
     # test_play（纯贪婪，无噪声）
@@ -78,7 +77,7 @@ def show_status(max_history=0, as_json=False):
         print("=" * 163)
         print(label)
         print("-" * 163)
-        header = (f"  {'Agent':>6}  "
+        header = (f"  {'Train':>6} {'Sample':>7}  "
                   f"{'PP_Piece':>8} {'PP_Lines':>8} {'PP_Steps':>8} {'PP_Min':>7} {'PP_Max':>7}  "
                   f"{'Te_Piece':>8} {'Te_Lines':>8} {'Te_Steps':>8} {'Te_Best':>7}  "
                   f"{'Tr_Acc':>8} {'Tr_KL':>9} {'Tr_Ent':>8} {'Tr_VL':>8}  "
@@ -87,7 +86,7 @@ def show_status(max_history=0, as_json=False):
         print(header)
         print("-" * 163)
         for h in display:
-            print(f"  {h.get('agent', 0):>6}  "
+            print(f"  {h.get('train', 0):>6} {h.get('agent', 0):>7}  "
                   f"{h.get('ppo_piececount', 0):>8.1f} "
                   f"{h.get('ppo_removedlines', 0):>8.3f} "
                   f"{h.get('ppo_steps', 0):>8.1f} "
