@@ -199,16 +199,16 @@ class PPOTrain():
         self.batch_size = 256
         self.learn_rate = 1e-5
         self.lr_multiplier = 1.0
-        self.max_files = 15000         # data 目录最大保留文件数（安全上限，需 ≥ 2 × P × n_train_times）
-        self.n_train_times = 3         # 每局严格保证被训练的轮数
-        self.min_new_files = 1         # 至少有1个新文件就训练（不限制移动数量，清空 wait 目录）
-        self.kl_targ = 0.25           # 实际 KL 约 0.4~0.5，目标降低让 LR 调整更早介入
+        self.max_files = 10000          # data 目录最大保留文件数（安全上限，需 ≥ 2 × P × n_train_times）
+        self.n_train_times = 2          # 每局严格保证被训练的轮数
+        self.min_new_files = 1          # 至少有1个新文件就训练（不限制移动数量，清空 wait 目录）
+        self.kl_targ = 0.25             # 实际 KL 约 0.4~0.5，目标降低让 LR 调整更早介入
 
         # PPO 超参数
         self.ppo_clip_eps = 0.2
-        self.ppo_beta = 0.05         # KL 惩罚系数，beta*KL=0.05*0.4=0.02，与 policy_loss 可比
+        self.ppo_beta = 0.05            # KL 惩罚系数，beta*KL=0.05*0.4=0.02，与 policy_loss 可比
         self.ppo_entropy_weight = 0.2   # 熵正则，维持 entropy 在 0.8-1.0 促进探索
-        self.n_epochs = 1             # 每轮训练只跑 1 个 epoch，训练次数由 min_new_files 控制
+        self.n_epochs = 1               # 每轮训练只跑 1 个 epoch，训练次数由 min_new_files 控制
 
     def policy_update(self, sample_data):
         """PPO 策略更新（带 GAE 信用分配）"""
