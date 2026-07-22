@@ -218,7 +218,7 @@ class PPOSelfPlay():
             # 更新贪婪局（test）的 EMA 指标
             greedy_agent = agents[0]
             state = read_status_file()
-            alpha = 0.1
+            alpha = 0.01
             m = state["metrics"]
             m["test_piececount"] = round(m.get("test_piececount", 0) * (1 - alpha) + greedy_agent.piececount * alpha, 3)
             m["test_removedlines"] = round(m.get("test_removedlines", 0) * (1 - alpha) + greedy_agent.removedlines * alpha, 3)
