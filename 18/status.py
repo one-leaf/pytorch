@@ -194,9 +194,6 @@ def _append_history(state: dict[str, Any]):
 
     c["_agent"] = 0
     c["_train"] = 0
-    acc["_sum_piececount"] = 0
-    acc["_sum_removedlines"] = 0
-    acc["_sum_steps"] = 0
 
 
 def save_status_file(state:dict[str, Any]):
