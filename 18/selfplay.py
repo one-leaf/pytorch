@@ -265,18 +265,18 @@ class PPOSelfPlay():
                 game_counter += 1
 
                 # 每步存储: (state, ref_prob, log_prob, action, prev_action, r_step, is_terminal)
-                # r_step: 每步基础 0.1，落地无消行 -0.01（惩罚），落地消行 +line_bonus
+                # r_step: 中间步 落地未消行 -0.1，落地消行 +0.1；最后一步按方块数给奖励
                 n_steps = len(trajectory)
                 game_steps = []
                 for step_idx, step_data in enumerate(trajectory):
                     landed, removed = step_results[step_idx]
-                    r_step = 0.1
-                    if landed:
-                        if removed == 0:
-                            r_step -= 0.1  # 落地未消行，轻微惩罚
-                        else:
-                            r_step += 0.1  # 落地消行，轻微奖励
                     is_terminal = 1 if step_idx == n_steps - 1 else 0
+                    if is_terminal:
+                        r_step = float(agent.piececount)  # 最后一步：按方块数
+                    else:
+                        r_step = 0.0
+                        if landed:
+                            r_step = -0.1 if removed == 0 else 0.1
                     game_steps.append((
                         step_data["state"], step_data["ref_prob"],
                         step_data["log_prob"], step_data["action"],
