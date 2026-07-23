@@ -303,11 +303,11 @@ class PPOSelfPlay():
 
             m = state["metrics"]
             # PPO player EMA（带噪声探索的移动平均）
-            m["ppo_piececount"]       = round(m.get("ppo_piececount",       0) * (1 - alpha) + g_avg_pc * alpha, 3)
-            m["ppo_removedlines"]     = round(m.get("ppo_removedlines",     0) * (1 - alpha) + g_avg_rl * alpha, 3)
-            m["ppo_steps"]            = round(m.get("ppo_steps",            0) * (1 - alpha) + g_avg_st * alpha, 3)
-            m["ppo_piececount_min"]   = round(m.get("ppo_piececount_min",   9) * (1 - alpha) + g_min_pc * alpha, 3)
-            m["ppo_piececount_max"]   = round(m.get("ppo_piececount_max",   0)      * (1 - alpha) + g_max_pc * alpha, 3)
+            m["ppo_piececount"]       = m.get("ppo_piececount",       0) * (1 - alpha) + g_avg_pc * alpha
+            m["ppo_removedlines"]     = m.get("ppo_removedlines",     0) * (1 - alpha) + g_avg_rl * alpha
+            m["ppo_steps"]            = m.get("ppo_steps",            0) * (1 - alpha) + g_avg_st * alpha
+            m["ppo_piececount_min"]   = m.get("ppo_piececount_min",   9) * (1 - alpha) + g_min_pc * alpha
+            m["ppo_piececount_max"]   = m.get("ppo_piececount_max",   0)      * (1 - alpha) + g_max_pc * alpha
             # 历史最值
             m["ppo_piececount_best"]    = max(m.get("ppo_piececount_best",    0), g_max_pc)
             m["ppo_removedlines_best"]  = max(m.get("ppo_removedlines_best",  0), g_max_rl)
