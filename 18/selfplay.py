@@ -218,11 +218,11 @@ class PPOSelfPlay():
             # 更新贪婪局（test）的 EMA 指标
             greedy_agent = agents[0]
             state = read_status_file()
-            alpha = 0.01
+            alpha = 0.001
             m = state["metrics"]
-            m["test_piececount"] = round(m.get("test_piececount", 0) * (1 - alpha) + greedy_agent.piececount * alpha, 3)
-            m["test_removedlines"] = round(m.get("test_removedlines", 0) * (1 - alpha) + greedy_agent.removedlines * alpha, 3)
-            m["test_steps"] = round(m.get("test_steps", 0) * (1 - alpha) + greedy_agent.steps * alpha, 3)
+            m["test_piececount"] = m.get("test_piececount", 0) * (1 - alpha) + greedy_agent.piececount * alpha
+            m["test_removedlines"] = m.get("test_removedlines", 0) * (1 - alpha) + greedy_agent.removedlines * alpha
+            m["test_steps"] = m.get("test_steps", 0) * (1 - alpha) + greedy_agent.steps * alpha
 
             # 检查是否刷新历史最佳
             old_best_pc = m.get("test_piececount_best", 0)
@@ -289,7 +289,7 @@ class PPOSelfPlay():
                     pickle.dump(game_steps, fn)
 
             # 更新计数器 + 历史统计（用实际游戏数据，保证 show_status 有数据）
-            alpha = 0.01
+            alpha = 0.001
             g_avg_pc = sum(a.piececount for a, _, _ in group_agents) / len(group_agents)
             g_avg_rl = sum(a.removedlines for a, _, _ in group_agents) / len(group_agents)
             g_avg_st = sum(a.steps for a, _, _ in group_agents) / len(group_agents)
