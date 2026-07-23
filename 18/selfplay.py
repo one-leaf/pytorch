@@ -307,7 +307,7 @@ class PPOSelfPlay():
             m["ppo_removedlines"]     = m.get("ppo_removedlines",     0) * (1 - alpha) + g_avg_rl * alpha
             m["ppo_steps"]            = m.get("ppo_steps",            0) * (1 - alpha) + g_avg_st * alpha
             m["ppo_piececount_min"]   = m.get("ppo_piececount_min",   9) * (1 - alpha) + g_min_pc * alpha
-            m["ppo_piececount_max"]   = m.get("ppo_piececount_max",   0)      * (1 - alpha) + g_max_pc * alpha
+            m["ppo_piececount_max"]   = m.get("ppo_piececount_max",   0) * (1 - alpha) + g_max_pc * alpha
             # 历史最值
             m["ppo_piececount_best"]    = max(m.get("ppo_piececount_best",    0), g_max_pc)
             m["ppo_removedlines_best"]  = max(m.get("ppo_removedlines_best",  0), g_max_rl)
