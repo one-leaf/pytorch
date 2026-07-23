@@ -273,9 +273,9 @@ class PPOSelfPlay():
                     r_step = 0.1
                     if landed:
                         if removed == 0:
-                            r_step -= 0.01  # 落地未消行，轻微惩罚
+                            r_step -= 0.1  # 落地未消行，轻微惩罚
                         else:
-                            r_step += 0.01  # 落地消行，轻微奖励
+                            r_step += 0.1  # 落地消行，轻微奖励
                     is_terminal = 1 if step_idx == n_steps - 1 else 0
                     game_steps.append((
                         step_data["state"], step_data["ref_prob"],
