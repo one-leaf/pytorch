@@ -276,7 +276,7 @@ class PPOSelfPlay():
                     else:
                         r_step = 0.0
                         if landed:
-                            r_step = 0 if removed == 0 else 0.1
+                            r_step = 0.0 if removed == 0 else 0.1
                     game_steps.append((
                         step_data["state"], step_data["ref_prob"],
                         step_data["log_prob"], step_data["action"],
