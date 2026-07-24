@@ -242,7 +242,7 @@ class PPOSelfPlay():
                 best_idx = max(range(len(pcs)), key=lambda i: pcs[i])
                 worst_idx = min(range(len(pcs)), key=lambda i: pcs[i])
                 group_agents = [(agents[i], trajectories[i], step_results[i]) for i in [best_idx, worst_idx]]
-                print(f"Group {g}: piececounts={pcs}, selected best={pcs[best_idx]} worst={pcs[worst_idx]}")
+                # print(f"Group {g}: piececounts={pcs}, selected best={pcs[best_idx]} worst={pcs[worst_idx]}")
             else:
                 print(f"Group {g}: piececounts={pcs}, diff={max(pcs) - min(pcs)} < 2, skipping")
                 # 导出最佳局的历史方块到重玩目录
