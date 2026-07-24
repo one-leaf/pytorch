@@ -237,9 +237,12 @@ class PPOSelfPlay():
 
             save_status_file(state)
 
-            # 判断是否保留：最大最小相差 2 以上则保存全部 4 局
+            # 判断是否保留：最大最小相差 2 以上则只采集最大局和最小局
             if max(pcs) - min(pcs) >= 2:
-                group_agents = [(agents[i], trajectories[i], step_results[i]) for i in range(len(agents))]
+                best_idx = max(range(len(pcs)), key=lambda i: pcs[i])
+                worst_idx = min(range(len(pcs)), key=lambda i: pcs[i])
+                group_agents = [(agents[i], trajectories[i], step_results[i]) for i in [best_idx, worst_idx]]
+                print(f"Group {g}: piececounts={pcs}, selected best={pcs[best_idx]} worst={pcs[worst_idx]}")
             else:
                 print(f"Group {g}: piececounts={pcs}, diff={max(pcs) - min(pcs)} < 2, skipping")
                 # 导出最佳局的历史方块到重玩目录
