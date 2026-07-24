@@ -65,7 +65,7 @@ def _default_state():
             "ppo_piececount": 0,       # EMA: 玩家平均方块数
             "ppo_removedlines": 0,     # EMA: 玩家平均消行数
             "ppo_steps": 0,            # EMA: 玩家平均步数
-            "ppo_piececount_min": 999999,  # EMA: 组内最少方块数
+            "ppo_piececount_min": 9,   # EMA: 组内最少方块数
             "ppo_piececount_max": 0,       # EMA: 组内最多方块数
             "ppo_removedlines_best": 0,    # 历史最高消行数
             "ppo_piececount_best": 0,      # 历史最高方块数
