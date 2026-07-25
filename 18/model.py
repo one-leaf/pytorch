@@ -221,9 +221,9 @@ class PolicyNet():
         kl_div = (probs_new * (log_probs_safe - log_probs_old_t)).sum(dim=-1).mean()
 
         # ── 熵正则化 ─────────────────────────────────────────────
-        # entropy_weight=0.5: 强探索激励，维持 entropy 在 1.0-1.6
+        # entropy_weight=0.1: 允许策略收敛，专注消行
         # 5 个动作最大 entropy = log(5) ≈ 1.61
-        # 0.5 * 1.61 = 0.8，与 policy_loss 量级可比
+        # 0.1 * 1.61 = 0.16，对 loss 影响温和
         # 0.3 接近完全确定性
         entropy = -(probs_new * log_probs_safe).sum(dim=-1).mean()
 
