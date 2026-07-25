@@ -19,7 +19,9 @@ GAME_WIDTH, GAME_HEIGHT = 10, 20
 
 class PPODataset(torch.utils.data.Dataset):
     """PPO 数据集，每个 pkl 包含一局游戏的所有 step:
-    (state, ref_prob, log_prob, action, prev_action, game_id, R)
+    (state, ref_prob, log_prob, action, prev_action, R, is_terminal)
+    game_id 由文件名推导，不在 pkl 中存储
+    load_data 后扩展为 8 元素: (state, ref_prob, log_prob, action, prev_action, R, is_terminal, G)
     """
     def __init__(self, data_dir, max_files, min_new_files, n_train_times=3):
         self.data_dir = data_dir
