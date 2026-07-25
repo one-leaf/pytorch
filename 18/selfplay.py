@@ -274,12 +274,15 @@ class PPOSelfPlay():
                 for step_idx, step_data in enumerate(trajectory):
                     landed, removed = step_results[step_idx]
                     is_terminal = 1 if step_idx == n_steps - 1 else 0
+                    r_step = 0.0
+                    if landed:
+                        r_step = -0.01                         # 每步落地小惩罚：鼓励速战速决
+                        if removed == 1:   r_step = 1.0        # 消1行
+                        elif removed == 2: r_step = 3.0        # 消2行
+                        elif removed == 3: r_step = 5.0        # 消3行
+                        elif removed >= 4: r_step = 8.0        # 消4行（Tetris）
                     if is_terminal:
-                        r_step = float(agent.piececount)  # 最后一步：按方块数
-                    else:
-                        r_step = 0.0
-                        if landed:
-                            r_step = 0.0 if removed == 0 else 0.1
+                        r_step += float(agent.piececount) * 0.1  # 终端奖励大幅削弱
                     game_steps.append((
                         step_data["state"], step_data["ref_prob"],
                         step_data["log_prob"], step_data["action"],
