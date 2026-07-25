@@ -129,30 +129,19 @@ class PolicyNet():
         spread = (values * taus).sum(-1) - (values * (1 - taus)).sum(-1)  # [B]
         spread = spread.clamp(min=0.01)
 
-        # ── 逐步奖励归一化 ──────────────────────────────────────────
-        # R_batch 现在是每步即时奖励（方块落地=1, 其他=0）
-        r_step = (R_batch - r_mean) / (r_std + 1e-3)
-        r_step = torch.clamp(r_step, -5.0, 5.0)
-
         # ── GAE: 按游戏分组计算步级别优势 ──────────
         B = v_scalar.shape[0]
-        advantages = torch.zeros(B, device=self.device)
-        v_targets = G_batch  # 使用预计算的完整 G_t
+        advantages = torch.zeros(B, device=self.device)  # GAE advantage
 
         for gid in set(game_ids):
             idx = [i for i, g in enumerate(game_ids) if g == gid]
             n = len(idx)
 
-            if n <= 1:
-                # 单步：advantage = G - V(s)
-                advantages[idx[0]] = G_batch[idx[0]] - v_scalar[idx[0]].detach()
-                continue
-
             V = v_scalar[idx]
 
             # GAE advantage: A_t = δ_t + γλ·δ_{t+1} + (γλ)²·δ_{t+2} + ...
             # δ_t = r_t + γ·V(s_{t+1}) - V(s_t)
-            rewards = r_step[idx]
+            rewards = R_batch[idx]  # 使用原始奖励，和 V(s) 尺度一致
             V_next = torch.zeros(n, device=self.device)
             V_next[:-1] = V[1:].detach()
             # 最后一步：游戏结束 → V_next=0；batch截断 → bootstrap V(s)
@@ -170,13 +159,13 @@ class PolicyNet():
             # if gid == list(set(game_ids))[0]:
             #     print(f"\n=== Game {gid} ({n} steps) ===")
             #     print(f"r_t:     {rewards.cpu().numpy()}")
-            #     print(f"v_target:{v_targets[idx].cpu().numpy()}")
+            #     print(f"G_batch:{G_batch[idx].cpu().numpy()}")
             #     print(f"V(s):    {V.detach().cpu().numpy()}")
             #     print(f"adv:     {gae.cpu().numpy()}")
 
-        # G 统计（折扣回报 v_targets）
-        g_mean = v_targets.mean().item()
-        g_std = v_targets.std().item()
+        # G 统计（折扣回报 G_batch）
+        g_mean = G_batch.mean().item()
+        g_std = G_batch.std().item()
 
         # 全局标准化
         adv_mean = advantages.mean()
@@ -192,13 +181,14 @@ class PolicyNet():
         ratios = torch.exp(log_ratio)
         surr1 = ratios * advantages
         surr2 = torch.clamp(ratios, 1 - clip_eps, 1 + clip_eps) * advantages
-        # 步重要性加权：spread 大的步骤获得更大梯度
+
+        # 重要性加权：spread 大的步骤获得更大梯度
         step_weight = spread / spread.mean().detach()
         step_weight = (0.5 + step_weight.clamp(max=1.5)).detach()  # [B]
         policy_loss = -(torch.min(surr1, surr2) * step_weight).mean()
 
         # ── Value loss (Quantile Huber: 分位数回归) ───────────────
-        target_exp = v_targets.unsqueeze(1).expand_as(values)  # [B, N]
+        target_exp = G_batch.unsqueeze(1).expand_as(values)  # [B, N]
         diff = values - target_exp
         q_weights = torch.where(diff > 0, taus.unsqueeze(0), 1 - taus.unsqueeze(0))
         value_loss = (q_weights * F.smooth_l1_loss(values, target_exp, reduction='none')).mean()
@@ -237,7 +227,6 @@ class PolicyNet():
                    f"kl_div={kl_div.item():.6f} entropy={entropy.item():.6f} loss={loss.item():.6f} | "
                    f"v_scalar=[{v_scalar.min().item():.4f}, {v_scalar.max().item():.4f}] "
                    f"spread=[{spread.min().item():.4f}, {spread.max().item():.4f}] "
-                   f"r_step=[{r_step.min().item():.4f}, {r_step.max().item():.4f}] "
                    f"adv=[{advantages.min().item():.4f}, {advantages.max().item():.4f}] | "
                    f"nan_params={nan_params[:10]}")
             print(f"\n[NaN GRAD] {msg}")
