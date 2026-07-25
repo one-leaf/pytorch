@@ -89,8 +89,8 @@ class PolicyNet():
         
 
     # PPO 训练步骤（带 Value Head + GAE 信用分配 + 分位数价值）
-    def train_step_ppo(self, state_batch, ref_probs, log_probs_old, action_batch, _mask_batch, prev_action_batch,
-                        game_ids, R_batch, is_terminal_batch, G_batch, lr, r_mean, r_std,
+    def train_step_ppo(self, state_batch, log_probs_old, action_batch, prev_action_batch,
+                        game_ids, R_batch, is_terminal_batch, G_batch, lr,
                         clip_eps=0.2, beta=0.05, entropy_weight=0.01,
                         gamma=0.99, lam=0.95, vf_coef=0.5):
         """PPO + V(s) 训练步骤（分位数价值头 + 步重要性加权）
@@ -111,6 +111,7 @@ class PolicyNet():
         action_batch = torch.LongTensor(action_batch).to(self.device)
         prev_action_batch = torch.LongTensor(prev_action_batch).to(self.device)
         game_ids = game_ids.tolist() if hasattr(game_ids, 'tolist') else list(game_ids)
+
         R_batch = torch.FloatTensor(R_batch).to(self.device)
         is_terminal_batch = torch.FloatTensor(is_terminal_batch).to(self.device)
         G_batch = torch.FloatTensor(G_batch).to(self.device)
@@ -163,11 +164,7 @@ class PolicyNet():
             #     print(f"V(s):    {V.detach().cpu().numpy()}")
             #     print(f"adv:     {gae.cpu().numpy()}")
 
-        # G 统计（折扣回报 G_batch）
-        g_mean = G_batch.mean().item()
-        g_std = G_batch.std().item()
-
-        # 全局标准化
+        # 全局标准化 advantages
         adv_mean = advantages.mean()
         adv_std = advantages.std().clamp(min=1e-3)
         advantages = (advantages - adv_mean) / adv_std
@@ -232,7 +229,7 @@ class PolicyNet():
             print(f"\n[NaN GRAD] {msg}")
             log_nan(msg)
             self.optimizer.zero_grad()
-            return torch.tensor(0.0), torch.tensor(0.0), torch.tensor(0.0), torch.tensor(float('nan')), 0.0, 0.0
+            return torch.tensor(0.0), torch.tensor(0.0), torch.tensor(0.0), torch.tensor(float('nan'))
 
         self.optimizer.step()
 
@@ -240,7 +237,7 @@ class PolicyNet():
         predicted = torch.argmax(log_probs, dim=1)
         accuracy = (predicted == action_batch).float().mean()
 
-        return accuracy.item(), kl_div.item(), entropy.item(), value_loss.item(), g_mean, g_std
+        return accuracy.item(), kl_div.item(), entropy.item(), value_loss.item()
 
     # 保存模型
     def save_model(self, model_file):

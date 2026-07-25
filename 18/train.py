@@ -109,47 +109,25 @@ class PPODataset(torch.utils.data.Dataset):
                 with open(fn, "rb") as f:
                     steps = pickle.load(f)
 
-                # 验证数据
+                # 格式: (state, ref_prob, log_prob, action, prev_action, R, is_terminal)
+                n_steps = len(steps)
                 for step in steps:
-                    state, ref_prob = step[0], step[1]
-                    assert state.shape == (2, 20, 10), f'error: state shape {state.shape}'
-                    assert ref_prob.shape == (5,), f'error: ref_prob shape {ref_prob.shape}'
-
-                # 兼容多种 pkl 格式：
-                # 旧格式(8元素): (state, ref_prob, log_prob, action, prev_action, game_id, R, is_terminal)
-                # 旧格式(7元素): (state, ref_prob, log_prob, action, prev_action, game_id, R)
-                # 新格式(7元素): (state, ref_prob, log_prob, action, prev_action, R, is_terminal)
-                # 判断方法：step[5] 是字符串 → 有 game_id；是数字 → 无 game_id
-                has_game_id = isinstance(steps[0][5], str) if steps else False
-
-                # 找到 R 的索引
-                r_idx = 6 if has_game_id else 5
-
-                # 验证 R
-                for step in steps:
-                    assert not np.isnan(step[r_idx]), f'error: R is Nan'
+                    assert step[0].shape == (2, 20, 10), f'error: state shape {step[0].shape}'
+                    assert step[1].shape == (5,), f'error: ref_prob shape {step[1].shape}'
+                    assert not np.isnan(step[5]), f'error: R is Nan'
 
                 # 预计算这局游戏的 G_t（折扣回报）
-                n_steps = len(steps)
                 g_values = np.zeros(n_steps)
-                g_values[-1] = steps[-1][r_idx]
+                g_values[-1] = steps[-1][5]
                 for t in range(n_steps - 2, -1, -1):
-                    g_values[t] = steps[t][r_idx] + gamma * g_values[t + 1]
+                    g_values[t] = steps[t][5] + gamma * g_values[t + 1]
 
-                # 统一为 8 元素（用文件名作为 game_id）
-                # (state, ref_prob, log_prob, action, prev_action, R, is_terminal, G)
-                game_id = os.path.basename(fn)
-                steps_unified = []
+                # 扩展为 8 元素: (state, ref_prob, log_prob, action, prev_action, R, is_terminal, G)
+                steps_out = []
                 for i, step in enumerate(steps):
-                    state, ref_prob, log_prob, action, prev_action = step[:5]
-                    R = step[r_idx]
-                    if has_game_id:
-                        is_terminal = step[7] if len(step) >= 8 else (1 if i == n_steps - 1 else 0)
-                    else:
-                        is_terminal = step[6] if len(step) >= 7 else (1 if i == n_steps - 1 else 0)
-                    steps_unified.append((state, ref_prob, log_prob, action, prev_action, R, is_terminal, g_values[i]))
+                    steps_out.append((*step[:7], g_values[i]))
 
-                self.data[fn] = steps_unified
+                self.data[fn] = steps_out
             except Exception as e:
                 print(f"file {fn} error: {e}")
                 if os.path.exists(fn):
@@ -157,12 +135,47 @@ class PPODataset(torch.utils.data.Dataset):
                 self.file_list.remove(fn)
 
         Rs = np.array([step[5] for steps in self.data.values() for step in steps])
+        Gs = np.array([step[7] for steps in self.data.values() for step in steps])
         if len(Rs) > 0:
-            self.r_mean = float(Rs.mean())
-            self.r_std = max(float(Rs.std()), 1e-3)
-            print(f"R stats: min={Rs.min():.1f} mean={self.r_mean:.2f} std={self.r_std:.2f} max={Rs.max():.1f}")
+            # 保存原始统计用于跟踪
+            self.r_mean_raw = float(Rs.mean())
+            self.r_std_raw = max(float(Rs.std()), 1e-3)
+            self.g_mean_raw = float(Gs.mean())
+            self.g_std_raw = max(float(Gs.std()), 1e-3)
+            print(f"R raw: min={Rs.min():.1f} mean={self.r_mean_raw:.2f} std={self.r_std_raw:.2f} max={Rs.max():.1f}")
+            print(f"G raw: min={Gs.min():.1f} mean={self.g_mean_raw:.2f} std={self.g_std_raw:.2f} max={Gs.max():.1f}")
+
+            # 直接写入 status（不平滑）
+            status = read_status_file()
+            m = status["metrics"]
+            m["r_mean_raw"] = round(self.r_mean_raw, 3)
+            m["r_std_raw"]  = round(self.r_std_raw, 3)
+            m["g_mean_raw"] = round(self.g_mean_raw, 3)
+            m["g_std_raw"]  = round(self.g_std_raw, 3)
+            save_status_file(status)
+
+            # 归一化所有 R 和 G（数据集级别 z-score）
+            r_mean, r_std = self.r_mean_raw, self.r_std_raw
+            g_mean, g_std = self.g_mean_raw, self.g_std_raw
+            for fn_key in self.data:
+                self.data[fn_key] = [
+                    (s[0], s[1], s[2], s[3], s[4],
+                     (s[5] - r_mean) / r_std,
+                     s[6],
+                     (s[7] - g_mean) / g_std)
+                    for s in self.data[fn_key]
+                ]
+            self.r_mean = 0.0
+            self.r_std = 1.0
+            self.g_mean = 0.0
+            self.g_std = 1.0
+            print(f"R/G normalized: r→(0,1) g→(0,1)")
         else:
-            self.r_mean = 15.0
+            self.r_mean_raw = 0.0
+            self.r_std_raw = 1.0
+            self.g_mean_raw = 0.0
+            self.g_std_raw = 1.0
+            self.r_mean = 0.0
             self.r_std = 1.0
 
         self._flat_index = [(fn, i) for fn in self.file_list for i in range(len(self.data[fn]))]
@@ -212,17 +225,16 @@ class PPOTrain():
 
     def policy_update(self, sample_data):
         """PPO 策略更新（带 GAE 信用分配）"""
-        state_batch, ref_probs_batch, log_probs_old_batch, actions_batch, prev_actions_batch, game_ids_batch, R_batch, is_terminal_batch, G_batch = sample_data
-        acc, kl, entropy, value_loss, g_mean, g_std = self.policy_net.train_step_ppo(
-            state_batch, ref_probs_batch, log_probs_old_batch, actions_batch, None, prev_actions_batch,
+        state_batch, _ref_probs_batch, log_probs_old_batch, actions_batch, prev_actions_batch, game_ids_batch, R_batch, is_terminal_batch, G_batch = sample_data
+        acc, kl, entropy, value_loss = self.policy_net.train_step_ppo(
+            state_batch, log_probs_old_batch, actions_batch, prev_actions_batch,
             game_ids_batch, R_batch, is_terminal_batch, G_batch,
             self.learn_rate * self.lr_multiplier,
-            self.dataset.r_mean, self.dataset.r_std,
             clip_eps=self.ppo_clip_eps,
             beta=self.ppo_beta,
             entropy_weight=self.ppo_entropy_weight
         )
-        return acc, kl, entropy, value_loss, g_mean, g_std
+        return acc, kl, entropy, value_loss
 
     def run(self):
         """启动 PPO 训练"""
@@ -281,35 +293,29 @@ class PPOTrain():
             print(f"batch_size: {self.batch_size}, lr_multiplier: {self.lr_multiplier}, learn_rate: {self.learn_rate * self.lr_multiplier}")
 
             # 训练循环（n_epochs 个 epoch，保证每局被训练 n_epochs 次）
-            _sum_acc = _sum_kl = _sum_ent = _sum_vl = _sum_g_mean = _sum_g_std = 0.0
+            _sum_acc = _sum_kl = _sum_ent = _sum_vl = 0.0
             _num_batches = 0
             for epoch in range(self.n_epochs):
                 training_loader = torch.utils.data.DataLoader(
                     self.dataset, batch_size=self.batch_size, shuffle=False, num_workers=0
                 )
-                _epoch_acc = _epoch_kl = _epoch_ent = _epoch_vl = _epoch_g_mean = _epoch_g_std = 0.0
+                _epoch_acc = _epoch_kl = _epoch_ent = _epoch_vl = 0.0
                 _epoch_batches = 0
                 for i, data in enumerate(training_loader):
-                    acc, kl, entropy, value_loss, g_mean, g_std = self.policy_update(data)
+                    acc, kl, entropy, value_loss = self.policy_update(data)
                     _sum_acc += acc
                     _sum_kl += kl
                     _sum_ent += entropy
                     _sum_vl += value_loss
-                    _sum_g_mean += g_mean
-                    _sum_g_std += g_std
                     _num_batches += 1
                     _epoch_acc += acc
                     _epoch_kl += kl
                     _epoch_ent += entropy
                     _epoch_vl += value_loss
-                    _epoch_g_mean += g_mean
-                    _epoch_g_std += g_std
                     _epoch_batches += 1
                     if i % 500 == 0:
-                        print(f"Train {i} {self.batch_size*i/len(self.dataset)*100:.1f}%", 
-                              "acc:", acc, "kl:", kl, "entropy:", entropy, "vloss:", value_loss,
-                              "g_mean:", round(g_mean, 3), "g_std:", round(g_std, 3),
-                              "r_mean:", round(self.dataset.r_mean, 2), "r_std:", round(self.dataset.r_std, 2))
+                        print(f"Train {i} {self.batch_size*i/len(self.dataset)*100:.1f}%",
+                              "acc:", acc, "kl:", kl, "entropy:", entropy, "vloss:", value_loss)
 
                     if epoch == 0 and i == 0:
                         state_batch, ref_probs_batch, log_probs_old_batch, actions_batch, prev_actions_batch, game_ids_batch, R_batch, _is_terminal, G_batch = data
@@ -334,18 +340,12 @@ class PPOTrain():
                 e_kl  = _epoch_kl  / max(_epoch_batches, 1)
                 e_ent = _epoch_ent / max(_epoch_batches, 1)
                 e_vl  = _epoch_vl  / max(_epoch_batches, 1)
-                e_g_mean = _epoch_g_mean / max(_epoch_batches, 1)
-                e_g_std = _epoch_g_std / max(_epoch_batches, 1)
-                print(f"epoch {epoch+1} done: acc={e_acc:.4f} kl={e_kl:.5f} entropy={e_ent:.4f} vloss={e_vl:.4f} g_mean={e_g_mean:.3f} g_std={e_g_std:.3f}")
+                print(f"epoch {epoch+1} done: acc={e_acc:.4f} kl={e_kl:.5f} entropy={e_ent:.4f} vloss={e_vl:.4f}")
 
             avg_acc = _sum_acc / max(_num_batches, 1)
             avg_kl  = _sum_kl  / max(_num_batches, 1)
             avg_ent = _sum_ent / max(_num_batches, 1)
             avg_vl  = _sum_vl  / max(_num_batches, 1)
-            avg_g_mean = _sum_g_mean / max(_num_batches, 1)
-            avg_g_std = _sum_g_std / max(_num_batches, 1)
-            avg_r_mean = self.dataset.r_mean
-            avg_r_std = self.dataset.r_std
 
             self.policy_net.save_model(model_file)
 
@@ -390,10 +390,6 @@ class PPOTrain():
             m["train_kl"]      = round(m.get("train_kl",      0) * (1 - alpha) + avg_kl  * alpha, 5)
             m["train_entropy"] = round(m.get("train_entropy", 0) * (1 - alpha) + avg_ent * alpha, 5)
             m["train_vloss"]   = round(m.get("train_vloss",   0) * (1 - alpha) + avg_vl  * alpha, 5)
-            m["g_mean"]        = round(m.get("g_mean",        0) * (1 - alpha) + avg_g_mean * alpha, 2)
-            m["g_std"]         = round(m.get("g_std",         0) * (1 - alpha) + avg_g_std * alpha, 2)
-            m["r_mean"]        = round(avg_r_mean, 3)
-            m["r_std"]         = round(avg_r_std, 3)
             # lr_multiplier 调整使用 EMA 平滑后的 train_kl
             set_status_value(status, "kl", avg_kl, alpha)
             total_kl = status["training"]["kl"]
@@ -408,7 +404,7 @@ class PPOTrain():
             status["counters"]["train"] += 1
             status["counters"]["_train"] += 1
             save_status_file(status)
-            print(f"train EMA: acc={m['train_acc']:.4f} kl={m['train_kl']:.5f} entropy={m['train_entropy']:.4f} vloss={m['train_vloss']:.4f} r_mean={m['r_mean']:.2f} r_std={m['r_std']:.2f}")
+            print(f"train EMA: acc={m['train_acc']:.4f} kl={m['train_kl']:.5f} entropy={m['train_entropy']:.4f} vloss={m['train_vloss']:.4f}")
 
             print(f"kl:{kl:.6f} vs {self.kl_targ} lr_multiplier:{self.lr_multiplier} "
                   f"lr:{self.learn_rate * self.lr_multiplier}")
