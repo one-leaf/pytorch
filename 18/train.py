@@ -296,6 +296,7 @@ class PPOTrain():
             _sum_acc = _sum_kl = _sum_ent = _sum_vl = 0.0
             _num_batches = 0
             for epoch in range(self.n_epochs):
+                # ⚠️ 必须 shuffle=False: GAE 要求同一 game 的步骤按时间顺序排列
                 training_loader = torch.utils.data.DataLoader(
                     self.dataset, batch_size=self.batch_size, shuffle=False, num_workers=0
                 )

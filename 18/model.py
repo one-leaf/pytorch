@@ -112,6 +112,26 @@ class PolicyNet():
         prev_action_batch = torch.LongTensor(prev_action_batch).to(self.device)
         game_ids = game_ids.tolist() if hasattr(game_ids, 'tolist') else list(game_ids)
 
+        # ── 参数校验 ─────────────────────────────────────────────
+        B = state_batch.shape[0]
+        assert state_batch.shape == (B, 2, 20, 10), f"state shape mismatch: {state_batch.shape}"
+        assert not torch.isnan(state_batch).any(), "state_batch contains NaN"
+        assert action_batch.min() >= 0 and action_batch.max() < self.output_size, \
+            f"action out of [0,{self.output_size}): [{action_batch.min()},{action_batch.max()}]"
+        assert prev_action_batch.min() >= 0 and prev_action_batch.max() < self.output_size, \
+            f"prev_action out of [0,{self.output_size}): [{prev_action_batch.min()},{prev_action_batch.max()}]"
+        assert log_probs_old_t.shape == (B, self.output_size), \
+            f"log_probs_old shape mismatch: {log_probs_old_t.shape}"
+        # game_ids 同一游戏的步骤必须在 batch 中连续（shuffle=False 保证）
+        seen = set()
+        prev_gid = None
+        for gid in game_ids:
+            if gid != prev_gid:
+                assert gid not in seen, \
+                    f"game_id '{gid}' appears non-contiguously in batch — DataLoader must use shuffle=False"
+                seen.add(gid)
+                prev_gid = gid
+
         R_batch = torch.FloatTensor(R_batch).to(self.device)
         is_terminal_batch = torch.FloatTensor(is_terminal_batch).to(self.device)
         G_batch = torch.FloatTensor(G_batch).to(self.device)
@@ -125,10 +145,11 @@ class PolicyNet():
         v_scalar = values[:, N_q // 2]  # [B] median
         v_scalar = torch.clamp(v_scalar, -10.0, 10.0)
 
-        # 分位数 spread：条件方差的代理，衡量步重要性
+        # 分位数 spread：分位数方差，衡量 V(s) 估计的不确定性
+        # 方差越大 → 该步价值越不确定 → 越值得投入梯度
         taus = (torch.arange(N_q, device=self.device) + 0.5) / N_q  # [N]
-        spread = (values * taus).sum(-1) - (values * (1 - taus)).sum(-1)  # [B]
-        spread = spread.clamp(min=0.01)
+        spread = ((values - v_scalar.unsqueeze(1)) ** 2).sum(-1)   # [B]  Σ(Q(τ)-median)²
+        spread = spread.clamp(min=1e-4)  # 防止完全确定时除零
 
         # ── GAE: 按游戏分组计算步级别优势 ──────────
         B = v_scalar.shape[0]
@@ -200,9 +221,9 @@ class PolicyNet():
         kl_div = (probs_new * (log_probs_safe - log_probs_old_t)).sum(dim=-1).mean()
 
         # ── 熵正则化 ─────────────────────────────────────────────
-        # 1.0 2-3 个动作在竞争
-        # 0.8 让策略保持 2-3 个动作的竞争。这样既有堆叠能力，又有机会探索消行
-        # 0.5 基本确定性，探索很弱
+        # entropy_weight=0.5: 强探索激励，维持 entropy 在 1.0-1.6
+        # 5 个动作最大 entropy = log(5) ≈ 1.61
+        # 0.5 * 1.61 = 0.8，与 policy_loss 量级可比
         # 0.3 接近完全确定性
         entropy = -(probs_new * log_probs_safe).sum(dim=-1).mean()
 
