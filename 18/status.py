@@ -80,10 +80,10 @@ def _default_state():
             "train_kl": 0,
             "train_entropy": 0,
             "train_vloss": 0,
-            "g_mean": 0,
-            "g_std": 0,
-            "r_mean": 0,
-            "r_std": 0,
+            "g_mean_raw": 0,
+            "g_std_raw": 0,
+            "r_mean_raw": 0,
+            "r_std_raw": 0,
         },
         "training": {"kl": 1e-2, "lr_multiplier": 1},
         "_accum": {"_sum_piececount": 0, "_sum_removedlines": 0, "_sum_steps": 0},
@@ -116,7 +116,7 @@ def _migrate(state: dict[str, Any]):
               "test_piececount", "test_removedlines", "test_steps",
               "test_piececount_best", "test_removedlines_best",
               "train_acc", "train_kl", "train_entropy", "train_vloss",
-              "g_mean", "g_std", "r_mean", "r_std"]:
+              "g_mean_raw", "g_std_raw", "r_mean_raw", "r_std_raw"]:
         if k in old:
             state["metrics"][k] = old.pop(k)
     for k in ("kl", "lr_multiplier"):
@@ -178,10 +178,10 @@ def _append_history(state: dict[str, Any]):
         "train_kl": m.get("train_kl", 0),
         "train_entropy": m.get("train_entropy", 0),
         "train_vloss": m.get("train_vloss", 0),
-        "g_mean": m.get("g_mean", 0),
-        "g_std": m.get("g_std", 0),
-        "r_mean": m.get("r_mean", 0),
-        "r_std": m.get("r_std", 0),
+        "g_mean_raw": m.get("g_mean_raw", 0),
+        "g_std_raw": m.get("g_std_raw", 0),
+        "r_mean_raw": m.get("r_mean_raw", 0),
+        "r_std_raw": m.get("r_std_raw", 0),
         # training
         "kl": tr.get("kl", 0),
         "lr_multiplier": tr.get("lr_multiplier", 1),
