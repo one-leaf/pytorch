@@ -50,7 +50,7 @@ class PPOSelfPlay():
             probs = torch.exp(log_probs / temperature).cpu().numpy()
 
             if i not in greedy_indices:
-                p = 0.98
+                p = 0.75
                 dirichlet = np.random.dirichlet(0.3 * np.ones(GAME_ACTIONS_NUM))
                 probs = p * probs + (1.0 - p) * dirichlet
                 probs = probs / np.sum(probs)
@@ -62,11 +62,11 @@ class PPOSelfPlay():
                     probs = availables.astype(np.float32)
                     probs_sum = probs.sum()
                 probs = probs / probs_sum
-                if np.random.rand() < 0.25:
-                    _probs = availables/availables.sum()
-                    action = np.random.choice(GAME_ACTIONS_NUM, p=_probs)
-                else:
-                    action = np.random.choice(GAME_ACTIONS_NUM, p=probs)
+                # if np.random.rand() < 0.25:
+                #     _probs = availables/availables.sum()
+                #     action = np.random.choice(GAME_ACTIONS_NUM, p=_probs)
+                # else:
+                action = np.random.choice(GAME_ACTIONS_NUM, p=probs)
             else:
                 availables = agent.availables
                 probs = probs * availables.astype(np.float32)
