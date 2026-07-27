@@ -62,7 +62,11 @@ class PPOSelfPlay():
                     probs = availables.astype(np.float32)
                     probs_sum = probs.sum()
                 probs = probs / probs_sum
-                action = np.random.choice(GAME_ACTIONS_NUM, p=probs)
+                if np.random.rand() < 0.1:
+                    _probs = availables/availables.sum()
+                    action = np.random.choice(GAME_ACTIONS_NUM, p=_probs)
+                else:
+                    action = np.random.choice(GAME_ACTIONS_NUM, p=probs)
             else:
                 availables = agent.availables
                 probs = probs * availables.astype(np.float32)
