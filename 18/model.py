@@ -140,9 +140,11 @@ class PolicyNet():
         log_probs, values = self.net(state_batch, prev_action_batch)
         # values: [B, N] quantiles
 
-        # 中位数作为标量 V(s) 用于 GAE
+        # 中间 1/2 分位数均值作为标量 V(s) 用于 GAE（trimmed mean，抗极端分位数扰动）
         N_q = values.shape[1]
-        v_scalar = values[:, N_q // 2]  # [B] median
+        lo = N_q // 4          # index 2
+        hi = N_q - N_q // 4    # index 6
+        v_scalar = values[:, lo:hi].mean(dim=1)  # [B]
         v_scalar = torch.clamp(v_scalar, -10.0, 10.0)
 
         # 分位数 spread：分位数方差，衡量 V(s) 估计的不确定性
