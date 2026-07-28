@@ -67,6 +67,8 @@ class PPOSelfPlay():
                 #     action = np.random.choice(GAME_ACTIONS_NUM, p=_probs)
                 # else:
                 action = np.random.choice(GAME_ACTIONS_NUM, p=probs)
+                if action == 3 and availables.sum() > 1:
+                    action = np.random.choice(GAME_ACTIONS_NUM, p=availables/availables.sum())
             else:
                 availables = agent.availables
                 probs = probs * availables.astype(np.float32)
