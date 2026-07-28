@@ -214,7 +214,7 @@ class PPOSelfPlay():
                 pieces_list = [random.choice(['s', 'z', 'i', 'o', 'l', 'j', 't']) for _ in range(int(avg_pc))]                
             pieces_list += [random.choice(['s', 'z', 'i', 'o', 'l', 'j', 't']) for _ in range(1000)]    
 
-            # 并行玩 8 局，取 max 和 min
+            # 并行玩 8 局（game 0 贪婪测试，game 1-7 带 Dirichlet 噪声探索）
             agents, trajectories, step_results = self.play_games_parallel(
                 n_games=8, pieces_list=pieces_list, temperature=1.0, greedy_indices={0}
             )
@@ -243,30 +243,20 @@ class PPOSelfPlay():
 
             save_status_file(state)
 
-            # 判断是否保留：最大最小相差 2 以上则只采集最大局和最小局
-            if max(pcs) - min(pcs) >= 2:
-                best_idx = max(range(len(pcs)), key=lambda i: pcs[i])
-                worst_idx = min(range(len(pcs)), key=lambda i: pcs[i])
-                group_agents = [(agents[i], trajectories[i], step_results[i]) for i in [best_idx, worst_idx]]
-                # print(f"Group {g}: piececounts={pcs}, selected best={pcs[best_idx]} worst={pcs[worst_idx]}")
-            else:
-                print(f"Group {g}: piececounts={pcs}, diff={max(pcs) - min(pcs)} < 2, skipping")
-                # 导出最佳局的历史方块到重玩目录
-                best_idx = max(range(len(pcs)), key=lambda i: pcs[i])
-                best_pieces = agents[best_idx].piecehis
-                if len(best_pieces) > 10:
-                    filename = f"{len(best_pieces):05d}-{agents[best_idx].removedlines:05d}-{''.join(best_pieces)[:50]}.pkl"
-                    savefile = os.path.join(replay_dir, filename)
-                    with open(savefile, "wb") as fn:
-                        pickle.dump(best_pieces, fn)
-                continue
+            # 保存所有探索局（game 1-7）用于训练，game 0 为贪婪测试局不保存
+            print(f"Group {g}: all_piececounts={pcs} lines={[a.removedlines for a in agents]}")
 
-            # 游戏级奖励：piececount + 消行奖励
-            N_arr = np.array([agent.piececount for agent, _, _ in group_agents])
-            L_arr = np.array([agent.removedlines for agent, _, _ in group_agents])
+            # 导出最佳局的历史方块到重玩目录
+            best_idx = max(range(len(pcs)), key=lambda i: pcs[i])
+            best_pieces = agents[best_idx].piecehis
+            if len(best_pieces) > 10:
+                filename = f"{len(best_pieces):05d}-{agents[best_idx].removedlines:05d}-{''.join(best_pieces)[:50]}.pkl"
+                savefile = os.path.join(replay_dir, filename)
+                with open(savefile, "wb") as fn:
+                    pickle.dump(best_pieces, fn)
 
-            # 打印信息
-            print(f"Group {g}: all_piececounts={pcs} selected={N_arr} lines={L_arr}")
+            # 所有探索局（game 1-7）都用于训练
+            group_agents = [(agents[i], trajectories[i], step_results[i]) for i in range(1, len(agents))]
 
             # 保存每局结果：一局一个 pkl 文件（包含所有 step）
             filetime = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
@@ -274,7 +264,7 @@ class PPOSelfPlay():
                 game_counter += 1
 
                 # 每步存储: (state, ref_prob, log_prob, action, prev_action, r_step, is_terminal)
-                # r_step: 中间步 落地未消行 -0.1，落地消行 +0.1；最后一步按方块数给奖励
+                # r_step: 落地 +0.01；消1/2/3/4行 +1/3/5/8；终止 -10.0
                 n_steps = len(trajectory)
                 game_steps = []
                 for step_idx, step_data in enumerate(trajectory):
