@@ -206,9 +206,9 @@ class PPOSelfPlay():
             else:
                 pieces_list = []
                 
-            # 并行玩 8 局（game 0 贪婪测试，game 1-7 带 Dirichlet 噪声探索）
+            # 并行玩 16 局（game 0 贪婪测试，game 1-7 带 Dirichlet 噪声探索）
             agents, trajectories, step_results = self.play_games_parallel(
-                n_games=8, pieces_list=pieces_list, temperature=1.0, greedy_indices={0}
+                n_games=16, pieces_list=pieces_list, temperature=1.0, greedy_indices={0}
             )
 
             pcs = [a.piececount for a in agents]
