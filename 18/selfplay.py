@@ -206,7 +206,7 @@ class PPOSelfPlay():
             else:
                 pieces_list = []
                 
-            # 并行玩 16 局（game 0 贪婪测试，game 1-7 带 Dirichlet 噪声探索）
+            # 并行玩 16 局（game 0 贪婪测试，game 1-15 带 Dirichlet 噪声探索）
             agents, trajectories, step_results = self.play_games_parallel(
                 n_games=16, pieces_list=pieces_list, temperature=1.0, greedy_indices={0}
             )
@@ -235,7 +235,7 @@ class PPOSelfPlay():
 
             save_status_file(state)
 
-            # 保存所有探索局（game 1-7）用于训练，game 0 为贪婪测试局不保存
+            # 保存所有探索局（game 1-15）用于训练，game 0 为贪婪测试局不保存
             print(f"Group {g}: all_piececounts={pcs} lines={[a.removedlines for a in agents]}")
 
             # 导出最佳局的历史方块到重玩目录
@@ -247,7 +247,7 @@ class PPOSelfPlay():
                 with open(savefile, "wb") as fn:
                     pickle.dump(best_pieces, fn)
 
-            # 所有探索局（game 1-7）都用于训练
+            # 所有探索局（game 1-15）都用于训练
             group_agents = [(agents[i], trajectories[i], step_results[i]) for i in range(1, len(agents))]
 
             # 保存每局结果：一局一个 pkl 文件（包含所有 step）
