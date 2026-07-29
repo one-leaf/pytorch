@@ -202,12 +202,10 @@ class PPOSelfPlay():
             # 确定本局方块序列：有重玩数据则用重玩，否则随机生成
             if len(his_pieces) > 0:
                 pieces_list = his_pieces
+                pieces_list += [random.choice(['s', 'z', 'i', 'o', 'l', 'j', 't']) for _ in range(1000)]    
             else:
-                status = read_status_file()
-                avg_pc = status["metrics"].get("ppo_piececount", 50)
-                pieces_list = [random.choice(['s', 'z', 'i', 'o', 'l', 'j', 't']) for _ in range(int(avg_pc))]                
-            pieces_list += [random.choice(['s', 'z', 'i', 'o', 'l', 'j', 't']) for _ in range(1000)]    
-
+                pieces_list = []
+                
             # 并行玩 8 局（game 0 贪婪测试，game 1-7 带 Dirichlet 噪声探索）
             agents, trajectories, step_results = self.play_games_parallel(
                 n_games=8, pieces_list=pieces_list, temperature=1.0, greedy_indices={0}
