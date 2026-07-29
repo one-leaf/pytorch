@@ -222,7 +222,7 @@ class PPOTrain():
         # PPO 超参数
         self.ppo_clip_eps = 0.2
         self.ppo_beta = 0.05            # KL 惩罚系数，beta*KL=0.05*0.4=0.02，与 policy_loss 可比
-        self.ppo_entropy_weight = 0.02  # 熵正则，防止 entropy 过快坍缩
+        self.ppo_entropy_weight = 0.05  # 熵正则，防止 entropy 过快坍缩
         self.n_epochs = 1               # 每轮训练只跑 1 个 epoch，训练次数由 min_new_files 控制
 
     def policy_update(self, sample_data):
@@ -401,7 +401,7 @@ class PPOTrain():
                 self.lr_multiplier /= 1.1
             elif total_kl < self.kl_targ / 2:
                 self.lr_multiplier *= 1.1
-            self.lr_multiplier = np.clip(self.lr_multiplier, 0.1, 5.0)
+            self.lr_multiplier = np.clip(self.lr_multiplier, 0.1, 3.0)
 
             status["training"]["lr_multiplier"] = float(self.lr_multiplier)
             status["counters"]["train"] += 1
