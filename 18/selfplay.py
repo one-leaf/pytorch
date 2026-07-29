@@ -62,13 +62,7 @@ class PPOSelfPlay():
                     probs = availables.astype(np.float32)
                     probs_sum = probs.sum()
                 probs = probs / probs_sum
-                # if np.random.rand() < 0.25:
-                #     _probs = availables/availables.sum()
-                #     action = np.random.choice(GAME_ACTIONS_NUM, p=_probs)
-                # else:
                 action = np.random.choice(GAME_ACTIONS_NUM, p=probs)
-                if action == 3 and availables.sum() > 1:
-                    action = np.random.choice(GAME_ACTIONS_NUM, p=availables/availables.sum())
             else:
                 availables = agent.availables
                 probs = probs * availables.astype(np.float32)
@@ -264,7 +258,7 @@ class PPOSelfPlay():
                 game_counter += 1
 
                 # 每步存储: (state, ref_prob, log_prob, action, prev_action, r_step, is_terminal)
-                # r_step: 落地 +0.01；消1/2/3/4行 +1/3/5/8；终止 -10.0
+                # r_step: 落地 +0.01；消1/2/3/4行 +1/3/5/8；终止 -3.0
                 n_steps = len(trajectory)
                 game_steps = []
                 for step_idx, step_data in enumerate(trajectory):
@@ -278,7 +272,7 @@ class PPOSelfPlay():
                         elif removed == 3: r_step = 5.0        # 消3行
                         elif removed >= 4: r_step = 8.0        # 消4行（Tetris）
                     if is_terminal:
-                        r_step = -10.0                         # 终止惩罚
+                        r_step = -3.0                          # 终止惩罚
                     game_steps.append((
                         step_data["state"], step_data["ref_prob"],
                         step_data["log_prob"], step_data["action"],

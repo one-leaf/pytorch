@@ -229,8 +229,12 @@ class PolicyNet():
         # entropy < 0.5 表示策略接近确定性，需注意
         entropy = -(probs_new * log_probs_safe).sum(dim=-1).mean()
 
+        # ── NONE 概率正则化：防止 NONE 被动累积 ──────────────────
+        none_penalty_coef = 0.02
+        none_penalty = probs_new[:, 3].mean()
+
         # ── 总损失 ───────────────────────────────────────────────
-        loss = policy_loss + vf_coef * value_loss + beta * kl_div - entropy_weight * entropy
+        loss = policy_loss + vf_coef * value_loss + beta * kl_div - entropy_weight * entropy + none_penalty_coef * none_penalty
 
         self.optimizer.zero_grad()
         loss.backward()
