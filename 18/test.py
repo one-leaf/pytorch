@@ -106,6 +106,7 @@ def play_one_game():
         prev_action = action
         landed, removed = agent.step(action)
         print(f"Probs: {dict(zip(ACTION_NAMES.values(), [f'{p:.3f}' for p in probs_masked]))}")
+        print(f"Availables: {dict(zip(ACTION_NAMES.values(), availables))}")
         print(f"V(s) : {v_median:.3f} (quantiles: {v_val.round(3)})")
         # if landed:
         #     print(f"  >> LANDED  cleared={removed}  piececount={agent.piececount}")
