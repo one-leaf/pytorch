@@ -138,6 +138,8 @@ class PolicyNet():
 
         self.net.train()
         log_probs, values = self.net(state_batch, prev_action_batch)
+        # 限制 logit 范围，防止概率饱和（单动作概率不超过 ~98%）
+        log_probs = log_probs.clamp(min=-4.0)
         # values: [B, N] quantiles
 
         # 中间 1/2 分位数均值作为标量 V(s) 用于 GAE（trimmed mean，抗极端分位数扰动）
