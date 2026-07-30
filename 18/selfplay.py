@@ -50,7 +50,7 @@ class PPOSelfPlay():
             probs = torch.exp(log_probs / temperature).cpu().numpy()
 
             if i not in greedy_indices:
-                p = 0.75
+                p = 0.85
                 dirichlet = np.random.dirichlet(0.3 * np.ones(GAME_ACTIONS_NUM))
                 probs = p * probs + (1.0 - p) * dirichlet
                 probs = probs / np.sum(probs)
