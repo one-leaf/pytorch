@@ -44,8 +44,8 @@ class PPOSelfPlay():
         N_q = values_batch.shape[1]
         v_scalar = values_batch[:, N_q // 4 : N_q - N_q // 4].mean(dim=1)
         v_np = v_scalar.cpu().numpy()
-        # V(s) ∈ [-2, +2] → temperature ∈ [3.0, 1.0]
-        v_temp = 2.0 - 0.5 * v_np
+        # V(s) ∈ [-2, +2] → temperature ∈ [5.0, 2.0]
+        v_temp = np.clip(3.5 - 0.75 * v_np, 2.0, 5.0)
 
         actions = []
         all_probs = []
