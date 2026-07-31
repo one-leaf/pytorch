@@ -61,15 +61,20 @@ def show_status(max_history=0, as_json=False):
 
     # 历史趋势
     if history and max_history > 0:
-        # 保留一头一尾，中间均匀抽样
-        if len(history) > max_history:
-            if max_history > 2:
-                step = (len(history) - 1) / (max_history - 1)
-                middle = [history[int(i * step)] for i in range(1, max_history - 1)]
-                display = [history[0]] + middle + [history[-1]]
+        # 前期疏后期密：最近 1/3 全显示，前 2/3 均匀抽样 2/3*N 条
+        n = len(history)
+        if n > max_history:
+            recent_n = max(max_history // 3, 2)
+            sample_n = max_history - recent_n
+            older = history[:n - recent_n]
+            recent = history[n - recent_n:]
+            if len(older) > sample_n and sample_n > 0:
+                step = (len(older) - 1) / (sample_n - 1)
+                older_sampled = [older[int(i * step)] for i in range(sample_n)]
             else:
-                display = [history[0], history[-1]]
-            label = f"  训练记录 (一头一尾+中间均匀抽样 {max_history}/{len(history)} 条):"
+                older_sampled = older
+            display = older_sampled + recent
+            label = f"  训练记录 (前期疏{len(older_sampled)}条 + 近期密{len(recent)}条，共{max_history}/{n}条):"
         else:
             display = history
             label = f"  训练记录 ({len(history)} 条):"
@@ -78,11 +83,11 @@ def show_status(max_history=0, as_json=False):
         print(label)
         print("-" * 163)
         header = (f"  {'Train':>6}  "
-                  f"{'PP_Piece':>8} {'PP_Lines':>8} {'PP_Steps':>8} {'PP_Min':>7} {'PP_Max':>7}  "
-                  f"{'Te_Piece':>8} {'Te_Lines':>8} {'Te_Steps':>8} {'Te_Best':>7}  "
-                  f"{'Tr_Acc':>8} {'Tr_KL':>9} {'Tr_Ent':>8} {'Tr_VL':>8}  "
-                  f"{'G_Raw_M':>7} {'G_Raw_S':>7}  "
-                  f"{'R_Raw_M':>7} {'R_Raw_S':>7}")
+                  f"{'PP_Pc':>8} {'PP_Ln':>8} {'PP_St':>8} {'PP_Min':>7} {'PP_Max':>7}  "
+                  f"{'Te_Pc':>8} {'Te_Ln':>8} {'Te_St':>8} {'Te_Best':>7}  "
+                  f"{'Acc':>8} {'KL':>9} {'Ent':>8} {'VL':>8}  "
+                  f"{'G_M':>7} {'G_S':>7}  "
+                  f"{'R_M':>7} {'R_S':>7}")
         print(header)
         print("-" * 163)
         for h in display:
