@@ -17,7 +17,7 @@ class PPOSelfPlay():
         self.rollout_max_steps = 500    # 单局最大步数
         self.policy_net = None
 
-    def get_actions_batch(self, agents, prev_actions, temperature=1.0, greedy_indices=None):
+    def get_actions_batch(self, agents, prev_actions, greedy_indices=None):
         """批量预测多个游戏的动作（一次 forward pass）"""
         if greedy_indices is None:
             greedy_indices = set()
@@ -40,11 +40,12 @@ class PPOSelfPlay():
         if torch.isnan(log_probs_batch).any():
             log_probs_batch = torch.zeros_like(log_probs_batch)
 
-        # V(s): 中间 1/2 分位数均值，映射到噪声强度（V低→多探索）
+        # V(s): 中间 1/2 分位数均值，映射到温度（V低→温度高→分布平坦→更多探索）
         N_q = values_batch.shape[1]
         v_scalar = values_batch[:, N_q // 4 : N_q - N_q // 4].mean(dim=1)
         v_np = v_scalar.cpu().numpy()
-        noise_strength = np.clip((1.0 - v_np) / 3.0, 0.0, 1.0)
+        # V(s) ∈ [-2, +2] → temperature ∈ [3.0, 1.0]
+        v_temp = 2.0 - 0.5 * v_np
 
         actions = []
         all_probs = []
@@ -53,27 +54,22 @@ class PPOSelfPlay():
         for idx, i in enumerate(active_indices):
             agent = agents[i]
             log_probs = log_probs_batch[idx]
-            probs = torch.exp(log_probs / temperature).cpu().numpy()
+            availables = agent.availables
 
             if i not in greedy_indices:
-                # 局面好就不用干扰，局面差就加 Dirichlet 噪声探索
-                p = 1.0 - 0.3 * noise_strength[idx]
-                dirichlet = np.random.dirichlet(0.3 * np.ones(GAME_ACTIONS_NUM))
-                _probs = p * probs + (1.0 - p) * dirichlet
-                # probs = _probs / np.sum(_probs)
-
-                availables = agent.availables
-                _probs = _probs * availables.astype(np.float32)
-                probs_sum = _probs.sum()
+                # V(s) 低 → 温度高 → 分布平坦 → 探索更多
+                scaled = torch.exp(log_probs / v_temp[idx]).cpu().numpy()
+                probs = scaled * availables.astype(np.float32)
+                probs_sum = probs.sum()
                 if probs_sum < 1e-10:
-                    _probs = availables.astype(np.float32)
-                    probs_sum = _probs.sum()
-                _probs = _probs / probs_sum
-                action = np.random.choice(GAME_ACTIONS_NUM, p=_probs)
+                    probs = availables.astype(np.float32)
+                    probs_sum = probs.sum()
+                probs = probs / probs_sum
+                action = np.random.choice(GAME_ACTIONS_NUM, p=probs)
             else:
-                availables = agent.availables
-                _probs = probs * availables.astype(np.float32)
-                action = np.argmax(_probs)
+                probs = torch.exp(log_probs).cpu().numpy()
+                probs = probs * availables.astype(np.float32)
+                action = np.argmax(probs)
 
             actions.append(int(action))
             all_probs.append(probs.copy())
@@ -84,7 +80,7 @@ class PPOSelfPlay():
 
         return actions, all_probs, all_log_probs
 
-    def play_games_parallel(self, n_games=4, pieces_list=None, temperature=1.0, greedy_indices=None):
+    def play_games_parallel(self, n_games=4, pieces_list=None, greedy_indices=None):
         """同时玩 n_games 局，共享方块序列，批量预测"""
         agents = [Agent(isRandomNextPiece=False, nextPiecesList=pieces_list) for _ in range(n_games)]
         trajectories = [[] for _ in range(n_games)]
@@ -96,7 +92,7 @@ class PPOSelfPlay():
                 break
 
             actions, all_probs, all_log_probs = self.get_actions_batch(
-                agents, prev_actions, temperature, greedy_indices
+                agents, prev_actions, greedy_indices
             )
 
             # 为每个 active 游戏记录轨迹
@@ -216,9 +212,9 @@ class PPOSelfPlay():
             else:
                 pieces_list = []
                 
-            # 并行玩 16 局（game 0 贪婪测试，game 1-15 带 Dirichlet 噪声探索）
+            # 并行玩 16 局（game 0 贪婪测试，game 1-15 带 V(s) 温度探索）
             agents, trajectories, step_results = self.play_games_parallel(
-                n_games=16, pieces_list=pieces_list, temperature=1.0, greedy_indices={0}
+                n_games=16, pieces_list=pieces_list, greedy_indices={0}
             )
 
             pcs = [a.piececount for a in agents]
