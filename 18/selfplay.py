@@ -59,25 +59,28 @@ class PPOSelfPlay():
                 # 局面好就不用干扰，局面差就加 Dirichlet 噪声探索
                 p = 1.0 - 0.3 * noise_strength[idx]
                 dirichlet = np.random.dirichlet(0.3 * np.ones(GAME_ACTIONS_NUM))
-                probs = p * probs + (1.0 - p) * dirichlet
-                probs = probs / np.sum(probs)
+                _probs = p * probs + (1.0 - p) * dirichlet
+                # probs = _probs / np.sum(_probs)
 
                 availables = agent.availables
-                probs = probs * availables.astype(np.float32)
-                probs_sum = probs.sum()
+                _probs = _probs * availables.astype(np.float32)
+                probs_sum = _probs.sum()
                 if probs_sum < 1e-10:
-                    probs = availables.astype(np.float32)
-                    probs_sum = probs.sum()
-                probs = probs / probs_sum
-                action = np.random.choice(GAME_ACTIONS_NUM, p=probs)
+                    _probs = availables.astype(np.float32)
+                    probs_sum = _probs.sum()
+                _probs = _probs / probs_sum
+                action = np.random.choice(GAME_ACTIONS_NUM, p=_probs)
             else:
                 availables = agent.availables
-                probs = probs * availables.astype(np.float32)
-                action = np.argmax(probs)
+                _probs = probs * availables.astype(np.float32)
+                action = np.argmax(_probs)
 
             actions.append(int(action))
             all_probs.append(probs.copy())
-            all_log_probs.append(log_probs.cpu().numpy())
+            # 记录 clamp + renorm 后的 log_prob，和训练时一致
+            p_clamped = np.clip(probs, 0.02, 0.98)
+            p_clamped = p_clamped / p_clamped.sum()
+            all_log_probs.append(np.log(p_clamped))
 
         return actions, all_probs, all_log_probs
 
