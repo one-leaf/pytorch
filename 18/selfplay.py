@@ -56,6 +56,7 @@ class PPOSelfPlay():
             probs = torch.exp(log_probs / temperature).cpu().numpy()
 
             if i not in greedy_indices:
+                # 局面好就不用干扰，局面差就加 Dirichlet 噪声探索
                 p = 1.0 - 0.3 * noise_strength[idx]
                 dirichlet = np.random.dirichlet(0.3 * np.ones(GAME_ACTIONS_NUM))
                 probs = p * probs + (1.0 - p) * dirichlet
