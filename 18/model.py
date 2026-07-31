@@ -138,10 +138,11 @@ class PolicyNet():
 
         self.net.train()
         log_probs, values = self.net(state_batch, prev_action_batch)
-        # 限制 logit 范围，防止概率饱和
-        # min=-4.0: 单动作概率最低 ~1.8%
-        # max=-0.02: 单动作概率最高 ~98%，防止进入梯度消失区
-        log_probs = log_probs.clamp(min=-4.0, max=-0.02)
+        # 在概率空间 clamp 防止饱和（log_softmax 输出 ≤0，直接 clamp log_probs 无效）
+        probs = torch.exp(log_probs)
+        probs = probs.clamp(min=0.02, max=0.98)  # 单动作概率限制在 [2%, 98%]
+        probs = probs / probs.sum(dim=-1, keepdim=True)
+        log_probs = torch.log(probs)
         # values: [B, N] quantiles
 
         # 中间 1/2 分位数均值作为标量 V(s) 用于 GAE（trimmed mean，抗极端分位数扰动）
