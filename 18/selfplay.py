@@ -83,7 +83,7 @@ class PPOSelfPlay():
 
     def play_games_parallel(self, n_games=4, pieces_list=None, greedy_indices=None):
         """同时玩 n_games 局，共享方块序列，批量预测"""
-        agents = [Agent(isRandomNextPiece=False, nextPiecesList=pieces_list) for _ in range(n_games)]
+        agents = [Agent(isRandomNextPiece=False, nextPiecesList=pieces_list or []) for _ in range(n_games)]
         trajectories = [[] for _ in range(n_games)]
         step_results = [[] for _ in range(n_games)]
         prev_actions = [3] * n_games  # KEY_NONE
