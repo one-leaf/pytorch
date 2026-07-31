@@ -35,10 +35,16 @@ class PPOSelfPlay():
 
         self.policy_net.net.eval()
         with torch.no_grad():
-            log_probs_batch, _ = self.policy_net.net(states_tensor, prev_tensor)
+            log_probs_batch, values_batch = self.policy_net.net(states_tensor, prev_tensor)
 
         if torch.isnan(log_probs_batch).any():
             log_probs_batch = torch.zeros_like(log_probs_batch)
+
+        # V(s): 中间 1/2 分位数均值，映射到噪声强度（V低→多探索）
+        N_q = values_batch.shape[1]
+        v_scalar = values_batch[:, N_q // 4 : N_q - N_q // 4].mean(dim=1)
+        v_np = v_scalar.cpu().numpy()
+        noise_strength = np.clip((1.0 - v_np) / 3.0, 0.0, 1.0)
 
         actions = []
         all_probs = []
@@ -50,7 +56,7 @@ class PPOSelfPlay():
             probs = torch.exp(log_probs / temperature).cpu().numpy()
 
             if i not in greedy_indices:
-                p = 0.85
+                p = 1.0 - 0.3 * noise_strength[idx]
                 dirichlet = np.random.dirichlet(0.3 * np.ones(GAME_ACTIONS_NUM))
                 probs = p * probs + (1.0 - p) * dirichlet
                 probs = probs / np.sum(probs)
