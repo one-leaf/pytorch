@@ -73,8 +73,9 @@ class PPOSelfPlay():
 
             actions.append(int(action))
             all_probs.append(probs.copy())
-            # 记录 clamp + renorm 后的 log_prob，和训练时一致
-            p_clamped = np.clip(probs, 0.02, 0.98)
+            # 记录模型原始输出的 clamp + renorm，和训练时 forward pass 一致
+            raw_probs = torch.exp(log_probs).cpu().numpy()
+            p_clamped = np.clip(raw_probs, 0.02, 0.98)
             p_clamped = p_clamped / p_clamped.sum()
             all_log_probs.append(np.log(p_clamped))
 
