@@ -19,9 +19,9 @@ GAME_WIDTH, GAME_HEIGHT = 10, 20
 
 class PPODataset(torch.utils.data.Dataset):
     """PPO 数据集，每个 pkl 包含一局游戏的所有 step:
-    (state, ref_prob, log_prob, action, prev_action, R, is_terminal)
+    (state, ref_prob, log_prob, action, prev_action, R, is_terminal, availables)
     game_id 由文件名推导，不在 pkl 中存储
-    load_data 后扩展为 8 元素: (state, ref_prob, log_prob, action, prev_action, R, is_terminal, G)
+    load_data 后扩展为 9 元素: (state, ref_prob, log_prob, action, prev_action, R, is_terminal, availables, G)
     """
     def __init__(self, data_dir, max_files, min_new_files, n_train_times=3):
         self.data_dir = data_dir
@@ -32,7 +32,6 @@ class PPODataset(torch.utils.data.Dataset):
         self.newsample = []
         self.data = {}
         self._flat_index = []
-        self._test_flat_index = []
         self.move_wait_files()
         self.load_game_files()
         self.load_data()
@@ -42,7 +41,7 @@ class PPODataset(torch.utils.data.Dataset):
 
     def __getitem__(self, index):
         fn, step_idx = self._flat_index[index]
-        state, ref_prob, log_prob, action, prev_action, R, is_terminal, G = self.data[fn][step_idx]
+        state, ref_prob, log_prob, action, prev_action, R, is_terminal, availables, G = self.data[fn][step_idx]
         game_id = os.path.basename(fn)  # 用文件名作为 game_id
         return (torch.from_numpy(state).float(),
                 torch.from_numpy(ref_prob).float(),
@@ -52,6 +51,7 @@ class PPODataset(torch.utils.data.Dataset):
                 game_id,
                 torch.as_tensor(R).float(),
                 torch.as_tensor(is_terminal).float(),
+                torch.from_numpy(availables).float(),
                 torch.as_tensor(G).float())
 
     def move_wait_files(self):
@@ -111,7 +111,7 @@ class PPODataset(torch.utils.data.Dataset):
                 with open(fn, "rb") as f:
                     steps = pickle.load(f)
 
-                # 格式: (state, ref_prob, log_prob, action, prev_action, R, is_terminal)
+                # 格式: (state, ref_prob, log_prob, action, prev_action, R, is_terminal, availables)
                 n_steps = len(steps)
                 for step in steps:
                     assert step[0].shape == (2, 20, 10), f'error: state shape {step[0].shape}'
@@ -124,10 +124,10 @@ class PPODataset(torch.utils.data.Dataset):
                 for t in range(n_steps - 2, -1, -1):
                     g_values[t] = steps[t][5] + gamma * g_values[t + 1]
 
-                # 扩展为 8 元素: (state, ref_prob, log_prob, action, prev_action, R, is_terminal, G)
+                # 扩展为 9 元素: (state, ref_prob, log_prob, action, prev_action, R, is_terminal, availables, G)
                 steps_out = []
                 for i, step in enumerate(steps):
-                    steps_out.append((*step[:7], g_values[i]))
+                    steps_out.append((*step[:8], g_values[i]))
 
                 self.data[fn] = steps_out
             except Exception as e:
@@ -137,7 +137,7 @@ class PPODataset(torch.utils.data.Dataset):
                 self.file_list.remove(fn)
 
         Rs = np.array([step[5] for steps in self.data.values() for step in steps])
-        Gs = np.array([step[7] for steps in self.data.values() for step in steps])
+        Gs = np.array([step[8] for steps in self.data.values() for step in steps])
         if len(Rs) > 0:
             # 保存原始统计用于跟踪
             self.r_mean_raw = float(Rs.mean())
@@ -163,8 +163,8 @@ class PPODataset(torch.utils.data.Dataset):
                 self.data[fn_key] = [
                     (s[0], s[1], s[2], s[3], s[4],
                      (s[5] - r_mean) / r_std,
-                     s[6],
-                     (s[7] - g_mean) / g_std)
+                     s[6], s[7],
+                     (s[8] - g_mean) / g_std)
                     for s in self.data[fn_key]
                 ]
             self.r_mean = 0.0
@@ -181,32 +181,9 @@ class PPODataset(torch.utils.data.Dataset):
             self.r_std = 1.0
 
         self._flat_index = [(fn, i) for fn in self.file_list for i in range(len(self.data[fn]))]
-        self._test_flat_index = [(fn, i) for fn in self.newsample for i in range(len(self.data.get(fn, [])))]
 
         print(f"loaded {len(self._flat_index)} steps in {time.time() - start_time:.1f}s")
 
-
-class PPOTestDataset(torch.utils.data.Dataset):
-    """测试数据集：使用 newsample（本轮新采集的文件）"""
-    def __init__(self, parent: PPODataset):
-        self.parent = parent
-
-    def __len__(self):
-        return len(self.parent._test_flat_index)
-
-    def __getitem__(self, index):
-        fn, step_idx = self.parent._test_flat_index[index]
-        state, ref_prob, log_prob, action, prev_action, R, is_terminal, G = self.parent.data[fn][step_idx]
-        game_id = os.path.basename(fn)  # 用文件名作为 game_id
-        return (torch.from_numpy(state).float(),
-                torch.from_numpy(ref_prob).float(),
-                torch.from_numpy(log_prob).float(),
-                torch.as_tensor(action).long(),
-                torch.as_tensor(prev_action).long(),
-                game_id,
-                torch.as_tensor(R).float(),
-                torch.as_tensor(is_terminal).float(),
-                torch.as_tensor(G).float())
 
 
 class PPOTrain():
@@ -227,14 +204,15 @@ class PPOTrain():
 
     def policy_update(self, sample_data):
         """PPO 策略更新（带 GAE 信用分配）"""
-        state_batch, _ref_probs_batch, log_probs_old_batch, actions_batch, prev_actions_batch, game_ids_batch, R_batch, is_terminal_batch, G_batch = sample_data
+        state_batch, _ref_probs_batch, log_probs_old_batch, actions_batch, prev_actions_batch, game_ids_batch, R_batch, is_terminal_batch, availables_batch, G_batch = sample_data
         acc, kl, entropy, value_loss = self.policy_net.train_step_ppo(
             state_batch, log_probs_old_batch, actions_batch, prev_actions_batch,
             game_ids_batch, R_batch, is_terminal_batch, G_batch,
             self.learn_rate * self.lr_multiplier,
             clip_eps=self.ppo_clip_eps,
             beta=self.ppo_beta,
-            entropy_weight=self.ppo_entropy_weight
+            entropy_weight=self.ppo_entropy_weight,
+            availables_batch=availables_batch
         )
         return acc, kl, entropy, value_loss
 
@@ -257,38 +235,11 @@ class PPOTrain():
                 try:
                     print("start data loader")
                     self.dataset = PPODataset(data_dir, self.max_files, self.min_new_files, self.n_train_times)
-                    self.testdataset = PPOTestDataset(self.dataset)
                     print("end data loader")
                     break
                 except Exception as e:
                     print(f"waiting for data: {e}")
                     time.sleep(30)
-
-            testing_loader = torch.utils.data.DataLoader(
-                self.testdataset, batch_size=self.batch_size, shuffle=False, num_workers=0
-            )
-
-            # 训练前评估
-            begin_accuracy = np.array([])
-            begin_act_probs = None
-            net = self.policy_net.policy
-            for i, data in enumerate(testing_loader):
-                test_batch, test_probs, _log_probs_old, test_action, test_prev_action, _game_ids, _R, _is_terminal, _G = data
-                if i == 0:
-                    print("test_batch shape:", test_batch.shape, "test_probs shape:", test_probs.shape)
-                test_batch = test_batch.to(self.policy_net.device)
-                test_prev_action = test_prev_action.to(self.policy_net.device)
-                with torch.no_grad():
-                    act_probs = net(test_batch, test_prev_action)
-                    if begin_act_probs is None:
-                        begin_act_probs = act_probs
-                        begin_accuracy = np.argmax(act_probs, axis=1) == np.argmax(test_probs.cpu().numpy(), axis=1)
-                    else:
-                        begin_act_probs = np.concatenate((begin_act_probs, act_probs), axis=0)
-                        begin_accuracy = np.concatenate(
-                            (begin_accuracy, np.argmax(act_probs, axis=1) == np.argmax(test_probs.cpu().numpy(), axis=1)),
-                            axis=0
-                        )
 
             status = read_status_file()
             self.lr_multiplier = status["training"]["lr_multiplier"]
@@ -321,7 +272,7 @@ class PPOTrain():
                               "acc:", acc, "kl:", kl, "entropy:", entropy, "vloss:", value_loss)
 
                     if epoch == 0 and i == 0:
-                        state_batch, ref_probs_batch, log_probs_old_batch, actions_batch, prev_actions_batch, game_ids_batch, R_batch, _is_terminal, G_batch = data
+                        state_batch, ref_probs_batch, log_probs_old_batch, actions_batch, prev_actions_batch, game_ids_batch, R_batch, _is_terminal, _availables, G_batch = data
                         print("R_batch:", R_batch)
                         print("G_batch:", G_batch)
                         print("actions_batch:", actions_batch)
@@ -351,39 +302,6 @@ class PPOTrain():
             avg_vl  = _sum_vl  / max(_num_batches, 1)
 
             self.policy_net.save_model(model_file)
-
-            # 训练后评估
-            end_accuracy = None
-            end_act_probs = None
-            all_test_probs = None
-            end_accuracy = np.array([])
-            for i, data in enumerate(testing_loader):
-                test_batch, test_probs, _log_probs_old, _test_action, test_prev_action, _game_ids, _R, _is_terminal, _G = data
-                test_batch = test_batch.to(self.policy_net.device)
-                test_prev_action = test_prev_action.to(self.policy_net.device)
-                with torch.no_grad():
-                    act_probs = net(test_batch, test_prev_action)
-                    if all_test_probs is None:
-                        all_test_probs = test_probs.cpu()
-                    else:
-                        all_test_probs = torch.cat((all_test_probs, test_probs.cpu()), dim=0)
-                    if end_act_probs is None:
-                        end_act_probs = act_probs
-                        end_accuracy = np.argmax(act_probs, axis=1) == np.argmax(test_probs.cpu().numpy(), axis=1)
-                    else:
-                        end_act_probs = np.concatenate((end_act_probs, act_probs), axis=0)
-                        end_accuracy = np.concatenate(
-                            (end_accuracy, np.argmax(act_probs, axis=1) == np.argmax(test_probs.cpu().numpy(), axis=1)),
-                            axis=0
-                        )
-
-            # 打印对比结果
-            begin_act_probs_e = np.exp(begin_act_probs - np.max(begin_act_probs, axis=1, keepdims=True))
-            begin_act_probs = begin_act_probs_e / np.sum(begin_act_probs_e, axis=1, keepdims=True)
-            end_act_probs_e = np.exp(end_act_probs - np.max(end_act_probs, axis=1, keepdims=True))
-            end_act_probs = end_act_probs_e / np.sum(end_act_probs_e, axis=1, keepdims=True)
-
-            print(f"probs begin_accuracy: {np.mean(begin_accuracy):.4f} end_accuracy: {np.mean(end_accuracy):.4f}")
 
             # KL 散度：使用训练循环的平均 KL
             status = read_status_file()

@@ -50,6 +50,7 @@ class PPOSelfPlay():
         actions = []
         all_probs = []
         all_log_probs = []
+        all_availables = []
 
         for idx, i in enumerate(active_indices):
             agent = agents[i]
@@ -73,13 +74,11 @@ class PPOSelfPlay():
 
             actions.append(int(action))
             all_probs.append(probs.copy())
-            # 记录模型原始输出的 clamp + renorm，和训练时 forward pass 一致
-            raw_probs = torch.exp(log_probs).cpu().numpy()
-            p_clamped = np.clip(raw_probs, 0.02, 0.98)
-            p_clamped = p_clamped / p_clamped.sum()
-            all_log_probs.append(np.log(p_clamped))
+            # 记录模型原始 log_probs（不做 clamp，由 train_step_ppo 统一处理）
+            all_log_probs.append(log_probs.cpu().numpy())
+            all_availables.append(availables.astype(np.float32))
 
-        return actions, all_probs, all_log_probs
+        return actions, all_probs, all_log_probs, all_availables
 
     def play_games_parallel(self, n_games=4, pieces_list=None, greedy_indices=None):
         """同时玩 n_games 局，共享方块序列，批量预测"""
@@ -92,7 +91,7 @@ class PPOSelfPlay():
             if all(a.terminal for a in agents):
                 break
 
-            actions, all_probs, all_log_probs = self.get_actions_batch(
+            actions, all_probs, all_log_probs, all_availables = self.get_actions_batch(
                 agents, prev_actions, greedy_indices
             )
 
@@ -106,6 +105,7 @@ class PPOSelfPlay():
                 action = actions[action_idx]
                 probs = all_probs[action_idx]
                 log_prob = all_log_probs[action_idx]
+                availables = all_availables[action_idx]
                 action_idx += 1
 
                 trajectories[i].append({
@@ -114,6 +114,7 @@ class PPOSelfPlay():
                     "prev_action": prev_actions[i],
                     "ref_prob": probs,
                     "log_prob": log_prob,
+                    "availables": availables,
                 })
 
                 prev_actions[i] = action
@@ -226,8 +227,8 @@ class PPOSelfPlay():
             for run_idx, (agent, trajectory, step_results) in enumerate(group_agents):
                 game_counter += 1
 
-                # 每步存储: (state, ref_prob, log_prob, action, prev_action, r_step, is_terminal)
-                # r_step: 落地 +0.01；消1/2/3/4行 +1/3/5/8；终止 -3.0
+                # 每步存储: (state, ref_prob, log_prob, action, prev_action, r_step, is_terminal, availables)
+                # r_step: 落地 +0.01；消1/2/3/4行 +1/3/5/8；终止 -1.0
                 n_steps = len(trajectory)
                 game_steps = []
                 for step_idx, step_data in enumerate(trajectory):
@@ -245,7 +246,8 @@ class PPOSelfPlay():
                     game_steps.append((
                         step_data["state"], step_data["ref_prob"],
                         step_data["log_prob"], step_data["action"],
-                        step_data["prev_action"], r_step, is_terminal
+                        step_data["prev_action"], r_step, is_terminal,
+                        step_data["availables"]
                     ))
                     
                 filename = f"{filetime}-{game_counter:06d}-r{run_idx}.pkl"

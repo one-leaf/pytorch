@@ -92,28 +92,41 @@ class PolicyNet():
     def train_step_ppo(self, state_batch, log_probs_old, action_batch, prev_action_batch,
                         game_ids, R_batch, is_terminal_batch, G_batch, lr,
                         clip_eps=0.2, beta=0.05, entropy_weight=0.01,
-                        gamma=0.99, lam=0.95, vf_coef=0.5):
-        """PPO + V(s) 训练步骤（分位数价值头 + 步重要性加权）
+                        gamma=0.99, lam=0.95, vf_coef=0.5, availables_batch=None):
+        """PPO + V(s) 训练步骤（分位数价值头 + 步重要性加权 + availables mask）
         - V(s): value head 估计每步状态价值
         - GAE: 步级别信用分配（替代线性衰减）
         - policy_loss: PPO clip 损失
         - value_loss: MSE 损失
         - kl_loss: KL 散度惩罚
-        - entropy: 熵正则化
+        - entropy: 熵正则化（仅计算有效动作）
+        - availables: 有效动作 mask，无效动作概率强制为 0
         """
         # 每次更新学习率（lr_multiplier 动态调整）
         for param_group in self.optimizer.param_groups:
             param_group['lr'] = lr
 
         state_batch = torch.FloatTensor(state_batch).to(self.device)
+        B = state_batch.shape[0]
+
+        # availables mask: [B, num_actions]，1=有效，0=无效
+        if availables_batch is not None:
+            availables_t = torch.FloatTensor(availables_batch).to(self.device)
+        else:
+            availables_t = torch.ones(B, self.output_size, device=self.device)
+
         log_probs_old_t = torch.FloatTensor(log_probs_old).to(self.device)
-        log_probs_old_t = torch.clamp(log_probs_old_t, min=-20.0)
+        # 对 log_probs_old 也应用 mask + clamp + renorm，和当前策略处理方式一致
+        probs_old = torch.exp(log_probs_old_t)
+        probs_old = probs_old * availables_t
+        probs_old = probs_old.clamp(min=0.02, max=0.98) * availables_t
+        probs_old = probs_old / probs_old.sum(dim=-1, keepdim=True)
+        log_probs_old_t = torch.log(probs_old)
         action_batch = torch.LongTensor(action_batch).to(self.device)
         prev_action_batch = torch.LongTensor(prev_action_batch).to(self.device)
         game_ids = game_ids.tolist() if hasattr(game_ids, 'tolist') else list(game_ids)
 
         # ── 参数校验 ─────────────────────────────────────────────
-        B = state_batch.shape[0]
         assert state_batch.shape == (B, 2, 20, 10), f"state shape mismatch: {state_batch.shape}"
         assert not torch.isnan(state_batch).any(), "state_batch contains NaN"
         assert action_batch.min() >= 0 and action_batch.max() < self.output_size, \
@@ -138,10 +151,13 @@ class PolicyNet():
 
         self.net.train()
         log_probs, values = self.net(state_batch, prev_action_batch)
-        # 在概率空间 clamp 防止饱和（log_softmax 输出 ≤0，直接 clamp log_probs 无效）
+
+        # 概率处理：先 mask 无效动作，再 clamp 有效动作，最后 renorm
         probs = torch.exp(log_probs)
-        probs = probs.clamp(min=0.02, max=0.98)  # 单动作概率限制在 [2%, 98%]
-        probs = probs / probs.sum(dim=-1, keepdim=True)
+        probs = probs * availables_t                          # 无效动作概率归零
+        valid_probs = probs.clamp(min=0.02, max=0.98)         # 有效动作 clamp 到 [2%, 98%]
+        valid_probs = valid_probs * availables_t              # 再次确保无效动作为 0
+        probs = valid_probs / valid_probs.sum(dim=-1, keepdim=True)  # renorm（仅有效动作求和为1）
         log_probs = torch.log(probs)
         # values: [B, N] quantiles
 
@@ -225,14 +241,14 @@ class PolicyNet():
         # 0.5+  策略偏移严重，训练不稳定
         log_probs_safe = torch.clamp(log_probs, min=-20.0)
         probs_new = torch.exp(log_probs_safe)
-        kl_div = (probs_new * (log_probs_safe - log_probs_old_t)).sum(dim=-1).mean()
+        # KL 仅在有效动作上计算（无效动作 prob=0，不贡献 KL）
+        kl_div = (probs_new * (log_probs_safe - log_probs_old_t) * availables_t).sum(dim=-1).mean()
 
         # ── 熵正则化 ─────────────────────────────────────────────
         # entropy_weight=0.30: 与 policy_loss 量级相当，稳定探索防止策略过快收敛
-        # 5 个动作最大 entropy = log(5) ≈ 1.61
-        # 0.30 * 1.61 = 0.48（最大），0.30 * 0.65 = 0.20（当前）
-        # entropy < 0.5 表示策略接近确定性，需注意
-        entropy = -(probs_new * log_probs_safe).sum(dim=-1).mean()
+        # 仅计算有效动作的 entropy，无效动作 prob=0 不参与
+        # 有效动作数影响最大 entropy：N 个有效动作 → max entropy = log(N)
+        entropy = -(probs_new * log_probs_safe * availables_t).sum(dim=-1).mean()
 
         # ── NONE 概率正则化：防止 NONE 被动累积 ──────────────────
         none_penalty_coef = 0.02
