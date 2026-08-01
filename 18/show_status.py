@@ -5,7 +5,7 @@
 """
 import json, os, sys
 
-model_name = "vit-ti"
+model_name = ""
 curr_dir = os.path.dirname(os.path.abspath(__file__))
 status_file = os.path.join(curr_dir, 'model', model_name, 'status.json')
 

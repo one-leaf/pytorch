@@ -7,7 +7,7 @@ from datetime import datetime
 from transformer import GameTransformer
 
 # 定义游戏的保存文件名和路径
-model_name = "vit-ti" # "vit" # "mlp"
+model_name = ""
 curr_dir = os.path.dirname(os.path.abspath(__file__))
 data_dir = os.path.join(curr_dir, 'data', model_name)
 if not os.path.exists(data_dir): os.makedirs(data_dir)
@@ -117,12 +117,12 @@ class PolicyNet():
 
         log_probs_old_t = torch.FloatTensor(log_probs_old).to(self.device)
         # 对 log_probs_old 也应用 mask + clamp + renorm，和当前策略处理方式一致
-        probs_old = torch.exp(log_probs_old_t)
-        probs_old = probs_old * availables_t
-        probs_old = probs_old.clamp(min=0.02, max=0.98) * availables_t
-        probs_old_sum = probs_old.sum(dim=-1, keepdim=True).clamp(min=1e-8)
-        probs_old = probs_old / probs_old_sum
-        log_probs_old_t = torch.log(probs_old)
+        # probs_old = torch.exp(log_probs_old_t)
+        # probs_old = probs_old * availables_t
+        # probs_old = probs_old.clamp(min=0.02, max=0.98) * availables_t
+        # probs_old_sum = probs_old.sum(dim=-1, keepdim=True).clamp(min=1e-8)
+        # probs_old = probs_old / probs_old_sum
+        # log_probs_old_t = torch.log(probs_old)
         action_batch = torch.LongTensor(action_batch).to(self.device)
         prev_action_batch = torch.LongTensor(prev_action_batch).to(self.device)
         game_ids = game_ids.tolist() if hasattr(game_ids, 'tolist') else list(game_ids)
@@ -154,12 +154,12 @@ class PolicyNet():
         log_probs, values = self.net(state_batch, prev_action_batch)
 
         # 概率处理：先 mask 无效动作，再 clamp 有效动作，最后 renorm
-        probs = torch.exp(log_probs)
-        probs = probs * availables_t                          # 无效动作概率归零
-        valid_probs = probs.clamp(min=0.02, max=0.98)         # 有效动作 clamp 到 [2%, 98%]
-        valid_probs = valid_probs * availables_t              # 再次确保无效动作为 0
-        probs = valid_probs / valid_probs.sum(dim=-1, keepdim=True).clamp(min=1e-8)
-        log_probs = torch.log(probs)
+        # probs = torch.exp(log_probs)
+        # probs = probs * availables_t                          # 无效动作概率归零
+        # valid_probs = probs.clamp(min=0.02, max=0.98)         # 有效动作 clamp 到 [2%, 98%]
+        # valid_probs = valid_probs * availables_t              # 再次确保无效动作为 0
+        # probs = valid_probs / valid_probs.sum(dim=-1, keepdim=True).clamp(min=1e-8)
+        # log_probs = torch.log(probs)
         # values: [B, N] quantiles
 
         # 中间 1/2 分位数均值作为标量 V(s) 用于 GAE（trimmed mean，抗极端分位数扰动）

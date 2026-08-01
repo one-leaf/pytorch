@@ -49,7 +49,7 @@ else:
     def _exclusive_lock(fd):
         yield
 
-model_name = "vit-ti" # "vit" # "mlp"
+model_name = ""
 curr_dir = os.path.dirname(os.path.abspath(__file__))
 model_dir = os.path.join(curr_dir, 'model', model_name)
 if not os.path.exists(model_dir): os.makedirs(model_dir)

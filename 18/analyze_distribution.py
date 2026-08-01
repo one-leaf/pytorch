@@ -2,7 +2,7 @@
 import os, glob, pickle
 import numpy as np
 
-model_name = "vit-ti"
+model_name = ""
 curr_dir = os.path.dirname(os.path.abspath(__file__))
 data_dir = os.path.join(curr_dir, 'data', model_name)
 

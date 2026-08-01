@@ -14,7 +14,7 @@ ACTION_NAMES = {0: 'ROTATE', 1: 'LEFT', 2: 'RIGHT', 3: 'NONE', 4: 'DOWN'}
 def plot_training_curves():
     """读取状态日志并在终端显示 PP_Piece 和 Te_Piece 曲线"""
     curr_dir = os.path.dirname(os.path.abspath(__file__))
-    status_file = os.path.join(curr_dir, 'model', 'vit-ti', 'status.json')
+    status_file = os.path.join(curr_dir, 'model', 'status.json')
 
     if not os.path.exists(status_file):
         print(f"状态文件不存在: {status_file}")
@@ -69,7 +69,7 @@ def plot_training_curves():
 
 def play_one_game():
     curr_dir = os.path.dirname(os.path.abspath(__file__))
-    mf = os.path.join(curr_dir, 'model', 'vit-ti', 'model.pth')
+    mf = os.path.join(curr_dir, 'model', 'model.pth')
     policy_net = PolicyNet(GAME_WIDTH, GAME_HEIGHT, GAME_ACTIONS_NUM, model_file=mf)
 
     agent = Agent(isRandomNextPiece=True)
