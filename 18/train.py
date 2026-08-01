@@ -222,7 +222,7 @@ class PPOTrain():
         # PPO 超参数
         self.ppo_clip_eps = 0.2
         self.ppo_beta = 0.05            # KL 惩罚系数，beta*KL=0.05*0.4=0.02，与 policy_loss 可比
-        self.ppo_entropy_weight = 0.10  # 熵正则，防止 entropy 过快坍缩
+        self.ppo_entropy_weight = 0.30  # 熵正则，与 policy_loss 量级相当，稳定探索防止策略过快收敛
         self.n_epochs = 1               # 每轮训练只跑 1 个 epoch，训练次数由 min_new_files 控制
 
     def policy_update(self, sample_data):
