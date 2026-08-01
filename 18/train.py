@@ -1,6 +1,6 @@
-import os, glob, pickle
+import os, glob, pickle, shutil
 
-from model import PolicyNet, data_dir, data_wait_dir, model_file, log_nan
+from model import PolicyNet, data_dir, data_wait_dir, model_file, model_dir, log_nan
 from agent import ACTIONS
 
 import time
@@ -10,7 +10,7 @@ import os, math, copy
 import numpy as np
 import torch
 
-from status import save_status_file, read_status_file, set_status_value
+from status import save_status_file, read_status_file, set_status_value, status_file
 
 # 定义游戏的动作
 GAME_ACTIONS_NUM = len(ACTIONS)
@@ -285,11 +285,22 @@ class PPOTrain():
                         msg = f"LOSS NaN/Inf | epoch {epoch+1} step {i}: acc={acc} kl={kl} entropy={entropy} vloss={value_loss}"
                         print(f"\n[ROLLBACK] {msg}")
                         log_nan(msg)
-                        if os.path.exists(model_file + ".bak"):
-                            print(f"[ROLLBACK] restoring from {model_file}.bak")
-                            self.policy_net = PolicyNet(
-                                GAME_WIDTH, GAME_HEIGHT, GAME_ACTIONS_NUM, model_file=model_file + ".bak", l2_const=1e-4
-                            )
+                        # 从最佳模型目录还原（找方块数最大的子目录）
+                        best_dirs = [d for d in os.listdir(model_dir)
+                                     if os.path.isdir(os.path.join(model_dir, d)) and d.replace('.', '').isdigit()]
+                        if best_dirs:
+                            best_dirs.sort(key=lambda x: float(x), reverse=True)
+                            best_dir = os.path.join(model_dir, best_dirs[0])
+                            restore_model = os.path.join(best_dir, 'model.pth')
+                            restore_status = os.path.join(best_dir, 'status.json')
+                            if os.path.exists(restore_model):
+                                print(f"[ROLLBACK] restoring from best dir: {best_dir}")
+                                shutil.copy2(restore_model, model_file)
+                                if os.path.exists(restore_status):
+                                    shutil.copy2(restore_status, status_file)
+                                self.policy_net = PolicyNet(
+                                    GAME_WIDTH, GAME_HEIGHT, GAME_ACTIONS_NUM, model_file=model_file, l2_const=1e-4
+                                )
                         return
                 e_acc = _epoch_acc / max(_epoch_batches, 1)
                 e_kl  = _epoch_kl  / max(_epoch_batches, 1)

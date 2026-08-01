@@ -1,11 +1,11 @@
-import os, pickle, time, itertools
+import os, pickle, time, itertools, shutil
 from datetime import datetime
 import numpy as np
 import torch
 
-from model import PolicyNet, data_wait_dir, model_file
+from model import PolicyNet, data_wait_dir, model_file, model_dir
 from agent import Agent, ACTIONS
-from status import save_status_file, read_status_file
+from status import save_status_file, read_status_file, status_file
 
 # 定义游戏的动作
 GAME_ACTIONS_NUM = len(ACTIONS)
@@ -140,10 +140,6 @@ class PPOSelfPlay():
 
         # 确定初始模型文件
         load_model_file = model_file
-        # if os.path.exists(model_file + "_best"):
-        #     load_model_file = model_file + "_best"
-        # elif os.path.exists(model_file + ".bak"):
-        #     load_model_file = model_file + ".bak"
 
         # 等待模型文件出现
         while not os.path.exists(load_model_file):
@@ -173,10 +169,6 @@ class PPOSelfPlay():
 
             # 每组之前检查模型是否有更新，有则重新加载
             current_model = model_file
-            # if os.path.exists(model_file + "_best"):
-            #     current_model = model_file + "_best"
-            # elif os.path.exists(model_file + ".bak"):
-            #     current_model = model_file + ".bak"
             if os.path.exists(current_model):
                 mtime = os.path.getmtime(current_model)
                 if mtime > _last_model_mtime:
@@ -208,13 +200,16 @@ class PPOSelfPlay():
             if greedy_agent.piececount > old_best_pc:
                 m["test_piececount_best"] = greedy_agent.piececount
                 m["test_removedlines_best"] = max(m.get("test_removedlines_best", 0), greedy_agent.removedlines)
-                # 保存最佳模型
-                best_model_path = f"{model_file}.{greedy_agent.piececount:.1f}"
-                self.policy_net.save_model(best_model_path)
-                self.policy_net.save_model(model_file + ".bak")
-                print(f"*** new best! greedy_piececount={greedy_agent.piececount} > best={old_best_pc}, saved to {best_model_path}")
 
             save_status_file(state)
+
+            if greedy_agent.piececount > old_best_pc:
+                # 保存最佳模型（按方块数建目录，备份状态文件）
+                best_dir = os.path.join(model_dir, f"{greedy_agent.piececount:.1f}")
+                os.makedirs(best_dir, exist_ok=True)
+                self.policy_net.save_model(os.path.join(best_dir, 'model.pth'))
+                shutil.copy2(status_file, os.path.join(best_dir, 'status.json'))
+                print(f"*** new best! greedy_piececount={greedy_agent.piececount} > best={old_best_pc}, saved to {best_dir}")
 
             # 保存所有探索局（game 1-15）用于训练，game 0 为贪婪测试局不保存
             print(f"Group {g}: all_piececounts={pcs} lines={[a.removedlines for a in agents]}")
