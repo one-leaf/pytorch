@@ -120,7 +120,8 @@ class PolicyNet():
         probs_old = torch.exp(log_probs_old_t)
         probs_old = probs_old * availables_t
         probs_old = probs_old.clamp(min=0.02, max=0.98) * availables_t
-        probs_old = probs_old / probs_old.sum(dim=-1, keepdim=True)
+        probs_old_sum = probs_old.sum(dim=-1, keepdim=True).clamp(min=1e-8)
+        probs_old = probs_old / probs_old_sum
         log_probs_old_t = torch.log(probs_old)
         action_batch = torch.LongTensor(action_batch).to(self.device)
         prev_action_batch = torch.LongTensor(prev_action_batch).to(self.device)
@@ -157,7 +158,7 @@ class PolicyNet():
         probs = probs * availables_t                          # 无效动作概率归零
         valid_probs = probs.clamp(min=0.02, max=0.98)         # 有效动作 clamp 到 [2%, 98%]
         valid_probs = valid_probs * availables_t              # 再次确保无效动作为 0
-        probs = valid_probs / valid_probs.sum(dim=-1, keepdim=True)  # renorm（仅有效动作求和为1）
+        probs = valid_probs / valid_probs.sum(dim=-1, keepdim=True).clamp(min=1e-8)
         log_probs = torch.log(probs)
         # values: [B, N] quantiles
 

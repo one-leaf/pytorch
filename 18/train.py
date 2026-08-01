@@ -113,6 +113,7 @@ class PPODataset(torch.utils.data.Dataset):
 
                 # 格式: (state, ref_prob, log_prob, action, prev_action, R, is_terminal, availables)
                 n_steps = len(steps)
+                assert len(steps[0]) == 8, f'error: expected 8 elements, got {len(steps[0])} (old format, delete file)'
                 for step in steps:
                     assert step[0].shape == (2, 20, 10), f'error: state shape {step[0].shape}'
                     assert step[1].shape == (5,), f'error: ref_prob shape {step[1].shape}'
