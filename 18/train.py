@@ -272,7 +272,10 @@ class PPOTrain():
                     _epoch_vl += value_loss
                     _epoch_batches += 1
 
-                    # 自适应 entropy_weight：根据实际 entropy 动态调整
+                    # 自适应 entropy_weight（SAC 启发式）
+                    # 目标熵：target_entropy = -scale × ln(|A|)，离散空间类比
+                    # 5 动作，scale=0.5~0.7 → target ≈ 0.8~1.13
+                    # 经验：0.8~1.0 折中；<0.5 策略定型；>1.3 基本随机
                     self.entropy_ema = 0.99 * self.entropy_ema + 0.01 * float(entropy)
                     entropy_diff = self.entropy_target - self.entropy_ema
                     if abs(entropy_diff) > 0.05:  # 只在偏差 > 0.05 时调整
