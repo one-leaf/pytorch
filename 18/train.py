@@ -171,37 +171,30 @@ class PPODataset(torch.utils.data.Dataset):
         Gs = np.array([step[8] for steps in self.data.values() for step in steps])
         if len(Rs) > 0:
             # 保存原始统计用于跟踪
-            self.r_mean_raw = float(Rs.mean())
-            self.r_std_raw = max(float(Rs.std()), 1e-3)
             self.g_mean_raw = float(Gs.mean())
             self.g_std_raw = max(float(Gs.std()), 1e-3)
-            print(f"R raw: min={Rs.min():.1f} mean={self.r_mean_raw:.2f} std={self.r_std_raw:.2f} max={Rs.max():.1f}")
+            print(f"R raw: min={Rs.min():.1f} max={Rs.max():.1f}")
             print(f"G raw: min={Gs.min():.1f} mean={self.g_mean_raw:.2f} std={self.g_std_raw:.2f} max={Gs.max():.1f}")
 
             # 直接写入 status（不平滑）
             status = read_status_file()
             m = status["metrics"]
-            m["r_mean_raw"] = round(self.r_mean_raw, 3)
-            m["r_std_raw"]  = round(self.r_std_raw, 3)
             m["g_mean_raw"] = round(self.g_mean_raw, 3)
             m["g_std_raw"]  = round(self.g_std_raw, 3)
             save_status_file(status)
 
-            # 归一化所有 R 和 G（数据集级别 z-score）
-            r_mean, r_std = self.r_mean_raw, self.r_std_raw
+            # 归一化 G（数据集级别 z-score）
             g_mean, g_std = self.g_mean_raw, self.g_std_raw
             for fn_key in self.data:
                 self.data[fn_key] = [
                     (s[0], s[1], s[2], s[3], s[4],
-                     (s[5] - r_mean) / r_std,
+                     s[5],
                      s[6], s[7],
                      (s[8] - g_mean) / g_std)
                     for s in self.data[fn_key]
                 ]
-            print(f"R/G normalized: r→(0,1) g→(0,1)")
+            print(f"G normalized: g→(0,1)")
         else:
-            self.r_mean_raw = 0.0
-            self.r_std_raw = 1.0
             self.g_mean_raw = 0.0
             self.g_std_raw = 1.0
 
