@@ -255,8 +255,15 @@ class PolicyNet():
         none_penalty_coef = 0.02
         none_penalty = probs_new[:, 3].mean()
 
+        # ── 不可行动作概率惩罚：压低不可用动作的概率 ──────────────
+        unavailable_penalty_coef = 0.1
+        # 不可用位置的 log_prob，希望它们趋向 -inf（概率趋向 0）
+        unavailable_log_probs = log_probs_safe * (1 - availables_t)  # [B, 5]，可用位置为 0
+        # 取负值，希望 log_prob 越小越好；clamp 防止数值不稳定
+        unavailable_penalty = -torch.clamp(unavailable_log_probs.sum(dim=-1), min=-20.0).mean()
+
         # ── 总损失 ───────────────────────────────────────────────
-        loss = policy_loss + vf_coef * value_loss + beta * kl_div - entropy_weight * entropy + none_penalty_coef * none_penalty
+        loss = policy_loss + vf_coef * value_loss + beta * kl_div - entropy_weight * entropy + none_penalty_coef * none_penalty + unavailable_penalty_coef * unavailable_penalty
 
         self.optimizer.zero_grad()
         loss.backward()

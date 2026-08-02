@@ -35,17 +35,10 @@ class PPOSelfPlay():
 
         self.policy_net.net.eval()
         with torch.no_grad():
-            log_probs_batch, values_batch = self.policy_net.net(states_tensor, prev_tensor)
+            log_probs_batch, _ = self.policy_net.net(states_tensor, prev_tensor)
 
         if torch.isnan(log_probs_batch).any():
             log_probs_batch = torch.zeros_like(log_probs_batch)
-
-        # V(s): 中间 1/2 分位数均值，映射到温度（V低→温度高→分布平坦→更多探索）
-        N_q = values_batch.shape[1]
-        v_scalar = values_batch[:, N_q // 4 : N_q - N_q // 4].mean(dim=1)
-        v_np = v_scalar.cpu().numpy()
-        # V(s) ∈ [-2, +2] → temperature ∈ [3.0, 1.0]
-        v_temp = np.clip(2.0 - 0.5 * v_np, 1.0, 3.0)
 
         actions = []
         all_probs = []
@@ -58,8 +51,7 @@ class PPOSelfPlay():
             availables = agent.availables
 
             if i not in greedy_indices:
-                # V(s) 低 → 温度高 → 分布平坦 → 探索更多
-                scaled = torch.exp(log_probs / v_temp[idx]).cpu().numpy()
+                scaled = torch.exp(log_probs).cpu().numpy()
                 probs = scaled * availables.astype(np.float32)
                 probs_sum = probs.sum()
                 if probs_sum < 1e-10:
