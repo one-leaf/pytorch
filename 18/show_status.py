@@ -7,7 +7,8 @@ import json, os, sys
 
 model_name = ""
 curr_dir = os.path.dirname(os.path.abspath(__file__))
-status_file = os.path.join(curr_dir, 'model', model_name, 'status.json')
+play_file = os.path.join(curr_dir, 'model', model_name, 'play.json')
+train_file = os.path.join(curr_dir, 'model', model_name, 'train.json')
 
 
 def fmt(val, decimals=3):
@@ -19,45 +20,60 @@ def fmt(val, decimals=3):
 
 
 def show_status(max_history=0, as_json=False):
-    if not os.path.exists(status_file):
-        print(f"状态文件不存在: {status_file}")
+    play = {}
+    train = {}
+
+    if not os.path.exists(play_file) and not os.path.exists(train_file):
+        print(f"状态文件不存在: {play_file} 和 {train_file}")
         sys.exit(1)
 
-    with open(status_file, "r") as f:
-        state = json.load(f)
+    if os.path.exists(play_file):
+        with open(play_file, "r") as f:
+            play = json.load(f)
+
+    if os.path.exists(train_file):
+        with open(train_file, "r") as f:
+            train = json.load(f)
 
     if as_json:
-        print(json.dumps(state, indent=2, ensure_ascii=False))
+        print("play.json:")
+        print(json.dumps(play, indent=2, ensure_ascii=False))
+        print("\ntrain.json:")
+        print(json.dumps(train, indent=2, ensure_ascii=False))
         return
 
-    c = state.get("counters", {})
-    m = state.get("metrics", {})
-    tr = state.get("training", {})
-    info = state.get("info", {})
-    history = state.get("history", [])
+    pc = play.get("counters", {})
+    pm = play.get("metrics", {})
+    tc = train.get("counters", {})
+    tm = train.get("metrics", {})
+    tr = train.get("training", {})
+    history = train.get("history", [])
 
     # 基本信息
     print("=" * 153)
-    print(f"  创建时间:   {info.get('create', '-')}  最后更新:   {info.get('modify', '-')}")
-    train_count = c.get("train", 0)
-    sample_count = c.get("agent", 0)
-    print(f"  训练轮次:   {train_count}    样本数:   {sample_count}")
+    p_info = play.get("info", {})
+    t_info = train.get("info", {})
+    print(f"  play 创建:   {p_info.get('create', '-')}  最后更新:   {p_info.get('modify', '-')}")
+    print(f"  train 创建:  {t_info.get('create', '-')}  最后更新:   {t_info.get('modify', '-')}")
+    train_count = tc.get("train", 0)
+    sample_count = pc.get("agent", 0)
+    print(f"  训练轮次:   {train_count}    样本组数:   {sample_count}")
     print("-" * 153)
 
     # test_play（纯贪婪，无噪声）
-    test_pc = m.get("test_piececount")
+    test_pc = pm.get("test_piececount")
     if test_pc is not None and test_pc != 0:
         print("  [Test] test_play（纯贪婪，无噪声）")
-        print(f"    平均方块数:   {fmt(test_pc, 1)}    平均步数:     {fmt(m.get('test_steps'), 1)}    平均消行数:   {fmt(m.get('test_removedlines'), 3)}")
-        print(f"    历史最高:     方块={m.get('test_piececount_best', 0)}  消行={m.get('test_removedlines_best', 0)}")
+        print(f"    平均方块数:   {fmt(test_pc, 1)}    平均步数:     {fmt(pm.get('test_steps'), 1)}    平均消行数:   {fmt(pm.get('test_removedlines'), 3)}")
+        print(f"    历史最高:     方块={pm.get('test_piececount_best', 0)}  消行={pm.get('test_removedlines_best', 0)}")
     else:
         print("  [Test] （尚未运行 test_play）")
     print("-" * 153)
     print(f"  KL 散度:      {fmt(tr.get('kl'), 6)}")
     print(f"  学习率倍率:   {fmt(tr.get('lr_multiplier'), 4)}    熵权重:   {fmt(tr.get('entropy_weight'), 4)}")
-    train_acc = m.get("train_acc")
+    train_acc = tm.get("train_acc")
     if train_acc is not None and train_acc != 0:
-        print(f"  Train EMA:    acc={fmt(train_acc, 4)}  kl={fmt(m.get('train_kl'), 5)}  entropy={fmt(m.get('train_entropy'), 4)}  vloss={fmt(m.get('train_vloss'), 4)}")
+        print(f"  Train EMA:    acc={fmt(train_acc, 4)}  kl={fmt(tm.get('train_kl'), 5)}  entropy={fmt(tm.get('train_entropy'), 4)}  vloss={fmt(tm.get('train_vloss'), 4)}")
 
     # 历史趋势
     if history and max_history > 0:

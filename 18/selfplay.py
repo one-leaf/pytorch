@@ -5,7 +5,7 @@ import torch
 
 from model import PolicyNet, data_wait_dir, model_file, model_dir
 from agent import Agent, ACTIONS
-from status import save_status_file, read_status_file, status_file
+from status import save_play_state, read_play_state, play_file, train_file
 
 # 定义游戏的动作
 GAME_ACTIONS_NUM = len(ACTIONS)
@@ -188,7 +188,7 @@ class PPOSelfPlay():
 
             # 更新贪婪局（test）的 EMA 指标
             greedy_agent = agents[0]
-            state = read_status_file()
+            state = read_play_state()
             alpha = 0.001
             m = state["metrics"]
             m["test_piececount"] = m.get("test_piececount", 0) * (1 - alpha) + greedy_agent.piececount * alpha
@@ -201,14 +201,16 @@ class PPOSelfPlay():
                 m["test_piececount_best"] = greedy_agent.piececount
                 m["test_removedlines_best"] = max(m.get("test_removedlines_best", 0), greedy_agent.removedlines)
 
-            save_status_file(state)
+            save_play_state(state)
 
             if greedy_agent.piececount > old_best_pc:
                 # 保存最佳模型（按方块数建目录，备份状态文件）
                 best_dir = os.path.join(model_dir, f"{greedy_agent.piececount:.1f}")
                 os.makedirs(best_dir, exist_ok=True)
                 self.policy_net.save_model(os.path.join(best_dir, 'model.pth'))
-                shutil.copy2(status_file, os.path.join(best_dir, 'status.json'))
+                shutil.copy2(play_file, os.path.join(best_dir, 'play.json'))
+                if os.path.exists(train_file):
+                    shutil.copy2(train_file, os.path.join(best_dir, 'train.json'))
                 print(f"*** new best! greedy_piececount={greedy_agent.piececount} > best={old_best_pc}, saved to {best_dir}")
 
             # 保存所有探索局（game 1-15）用于训练，game 0 为贪婪测试局不保存
@@ -259,7 +261,7 @@ class PPOSelfPlay():
             g_max_pc = max(a.piececount for a, _, _ in group_agents)
             g_max_rl = max(a.removedlines for a, _, _ in group_agents)
 
-            state = read_status_file()
+            state = read_play_state()
             state["counters"]["agent"] += 1
             state["counters"]["_agent"] += 1
 
@@ -274,7 +276,7 @@ class PPOSelfPlay():
             m["ppo_piececount_best"]    = max(m.get("ppo_piececount_best",    0), g_max_pc)
             m["ppo_removedlines_best"]  = max(m.get("ppo_removedlines_best",  0), g_max_rl)
 
-            save_status_file(state)
+            save_play_state(state)
 
         print(f"\nCollection finished. Total games: {game_counter}")
 

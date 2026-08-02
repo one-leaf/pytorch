@@ -10,7 +10,7 @@ import os, math, copy
 import numpy as np
 import torch
 
-from status import save_status_file, read_status_file, set_status_value, status_file
+from status import read_train_state, save_train_state, set_train_value, train_file
 
 # 定义游戏的动作
 GAME_ACTIONS_NUM = len(ACTIONS)
@@ -176,12 +176,12 @@ class PPODataset(torch.utils.data.Dataset):
             print(f"R raw: min={Rs.min():.1f} max={Rs.max():.1f}")
             print(f"G raw: min={Gs.min():.1f} mean={self.g_mean_raw:.2f} std={self.g_std_raw:.2f} max={Gs.max():.1f}")
 
-            # 直接写入 status（不平滑）
-            status = read_status_file()
-            m = status["metrics"]
+            # 直接写入 train.json（不平滑）
+            train_state = read_train_state()
+            m = train_state["metrics"]
             m["g_mean_raw"] = round(self.g_mean_raw, 3)
             m["g_std_raw"]  = round(self.g_std_raw, 3)
-            save_status_file(status)
+            save_train_state(train_state)
 
             # 归一化 G（数据集级别 z-score）
             g_mean, g_std = self.g_mean_raw, self.g_std_raw
@@ -261,9 +261,9 @@ class PPOTrain():
                     print(f"waiting for data: {e}")
                     time.sleep(30)
 
-            status = read_status_file()
-            self.lr_multiplier = status["training"]["lr_multiplier"]
-            self.ppo_entropy_weight = float(status["training"].get("entropy_weight", 1.0))
+            train_state = read_train_state()
+            self.lr_multiplier = train_state["training"]["lr_multiplier"]
+            self.ppo_entropy_weight = float(train_state["training"].get("entropy_weight", 1.0))
             print(f"batch_size: {self.batch_size}, lr_multiplier: {self.lr_multiplier}, entropy_weight: {self.ppo_entropy_weight}, learn_rate: {self.learn_rate * self.lr_multiplier}")
 
             # 训练循环（n_epochs 个 epoch，保证每局被训练 n_epochs 次）
@@ -314,12 +314,12 @@ class PPOTrain():
                             best_dirs.sort(key=lambda x: float(x), reverse=True)
                             best_dir = os.path.join(model_dir, best_dirs[0])
                             restore_model = os.path.join(best_dir, 'model.pth')
-                            restore_status = os.path.join(best_dir, 'status.json')
+                            restore_train = os.path.join(best_dir, 'train.json')
                             if os.path.exists(restore_model):
                                 print(f"[ROLLBACK] restoring from best dir: {best_dir}")
                                 shutil.copy2(restore_model, model_file)
-                                if os.path.exists(restore_status):
-                                    shutil.copy2(restore_status, status_file)
+                                if os.path.exists(restore_train):
+                                    shutil.copy2(restore_train, train_file)
                                 self.policy_net = PolicyNet(
                                     GAME_WIDTH, GAME_HEIGHT, GAME_ACTIONS_NUM, model_file=model_file, l2_const=1e-4
                                 )
@@ -350,16 +350,16 @@ class PPOTrain():
             self.policy_net.save_model(model_file)
 
             # KL 散度：使用训练循环的平均 KL
-            status = read_status_file()
+            train_state = read_train_state()
             alpha = 0.1
-            m = status["metrics"]
+            m = train_state["metrics"]
             m["train_acc"]     = round(m.get("train_acc",     0) * (1 - alpha) + avg_acc * alpha, 5)
             m["train_kl"]      = round(m.get("train_kl",      0) * (1 - alpha) + avg_kl  * alpha, 5)
             m["train_entropy"] = round(m.get("train_entropy", 0) * (1 - alpha) + avg_ent * alpha, 5)
             m["train_vloss"]   = round(m.get("train_vloss",   0) * (1 - alpha) + avg_vl  * alpha, 5)
             # lr_multiplier 调整使用 EMA 平滑后的 train_kl
-            set_status_value(status, "kl", avg_kl, alpha)
-            total_kl = status["training"]["kl"]
+            set_train_value(train_state, "kl", avg_kl, alpha)
+            total_kl = train_state["training"]["kl"]
 
             if total_kl > self.kl_targ * 2:
                 self.lr_multiplier /= 1.1
@@ -367,11 +367,11 @@ class PPOTrain():
                 self.lr_multiplier *= 1.1
             self.lr_multiplier = np.clip(self.lr_multiplier, 0.1, 3.0)
 
-            status["training"]["lr_multiplier"] = float(self.lr_multiplier)
-            status["training"]["entropy_weight"] = float(self.ppo_entropy_weight)
-            status["counters"]["train"] += 1
-            status["counters"]["_train"] += 1
-            save_status_file(status)
+            train_state["training"]["lr_multiplier"] = float(self.lr_multiplier)
+            train_state["training"]["entropy_weight"] = float(self.ppo_entropy_weight)
+            train_state["counters"]["train"] += 1
+            train_state["counters"]["_train"] += 1
+            save_train_state(train_state)
             print(f"train EMA: acc={m['train_acc']:.4f} kl={m['train_kl']:.5f} entropy={m['train_entropy']:.4f} vloss={m['train_vloss']:.4f}")
 
             print(f"kl:{kl:.6f} vs {self.kl_targ} lr_multiplier:{self.lr_multiplier} "
