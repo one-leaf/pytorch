@@ -198,18 +198,12 @@ class PPODataset(torch.utils.data.Dataset):
                      (s[8] - g_mean) / g_std)
                     for s in self.data[fn_key]
                 ]
-            self.r_mean = 0.0
-            self.r_std = 1.0
-            self.g_mean = 0.0
-            self.g_std = 1.0
             print(f"R/G normalized: r→(0,1) g→(0,1)")
         else:
             self.r_mean_raw = 0.0
             self.r_std_raw = 1.0
             self.g_mean_raw = 0.0
             self.g_std_raw = 1.0
-            self.r_mean = 0.0
-            self.r_std = 1.0
 
         self._flat_index = [(fn, i) for fn in self.file_list for i in range(len(self.data[fn]))]
 
