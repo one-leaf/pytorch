@@ -237,7 +237,7 @@ class PPOSelfPlay():
                         elif removed == 3: r_step = 5.0        # 消3行
                         elif removed >= 4: r_step = 8.0        # 消4行（Tetris）
                     if is_terminal:
-                        r_step = -1.0                          # 终止惩罚
+                        r_step = agent.piececount              # 方块数（train 中归一化到 [-1, 1]）
                     game_steps.append((
                         step_data["state"], step_data["ref_prob"],
                         step_data["log_prob"], step_data["action"],

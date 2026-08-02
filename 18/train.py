@@ -106,18 +106,48 @@ class PPODataset(torch.utils.data.Dataset):
         start_time = time.time()
         gamma = 0.99
 
+        # ── Pass 1: 收集每局最后一步的 r（方块数），用于归一化 ──
+        game_piececounts = {}  # fn → piececount（最后一步的 r）
         for fn in self.file_list:
             try:
                 with open(fn, "rb") as f:
                     steps = pickle.load(f)
-
-                # 格式: (state, ref_prob, log_prob, action, prev_action, R, is_terminal, availables)
-                n_steps = len(steps)
+                # (state, ref_prob, log_prob, action, prev_action, r_step, is_terminal, availables)                    
                 assert len(steps[0]) == 8, f'error: expected 8 elements, got {len(steps[0])} (old format, delete file)'
-                for step in steps:
-                    assert step[0].shape == (2, 20, 10), f'error: state shape {step[0].shape}'
-                    assert step[1].shape == (5,), f'error: ref_prob shape {step[1].shape}'
-                    assert not np.isnan(step[5]), f'error: R is Nan'
+                game_piececounts[fn] = steps[-1][5]  # 最后一步的 r = 方块数
+            except Exception as e:
+                print(f"file {fn} scan error: {e}")
+                if os.path.exists(fn):
+                    os.remove(fn)
+                self.file_list.remove(fn)
+
+        if not game_piececounts:
+            return
+
+        all_pc = list(game_piececounts.values())
+        min_pc = min(all_pc)
+        max_pc = max(all_pc)
+        pc_range = max(max_pc - min_pc, 1)
+        print(f"Piececounts: min={min_pc} max={max_pc} mean={np.mean(all_pc):.1f} games={len(all_pc)}")
+
+        # ── Pass 2: 加载数据，归一化终止奖励到 [-1, 1]，计算 G_t ──
+        for fn in self.file_list:
+            if fn not in game_piececounts:
+                continue
+            try:
+                with open(fn, "rb") as f:
+                    steps = pickle.load(f)
+
+                n_steps = len(steps)
+
+                # 归一化终止奖励：方块数越多 → 越接近 +1，方块数越少 → 越接近 -1
+                # 落地消行奖励（中间步骤）保持不变
+                pc = game_piececounts[fn]
+                terminal_r = 2.0 * (pc - min_pc) / pc_range - 1.0
+
+                # 修改最后一步的 R
+                last_step = steps[-1]
+                steps[-1] = (*last_step[:5], terminal_r, last_step[6], last_step[7])
 
                 # 预计算这局游戏的 G_t（折扣回报）
                 g_values = np.zeros(n_steps)
