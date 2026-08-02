@@ -289,16 +289,6 @@ class PPOTrain():
                     _epoch_vl += value_loss
                     _epoch_batches += 1
 
-                    # 自适应 entropy_weight（SAC 启发式）
-                    # 目标熵：target_entropy = -scale × ln(|A|)，离散空间类比
-                    # 5 动作，scale=0.5~0.7 → target ≈ 0.8~1.13
-                    # 经验：0.8~1.0 折中；<0.5 策略定型；>1.3 基本随机
-                    self.entropy_ema = 0.99 * self.entropy_ema + 0.01 * float(entropy)
-                    entropy_diff = self.entropy_target - self.entropy_ema
-                    if abs(entropy_diff) > 0.05:  # 只在偏差 > 0.05 时调整
-                        adjust = 1.0 + 0.1 * entropy_diff  # 比例控制
-                        self.ppo_entropy_weight = float(np.clip(self.ppo_entropy_weight * adjust, 0.1, 5.0))
-
                     if i % 100 == 0:
                         print(f"Train {i} {self.batch_size*i/len(self.dataset)*100:.1f}%",
                               f"acc:{acc:.4f} kl:{kl:.5f} ent:{entropy:.4f} vloss:{value_loss:.4f}",
@@ -343,6 +333,18 @@ class PPOTrain():
             avg_acc = _sum_acc / max(_num_batches, 1)
             avg_kl  = _sum_kl  / max(_num_batches, 1)
             avg_ent = _sum_ent / max(_num_batches, 1)
+
+            # 训练结束后才更新 entropy_weight，供下一轮 train 使用
+            # 目标熵：target_entropy = -scale × ln(|A|)，离散空间类比
+            # 5 动作，scale=0.5~0.7 → target ≈ 0.8~1.13
+            # 经验：0.8~1.0 折中；<0.5 策略定型；>1.3 基本随机
+            self.entropy_ema = 0.99 * self.entropy_ema + 0.01 * float(avg_ent)
+            entropy_diff = self.entropy_target - self.entropy_ema
+            if abs(entropy_diff) > 0.05:  # 只在偏差 > 0.05 时调整
+                adjust = 1.0 + 0.1 * entropy_diff  # 比例控制
+                self.ppo_entropy_weight = float(np.clip(self.ppo_entropy_weight * adjust, 0.1, 5.0))
+            print(f"entropy update: avg_ent={avg_ent:.4f} ema={self.entropy_ema:.4f} "
+                  f"diff={entropy_diff:.4f} ent_w={self.ppo_entropy_weight:.3f}")
             avg_vl  = _sum_vl  / max(_num_batches, 1)
 
             self.policy_net.save_model(model_file)
