@@ -200,7 +200,9 @@ class PPOTrain():
         # PPO 超参数
         self.ppo_clip_eps = 0.2
         self.ppo_beta = 0.05            # KL 惩罚系数，beta*KL=0.05*0.4=0.02，与 policy_loss 可比
-        self.ppo_entropy_weight = 1.0   # 熵正则，强制保持探索防止策略崩溃
+        self.ppo_entropy_weight = 1.0   # 熵正则（初始值，会自适应调整）
+        self.entropy_target = 1.0       # 目标 entropy（自适应控制目标）
+        self.entropy_ema = 1.0          # entropy EMA（用于自适应控制）
         self.n_epochs = 1               # 每轮训练只跑 1 个 epoch，训练次数由 min_new_files 控制
 
     def policy_update(self, sample_data):
@@ -244,7 +246,8 @@ class PPOTrain():
 
             status = read_status_file()
             self.lr_multiplier = status["training"]["lr_multiplier"]
-            print(f"batch_size: {self.batch_size}, lr_multiplier: {self.lr_multiplier}, learn_rate: {self.learn_rate * self.lr_multiplier}")
+            self.ppo_entropy_weight = float(status["training"].get("entropy_weight", 1.0))
+            print(f"batch_size: {self.batch_size}, lr_multiplier: {self.lr_multiplier}, entropy_weight: {self.ppo_entropy_weight}, learn_rate: {self.learn_rate * self.lr_multiplier}")
 
             # 训练循环（n_epochs 个 epoch，保证每局被训练 n_epochs 次）
             _sum_acc = _sum_kl = _sum_ent = _sum_vl = 0.0
@@ -268,9 +271,18 @@ class PPOTrain():
                     _epoch_ent += entropy
                     _epoch_vl += value_loss
                     _epoch_batches += 1
+
+                    # 自适应 entropy_weight：根据实际 entropy 动态调整
+                    self.entropy_ema = 0.99 * self.entropy_ema + 0.01 * float(entropy)
+                    entropy_diff = self.entropy_target - self.entropy_ema
+                    if abs(entropy_diff) > 0.05:  # 只在偏差 > 0.05 时调整
+                        adjust = 1.0 + 0.1 * entropy_diff  # 比例控制
+                        self.ppo_entropy_weight = float(np.clip(self.ppo_entropy_weight * adjust, 0.1, 5.0))
+
                     if i % 500 == 0:
                         print(f"Train {i} {self.batch_size*i/len(self.dataset)*100:.1f}%",
-                              "acc:", acc, "kl:", kl, "entropy:", entropy, "vloss:", value_loss)
+                              f"acc:{acc:.4f} kl:{kl:.5f} ent:{entropy:.4f} vloss:{value_loss:.4f}",
+                              f"ent_w:{self.ppo_entropy_weight:.3f} ent_ema:{self.entropy_ema:.4f}")
 
                     if epoch == 0 and i == 0:
                         state_batch, ref_probs_batch, log_probs_old_batch, actions_batch, prev_actions_batch, game_ids_batch, R_batch, _is_terminal, _availables, G_batch = data
@@ -334,6 +346,7 @@ class PPOTrain():
             self.lr_multiplier = np.clip(self.lr_multiplier, 0.1, 3.0)
 
             status["training"]["lr_multiplier"] = float(self.lr_multiplier)
+            status["training"]["entropy_weight"] = float(self.ppo_entropy_weight)
             status["counters"]["train"] += 1
             status["counters"]["_train"] += 1
             save_status_file(status)

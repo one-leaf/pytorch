@@ -85,7 +85,7 @@ def _default_state():
             "r_mean_raw": 0,
             "r_std_raw": 0,
         },
-        "training": {"kl": 1e-2, "lr_multiplier": 1},
+        "training": {"kl": 1e-2, "lr_multiplier": 1, "entropy_weight": 1.0},
         "_accum": {"_sum_piececount": 0, "_sum_removedlines": 0, "_sum_steps": 0},
         "history": [],
         "info": {},
@@ -185,6 +185,7 @@ def _append_history(state: dict[str, Any]):
         # training
         "kl": tr.get("kl", 0),
         "lr_multiplier": tr.get("lr_multiplier", 1),
+        "entropy_weight": tr.get("entropy_weight", 1.0),
         "modify": "",
     }
     if "info" in state:

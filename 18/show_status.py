@@ -54,7 +54,7 @@ def show_status(max_history=0, as_json=False):
         print("  [Test] （尚未运行 test_play）")
     print("-" * 163)
     print(f"  KL 散度:      {fmt(tr.get('kl'), 6)}")
-    print(f"  学习率倍率:   {fmt(tr.get('lr_multiplier'), 4)}")
+    print(f"  学习率倍率:   {fmt(tr.get('lr_multiplier'), 4)}    熵权重:   {fmt(tr.get('entropy_weight'), 4)}")
     train_acc = m.get("train_acc")
     if train_acc is not None and train_acc != 0:
         print(f"  Train EMA:    acc={fmt(train_acc, 4)}  kl={fmt(m.get('train_kl'), 5)}  entropy={fmt(m.get('train_entropy'), 4)}  vloss={fmt(m.get('train_vloss'), 4)}")
@@ -85,7 +85,7 @@ def show_status(max_history=0, as_json=False):
         header = (f"  {'Train':>6}  "
                   f"{'PP_Pc':>8} {'PP_Ln':>8} {'PP_St':>8} {'PP_Min':>7} {'PP_Max':>7}  "
                   f"{'Te_Pc':>8} {'Te_Ln':>8} {'Te_St':>8} {'Te_Best':>7}  "
-                  f"{'Acc':>8} {'KL':>9} {'Ent':>8} {'VL':>8}  "
+                  f"{'Acc':>8} {'KL':>9} {'Ent':>8} {'EntW':>7} {'VL':>8}  "
                   f"{'G_M':>7} {'G_S':>7}  "
                   f"{'R_M':>7} {'R_S':>7}")
         print(header)
@@ -104,6 +104,7 @@ def show_status(max_history=0, as_json=False):
                   f"{h.get('train_acc', 0):>8.4f} "
                   f"{h.get('train_kl', 0):>9.5f} "
                   f"{h.get('train_entropy', 0):>8.4f} "
+                  f"{h.get('entropy_weight', 0):>7.3f} "
                   f"{h.get('train_vloss', 0):>8.4f}  "
                   f"{h.get('g_mean_raw', 0):>7.2f} "
                   f"{h.get('g_std_raw', 0):>7.2f}  "
