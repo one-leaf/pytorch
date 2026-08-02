@@ -37,12 +37,12 @@ def show_status(max_history=0, as_json=False):
     history = state.get("history", [])
 
     # 基本信息
-    print("=" * 163)
+    print("=" * 170)
     print(f"  创建时间:   {info.get('create', '-')}  最后更新:   {info.get('modify', '-')}")
     train_count = c.get("train", 0)
     sample_count = c.get("agent", 0)
     print(f"  训练轮次:   {train_count}    样本数:   {sample_count}")
-    print("-" * 163)
+    print("-" * 170)
 
     # test_play（纯贪婪，无噪声）
     test_pc = m.get("test_piececount")
@@ -52,7 +52,7 @@ def show_status(max_history=0, as_json=False):
         print(f"    历史最高:     方块={m.get('test_piececount_best', 0)}  消行={m.get('test_removedlines_best', 0)}")
     else:
         print("  [Test] （尚未运行 test_play）")
-    print("-" * 163)
+    print("-" * 170)
     print(f"  KL 散度:      {fmt(tr.get('kl'), 6)}")
     print(f"  学习率倍率:   {fmt(tr.get('lr_multiplier'), 4)}    熵权重:   {fmt(tr.get('entropy_weight'), 4)}")
     train_acc = m.get("train_acc")
@@ -79,9 +79,9 @@ def show_status(max_history=0, as_json=False):
             display = history
             label = f"  训练记录 ({len(history)} 条):"
 
-        print("=" * 163)
+        print("=" * 170)
         print(label)
-        print("-" * 163)
+        print("-" * 170)
         header = (f"  {'Train':>6}  "
                   f"{'PP_Pc':>8} {'PP_Ln':>8} {'PP_St':>8} {'PP_Min':>7} {'PP_Max':>7}  "
                   f"{'Te_Pc':>8} {'Te_Ln':>8} {'Te_St':>8} {'Te_Best':>7}  "
@@ -89,7 +89,7 @@ def show_status(max_history=0, as_json=False):
                   f"{'G_M':>7} {'G_S':>7}  "
                   f"{'R_M':>7} {'R_S':>7}")
         print(header)
-        print("-" * 163)
+        print("-" * 170)
         for h in display:
             print(f"  {h.get('train', 0):>6}  "
                   f"{h.get('ppo_piececount', 0):>8.1f} "
@@ -110,9 +110,9 @@ def show_status(max_history=0, as_json=False):
                   f"{h.get('g_std_raw', 0):>7.2f}  "
                   f"{h.get('r_mean_raw', 0):>7.2f} "
                   f"{h.get('r_std_raw', 0):>7.2f}")
-        print("=" * 163)
+        print("=" * 170)
     elif history:
-        print("=" * 163)
+        print("=" * 170)
         print(f"  历史记录: 共 {len(history)} 条 (用 --history N 查看)")
         if len(history) >= 2:
             first, last = history[0], history[-1]
@@ -122,7 +122,7 @@ def show_status(max_history=0, as_json=False):
             print(f"  当前(train {last.get('train', 0)}):  "
                   f"player pc={last.get('ppo_piececount', 0):.1f} ln={last.get('ppo_removedlines', 0):.3f}  "
                   f"test pc={last.get('test_piececount', 0):.1f} ln={last.get('test_removedlines', 0):.3f}")
-        print("=" * 163)
+        print("=" * 170)
 
 
 if __name__ == '__main__':
