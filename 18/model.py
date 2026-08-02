@@ -246,7 +246,7 @@ class PolicyNet():
         kl_div = (probs_new * (log_probs_safe - log_probs_old_t) * availables_t).sum(dim=-1).mean()
 
         # ── 熵正则化 ─────────────────────────────────────────────
-        # entropy_weight=0.30: 与 policy_loss 量级相当，稳定探索防止策略过快收敛
+        # entropy_weight=1.0: 强制保持探索防止策略崩溃
         # 仅计算有效动作的 entropy，无效动作 prob=0 不参与
         # 有效动作数影响最大 entropy：N 个有效动作 → max entropy = log(N)
         entropy = -(probs_new * log_probs_safe * availables_t).sum(dim=-1).mean()
