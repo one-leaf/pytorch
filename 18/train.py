@@ -209,7 +209,7 @@ class PPOTrain():
         self.batch_size = 512
         self.learn_rate = 1e-5
         self.lr_multiplier = 1.0
-        self.max_files = 10000          # data 目录最大保留文件数（安全上限，需 ≥ 2 × P × n_train_times）
+        self.max_files = 20000          # data 目录最大保留文件数（安全上限，需 ≥ 2 × P × n_train_times）
         self.n_train_times = 2          # 每局严格保证被训练的轮数
         self.min_new_files = 1          # 至少有1个新文件就训练（不限制移动数量，清空 wait 目录）
         self.kl_targ = 0.02             # KL 超过 0.04 降速，低于 0.01 加速
