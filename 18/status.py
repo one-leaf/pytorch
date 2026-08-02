@@ -57,7 +57,6 @@ play_file = os.path.join(model_dir, 'play.json')
 play_file_bak = os.path.join(model_dir, 'play_bak.json')
 train_file = os.path.join(model_dir, 'train.json')
 train_file_bak = os.path.join(model_dir, 'train_bak.json')
-status_file = os.path.join(model_dir, 'status.json')      # 仅用于旧格式迁移
 
 
 # ── 公共工具 ──────────────────────────────────────────────────────────────────
@@ -132,38 +131,6 @@ def _default_play_state():
     }
 
 
-def _migrate_play(state):
-    """兼容旧 status.json 格式"""
-    if "_migrated" in state:
-        return
-    if "total" not in state or "counters" in state:
-        state.setdefault("_migrated", True)
-        return
-
-    old = state.pop("total")
-    state.setdefault("counters", {})
-    state.setdefault("metrics", {})
-    state.setdefault("_accum", {})
-
-    for k in ("agent", "_agent"):
-        if k in old:
-            state["counters"][k] = old.pop(k)
-    for k in ["ppo_piececount", "ppo_removedlines", "ppo_steps",
-              "ppo_piececount_min", "ppo_piececount_max",
-              "ppo_removedlines_best", "ppo_piececount_best",
-              "test_piececount", "test_removedlines", "test_steps",
-              "test_piececount_best", "test_removedlines_best"]:
-        if k in old:
-            state["metrics"][k] = old.pop(k)
-    for k in ("_sum_piececount", "_sum_removedlines", "_sum_steps"):
-        if k in old:
-            state["_accum"][k] = old.pop(k)
-    if "info" in old:
-        state["info"] = old["info"]
-
-    state.setdefault("_migrated", True)
-
-
 def save_play_state(state):
     """写入 play.json（selfplay 专用）"""
     format_str = '%Y-%m-%d %H:%M:%S'
@@ -172,8 +139,6 @@ def save_play_state(state):
     if "create" not in state["info"]:
         state["info"]["create"] = datetime.now().strftime(format_str)
     state["info"]["modify"] = datetime.now().strftime(format_str)
-
-    _migrate_play(state)
 
     # 备份
     try:
@@ -207,7 +172,6 @@ def read_play_state():
             if attempt == max_retries - 1:
                 return _default_play_state()
 
-    _migrate_play(state)
     _fill_defaults(state, _default_play_state())
     return state
 
@@ -229,38 +193,6 @@ def _default_train_state():
         "history": [],
         "info": {},
     }
-
-
-def _migrate_train(state):
-    """兼容旧 status.json 格式"""
-    if "_migrated" in state:
-        return
-    if "total" not in state or "counters" in state:
-        state.setdefault("_migrated", True)
-        return
-
-    old = state.pop("total")
-    state.setdefault("counters", {})
-    state.setdefault("metrics", {})
-    state.setdefault("training", {})
-    state.setdefault("history", [])
-
-    for k in ("train", "_train"):
-        if k in old:
-            state["counters"][k] = old.pop(k)
-    for k in ["train_acc", "train_kl", "train_entropy", "train_vloss",
-              "g_mean_raw", "g_std_raw"]:
-        if k in old:
-            state["metrics"][k] = old.pop(k)
-    for k in ("kl", "lr_multiplier"):
-        if k in old:
-            state["training"][k] = old.pop(k)
-    if "history" in old:
-        state["history"] = old.pop("history")
-    if "info" in old:
-        state["info"] = old["info"]
-
-    state.setdefault("_migrated", True)
 
 
 def _append_train_history(train_state, play_state):
@@ -321,8 +253,6 @@ def save_train_state(state):
         state["info"]["create"] = datetime.now().strftime(format_str)
     state["info"]["modify"] = datetime.now().strftime(format_str)
 
-    _migrate_train(state)
-
     # 读取 play.json 最新状态用于 history 快照
     play_state = read_play_state()
     _append_train_history(state, play_state)
@@ -366,7 +296,6 @@ def read_train_state():
             if attempt == max_retries - 1:
                 return _default_train_state()
 
-    _migrate_train(state)
     _fill_defaults(state, _default_train_state())
     return state
 
@@ -377,4 +306,3 @@ def set_train_value(state, key, value, rate=1/1000):
         state["training"][key] = value
     else:
         state["training"][key] += (value - state["training"][key]) * rate
-
