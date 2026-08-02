@@ -52,6 +52,7 @@ class PPOSelfPlay():
 
             if i not in greedy_indices:
                 scaled = torch.exp(log_probs).cpu().numpy()
+                scaled = np.clip(scaled, a_min=0.01, a_max=0.95)
                 probs = scaled * availables.astype(np.float32)
                 probs_sum = probs.sum()
                 if probs_sum < 1e-10:
