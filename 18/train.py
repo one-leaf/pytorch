@@ -264,7 +264,8 @@ class PPOTrain():
             train_state = read_train_state()
             self.lr_multiplier = train_state["training"]["lr_multiplier"]
             self.ppo_entropy_weight = float(train_state["training"].get("entropy_weight", 1.0))
-            print(f"batch_size: {self.batch_size}, lr_multiplier: {self.lr_multiplier}, entropy_weight: {self.ppo_entropy_weight}, learn_rate: {self.learn_rate * self.lr_multiplier}")
+            self.entropy_ema = float(train_state["training"].get("entropy_ema", 1.0))
+            print(f"batch_size: {self.batch_size}, lr_multiplier: {self.lr_multiplier}, entropy_weight: {self.ppo_entropy_weight}, entropy_ema: {self.entropy_ema}, learn_rate: {self.learn_rate * self.lr_multiplier}")
 
             # 训练循环（n_epochs 个 epoch，保证每局被训练 n_epochs 次）
             _sum_acc = _sum_kl = _sum_ent = _sum_vl = 0.0
@@ -369,6 +370,7 @@ class PPOTrain():
 
             train_state["training"]["lr_multiplier"] = float(self.lr_multiplier)
             train_state["training"]["entropy_weight"] = float(self.ppo_entropy_weight)
+            train_state["training"]["entropy_ema"] = float(self.entropy_ema)
             train_state["counters"]["train"] += 1
             train_state["counters"]["_train"] += 1
             save_train_state(train_state)

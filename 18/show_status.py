@@ -70,7 +70,7 @@ def show_status(max_history=0, as_json=False):
         print("  [Test] （尚未运行 test_play）")
     print("-" * 153)
     print(f"  KL 散度:      {fmt(tr.get('kl'), 6)}")
-    print(f"  学习率倍率:   {fmt(tr.get('lr_multiplier'), 4)}    熵权重:   {fmt(tr.get('entropy_weight'), 4)}")
+    print(f"  学习率倍率:   {fmt(tr.get('lr_multiplier'), 4)}    熵权重:   {fmt(tr.get('entropy_weight'), 4)}    熵EMA:   {fmt(tr.get('entropy_ema'), 4)}")
     train_acc = tm.get("train_acc")
     if train_acc is not None and train_acc != 0:
         print(f"  Train EMA:    acc={fmt(train_acc, 4)}  kl={fmt(tm.get('train_kl'), 5)}  entropy={fmt(tm.get('train_entropy'), 4)}  vloss={fmt(tm.get('train_vloss'), 4)}")
