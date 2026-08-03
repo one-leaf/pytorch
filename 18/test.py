@@ -43,7 +43,11 @@ def play_one_game():
 
         action = int(np.argmax(probs_masked))
 
-        os.system('cls' if os.name == 'nt' else 'clear')
+        # 清屏：Windows 用 cls，其他系统用打印换行（避免 TERM 环境变量问题）
+        if os.name == 'nt':
+            os.system('cls')
+        else:
+            print('\n' * 50)  # 打印50个换行代替 clear
         print(f"=== Step {step} === Action: {ACTION_NAMES[action]} | Piece: {agent.fallpiece['shape']} (rot={agent.fallpiece['rotation']}, x={agent.fallpiece['x']}, y={agent.fallpiece['y']})")
         agent.print()
         prev_action = action
