@@ -156,7 +156,7 @@ class PPOSelfPlay():
         _start_time = time.time()
         game_counter = 0
 
-        for g in itertools.count():
+        for _ in itertools.count():
             if time.time() - _start_time > 60 * 60:  # 最多60分钟采集
                 break
 
@@ -177,8 +177,6 @@ class PPOSelfPlay():
                 n_games=16, greedy_indices={0}
             )
 
-            pcs = [a.piececount for a in agents]
-
             # 更新贪婪局（test）的 EMA 指标
             greedy_agent = agents[0]
             state = read_play_state()
@@ -188,29 +186,49 @@ class PPOSelfPlay():
             m["test_removedlines"] = m.get("test_removedlines", 0) * (1 - alpha) + greedy_agent.removedlines * alpha
             m["test_steps"] = m.get("test_steps", 0) * (1 - alpha) + greedy_agent.steps * alpha
 
-            # 检查是否刷新历史最佳
-            old_best_pc = m.get("test_piececount_best", 0)
-            if greedy_agent.piececount > old_best_pc:
-                m["test_piececount_best"] = greedy_agent.piececount
-                m["test_removedlines_best"] = max(m.get("test_removedlines_best", 0), greedy_agent.removedlines)
+            # 所有探索局（game 1-15）用于训练
+            group_agents = [(agents[i], trajectories[i], step_results[i]) for i in range(1, len(agents))]
+
+            # 更新 PPO 探索局 EMA 指标
+            g_avg_pc = sum(a.piececount for a, _, _ in group_agents) / len(group_agents)
+            g_avg_rl = sum(a.removedlines for a, _, _ in group_agents) / len(group_agents)
+            g_avg_st = sum(a.steps for a, _, _ in group_agents) / len(group_agents)
+            g_min_pc = min(a.piececount for a, _, _ in group_agents)
+            g_max_pc = max(a.piececount for a, _, _ in group_agents)
+            g_max_rl = max(a.removedlines for a, _, _ in group_agents)
+
+            state = read_play_state()
+            state["counters"]["agent"] += 1
+            state["counters"]["_agent"] += 1
+
+            m = state["metrics"]
+            # PPO player EMA（带噪声探索的移动平均）
+            m["ppo_piececount"]       = m.get("ppo_piececount",       0) * (1 - alpha) + g_avg_pc * alpha
+            m["ppo_removedlines"]     = m.get("ppo_removedlines",     0) * (1 - alpha) + g_avg_rl * alpha
+            m["ppo_steps"]            = m.get("ppo_steps",            0) * (1 - alpha) + g_avg_st * alpha
+            m["ppo_piececount_min"]   = m.get("ppo_piececount_min",   9) * (1 - alpha) + g_min_pc * alpha
+            m["ppo_piececount_max"]   = m.get("ppo_piececount_max",   0) * (1 - alpha) + g_max_pc * alpha
+            # 历史最值
+            m["ppo_piececount_best"]    = max(m.get("ppo_piececount_best",    0), g_max_pc)
+            m["ppo_removedlines_best"]  = max(m.get("ppo_removedlines_best",  0), g_max_rl)
 
             save_play_state(state)
 
-            if greedy_agent.piececount > old_best_pc:
-                # 保存最佳模型（按方块数建目录，备份状态文件）
-                best_dir = os.path.join(model_dir, f"{greedy_agent.piececount:.1f}")
+            # 检查是否刷新历史最佳（按ppo EMA方块数）
+            ppo_ema_pc = m.get("ppo_piececount", 0)
+            old_best_pc = m.get("ppo_piececount_best_ema", 0)
+            if ppo_ema_pc > old_best_pc:
+                m["ppo_piececount_best_ema"] = ppo_ema_pc
+                save_play_state(state)  # 保存更新后的 best_ema
+                # 保存最佳模型（按ppo EMA方块数建目录，备份状态文件）
+                best_dir = os.path.join(model_dir, f"{ppo_ema_pc:.1f}")
                 os.makedirs(best_dir, exist_ok=True)
                 self.policy_net.save_model(os.path.join(best_dir, 'model.pth'))
                 shutil.copy2(play_file, os.path.join(best_dir, 'play.json'))
                 if os.path.exists(train_file):
                     shutil.copy2(train_file, os.path.join(best_dir, 'train.json'))
-                print(f"*** new best! greedy_piececount={greedy_agent.piececount} > best={old_best_pc}, saved to {best_dir}")
+                print(f"*** new best! ppo_ema={ppo_ema_pc:.1f} > best={old_best_pc:.1f}, saved to {best_dir}")
 
-            # 保存所有探索局（game 1-15）用于训练，game 0 为贪婪测试局不保存
-            print(f"Group {g}: all_piececounts={pcs} lines={[a.removedlines for a in agents]}")
-
-            # 所有探索局（game 1-15）都用于训练
-            group_agents = [(agents[i], trajectories[i], step_results[i]) for i in range(1, len(agents))]
 
             # 保存每局结果：一局一个 pkl 文件（包含所有 step）
             filetime = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
