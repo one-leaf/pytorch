@@ -244,20 +244,20 @@ class PPOSelfPlay():
                 # 每步存储: (state, ref_prob, log_prob, action, prev_action, r_step, is_terminal, availables)
                 n_steps = len(trajectory)
                 # 全局效率奖励：piececount / steps（鼓励高效放置）
-                default_r = agent.piececount / max(agent.steps, 1)
+                # default_r = agent.piececount / max(agent.steps, 1)
                 game_steps = []
                 for step_idx, step_data in enumerate(trajectory):
                     landed, removed = step_results[step_idx]
                     is_terminal = 1 if step_idx == n_steps - 1 else 0
                     r_step = 0
-                    if landed:
-                        r_step = -0.1                         # 落地惩罚
-                        if removed == 1:   r_step = 0.25       # 消1行
-                        elif removed == 2: r_step = 0.5        # 消2行
-                        elif removed == 3: r_step = 0.75       # 消3行
-                        elif removed >= 4: r_step = 1.0        # 消4行（Tetris）
+                    # if landed:
+                    #     r_step = -0.1                         # 落地惩罚
+                    #     if removed == 1:   r_step = 0.25       # 消1行
+                    #     elif removed == 2: r_step = 0.5        # 消2行
+                    #     elif removed == 3: r_step = 0.75       # 消3行
+                    #     elif removed >= 4: r_step = 1.0        # 消4行（Tetris）
                     if is_terminal:
-                        r_step = default_r
+                        r_step = -1 # default_r
                     
                     game_steps.append((
                         step_data["state"], step_data["ref_prob"],
