@@ -56,8 +56,8 @@ def play_one_game():
         print(f"V(s) : {v_median:.3f} (quantiles: {v_val.round(3)})")
 
         landed, removed = agent.step(action)
-        # if landed:
-        #     print(f"  >> LANDED  cleared={removed}  piececount={agent.piececount}")
+        if landed:
+            print(f"  >> LANDED  cleared={removed}  piececount={agent.piececount}")
 
         step += 1
         time.sleep(0.2)
