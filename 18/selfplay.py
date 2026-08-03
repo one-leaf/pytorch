@@ -238,17 +238,18 @@ class PPOSelfPlay():
 
             # 保存每局结果：一局一个 pkl 文件（包含所有 step）
             filetime = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-            for run_idx, (_, trajectory, step_results) in enumerate(group_agents):
+            for run_idx, (agent, trajectory, step_results) in enumerate(group_agents):
                 game_counter += 1
 
                 # 每步存储: (state, ref_prob, log_prob, action, prev_action, r_step, is_terminal, availables)
-                # r_step: 落地 +0.01；消1/2/3/4行 +1/3/5/8；终止 -1.0
                 n_steps = len(trajectory)
+                # 全局效率奖励：piececount / steps（鼓励高效放置）
+                default_r = agent.piececount / max(agent.steps, 1)
                 game_steps = []
                 for step_idx, step_data in enumerate(trajectory):
                     landed, removed = step_results[step_idx]
                     is_terminal = 1 if step_idx == n_steps - 1 else 0
-                    r_step = 0
+                    r_step = default_r
                     if landed:
                         r_step = -0.001                        # 落地惩罚
                         if removed == 1:   r_step = 0.25       # 消1行
