@@ -251,8 +251,6 @@ class PPOSelfPlay():
                         elif removed == 2: r_step = 0.5        # 消2行
                         elif removed == 3: r_step = 0.75       # 消3行
                         elif removed >= 4: r_step = 1.0        # 消4行（Tetris）
-                    if is_terminal:
-                        r_step = 0          # 最终步奖励为0
                     game_steps.append((
                         step_data["state"], step_data["ref_prob"],
                         step_data["log_prob"], step_data["action"],
