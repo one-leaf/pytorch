@@ -51,7 +51,7 @@ def play_one_game():
         print(f"=== Step {step} === Action: {ACTION_NAMES[action]} | Piece: {agent.fallpiece['shape']} (rot={agent.fallpiece['rotation']}, x={agent.fallpiece['x']}, y={agent.fallpiece['y']})")
         agent.print()
         prev_action = action
-        print(f"Probs: {dict(zip(ACTION_NAMES.values(), [f'{p:.3f}' for p in probs_masked]))}")
+        print(f"Probs: {dict(zip(ACTION_NAMES.values(), [f'{p:.3f}' for p in probs]))}")
         print(f"Availables: {dict(zip(ACTION_NAMES.values(), [f'{int(a)}' for a in availables]))}")
         print(f"V(s) : {v_median:.3f} (quantiles: {v_val.round(3)})")
 
