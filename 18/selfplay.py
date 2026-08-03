@@ -197,7 +197,6 @@ class PPOSelfPlay():
             g_max_pc = max(a.piececount for a, _, _ in group_agents)
             g_max_rl = max(a.removedlines for a, _, _ in group_agents)
 
-            state = read_play_state()
             state["counters"]["agent"] += 1
             state["counters"]["_agent"] += 1
 
