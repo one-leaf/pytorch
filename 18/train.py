@@ -339,7 +339,7 @@ class PPOTrain():
             # 目标熵：target_entropy = -scale × ln(|A|)，离散空间类比
             # 5 动作，scale=0.5~0.7 → target ≈ 0.8~1.13
             # 经验：0.8~1.0 折中；<0.5 策略定型；>1.3 基本随机
-            self.entropy_ema = 0.99 * self.entropy_ema + 0.01 * float(avg_ent)
+            self.entropy_ema = 0.9 * self.entropy_ema + 0.1 * float(avg_ent)
             entropy_diff = self.entropy_target - self.entropy_ema
             if abs(entropy_diff) > 0.05:  # 只在偏差 > 0.05 时调整
                 adjust = 1.0 + 0.1 * entropy_diff  # 比例控制
