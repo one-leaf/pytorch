@@ -256,7 +256,7 @@ class PolicyNet():
         none_penalty = probs_new[:, 3].mean()
 
         # ── 不可行动作概率惩罚：压低不可用动作的概率 ──────────────
-        unavailable_penalty_coef = 0.1
+        unavailable_penalty_coef = 1
         # 不可用位置的 log_prob，希望它们趋向 -inf（概率趋向 0）
         unavailable_log_probs = log_probs_safe * (1 - availables_t)  # [B, 5]，可用位置为 0
         # 取负值，希望 log_prob 越小越好；clamp 防止数值不稳定
