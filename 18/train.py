@@ -106,50 +106,21 @@ class PPODataset(torch.utils.data.Dataset):
         start_time = time.time()
         gamma = 0.99
 
-        # ── Pass 1: 收集每局最后一步的 r（方块数），用于归一化 ──
-        game_piececounts = {}  # fn → piececount（最后一步的 r）
+        # ── 加载数据，直接使用原始奖励，计算 G_t ──
         for fn in self.file_list:
-            try:
-                with open(fn, "rb") as f:
-                    steps = pickle.load(f)
-                # (state, ref_prob, log_prob, action, prev_action, r_step, is_terminal, availables)                    
-                assert len(steps[0]) == 8, f'error: expected 8 elements, got {len(steps[0])} (old format, delete file)'
-                game_piececounts[fn] = steps[-1][5]  # 最后一步的 r = 方块数
-            except Exception as e:
-                print(f"file {fn} scan error: {e}")
-                if os.path.exists(fn):
-                    os.remove(fn)
-                self.file_list.remove(fn)
-
-        if not game_piececounts:
-            return
-
-        all_pc = list(game_piececounts.values())
-        min_pc = min(all_pc)
-        max_pc = max(all_pc)
-        pc_range = max(max_pc - min_pc, 1)
-        print(f"Piececounts: min={min_pc} max={max_pc} mean={np.mean(all_pc):.1f} games={len(all_pc)}")
-
-        # ── Pass 2: 加载数据，归一化终止奖励到 [-1, 1]，计算 G_t ──
-        for fn in self.file_list:
-            if fn not in game_piececounts:
-                continue
             try:
                 with open(fn, "rb") as f:
                     steps = pickle.load(f)
 
                 n_steps = len(steps)
+                if n_steps == 0:
+                    print(f"file {fn} is empty, skipping")
+                    continue
 
-                # 归一化终止奖励：方块数越多 → 越接近 +1，方块数越少 → 越接近 -1
-                # 落地消行奖励（中间步骤）保持不变
-                pc = game_piececounts[fn]
-                terminal_r = 2.0 * (pc - min_pc) / pc_range - 1.0
+                # 检查数据格式
+                assert len(steps[0]) == 8, f'error: expected 8 elements, got {len(steps[0])} (old format, delete file)'
 
-                # 修改最后一步的 R
-                last_step = steps[-1]
-                steps[-1] = (*last_step[:5], terminal_r, last_step[6], last_step[7])
-
-                # 预计算这局游戏的 G_t（折扣回报）
+                # 预计算这局游戏的 G_t（折扣回报），直接使用原始奖励
                 g_values = np.zeros(n_steps)
                 g_values[-1] = steps[-1][5]
                 for t in range(n_steps - 2, -1, -1):
@@ -339,8 +310,7 @@ class PPOTrain():
             # 目标熵：target_entropy = -scale × ln(|A|)，离散空间类比
             # 5 动作，scale=0.5~0.7 → target ≈ 0.8~1.13
             # 经验：0.8~1.0 折中；<0.5 策略定型；>1.3 基本随机
-            self.entropy_ema = 0.9 * self.entropy_ema + 0.1 * float(avg_ent)
-            entropy_diff = self.entropy_target - self.entropy_ema
+            entropy_diff = self.entropy_target - float(avg_ent)
             if abs(entropy_diff) > 0.05:  # 只在偏差 > 0.05 时调整
                 adjust = 1.0 + 0.1 * entropy_diff  # 比例控制
                 self.ppo_entropy_weight = float(np.clip(self.ppo_entropy_weight * adjust, 0.1, 5.0))

@@ -244,13 +244,13 @@ class PPOSelfPlay():
                     is_terminal = 1 if step_idx == n_steps - 1 else 0
                     r_step = 0
                     if landed:
-                        r_step = -0.01                         # 落地惩罚
-                        if removed == 1:   r_step = 1.0        # 消1行
-                        elif removed == 2: r_step = 3.0        # 消2行
-                        elif removed == 3: r_step = 5.0        # 消3行
-                        elif removed >= 4: r_step = 8.0        # 消4行（Tetris）
+                        r_step = -0.1                          # 落地惩罚
+                        if removed == 1:   r_step = 0.25       # 消1行
+                        elif removed == 2: r_step = 0.5        # 消2行
+                        elif removed == 3: r_step = 0.75       # 消3行
+                        elif removed >= 4: r_step = 1.0        # 消4行（Tetris）
                     if is_terminal:
-                        r_step = agent.piececount              # 方块数（train 中归一化到 [-1, 1]）
+                        r_step = agent.piececount*0.1          # 方块数（train 中归一化到 [-1, 1]）
                     game_steps.append((
                         step_data["state"], step_data["ref_prob"],
                         step_data["log_prob"], step_data["action"],
