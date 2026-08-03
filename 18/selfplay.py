@@ -234,7 +234,7 @@ class PPOSelfPlay():
 
             # 保存每局结果：一局一个 pkl 文件（包含所有 step）
             filetime = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-            for run_idx, (agent, trajectory, step_results) in enumerate(group_agents):
+            for run_idx, (_, trajectory, step_results) in enumerate(group_agents):
                 game_counter += 1
 
                 # 每步存储: (state, ref_prob, log_prob, action, prev_action, r_step, is_terminal, availables)
@@ -252,7 +252,7 @@ class PPOSelfPlay():
                         elif removed == 3: r_step = 0.75       # 消3行
                         elif removed >= 4: r_step = 1.0        # 消4行（Tetris）
                     if is_terminal:
-                        r_step = agent.piececount*0.1          # 方块数（train 中归一化到 [-1, 1]）
+                        r_step = 0          # 最终步奖励为0
                     game_steps.append((
                         step_data["state"], step_data["ref_prob"],
                         step_data["log_prob"], step_data["action"],
