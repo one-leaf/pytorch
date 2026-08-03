@@ -311,6 +311,8 @@ class PPOTrain():
             # 5 动作，scale=0.5~0.7 → target ≈ 0.8~1.13
             # 经验：0.8~1.0 折中；<0.5 策略定型；>1.3 基本随机
             entropy_diff = self.entropy_target - float(avg_ent)
+            # 更新 entropy EMA
+            self.entropy_ema = self.entropy_ema * 0.9 + avg_ent * 0.1
             if entropy_diff > 0.1:  # 只在低于目标熵 > 0.1 时调整
                 adjust = 1.0 + 0.1 * entropy_diff  # 比例控制
                 self.ppo_entropy_weight = float(np.clip(self.ppo_entropy_weight * adjust, 0.1, 10.0))
