@@ -185,6 +185,11 @@ class PPOSelfPlay():
             m["test_piececount"] = m.get("test_piececount", 0) * (1 - alpha) + greedy_agent.piececount * alpha
             m["test_removedlines"] = m.get("test_removedlines", 0) * (1 - alpha) + greedy_agent.removedlines * alpha
             m["test_steps"] = m.get("test_steps", 0) * (1 - alpha) + greedy_agent.steps * alpha
+            # 更新最高记录
+            if greedy_agent.piececount > m.get("test_piececount_best", 0):
+                m["test_piececount_best"] = greedy_agent.piececount
+            if greedy_agent.removedlines > m.get("test_removedlines_best", 0):
+                m["test_removedlines_best"] = greedy_agent.removedlines
 
             # 所有探索局（game 1-15）用于训练
             group_agents = [(agents[i], trajectories[i], step_results[i]) for i in range(1, len(agents))]
