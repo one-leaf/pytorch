@@ -251,7 +251,7 @@ class PPOSelfPlay():
                     is_terminal = 1 if step_idx == n_steps - 1 else 0
                     r_step = 0
                     if landed:
-                        r_step = -0.01                         # 落地惩罚
+                        r_step = -0.1                         # 落地惩罚
                         if removed == 1:   r_step = 0.25       # 消1行
                         elif removed == 2: r_step = 0.5        # 消2行
                         elif removed == 3: r_step = 0.75       # 消3行
