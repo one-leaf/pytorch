@@ -188,7 +188,7 @@ class PPOTrain():
         # PPO 超参数
         self.ppo_clip_eps = 0.2
         self.ppo_beta = 0.05            # KL 惩罚系数，beta*KL=0.05*0.4=0.02，与 policy_loss 可比
-        self.ppo_entropy_weight = 1.0   # 熵正则（初始值，会自适应调整）
+        self.ppo_entropy_weight = 0.1   # 熵正则（初始值，会自适应调整）
         self.entropy_target = 1.0       # 目标 entropy（自适应控制目标）
         self.entropy_ema = 1.0          # entropy EMA（用于自适应控制）
         self.n_epochs = 1               # 每轮训练只跑 1 个 epoch，训练次数由 min_new_files 控制
@@ -234,7 +234,7 @@ class PPOTrain():
 
             train_state = read_train_state()
             self.lr_multiplier = train_state["training"]["lr_multiplier"]
-            self.ppo_entropy_weight = float(train_state["training"].get("entropy_weight", 1.0))
+            self.ppo_entropy_weight = float(train_state["training"].get("entropy_weight", 0.1))
             self.entropy_ema = float(train_state["training"].get("entropy_ema", 1.0))
             print(f"batch_size: {self.batch_size}, lr_multiplier: {self.lr_multiplier}, entropy_weight: {self.ppo_entropy_weight}, entropy_ema: {self.entropy_ema}, learn_rate: {self.learn_rate * self.lr_multiplier}")
 
@@ -311,9 +311,9 @@ class PPOTrain():
             # 5 动作，scale=0.5~0.7 → target ≈ 0.8~1.13
             # 经验：0.8~1.0 折中；<0.5 策略定型；>1.3 基本随机
             entropy_diff = self.entropy_target - float(avg_ent)
-            if abs(entropy_diff) > 0.05:  # 只在偏差 > 0.05 时调整
+            if entropy_diff > 0.05:  # 只在低于目标熵 > 0.05 时调整
                 adjust = 1.0 + 0.1 * entropy_diff  # 比例控制
-                self.ppo_entropy_weight = float(np.clip(self.ppo_entropy_weight * adjust, 0.1, 5.0))
+                self.ppo_entropy_weight = float(np.clip(self.ppo_entropy_weight * adjust, 0.1, 10.0))
             print(f"entropy update: avg_ent={avg_ent:.4f} ema={self.entropy_ema:.4f} "
                   f"diff={entropy_diff:.4f} ent_w={self.ppo_entropy_weight:.3f}")
             avg_vl  = _sum_vl  / max(_num_batches, 1)
