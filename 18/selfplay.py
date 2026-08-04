@@ -35,19 +35,27 @@ class PPOSelfPlay():
 
         self.policy_net.net.eval()
         with torch.no_grad():
-            log_probs_batch, _ = self.policy_net.net(states_tensor, prev_tensor)
+            log_probs_batch, values_batch = self.policy_net.net(states_tensor, prev_tensor)
 
         if torch.isnan(log_probs_batch).any():
             log_probs_batch = torch.zeros_like(log_probs_batch)
+
+        # 计算 v_scalar（中间分位数均值）
+        N_q = values_batch.shape[1]
+        lo = N_q // 4
+        hi = N_q - N_q // 4
+        v_scalar_batch = values_batch[:, lo:hi].mean(dim=1)  # [B]
 
         actions = []
         all_probs = []
         all_log_probs = []
         all_availables = []
+        all_v_t = []
 
         for idx, i in enumerate(active_indices):
             agent = agents[i]
             log_probs = log_probs_batch[idx]
+            v_t = v_scalar_batch[idx]
             availables = agent.availables
 
             if i not in greedy_indices:
@@ -70,8 +78,9 @@ class PPOSelfPlay():
             # 记录模型原始 log_probs（不做 clamp，由 train_step_ppo 统一处理）
             all_log_probs.append(log_probs.cpu().numpy())
             all_availables.append(availables.astype(np.float32))
+            all_v_t.append(v_t.cpu().numpy())
 
-        return actions, all_probs, all_log_probs, all_availables
+        return actions, all_probs, all_log_probs, all_availables, all_v_t
 
     def play_games_parallel(self, n_games=4, pieces_list=None, greedy_indices=None):
         """同时玩 n_games 局，共享方块序列，批量预测"""
@@ -84,7 +93,7 @@ class PPOSelfPlay():
             if all(a.terminal for a in agents):
                 break
 
-            actions, all_probs, all_log_probs, all_availables = self.get_actions_batch(
+            actions, all_probs, all_log_probs, all_availables, all_v_t = self.get_actions_batch(
                 agents, prev_actions, greedy_indices
             )
 
@@ -99,6 +108,7 @@ class PPOSelfPlay():
                 probs = all_probs[action_idx]
                 log_prob = all_log_probs[action_idx]
                 availables = all_availables[action_idx]
+                v_t = all_v_t[action_idx]
                 action_idx += 1
 
                 trajectories[i].append({
@@ -108,6 +118,7 @@ class PPOSelfPlay():
                     "ref_prob": probs,
                     "log_prob": log_prob,
                     "availables": availables,
+                    "v_t": v_t,
                 })
 
                 prev_actions[i] = action
@@ -258,12 +269,13 @@ class PPOSelfPlay():
                     #     elif removed >= 4: r_step = 1.0        # 消4行（Tetris）
                     if is_terminal:
                         r_step = -1 # default_r
-                    
+
+                    # 9字段: (state, ref_prob, log_prob, action, prev_action, r_step, is_terminal, availables, v_t)
                     game_steps.append((
                         step_data["state"], step_data["ref_prob"],
                         step_data["log_prob"], step_data["action"],
                         step_data["prev_action"], r_step, is_terminal,
-                        step_data["availables"]
+                        step_data["availables"], step_data["v_t"]
                     ))
                     
                 filename = f"{filetime}-{game_counter:06d}-r{run_idx}.pkl"

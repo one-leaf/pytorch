@@ -19,9 +19,9 @@ GAME_WIDTH, GAME_HEIGHT = 10, 20
 
 class PPODataset(torch.utils.data.Dataset):
     """PPO 数据集，每个 pkl 包含一局游戏的所有 step:
-    (state, ref_prob, log_prob, action, prev_action, R, is_terminal, availables)
+    (state, ref_prob, log_prob, action, prev_action, r_step, is_terminal, availables, v_t)
     game_id 由文件名推导，不在 pkl 中存储
-    load_data 后扩展为 9 元素: (state, ref_prob, log_prob, action, prev_action, R, is_terminal, availables, G)
+    load_data 后扩展为 9 元素: (state, ref_prob, log_prob, action, prev_action, r_step, is_terminal, availables, v_next)
     """
     def __init__(self, data_dir, max_files, min_new_files, n_train_times=3):
         self.data_dir = data_dir
@@ -41,7 +41,7 @@ class PPODataset(torch.utils.data.Dataset):
 
     def __getitem__(self, index):
         fn, step_idx = self._flat_index[index]
-        state, ref_prob, log_prob, action, prev_action, R, is_terminal, availables, G = self.data[fn][step_idx]
+        state, ref_prob, log_prob, action, prev_action, R, is_terminal, availables, v_next = self.data[fn][step_idx]
         game_id = os.path.basename(fn)  # 用文件名作为 game_id
         return (torch.from_numpy(state).float(),
                 torch.from_numpy(ref_prob).float(),
@@ -52,7 +52,7 @@ class PPODataset(torch.utils.data.Dataset):
                 torch.as_tensor(R).float(),
                 torch.as_tensor(is_terminal).float(),
                 torch.from_numpy(availables).float(),
-                torch.as_tensor(G).float())
+                torch.as_tensor(v_next).float())
 
     def move_wait_files(self):
         """将 wait 目录的 pkl 全部移入 data 目录（清空 wait，防止堆积）"""
@@ -102,11 +102,10 @@ class PPODataset(torch.utils.data.Dataset):
         print(f"loaded {len(self.file_list)} files, deleted {deleted} (pool rotation: {to_delete_by_rotation})")
 
     def load_data(self):
-        """将所有 pkl 加载到内存，构建 flat index，并预计算每步的 G_t"""
+        """将所有 pkl 加载到内存，构建 flat index，并预计算每步的 v_next"""
         start_time = time.time()
-        gamma = 0.99
 
-        # ── 加载数据，直接使用原始奖励，计算 G_t ──
+        # ── 加载数据，预计算 v_next（下一步的 v_t）──
         for fn in self.file_list:
             try:
                 with open(fn, "rb") as f:
@@ -117,19 +116,19 @@ class PPODataset(torch.utils.data.Dataset):
                     print(f"file {fn} is empty, skipping")
                     continue
 
-                # 检查数据格式
-                assert len(steps[0]) == 8, f'error: expected 8 elements, got {len(steps[0])} (old format, delete file)'
+                # 检查数据格式：新格式 9 字段（包含 v_t）
+                assert len(steps[0]) == 9, f'error: expected 9 elements, got {len(steps[0])} (old format, delete file)'
 
-                # 预计算这局游戏的 G_t（折扣回报），直接使用原始奖励
-                g_values = np.zeros(n_steps)
-                g_values[-1] = steps[-1][5]
-                for t in range(n_steps - 2, -1, -1):
-                    g_values[t] = steps[t][5] + gamma * g_values[t + 1]
+                # 预计算 v_next：下一步的 v_t，最后一步为 0
+                v_nexts = np.zeros(n_steps)
+                for t in range(n_steps - 1):
+                    v_nexts[t] = steps[t + 1][8]  # 下一步的 v_t
+                # v_nexts[-1] 保持为 0（游戏结束）
 
-                # 扩展为 9 元素: (state, ref_prob, log_prob, action, prev_action, R, is_terminal, availables, G)
+                # 扩展为 9 元素: (state, ref_prob, log_prob, action, prev_action, R, is_terminal, availables, v_next)
                 steps_out = []
                 for i, step in enumerate(steps):
-                    steps_out.append((*step[:8], g_values[i]))
+                    steps_out.append((*step[:8], v_nexts[i]))
 
                 self.data[fn] = steps_out
             except Exception as e:
@@ -138,36 +137,10 @@ class PPODataset(torch.utils.data.Dataset):
                     os.remove(fn)
                 self.file_list.remove(fn)
 
-        Rs = np.array([step[5] for steps in self.data.values() for step in steps])
-        Gs = np.array([step[8] for steps in self.data.values() for step in steps])
-        if len(Rs) > 0:
-            # 保存原始统计用于跟踪
-            self.g_mean_raw = float(Gs.mean())
-            self.g_std_raw = max(float(Gs.std()), 1e-3)
-            print(f"R raw: min={Rs.min():.1f} max={Rs.max():.1f}")
-            print(f"G raw: min={Gs.min():.1f} mean={self.g_mean_raw:.2f} std={self.g_std_raw:.2f} max={Gs.max():.1f}")
-
-            # 直接写入 train.json（不平滑）
-            train_state = read_train_state()
-            m = train_state["metrics"]
-            m["g_mean_raw"] = round(self.g_mean_raw, 3)
-            m["g_std_raw"]  = round(self.g_std_raw, 3)
-            save_train_state(train_state)
-
-            # 归一化 G（数据集级别 z-score）
-            g_mean, g_std = self.g_mean_raw, self.g_std_raw
-            for fn_key in self.data:
-                self.data[fn_key] = [
-                    (s[0], s[1], s[2], s[3], s[4],
-                     s[5],
-                     s[6], s[7],
-                     (s[8] - g_mean) / g_std)
-                    for s in self.data[fn_key]
-                ]
-            print(f"G normalized: g→(0,1)")
-        else:
-            self.g_mean_raw = 0.0
-            self.g_std_raw = 1.0
+        # 统计 v_next 的分布（仅用于日志，不归一化）
+        v_nexts = np.array([step[8] for steps in self.data.values() for step in steps])
+        if len(v_nexts) > 0:
+            print(f"v_next raw: mean={v_nexts.mean():.3f} std={v_nexts.std():.3f} min={v_nexts.min():.3f} max={v_nexts.max():.3f}")
 
         self._flat_index = [(fn, i) for fn in self.file_list for i in range(len(self.data[fn]))]
 
@@ -194,11 +167,11 @@ class PPOTrain():
         self.n_epochs = 1               # 每轮训练只跑 1 个 epoch，训练次数由 min_new_files 控制
 
     def policy_update(self, sample_data):
-        """PPO 策略更新（带 GAE 信用分配）"""
-        state_batch, _ref_probs_batch, log_probs_old_batch, actions_batch, prev_actions_batch, game_ids_batch, R_batch, is_terminal_batch, availables_batch, G_batch = sample_data
+        """PPO 策略更新"""
+        state_batch, _ref_probs_batch, log_probs_old_batch, actions_batch, prev_actions_batch, game_ids_batch, R_batch, is_terminal_batch, availables_batch, v_next_batch = sample_data
         acc, kl, entropy, value_loss = self.policy_net.train_step_ppo(
             state_batch, log_probs_old_batch, actions_batch, prev_actions_batch,
-            game_ids_batch, R_batch, is_terminal_batch, G_batch,
+            game_ids_batch, R_batch, is_terminal_batch, v_next_batch,
             self.learn_rate * self.lr_multiplier,
             clip_eps=self.ppo_clip_eps,
             beta=self.ppo_beta,
@@ -242,9 +215,8 @@ class PPOTrain():
             _sum_acc = _sum_kl = _sum_ent = _sum_vl = 0.0
             _num_batches = 0
             for epoch in range(self.n_epochs):
-                # ⚠️ 必须 shuffle=False: GAE 要求同一 game 的步骤按时间顺序排列
                 training_loader = torch.utils.data.DataLoader(
-                    self.dataset, batch_size=self.batch_size, shuffle=False, num_workers=0
+                    self.dataset, batch_size=self.batch_size, shuffle=True, num_workers=0
                 )
                 _epoch_acc = _epoch_kl = _epoch_ent = _epoch_vl = 0.0
                 _epoch_batches = 0
@@ -267,9 +239,9 @@ class PPOTrain():
                               f"ent_w:{self.ppo_entropy_weight:.3f} ent_ema:{self.entropy_ema:.4f}")
 
                     if epoch == 0 and i == 0:
-                        state_batch, ref_probs_batch, log_probs_old_batch, actions_batch, prev_actions_batch, game_ids_batch, R_batch, _is_terminal, _availables, G_batch = data
+                        state_batch, ref_probs_batch, log_probs_old_batch, actions_batch, prev_actions_batch, game_ids_batch, R_batch, _is_terminal, _availables, v_next_batch = data
                         print("R_batch:", R_batch)
-                        print("G_batch:", G_batch)
+                        print("v_next_batch:", v_next_batch)
                         print("actions_batch:", actions_batch)
                         print("terminal:", _is_terminal)
                         print("game_ids_batch:", set(game_ids_batch))

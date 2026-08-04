@@ -88,16 +88,17 @@ class PolicyNet():
         return act_probs
         
 
-    # PPO 训练步骤（带 Value Head + GAE 信用分配 + 分位数价值）
+    # PPO 训练步骤（带 Value Head + v_next TD target + 分位数价值）
     def train_step_ppo(self, state_batch, log_probs_old, action_batch, prev_action_batch,
-                        game_ids, R_batch, is_terminal_batch, G_batch, lr,
+                        game_ids, R_batch, is_terminal_batch, v_next_batch, lr,
                         clip_eps=0.2, beta=0.05, entropy_weight=0.01,
-                        gamma=0.99, lam=0.95, vf_coef=0.5, availables_batch=None):
-        """PPO + V(s) 训练步骤（分位数价值头 + 步重要性加权 + availables mask）
-        - V(s): value head 估计每步状态价值
-        - GAE: 步级别信用分配（替代线性衰减）
+                        gamma=0.99, vf_coef=0.5, availables_batch=None):
+        """PPO + V(s) 训练步骤（分位数价值头 + 离线 v_next TD target）
+        - v_next: 来自 selfplay 旧模型的离线价值估计，由 train 预计算
+        - TD target = R + gamma * v_next
+        - advantage = TD target - V_current
         - policy_loss: PPO clip 损失
-        - value_loss: MSE 损失
+        - value_loss: Quantile Huber 损失
         - kl_loss: KL 散度惩罚
         - entropy: 熵正则化（仅计算有效动作）
         - availables: 有效动作 mask，无效动作概率强制为 0
@@ -136,19 +137,11 @@ class PolicyNet():
             f"prev_action out of [0,{self.output_size}): [{prev_action_batch.min()},{prev_action_batch.max()}]"
         assert log_probs_old_t.shape == (B, self.output_size), \
             f"log_probs_old shape mismatch: {log_probs_old_t.shape}"
-        # game_ids 同一游戏的步骤必须在 batch 中连续（shuffle=False 保证）
-        seen = set()
-        prev_gid = None
-        for gid in game_ids:
-            if gid != prev_gid:
-                assert gid not in seen, \
-                    f"game_id '{gid}' appears non-contiguously in batch — DataLoader must use shuffle=False"
-                seen.add(gid)
-                prev_gid = gid
 
         R_batch = torch.FloatTensor(R_batch).to(self.device)
         is_terminal_batch = torch.FloatTensor(is_terminal_batch).to(self.device)
-        G_batch = torch.FloatTensor(G_batch).to(self.device)
+        v_next_tensor = torch.FloatTensor(v_next_batch).to(self.device)
+        v_next_tensor = torch.clamp(v_next_tensor, -10.0, 10.0)  # 防止极端值
 
         self.net.train()
         log_probs, values = self.net(state_batch, prev_action_batch)
@@ -162,7 +155,7 @@ class PolicyNet():
         # log_probs = torch.log(probs)
         # values: [B, N] quantiles
 
-        # 中间 1/2 分位数均值作为标量 V(s) 用于 GAE（trimmed mean，抗极端分位数扰动）
+        # 中间 1/2 分位数均值作为标量 V(s)（trimmed mean，抗极端分位数扰动）
         N_q = values.shape[1]
         lo = N_q // 4          # index 2
         hi = N_q - N_q // 4    # index 6
@@ -175,39 +168,18 @@ class PolicyNet():
         spread = ((values - v_scalar.unsqueeze(1)) ** 2).sum(-1)   # [B]  Σ(Q(τ)-median)²
         spread = spread.clamp(min=1e-4)  # 防止完全确定时除零
 
-        # ── GAE: 按游戏分组计算步级别优势 ──────────
-        B = v_scalar.shape[0]
-        advantages = torch.zeros(B, device=self.device)  # GAE advantage
+        # ── TD target: R + gamma * v_next（离线预计算） ──────────
+        # v_next 来自 selfplay 时的旧模型，而非当前正在更新的模型。
+        # 合理性：v_next 是对 V(s_next) 的估计，属于价值函数而非策略。
+        # 价值函数收敛慢、相邻版本差异小，用旧版本的 V 近似真实 V 是合理的。
+        # 这正是 experience replay 的核心思路：用历史数据更新当前网络。
+        # ratios = pi_new / pi_old 负责修正策略偏移带来的重要性采样偏差，
+        # 而 v_next 只需要提供一个足够好的 bootstrapping target，
+        # 两者分工独立：ratios 修正"策略分布"，v_next 提供"价值目标"。
+        td_target = R_batch + gamma * v_next_tensor  # [B]
 
-        for gid in set(game_ids):
-            idx = [i for i, g in enumerate(game_ids) if g == gid]
-            n = len(idx)
-
-            V = v_scalar[idx]
-
-            # GAE advantage: A_t = δ_t + γλ·δ_{t+1} + (γλ)²·δ_{t+2} + ...
-            # δ_t = r_t + γ·V(s_{t+1}) - V(s_t)
-            rewards = R_batch[idx]  # 使用原始奖励，和 V(s) 尺度一致
-            V_next = torch.zeros(n, device=self.device)
-            V_next[:-1] = V[1:].detach()
-            # 最后一步：游戏结束 → V_next=0；batch截断 → bootstrap V(s)
-            last_terminal = is_terminal_batch[idx[-1]]
-            V_next[-1] = V[-1].detach() * (1 - last_terminal)
-            deltas = rewards + gamma * V_next - V.detach()
-
-            gae = torch.zeros(n, device=self.device)
-            gae[-1] = deltas[-1]
-            for t in range(n - 2, -1, -1):
-                gae[t] = deltas[t] + gamma * lam * gae[t + 1]
-            advantages[idx] = gae
-
-            # 调试：打印第一局的详细信息
-            # if gid == list(set(game_ids))[0]:
-            #     print(f"\n=== Game {gid} ({n} steps) ===")
-            #     print(f"r_t:     {rewards.cpu().numpy()}")
-            #     print(f"G_batch:{G_batch[idx].cpu().numpy()}")
-            #     print(f"V(s):    {V.detach().cpu().numpy()}")
-            #     print(f"adv:     {gae.cpu().numpy()}")
+        # advantage = td_target - V(s)（当前模型的估计）
+        advantages = td_target - v_scalar.detach()  # [B]
 
         # 全局标准化 advantages
         adv_mean = advantages.mean()
@@ -215,6 +187,10 @@ class PolicyNet():
         advantages = (advantages - adv_mean) / adv_std
 
         # ── Policy loss (PPO clip + 步重要性加权) ─────────────────
+        # ratios = pi_new(a|s) / pi_old(a|s)
+        # pi_old 是 selfplay 采样时的策略（与 v_next 来自同一版本模型）
+        # ratios 修正新旧策略分布差异，使梯度方向对当前策略无偏
+        # clip(ratios, 1-eps, 1+eps) 限制更新步长，防止策略跳变
         actions = action_batch.unsqueeze(-1)
         log_prob_new = log_probs.gather(-1, actions)                        # [B, 1]
         log_prob_old = log_probs_old_t.gather(-1, actions).squeeze(-1)      # [B]
@@ -230,7 +206,7 @@ class PolicyNet():
         policy_loss = -(torch.min(surr1, surr2) * step_weight).mean()
 
         # ── Value loss (Quantile Huber: 分位数回归) ───────────────
-        target_exp = G_batch.unsqueeze(1).expand_as(values)  # [B, N]
+        target_exp = td_target.unsqueeze(1).expand_as(values)  # [B, N]
         diff = values - target_exp
         q_weights = torch.where(diff > 0, taus.unsqueeze(0), 1 - taus.unsqueeze(0))
         value_loss = (q_weights * F.smooth_l1_loss(values, target_exp, reduction='none')).mean()
