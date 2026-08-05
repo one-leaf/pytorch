@@ -20,7 +20,6 @@ GAME_WIDTH, GAME_HEIGHT = 10, 20
 class PPODataset(torch.utils.data.Dataset):
     """PPO 数据集，每个 pkl 包含一局游戏的所有 step:
     (state, ref_prob, log_prob, action, prev_action, r_step, is_terminal, availables, v_t)
-    game_id 由文件名推导，不在 pkl 中存储
     load_data 后扩展为 9 元素: (state, ref_prob, log_prob, action, prev_action, r_step, is_terminal, availables, v_next)
     """
     def __init__(self, data_dir, max_files, min_new_files, n_train_times=3):
@@ -42,13 +41,11 @@ class PPODataset(torch.utils.data.Dataset):
     def __getitem__(self, index):
         fn, step_idx = self._flat_index[index]
         state, ref_prob, log_prob, action, prev_action, R, is_terminal, availables, v_next = self.data[fn][step_idx]
-        game_id = os.path.basename(fn)  # 用文件名作为 game_id
         return (torch.from_numpy(state).float(),
                 torch.from_numpy(ref_prob).float(),
                 torch.from_numpy(log_prob).float(),
                 torch.as_tensor(action).long(),
                 torch.as_tensor(prev_action).long(),
-                game_id,
                 torch.as_tensor(R).float(),
                 torch.as_tensor(is_terminal).float(),
                 torch.from_numpy(availables).float(),
@@ -168,10 +165,10 @@ class PPOTrain():
 
     def policy_update(self, sample_data):
         """PPO 策略更新"""
-        state_batch, _ref_probs_batch, log_probs_old_batch, actions_batch, prev_actions_batch, game_ids_batch, R_batch, is_terminal_batch, availables_batch, v_next_batch = sample_data
+        state_batch, _ref_probs_batch, log_probs_old_batch, actions_batch, prev_actions_batch, R_batch, is_terminal_batch, availables_batch, v_next_batch = sample_data
         acc, kl, entropy, value_loss = self.policy_net.train_step_ppo(
             state_batch, log_probs_old_batch, actions_batch, prev_actions_batch,
-            game_ids_batch, R_batch, is_terminal_batch, v_next_batch,
+            R_batch, is_terminal_batch, v_next_batch,
             self.learn_rate * self.lr_multiplier,
             clip_eps=self.ppo_clip_eps,
             beta=self.ppo_beta,
@@ -239,12 +236,11 @@ class PPOTrain():
                               f"ent_w:{self.ppo_entropy_weight:.3f} ent_ema:{self.entropy_ema:.4f}")
 
                     if epoch == 0 and i == 0:
-                        state_batch, ref_probs_batch, log_probs_old_batch, actions_batch, prev_actions_batch, game_ids_batch, R_batch, _is_terminal, _availables, v_next_batch = data
+                        state_batch, ref_probs_batch, log_probs_old_batch, actions_batch, prev_actions_batch, R_batch, _is_terminal, _availables, v_next_batch = data
                         print("R_batch:", R_batch)
                         print("v_next_batch:", v_next_batch)
                         print("actions_batch:", actions_batch)
                         print("terminal:", _is_terminal)
-                        # print("game_ids_batch:", set(game_ids_batch))
 
                     if math.isnan(kl) or math.isnan(acc) or math.isnan(entropy) or math.isnan(value_loss) or \
                        math.isinf(kl) or math.isinf(acc) or math.isinf(entropy) or math.isinf(value_loss):

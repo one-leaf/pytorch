@@ -90,7 +90,7 @@ class PolicyNet():
 
     # PPO 训练步骤（带 Value Head + v_next TD target + 分位数价值）
     def train_step_ppo(self, state_batch, log_probs_old, action_batch, prev_action_batch,
-                        game_ids, R_batch, is_terminal_batch, v_next_batch, lr,
+                        R_batch, is_terminal_batch, v_next_batch, lr,
                         clip_eps=0.2, beta=0.05, entropy_weight=0.01,
                         gamma=0.99, vf_coef=0.5, availables_batch=None):
         """PPO + V(s) 训练步骤（分位数价值头 + 离线 v_next TD target）
@@ -126,7 +126,6 @@ class PolicyNet():
         # log_probs_old_t = torch.log(probs_old)
         action_batch = torch.LongTensor(action_batch).to(self.device)
         prev_action_batch = torch.LongTensor(prev_action_batch).to(self.device)
-        game_ids = game_ids.tolist() if hasattr(game_ids, 'tolist') else list(game_ids)
 
         # ── 参数校验 ─────────────────────────────────────────────
         assert state_batch.shape == (B, 2, 20, 10), f"state shape mismatch: {state_batch.shape}"
