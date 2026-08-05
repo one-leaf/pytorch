@@ -244,7 +244,7 @@ class PPOTrain():
                         print("v_next_batch:", v_next_batch)
                         print("actions_batch:", actions_batch)
                         print("terminal:", _is_terminal)
-                        print("game_ids_batch:", set(game_ids_batch))
+                        # print("game_ids_batch:", set(game_ids_batch))
 
                     if math.isnan(kl) or math.isnan(acc) or math.isnan(entropy) or math.isnan(value_loss) or \
                        math.isinf(kl) or math.isinf(acc) or math.isinf(entropy) or math.isinf(value_loss):
