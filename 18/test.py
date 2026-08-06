@@ -58,6 +58,7 @@ def play_one_game():
         landed, removed = agent.step(action)
         if landed:
             print(f"  >> LANDED  cleared={removed}  piececount={agent.piececount}")
+            input()
 
         step += 1
         time.sleep(0.2)
