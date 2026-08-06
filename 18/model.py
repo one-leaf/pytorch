@@ -252,11 +252,20 @@ class PolicyNet():
         if has_nan_grad:
             nan_params = [name for name, p in self.net.named_parameters()
                           if p.grad is not None and (torch.isnan(p.grad).any() or torch.isinf(p.grad).any())]
+            # 详细的 NaN 诊断信息
             msg = (f"GRAD NaN | policy_loss={policy_loss.item():.6f} value_loss={value_loss.item():.6f} "
                    f"kl_div={kl_div.item():.6f} entropy={entropy.item():.6f} loss={loss.item():.6f} | "
                    f"v_scalar=[{v_scalar.min().item():.4f}, {v_scalar.max().item():.4f}] "
-                   f"spread=[{spread.min().item():.4f}, {spread.max().item():.4f}] "
-                   f"adv=[{advantages.min().item():.4f}, {advantages.max().item():.4f}] | "
+                   f"spread=[{spread.min().item():.4f}, {spread.max().item():.4f}] | "
+                   # 追踪 NaN 来源
+                   f"R=[{R_batch.min().item():.4f}, {R_batch.max().item():.4f}, nan={torch.isnan(R_batch).sum().item()}] "
+                   f"v_next=[{v_next_tensor.min().item():.4f}, {v_next_tensor.max().item():.4f}, nan={torch.isnan(v_next_tensor).sum().item()}] "
+                   f"td_target=[{td_target.min().item():.4f}, {td_target.max().item():.4f}, nan={torch.isnan(td_target).sum().item()}] "
+                   f"adv_mean={adv_mean.item():.4f} adv_std={adv_std.item():.4f} "
+                   f"adv=[{advantages.min().item():.4f}, {advantages.max().item():.4f}, nan={torch.isnan(advantages).sum().item()}] | "
+                   f"log_prob_new=[{log_prob_new.min().item():.4f}, {log_prob_new.max().item():.4f}, nan={torch.isnan(log_prob_new).sum().item()}] "
+                   f"log_prob_old=[{log_prob_old.min().item():.4f}, {log_prob_old.max().item():.4f}, nan={torch.isnan(log_prob_old).sum().item()}] "
+                   f"ratios=[{ratios.min().item():.4f}, {ratios.max().item():.4f}, nan={torch.isnan(ratios).sum().item()}] | "
                    f"nan_params={nan_params[:10]}")
             print(f"\n[NaN GRAD] {msg}")
             log_nan(msg)
