@@ -176,6 +176,7 @@ class PolicyNet():
         # 而 v_next 只需要提供一个足够好的 bootstrapping target，
         # 两者分工独立：ratios 修正"策略分布"，v_next 提供"价值目标"。
         td_target = R_batch + gamma * v_next_tensor  # [B]
+        td_target = torch.nan_to_num(td_target, nan=0.0)  # NaN 替换为 0
 
         # advantage = td_target - V(s)（当前模型的估计）
         advantages = td_target - v_scalar.detach()  # [B]
