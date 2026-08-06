@@ -40,6 +40,10 @@ class PPOSelfPlay():
         if torch.isnan(log_probs_batch).any():
             log_probs_batch = torch.zeros_like(log_probs_batch)
 
+        # 对 values_batch 也进行 NaN 保护
+        if torch.isnan(values_batch).any():
+            values_batch = torch.zeros_like(values_batch)
+
         # 计算 v_scalar（中间分位数均值）
         N_q = values_batch.shape[1]
         lo = N_q // 4
@@ -56,6 +60,9 @@ class PPOSelfPlay():
             agent = agents[i]
             log_probs = log_probs_batch[idx]
             v_t = v_scalar_batch[idx]
+            # 对 v_t 添加 NaN 保护
+            if torch.isnan(v_t) or torch.isinf(v_t):
+                v_t = torch.tensor(0.0, device=device)
             availables = agent.availables
 
             if i not in greedy_indices:
