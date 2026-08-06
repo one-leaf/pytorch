@@ -184,7 +184,6 @@ class Agent():
         self.set_state()
         # 下一个可用步骤
         self.availables=np.ones(ACTONS_LEN, dtype=np.int8)
-        self._availables=np.ones(ACTONS_LEN, dtype=np.int8)        
         self.set_availables()
         self.start_time = time.time()
 
@@ -252,23 +251,23 @@ class Agent():
     # 获取可用步骤, 保留一个旋转始终有用
     def set_availables(self):
         if not self.validposition_mask(self.fallpiece, ax = -1):
-            self._availables[KEY_LEFT]=0
+            self.availables[KEY_LEFT]=0
         else:
-            self._availables[KEY_LEFT]=1
+            self.availables[KEY_LEFT]=1
         if not self.validposition_mask(self.fallpiece, ax = 1):
-            self._availables[KEY_RIGHT]=0
+            self.availables[KEY_RIGHT]=0
         else:
-            self._availables[KEY_RIGHT]=1
+            self.availables[KEY_RIGHT]=1
 
         if self.fallpiece['shape']=="o":
-            self._availables[KEY_ROTATION]=0
+            self.availables[KEY_ROTATION]=0
         else:
             r = self.fallpiece['rotation']
             self.fallpiece['rotation'] =  (self.fallpiece['rotation'] + 1) % len(pieces[self.fallpiece['shape']])
             if not self.validposition_mask(self.fallpiece):
-                self._availables[KEY_ROTATION]=0
+                self.availables[KEY_ROTATION]=0
             else:
-                self._availables[KEY_ROTATION]=1
+                self.availables[KEY_ROTATION]=1
             self.fallpiece['rotation'] = r
 
     # 打印
@@ -278,7 +277,7 @@ class Agent():
         self.steps += 1
         self.piecesteps += 1
 
-        if self._availables[action] == 1:
+        if self.availables[action] == 1:
             if action == KEY_LEFT: 
                 self.fallpiece['x'] -= 1
 
@@ -293,8 +292,6 @@ class Agent():
                     self.downcount += 1
                     self.fallpiece['y'] += 1            
                     if not self.validposition_mask(self.fallpiece, ay=1): break
-        else:
-            action = KEY_NONE
 
         isFalling=True
         if self.validposition_mask(self.fallpiece, ay=1):
