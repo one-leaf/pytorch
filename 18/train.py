@@ -128,11 +128,13 @@ class PPODataset(torch.utils.data.Dataset):
                     steps_out.append((*step[:8], v_nexts[i]))
 
                 self.data[fn] = steps_out
-                if c==0:
-                    print("R:")
-                    print(*steps[5])
-                    print("V_next:")
-                    print(v_nexts)
+                if c == 0:
+                    ref_probs = [step[1] for step in steps]
+                    print(f"\n=== First file debug: {fn} ===")
+                    print(f"R:         {[steps[i][5] for i in range(n_steps)]}")
+                    print(f"V_next:    {list(v_nexts)}")
+                    print(f"ref_probs: {[[round(max(rp), 3) for rp in ref_probs]]}")
+                    print("=" * 40)
                                     
             except Exception as e:
                 print(f"file {fn} error: {e}")
