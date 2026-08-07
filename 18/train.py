@@ -40,16 +40,16 @@ class PPODataset(torch.utils.data.Dataset):
 
     def __getitem__(self, index):
         fn, step_idx = self._flat_index[index]
-        state, ref_prob, log_prob, action, prev_action, R, is_terminal, availables, v_next = self.data[fn][step_idx]
+        state, ref_prob, log_prob, action, prev_action, v_t, gae_advantage, availables, is_terminal = self.data[fn][step_idx]
         return (torch.from_numpy(state).float(),
                 torch.from_numpy(ref_prob).float(),
                 torch.from_numpy(log_prob).float(),
                 torch.as_tensor(action).long(),
                 torch.as_tensor(prev_action).long(),
-                torch.as_tensor(R).float(),
-                torch.as_tensor(is_terminal).float(),
+                torch.as_tensor(v_t).float(),
+                torch.as_tensor(gae_advantage).float(),
                 torch.from_numpy(availables).float(),
-                torch.as_tensor(v_next).float())
+                torch.as_tensor(is_terminal).float())
 
     def move_wait_files(self):
         """将 wait 目录的 pkl 全部移入 data 目录（清空 wait，防止堆积）"""
@@ -99,10 +99,12 @@ class PPODataset(torch.utils.data.Dataset):
         print(f"loaded {len(self.file_list)} files, deleted {deleted} (pool rotation: {to_delete_by_rotation})")
 
     def load_data(self):
-        """将所有 pkl 加载到内存，构建 flat index，并预计算每步的 v_next"""
+        """将所有 pkl 加载到内存，按 episode 预计算 GAE advantage"""
         start_time = time.time()
+        gamma = 0.99
+        lam = 0.95  # GAE lambda：0=TD(0)，1=MC，0.95 平衡偏差方差
 
-        # ── 加载数据，预计算 v_next（下一步的 v_t）──
+        # ── 加载数据，按 episode 从后往前计算 GAE ──
         for c, fn in enumerate(self.file_list):
             try:
                 with open(fn, "rb") as f:
@@ -116,36 +118,48 @@ class PPODataset(torch.utils.data.Dataset):
                 # 检查数据格式：新格式 9 字段（包含 v_t）
                 assert len(steps[0]) == 9, f'error: expected 9 elements, got {len(steps[0])} (old format, delete file)'
 
-                # 预计算 v_next：下一步的 v_t，最后一步为 0
-                v_nexts = np.zeros(n_steps)
-                for t in range(n_steps - 1):
-                    v_nexts[t] = steps[t + 1][8]  # 下一步的 v_t
-                # v_nexts[-1] 保持为 0（游戏结束）
+                # ── GAE: 从后往前递推 ──
+                # v_t[t] = selfplay 时模型预测的 V(s[t])
+                v_t = np.array([float(step[8]) for step in steps])
+                R = np.array([float(step[5]) for step in steps])
+                is_terminal = np.array([float(step[6]) for step in steps])
 
-                # 扩展为 9 元素: (state, ref_prob, log_prob, action, prev_action, R, is_terminal, availables, v_next)
+                gae_advantages = np.zeros(n_steps)
+                gae_next = 0.0
+                for t in reversed(range(n_steps)):
+                    # terminal 时不 bootstrapping
+                    v_next = v_t[t + 1] if t < n_steps - 1 else 0.0
+                    non_terminal = 1.0 - is_terminal[t]
+                    delta = R[t] + gamma * v_next * non_terminal - v_t[t]
+                    gae_advantages[t] = delta + gamma * lam * non_terminal * gae_next
+                    gae_next = gae_advantages[t]
+
+                # 扩展为 9 元素: (state, ref_prob, log_prob, action, prev_action, v_t, gae_advantage, availables, is_terminal)
                 steps_out = []
                 for i, step in enumerate(steps):
-                    steps_out.append((*step[:8], v_nexts[i]))
+                    steps_out.append((step[0], step[1], step[2], step[3], step[4],
+                                      v_t[i], gae_advantages[i], step[7], step[6]))
 
                 self.data[fn] = steps_out
                 if c == 0:
+                    max_probs = [max(step[1]) for step in steps]  # step[1] 是 ref_prob
                     print(f"\n=== First file debug: {fn} ===")
-                    print(f"R:         {[float(x) for x in [steps[i][5] for i in range(n_steps)]]}")
-                    print(f"V_next:    {[round(float(v), 4) for v in v_nexts]}")
-                    ref_probs = [max(step[1]) for step in steps]
-                    print(f"ref_probs: {[round(float(p), 3) for p in ref_probs]}")
+                    print(f"R:         {[float(x) for x in R]}")
+                    print(f"v_t:       {[round(float(v), 4) for v in v_t]}")
+                    print(f"GAE:       {[round(float(a), 4) for a in gae_advantages]}")
+                    print(f"Max probs: {[round(float(p), 3) for p in max_probs]}")
                     print("=" * 40)
-                                    
+
             except Exception as e:
                 print(f"file {fn} error: {e}")
                 if os.path.exists(fn):
                     os.remove(fn)
                 self.file_list.remove(fn)
 
-        # 统计 v_next 的分布（仅用于日志，不归一化）
-        v_nexts = np.array([step[8] for steps in self.data.values() for step in steps])
-        if len(v_nexts) > 0:
-            print(f"v_next raw: mean={v_nexts.mean():.3f} std={v_nexts.std():.3f} min={v_nexts.min():.3f} max={v_nexts.max():.3f}")
+        # 统计 GAE 的分布（仅用于日志）
+        gae_all = np.array([step[6] for steps in self.data.values() for step in steps])
+        if len(gae_all) > 0:
+            print(f"GAE raw: mean={gae_all.mean():.3f} std={gae_all.std():.3f} min={gae_all.min():.3f} max={gae_all.max():.3f}")
 
         self._flat_index = [(fn, i) for fn in self.file_list for i in range(len(self.data[fn]))]
 
@@ -173,10 +187,10 @@ class PPOTrain():
 
     def policy_update(self, sample_data):
         """PPO 策略更新"""
-        state_batch, _ref_probs_batch, log_probs_old_batch, actions_batch, prev_actions_batch, R_batch, is_terminal_batch, availables_batch, v_next_batch = sample_data
+        state_batch, _ref_probs_batch, log_probs_old_batch, actions_batch, prev_actions_batch, v_t_batch, gae_advantage_batch, availables_batch, _is_terminal_batch = sample_data
         acc, kl, entropy, value_loss = self.policy_net.train_step_ppo(
             state_batch, log_probs_old_batch, actions_batch, prev_actions_batch,
-            R_batch, is_terminal_batch, v_next_batch,
+            v_t_batch, gae_advantage_batch,
             self.learn_rate * self.lr_multiplier,
             clip_eps=self.ppo_clip_eps,
             beta=self.ppo_beta,
