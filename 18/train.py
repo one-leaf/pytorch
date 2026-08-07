@@ -103,7 +103,7 @@ class PPODataset(torch.utils.data.Dataset):
         start_time = time.time()
 
         # ── 加载数据，预计算 v_next（下一步的 v_t）──
-        for fn in self.file_list:
+        for i, fn in enumerate(self.file_list):
             try:
                 with open(fn, "rb") as f:
                     steps = pickle.load(f)
@@ -128,6 +128,10 @@ class PPODataset(torch.utils.data.Dataset):
                     steps_out.append((*step[:8], v_nexts[i]))
 
                 self.data[fn] = steps_out
+                print(steps_out[5])
+                print(steps_out[8])
+                print(np.max(steps_out[1], axis=0))
+                
             except Exception as e:
                 print(f"file {fn} error: {e}")
                 if os.path.exists(fn):
@@ -235,12 +239,12 @@ class PPOTrain():
                               f"acc:{acc:.4f} kl:{kl:.5f} ent:{entropy:.4f} vloss:{value_loss:.4f}",
                               f"ent_w:{self.ppo_entropy_weight:.3f} ent_ema:{self.entropy_ema:.4f}")
 
-                    if epoch == 0 and i == 0:
-                        state_batch, ref_probs_batch, log_probs_old_batch, actions_batch, prev_actions_batch, R_batch, _is_terminal, _availables, v_next_batch = data
-                        print("R_batch:", R_batch)
-                        print("v_next_batch:", v_next_batch)
-                        print("actions_batch:", actions_batch)
-                        print("terminal:", _is_terminal)
+                    # if epoch == 0 and i == 0:
+                    #     state_batch, ref_probs_batch, log_probs_old_batch, actions_batch, prev_actions_batch, R_batch, _is_terminal, _availables, v_next_batch = data
+                    #     print("R_batch:", R_batch)
+                    #     print("v_next_batch:", v_next_batch)
+                    #     print("actions_batch:", actions_batch)
+                    #     print("terminal:", _is_terminal)
 
                     if math.isnan(kl) or math.isnan(acc) or math.isnan(entropy) or math.isnan(value_loss) or \
                        math.isinf(kl) or math.isinf(acc) or math.isinf(entropy) or math.isinf(value_loss):
