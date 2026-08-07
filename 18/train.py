@@ -134,7 +134,7 @@ class PPODataset(torch.utils.data.Dataset):
                     print("V_next:")
                     print(v_nexts)
                     print("prob:")
-                    print(np.max(*steps[1], axis=0))
+                    print(np.max(*steps[1]))
                 
             except Exception as e:
                 print(f"file {fn} error: {e}")
