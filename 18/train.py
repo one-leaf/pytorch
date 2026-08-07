@@ -130,7 +130,7 @@ class PPODataset(torch.utils.data.Dataset):
                 self.data[fn] = steps_out
                 if c==0:
                     print("R:")
-                    print(steps[5])
+                    print(*steps[5])
                     print("V_next:")
                     print(v_nexts)
                     print("prob:")
