@@ -103,7 +103,7 @@ class PPODataset(torch.utils.data.Dataset):
         start_time = time.time()
 
         # ── 加载数据，预计算 v_next（下一步的 v_t）──
-        for i, fn in enumerate(self.file_list):
+        for c, fn in enumerate(self.file_list):
             try:
                 with open(fn, "rb") as f:
                     steps = pickle.load(f)
@@ -128,7 +128,7 @@ class PPODataset(torch.utils.data.Dataset):
                     steps_out.append((*step[:8], v_nexts[i]))
 
                 self.data[fn] = steps_out
-                if i==0:
+                if c==0:
                     print("R:")
                     print(steps[5])
                     print("V_next:")
