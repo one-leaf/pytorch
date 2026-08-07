@@ -128,8 +128,11 @@ class PPODataset(torch.utils.data.Dataset):
                     steps_out.append((*step[:8], v_nexts[i]))
 
                 self.data[fn] = steps_out
+                print("R:")
                 print(steps_out[5])
+                print("V_next:")
                 print(steps_out[8])
+                print("prob:")
                 print(np.max(steps_out[1], axis=0))
                 
             except Exception as e:
