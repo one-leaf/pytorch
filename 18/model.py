@@ -180,10 +180,13 @@ class PolicyNet():
 
         # advantage = td_target - V(s)（当前模型的估计）
         advantages = td_target - v_scalar.detach()  # [B]
+        advantages = torch.nan_to_num(advantages, nan=0.0)  # 防止个别 NaN 污染整体
 
         # 全局标准化 advantages
         adv_mean = advantages.mean()
         adv_std = advantages.std().clamp(min=1e-3)
+        if torch.isnan(adv_std):
+            adv_std = torch.tensor(1.0, device=self.device)  # std 为 NaN 时跳过标准化
         advantages = (advantages - adv_mean) / adv_std
 
         # ── Policy loss (PPO clip + 步重要性加权) ─────────────────
