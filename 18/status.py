@@ -186,8 +186,6 @@ def _default_train_state():
             "train_kl": 0,
             "train_entropy": 0,
             "train_vloss": 0,
-            "g_mean_raw": 0,
-            "g_std_raw": 0,
         },
         "training": {"kl": 1e-2, "lr_multiplier": 1, "entropy_weight": 1.0, "entropy_ema": 1.0},
         "history": [],
@@ -227,8 +225,6 @@ def _append_train_history(train_state, play_state):
         "train_kl": tm.get("train_kl", 0),
         "train_entropy": tm.get("train_entropy", 0),
         "train_vloss": tm.get("train_vloss", 0),
-        "g_mean_raw": tm.get("g_mean_raw", 0),
-        "g_std_raw": tm.get("g_std_raw", 0),
         # training
         "kl": tr.get("kl", 0),
         "lr_multiplier": tr.get("lr_multiplier", 1),
