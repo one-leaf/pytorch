@@ -145,11 +145,11 @@ class PPODataset(torch.utils.data.Dataset):
                     max_probs = [max(step[1]) for step in steps]  # step[1] 是 ref_prob
                     td_targets = [v_t[i] + gae_advantages[i] for i in range(n_steps)]
                     print(f"\n=== First file debug: {fn} ===")
-                    print(f"R:         {[float(x) for x in R]}")
-                    print(f"v_t:       {[round(float(v), 4) for v in v_t]}")
-                    print(f"td_target: {[round(float(t), 4) for t in td_targets]}")
-                    print(f"GAE:       {[round(float(a), 4) for a in gae_advantages]}")
-                    print(f"Max probs: {[round(float(p), 3) for p in max_probs]}")
+                    print(f"R:         \n{[float(x) for x in R]}")
+                    print(f"v_t:       \n{[round(float(v), 4) for v in v_t]}")
+                    print(f"td_target: \n{[round(float(t), 4) for t in td_targets]}")
+                    print(f"GAE:       \n{[round(float(a), 4) for a in gae_advantages]}")
+                    print(f"Max probs: \n{[round(float(p), 3) for p in max_probs]}")
                     print("=" * 40)
 
             except Exception as e:
