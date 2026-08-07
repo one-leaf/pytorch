@@ -130,11 +130,11 @@ class PPODataset(torch.utils.data.Dataset):
                 self.data[fn] = steps_out
                 if i==0:
                     print("R:")
-                    print(steps_out[5])
+                    print(steps[5])
                     print("V_next:")
-                    print(steps_out[8])
+                    print(v_nexts)
                     print("prob:")
-                    print(np.max(steps_out[1]))
+                    print(np.max(steps[1], axis=0))
                 
             except Exception as e:
                 print(f"file {fn} error: {e}")
