@@ -219,6 +219,7 @@ class PPOSelfPlay():
 
             # 决定是否使用最佳模型
             model_to_load = best_model_path if best_model_path else current_model
+            model_label = "best" if best_model_path else "current"
 
             if os.path.exists(model_to_load):
                 mtime = os.path.getmtime(model_to_load)
@@ -275,7 +276,7 @@ class PPOSelfPlay():
             m["ppo_piececount_best"]    = max(m.get("ppo_piececount_best",    0), g_max_pc)
             m["ppo_removedlines_best"]  = max(m.get("ppo_removedlines_best",  0), g_max_rl)
 
-            print(f"Group: ppo_avg={g_avg_pc:.1f} min={g_min_pc} max={g_max_pc} lines_avg={g_avg_rl:.2f}")
+            print(f"Group: ppo_avg={g_avg_pc:.1f} min={g_min_pc} max={g_max_pc} lines_avg={g_avg_rl:.2f} model={model_label}")
 
             save_play_state(state)
 
