@@ -101,7 +101,7 @@ class PPODataset(torch.utils.data.Dataset):
     def load_data(self):
         """将所有 pkl 加载到内存，按 episode 预计算 GAE advantage"""
         start_time = time.time()
-        gamma = 0.99
+        gamma = 0.9
         lam = 0.95  # GAE lambda：0=TD(0)，1=MC，0.95 平衡偏差方差
 
         # ── 加载数据，按 episode 从后往前计算 GAE ──
