@@ -145,6 +145,33 @@ class PPOSelfPlay():
             print("WARNING: model output contains NaN, reinitializing weights!")
             policy_net.net.init_weights()
 
+    def _get_best_model_path(self):
+        """获取最佳模型路径（根据 test_piececount_best_ema）"""
+        try:
+            state = read_play_state()
+            best_ema = state["metrics"].get("test_piececount_best_ema", 0)
+            if best_ema <= 0:
+                return None
+            # 最佳模型保存在 model_dir/{best_ema:.1f}/model.pth
+            best_dir = os.path.join(model_dir, f"{best_ema:.1f}")
+            best_model = os.path.join(best_dir, 'model.pth')
+            if os.path.exists(best_model):
+                return best_model
+        except Exception:
+            pass
+        return None
+
+    def _should_use_best_model(self):
+        """判断是否应该使用最佳模型（当性能明显下降时）"""
+        try:
+            state = read_play_state()
+            te_pc = state["metrics"].get("test_piececount", 0)
+            best_ema = state["metrics"].get("test_piececount_best_ema", 0)
+            # 当前性能比最佳差 1.0 个方块以上，使用最佳模型
+            return te_pc < best_ema - 1.0
+        except Exception:
+            return False
+
     def collect_ppo_data(self):
         """收集 PPO 自我对抗数据"""
         print("PPO Self Play starting ...")
@@ -160,6 +187,13 @@ class PPOSelfPlay():
         if time.time() - os.path.getmtime(load_model_file) > 60 * 60 * 5:
             print("超过5小时模型都没有更新了，停止训练")
             return
+
+        # 检查是否应该使用最佳模型初始化
+        use_best = self._should_use_best_model()
+        best_model_path = self._get_best_model_path() if use_best else None
+        if best_model_path:
+            load_model_file = best_model_path
+            print(f"Using best model for initialization: {best_model_path}")
 
         # 加载模型用于数据收集
         if self.policy_net is None:
@@ -180,12 +214,19 @@ class PPOSelfPlay():
 
             # 每组之前检查模型是否有更新，有则重新加载
             current_model = model_file
-            if os.path.exists(current_model):
-                mtime = os.path.getmtime(current_model)
+            use_best = self._should_use_best_model()
+            best_model_path = self._get_best_model_path() if use_best else None
+
+            # 决定是否使用最佳模型
+            model_to_load = best_model_path if best_model_path else current_model
+
+            if os.path.exists(model_to_load):
+                mtime = os.path.getmtime(model_to_load)
                 if mtime > _last_model_mtime:
-                    print(f"Model updated, reloading from {current_model}")
+                    model_name = "best model" if best_model_path else "current model"
+                    print(f"Model updated, reloading {model_name} from {model_to_load}")
                     self.policy_net = PolicyNet(
-                        GAME_WIDTH, GAME_HEIGHT, GAME_ACTIONS_NUM, model_file=current_model
+                        GAME_WIDTH, GAME_HEIGHT, GAME_ACTIONS_NUM, model_file=model_to_load
                     )
                     self._check_and_fix_nan(self.policy_net)
                     _last_model_mtime = mtime
