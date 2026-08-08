@@ -158,10 +158,12 @@ class PPODataset(torch.utils.data.Dataset):
                     os.remove(fn)
                 self.file_list.remove(fn)
 
-        # 统计 GAE 的分布（仅用于日志）
+        # 统计 GAE 的分布（保存到实例属性）
         gae_all = np.array([step[6] for steps in self.data.values() for step in steps])
+        self.gae_mean = float(gae_all.mean()) if len(gae_all) > 0 else 0.0
+        self.gae_std = float(gae_all.std()) if len(gae_all) > 0 else 0.0
         if len(gae_all) > 0:
-            print(f"GAE raw: mean={gae_all.mean():.3f} std={gae_all.std():.3f} min={gae_all.min():.3f} max={gae_all.max():.3f}")
+            print(f"GAE raw: mean={self.gae_mean:.3f} std={self.gae_std:.3f} min={gae_all.min():.3f} max={gae_all.max():.3f}")
 
         self._flat_index = [(fn, i) for fn in self.file_list for i in range(len(self.data[fn]))]
 
@@ -326,6 +328,8 @@ class PPOTrain():
             m["train_kl"]      = round(m.get("train_kl",      0) * (1 - alpha) + avg_kl  * alpha, 5)
             m["train_entropy"] = round(m.get("train_entropy", 0) * (1 - alpha) + avg_ent * alpha, 5)
             m["train_vloss"]   = round(m.get("train_vloss",   0) * (1 - alpha) + avg_vl  * alpha, 5)
+            m["gae_mean"]      = round(self.dataset.gae_mean, 5)
+            m["gae_std"]       = round(self.dataset.gae_std, 5)
             # lr_multiplier 调整使用 EMA 平滑后的 train_kl
             set_train_value(train_state, "kl", avg_kl, alpha)
             total_kl = train_state["training"]["kl"]

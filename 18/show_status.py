@@ -50,7 +50,7 @@ def show_status(max_history=0, as_json=False):
     history = train.get("history", [])
 
     # 基本信息
-    print("=" * 136)
+    print("=" * 153)
     p_info = play.get("info", {})
     t_info = train.get("info", {})
     print(f"  play 创建:   {p_info.get('create', '-')}  最后更新:   {p_info.get('modify', '-')}")
@@ -58,7 +58,7 @@ def show_status(max_history=0, as_json=False):
     train_count = tc.get("train", 0)
     sample_count = pc.get("agent", 0)
     print(f"  训练轮次:   {train_count}    样本组数:   {sample_count}")
-    print("-" * 136)
+    print("-" * 153)
 
     # test_play（纯贪婪，无噪声）
     test_pc = pm.get("test_piececount")
@@ -68,7 +68,7 @@ def show_status(max_history=0, as_json=False):
         print(f"    历史最高:     方块={pm.get('test_piececount_best', 0)}  消行={pm.get('test_removedlines_best', 0)}")
     else:
         print("  [Test] （尚未运行 test_play）")
-    print("-" * 136)
+    print("-" * 153)
     print(f"  KL 散度:      {fmt(tr.get('kl'), 6)}")
     print(f"  学习率倍率:   {fmt(tr.get('lr_multiplier'), 4)}    熵权重:   {fmt(tr.get('entropy_weight'), 4)}    熵EMA:   {fmt(tr.get('entropy_ema'), 4)}")
     train_acc = tm.get("train_acc")
@@ -95,15 +95,15 @@ def show_status(max_history=0, as_json=False):
             display = history
             label = f"  训练记录 ({len(history)} 条):"
 
-        print("=" * 136)
+        print("=" * 153)
         print(label)
-        print("-" * 136)
+        print("-" * 153)
         header = (f"  {'Train':>6}  "
                   f"{'PP_Pc':>8} {'PP_Ln':>8} {'PP_St':>8} {'PP_Min':>7} {'PP_Max':>7}  "
                   f"{'Te_Pc':>8} {'Te_Ln':>8} {'Te_St':>8} {'Te_Best':>7}  "
-                  f"{'Acc':>8} {'KL':>9} {'Ent':>8} {'EntW':>7} {'VL':>8}")
+                  f"{'Acc':>8} {'KL':>9} {'Ent':>8} {'EntW':>7} {'VL':>8} {'GAE_M':>8} {'GAE_S':>8}")
         print(header)
-        print("-" * 136)
+        print("-" * 153)
         for h in display:
             print(f"  {h.get('train', 0):>6}  "
                   f"{h.get('ppo_piececount', 0):>8.1f} "
@@ -119,10 +119,12 @@ def show_status(max_history=0, as_json=False):
                   f"{h.get('train_kl', 0):>9.5f} "
                   f"{h.get('train_entropy', 0):>8.4f} "
                   f"{h.get('entropy_weight', 0):>7.3f} "
-                  f"{h.get('train_vloss', 0):>8.4f}")
-        print("=" * 136)
+                  f"{h.get('train_vloss', 0):>8.4f} "
+                  f"{h.get('gae_mean', 0):>8.5f} "
+                  f"{h.get('gae_std', 0):>8.5f}")
+        print("=" * 153)
     elif history:
-        print("=" * 136)
+        print("=" * 153)
         print(f"  历史记录: 共 {len(history)} 条 (用 --history N 查看)")
         if len(history) >= 2:
             first, last = history[0], history[-1]
@@ -132,7 +134,7 @@ def show_status(max_history=0, as_json=False):
             print(f"  当前(train {last.get('train', 0)}):  "
                   f"player pc={last.get('ppo_piececount', 0):.1f} ln={last.get('ppo_removedlines', 0):.3f}  "
                   f"test pc={last.get('test_piececount', 0):.1f} ln={last.get('test_removedlines', 0):.3f}")
-        print("=" * 136)
+        print("=" * 153)
 
 
 if __name__ == '__main__':
