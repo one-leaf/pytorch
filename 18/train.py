@@ -135,25 +135,25 @@ class PPODataset(torch.utils.data.Dataset):
                 # 限制 TD 在 [-1, 0] 范围内
                 td_targets = np.clip(td_targets, -1.0, 0.0)
 
-                # 只在 landed step 上计算 GAE，从后往前反算
-                gae_landed = {}  # {landed_idx: gae_value}
-                gae_next = 0.0  # 上一个 landed step 的 GAE
-
-                for t in reversed(landed_indices):
-                    # delta = TD - V(s)
-                    delta = td_targets[t] - v_t[t]
-                    # gae = delta + gamma * lam * gae_next
-                    gae_t = delta + gamma * lam * gae_next
-                    gae_landed[t] = gae_t
-                    gae_next = gae_t
-
-                # 填充 GAE：每个 landed step 的 GAE 应用到它之前的所有下降 step
-                gae_advantages = np.zeros(n_steps)
+                # 填充 TD：每个 landed step 的 TD 应用到它之前的所有下降 step
+                td_filled = np.zeros(n_steps)
                 for i, t in enumerate(landed_indices):
-                    # 找到这个 landed step 之前的所有下降 step
                     prev_landed = landed_indices[i - 1] if i > 0 else -1
                     for s in range(prev_landed + 1, t + 1):
-                        gae_advantages[s] = gae_landed[t]
+                        td_filled[s] = td_targets[t]
+                td_targets = td_filled
+
+                # 在所有 step 上计算 GAE，从后往前递推
+                gae_advantages = np.zeros(n_steps)
+                gae_next = 0.0
+                for t in reversed(range(n_steps)):
+                    # delta = TD - V(s)
+                    delta = td_targets[t] - v_t[t]
+                    # 如果是 landed step，不继续传播（下一个方块的起点）
+                    non_terminal = 1.0 - landed[t]
+                    # gae = delta + gamma * lam * gae_next * non_terminal
+                    gae_advantages[t] = delta + gamma * lam * gae_next * non_terminal
+                    gae_next = gae_advantages[t]
 
                 # 扩展为 9 元素 tuple: (state, ref_prob, log_prob, action, prev_action, gae_advantage, td_target, availables, landed)
                 steps_out = []
