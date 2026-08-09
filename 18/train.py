@@ -115,13 +115,10 @@ class PPODataset(torch.utils.data.Dataset):
                     print(f"file {fn} is empty, skipping")
                     continue
 
-                # 检查数据格式：新格式 9 字段（包含 v_t）
-                assert len(steps[0]) == 9, f'error: expected 9 elements, got {len(steps[0])} (old format, delete file)'
-
                 # ── GAE: 按方块计算，只在 landed=True 的 step 计算 ──
-                v_t = np.array([float(step[8]) for step in steps])
-                R = np.array([float(step[5]) for step in steps])
-                landed = np.array([float(step[6]) for step in steps])
+                v_t = np.array([float(step["v_t"]) for step in steps])
+                R = np.array([float(step["r_step"]) for step in steps])
+                landed = np.array([float(step["landed"]) for step in steps])
 
                 # 找出所有 landed step 的索引
                 landed_indices = [i for i in range(n_steps) if landed[i]]
@@ -150,15 +147,16 @@ class PPODataset(torch.utils.data.Dataset):
                     for s in range(prev_landed + 1, t + 1):
                         gae_advantages[s] = gae_landed[t]
 
-                # 扩展为 9 元素: (state, ref_prob, log_prob, action, prev_action, v_t, gae_advantage, availables, landed)
+                # 扩展为 9 元素 tuple: (state, ref_prob, log_prob, action, prev_action, v_t, gae_advantage, availables, landed)
                 steps_out = []
                 for i, step in enumerate(steps):
-                    steps_out.append((step[0], step[1], step[2], step[3], step[4],
-                                      v_t[i], gae_advantages[i], step[7], landed[i]))
+                    steps_out.append((step["state"], step["ref_prob"], step["log_prob"],
+                                      step["action"], step["prev_action"],
+                                      v_t[i], gae_advantages[i], step["availables"], landed[i]))
 
                 self.data[fn] = steps_out
                 if c == 0:
-                    max_probs = [max(step[1]) for step in steps]  # step[1] 是 ref_prob
+                    max_probs = [max(step["ref_prob"]) for step in steps]
                     td_targets = [v_t[i] + gae_advantages[i] for i in range(n_steps)]
                     print(f"\n=== First file debug: {fn}, length: {n_steps} ===")
                     print(f"R:         \n{[float(x) for x in R]}")

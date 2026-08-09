@@ -300,26 +300,33 @@ class PPOSelfPlay():
 
             # 保存每局结果：一局一个 pkl 文件（包含所有 step）
             filetime = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-            for run_idx, (agent, trajectory, step_results) in enumerate(group_agents):
+            for run_idx, (_, trajectory, step_results) in enumerate(group_agents):
                 game_counter += 1
 
-                # 每步存储: (state, ref_prob, log_prob, action, prev_action, r_step, landed, availables, v_t)
+                # 每步存储为 dict
+                n_steps = len(trajectory)
                 game_steps = []
                 for step_idx, step_data in enumerate(trajectory):
                     landed, removed = step_results[step_idx]
                     landed_int = 1 if landed else 0
                     r_step = 0
-                    if agent.terminal:
+                    # 只在最后一个 step 且 landed 时给 -1 奖励（游戏结束）
+                    if step_idx == n_steps - 1 and landed:
                         r_step = -1
 
-                    # 9字段: (state, ref_prob, log_prob, action, prev_action, r_step, landed, availables, v_t)
-                    game_steps.append((
-                        step_data["state"], step_data["ref_prob"],
-                        step_data["log_prob"], step_data["action"],
-                        step_data["prev_action"], r_step, landed_int,
-                        step_data["availables"], step_data["v_t"]
-                    ))
-                    
+                    step_dict = {
+                        "state": step_data["state"],
+                        "ref_prob": step_data["ref_prob"],
+                        "log_prob": step_data["log_prob"],
+                        "action": step_data["action"],
+                        "prev_action": step_data["prev_action"],
+                        "r_step": r_step,
+                        "landed": landed_int,
+                        "availables": step_data["availables"],
+                        "v_t": step_data["v_t"],
+                    }
+                    game_steps.append(step_dict)
+
                 filename = f"{filetime}-{game_counter:06d}-r{run_idx}.pkl"
                 savefile = os.path.join(data_wait_dir, filename)
                 with open(savefile, "wb") as fn:
