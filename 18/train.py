@@ -161,9 +161,9 @@ class PPODataset(torch.utils.data.Dataset):
                     print(f"\n=== First file debug: {fn}, length: {n_steps} ===")
                     print(f"landed:    \n{[int(x) for x in landed]}")
                     print(f"R:         \n{[int(x) for x in R]}")
-                    print(f"v_t:       \n{[round(float(v), 4) for v in v_t]}")
-                    print(f"td_target: \n{[round(float(t), 4) for t in td_targets]}")
-                    print(f"GAE:       \n{[round(float(a), 4) for a in gae_advantages]}")
+                    print(f"v_t:       \n{[round(float(v), 3) for v in v_t]}")
+                    print(f"td_target: \n{[round(float(t), 3) for t in td_targets]}")
+                    print(f"GAE:       \n{[round(float(a), 3) for a in gae_advantages]}")
                     print(f"Max probs: \n{[round(float(p), 3) for p in max_probs]}")
                     print("=" * 40)
 
