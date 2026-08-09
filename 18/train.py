@@ -104,7 +104,7 @@ class PPODataset(torch.utils.data.Dataset):
         gamma = 0.9
         lam = 0.95  # GAE lambda：0=TD(0)，1=MC，0.95 平衡偏差方差
 
-        # ── 加载数据，按 episode 从后往前计算 GAE ──
+        # ── 加载数据，按 episode 计算 GAE ──
         for c, fn in enumerate(self.file_list):
             try:
                 with open(fn, "rb") as f:
@@ -118,27 +118,43 @@ class PPODataset(torch.utils.data.Dataset):
                 # 检查数据格式：新格式 9 字段（包含 v_t）
                 assert len(steps[0]) == 9, f'error: expected 9 elements, got {len(steps[0])} (old format, delete file)'
 
-                # ── GAE: 从后往前递推 ──
-                # v_t[t] = selfplay 时模型预测的 V(s[t])
+                # ── GAE: 按方块计算，只在 landed=True 的 step 计算 ──
                 v_t = np.array([float(step[8]) for step in steps])
                 R = np.array([float(step[5]) for step in steps])
-                is_terminal = np.array([float(step[6]) for step in steps])
+                landed = np.array([float(step[6]) for step in steps])
 
+                # 找出所有 landed step 的索引
+                landed_indices = [i for i in range(n_steps) if landed[i]]
+
+                # 只在 landed step 上计算 GAE，从后往前反算
+                gae_landed = {}  # {landed_idx: gae_value}
+                gae_next = 0.0  # 上一个 landed step 的 GAE
+
+                for t in reversed(landed_indices):
+                    # v_next：下一个 landed step 的 V(s)，如果没有则为 0
+                    t_next = landed_indices[landed_indices.index(t) + 1] if landed_indices.index(t) + 1 < len(landed_indices) else None
+                    v_next = v_t[t_next] if t_next is not None else 0.0
+
+                    # delta = R[t] + gamma * V(s_next) - V(s)
+                    delta = R[t] + gamma * v_next - v_t[t]
+                    # gae = delta + gamma * lam * gae_next
+                    gae_t = delta + gamma * lam * gae_next
+                    gae_landed[t] = gae_t
+                    gae_next = gae_t
+
+                # 填充 GAE：每个 landed step 的 GAE 应用到它之前的所有下降 step
                 gae_advantages = np.zeros(n_steps)
-                gae_next = 0.0
-                for t in reversed(range(n_steps)):
-                    # terminal 时不 bootstrapping
-                    v_next = v_t[t + 1] if t < n_steps - 1 else 0.0
-                    non_terminal = 1.0 - is_terminal[t]
-                    delta = R[t] + gamma * v_next * non_terminal - v_t[t]
-                    gae_advantages[t] = delta + gamma * lam * non_terminal * gae_next
-                    gae_next = gae_advantages[t]
+                for i, t in enumerate(landed_indices):
+                    # 找到这个 landed step 之前的所有下降 step
+                    prev_landed = landed_indices[i - 1] if i > 0 else -1
+                    for s in range(prev_landed + 1, t + 1):
+                        gae_advantages[s] = gae_landed[t]
 
-                # 扩展为 9 元素: (state, ref_prob, log_prob, action, prev_action, v_t, gae_advantage, availables, is_terminal)
+                # 扩展为 9 元素: (state, ref_prob, log_prob, action, prev_action, v_t, gae_advantage, availables, landed)
                 steps_out = []
                 for i, step in enumerate(steps):
                     steps_out.append((step[0], step[1], step[2], step[3], step[4],
-                                      v_t[i], gae_advantages[i], step[7], step[6]))
+                                      v_t[i], gae_advantages[i], step[7], landed[i]))
 
                 self.data[fn] = steps_out
                 if c == 0:
