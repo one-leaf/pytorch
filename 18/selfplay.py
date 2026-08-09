@@ -164,7 +164,7 @@ class PPOSelfPlay():
     def _should_use_best_model(self):
         """判断是否应该使用最佳模型（当性能明显下降时）"""
         try:
-            if random.random() < 0.1:  # 10% 概率检查
+            if random.random() > 0.1:  # 10% 概率检查
                 return False
             state = read_play_state()
             te_pc = state["metrics"].get("test_piececount", 0)
