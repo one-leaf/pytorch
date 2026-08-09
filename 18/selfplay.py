@@ -309,7 +309,7 @@ class PPOSelfPlay():
                     landed, removed = step_results[step_idx]
                     landed_int = 1 if landed else 0
                     r_step = 0
-                    if landed_int:
+                    if agent.terminal:
                         r_step = -1
 
                     # 9字段: (state, ref_prob, log_prob, action, prev_action, r_step, landed, availables, v_t)
