@@ -40,16 +40,16 @@ class PPODataset(torch.utils.data.Dataset):
 
     def __getitem__(self, index):
         fn, step_idx = self._flat_index[index]
-        state, ref_prob, log_prob, action, prev_action, v_t, gae_advantage, availables, is_terminal = self.data[fn][step_idx]
+        state, ref_prob, log_prob, action, prev_action, gae_advantage, td_target, availables, landed = self.data[fn][step_idx]
         return (torch.from_numpy(state).float(),
                 torch.from_numpy(ref_prob).float(),
                 torch.from_numpy(log_prob).float(),
                 torch.as_tensor(action).long(),
                 torch.as_tensor(prev_action).long(),
-                torch.as_tensor(v_t).float(),
                 torch.as_tensor(gae_advantage).float(),
+                torch.as_tensor(td_target).float(),
                 torch.from_numpy(availables).float(),
-                torch.as_tensor(is_terminal).float())
+                torch.as_tensor(landed).float())
 
     def move_wait_files(self):
         """将 wait 目录的 pkl 全部移入 data 目录（清空 wait，防止堆积）"""
@@ -123,17 +123,25 @@ class PPODataset(torch.utils.data.Dataset):
                 # 找出所有 landed step 的索引
                 landed_indices = [i for i in range(n_steps) if landed[i]]
 
+                # 先计算所有 landed step 的 TD target，然后限制范围
+                td_targets = np.zeros(n_steps)
+                for t in landed_indices:
+                    # 找到下一个 landed step
+                    idx = landed_indices.index(t)
+                    t_next = landed_indices[idx + 1] if idx + 1 < len(landed_indices) else None
+                    v_next = v_t[t_next] if t_next is not None else 0.0
+                    # TD = R[t] + gamma * V(s_next)
+                    td_targets[t] = R[t] + gamma * v_next
+                # 限制 TD 在 [-1, 0] 范围内
+                td_targets = np.clip(td_targets, -1.0, 0.0)
+
                 # 只在 landed step 上计算 GAE，从后往前反算
                 gae_landed = {}  # {landed_idx: gae_value}
                 gae_next = 0.0  # 上一个 landed step 的 GAE
 
                 for t in reversed(landed_indices):
-                    # v_next：下一个 landed step 的 V(s)，如果没有则为 0
-                    t_next = landed_indices[landed_indices.index(t) + 1] if landed_indices.index(t) + 1 < len(landed_indices) else None
-                    v_next = v_t[t_next] if t_next is not None else 0.0
-
-                    # delta = R[t] + gamma * V(s_next) - V(s)
-                    delta = R[t] + gamma * v_next - v_t[t]
+                    # delta = TD - V(s)
+                    delta = td_targets[t] - v_t[t]
                     # gae = delta + gamma * lam * gae_next
                     gae_t = delta + gamma * lam * gae_next
                     gae_landed[t] = gae_t
@@ -147,22 +155,21 @@ class PPODataset(torch.utils.data.Dataset):
                     for s in range(prev_landed + 1, t + 1):
                         gae_advantages[s] = gae_landed[t]
 
-                # 扩展为 9 元素 tuple: (state, ref_prob, log_prob, action, prev_action, v_t, gae_advantage, availables, landed)
+                # 扩展为 9 元素 tuple: (state, ref_prob, log_prob, action, prev_action, gae_advantage, td_target, availables, landed)
                 steps_out = []
                 for i, step in enumerate(steps):
                     steps_out.append((step["state"], step["ref_prob"], step["log_prob"],
                                       step["action"], step["prev_action"],
-                                      v_t[i], gae_advantages[i], step["availables"], landed[i]))
+                                      gae_advantages[i], td_targets[i], step["availables"], landed[i]))
 
                 self.data[fn] = steps_out
                 if c == 0:
                     max_probs = [max(step["ref_prob"]) for step in steps]
-                    td_targets = [v_t[i] + gae_advantages[i] for i in range(n_steps)]
                     print(f"\n=== First file debug: {fn}, length: {n_steps} ===")
                     print(f"landed:    \n{[int(x) for x in landed]}")
                     print(f"R:         \n{[int(x) for x in R]}")
                     print(f"v_t:       \n{[round(float(v), 3) for v in v_t]}")
-                    print(f"td_target: \n{[round(float(t), 3) for t in td_targets]}")
+                    print(f"TD:        \n{[round(float(t), 3) for t in td_targets]}")
                     print(f"GAE:       \n{[round(float(a), 3) for a in gae_advantages]}")
                     print(f"Max probs: \n{[round(float(p), 3) for p in max_probs]}")
                     print("=" * 40)
@@ -206,10 +213,10 @@ class PPOTrain():
 
     def policy_update(self, sample_data):
         """PPO 策略更新"""
-        state_batch, _ref_probs_batch, log_probs_old_batch, actions_batch, prev_actions_batch, v_t_batch, gae_advantage_batch, availables_batch, _is_terminal_batch = sample_data
+        state_batch, _ref_probs_batch, log_probs_old_batch, actions_batch, prev_actions_batch, gae_advantage_batch, td_target_batch, availables_batch, _landed_batch = sample_data
         acc, kl, entropy, value_loss = self.policy_net.train_step_ppo(
             state_batch, log_probs_old_batch, actions_batch, prev_actions_batch,
-            v_t_batch, gae_advantage_batch,
+            gae_advantage_batch, td_target_batch,
             self.learn_rate * self.lr_multiplier,
             clip_eps=self.ppo_clip_eps,
             beta=self.ppo_beta,

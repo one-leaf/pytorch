@@ -90,13 +90,12 @@ class PolicyNet():
 
     # PPO 训练步骤（GAE advantage + 分位数价值）
     def train_step_ppo(self, state_batch, log_probs_old, action_batch, prev_action_batch,
-                        v_t_batch, gae_advantage_batch, lr,
+                        gae_advantage_batch, td_target_batch, lr,
                         clip_eps=0.2, beta=0.05, entropy_weight=0.01,
                         vf_coef=0.5, availables_batch=None):
         """PPO + GAE 训练步骤（分位数价值头）
-        - v_t: selfplay 旧模型的 V(s)，用于 value loss 的 target 基线
         - gae_advantage: 预计算的 GAE advantage（从后往前递推）
-        - td_target = v_t + gae_advantage（多步回报目标，用于 value loss 回归）
+        - td_target: 预计算的 TD target（已限制范围 [-1, 0]）
         - policy_loss: PPO clip 损失，直接用 gae_advantage
         - value_loss: Quantile Huber 损失，回归 td_target
         """
@@ -134,10 +133,11 @@ class PolicyNet():
         assert log_probs_old_t.shape == (B, self.output_size), \
             f"log_probs_old shape mismatch: {log_probs_old_t.shape}"
 
-        v_t_tensor = torch.FloatTensor(v_t_batch).to(self.device)
-        v_t_tensor = torch.clamp(v_t_tensor, -10.0, 10.0)  # 防止极端值
         gae_advantages = torch.FloatTensor(gae_advantage_batch).to(self.device)
         gae_advantages = torch.nan_to_num(gae_advantages, nan=0.0)  # NaN 替换为 0
+
+        td_target_tensor = torch.FloatTensor(td_target_batch).to(self.device)
+        td_target_tensor = torch.clamp(td_target_tensor, -10.0, 10.0)  # 防止极端值
 
         self.net.train()
         log_probs, values = self.net(state_batch, prev_action_batch)
@@ -169,10 +169,8 @@ class PolicyNet():
         # 优势：对稀疏奖励，能传播终端奖励信号到更多步
         advantages = gae_advantages  # [B] 直接使用预计算的 GAE
 
-        # td_target = v_t + gae_advantage，用于 value loss 回归
-        # 因为 advantage = td_target - V_old(s)，所以 td_target = V_old(s) + advantage
-        td_target = v_t_tensor + advantages  # [B]
-        td_target = torch.clamp(td_target, -10.0, 10.0)
+        # td_target: 离线预计算，直接用于 value loss 回归
+        td_target = td_target_tensor  # [B]
 
         # 全局标准化 advantages
         adv_mean = advantages.mean()
@@ -253,9 +251,8 @@ class PolicyNet():
                    f"v_scalar=[{v_scalar.min().item():.4f}, {v_scalar.max().item():.4f}] "
                    f"spread=[{spread.min().item():.4f}, {spread.max().item():.4f}] | "
                    # 追踪 NaN 来源
-                   f"v_t=[{v_t_tensor.min().item():.4f}, {v_t_tensor.max().item():.4f}, nan={torch.isnan(v_t_tensor).sum().item()}] "
+                   f"td_target=[{td_target_tensor.min().item():.4f}, {td_target_tensor.max().item():.4f}, nan={torch.isnan(td_target_tensor).sum().item()}] "
                    f"gae=[{gae_advantages.min().item():.4f}, {gae_advantages.max().item():.4f}, nan={torch.isnan(gae_advantages).sum().item()}] "
-                   f"td_target=[{td_target.min().item():.4f}, {td_target.max().item():.4f}, nan={torch.isnan(td_target).sum().item()}] "
                    f"adv_mean={adv_mean.item():.4f} adv_std={adv_std.item():.4f} "
                    f"adv=[{advantages.min().item():.4f}, {advantages.max().item():.4f}, nan={torch.isnan(advantages).sum().item()}] | "
                    f"log_prob_new=[{log_prob_new.min().item():.4f}, {log_prob_new.max().item():.4f}, nan={torch.isnan(log_prob_new).sum().item()}] "
