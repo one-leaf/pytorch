@@ -1,7 +1,7 @@
 import os, pickle, time, itertools, shutil
 from datetime import datetime
 import numpy as np
-import torch
+import torch, random
 
 from model import PolicyNet, data_wait_dir, model_file, model_dir
 from agent import Agent, ACTIONS
@@ -164,6 +164,8 @@ class PPOSelfPlay():
     def _should_use_best_model(self):
         """判断是否应该使用最佳模型（当性能明显下降时）"""
         try:
+            if random.random() < 0.1:  # 10% 概率检查
+                return False
             state = read_play_state()
             te_pc = state["metrics"].get("test_piececount", 0)
             best_ema = state["metrics"].get("test_piececount_best_ema", 0)
