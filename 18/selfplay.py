@@ -146,14 +146,14 @@ class PPOSelfPlay():
             policy_net.net.init_weights()
 
     def _get_best_model_path(self):
-        """获取最佳模型路径（根据 test_piececount_best_ema）"""
+        """获取最佳模型路径（根据 ppo_best_ema）"""
         try:
             state = read_play_state()
-            best_ema = state["metrics"].get("test_piececount_best_ema", 0)
-            if best_ema <= 0:
+            best_pc = state["metrics"].get("ppo_best_ema", 0)
+            if best_pc <= 0:
                 return None
-            # 最佳模型保存在 model_dir/{best_ema:.1f}/model.pth
-            best_dir = os.path.join(model_dir, f"{best_ema:.1f}")
+            # 最佳模型保存在 model_dir/{best_pc}/model.pth
+            best_dir = os.path.join(model_dir, f"{best_pc}")
             best_model = os.path.join(best_dir, 'model.pth')
             if os.path.exists(best_model):
                 return best_model
@@ -167,10 +167,10 @@ class PPOSelfPlay():
             if random.random() > 0.1:  # 10% 概率检查
                 return False
             state = read_play_state()
-            te_pc = state["metrics"].get("test_piececount", 0)
-            best_ema = state["metrics"].get("test_piececount_best_ema", 0)
+            ppo_pc = state["metrics"].get("ppo_piececount", 0)
+            best_pc = state["metrics"].get("ppo_best_ema", 0)
             # 当前性能比最佳差 1.0 个方块以上，使用最佳模型
-            return te_pc < best_ema - 1.0
+            return ppo_pc < best_pc - 1.0
         except Exception:
             return False
 
@@ -282,20 +282,20 @@ class PPOSelfPlay():
 
             save_play_state(state)
 
-            # 检查是否刷新历史最佳（按test EMA方块数）
-            test_ema_pc = m.get("test_piececount", 0)
-            old_best_pc = m.get("test_piececount_best_ema", 0)
-            if test_ema_pc >= old_best_pc:
-                m["test_piececount_best_ema"] = test_ema_pc
-                save_play_state(state)  # 保存更新后的 best_ema
-                # 保存最佳模型（按test EMA方块数建目录，备份状态文件）
-                best_dir = os.path.join(model_dir, f"{test_ema_pc:.1f}")
+            # 检查是否刷新历史最佳（按 ppo 最大方块数）
+            ppo_best_pc = m.get("ppo_piececount_best", 0)
+            old_best_pc = m.get("ppo_best_ema", 0)
+            if ppo_best_pc > old_best_pc:
+                m["ppo_best_ema"] = ppo_best_pc
+                save_play_state(state)  # 保存更新后的 best
+                # 保存最佳模型（按 ppo 最大方块数建目录，备份状态文件）
+                best_dir = os.path.join(model_dir, f"{ppo_best_pc}")
                 os.makedirs(best_dir, exist_ok=True)
                 self.policy_net.save_model(os.path.join(best_dir, 'model.pth'))
                 shutil.copy2(play_file, os.path.join(best_dir, 'play.json'))
                 if os.path.exists(train_file):
                     shutil.copy2(train_file, os.path.join(best_dir, 'train.json'))
-                print(f"*** new best! test_ema={test_ema_pc:.1f} > best={old_best_pc:.1f}, saved to {best_dir}")
+                print(f"*** new best! ppo_max={ppo_best_pc} > best={old_best_pc}, saved to {best_dir}")
 
 
             # 保存每局结果：一局一个 pkl 文件（包含所有 step）
