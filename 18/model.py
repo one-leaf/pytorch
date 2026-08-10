@@ -209,8 +209,11 @@ class PolicyNet():
         # 0.05~0.15 健康范围，策略在稳步更新
         # 0.2~0.3 变化较大，可能需要降低学习率
         # 0.5+  策略偏移严重，训练不稳定
-        log_probs_safe = torch.clamp(log_probs, min=-20.0)
-        probs_new = torch.exp(log_probs_safe)
+        probs_new = torch.exp(log_probs)
+        # 限制概率范围到 [0.1, 0.9]
+        probs_new = torch.clamp(probs_new, min=0.1, max=0.9)
+        # 重新计算 log_probs 使其一致
+        log_probs_safe = torch.log(probs_new)
         # KL 仅在有效动作上计算（无效动作 prob=0，不贡献 KL）
         kl_div = (probs_new * (log_probs_safe - log_probs_old_t) * availables_t).sum(dim=-1).mean()
 
