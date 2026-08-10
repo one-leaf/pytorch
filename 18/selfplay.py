@@ -221,7 +221,7 @@ class PPOSelfPlay():
 
             # 决定是否使用最佳模型
             model_to_load = best_model_path if best_model_path else current_model
-            model_label = "best" if best_model_path else "current"
+            model_label = os.path.basename(os.path.dirname(best_model_path)) if best_model_path else "current"
 
             if os.path.exists(model_to_load):
                 mtime = os.path.getmtime(model_to_load)
