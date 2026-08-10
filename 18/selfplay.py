@@ -284,7 +284,6 @@ class PPOSelfPlay():
             # 检查是否刷新历史最佳（当前平均 > 历史平滑最大值）
             old_best_pc = m.get("ppo_piececount_best", 0)
             if g_avg_pc > old_best_pc:
-                m["ppo_best_avg"] = g_avg_pc
                 save_play_state(state)  # 保存更新后的 best
                 # 保存最佳模型（按当前平均方块数建目录，备份状态文件）
                 best_dir = os.path.join(model_dir, f"{g_avg_pc:.1f}")
