@@ -146,10 +146,10 @@ class PPOSelfPlay():
             policy_net.net.init_weights()
 
     def _get_best_model_path(self):
-        """获取最佳模型路径（根据 ppo_best_avg）"""
+        """获取最佳模型路径（根据 ppo_piececount_best"""
         try:
             state = read_play_state()
-            best_pc = state["metrics"].get("ppo_best_avg", 0)
+            best_pc = state["metrics"].get("ppo_piececount_best", 0)
             if best_pc <= 0:
                 return None
             # 最佳模型保存在 model_dir/{best_pc:.1f}/model.pth
