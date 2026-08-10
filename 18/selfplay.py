@@ -146,14 +146,14 @@ class PPOSelfPlay():
             policy_net.net.init_weights()
 
     def _get_best_model_path(self):
-        """获取最佳模型路径（根据 ppo_best_ema）"""
+        """获取最佳模型路径（根据 ppo_best_avg）"""
         try:
             state = read_play_state()
-            best_pc = state["metrics"].get("ppo_best_ema", 0)
+            best_pc = state["metrics"].get("ppo_best_avg", 0)
             if best_pc <= 0:
                 return None
-            # 最佳模型保存在 model_dir/{best_pc}/model.pth
-            best_dir = os.path.join(model_dir, f"{best_pc}")
+            # 最佳模型保存在 model_dir/{best_pc:.1f}/model.pth
+            best_dir = os.path.join(model_dir, f"{best_pc:.1f}")
             best_model = os.path.join(best_dir, 'model.pth')
             if os.path.exists(best_model):
                 return best_model
@@ -168,7 +168,7 @@ class PPOSelfPlay():
                 return False
             state = read_play_state()
             ppo_pc = state["metrics"].get("ppo_piececount", 0)
-            best_pc = state["metrics"].get("ppo_best_ema", 0)
+            best_pc = state["metrics"].get("ppo_best_avg", 0)
             # 当前性能比最佳差 1.0 个方块以上，使用最佳模型
             return ppo_pc < best_pc - 1.0
         except Exception:
@@ -262,7 +262,6 @@ class PPOSelfPlay():
             g_avg_st = sum(a.steps for a, _, _ in group_agents) / len(group_agents)
             g_min_pc = min(a.piececount for a, _, _ in group_agents)
             g_max_pc = max(a.piececount for a, _, _ in group_agents)
-            g_max_rl = max(a.removedlines for a, _, _ in group_agents)
 
             state["counters"]["agent"] += 1
             state["counters"]["_agent"] += 1
@@ -275,27 +274,26 @@ class PPOSelfPlay():
             m["ppo_piececount_min"]   = m.get("ppo_piececount_min",   9) * (1 - alpha) + g_min_pc * alpha
             m["ppo_piececount_max"]   = m.get("ppo_piececount_max",   0) * (1 - alpha) + g_max_pc * alpha
             # 历史最值
-            m["ppo_piececount_best"]    = max(m.get("ppo_piececount_best",    0), g_max_pc)
-            m["ppo_removedlines_best"]  = max(m.get("ppo_removedlines_best",  0), g_max_rl)
+            m["ppo_piececount_best"]    = max(m.get("ppo_piececount_best",    0), g_avg_pc)
+            m["ppo_removedlines_best"]  = max(m.get("ppo_removedlines_best",  0), g_avg_rl)
 
             print(f"Group: ppo_avg={g_avg_pc:.1f} min={g_min_pc} max={g_max_pc} lines_avg={g_avg_rl:.2f} model={model_label}")
 
             save_play_state(state)
 
-            # 检查是否刷新历史最佳（按 ppo 最大方块数）
-            ppo_best_pc = m.get("ppo_piececount_best", 0)
-            old_best_pc = m.get("ppo_best_ema", 0)
-            if ppo_best_pc > old_best_pc:
-                m["ppo_best_ema"] = ppo_best_pc
+            # 检查是否刷新历史最佳（当前平均 > 历史平滑最大值）
+            old_best_pc = m.get("ppo_piececount_best", 0)
+            if g_avg_pc > old_best_pc:
+                m["ppo_best_avg"] = g_avg_pc
                 save_play_state(state)  # 保存更新后的 best
-                # 保存最佳模型（按 ppo 最大方块数建目录，备份状态文件）
-                best_dir = os.path.join(model_dir, f"{ppo_best_pc}")
+                # 保存最佳模型（按当前平均方块数建目录，备份状态文件）
+                best_dir = os.path.join(model_dir, f"{g_avg_pc:.1f}")
                 os.makedirs(best_dir, exist_ok=True)
                 self.policy_net.save_model(os.path.join(best_dir, 'model.pth'))
                 shutil.copy2(play_file, os.path.join(best_dir, 'play.json'))
                 if os.path.exists(train_file):
                     shutil.copy2(train_file, os.path.join(best_dir, 'train.json'))
-                print(f"*** new best! ppo_max={ppo_best_pc} > best={old_best_pc}, saved to {best_dir}")
+                print(f"*** new best! ppo_avg={g_avg_pc:.1f} > max={old_best_pc:.1f}, saved to {best_dir}")
 
 
             # 保存每局结果：一局一个 pkl 文件（包含所有 step）
