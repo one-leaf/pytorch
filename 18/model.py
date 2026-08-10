@@ -144,7 +144,7 @@ class PolicyNet():
 
         # 概率处理：先 clamp，再 mask 无效动作，最后 renorm
         probs = torch.exp(log_probs)
-        probs = probs.clamp(min=0.1, max=0.9)  # 先 clamp 所有概率
+        probs = probs.clamp(min=0.05, max=0.8)  # 先 clamp 所有概率
         probs = probs * availables_t  # 再 mask 无效动作归零
         probs = probs / probs.sum(dim=-1, keepdim=True).clamp(min=1e-8)  # renorm
         log_probs = torch.log(probs)
