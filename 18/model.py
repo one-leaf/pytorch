@@ -142,15 +142,14 @@ class PolicyNet():
         self.net.train()
         log_probs, values = self.net(state_batch, prev_action_batch)
 
-        # 概率处理：先 mask 无效动作，再 clamp 有效动作，最后 renorm
-        # probs = torch.exp(log_probs)
-        # probs = probs * availables_t                          # 无效动作概率归零
-        # valid_probs = probs.clamp(min=0.02, max=0.98)         # 有效动作 clamp 到 [2%, 98%]
-        # valid_probs = valid_probs * availables_t              # 再次确保无效动作为 0
-        # probs = valid_probs / valid_probs.sum(dim=-1, keepdim=True).clamp(min=1e-8)
-        # log_probs = torch.log(probs)
-        # values: [B, N] quantiles
+        # 概率处理：先 clamp，再 mask 无效动作，最后 renorm
+        probs = torch.exp(log_probs)
+        probs = probs.clamp(min=0.1, max=0.9)  # 先 clamp 所有概率
+        probs = probs * availables_t  # 再 mask 无效动作归零
+        probs = probs / probs.sum(dim=-1, keepdim=True).clamp(min=1e-8)  # renorm
+        log_probs = torch.log(probs)
 
+        # values: [B, N] quantiles
         # 中间 1/2 分位数均值作为标量 V(s)（trimmed mean，抗极端分位数扰动）
         N_q = values.shape[1]
         lo = N_q // 4          # index 2
@@ -205,37 +204,28 @@ class PolicyNet():
         value_loss = (q_weights * F.smooth_l1_loss(values, target_exp, reduction='none')).mean()
 
         # ── KL 散度 ──────────────────────────────────────────────
-        # 0.01 策略几乎没变，训练非常保守
-        # 0.05~0.15 健康范围，策略在稳步更新
-        # 0.2~0.3 变化较大，可能需要降低学习率
-        # 0.5+  策略偏移严重，训练不稳定
-        probs_new = torch.exp(log_probs)
-        # 限制概率范围到 [0.1, 0.9]
-        probs_new = torch.clamp(probs_new, min=0.1, max=0.9)
-        # 重新计算 log_probs 使其一致
-        log_probs_safe = torch.log(probs_new)
-        # KL 仅在有效动作上计算（无效动作 prob=0，不贡献 KL）
-        kl_div = (probs_new * (log_probs_safe - log_probs_old_t) * availables_t).sum(dim=-1).mean()
+        # 0.01        策略几乎没变，训练非常保守
+        # 0.05~0.15   健康范围，策略在稳步更新
+        # 0.2~0.3     变化较大，可能需要降低学习率
+        # 0.5+        策略偏移严重，训练不稳定
+        kl_div = (probs * (log_probs - log_probs_old_t) * availables_t).sum(dim=-1).mean()
 
         # ── 熵正则化 ─────────────────────────────────────────────
-        # entropy_weight=1.0: 强制保持探索防止策略崩溃
-        # 仅计算有效动作的 entropy，无效动作 prob=0 不参与
-        # 有效动作数影响最大 entropy：N 个有效动作 → max entropy = log(N)
-        entropy = -(probs_new * log_probs_safe * availables_t).sum(dim=-1).mean()
+        # 熵衡量策略的随机性/探索程度
+        # 最大熵 = log(有效动作数)，例如 5 个动作时 max ≈ 1.61
+        # < 0.1       几乎确定性策略，探索不足
+        # 0.1~0.5     保守探索，主要利用已知信息
+        # 0.5~1.0     平衡的探索与利用
+        # 1.0~1.5     强探索
+        # > 1.5       接近均匀分布，探索过多
+        entropy = -(probs * log_probs * availables_t).sum(dim=-1).mean()
 
-        # ── NONE 概率正则化：防止 NONE 被动累积 ──────────────────
-        none_penalty_coef = 0.02
-        none_penalty = probs_new[:, 3].mean()
-
-        # ── 不可行动作概率惩罚：压低不可用动作的概率 ──────────────
-        unavailable_penalty_coef = 1
-        # 不可用位置的 log_prob，希望它们趋向 -inf（概率趋向 0）
-        unavailable_log_probs = log_probs_safe * (1 - availables_t)  # [B, 5]，可用位置为 0
-        # 取负值，希望 log_prob 越小越好；clamp 防止数值不稳定
-        unavailable_penalty = torch.clamp(unavailable_log_probs.sum(dim=-1), min=-20.0).mean()
+        # ── ACTION NONE 概率正则化：防止 NONE 被动累积 ──────────────────
+        none_penalty_coef = 0.001
+        none_penalty = probs[:, 3].mean()
 
         # ── 总损失 ───────────────────────────────────────────────
-        loss = policy_loss + vf_coef * value_loss + beta * kl_div - entropy_weight * entropy + none_penalty_coef * none_penalty + unavailable_penalty_coef * unavailable_penalty
+        loss = policy_loss + vf_coef * value_loss + beta * kl_div - entropy_weight * entropy + none_penalty_coef * none_penalty
 
         self.optimizer.zero_grad()
         loss.backward()
