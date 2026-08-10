@@ -332,32 +332,6 @@ class PPOSelfPlay():
                 with open(savefile, "wb") as fn:
                     pickle.dump(game_steps, fn)
 
-            # 更新计数器 + 历史统计（用实际游戏数据，保证 show_status 有数据）
-            alpha = 0.001
-            g_avg_pc = sum(a.piececount for a, _, _ in group_agents) / len(group_agents)
-            g_avg_rl = sum(a.removedlines for a, _, _ in group_agents) / len(group_agents)
-            g_avg_st = sum(a.steps for a, _, _ in group_agents) / len(group_agents)
-            g_min_pc = min(a.piececount for a, _, _ in group_agents)
-            g_max_pc = max(a.piececount for a, _, _ in group_agents)
-            g_max_rl = max(a.removedlines for a, _, _ in group_agents)
-
-            state = read_play_state()
-            state["counters"]["agent"] += 1
-            state["counters"]["_agent"] += 1
-
-            m = state["metrics"]
-            # PPO player EMA（带噪声探索的移动平均）
-            m["ppo_piececount"]       = m.get("ppo_piececount",       0) * (1 - alpha) + g_avg_pc * alpha
-            m["ppo_removedlines"]     = m.get("ppo_removedlines",     0) * (1 - alpha) + g_avg_rl * alpha
-            m["ppo_steps"]            = m.get("ppo_steps",            0) * (1 - alpha) + g_avg_st * alpha
-            m["ppo_piececount_min"]   = m.get("ppo_piececount_min",   9) * (1 - alpha) + g_min_pc * alpha
-            m["ppo_piececount_max"]   = m.get("ppo_piececount_max",   0) * (1 - alpha) + g_max_pc * alpha
-            # 历史最值
-            m["ppo_piececount_best"]    = max(m.get("ppo_piececount_best",    0), g_max_pc)
-            m["ppo_removedlines_best"]  = max(m.get("ppo_removedlines_best",  0), g_max_rl)
-
-            save_play_state(state)
-
         print(f"\nCollection finished. Total games: {game_counter}")
 
     def run(self):
