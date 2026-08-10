@@ -168,7 +168,7 @@ class PPOSelfPlay():
                 return False
             state = read_play_state()
             ppo_pc = state["metrics"].get("ppo_piececount", 0)
-            best_pc = state["metrics"].get("ppo_best_avg", 0)
+            best_pc = state["metrics"].get("ppo_piececount_best", 0)
             # 当前性能比最佳差 1.0 个方块以上，使用最佳模型
             return ppo_pc < best_pc - 1.0
         except Exception:
