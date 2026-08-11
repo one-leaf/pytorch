@@ -267,6 +267,9 @@ class PPOSelfPlay():
             state["counters"]["_agent"] += 1
 
             m = state["metrics"]
+            # 保存旧的历史最值（用于后面检查是否刷新最佳）
+            old_piececount_best = m.get("ppo_piececount_best", 0)
+
             # PPO player EMA（带噪声探索的移动平均）
             m["ppo_piececount"]       = m.get("ppo_piececount",       0) * (1 - alpha) + g_avg_pc * alpha
             m["ppo_removedlines"]     = m.get("ppo_removedlines",     0) * (1 - alpha) + g_avg_rl * alpha
@@ -279,11 +282,8 @@ class PPOSelfPlay():
 
             print(f"Group: ppo_avg={g_avg_pc:.1f} min={g_min_pc} max={g_max_pc} lines_avg={g_avg_rl:.2f} model={model_label}")
 
-            save_play_state(state)
-
-            # 检查是否刷新历史最佳（当前平均 > 历史平滑最大值）
-            old_best_pc = m.get("ppo_piececount_best", 0)
-            if g_avg_pc > old_best_pc:
+            # 检查是否刷新历史最佳（当前平均 > 旧的历史最大值）
+            if g_avg_pc > old_piececount_best:
                 save_play_state(state)  # 保存更新后的 best
                 # 保存最佳模型（按当前平均方块数建目录，备份状态文件）
                 best_dir = os.path.join(model_dir, f"{g_avg_pc:.1f}")
@@ -292,7 +292,7 @@ class PPOSelfPlay():
                 shutil.copy2(play_file, os.path.join(best_dir, 'play.json'))
                 if os.path.exists(train_file):
                     shutil.copy2(train_file, os.path.join(best_dir, 'train.json'))
-                print(f"*** new best! ppo_avg={g_avg_pc:.1f} > max={old_best_pc:.1f}, saved to {best_dir}")
+                print(f"*** new best! ppo_avg={g_avg_pc:.1f} > max={old_piececount_best:.1f}, saved to {best_dir}")
 
             # 保存每局结果：一局一个 pkl 文件（包含所有 step）
             filetime = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
