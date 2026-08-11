@@ -123,24 +123,21 @@ class PPODataset(torch.utils.data.Dataset):
                 # 找出所有 landed step 的索引
                 landed_indices = [i for i in range(n_steps) if landed[i]]
 
-                # 先计算所有 landed step 的 TD target，然后限制范围
+                # 下降步的 target 依赖 v_t[t+1]
                 td_targets = np.zeros(n_steps)
-                for idx, t in enumerate(landed_indices):
-                    # 找到下一个 landed step
-                    t_next = landed_indices[idx + 1] if idx + 1 < len(landed_indices) else None
-                    v_next = v_t[t_next] if t_next is not None else 0.0
-                    # TD = R[t] + gamma * V(s_next)
-                    td_targets[t] = R[t] + gamma * v_next
+                for t in reversed(range(n_steps)):
+                    if landed[t]:
+                        # 落地步：用下一个落地步的 v_t
+                        idx = landed_indices.index(t)  # 这里可以优化
+                        t_next = landed_indices[idx + 1] if idx + 1 < len(landed_indices) else None
+                        v_next = v_t[t_next] if t_next is not None else 0.0
+                    else:
+                        # 下降步：用下一步的 v_t
+                        v_next = v_t[t+1] if t+1 < n_steps else 0.0
+                    td_targets[t] = R[t] + gamma * v_next  
+                    
                 # 限制 TD 在 [-1, 0] 范围内
                 td_targets = np.clip(td_targets, -1.0, 0.0)
-
-                # 填充 TD：每个 landed step 的 TD 应用到它之前的所有下降 step
-                td_filled = np.zeros(n_steps)
-                for i, t in enumerate(landed_indices):
-                    prev_landed = landed_indices[i - 1] if i > 0 else -1
-                    for s in range(prev_landed + 1, t + 1):
-                        td_filled[s] = td_targets[t]
-                td_targets = td_filled
 
                 # 在所有 step 上计算 GAE，从后往前递推
                 gae_advantages = np.zeros(n_steps)
