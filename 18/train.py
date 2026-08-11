@@ -101,8 +101,8 @@ class PPODataset(torch.utils.data.Dataset):
     def load_data(self):
         """将所有 pkl 加载到内存，按 episode 预计算 GAE advantage"""
         start_time = time.time()
-        gamma = 0.9
-        lam = 0.95  # GAE lambda：0=TD(0)，1=MC，0.95 平衡偏差方差
+        gamma = 0.99
+        lam = 0.99  # GAE lambda：0=TD(0)，1=MC，0.95 平衡偏差方差
 
         # ── 加载数据，按 episode 计算 GAE ──
         for c, fn in enumerate(self.file_list):
@@ -115,41 +115,30 @@ class PPODataset(torch.utils.data.Dataset):
                     print(f"file {fn} is empty, skipping")
                     continue
 
-                # ── GAE: 按方块计算，只在 landed=True 的 step 计算 ──
+                # ── 标准 PPO GAE（按落地边界折算）──
+                # delta = R[t] + γ * v_t[t+1] - v_t[t]
+                # gae = delta + γλ * gae_next * (1 - landed)  # 落地步截断，不向前一个方块传播
+                # td_target = gae + v_t                        # 锚定在旧价值上，不会趋近0
                 v_t = np.array([float(step["v_t"]) for step in steps])
                 R = np.array([float(step["r_step"]) for step in steps])
                 landed = np.array([float(step["landed"]) for step in steps])
 
-                # 找出所有 landed step 的索引
-                landed_indices = [i for i in range(n_steps) if landed[i]]
-
-                # 下降步的 target 依赖 v_t[t+1]
-                td_targets = np.zeros(n_steps)
-                for t in reversed(range(n_steps)):
-                    if landed[t]:
-                        # 落地步：用下一个落地步的 v_t
-                        idx = landed_indices.index(t)  # 这里可以优化
-                        t_next = landed_indices[idx + 1] if idx + 1 < len(landed_indices) else None
-                        v_next = v_t[t_next] if t_next is not None else 0.0
-                    else:
-                        # 下降步：用下一步的 v_t
-                        v_next = v_t[t+1] if t+1 < n_steps else 0.0
-                    td_targets[t] = R[t] + gamma * v_next  
-                    
-                # 限制 TD 在 [-1, 0] 范围内
-                td_targets = np.clip(td_targets, -1.0, 0.0)
-
-                # 在所有 step 上计算 GAE，从后往前递推
+                # 从后往前计算 GAE
+                # 按照落地步截断，落地步的 GAE 限制到同一个方块内
+                # td = R[t] + γ * v_t[t+1]
+                # gae[t] = td - v_t[t] + γλ * gae[t+1] * (1 - landed[t])
                 gae_advantages = np.zeros(n_steps)
                 gae_next = 0.0
                 for t in reversed(range(n_steps)):
-                    # delta = TD - V(s)
-                    delta = td_targets[t] - v_t[t]
-                    # 如果是 landed step，不继续传播（下一个方块的起点）
-                    non_terminal = 1.0 - landed[t]
-                    # gae = delta + gamma * lam * gae_next * non_terminal
+                    v_next = v_t[t + 1] if t + 1 < n_steps else 0.0
+                    delta = R[t] + gamma * v_next - v_t[t]
+                    non_terminal = 1.0 - landed[t]  # 落地步截断
                     gae_advantages[t] = delta + gamma * lam * gae_next * non_terminal
                     gae_next = gae_advantages[t]
+
+                # td_target = gae + v_t（标准 PPO）
+                td_targets = gae_advantages + v_t
+                td_targets = np.clip(td_targets, -1.0, 0.0)
 
                 # 扩展为 9 元素 tuple: (state, ref_prob, log_prob, action, prev_action, gae_advantage, td_target, availables, landed)
                 steps_out = []
