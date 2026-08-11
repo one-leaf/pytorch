@@ -294,7 +294,6 @@ class PPOSelfPlay():
                     shutil.copy2(train_file, os.path.join(best_dir, 'train.json'))
                 print(f"*** new best! ppo_avg={g_avg_pc:.1f} > max={old_best_pc:.1f}, saved to {best_dir}")
 
-
             # 保存每局结果：一局一个 pkl 文件（包含所有 step）
             filetime = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
             for run_idx, (_, trajectory, step_results) in enumerate(group_agents):
