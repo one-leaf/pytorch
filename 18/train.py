@@ -125,9 +125,8 @@ class PPODataset(torch.utils.data.Dataset):
 
                 # 先计算所有 landed step 的 TD target，然后限制范围
                 td_targets = np.zeros(n_steps)
-                for t in landed_indices:
+                for idx, t in enumerate(landed_indices):
                     # 找到下一个 landed step
-                    idx = landed_indices.index(t)
                     t_next = landed_indices[idx + 1] if idx + 1 < len(landed_indices) else None
                     v_next = v_t[t_next] if t_next is not None else 0.0
                     # TD = R[t] + gamma * V(s_next)
