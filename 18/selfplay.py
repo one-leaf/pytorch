@@ -284,15 +284,19 @@ class PPOSelfPlay():
 
             # 检查是否刷新历史最佳（当前平均 > 旧的历史最大值）
             if g_avg_pc > old_piececount_best:
-                save_play_state(state)  # 保存更新后的 best
                 # 保存最佳模型（按当前平均方块数建目录，备份状态文件）
                 best_dir = os.path.join(model_dir, f"{g_avg_pc:.1f}")
                 os.makedirs(best_dir, exist_ok=True)
                 self.policy_net.save_model(os.path.join(best_dir, 'model.pth'))
+                # 先保存状态到文件，再复制到最佳目录
+                save_play_state(state)
                 shutil.copy2(play_file, os.path.join(best_dir, 'play.json'))
                 if os.path.exists(train_file):
                     shutil.copy2(train_file, os.path.join(best_dir, 'train.json'))
                 print(f"*** new best! ppo_avg={g_avg_pc:.1f} > max={old_piececount_best:.1f}, saved to {best_dir}")
+            else:
+                # 没刷新最佳也要保存状态（更新 modify 时间）
+                save_play_state(state)
 
             # 保存每局结果：一局一个 pkl 文件（包含所有 step）
             filetime = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
