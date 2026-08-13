@@ -173,7 +173,10 @@ class PolicyNet():
 
         # 全局标准化 advantages
         adv_mean = advantages.mean()
-        adv_std = advantages.std().clamp(min=1e-3)
+        if advantages.numel() > 1:
+            adv_std = advantages.std(unbiased=False).clamp(min=1e-3)
+        else:
+            adv_std = torch.tensor(1.0, device=self.device)  # 单样本跳过标准化
         if torch.isnan(adv_std) or torch.isinf(adv_std):
             adv_std = torch.tensor(1.0, device=self.device)  # std 为 NaN 时跳过标准化
         advantages = (advantages - adv_mean) / adv_std
