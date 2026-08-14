@@ -216,7 +216,8 @@ class PPOSelfPlay():
 
             # 每组之前检查模型是否有更新，有则重新加载
             current_model = model_file
-            use_best = self._should_use_best_model()
+            # use_best = self._should_use_best_model()
+            use_best = False  # 暂时禁用使用最佳模型的逻辑，避免频繁切换
             best_model_path = self._get_best_model_path() if use_best else None
 
             # 决定是否使用最佳模型
