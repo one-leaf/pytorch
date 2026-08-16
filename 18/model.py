@@ -91,7 +91,7 @@ class PolicyNet():
     # PPO 训练步骤（GAE advantage + 分位数价值）
     def train_step_ppo(self, state_batch, log_probs_old, action_batch, prev_action_batch,
                         gae_advantage_batch, td_target_batch, lr,
-                        clip_eps=0.2, beta=0.05, entropy_weight=0.01,
+                        clip_eps=0.2, beta=0.1, entropy_weight=0.01,
                         vf_coef=0.5, availables_batch=None):
         """PPO + GAE 训练步骤（分位数价值头）
         - gae_advantage: 预计算的 GAE advantage（从后往前递推）
