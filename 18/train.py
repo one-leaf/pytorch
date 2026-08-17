@@ -332,7 +332,7 @@ class PPOTrain():
                         should_decrease = True
                         print(f"  entropy trend: slope={slope:.4f} (not rising), last 10 = {[f'{e:.4f}' for e in recent_entropies]}")
 
-                if should_decrease:
+                if not should_decrease:
                     adjust = 1.0 + 0.001 * entropy_diff
                     self.ppo_entropy_weight = float(np.clip(self.ppo_entropy_weight * adjust, 0.1, 1.0))
                     print(f"  decreasing entropy_weight: {self.ppo_entropy_weight:.4f}")
