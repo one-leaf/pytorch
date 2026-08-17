@@ -325,14 +325,14 @@ class PPOTrain():
                 if len(history) >= 10:
                     # 取最后 10 笔数据的 entropy
                     recent_entropies = [h.get("train_entropy", 0) for h in history[-10:]]
-                    # 用线性回归算斜率，slope <= 0 表示没有上升趋势
+                    # 用线性回归算斜率，slope > 0 表示上升趋势
                     x = np.arange(len(recent_entropies))
                     slope, _ = np.polyfit(x, recent_entropies, 1)
-                    if slope <= 0:
+                    if slope > 0:
                         should_decrease = True
                         print(f"  entropy trend: slope={slope:.4f} (not rising), last 10 = {[f'{e:.4f}' for e in recent_entropies]}")
 
-                if not should_decrease:
+                if should_decrease:
                     adjust = 1.0 + 0.001 * entropy_diff
                     self.ppo_entropy_weight = float(np.clip(self.ppo_entropy_weight * adjust, 0.1, 1.0))
                     print(f"  decreasing entropy_weight: {self.ppo_entropy_weight:.4f}")
