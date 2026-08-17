@@ -52,14 +52,18 @@ class PPODataset(torch.utils.data.Dataset):
                 torch.as_tensor(landed).float())
 
     def move_wait_files(self):
-        """将 wait 目录的 pkl 全部移入 data 目录（清空 wait，防止堆积）"""
-        files = sorted(glob.glob(os.path.join(data_wait_dir, "*.pkl")),
-                       key=lambda x: os.path.getmtime(x))
-        time.sleep(1)
+        """将 wait 目录的 pkl 全部移入 data 目录（清空 wait，防止堆积）
+        如果文件数不够，等待直到满足要求"""
+        while True:
+            files = sorted(glob.glob(os.path.join(data_wait_dir, "*.pkl")),
+                           key=lambda x: os.path.getmtime(x))
+            time.sleep(1)
 
-        if len(files) < self.min_new_files:
-            print(f"Insufficient data: have {len(files)}, need {self.min_new_files}")
-            raise Exception("NEED MORE DATA TO TRAIN")
+            if len(files) >= self.min_new_files:
+                break
+
+            print(f"Insufficient data: have {len(files)}, need {self.min_new_files}, waiting...")
+            time.sleep(30)
 
         for fn in files:
             dest = os.path.join(self.data_dir, os.path.basename(fn))
@@ -185,7 +189,7 @@ class PPOTrain():
         self.lr_multiplier = 1.0
         self.max_files = 10000          # data 目录最大保留文件数（安全上限，需 ≥ 2 × P × n_train_times）
         self.n_train_times = 2          # 每局严格保证被训练的轮数
-        self.min_new_files = 1          # 至少有1个新文件就训练（不限制移动数量，清空 wait 目录）
+        self.min_new_files = self.max_files*0.9          # 至少有1个新文件就训练（不限制移动数量，清空 wait 目录）
         self.kl_targ = 0.02             # KL 超过 0.04 降速，低于 0.01 加速
 
         # PPO 超参数
@@ -224,16 +228,10 @@ class PPOTrain():
                 time.sleep(60)
                 return
 
-            # 等待 selfplay 产生训练数据
-            while True:
-                try:
-                    print("start data loader")
-                    self.dataset = PPODataset(data_dir, self.max_files, self.min_new_files, self.n_train_times)
-                    print("end data loader")
-                    break
-                except Exception as e:
-                    print(f"waiting for data: {e}")
-                    time.sleep(30)
+            # 等待 selfplay 产生训练数据（PPODataset 内部会等待文件数足够）
+            print("start data loader")
+            self.dataset = PPODataset(data_dir, self.max_files, self.min_new_files, self.n_train_times)
+            print("end data loader")
 
             train_state = read_train_state()
             self.lr_multiplier = train_state["training"]["lr_multiplier"]
