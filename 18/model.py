@@ -113,11 +113,10 @@ class PolicyNet():
             availables_t = torch.ones(B, self.output_size, device=self.device)
 
         log_probs_old_t = torch.FloatTensor(log_probs_old).to(self.device)
-        # 对 log_probs_old 也应用 clamp + mask + renorm，和当前策略处理方式一致
+        # 对 log_probs_old 只做 mask + renorm，不 clamp（保持原始分布）
         # 确保两个分布在同一概率空间，KL 计算才有意义
         probs_old = torch.exp(log_probs_old_t)
-        probs_old = probs_old.clamp(min=0.05, max=0.8)  # 先 clamp
-        probs_old = probs_old * availables_t  # 再 mask 无效动作归零
+        probs_old = probs_old * availables_t  # mask 无效动作归零
         probs_old = probs_old / probs_old.sum(dim=-1, keepdim=True).clamp(min=1e-8)  # renorm
         log_probs_old_t = torch.log(probs_old)
         action_batch = torch.LongTensor(action_batch).to(self.device)
@@ -142,10 +141,9 @@ class PolicyNet():
         self.net.train()
         log_probs, values = self.net(state_batch, prev_action_batch)
 
-        # 概率处理：先 clamp，再 mask 无效动作，最后 renorm
+        # 概率处理：只 mask 无效动作，然后 renorm（不 clamp，保持原始分布）
         probs = torch.exp(log_probs)
-        probs = probs.clamp(min=0.05, max=0.8)  # 先 clamp 所有概率
-        probs = probs * availables_t  # 再 mask 无效动作归零
+        probs = probs * availables_t  # mask 无效动作归零
         probs = probs / probs.sum(dim=-1, keepdim=True).clamp(min=1e-8)  # renorm
         log_probs = torch.log(probs)
 
