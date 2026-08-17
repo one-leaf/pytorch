@@ -317,7 +317,7 @@ class PPOTrain():
                 self.ppo_entropy_weight = float(np.clip(self.ppo_entropy_weight * adjust, 0.01, 1.0))
             elif entropy_diff < -0.2:  # 高于目标熵 > 0.2 时调整
                 adjust = 1.0 + 0.001 * entropy_diff
-                self.ppo_entropy_weight = float(np.clip(self.ppo_entropy_weight * adjust, 0.10, 1.0))
+                self.ppo_entropy_weight = float(np.clip(self.ppo_entropy_weight * adjust, 0.40, 1.0))
                 
             print(f"entropy update: avg_ent={avg_ent:.4f} ema={self.entropy_ema:.4f} "
                   f"diff={entropy_diff:.4f} ent_w={self.ppo_entropy_weight:.3f}")
