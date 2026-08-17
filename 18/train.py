@@ -323,13 +323,12 @@ class PPOTrain():
                 if len(history) >= 10:
                     # 取最后 10 笔数据的 entropy
                     recent_entropies = [h.get("train_entropy", 0) for h in history[-10:]]
-                    # 检查是否呈现下降趋势（每个值都比前一个大 = 严格递增）
-                    # 如果不是严格递增（即有波动或下降），则认为"没有呈现下降趋势"
-                    is_strictly_increasing = all(recent_entropies[i] < recent_entropies[i+1]
-                                                 for i in range(len(recent_entropies)-1))
-                    if not is_strictly_increasing:
+                    # 用线性回归算斜率，slope <= 0 表示没有上升趋势
+                    x = np.arange(len(recent_entropies))
+                    slope, _ = np.polyfit(x, recent_entropies, 1)
+                    if slope <= 0:
                         should_decrease = True
-                        print(f"  entropy trend check: last 10 = {[f'{e:.4f}' for e in recent_entropies]} (not strictly increasing)")
+                        print(f"  entropy trend: slope={slope:.4f} (not rising), last 10 = {[f'{e:.4f}' for e in recent_entropies]}")
 
                 if should_decrease:
                     adjust = 1.0 + 0.001 * entropy_diff
