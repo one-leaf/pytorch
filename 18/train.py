@@ -190,7 +190,7 @@ class PPOTrain():
 
         # PPO 超参数
         self.ppo_clip_eps = 0.2
-        self.ppo_beta = 0.5             # KL 惩罚系数，beta*KL=0.5*0.4=0.2
+        self.ppo_beta = 0.05             # KL 惩罚系数，beta*KL=0.05*0.4=0.02
         self.ppo_entropy_weight = 1     # 熵正则（初始值，会自适应调整）
         self.entropy_target = 1.0       # 目标 entropy（自适应控制目标）
         self.entropy_ema = 1.0          # entropy EMA（用于自适应控制）
