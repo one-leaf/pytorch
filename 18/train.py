@@ -53,26 +53,28 @@ class PPODataset(torch.utils.data.Dataset):
 
     def move_wait_files(self):
         """将 wait 目录的 pkl 全部移入 data 目录（清空 wait，防止堆积）
-        如果文件数不够，等待直到满足要求"""
+        如果文件数不够，等待直到满足要求（wait + data 总数）"""
         while True:
-            files = sorted(glob.glob(os.path.join(data_wait_dir, "*.pkl")),
-                           key=lambda x: os.path.getmtime(x))
+            wait_files = sorted(glob.glob(os.path.join(data_wait_dir, "*.pkl")),
+                                key=lambda x: os.path.getmtime(x))
+            data_files = glob.glob(os.path.join(self.data_dir, "*.pkl"))
+            total_files = len(wait_files) + len(data_files)
             time.sleep(1)
 
-            if len(files) >= self.min_new_files:
+            if total_files >= self.min_new_files:
                 break
 
-            print(f"Insufficient data: have {len(files)}, need {self.min_new_files}, waiting...")
+            print(f"Insufficient data: wait={len(wait_files)}, data={len(data_files)}, total={total_files}, need {self.min_new_files}, waiting...")
             time.sleep(30)
 
-        for fn in files:
+        for fn in wait_files:
             dest = os.path.join(self.data_dir, os.path.basename(fn))
             if os.path.exists(dest):
                 os.remove(dest)
             os.rename(fn, dest)
             self.newsample.append(dest)
 
-        print(f"moved {len(files)} files to train, newsample: {len(self.newsample)}")
+        print(f"moved {len(wait_files)} files to train, newsample: {len(self.newsample)}")
 
     def load_game_files(self):
         """加载 data 目录的文件列表，按时间倒序，动态删除以保证每局被训练 n_train_times 次"""
