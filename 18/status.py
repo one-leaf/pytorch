@@ -57,6 +57,7 @@ play_file = os.path.join(model_dir, 'play.json')
 play_file_bak = os.path.join(model_dir, 'play_bak.json')
 train_file = os.path.join(model_dir, 'train.json')
 train_file_bak = os.path.join(model_dir, 'train_bak.json')
+model_file = os.path.join(model_dir, 'model.pth')
 
 
 # ── 公共工具 ──────────────────────────────────────────────────────────────────
@@ -265,12 +266,22 @@ def save_train_state(state):
     except Exception:
         pass
 
-    # 归档：每 1000 轮 train 备份一次
+    # 归档：每 1000 轮 train 备份一次（保存 train.json, play.json, model.pth）
     train_count = state["counters"].get("train", 0)
     if train_count > 0 and train_count % 1000 == 0:
-        archive_path = os.path.join(model_dir, f'train_{train_count}.json')
-        if not os.path.exists(archive_path) and os.path.exists(train_file):
-            shutil.copy(train_file, archive_path)
+        archive_dir = os.path.join(model_dir, f'checkpoint_{train_count}')
+        if not os.path.exists(archive_dir):
+            os.makedirs(archive_dir)
+            # 保存 train.json
+            if os.path.exists(train_file):
+                shutil.copy(train_file, os.path.join(archive_dir, 'train.json'))
+            # 保存 play.json
+            if os.path.exists(play_file):
+                shutil.copy(play_file, os.path.join(archive_dir, 'play.json'))
+            # 保存 model.pth
+            if os.path.exists(model_file):
+                shutil.copy(model_file, os.path.join(archive_dir, 'model.pth'))
+            print(f"checkpoint saved: {archive_dir}")
 
     _atomic_write(train_file, state, model_dir)
 
