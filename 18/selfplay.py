@@ -35,7 +35,7 @@ class PPOSelfPlay():
 
         self.policy_net.net.eval()
         with torch.no_grad():
-            log_probs_batch, values_batch = self.policy_net.net(states_tensor, prev_tensor)
+            log_probs_batch, values_batch, _ = self.policy_net.net(states_tensor, prev_tensor)
 
         if torch.isnan(log_probs_batch).any():
             log_probs_batch = torch.zeros_like(log_probs_batch)
@@ -140,7 +140,7 @@ class PPOSelfPlay():
         dummy_state = torch.zeros(1, 2, 20, 10, device=device)
         dummy_prev = torch.zeros(1, dtype=torch.long, device=device)
         with torch.no_grad():
-            out, _ = policy_net.net(dummy_state, dummy_prev)
+            out, _, _ = policy_net.net(dummy_state, dummy_prev)
         if torch.isnan(out).any():
             print("WARNING: model output contains NaN, reinitializing weights!")
             policy_net.net.init_weights()

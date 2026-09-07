@@ -37,7 +37,7 @@ class PolicyNet():
         print("use", device)
 
         self.l2_const = l2_const
-        self.net = GameTransformer(embed_dim=64, depth=2, num_heads=4,
+        self.net = GameTransformer(embed_dim=32, depth=2, num_heads=4,
                                                  num_actions=output_size, in_channels=2)
         self.net.to(device)
 
@@ -61,7 +61,7 @@ class PolicyNet():
         x = torch.Tensor(1,2,20,10).to(self.device)
         prev_action = torch.LongTensor([0]).to(self.device)
         print(self.net)
-        log_probs, value = self.net(x, prev_action)
+        log_probs, value, _ = self.net(x, prev_action)
         print("log_probs:", log_probs.size(), "value:", value.size())
         print("policy probs:", torch.exp(log_probs).size())
 
@@ -82,7 +82,7 @@ class PolicyNet():
 
         self.net.eval()
         with torch.no_grad():
-            act_probs, _ = self.net.forward(state_batch_tensor, prev_action)
+            act_probs, _, _ = self.net.forward(state_batch_tensor, prev_action)
 
         act_probs = np.exp(act_probs.cpu().numpy())
         return act_probs
@@ -142,7 +142,7 @@ class PolicyNet():
         td_target_tensor = torch.clamp(td_target_tensor, -10.0, 10.0)  # 防止极端值
 
         self.net.train()
-        log_probs, values = self.net(state_batch, prev_action_batch)
+        log_probs, values, aux_loss = self.net(state_batch, prev_action_batch)
 
         # 概率处理：只 mask 无效动作，然后 renorm（不 clamp，保持原始分布）
         probs = torch.exp(log_probs)
@@ -230,7 +230,9 @@ class PolicyNet():
         none_penalty = probs[:, 3].mean()
 
         # ── 总损失 ───────────────────────────────────────────────
-        loss = policy_loss + vf_coef * value_loss + beta * kl_div - entropy_weight * entropy + none_penalty_coef * none_penalty
+        # MoE load balancing loss 系数
+        aux_loss_coef = 0.01
+        loss = policy_loss + vf_coef * value_loss + beta * kl_div - entropy_weight * entropy + none_penalty_coef * none_penalty + aux_loss_coef * aux_loss
 
         self.optimizer.zero_grad()
         loss.backward()

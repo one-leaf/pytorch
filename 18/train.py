@@ -314,10 +314,10 @@ class PPOTrain():
             entropy_diff = self.entropy_target - float(avg_ent)
             # 更新 entropy EMA
             self.entropy_ema = self.entropy_ema * 0.9 + avg_ent * 0.1
-            if entropy_diff > 0.1:  # 只在低于目标熵 > 0.1 时调整
+            if entropy_diff < 0.2:  # 只在低于目标熵 < 0.2 时调整 也就是低于0.8
                 adjust = 1.0 + 0.001 * entropy_diff  # 比例控制
                 self.ppo_entropy_weight = float(np.clip(self.ppo_entropy_weight * adjust, 0.01, 1.0))
-            elif entropy_diff < -0.2:  # 高于目标熵 > 0.2 时调整
+            elif entropy_diff < 0:  # 高于目标熵 > 0 时调整 也就是高于1.0
                 # 检查最后 10 笔历史数据的 entropy 趋势
                 train_state_for_history = read_train_state()
                 history = train_state_for_history.get("history", [])
