@@ -27,7 +27,7 @@ def play_one_game():
 
         policy_net.net.eval()
         with torch.no_grad():
-            log_probs, values = policy_net.net(state_tensor, prev_action_tensor)
+            log_probs, values, _ = policy_net.net(state_tensor, prev_action_tensor)
         probs = np.exp(log_probs[0].cpu().numpy())
         v_val = values[0].cpu().numpy()  # [N_q] quantiles
         v_median = v_val[len(v_val)//2]
