@@ -314,28 +314,28 @@ class PPOTrain():
             entropy_diff = self.entropy_target - float(avg_ent)
             # 更新 entropy EMA
             self.entropy_ema = self.entropy_ema * 0.9 + avg_ent * 0.1
-            if entropy_diff < 0.2:  # 只在低于目标熵 < 0.2 时调整 也就是低于0.8
-                adjust = 1.0 + 0.001 * entropy_diff  # 比例控制
-                self.ppo_entropy_weight = float(np.clip(self.ppo_entropy_weight * adjust, 0.01, 1.0))
-            elif entropy_diff < 0:  # 高于目标熵 > 0 时调整 也就是高于1.0
+            # if entropy_diff < 0.2:  # 只在低于目标熵 < 0.2 时调整 也就是低于0.8
+            #     adjust = 1.0 + 0.001 * entropy_diff  # 比例控制
+            #     self.ppo_entropy_weight = float(np.clip(self.ppo_entropy_weight * adjust, 0.01, 1.0))
+            # elif entropy_diff < 0:  # 高于目标熵 > 0 时调整 也就是高于1.0
                 # 检查最后 10 笔历史数据的 entropy 趋势
-                train_state_for_history = read_train_state()
-                history = train_state_for_history.get("history", [])
-                should_decrease = False
-                if len(history) >= 10:
-                    # 取最后 10 笔数据的 entropy
-                    recent_entropies = [h.get("train_entropy", 0) for h in history[-10:]]
-                    # 用线性回归算斜率，slope > 0 表示上升趋势
-                    x = np.arange(len(recent_entropies))
-                    slope, _ = np.polyfit(x, recent_entropies, 1)
-                    if slope > 0:
-                        should_decrease = True
-                        print(f"  entropy trend: slope={slope:.4f} (not rising), last 10 = {[f'{e:.4f}' for e in recent_entropies]}")
+            train_state_for_history = read_train_state()
+            history = train_state_for_history.get("history", [])
+            should_decrease = False
+            if len(history) >= 10:
+                # 取最后 10 笔数据的 entropy
+                recent_entropies = [h.get("train_entropy", 0) for h in history[-10:]]
+                # 用线性回归算斜率，slope > 0 表示上升趋势
+                x = np.arange(len(recent_entropies))
+                slope, _ = np.polyfit(x, recent_entropies, 1)
+                if slope > 0:
+                    should_decrease = True
+                    print(f"  entropy trend: slope={slope:.4f} (not rising), last 10 = {[f'{e:.4f}' for e in recent_entropies]}")
 
-                if should_decrease:
-                    adjust = 1.0 + 0.001 * entropy_diff
-                    self.ppo_entropy_weight = float(np.clip(self.ppo_entropy_weight * adjust, 0.1, 1.0))
-                    print(f"  decreasing entropy_weight: {self.ppo_entropy_weight:.4f}")
+            if should_decrease:
+                adjust = 1.0 + 0.001 * entropy_diff
+                self.ppo_entropy_weight = float(np.clip(self.ppo_entropy_weight * adjust, 0.1, 1.0))
+                print(f"  decreasing entropy_weight: {self.ppo_entropy_weight:.4f}")
 
             print(f"entropy update: avg_ent={avg_ent:.4f} ema={self.entropy_ema:.4f} "
                   f"diff={entropy_diff:.4f} ent_w={self.ppo_entropy_weight:.3f}")
