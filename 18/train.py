@@ -318,7 +318,8 @@ class PPOTrain():
             #     adjust = 1.0 + 0.001 * entropy_diff  # 比例控制
             #     self.ppo_entropy_weight = float(np.clip(self.ppo_entropy_weight * adjust, 0.01, 1.0))
             # elif entropy_diff < 0:  # 高于目标熵 > 0 时调整 也就是高于1.0
-                # 检查最后 10 笔历史数据的 entropy 趋势
+            
+            # 检查最后 10 笔历史数据的 entropy 趋势
             train_state_for_history = read_train_state()
             history = train_state_for_history.get("history", [])
             should_decrease = False
@@ -332,9 +333,10 @@ class PPOTrain():
                     should_decrease = True
                     print(f"  entropy trend: slope={slope:.4f} (not rising), last 10 = {[f'{e:.4f}' for e in recent_entropies]}")
 
+            # 如果没有下降趋势，则降低 entropy_weight，避免过度随机化
             if should_decrease:
-                adjust = 1.0 + 0.001 * entropy_diff
-                self.ppo_entropy_weight = float(np.clip(self.ppo_entropy_weight * adjust, 0.1, 1.0))
+                adjust = 0.999 # 1.0 + 0.001 * entropy_diff
+                self.ppo_entropy_weight = float(np.clip(self.ppo_entropy_weight * adjust, 0.01, 1.0))
                 print(f"  decreasing entropy_weight: {self.ppo_entropy_weight:.4f}")
 
             print(f"entropy update: avg_ent={avg_ent:.4f} ema={self.entropy_ema:.4f} "
