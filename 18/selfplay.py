@@ -17,10 +17,12 @@ class PPOSelfPlay():
         self.rollout_max_steps = 500    # 单局最大步数
         self.policy_net = None
 
-    def get_actions_batch(self, agents, prev_actions, greedy_indices=None):
+    def get_actions_batch(self, agents, prev_actions, greedy_indices=None, temperatures=None):
         """批量预测多个游戏的动作（一次 forward pass）"""
         if greedy_indices is None:
             greedy_indices = set()
+        if temperatures is None:
+            temperatures = [1.0] * len(agents)
         # 只处理未结束的游戏
         active_indices = [i for i, a in enumerate(agents) if not a.terminal]
         if not active_indices:
@@ -66,7 +68,8 @@ class PPOSelfPlay():
             availables = agent.availables
 
             if i not in greedy_indices:
-                scaled = torch.exp(log_probs).cpu().numpy()
+                T = temperatures[i] if temperatures else 1.0
+                scaled = torch.exp(log_probs / T).cpu().numpy()
                 scaled = np.clip(scaled, a_min=0.01, a_max=0.95)
                 probs = scaled * availables.astype(np.float32)
                 probs_sum = probs.sum()
@@ -89,7 +92,7 @@ class PPOSelfPlay():
 
         return actions, all_probs, all_log_probs, all_availables, all_v_t
 
-    def play_games_parallel(self, n_games=4, pieces_list=None, greedy_indices=None):
+    def play_games_parallel(self, n_games=4, pieces_list=None, greedy_indices=None, temperatures=None):
         """同时玩 n_games 局，共享方块序列，批量预测"""
         agents = [Agent(isRandomNextPiece=False, nextPiecesList=pieces_list or []) for _ in range(n_games)]
         trajectories = [[] for _ in range(n_games)]
@@ -101,7 +104,7 @@ class PPOSelfPlay():
                 break
 
             actions, all_probs, all_log_probs, all_availables, all_v_t = self.get_actions_batch(
-                agents, prev_actions, greedy_indices
+                agents, prev_actions, greedy_indices, temperatures
             )
 
             # 为每个 active 游戏记录轨迹
@@ -235,9 +238,11 @@ class PPOSelfPlay():
                     self._check_and_fix_nan(self.policy_net)
                     _last_model_mtime = mtime
 
-            # 并行玩 16 局（game 0 贪婪测试，game 1-15 带 V(s) 温度探索）
+            # 并行玩 16 局（game 0 贪婪测试，game 1-15 带温度探索）
+            # 4 档温度：0.3, 1.0, 2.0, 4.0，每档 4 局（最后一档 3 局）
+            temperatures = [1.0] + [0.3]*4 + [1.0]*4 + [2.0]*4 + [4.0]*3  # game 0 贪婪不用温度，随意赋值
             agents, trajectories, step_results = self.play_games_parallel(
-                n_games=16, greedy_indices={0}
+                n_games=16, greedy_indices={0}, temperatures=temperatures
             )
 
             # 更新贪婪局（test）的 EMA 指标
@@ -255,7 +260,7 @@ class PPOSelfPlay():
                 m["test_removedlines_best"] = greedy_agent.removedlines
 
             # 所有探索局用于训练
-            group_agents = [(agents[i], trajectories[i], step_results[i]) for i in range(len(agents))]
+            group_agents = [(agents[i], trajectories[i], step_results[i]) for i in range(1, len(agents))]
 
             # 更新 PPO 探索局 EMA 指标
             g_avg_pc = sum(a.piececount for a, _, _ in group_agents) / len(group_agents)
