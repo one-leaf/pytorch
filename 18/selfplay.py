@@ -254,8 +254,8 @@ class PPOSelfPlay():
             if greedy_agent.removedlines > m.get("test_removedlines_best", 0):
                 m["test_removedlines_best"] = greedy_agent.removedlines
 
-            # 所有探索局（game 1-15）用于训练
-            group_agents = [(agents[i], trajectories[i], step_results[i]) for i in range(1, len(agents))]
+            # 所有探索局用于训练
+            group_agents = [(agents[i], trajectories[i], step_results[i]) for i in range(len(agents))]
 
             # 更新 PPO 探索局 EMA 指标
             g_avg_pc = sum(a.piececount for a, _, _ in group_agents) / len(group_agents)
