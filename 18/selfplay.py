@@ -239,8 +239,10 @@ class PPOSelfPlay():
                     _last_model_mtime = mtime
 
             # 并行玩 16 局（game 0 贪婪测试，game 1-15 带温度探索）
-            # 4 档温度：0.3, 1.0, 2.0, 4.0，每档 4 局（最后一档 3 局）
-            temperatures = [1.0] + [0.3]*4 + [1.0]*4 + [2.0]*4 + [4.0]*3  # game 0 贪婪不用温度，随意赋值
+            # 温度以1.0为中心的正态分布，很窄的范围（0.8-1.2），避免极端值
+            np.random.seed(42)  # 固定种子保证可复现
+            raw_temps = np.random.normal(loc=1.0, scale=0.15, size=15)
+            temperatures = [1.0] + np.clip(raw_temps, 0.8, 1.2).tolist()  # game 0 贪婪不用温度，随意赋值
             agents, trajectories, step_results = self.play_games_parallel(
                 n_games=16, greedy_indices={0}, temperatures=temperatures
             )
