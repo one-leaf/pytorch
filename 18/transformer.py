@@ -164,7 +164,7 @@ class GameTransformer(nn.Module):
         self.num_quantiles = 4
         self.value_head = nn.Linear(embed_dim, self.num_quantiles)
 
-        self.causal_mask = nn.Transformer.generate_square_subsequent_mask(seq_len)
+        self.causal_mask = nn.Transformer.generate_square_subsequent_mask(seq_len).to(torch.float32)
 
         self.init_weights()
 

@@ -26,6 +26,9 @@ def log_nan(msg):
 
 class PolicyNet():
     def __init__(self, input_width, input_height, output_size, model_file=None, device=None, l2_const=5e-5):
+        # 设置全局默认数据类型为 FP32
+        torch.set_default_dtype(torch.float32)
+
         self.input_channels = 2  # 输入通道数
         self.input_width = input_width
         self.input_height = input_height
@@ -39,6 +42,8 @@ class PolicyNet():
         self.l2_const = l2_const
         self.net = GameTransformer(embed_dim=32, depth=2, num_heads=4,
                                                  num_actions=output_size, in_channels=2)
+        # 确保所有模型参数为 FP32
+        self.net = self.net.to(torch.float32)
         self.net.to(device)
 
         self.optimizer = optim.AdamW(self.net.parameters(), lr=1e-5, weight_decay=self.l2_const)
